@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>llm-006: Unicode, bytes and tokenizer round trips · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>llm-006: Unicode, bytes and tokenizer round trips</h1>
+      <p class="source-path">Generated from <code>courses/llm-theory/guides/llm-006.md</code></p>
+    </header>
+    <article class="document"><h2 id="llm-006-unicode-bytes-and-tokenizer-round-trips">llm-006: Unicode, bytes and tokenizer round trips<a class="heading-anchor" href="#llm-006-unicode-bytes-and-tokenizer-round-trips" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Beginner within this subject; estimated time: 105 minutes. Direct prerequisite: <code>llm-005</code>. The entry Python course supplies basic functions, lists, dictionaries, testing and NumPy arrays. This unit introduces its subject terms explicitly; it requires no service account, model weights, GPU or database. Content is authored beta material; catalog publication and actual runtime readiness are separate checks.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Trace text through a reversible representation without confusing characters and bytes. By the end, you can produce the exact observations below, explain one plausible wrong result and transfer the reasoning to a new fixed fixture without copying a solution. Keep your first prediction alongside the actual evidence so a changed conclusion remains visible.</p>
+<h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
+<p>Text has several representations. A Python string contains Unicode code points, while UTF-8 encodes that text as a sequence of bytes. The number of code points and the number of bytes need not agree. Before learning a tokenizer, trace this boundary so a character count is not silently substituted for a byte or token count.</p>
+<p>The words cat, café and the single code-point smile 🙂 have respectively 3, 4 and 1 code points in these literal fixtures, but 3, 5 and 4 UTF-8 bytes. A displayed character can also be composed from multiple code points. The text é and the sequence e followed by a combining accent can look alike while having different raw byte representations.</p>
+<p>Normalization is an explicit data policy that can deliberately make canonically equivalent spellings share a representation. NFC normalization is useful for some pipelines, but it changes raw identity. Decide it before deduplication and splitting, retain original provenance when needed, and do not claim that a normalized round trip reproduces every original byte. This lesson uses only the Python standard library and authored strings.</p>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<p><strong>Code point:</strong> one Unicode numeric element in a Python string; it is not necessarily a complete displayed grapheme.</p>
+<p><strong>UTF-8 byte:</strong> one eight-bit unit in a variable-length encoding of Unicode text.</p>
+<p><strong>Round trip:</strong> encoding and decoding under a stated strict policy and obtaining the original representation.</p>
+<p><strong>NFC normalization:</strong> a Unicode canonical-composition policy that can merge equivalent code-point sequences.</p>
+<p><strong>Replacement decoding:</strong> a lossy policy that substitutes a replacement character for malformed bytes instead of preserving them.</p>
+<h3 id="syntax-or-reasoning-anatomy">Syntax or reasoning anatomy<a class="heading-anchor" href="#syntax-or-reasoning-anatomy" aria-label="Link to this section">#</a></h3>
+<p>text.encode(&quot;utf-8&quot;) turns a string into bytes. payload.decode(&quot;utf-8&quot;) performs strict decoding by default and raises when byte sequences are invalid. len(text) counts Python code points; len(payload) counts bytes. Neither expression universally counts displayed characters or language-model tokens.</p>
+<p>unicodedata.normalize(&quot;NFC&quot;, text) creates a normalized string rather than changing the original object. A hash of raw bytes identifies raw content; a hash of normalized bytes identifies the chosen canonicalized representation. Keep the policies labeled. The optional hash is not encryption, permission or a privacy guarantee. An empty string has a valid empty encoding, even though a later token-loss mean would still need a nonempty target denominator.</p>
+<h3 id="how-to-run">How to run<a class="heading-anchor" href="#how-to-run" aria-label="Link to this section">#</a></h3>
+<p>Open <a href="../lessons/llm-006.py.html">the learner source</a>. Save an owned copy beneath <code>.learning/expansion/llm-006/practice.py</code> before editing. Use the application&#x27;s declared <code>python-core</code> profile only when its readiness notice confirms its dependencies; source viewing and notes remain available otherwise. The native alternative uses the prepared interpreter for this lesson&#x27;s declared python-core profile, without installing anything in a lesson. Run from the repository root. Output appears in the console; assertions and named failures below provide evidence, not exact printed-string matching.</p>
+<pre><code class="language-powershell"># Windows PowerShell: selected interpreter from the course setup.
+&amp; $CoursePython .learning\expansion\llm-006\practice.py</code></pre>
+<pre><code class="language-bash"># macOS/Linux: selected course interpreter path from setup.
+&quot;$DS60_COURSE_PYTHON&quot; .learning/expansion/llm-006/practice.py</code></pre>
+<p>If the interpreter path is unset or a declared package cannot be imported, inspect runtime readiness and keep the error. Do not run pip, download data or silently change the interpreter inside the lesson. All supplied inputs are tiny local literals.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="example-a-inspect-bytes-and-code-points">Example A: Inspect bytes and code points<a class="heading-anchor" href="#example-a-inspect-bytes-and-code-points" aria-label="Link to this section">#</a></h4>
+<p>Compare three fixed strings and round-trip their exact UTF-8 payloads.</p>
+<pre><code class="language-python">texts = [&quot;cat&quot;, &quot;café&quot;, &quot;🙂&quot;]
+counts = [(len(text), len(text.encode(&quot;utf-8&quot;))) for text in texts]
+assert counts == [(3, 3), (4, 5), (1, 4)]
+assert all(text.encode(&quot;utf-8&quot;).decode(&quot;utf-8&quot;) == text for text in texts)
+print(counts)</code></pre>
+<p><strong>Expected:</strong> The accented word and smile require more bytes than code points. These are exact counts for the literal examples, not a general grapheme-counting algorithm.</p>
+<h4 id="example-b-a-deliberate-identity-change">Example B: A deliberate identity change<a class="heading-anchor" href="#example-b-a-deliberate-identity-change" aria-label="Link to this section">#</a></h4>
+<p>Compare composed and decomposed spellings before and after NFC.</p>
+<pre><code class="language-python">import unicodedata
+
+composed = &quot;é&quot;
+# Construct directly to avoid a platform-dependent source-file normalization step.
+decomposed = &quot;e&quot; + chr(0x0301)
+assert composed != decomposed
+assert composed.encode(&quot;utf-8&quot;) != decomposed.encode(&quot;utf-8&quot;)
+assert unicodedata.normalize(&quot;NFC&quot;, decomposed) == composed
+print(len(composed), len(decomposed))</code></pre>
+<p><strong>Expected:</strong> Raw identity differs, while the explicit normalization makes these two fixtures agree. Retaining the normalized string cannot reconstruct which original spelling was supplied.</p>
+<h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
+<p>Before executing or calculating, write the result you expect from the normal fixture and which changed condition would invalidate it. Save that prediction. Afterward, name the first observation that supported or contradicted it rather than rewriting your original answer to match the reference.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Trace the encoding units.</strong> Calculate code-point and UTF-8 byte counts for cat, café and 🙂 before running the example. <strong>Expected:</strong> Counts (3,3), (4,5) and (1,4), respectively. <strong>Verify:</strong> Assert all six counts and retain each encoded byte sequence as hex for inspection.</li>
+</ol>
+<ol>
+<li><strong>Construct a strict round trip.</strong> Implement encode_record(text,policy) with none/NFC policies and a matching strict decoder. <strong>Expected:</strong> With policy none, every fixture returns exactly its original string and bytes. <strong>Verify:</strong> Assert decode(encode(text)) equality and compare raw payload hex rather than relying on visual appearance.</li>
+</ol>
+<ol>
+<li><strong>Diagnose canonical duplicates.</strong> Compare é and e+combining-accent under raw and NFC identity. <strong>Expected:</strong> Raw counts are 1 versus 2 code points and 2 versus 3 bytes; NFC strings and normalized hashes match. <strong>Verify:</strong> Inspect raw hashes separately from normalized hashes and preserve the original strings.</li>
+</ol>
+<ol>
+<li><strong>Reject malformed UTF-8.</strong> Strictly decode byte 0xff, then compare an explicit errors=replace diagnostic. <strong>Expected:</strong> Strict decoding raises UnicodeDecodeError; replacement produces U+FFFD and cannot reproduce the original 0xff byte. <strong>Verify:</strong> Capture the named exception and assert replacement re-encoding differs from the original bytes.</li>
+</ol>
+<ol>
+<li><strong>Handle empty and unknown policies.</strong> Round-trip the empty string and request policy mystery. <strong>Expected:</strong> Empty text maps to empty bytes and returns empty text; unknown policy raises ValueError. <strong>Verify:</strong> Assert the empty values and capture the unsupported-policy exception without selecting a fallback silently.</li>
+</ol>
+<ol>
+<li><strong>Choose identity before splitting.</strong> Use documents café, cafe+combining-accent and tea. Compare raw versus NFC distinct counts before assigning source families. <strong>Expected:</strong> Three raw strings but two NFC identities; the two café spellings must not be presented as independent unseen canonical sources. <strong>Verify:</strong> Record raw and normalized hashes for all three documents and assert the duplicate normalized pair is grouped before partitioning.</li>
+</ol>
+<h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Hint 1:</strong> Inspect code points and hex bytes separately from the rendered glyph.</li>
+<li><strong>Hint 2:</strong> Make normalization an explicit returned policy and keep raw versus normalized identities distinct.</li>
+<li><strong>Hint 3:</strong> Use strict decode for a round-trip claim; replacement is a different, lossy contract.</li>
+</ul>
+<h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
+<p>If a count changes after export, inspect whether the file was decoded with a different codec or normalized. If a displayed string looks unchanged, compare repr, code points or encoded hex rather than assuming byte identity. If invalid bytes seem to disappear, inspect whether a replacement or ignore error policy was used.</p>
+<p>A normalization policy can help detect canonical duplicates, but it does not identify every near-duplicate document or semantic paraphrase. Hash equality depends on the chosen representation, not on natural-language meaning. Keep original provenance where the task requires it, avoid collecting private text, and never describe a plain content hash as anonymization or encryption.</p>
+<h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
+<p>Without the examples, explain why len(text), len(text.encode(&quot;utf-8&quot;)) and token count can all differ. Then choose a fresh combining-character fixture and state which identity policy your duplicate check uses.</p>
+<h3 id="evidence-review">Evidence review<a class="heading-anchor" href="#evidence-review" aria-label="Link to this section">#</a></h3>
+<p>Use a 0, 1 or 2 score for each of five dimensions: the declared data/observation contract, a correct normal-case derivation, diagnosis of the changed fixture, explicit handling of the invalid case, and a fresh explanation of the evidence boundary. Normally seek 8/10 with no zero for the contract or claim boundary, then require a new transfer example. This is a human learning rubric, not an automatic certification or completion awarded by a single successful Run.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>Continue to <code>llm-007</code> when its authored file and readiness are available. Use <a href="../README.md.html">the course README</a> and <a href="../../../docs/implementation/ml-content-status.md.html">implementation checkpoint</a> to distinguish implemented work from later design units. Keep this lesson&#x27;s smallest counterexample as a regression when later abstractions appear.</p>
+<h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning workflow for llm-006,
+Unicode, bytes and tokenizer round trips. Read courses/llm-theory/guides/llm-006.md
+and courses/llm-theory/lessons/llm-006.py. Respect direct prerequisites
+llm-005 and beginner depth. Explain the actual fixture&#x27;s
+units, axes or evaluation denominator before new abstractions. Ask for a saved
+prediction, inspect my own attempt, give one hint at a time, then review the
+specific expected values or named failure. Keep courses/llm-theory/solutions/
+closed until I request comparison or show an honest attempt. Ask me to explain
+one counterexample and solve a fresh retrieval case without copying. Done when I can provide working evidence and explain a fresh case in my own
+words without copying, not merely check a box. No service call,
+model/data download, package installation or database is involved. Use reading
+notes when no execution is required and report missing runtime readiness honestly.</code></pre></article>
+  </main>
+</body>
+</html>

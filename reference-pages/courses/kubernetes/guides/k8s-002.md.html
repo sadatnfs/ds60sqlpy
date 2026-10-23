@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>k8s-002: Processes, containers, images and ports · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>k8s-002: Processes, containers, images and ports</h1>
+      <p class="source-path">Generated from <code>courses/kubernetes/guides/k8s-002.md</code></p>
+    </header>
+    <article class="document"><h2 id="k8s-002-processes-containers-images-and-ports">k8s-002: Processes, containers, images and ports<a class="heading-anchor" href="#k8s-002-processes-containers-images-and-ports" aria-label="Link to this section">#</a></h2>
+<p>Authored beta teaching content. Publication and runtime qualification are separate gates. Read the current capability notice before running. No opening or saving this lesson installs tools, starts a cluster or proves mastery.</p>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Beginner; 90 minutes. Direct design prerequisites: <code>k8s-001</code>. An ID in this prerequisite list may still be unpublished. Use its concept diagnostic or wait for the authored bridge; do not infer an executable prerequisite from a planning ID.</p>
+<p>Learner artifact: <a href="../lessons/k8s-002.md.html">k8s-002.md</a>. Keep <a href="../solutions/k8s-002_solutions.md.html">solutions</a> closed until an attempt or explicit reveal.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Distinguish an image from a running process and a container port from a host port.</li>
+<li>Produce the exact bounded evidence named by the six exercises and explain one counterexample.</li>
+</ul>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<p>An image is a packaged filesystem/configuration template. A container is an instance created from image content; it normally runs one main application process and can exit or restart. Two container instances can use the same image. A tag is a mutable human-readable reference, while a digest identifies content. The course will preload one exact fixture image and record its digest; reading a tag in YAML is not proof of cached content.</p>
+<p>A port is an endpoint number within a network namespace. A container listening on8080 is different from a host forwarding127.0.0.1:8765 to it. Inside another container,127.0.0.1 refers to that container itself. Inside a Kubernetes namespace, a Service name selects a cluster routing path. Declaring containerPort does not create a listening server or a host port. This lesson traces supplied evidence and performs no engine or network action.</p>
+<ul>
+<li><strong>image:</strong> the packaged content used to create containers</li>
+<li><strong>container:</strong> a running or stopped instance, separate from its image</li>
+<li><strong>digest:</strong> a content identity recorded after actual image preparation</li>
+<li><strong>port mapping:</strong> an explicit forwarding relation between network endpoints</li>
+<li><strong>loopback:</strong> an address referring to the current network namespace, not every machine</li>
+</ul>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="worked-example-1-one-image-two-instances">Worked example 1: One image, two instances<a class="heading-anchor" href="#worked-example-1-one-image-two-instances" aria-label="Link to this section">#</a></h4>
+<p>Restarting or replacing one instance need not rebuild its immutable image content.</p>
+<pre><code class="language-text">image content I1
+container C1 from I1: running
+container C2 from I1: exited</code></pre>
+<p><strong>Expected:</strong> One image identity and two separate instance states.</p>
+<h4 id="worked-example-2-trace-a-host-to-container-mapping">Worked example 2: Trace a host-to-container mapping<a class="heading-anchor" href="#worked-example-2-trace-a-host-to-container-mapping" aria-label="Link to this section">#</a></h4>
+<p>The mapping is an explicit host arrangement. Writing containerPort8080 into YAML alone does not establish it.</p>
+<pre><code class="language-text">browser -&gt; 127.0.0.1:8765 on host
+forwarding rule -&gt; container app:8080
+process listens on8080</code></pre>
+<p><strong>Expected:</strong> The browser uses8765; the process listens on8080.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<h4 id="exercise-1-count-images-and-containers">Exercise 1: Count images and containers<a class="heading-anchor" href="#exercise-1-count-images-and-containers" aria-label="Link to this section">#</a></h4>
+<p>Classify the two-instance fixture.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 1, C1 andC2 both useI1.</p>
+<p><strong>Expected result/shape:</strong> For k8s-002 Exercise 1, 1 image,2 containers,independent running/exited states.</p>
+<p><strong>Verify:</strong> For k8s-002 Exercise 1, count image identities and instance identities separately.</p>
+<p><strong>Progressive hints:</strong></p>
+<ol>
+<li>Group by content identity.</li>
+<li>Count instances separately.</li>
+<li>C1 andC2 are not two image builds.</li>
+</ol>
+<h4 id="exercise-2-resolve-the-browser-endpoint">Exercise 2: Resolve the browser endpoint<a class="heading-anchor" href="#exercise-2-resolve-the-browser-endpoint" aria-label="Link to this section">#</a></h4>
+<p>Choose the URL endpoint for the stated host mapping.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 2, host127.0.0.1:8765 forwards to app:8080.</p>
+<p><strong>Expected result/shape:</strong> For k8s-002 Exercise 2, the host browser connects to127.0.0.1:8765.</p>
+<p><strong>Verify:</strong> For k8s-002 Exercise 2, trace both sides without changing the application listening port.</p>
+<p><strong>Progressive hints:</strong></p>
+<ol>
+<li>Start at the browser network namespace.</li>
+<li>Find the published host port.</li>
+<li>Use8765 at the host boundary.</li>
+</ol>
+<h4 id="exercise-3-separate-declaration-and-listener">Exercise 3: Separate declaration and listener<a class="heading-anchor" href="#exercise-3-separate-declaration-and-listener" aria-label="Link to this section">#</a></h4>
+<p>Review YAML declaring containerPort8080 with a process that exited.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 3, declared8080;process not running.</p>
+<p><strong>Expected result/shape:</strong> For k8s-002 Exercise 3, no working listener established by the declaration.</p>
+<p><strong>Verify:</strong> For k8s-002 Exercise 3, name the missing running application evidence.</p>
+<p><strong>Progressive hints:</strong></p>
+<ol>
+<li>A field is not a server.</li>
+<li>Check process state and actual response.</li>
+<li>Require the application observation.</li>
+</ol>
+<h4 id="exercise-4-interpret-replacement">Exercise 4: Interpret replacement<a class="heading-anchor" href="#exercise-4-interpret-replacement" aria-label="Link to this section">#</a></h4>
+<p>Replace C1 with C3 from the same prepared image.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 4, oldC1,newC3,contentI1.</p>
+<p><strong>Expected result/shape:</strong> For k8s-002 Exercise 4, container identity changes; image identity staysI1.</p>
+<p><strong>Verify:</strong> For k8s-002 Exercise 4, record both instance IDs and the same digest receipt.</p>
+<p><strong>Progressive hints:</strong></p>
+<ol>
+<li>Which thing was recreated?</li>
+<li>Separate content from process instance.</li>
+<li>Keep the image digest unchanged in this scenario.</li>
+</ol>
+<h4 id="exercise-5-handle-a-missing-offline-image">Exercise 5: Handle a missing offline image<a class="heading-anchor" href="#exercise-5-handle-a-missing-offline-image" aria-label="Link to this section">#</a></h4>
+<p>Predict an uncached image with imagePullPolicy Never.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 5, fixture tag declared but no matching cached content.</p>
+<p><strong>Expected result/shape:</strong> For k8s-002 Exercise 5, visible image-start failure; no network pull is attempted by this policy.</p>
+<p><strong>Verify:</strong> For k8s-002 Exercise 5, classify missing preload and preserve progress rather than substituting an arbitrary public image.</p>
+<p><strong>Progressive hints:</strong></p>
+<ol>
+<li>Read the pull policy.</li>
+<li>The image must already exist locally.</li>
+<li>Prepare the approved content explicitly.</li>
+</ol>
+<h4 id="exercise-6-transfer-the-client-path">Exercise 6: Transfer the client path<a class="heading-anchor" href="#exercise-6-transfer-the-client-path" aria-label="Link to this section">#</a></h4>
+<p>Choose the endpoint from a client Job inside the owned namespace.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 6, Service hello on8080;client has its own loopback.</p>
+<p><strong>Expected result/shape:</strong> For k8s-002 Exercise 6, http://hello:8080/version, not host127.0.0.1:8765.</p>
+<p><strong>Verify:</strong> For k8s-002 Exercise 6, explain both network namespaces and the Service DNS name.</p>
+<p><strong>Progressive hints:</strong></p>
+<ol>
+<li>Locate the client.</li>
+<li>Its loopback points to itself.</li>
+<li>Use the namespace Service name and port.</li>
+</ol>
+<h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Can you reproduce each exact observation without reading the official answer?</li>
+<li>Can you explain a failed check using the lesson&#x27;s model, rather than changing an expected value?</li>
+</ul>
+<h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Close the source. Explain the mechanism in your own words, name the boundary that a plausible wrong answer crosses, and predict a changed fixture before running again.</p>
+<h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
+<p>Do not count tags as immutable content identities. A Running state is not proof of readiness, a port declaration is not a listener, and host loopback is not the host from every container. Image preparation remains an explicit separate operation.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>Continue with <a href="k8s-003.md.html">k8s-003</a>, which reads desired-state API objects without selecting an ambient cluster.</p>
+<h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach k8s-002.
+Read courses/kubernetes/guides/k8s-002.md and courses/kubernetes/lessons/k8s-002.md.
+Direct design prerequisites: `k8s-001`. This is authored beta content; check actual runtime capability and unpublished prerequisites.
+Explain one mechanism, ask me to predict, let me attempt one exercise, then give one hint at a time.
+Do not read courses/kubernetes/solutions/ until I make an honest attempt or explicitly ask for a reveal.
+Review my exact values, diagnostics or written evidence; distinguish source inspection, process success and verified understanding.
+Finish with a changed fixture and retrieval in my own words. Do not install tools, download assets or select an ambient cluster for me.</code></pre></article>
+  </main>
+</body>
+</html>

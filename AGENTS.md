@@ -273,6 +273,19 @@ Keep durable truth in checked-in artifacts, authoring metadata, docs, and the re
 - `bridge/AGENTS.md` governs Python/PostgreSQL integration lessons and tests.
 - [CONTRIBUTING.md](CONTRIBUTING.md) contains the human contribution workflow.
 
+## Expansion implementation checkpoint
+
+Read [the implementation checkpoint](docs/implementation/CHECKPOINT.md) before
+continuing the five new modules. Read [the module authoring contract](docs/implementation/ADDING_A_MODULE.md)
+when extending a subject or adding a language. Authored beta files live in `courses/` and are
+loaded by `modules.py`; they do not silently replace the published catalog.
+`module_jobs.py` owns persisted jobs, `module_service.py` authenticated app
+actions, and the optional `module_worker.py` / `worker_operations.py` pair owns
+bounded private-worker execution. Every claimed runtime needs an actual Docker
+receipt. Preserve private runtime session files outside `.learning`, and never
+print their credentials. Keep image builds sequential under the measured disk
+budget. Do not start unrelated containers or change the engine configuration.
+
 ## Guided application and Codex adapter
 
 - Read [the expansion design hub](docs/expansion/README.md) before adding Kubernetes, TensorFlow, LLM, C++, or Scala/Spark content. Subject plans, pilot lessons, typed job boundaries, profile qualification, and publication gates live there.

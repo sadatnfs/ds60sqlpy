@@ -23,7 +23,7 @@ from typing import Any
 from urllib.parse import quote, unquote, urlsplit
 
 from ds60sqlpy.catalog import Catalog, Lesson
-from ds60sqlpy.curriculum_framework import RUNNERS
+from ds60sqlpy.curriculum_framework import RUNNERS, validate_content_path
 from ds60sqlpy.reader_math import INLINE_MATH, render_math
 
 LESSON_PAGES_DIR = "lesson-pages"
@@ -246,6 +246,40 @@ def reference_source_paths(catalog: Catalog) -> tuple[Path, ...]:
             raise ValueError(f"Unsafe or missing rendered reference source: {path}")
         references.add(resolved)
         pending.append(resolved)
+
+    # Authored beta module files have safe readable references before active
+    # catalog publication. The manifest supplies paths, never run commands.
+    for manifest in sorted((repo_root / "courses").glob("*/lessons.json")):
+        validate_content_path(
+            repo_root, manifest.relative_to(repo_root).as_posix(), "Module manifest"
+        )
+        add_reference(manifest)
+        readme = manifest.parent / "README.md"
+        if readme.is_file():
+            add_reference(readme)
+        payload = json.loads(manifest.read_text(encoding="utf-8"))
+        if not isinstance(payload, dict) or not isinstance(payload.get("lessons"), list):
+            raise ValueError("Invalid authored module reference manifest.")
+        for lesson in payload["lessons"]:
+            if not isinstance(lesson, dict) or not isinstance(lesson.get("solution_paths"), list):
+                raise ValueError("Invalid authored module reference entry.")
+            for field in ("guide_path", "source_path"):
+                relative = validate_content_path(repo_root, lesson.get(field), "Module reference")
+                add_reference(repo_root / relative)
+            for value in lesson.get("solution_paths", []):
+                relative = validate_content_path(repo_root, value, "Module solution reference")
+                add_reference(repo_root / relative)
+            variants = lesson.get("variants", [])
+            if not isinstance(variants, list):
+                raise ValueError("Invalid module reference variants.")
+            for variant in variants:
+                if not isinstance(variant, dict) or not isinstance(
+                    variant.get("solution_paths"), list
+                ):
+                    raise ValueError("Invalid module reference variant paths.")
+                for value in [variant.get("source_path"), *variant["solution_paths"]]:
+                    relative = validate_content_path(repo_root, value, "Module variant reference")
+                    add_reference(repo_root / relative)
 
     for relative_path in COURSE_GUIDE_REFERENCE_PATHS:
         add_reference(repo_root / relative_path)

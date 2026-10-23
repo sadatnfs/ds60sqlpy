@@ -21,10 +21,10 @@ The repository is designed for:
 
 **Next learning journeys:** the [expansion design hub](docs/expansion/README.md)
 plans full beginner, intermediate, and advanced courses in Kubernetes, C++, deep
-learning with TensorFlow, LLM theory in Python, and Scala/Apache Spark. Each has
-a detailed pilot and stage capstones. Open `/journey-preview` in the learning
-application for an interactive teaching preview. These are planned courses;
-the existing 168 published lessons and execution profiles remain the active course.
+learning with TensorFlow, LLM theory in Python, and Scala/Apache Spark. The design contains 204 planned lessons and stage capstones. The first 29
+authored lessons are available in `/journeys`, with optional private runtimes.
+Open `/journey-preview` for the complete planned route. The original 168
+published lessons remain available alongside this beta expansion.
 
 Each Python, SQL, and bridge guide is designed to stand on its own: it defines the
 mental model and vocabulary, breaks down syntax or query anatomy, provides
@@ -34,6 +34,33 @@ optional, copy-ready coaching context - not a replacement for the lesson.
 
 > [!IMPORTANT]
 > The repository runs locally after setup, but a brand-new machine still needs internet access to install Python packages, PostgreSQL or Docker, and VS Code extensions. A few lessons use Seaborn datasets that download on first use and are cached afterward. Pretrained Hugging Face, spaCy, and torchvision exercises can also require a deliberate first download; their lesson notes identify those cases. See [Offline use](docs/setup/offline.md).
+
+## New module labs
+
+The authored pilot workspace at `/journeys` introduces Kubernetes, C++20,
+TensorFlow, LLM theory in Python, and Scala/Spark. It renders real guides and
+source files, saves drafts on the host, and runs explicitly prepared private
+workers. Planned lessons stay visibly planned. These pilots are separate from
+the existing published course and do not award automatic mastery.
+
+Prepare the base Docker course first using the instructions below, then read
+[the optional runtime guide](docs/modules-runtime.md). Local builds show their
+logs and publish no images:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\module_lab.ps1 build -Profiles python-core,cpp20
+powershell -ExecutionPolicy Bypass -File .\scripts\module_lab.ps1 start -Profiles python-core,cpp20
+```
+
+```bash
+bash scripts/module_lab.sh build --profiles python-core,cpp20
+bash scripts/module_lab.sh start --profiles python-core,cpp20
+```
+
+The [implementation checkpoint](docs/implementation/CHECKPOINT.md) records
+completed content, actual runtime evidence, limitations, and the next batch.
+Windows can use `START_MODULE_LAB.cmd` to select prepared profiles. First-time
+engine setup remains in `START_DOCKER_LAB.cmd`.
 
 ## Start the guided coding application
 

@@ -1,0 +1,3 @@
+# Separate from the core environment. No CUDA extra or model download.
+tensorflow==2.20.0
+numpy==2.2.6

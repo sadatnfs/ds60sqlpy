@@ -1,0 +1,144 @@
+# Optional services only. The host launcher owns preparation and credentials.
+# Compose with: -f compose.yaml -f compose.modules.yaml
+x-worker: &worker
+  pull_policy: never
+  networks: [module-private]
+  init: true
+  read_only: true
+  user: "0:0"
+  cap_drop: [ALL]
+  cap_add: [CHOWN, SETUID, SETGID, DAC_OVERRIDE, KILL]
+  security_opt: ["no-new-privileges:true"]
+  pids_limit: 128
+  cpus: 2
+  mem_limit: 2g
+  tmpfs:
+    - /tmp:size=128m,mode=1777,exec
+  volumes:
+    - type: bind
+      source: ${DS60_MODULE_RUNTIME_DIR:?Prepare a private module runtime session first}/worker-token
+      target: /run/ds60/worker-token
+      read_only: true
+      bind:
+        create_host_path: false
+  environment: &worker-env
+    DS60_WORKER_TOKEN_FILE: /run/ds60/worker-token
+  healthcheck:
+    test: ["CMD", "python3", "-c", "import json,os,urllib.request; t=open(os.environ['DS60_WORKER_TOKEN_FILE']).read().strip(); r=urllib.request.urlopen(urllib.request.Request('http://127.0.0.1:8081/health',headers={'X-DS60-Worker-Token':t}),timeout=3); assert json.load(r)['ready']"]
+    interval: 5s
+    timeout: 5s
+    retries: 24
+    start_period: 60s
+
+services:
+  postgres:
+    networks: [default, module-private]
+  lab:
+    environment:
+      DS60_MODULE_TOKEN_FILE: /run/ds60/worker-token
+      DS60_MODULE_ENDPOINTS: "${DS60_MODULE_ENDPOINTS:-}"
+    volumes:
+      - type: bind
+        source: ${DS60_MODULE_RUNTIME_DIR:?Prepare a private module runtime session first}/worker-token
+        target: /run/ds60/worker-token
+        read_only: true
+        bind:
+          create_host_path: false
+  python-core-worker:
+    <<: *worker
+    image: ds60sqlpy-worker-python-core:0.3.0
+    profiles: [python-core]
+    build:
+      context: .
+      dockerfile: docker/workers/Dockerfile.python-core
+      args:
+        DS60_CORE_IMAGE: ${DS60_CORE_IMAGE:-ds60sqlpy-lab:0.3.0}
+    environment:
+      <<: *worker-env
+      DS60_WORKER_PROFILE: python-core
+  cpp-worker:
+    <<: *worker
+    image: ds60sqlpy-worker-cpp20:0.3.0
+    profiles: [cpp20]
+    build:
+      context: .
+      dockerfile: docker/workers/Dockerfile.cpp
+      args:
+        DS60_CPP_IMAGE: ${DS60_CPP_IMAGE:-gcc:14.3.0-bookworm}
+    environment:
+      <<: *worker-env
+      DS60_WORKER_PROFILE: cpp20
+  tensorflow-worker:
+    <<: *worker
+    image: ds60sqlpy-worker-tensorflow-cpu:0.3.0
+    profiles: [tensorflow-cpu]
+    mem_limit: 3g
+    build:
+      context: .
+      dockerfile: docker/workers/Dockerfile.tensorflow
+      args:
+        DS60_PYTHON_IMAGE: ${DS60_PYTHON_IMAGE:-python:3.12.12-slim-bookworm}
+    environment:
+      <<: *worker-env
+      DS60_WORKER_PROFILE: tensorflow-cpu
+  llm-worker:
+    <<: *worker
+    image: ds60sqlpy-worker-llm-torch-cpu:0.3.0
+    profiles: [llm-torch-cpu]
+    mem_limit: 3g
+    build:
+      context: .
+      dockerfile: docker/workers/Dockerfile.torch
+      args:
+        DS60_PYTHON_IMAGE: ${DS60_PYTHON_IMAGE:-python:3.12.12-slim-bookworm}
+    environment:
+      <<: *worker-env
+      DS60_WORKER_PROFILE: llm-torch-cpu
+  scala-worker:
+    <<: *worker
+    image: ds60sqlpy-worker-scala-jvm:0.3.0
+    profiles: [scala-jvm]
+    build:
+      context: .
+      dockerfile: docker/workers/Dockerfile.spark
+      args:
+        DS60_SPARK_IMAGE: ${DS60_SPARK_IMAGE:-spark:4.0.1-scala2.13-java17-python3-ubuntu}
+        DS60_PYTHON_IMAGE: ${DS60_PYTHON_IMAGE:-python:3.12.12-slim-bookworm}
+    environment:
+      <<: *worker-env
+      DS60_WORKER_PROFILE: scala-jvm
+  spark-scala-worker:
+    <<: *worker
+    image: ds60sqlpy-worker-spark-local-scala:0.3.0
+    profiles: [spark-local-scala]
+    mem_limit: 3g
+    pids_limit: 384
+    build:
+      context: .
+      dockerfile: docker/workers/Dockerfile.spark
+      args:
+        DS60_SPARK_IMAGE: ${DS60_SPARK_IMAGE:-spark:4.0.1-scala2.13-java17-python3-ubuntu}
+        DS60_PYTHON_IMAGE: ${DS60_PYTHON_IMAGE:-python:3.12.12-slim-bookworm}
+    environment:
+      <<: *worker-env
+      DS60_WORKER_PROFILE: spark-local-scala
+  spark-python-worker:
+    <<: *worker
+    image: ds60sqlpy-worker-spark-local-python:0.3.0
+    profiles: [spark-local-python]
+    mem_limit: 3g
+    pids_limit: 384
+    build:
+      context: .
+      dockerfile: docker/workers/Dockerfile.spark
+      args:
+        DS60_SPARK_IMAGE: ${DS60_SPARK_IMAGE:-spark:4.0.1-scala2.13-java17-python3-ubuntu}
+        DS60_PYTHON_IMAGE: ${DS60_PYTHON_IMAGE:-python:3.12.12-slim-bookworm}
+    environment:
+      <<: *worker-env
+      DS60_WORKER_PROFILE: spark-local-python
+
+networks:
+  default: {}
+  module-private:
+    internal: true

@@ -390,7 +390,7 @@ class PortalRequestHandler(BaseHTTPRequestHandler):
                 return False
         return True
 
-    def _read_json(self) -> dict[str, Any]:
+    def _read_json(self, *, max_bytes: int = MAX_REQUEST_BYTES) -> dict[str, Any]:
         content_type = self.headers.get_content_type()
         if content_type != "application/json":
             raise PortalError("Portal API requests must use application/json.")
@@ -398,7 +398,7 @@ class PortalRequestHandler(BaseHTTPRequestHandler):
         if raw_length is None:
             raise PortalError("Portal API request is missing Content-Length.")
         length = int(raw_length)
-        if length < 0 or length > MAX_REQUEST_BYTES:
+        if length < 0 or length > max_bytes:
             raise PortalError("Portal API request is too large.")
         decoded = json.loads(self.rfile.read(length))
         if not isinstance(decoded, dict):

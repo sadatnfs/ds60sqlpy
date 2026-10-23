@@ -1,13 +1,15 @@
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 TEST_WORKERS ?= 4
+MODULE_PROFILES ?= python-core,cpp20
 
-.PHONY: help setup generate journey-preview check test test-serial testserial lab mcp app windows-starter docker docker-stop docker-status
+.PHONY: help setup generate journey-preview check test test-serial testserial lab mcp app windows-starter docker docker-stop docker-status modules-build modules-start modules-stop modules-check
 help:
 	@echo "setup: install learner environment; lab: open coding lab; app: build native executable"
 	@echo "generate: refresh catalog/readers/reports; check: validate; docker: build and start lab"
 	@echo "windows-starter: package the complete double-click Windows starter ZIP"
 	@echo "test: grouped parallel suite (TEST_WORKERS=4); test-serial: serial debugging"
 	@echo "journey-preview: validate five planned tracks and rebuild their offline teaching preview"
+	@echo "modules-build/start/stop: optional labs (MODULE_PROFILES=python-core,cpp20)"
 
 setup:
 	bash scripts/setup.sh
@@ -55,3 +57,16 @@ docker-stop:
 
 docker-status:
 	bash scripts/docker_lab.sh status
+
+modules-build:
+	bash scripts/module_lab.sh build --profiles "$(MODULE_PROFILES)"
+
+modules-start:
+	bash scripts/module_lab.sh start --profiles "$(MODULE_PROFILES)"
+
+modules-stop:
+	bash scripts/module_lab.sh stop --profiles "$(MODULE_PROFILES)"
+
+modules-check:
+	$(PYTHON) scripts/check_modules.py
+	node scripts/check_module_ui.mjs

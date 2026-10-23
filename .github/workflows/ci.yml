@@ -84,6 +84,10 @@ jobs:
         run: uv run --no-sync python scripts/build_lesson_readers.py --check
       - name: Validate expansion designs and teaching preview
         run: uv run --no-sync python scripts/build_journey_preview.py --check
+      - name: Validate authored module manifests
+        run: uv run --no-sync python scripts/check_modules.py
+      - name: Exercise the module UI behavior
+        run: node scripts/check_module_ui.mjs
       - name: Lint
         run: uv run --no-sync ruff check src scripts tests bridge python/professional
       - name: Check formatting

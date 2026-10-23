@@ -1,0 +1,3 @@
+# The explicit CPU index supplies both supported Linux architectures.
+torch==2.9.1+cpu
+numpy==2.2.6

@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "track_id": "kubernetes",
+  "lessons": [
+    {
+      "id": "k8s-001",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/kubernetes/guides/k8s-001.md",
+      "source_path": "courses/kubernetes/lessons/k8s-001.md",
+      "solution_paths": [
+        "courses/kubernetes/solutions/k8s-001_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "k8s-002",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/kubernetes/guides/k8s-002.md",
+      "source_path": "courses/kubernetes/lessons/k8s-002.md",
+      "solution_paths": [
+        "courses/kubernetes/solutions/k8s-002_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "k8s-003",
+      "status": "authored",
+      "language": "yaml",
+      "runtime_profile": "k8s-kind",
+      "guide_path": "courses/kubernetes/guides/k8s-003.md",
+      "source_path": "courses/kubernetes/lessons/k8s-003.yaml",
+      "solution_paths": [
+        "courses/kubernetes/solutions/k8s-003_solution.yaml",
+        "courses/kubernetes/solutions/k8s-003_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "k8s-008",
+      "status": "authored",
+      "language": "yaml",
+      "runtime_profile": "k8s-kind",
+      "guide_path": "courses/kubernetes/guides/k8s-008.md",
+      "source_path": "courses/kubernetes/lessons/k8s-008.yaml",
+      "solution_paths": [
+        "courses/kubernetes/solutions/k8s-008_solution.yaml",
+        "courses/kubernetes/solutions/k8s-008_solutions.md"
+      ],
+      "verification_id": "k8s-readiness-v1"
+    }
+  ]
+}

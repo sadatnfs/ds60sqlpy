@@ -19,6 +19,7 @@ from ds60sqlpy.coaching import CoachingService
 from ds60sqlpy.curriculum_framework import RUNNERS
 from ds60sqlpy.execution import ALLOWED_TIMEOUT_SECONDS, PadRunner
 from ds60sqlpy.lesson_reader import render_artifact, rendered_targets
+from ds60sqlpy.module_service import ModuleService
 from ds60sqlpy.portal import PortalError, PortalRequestHandler, PortalServer
 from ds60sqlpy.sql_lesson import SqlLessonRunner
 from ds60sqlpy.sql_runner import SqlRunner, SqlRunnerError
@@ -65,11 +66,34 @@ class LabServer(PortalServer):
         self.capabilities = CapabilityService(catalog, self.pads.python)
         self.execution_lock = threading.Lock()
         self.targets = rendered_targets(catalog)
+        self._modules: ModuleService | None = None
+        self._module_lock = threading.Lock()
+        self._modules_closing = False
+        self._module_state_directory = (
+            progress_path.parent / "modules" if progress_path is not None else None
+        )
+
+    def server_close(self) -> None:
+        lock = getattr(self, "_module_lock", None)
+        if lock is not None:
+            with lock:
+                self._modules_closing = True
+                modules = self._modules
+                if modules is not None:
+                    modules.close()
+        super().server_close()
 
     def action(self, payload: dict[str, Any]) -> dict[str, Any]:
         """Dispatch only catalog-bound operations, with strict input types."""
 
         action = payload.get("action")
+        if isinstance(action, str) and action.startswith("module-"):
+            with self._module_lock:
+                if self._modules_closing:
+                    raise ValueError("The module application is closing.")
+                if self._modules is None:
+                    self._modules = ModuleService(self.catalog, self._module_state_directory)
+            return self._modules.action(payload)
         if action == "paths":
             return self.coaching.paths()
         if action == "plan":
@@ -232,15 +256,19 @@ class LabRequestHandler(PortalRequestHandler):
 
     def do_GET(self) -> None:  # noqa: N802
         route = urlsplit(self.path).path
-        if route not in {"/learn", "/journey-preview"}:
+        if route not in {"/learn", "/journey-preview", "/journeys"}:
             super().do_GET()
             return
         if self.headers.get("Host") != self.lab.expected_host:
             self._send_error(HTTPStatus.BAD_REQUEST, "Unexpected Host header.")
             return
-        asset = "learning_lab.html" if route == "/learn" else "journey_preview.html"
+        asset = {
+            "/learn": "learning_lab.html",
+            "/journey-preview": "journey_preview.html",
+            "/journeys": "learning_modules.html",
+        }[route]
         document = files("ds60sqlpy").joinpath(f"assets/{asset}").read_text(encoding="utf-8")
-        if route == "/learn":
+        if route in {"/learn", "/journeys"}:
             document = document.replace(
                 'const SERVER_TOKEN = "";', f"const SERVER_TOKEN = {json.dumps(self.lab.token)};", 1
             )
@@ -258,13 +286,24 @@ class LabRequestHandler(PortalRequestHandler):
         self.wfile.write(encoded)
 
     def do_POST(self) -> None:  # noqa: N802
-        if urlsplit(self.path).path != "/api/lab":
+        route = urlsplit(self.path).path
+        if route not in {"/api/lab", "/api/modules"}:
             super().do_POST()
             return
         if not self._authorized_api_request(require_origin=True):
             return
         try:
-            self._send_json(self.lab.action(self._read_json()))
+            payload = (
+                self._read_json(max_bytes=512 * 1024)
+                if route == "/api/modules"
+                else self._read_json()
+            )
+            if route == "/api/modules" and (
+                not isinstance(payload.get("action"), str)
+                or not payload["action"].startswith("module-")
+            ):
+                raise ValueError("The module endpoint accepts module actions only.")
+            self._send_json(self.lab.action(payload))
         except (KeyError, OSError, PortalError, TypeError, ValueError) as exc:
             self._send_error(HTTPStatus.BAD_REQUEST, str(exc))
 

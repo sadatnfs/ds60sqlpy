@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello
+  labels:
+    app: hello
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hello
+  template:
+    metadata:
+      labels:
+        app: hello
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: hello
+          image: ds60sqlpy-k8s-fixture:0.1.0
+          imagePullPolicy: Never
+          command: ["python", "/fixture.py", "server"]
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            periodSeconds: 2
+            failureThreshold: 2
+          resources:
+            requests: {cpu: 10m, memory: 16Mi}
+            limits: {cpu: 100m, memory: 64Mi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello
+spec:
+  selector:
+    app: hello
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+
+# Exercise 1: Predict controlled all-unready state; Running does not imply Ready or eligible backends.
+# Exercise 2: Prove two-replica healthy baseline using Deployment,Ready Pod UIDs,ready EndpointSlice UIDs and fresh client.
+# Exercise 3: Change only Service selector to app:wrong, observe zero matching backends, repair the saved source.
+# Exercise 4: Delete only one verified owned Pod; prove replacement identity and recovered two-replica intent.
+# Exercise 5: Explain failed rolling readiness revision with possible old Ready backends; repair and verify new generation.
+# Exercise 6: Transfer the checks to a second Service without changing unrelated resources or exporting credentials.

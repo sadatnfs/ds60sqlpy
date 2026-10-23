@@ -1,0 +1,36 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hello-check
+  labels:
+    app: hello-check
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 10
+  ttlSecondsAfterFinished: 180
+  template:
+    metadata:
+      labels:
+        app: hello-check
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: check
+          image: ds60sqlpy-k8s-fixture:0.1.0
+          imagePullPolicy: Never
+          command: ["python", "/fixture.py", "client", "--url",
+                    "http://hello:8080/version", "--expect", "ds60-fixture-v1"]
+          resources:
+            requests: {cpu: 10m, memory: 16Mi}
+            limits: {cpu: 100m, memory: 64Mi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]

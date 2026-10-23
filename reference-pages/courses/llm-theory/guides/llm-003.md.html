@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>llm-003: Conditional probability and a sequence likelihood · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>llm-003: Conditional probability and a sequence likelihood</h1>
+      <p class="source-path">Generated from <code>courses/llm-theory/guides/llm-003.md</code></p>
+    </header>
+    <article class="document"><h2 id="llm-003-conditional-probability-and-a-sequence-likelihood">llm-003: Conditional probability and a sequence likelihood<a class="heading-anchor" href="#llm-003-conditional-probability-and-a-sequence-likelihood" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Beginner within this subject; estimated time: 90 minutes. Direct prerequisite: <code>llm-002</code>. The entry Python course supplies basic functions, lists, dictionaries, testing and NumPy arrays. This unit introduces its subject terms explicitly; it requires no service account, model weights, GPU or database. Content is authored beta material; catalog publication and actual runtime readiness are separate checks.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Expand a sequence probability without treating tokens as independent. By the end, you can produce the exact observations below, explain one plausible wrong result and transfer the reasoning to a new fixed fixture without copying a solution. Keep your first prediction alongside the actual evidence so a changed conclusion remains visible.</p>
+<h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
+<p>A sequence probability is built from conditional probabilities. The first token has a probability under its start context, the next has a probability given the preceding prefix, and later tokens depend on longer prefixes or a model&#x27;s restricted context. Multiplying those conditional values follows the probability chain rule; multiplying unrelated marginal token frequencies answers a different question.</p>
+<p>For a fixed three-target demonstration, the supplied conditional probabilities are 0.5, 0.25 and 0.8. Their product is 0.1. A negative log likelihood adds the negative logarithms instead, yielding log(10). It is a score of the supplied observed sequence under that conditional table, not a probability that a story is true.</p>
+<p>Working in log space matters for long sequences because a direct product can round down to zero even when every factor is positive. A zero assigned probability is a different case: the observed event is impossible under the supplied distribution, so its negative log score is infinite. We will keep those two observations distinct and label whether a reported loss is a total or a mean over target positions.</p>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<p><strong>Prefix:</strong> the preceding tokens supplied as context before scoring the next target.</p>
+<p><strong>Conditional probability:</strong> the probability of an event given its stated context, not a claim that successive tokens are independent.</p>
+<p><strong>Likelihood:</strong> the probability the model assigns to the observed target sequence under its conditions.</p>
+<p><strong>Negative log likelihood:</strong> the sum of negative natural logarithms of target probabilities; smaller values assign more probability to the observation.</p>
+<p><strong>Underflow:</strong> a floating-point product becoming zero because its positive mathematical value is too small for the representation.</p>
+<h3 id="syntax-or-reasoning-anatomy">Syntax or reasoning anatomy<a class="heading-anchor" href="#syntax-or-reasoning-anatomy" aria-label="Link to this section">#</a></h3>
+<p>For probabilities p1, p2 and p3, the product is p1<em>p2</em>p3. The corresponding total negative log likelihood is -log(p1)-log(p2)-log(p3). math.log uses the natural logarithm. A mean divides that total by the number of scored target positions, which must be recorded. The logarithm identity improves arithmetic stability; it does not repair probabilities computed from the wrong contexts.</p>
+<p>A helper should accept a nonempty list of finite values between zero and one. Reject an invalid negative value, a value above one, and NaN. Treat an explicit zero as infinite negative log likelihood instead of quietly clipping it to an arbitrary positive value. Preserve a finite log-space total even when the separately reported direct product underflows. Do not infer factual correctness or independent evidence from a favorable likelihood.</p>
+<h3 id="how-to-run">How to run<a class="heading-anchor" href="#how-to-run" aria-label="Link to this section">#</a></h3>
+<p>Open <a href="../lessons/llm-003.py.html">the learner source</a>. Save an owned copy beneath <code>.learning/expansion/llm-003/practice.py</code> before editing. Use the application&#x27;s <code>python-core</code> profile only when its readiness notice confirms Python and NumPy; source viewing and notes remain available otherwise. The native alternative uses the prepared course interpreter, without installing anything in a lesson. Run from the repository root. Output appears in the console; assertions and named failures below provide evidence, not exact printed-string matching.</p>
+<pre><code class="language-powershell"># Windows PowerShell: selected interpreter from the course setup.
+&amp; $CoursePython .learning\expansion\llm-003\practice.py</code></pre>
+<pre><code class="language-bash"># macOS/Linux: selected course interpreter path from setup.
+&quot;$DS60_COURSE_PYTHON&quot; .learning/expansion/llm-003/practice.py</code></pre>
+<p>If the interpreter path is unset or NumPy cannot be imported, inspect runtime readiness and keep the error. Do not run pip, download data or silently change the interpreter inside the lesson. All supplied inputs are tiny local literals.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="example-a-trace-a-three-target-score">Example A: Trace a three-target score<a class="heading-anchor" href="#example-a-trace-a-three-target-score" aria-label="Link to this section">#</a></h4>
+<p>Use the supplied conditional table as fixed data, not three independent token marginals.</p>
+<pre><code class="language-python">import math
+
+probabilities = [0.5, 0.25, 0.8]
+likelihood = math.prod(probabilities)
+nll = -sum(math.log(p) for p in probabilities)
+assert math.isclose(likelihood, 0.1, rel_tol=0, abs_tol=1e-12)
+assert math.isclose(nll, math.log(10), rel_tol=0, abs_tol=1e-12)
+print(likelihood, nll)</code></pre>
+<p><strong>Expected:</strong> The total is log(10), while the per-target mean is log(10)/3. A different prefix could change any later conditional; the list is not a universal token-frequency table.</p>
+<h4 id="example-b-a-finite-log-score-after-product-underflow">Example B: A finite log score after product underflow<a class="heading-anchor" href="#example-b-a-finite-log-score-after-product-underflow" aria-label="Link to this section">#</a></h4>
+<p>Repeat a small positive conditional probability many times. Do not replace a zero printed product with a claim that the supplied probabilities were zero.</p>
+<pre><code class="language-python">probabilities = [0.01] * 1000
+likelihood = math.prod(probabilities)
+nll = -sum(math.log(p) for p in probabilities)
+assert likelihood == 0.0
+assert math.isfinite(nll)
+assert math.isclose(nll, 1000 * math.log(100), rel_tol=0, abs_tol=1e-9)
+print(likelihood, nll)</code></pre>
+<p><strong>Expected:</strong> The direct product underflows to zero in float64/Python float, but the log-space total remains finite. This is a numeric representation limit, not an impossible event in the declared table.</p>
+<h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
+<p>Before executing or calculating, write the result you expect from the normal fixture and which changed condition would invalidate it. Save that prediction. Afterward, name the first observation that supported or contradicted it rather than rewriting your original answer to match the reference.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Trace the fixed conditionals.</strong> Derive the product, total negative log likelihood and scored-target count for [0.5,0.25,0.8]. <strong>Expected:</strong> Likelihood 0.1, total NLL log(10), and three targets. <strong>Verify:</strong> Assert the product and log score within 1e-12 and name each preceding context in a short table.</li>
+</ol>
+<ol>
+<li><strong>Change the conditioning assumption.</strong> Compare the supplied table with [0.5,0.5,0.5], which incorrectly reuses one unconditional frequency for all positions. <strong>Expected:</strong> The alternative product is 0.125 and its total NLL is 3*log(2), different from log(10). <strong>Verify:</strong> Record both products and explain that the changed conditionals define a different model, not an algebraic shortcut.</li>
+</ol>
+<ol>
+<li><strong>Preserve a long log score.</strong> Implement sequence_score(probabilities) and test 1000 copies of 0.01 without summing logs of an already multiplied product. <strong>Expected:</strong> Direct product is 0.0 from underflow; total NLL is finite and equals 1000*log(100) within 1e-9. <strong>Verify:</strong> Assert the finite log-space value and keep the underflowed product labeled separately.</li>
+</ol>
+<ol>
+<li><strong>Handle certain and impossible targets.</strong> Score [1,1] and [0.5,0]. Do not replace zero with an undisclosed epsilon. <strong>Expected:</strong> The all-one score has NLL 0; a zero-probability target gives product 0 and NLL positive infinity. <strong>Verify:</strong> Use math.isinf for the impossible-event result and compare it with the finite underflow result from Exercise 3.</li>
+</ol>
+<ol>
+<li><strong>Reject invalid probabilities.</strong> Test an empty list, [-0.1], [1.1] and [NaN]. <strong>Expected:</strong> All four cases raise ValueError with a nonempty/range/finite explanation. <strong>Verify:</strong> Capture each exception separately, then assert that the original three-target score still matches log(10).</li>
+</ol>
+<ol>
+<li><strong>Declare an aggregation unit.</strong> Document A has target probabilities [0.5]; document B has [0.25,0.25,0.25]. Compare token-weighted mean NLL and equal-document mean NLL. <strong>Expected:</strong> Token mean is 7<em>log(2)/4; equal-document mean is 3</em>log(2)/2. <strong>Verify:</strong> Write the four-target denominator and the two-document denominator explicitly and assert both values within 1e-12.</li>
+</ol>
+<h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Hint 1:</strong> Write the prefix beside every target probability before multiplying.</li>
+<li><strong>Hint 2:</strong> Take logs of each positive factor before adding; do not log a product that may already be zero.</li>
+<li><strong>Hint 3:</strong> Label whether your denominator counts targets or documents and handle an explicit zero as its own case.</li>
+</ul>
+<h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
+<p>If a product prints zero, inspect the individual probabilities. A thousand positive factors can underflow; a supplied factor of zero represents an impossible observed event under the declared model. Those cases share a printed product but differ in their log score. If an implementation computes log(product) after multiplication, it has already lost the stability benefit.</p>
+<p>If two loss reports disagree, inspect whether one is a sequence total, token mean or equal-document mean. A changed tokenizer changes which targets are counted, so a token-based score cannot be casually compared across different representations. High sequence likelihood is also not an answer-verification method: it measures the model&#x27;s assigned probability to text, not the truth of its content.</p>
+<h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
+<p>Without opening the helper, derive the log score of probabilities [0.25,1]. Explain why adding conditional log probabilities does not assume independent tokens. Name one way a zero printed likelihood can coexist with finite NLL.</p>
+<h3 id="evidence-review">Evidence review<a class="heading-anchor" href="#evidence-review" aria-label="Link to this section">#</a></h3>
+<p>Use a 0, 1 or 2 score for each of five dimensions: the declared data/observation contract, a correct normal-case derivation, diagnosis of the changed fixture, explicit handling of the invalid case, and a fresh explanation of the evidence boundary. Normally seek 8/10 with no zero for the contract or claim boundary, then require a new transfer example. This is a human learning rubric, not an automatic certification or completion awarded by a single successful Run.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>Continue to <code>llm-004</code> when its authored file and readiness are available. Use <a href="../README.md.html">the course README</a> and <a href="../../../docs/implementation/ml-content-status.md.html">implementation checkpoint</a> to distinguish implemented work from later design units. Keep this lesson&#x27;s smallest counterexample as a regression when later abstractions appear.</p>
+<h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning workflow for llm-003,
+Conditional probability and a sequence likelihood. Read courses/llm-theory/guides/llm-003.md
+and courses/llm-theory/lessons/llm-003.py. Respect direct prerequisites
+llm-002 and beginner depth. Explain the actual fixture&#x27;s
+units, axes or evaluation denominator before new abstractions. Ask for a saved
+prediction, inspect my own attempt, give one hint at a time, then review the
+specific expected values or named failure. Keep courses/llm-theory/solutions/
+closed until I request comparison or show an honest attempt. Ask me to explain
+one counterexample and solve a fresh retrieval case without copying. Done when I can provide working evidence and explain a fresh case in my own
+words without copying, not merely check a box. No service call,
+model/data download, package installation or database is involved. Use reading
+notes when no execution is required and report missing runtime readiness honestly.</code></pre></article>
+  </main>
+</body>
+</html>

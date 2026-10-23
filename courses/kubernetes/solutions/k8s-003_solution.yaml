@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello
+  labels:
+    app: hello
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hello
+  template:
+    metadata:
+      labels:
+        app: hello
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: app
+          image: ds60sqlpy-k8s-fixture:0.1.0
+          imagePullPolicy: Never
+          command: ["python", "/fixture.py", "server"]
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet: {path: /ready, port: http}
+            periodSeconds: 2
+            failureThreshold: 2
+          resources:
+            requests: {cpu: 10m, memory: 16Mi}
+            limits: {cpu: 100m, memory: 64Mi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: ["ALL"]}
+
+# Exercise 1: Read the request envelope. Inputs: the complete hello Deployment learner source. Expected: apps/v1,Deployment,hello. Verify: read the three exact fields at their declared levels.
+# Exercise 2: Validate a numeric field. Inputs: one valid number and one invalid string. Expected: numeric1 is the intended request; the string is rejected by schema validation. Verify: retain the validation phase/result and do not claim a rejected object has a new UID.
+# Exercise 3: Trace selector and template labels. Inputs: selector app:hello and template label app:hello. Expected: the key/value pairs agree; app:wrong would violate the intended controller/template relation. Verify: compare the exact pair on both sides.
+# Exercise 4: Bind only the owned namespace. Inputs: source omits namespace;private lease specifies lesson-a with verified UID. Expected: the reviewed operation binds lesson-a; no ambient fallback or source namespace escape. Verify: inspect the bound request and receipt; refuse when the lease is absent.
+# Exercise 5: Separate intent from observation. Inputs: desired1,observed ready0. Expected: the request can be accepted while readiness is not established. Verify: record generation/observedGeneration and readiness after bounded reconciliation; do not edit status into the source.
+# Exercise 6: Verify server identity and safe cleanup. Inputs: name hello,namespace from lease,server-assigned UID. Expected: namespace matches the lease; UID is recorded from readback and used for owned cleanup. Verify: check actual returned identity; never fabricate a fixed UID from this document.

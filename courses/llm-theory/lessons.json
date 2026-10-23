@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "track_id": "llm-theory",
+  "lessons": [
+    {
+      "id": "llm-001",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/llm-theory/guides/llm-001.md",
+      "source_path": "courses/llm-theory/lessons/llm-001.md",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-001_solution.py",
+        "courses/llm-theory/solutions/llm-001_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-002",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-theory/guides/llm-002.md",
+      "source_path": "courses/llm-theory/lessons/llm-002.py",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-002_solution.py",
+        "courses/llm-theory/solutions/llm-002_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-003",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-theory/guides/llm-003.md",
+      "source_path": "courses/llm-theory/lessons/llm-003.py",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-003_solution.py",
+        "courses/llm-theory/solutions/llm-003_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-004",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-theory/guides/llm-004.md",
+      "source_path": "courses/llm-theory/lessons/llm-004.py",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-004_solution.py",
+        "courses/llm-theory/solutions/llm-004_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-005",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-theory/guides/llm-005.md",
+      "source_path": "courses/llm-theory/lessons/llm-005.py",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-005_solution.py",
+        "courses/llm-theory/solutions/llm-005_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-006",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-theory/guides/llm-006.md",
+      "source_path": "courses/llm-theory/lessons/llm-006.py",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-006_solution.py",
+        "courses/llm-theory/solutions/llm-006_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-007",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-theory/guides/llm-007.md",
+      "source_path": "courses/llm-theory/lessons/llm-007.py",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-007_solution.py",
+        "courses/llm-theory/solutions/llm-007_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-008",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-theory/guides/llm-008.md",
+      "source_path": "courses/llm-theory/lessons/llm-008.py",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-008_solution.py",
+        "courses/llm-theory/solutions/llm-008_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-009",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-theory/guides/llm-009.md",
+      "source_path": "courses/llm-theory/lessons/llm-009.py",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-009_solution.py",
+        "courses/llm-theory/solutions/llm-009_solutions.md"
+      ],
+      "verification_id": "llm-causal-attention-v1"
+    }
+  ]
+}

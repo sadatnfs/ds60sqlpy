@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>tf-007: Eager tensors, variables and a tape · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>tf-007: Eager tensors, variables and a tape</h1>
+      <p class="source-path">Generated from <code>courses/deep-learning-tensorflow/guides/tf-007.md</code></p>
+    </header>
+    <article class="document"><h2 id="tf-007-eager-tensors-variables-and-a-tape">tf-007: Eager tensors, variables and a tape<a class="heading-anchor" href="#tf-007-eager-tensors-variables-and-a-tape" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Beginner within this subject; estimated time: 105 minutes. Direct prerequisite: <code>tf-006</code>. The entry Python course supplies basic functions, lists, dictionaries, testing and NumPy arrays. This unit introduces its subject terms explicitly; it requires no service account, model weights, GPU or database. Content is authored beta material; catalog publication and actual runtime readiness are separate checks.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Identify which forward operations and variables are recorded for differentiation. By the end, you can produce the exact observations below, explain one plausible wrong result and transfer the reasoning to a new fixed fixture without copying a solution. Keep your first prediction alongside the actual evidence so a changed conclusion remains visible.</p>
+<h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
+<p>Automatic differentiation follows a recorded computation from a watched variable to a chosen output. TensorFlow&#x27;s GradientTape is a recording scope. It does not infer dependencies merely because two values have a familiar name or because an unrecorded forward result happens to equal a recorded one.</p>
+<p>Use loss=(w-2)^2 with a float64 Variable. At zero the connected gradient is -4; at two it is numeric zero. If the forward loss was computed before the tape began, the tape has no recorded route from that loss to w, so its gradient is None. Missing and zero therefore report different facts. Treating every missing path as a zero update hides a broken experiment.</p>
+<p>Variables also have identity and mutable state. assign_sub updates the existing Variable; rebinding a Python name to a calculated Tensor creates a different object. This unit inspects those boundaries using scalar CPU fixtures, before the three-point gradient pilot introduces paired observations. A qualified TensorFlow runtime is required for execution; reading the trace remains useful when that profile is unavailable.</p>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<p><strong>Tensor:</strong> a TensorFlow value with shape and dtype, which need not be a trainable mutable parameter.</p>
+<p><strong>Variable:</strong> a mutable TensorFlow object whose identity and value can persist across updates.</p>
+<p><strong>GradientTape:</strong> the scope that records relevant operations for a later differentiation query.</p>
+<p><strong>Watched value:</strong> an input tracked for differentiation; trainable Variables are watched automatically when read inside the scope.</p>
+<p><strong>Disconnected gradient:</strong> None when the recorded graph has no path from the requested output to the requested input, unlike numeric zero on a connected path.</p>
+<h3 id="syntax-or-reasoning-anatomy">Syntax or reasoning anatomy<a class="heading-anchor" href="#syntax-or-reasoning-anatomy" aria-label="Link to this section">#</a></h3>
+<p>The with statement starts a recording scope and indentation identifies its forward operations. Compute the loss from the Variable inside that scope. Calling tape.gradient afterward queries the recorded dependency. An ordinary nonpersistent tape supports one gradient query, so use a fresh tape and forward computation for another update. A constant can be watched explicitly, while a constant input feature does not need to be trainable for a separate Variable&#x27;s derivative to exist.</p>
+<p>Use float64 for these scalar checks and CPU placement explicitly. Integer tensors are not ordinary differentiable parameters. Never repair a disconnected path by substituting zero without diagnosing its origin. Updating a Variable uses its assignment method, whereas the Python assignment operator changes what a name refers to.</p>
+<h3 id="how-to-run">How to run<a class="heading-anchor" href="#how-to-run" aria-label="Link to this section">#</a></h3>
+<p>Open <a href="../lessons/tf-007.py.html">the learner source</a>. Save an owned copy beneath <code>.learning/expansion/tf-007/practice.py</code> before editing. Use the application&#x27;s declared <code>tensorflow-cpu</code> profile only when its readiness notice confirms its dependencies; source viewing and notes remain available otherwise. The native alternative uses the prepared interpreter for this lesson&#x27;s declared tensorflow-cpu profile, without installing anything in a lesson. Run from the repository root. Output appears in the console; assertions and named failures below provide evidence, not exact printed-string matching.</p>
+<pre><code class="language-powershell"># Windows PowerShell: selected interpreter from the course setup.
+&amp; $CoursePython .learning\expansion\tf-007\practice.py</code></pre>
+<pre><code class="language-bash"># macOS/Linux: selected course interpreter path from setup.
+&quot;$DS60_COURSE_PYTHON&quot; .learning/expansion/tf-007/practice.py</code></pre>
+<p>If the interpreter path is unset or a declared package cannot be imported, inspect runtime readiness and keep the error. Do not run pip, download data or silently change the interpreter inside the lesson. All supplied inputs are tiny local literals.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="example-a-a-recorded-scalar-loss">Example A: A recorded scalar loss<a class="heading-anchor" href="#example-a-a-recorded-scalar-loss" aria-label="Link to this section">#</a></h4>
+<p>The multiplication and subtraction depend on w inside the recording region.</p>
+<pre><code class="language-python">import tensorflow as tf
+
+with tf.device(&quot;/CPU:0&quot;):
+    w = tf.Variable(0.0, dtype=tf.float64)
+    with tf.GradientTape() as tape:
+        loss = tf.square(w - 2.0)
+    gradient = tape.gradient(loss, w)
+assert gradient is not None
+assert float(gradient.numpy()) == -4.0
+print(float(loss.numpy()), float(gradient.numpy()))</code></pre>
+<p><strong>Expected:</strong> The output is loss 4 and gradient -4. A watched mutable Variable and a connected forward path produce an ordinary numeric gradient.</p>
+<h4 id="example-b-a-value-formed-before-recording">Example B: A value formed before recording<a class="heading-anchor" href="#example-b-a-value-formed-before-recording" aria-label="Link to this section">#</a></h4>
+<p>Keep the same numerical loss but move its calculation outside the scope.</p>
+<pre><code class="language-python">with tf.device(&quot;/CPU:0&quot;):
+    precomputed = tf.square(w - 2.0)
+    with tf.GradientTape() as tape:
+        copied_loss = tf.identity(precomputed)
+    missing = tape.gradient(copied_loss, w)
+assert missing is None
+print(missing)</code></pre>
+<p><strong>Expected:</strong> The scalar can still equal 4, but the Variable-dependent operations were not recorded. Starting another scope afterward cannot reconstruct them.</p>
+<h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
+<p>Before executing or calculating, write the result you expect from the normal fixture and which changed condition would invalidate it. Save that prediction. Afterward, name the first observation that supported or contradicted it rather than rewriting your original answer to match the reference.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Trace a recorded path.</strong> Reproduce the connected scalar example and name which forward operations depend on w. <strong>Expected:</strong> Loss 4 and gradient -4 at w=0, dtype float64. <strong>Verify:</strong> Assert the scalar values and inspect that subtraction and square both occur inside the tape indentation.</li>
+</ol>
+<ol>
+<li><strong>Distinguish a true zero.</strong> Create a fresh Variable at w=2 and record the same loss computation. <strong>Expected:</strong> Connected loss 0 and numeric gradient 0, not None. <strong>Verify:</strong> Use is not None before comparing the gradient value to 0.</li>
+</ol>
+<ol>
+<li><strong>Repair a missing path.</strong> Reproduce the outside-scope calculation, then recompute the forward path inside a new tape. <strong>Expected:</strong> Outside path gives None; repaired path at zero gives -4. <strong>Verify:</strong> Retain both results and assert their different types/values rather than converting None to zero.</li>
+</ol>
+<ol>
+<li><strong>Watch a constant deliberately.</strong> Differentiate square(c-2) for a float64 constant c=0 with and without tape.watch(c). <strong>Expected:</strong> Unwatched constant gives None; explicitly watched constant gives -4. <strong>Verify:</strong> Assert both outcomes and explain why this does not make all input features trainable parameters.</li>
+</ol>
+<ol>
+<li><strong>Preserve Variable identity.</strong> Compare name rebinding after w-0.1*gradient with w.assign_sub on a fresh Variable. <strong>Expected:</strong> Rebinding yields a Tensor at 0.4 while the old Variable remains 0; assign_sub preserves the Variable object and changes its value to 0.4. <strong>Verify:</strong> Inspect isinstance(...,tf.Variable), object identity and both old/new numeric values.</li>
+</ol>
+<ol>
+<li><strong>Use a fresh recording.</strong> Query an ordinary tape twice, then repeat the operation using a new tape. Also use constant feature x=2 with loss=(w*x-4)^2 at w=0. <strong>Expected:</strong> Second use of the consumed tape raises RuntimeError; a fresh scalar tape gives -4, and the constant-feature loss gives gradient -16. <strong>Verify:</strong> Capture the consumed-tape exception and assert the two fresh-path gradients separately.</li>
+</ol>
+<h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Hint 1:</strong> Locate the first operation that reads the Variable and check its position relative to the with block.</li>
+<li><strong>Hint 2:</strong> Keep None checks separate from numeric comparisons at the optimum.</li>
+<li><strong>Hint 3:</strong> Preserve the Variable object when updating state, and create a new recording for a new query.</li>
+</ul>
+<h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
+<p>If gradient is None, trace the earliest Variable-dependent operation and check whether it occurred before the tape or became a Python/NumPy value. Explicitly watching a constant cannot restore an operation performed earlier. If a second gradient query fails, inspect whether an ordinary tape has already been consumed instead of swallowing the RuntimeError.</p>
+<p>If a parameter stops behaving like a Variable after an update, inspect whether Python name rebinding replaced it with a Tensor. A correct printed weight alone does not establish the state contract needed by another step. Keep CPU placement and dtype explicit; a missing TensorFlow import is an unavailable runtime, not a mathematical failure or a prompt to install packages inside this file.</p>
+<h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
+<p>Close the examples and explain the three different observations None, numeric zero and RuntimeError after tape consumption. Then derive the gradient of (3*w-6)^2 at zero before running a fresh recording.</p>
+<h3 id="evidence-review">Evidence review<a class="heading-anchor" href="#evidence-review" aria-label="Link to this section">#</a></h3>
+<p>Use a 0, 1 or 2 score for each of five dimensions: the declared data/observation contract, a correct normal-case derivation, diagnosis of the changed fixture, explicit handling of the invalid case, and a fresh explanation of the evidence boundary. Normally seek 8/10 with no zero for the contract or claim boundary, then require a new transfer example. This is a human learning rubric, not an automatic certification or completion awarded by a single successful Run.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>Continue to <code>tf-008</code> when its authored file and readiness are available. Use <a href="../README.md.html">the course README</a> and <a href="../../../docs/implementation/ml-content-status.md.html">implementation checkpoint</a> to distinguish implemented work from later design units. Keep this lesson&#x27;s smallest counterexample as a regression when later abstractions appear.</p>
+<h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning workflow for tf-007,
+Eager tensors, variables and a tape. Read courses/deep-learning-tensorflow/guides/tf-007.md
+and courses/deep-learning-tensorflow/lessons/tf-007.py. Respect direct prerequisites
+tf-006 and beginner depth. Explain the actual fixture&#x27;s
+units, axes or evaluation denominator before new abstractions. Ask for a saved
+prediction, inspect my own attempt, give one hint at a time, then review the
+specific expected values or named failure. Keep courses/deep-learning-tensorflow/solutions/
+closed until I request comparison or show an honest attempt. Ask me to explain
+one counterexample and solve a fresh retrieval case without copying. Done when I can provide working evidence and explain a fresh case in my own
+words without copying, not merely check a box. No service call,
+model/data download, package installation or database is involved. Use reading
+notes when no execution is required and report missing runtime readiness honestly.</code></pre></article>
+  </main>
+</body>
+</html>
