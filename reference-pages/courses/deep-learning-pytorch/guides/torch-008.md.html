@@ -116,15 +116,16 @@
       <p class="source-path">Generated from <code>courses/deep-learning-pytorch/guides/torch-008.md</code></p>
     </header>
     <article class="document"><h2 id="torch-008-one-optimizer-step-you-can-audit">torch-008: One optimizer step you can audit<a class="heading-anchor" href="#torch-008-one-optimizer-step-you-can-audit" aria-label="Link to this section">#</a></h2>
-<p>Status: authored PyTorch course content. The manifest inventories complete teaching files; runtime readiness remains a separate, measured property.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Beginner; approximately 120 minutes. Direct prerequisites: <code>torch-007</code>. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
-<p>One optimizer step is the smallest complete training experiment. The central investigation is concrete: Use float64x1, 2, 3, y2x and scalar w0. The finish condition is mean squared loss56/3. w.grad None; updated weight unchanged. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
+<p>One optimizer step is the smallest complete training experiment. The central investigation is concrete: Use float64 x1, 2, 3, y2x and scalar w0. The finish condition is mean squared loss 56/3. w.grad None; updated weight unchanged. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
 <h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
-<p>One optimizer step is the smallest complete training experiment. Specify inputs, targets, initial weight, dtype, loss reduction, learning rate and optimizer rule. Calculate the forward loss, derive the gradient, apply the update and recompute the loss at the new state. A PyTorch optimizer does not calculate gradients itself:backward populates the parameter.grad fields and optimizer.step consumes them. zero_grad establishes which contributions belong to the next step.</p>
-<p>The scalar fixture x1, 2, 3, y2x, w0 and rate.1 has an exact oracle. Mean squared loss starts at56/3, the derivative is-56/3, the new weight is28/15, and the new loss is56/675. A mistaken l y broadcast column target gives the same initial loss but a different gradient. This is why comparing only a printed initial objective is an inadequate correctness test.</p>
+<p>One optimizer step is the smallest complete training experiment. Specify inputs, targets, initial weight, dtype, loss reduction, learning rate and optimizer rule. Calculate the forward loss, derive the gradient, apply the update and recompute the loss at the new state. A PyTorch optimizer does not calculate gradients itself: backward populates the parameter.grad fields and optimizer.step consumes them. zero_grad establishes which contributions belong to the next step.</p>
+<p>The scalar fixture x1, 2, 3, y2x, w0 and rate.1 has an exact oracle. Mean squared loss starts at 56/3, the derivative is-56/3, the new weight is 28/15, and the new loss is 56/675. A mistakenly broadcast column target gives the same initial loss but a different gradient. This is why comparing only a printed initial objective is an inadequate correctness test.</p>
 <h3 id="design-decisions-and-when-to-use-this-method">Design decisions and when to use this method<a class="heading-anchor" href="#design-decisions-and-when-to-use-this-method" aria-label="Link to this section">#</a></h3>
+<p>Use this one-step audit before trusting a longer training loop, porting an optimizer path or comparing frameworks. Fix every input, initial value and reduction so a disagreement can be localized to forward computation, backward accumulation or parameter mutation. Start with plain SGD, zero momentum and zero weight decay before adding stateful optimizer behavior.</p>
+<p>A successful update is evidence about this numerical mechanism. It is not a model-quality result, and the exact learning-rate interval derived here belongs only to this one-parameter quadratic. Later nonlinear, stochastic and distributed models require their own scale and stability analysis rather than borrowing this bound as a default.</p>
 <h3 id="paired-tensorflow-comparison">Paired TensorFlow comparison<a class="heading-anchor" href="#paired-tensorflow-comparison" aria-label="Link to this section">#</a></h3>
 <p>Compare <a href="../../deep-learning-tensorflow/guides/tf-008.md.html">tf-008</a> after deriving the shared numerical contract.</p>
 <p>The paired TensorFlow GradientTape example has the same arithmetic oracle. PyTorch separates backward accumulation and optimizer.step, while the TensorFlow example explicitly passes returned gradients to an update. Both need an exact shape contract and a fresh post-update forward calculation.</p>
@@ -133,13 +134,49 @@
 <p><strong>SGD step:</strong> Subtracting learning rate times the current gradient.</p>
 <p><strong>Independent oracle:</strong> A separately derived expected result for the computation.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Use a prepared <code>llm-torch-cpu</code> environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored <code>.learning/expansion/torch-008/</code> before editing, or use the application&#x27;s saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: <code>&amp; $CoursePython courses/deep-learning-pytorch/lessons/torch-008.py</code>. For macOS/Linux use <code>.venv/bin/python courses/deep-learning-pytorch/lessons/torch-008.py</code> from the repository root.</p>
-<p>Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.</p>
+<p>Use a prepared <code>llm-torch-cpu</code> environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored <code>.learning/expansion/torch-008/</code> before editing, or use the application&#x27;s saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: <code>&amp; $CoursePython courses/deep-learning-pytorch/lessons/torch-008.py</code>. For macOS/Linux, use the interpreter explicitly selected for a separately prepared native PyTorch environment, and invoke that interpreter on <code>courses/deep-learning-pytorch/lessons/torch-008.py</code> from the repository root. The repository&#x27;s general <code>.venv</code> is not assumed to contain PyTorch; the prepared classroom profile is the default execution route.</p>
+<p>Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the explicit tolerance in each assertion. Several analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone is not a universal numerical-error bound. Finite differences, reductions and conditioning can require different justified tolerances. Integer counts, identities and boolean decisions should be exact.</p>
 <h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
-<p>Wrap the scalar weight innn.Parameter with float64. Use an SGD optimizer with momentum0 and no weight decay. Call zero_grad, set the mean squared residual objective, backward, save the gradient, then step. Use a fresh forward expression for the post-update loss. Validate prediction/target shape equality before allowing a production loss helper to rely on broadcasting.</p>
+<p>Wrap the scalar weight in nn.Parameter with float64. Use an SGD optimizer with momentum 0 and no weight decay. Call zero_grad, set the mean squared residual objective, backward, save the gradient, then step. Use a fresh forward expression for the post-update loss. Validate prediction/target shape equality before allowing a production loss helper to rely on broadcasting.</p>
+<h3 id="derive-the-complete-scalar-training-transition">Derive the complete scalar training transition<a class="heading-anchor" href="#derive-the-complete-scalar-training-transition" aria-label="Link to this section">#</a></h3>
+<p>The hypothesis is prediction_i=w x_i for x=[1, 2, 3] and y=2x. With a mean over three paired observations, the objective simplifies to:</p>
+<p><code>L(w) = (1²+2²+3²)(w-2)²/3 = (14/3)(w-2)²</code>.</p>
+<p>Its derivative is<code>g(w)=(28/3)(w-2)</code>. At w=0, the predictions are zeros, residuals[-2, -4, -6], squared errors[4, 16, 36], loss 56/3 and gradient-56/3. The input features can remain ordinary constant tensors because the requested derivative is with respect to w. Targets also remain fixed labels rather than state the optimizer is allowed to change.</p>
+<p>For learning rateη=1/10, plain SGD gives w_new=w-ηg=28/15. The new residual is(w_new-2)x=(-2/15)x, so its entries are[-2/15, -4/15, -6/15]. Squaring and averaging gives 56/675. The before-loss, gradient, new parameter and after-loss are four separately inspected observations:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Stage</th>
+<th>Weight</th>
+<th>Quantity observed</th>
+</tr></thead><tbody>
+<tr>
+<td>Forward</td>
+<td>0</td>
+<td>L=56/3</td>
+</tr>
+<tr>
+<td>Backward</td>
+<td>0</td>
+<td>stored gradient=-56/3</td>
+</tr>
+<tr>
+<td>Step</td>
+<td>28/15</td>
+<td>parameter changed by 28/15</td>
+</tr>
+<tr>
+<td>New forward</td>
+<td>28/15</td>
+<td>L=56/675</td>
+</tr>
+</tbody></table></div>
+<p>Backward does not perform the update, and step does not recompute the loss. The old loss tensor still records the earlier forward result after the parameter changes. The fresh Parameter starts with no stored gradient, which makes the first backward unambiguous; repeated independent steps need an explicit clearing policy. The SGD API specifies how momentum, weight decay and other options would change this simpler transition. <a href="https://docs.pytorch.org/docs/2.9/generated/torch.optim.SGD.html">PyTorch 2.9 SGD</a>.</p>
+<p>The exact quadratic also permits a stability calculation. Let e=w-2 be the error from the optimum. One update gives e_new=(1-28η/3)e. Repeated full-batch updates contract this error only when|1-28η/3|&lt;1, or 0&lt;η&lt;3/14. Atη=0.1, the contraction factor is 1/15. Atη=0.25, it is-4/3: the parameter crosses the optimum and its error grows. The first weight becomes 14/3 and the new loss 896/27, larger than the initial 56/3 despite a correct derivative.</p>
+<p>Changing to a summed objective changes that bound because the gradient is three times larger. This is why learning-rate claims require a declared denominator. The result is exact for this fixed convex scalar objective; it is not a universal neural-network learning-rate rule.</p>
+<p>The mistaken column target produces a different objective over every input-target pair. Its mean can be expanded as<code>L_bad(w)=(14/3)w²-16w+56/3</code>. At zero, it shares the correct initial loss 56/3, but its derivative is-16. Its optimum is 12/7 rather than two, and its minimum is 104/21 rather than zero. This is a changed statistical pairing, not merely an objective-scale factor. Adjusting the learning rate to disguise the first gradient difference cannot restore the intended optimum.</p>
+<p>An audit should therefore check the residual shape and per-record identity before reducing to a scalar. It should then compare the derivative with the independent NumPy probe and verify that the optimizer owns the exact Parameter object whose gradient was computed. Only after those boundaries pass does a longer loop add useful evidence.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-calculate-the-initial-loss">Example A: Calculate the initial loss<a class="heading-anchor" href="#example-a-calculate-the-initial-loss" aria-label="Link to this section">#</a></h4>
-<p>The three squared residuals are4, 16, 36. Their sum56 divided by three defines the objective denominator.</p>
+<p>The three squared residuals are 4, 16, 36. Their sum 56 divided by three defines the objective denominator.</p>
 <pre><code class="language-python">import numpy as np
 import torch
 from torch import nn
@@ -147,41 +184,42 @@ from torch.nn import functional as F
 
 x=torch.tensor([1.,2.,3.],dtype=torch.float64); y=2*x; w=nn.Parameter(torch.tensor(0.,dtype=torch.float64))
 loss=((w*x-y)**2).mean(); np.testing.assert_allclose(loss.item(),56/3,atol=1e-12,rtol=0)</code></pre>
-<p><strong>Expected:</strong> mean squared loss56/3.</p>
+<p><strong>Expected:</strong> mean squared loss 56/3.</p>
 <h4 id="example-b-inspect-the-gradient-before-updating">Example B: Inspect the gradient before updating<a class="heading-anchor" href="#example-b-inspect-the-gradient-before-updating" aria-label="Link to this section">#</a></h4>
 <p>Backward computes derivatives but does not update the parameter. Separating these observations helps diagnose a missing optimizer step.</p>
 <pre><code class="language-python">loss.backward(); np.testing.assert_allclose(w.grad.item(),-56/3,atol=1e-12,rtol=0)
 assert w.item()==0</code></pre>
-<p><strong>Expected:</strong> gradient-56/3; weight still0.</p>
+<p><strong>Expected:</strong> gradient-56/3; weight still 0.</p>
 <h4 id="example-c-apply-exactly-one-sgd-update">Example C: Apply exactly one SGD update<a class="heading-anchor" href="#example-c-apply-exactly-one-sgd-update" aria-label="Link to this section">#</a></h4>
 <p>The optimizer consumes the stored gradient. The old loss tensor remains the before-update result, so the new loss requires another forward calculation.</p>
 <pre><code class="language-python">optimizer=torch.optim.SGD([w],lr=.1); optimizer.step()
 np.testing.assert_allclose(w.item(),28/15,atol=1e-12,rtol=0)
 np.testing.assert_allclose(((w*x-y)**2).mean().item(),56/675,atol=1e-12,rtol=0)</code></pre>
-<p><strong>Expected:</strong> w28/15; loss56/675.</p>
+<p><strong>Expected:</strong> w28/15; loss 56/675.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
-<p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: mean squared loss56/3. w.grad None; updated weight unchanged. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
+<p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: mean squared loss 56/3. w.grad None; updated weight unchanged. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
-<li><strong>Calculate the initial loss.</strong> Use float64x1, 2, 3, y2x and scalar w0. <strong>Expected:</strong> mean squared loss56/3. <strong>Verify:</strong> Save the assertion results for exercise 1, including mean squared loss56/3.</li>
+<li><strong>Calculate the initial loss.</strong> Use float64 x1, 2, 3, y2x and scalar w0. <strong>Expected:</strong> mean squared loss 56/3. <strong>Verify:</strong> Save the assertion results for exercise 1, including mean squared loss 56/3.</li>
 </ol>
 <ol>
-<li><strong>Inspect the gradient before updating.</strong> Back propagate the initial loss and compare with-56/3. <strong>Expected:</strong> gradient-56/3; weight still0. <strong>Verify:</strong> Save the assertion results for exercise 2, including gradient-56/3; weight still0.</li>
+<li><strong>Inspect the gradient before updating.</strong> Back propagate the initial loss and compare with-56/3. <strong>Expected:</strong> gradient-56/3; weight still 0. <strong>Verify:</strong> Save the assertion results for exercise 2, including gradient-56/3; weight still 0.</li>
 </ol>
 <ol>
-<li><strong>Apply exactly one SGD update.</strong> Use SGD learning rate.1 onw and recompute the objective afterward. <strong>Expected:</strong> w28/15; loss56/675. <strong>Verify:</strong> Save the assertion results for exercise 3, including w28/15; loss56/675.</li>
+<li><strong>Apply exactly one SGD update.</strong> Use SGD learning rate.1 onw and recompute the objective afterward. <strong>Expected:</strong> w28/15; loss 56/675. <strong>Verify:</strong> Save the assertion results for exercise 3, including w28/15; loss 56/675.</li>
 </ol>
 <ol>
-<li><strong>Expose the broadcast counterexample.</strong> At a fresh w0, compare vector predictions with column targets shaped(3, 1). <strong>Expected:</strong> initial loss still56/3, but gradient-16. <strong>Verify:</strong> Save the assertion results for exercise 4, including initial loss still56/3, but gradient-16.</li>
+<li><strong>Expose the broadcast counterexample.</strong> At a fresh w0, compare vector predictions with column targets shaped(3, 1). <strong>Expected:</strong> initial loss still 56/3, but gradient-16. <strong>Verify:</strong> Save the assertion results for exercise 4, including initial loss still 56/3, but gradient-16.</li>
 </ol>
 <ol>
-<li><strong>Check a finite-difference gradient.</strong> Use a plain NumPy scalar objective around w0 with h.001. <strong>Expected:</strong> slope-56/3 within1e-9. <strong>Verify:</strong> Save the assertion results for exercise 5, including slope-56/3 within1e-9.</li>
+<li><strong>Check a finite-difference gradient.</strong> Use a plain NumPy scalar objective around w0 with h.001. <strong>Expected:</strong> slope-56/3 within 1e-9. <strong>Verify:</strong> Save the assertion results for exercise 5, including slope-56/3 within 1e-9.</li>
 </ol>
 <ol>
 <li><strong>Clear the consumed gradient.</strong> Call optimizer.zero_grad(set_to_none=True) after the step and inspect state. <strong>Expected:</strong> w.grad None; updated weight unchanged. <strong>Verify:</strong> Save the assertion results for exercise 6, including w.grad None; updated weight unchanged.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>When a result disagrees, locate the first intermediate value that violates this explanation. Inspect shapes and identities before aggregates, and inspect counts before averages. Preserve the original fixture and introduce only one controlled change at a time. If an arithmetic identity passes but a data-boundary condition fails, the experiment is still invalid. If a runtime is unavailable, record the unexecuted code as unverified rather than replacing its output with the expected text. The separate explanation discusses why the tempting alternative in each case changes the result.</p>
+<p>If backward produces the right derivative but w remains zero, check whether step ran and whether the optimizer contains that exact Parameter object. If w changes but the reported loss stays 56/3, inspect whether code reused the old loss tensor instead of recomputing the forward expression. Clearing gradients should leave the updated parameter unchanged.</p>
+<p>If the initial loss agrees but the gradient is-16, inspect for the(3, 3) broadcast grid before changing SGD. If a correct gradient increases the loss, check update sign and learning rate; the exact quadratic bound distinguishes overshoot from a differentiation defect. If a second update is identical to the first, check for a stale stored gradient. Preserve the four-stage trace so a failure can be attributed to the correct boundary rather than hidden inside one final scalar.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise&#x27;s expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.</p>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
@@ -192,7 +230,7 @@ np.testing.assert_allclose(((w*x-y)**2).mean().item(),56/675,atol=1e-12,rtol=0)<
 <p>API and mechanism reference: <a href="https://docs.pytorch.org/docs/2.9/index.html">PyTorch2.9 reference</a>, reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. Current execution receipts are recorded in <code>docs/implementation/pytorch-content-status.md</code>; authored content does not imply that a heavy runtime was executed.</p>
 <h3 id="interview-reasoning-with-worked-answers">Interview reasoning with worked answers<a class="heading-anchor" href="#interview-reasoning-with-worked-answers" aria-label="Link to this section">#</a></h3>
 <p><strong>Why can the wrong broadcast have the same first loss?</strong></p>
-<p>Atw0 every prediction is zero, so repeating each target across a new axis leaves its mean squared magnitude unchanged. The derivative also depends on how each input is paired with targets, and that pairing changed.</p>
+<p>At w=0 every prediction is zero, so repeating each target across a new axis leaves its mean squared magnitude unchanged. The derivative also depends on how each input is paired with targets, and that pairing changed.</p>
 <p><strong>Does optimizer.step recompute the loss?</strong></p>
 <p>No. It uses current gradients stored on its parameter objects. Forward calculation, backward and step are separate stages.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>

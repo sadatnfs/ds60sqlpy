@@ -116,7 +116,6 @@
       <p class="source-path">Generated from <code>courses/cpp/guides/cpp-025.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-025-sanitizers-and-observable-memory-failures">cpp-025: Sanitizers and observable memory failures<a class="heading-anchor" href="#cpp-025-sanitizers-and-observable-memory-failures" aria-label="Link to this section">#</a></h2>
-<p>Authored beta content. Content completion and runtime qualification are separate evidence.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Intermediate; 120 minutes. Direct prerequisites: <code>cpp-015</code>, <code>cpp-018</code>, <code>cpp-024</code>.</p>
 <p>Learner artifact: <a href="../lessons/cpp-025.cpp.html">cpp-025.cpp</a>. Keep <a href="../solutions/cpp-025_solutions.md.html">official solutions</a> closed until an attempt. The immutable <a href="../fixtures/cpp-025-cases.json.html">case ledger</a> records exercise inputs and expected observations.</p>
@@ -125,58 +124,98 @@
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>Undefined behavior is an operation outside the language contract, such as out-of-bounds access or signed overflow. Sanitizers instrument compiled code to detect selected violations at runtime. AddressSanitizer targets many memory errors, while UndefinedBehaviorSanitizer targets several undefined operations. A clean bounded run is evidence only for the paths exercised.</p>
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
-<p>Use a separate owned host build with -g -O1 -fsanitize=address,undefined -fno-omit-frame-pointer if the compiler/runtime supports it. Both compile and link need sanitizer flags. Do not execute an intentional invalid program through the ordinary unsanitized browser profile.</p>
+<p>Use a separate owned host build with -g -O1 -fsanitize=address, undefined -fno-omit-frame-pointer if the compiler/runtime supports it. Both compile and link need sanitizer flags. Do not execute an intentional invalid program through the ordinary unsanitized browser profile.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Checked access and sanitizer instrumentation are different mechanisms. vector::at checks its index as part of the library contract and throws out_of_range. AddressSanitizer observes selected illegal accesses in instrumented code and reports a runtime defect, often with a source stack. The ordinary safe example should never invoke undefined behavior merely to prove that it knows what a bug looks like. Compile and link the isolated fault with matching instrumentation before running it.</p>
+<h3 id="checked-access-and-instrumented-memory-diagnostics">Checked access and instrumented memory diagnostics<a class="heading-anchor" href="#checked-access-and-instrumented-memory-diagnostics" aria-label="Link to this section">#</a></h3>
+<p>Undefined behavior means the language does not provide a meaningful execution contract for that operation. An out-of-range vector subscript can appear to work, crash or produce unrelated effects. Observing one plausible value does not make it valid. A lesson should teach the invalid operation by explanation and isolated diagnostic tooling, not rely on its output as a deterministic result.</p>
+<p>vector::at performs a checked access and throws out_of_range when the index is outside size. The first program accesses index 1 of [2, 4] and gets 4. The second requests index 2, catches the specific exception and asserts that the handler ran. This is defined behavior and a deterministic boundary test. It is different from using operator[] with index 2 and hoping for a sanitizer report.</p>
+<p>AddressSanitizer instruments compiled code to detect selected memory errors such as certain out-of-bounds accesses and use-after-free. UndefinedBehaviorSanitizer targets other categories. These tools do not prove the absence of every bug, and their availability and supported combinations depend on the toolchain. Compile and link the isolated diagnostic program with the matching flags so the runtime support is present.</p>
+<p>A useful sanitizer report connects an invalid access to an allocation or lifetime event and a source stack. Read the first relevant error before interpreting later symptoms. Debug symbols and a reproducible small input make the report more useful. Fix the owner, bounds or lifetime rule that caused the access rather than merely increasing allocation size until the example stops crashing.</p>
+<p>The normal safe reference does not intentionally invoke undefined behavior. The actual fault exercise is a separate host-tooling activity with its own process and expected nonzero diagnostic outcome. That boundary prevents the browser&#x27;s successful safe example from being mislabeled as a sanitizer qualification. Compiler warnings, checked APIs and dynamic instrumentation are complementary evidence.</p>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">assert(checked_at({2,4},1)==4);</code></pre>
-<p><strong>Expected:</strong> Index 1 selects 4.</p>
+<p><a href="../examples/cpp-025-example-1.cpp.html">Complete program 1</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;cstddef&gt;
+#include &lt;iostream&gt;
+#include &lt;vector&gt;
+
+int checked_at(const std::vector&lt;int&gt;&amp; xs,std::size_t i) {
+    return xs.at(i);
+}
+int main() {
+    assert(checked_at({2,4},1)==4);
+    std::cout &lt;&lt; &quot;cpp-025 example 1 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-025 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">try { checked_at({2,4},2); } catch(const std::out_of_range&amp;) { /* expected */ }</code></pre>
-<p><strong>Expected:</strong> Checked access rejects index 2 instead of invoking unchecked access.</p>
+<p><a href="../examples/cpp-025-example-2.cpp.html">Complete program 2</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;cstddef&gt;
+#include &lt;iostream&gt;
+#include &lt;stdexcept&gt;
+#include &lt;vector&gt;
+
+int checked_at(const std::vector&lt;int&gt;&amp; xs,std::size_t i) {
+    return xs.at(i);
+}
+int main() {
+    bool caught=false;
+    try { (void)checked_at({2,4},2); }
+    catch(const std::out_of_range&amp;) { caught=true; }
+    assert(caught);
+    std::cout &lt;&lt; &quot;cpp-025 example 2 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-025 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-classify-the-defect">Exercise 1: Classify the defect<a class="heading-anchor" href="#exercise-1-classify-the-defect" aria-label="Link to this section">#</a></h4>
 <p>Explain index 2 into vector size 2.</p>
 <p><strong>Expected result/shape:</strong> Out of bounds; valid indices 0 and 1.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Out of bounds; valid indices 0 and 1.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: A half-open index interval ends before size.</p>
+<p><strong>Verify:</strong> Out of bounds; valid indices 0 and 1.</p>
+<p><strong>Progressive hints:</strong> A half-open index interval ends before size.</p>
 <h4 id="exercise-2-use-checked-access">Exercise 2: Use checked access<a class="heading-anchor" href="#exercise-2-use-checked-access" aria-label="Link to this section">#</a></h4>
 <p>Compare at(2) with the contract of operator[2].</p>
 <p><strong>Expected result/shape:</strong> at throws; unchecked invalid access is undefined behavior.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: at throws; unchecked invalid access is undefined behavior.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: A deterministic exception is not a sanitizer report.</p>
+<p><strong>Verify:</strong> at throws; unchecked invalid access is undefined behavior.</p>
+<p><strong>Progressive hints:</strong> A deterministic exception is not a sanitizer report.</p>
 <h4 id="exercise-3-prepare-instrumented-build">Exercise 3: Prepare instrumented build<a class="heading-anchor" href="#exercise-3-prepare-instrumented-build" aria-label="Link to this section">#</a></h4>
 <p>Compile the safe reference with sanitizer flags on a supported host.</p>
 <p><strong>Expected result/shape:</strong> Compile/link/run statuses and compiler version recorded.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Compile/link/run statuses and compiler version recorded.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Instrumentation requires the matching runtime library.</p>
+<p><strong>Verify:</strong> Compile/link/run statuses and compiler version recorded.</p>
+<p><strong>Progressive hints:</strong> Instrumentation requires the matching runtime library.</p>
 <h4 id="exercise-4-diagnose-a-controlled-failure">Exercise 4: Diagnose a controlled failure<a class="heading-anchor" href="#exercise-4-diagnose-a-controlled-failure" aria-label="Link to this section">#</a></h4>
 <p>In a separate instrumented scratch program introduce one heap out-of-bounds access.</p>
 <p><strong>Expected result/shape:</strong> Nonzero sanitizer report naming access and source location; never claim ordinary profile detection.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Nonzero sanitizer report naming access and source location; never claim ordinary profile detection.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Keep the fault isolated from normal lesson execution.</p>
+<p><strong>Verify:</strong> Nonzero sanitizer report naming access and source location; never claim ordinary profile detection.</p>
+<p><strong>Progressive hints:</strong> Keep the fault isolated from normal lesson execution.</p>
 <h4 id="exercise-5-repair-and-rerun">Exercise 5: Repair and rerun<a class="heading-anchor" href="#exercise-5-repair-and-rerun" aria-label="Link to this section">#</a></h4>
 <p>Replace invalid access with a valid index or explicit check.</p>
 <p><strong>Expected result/shape:</strong> Sanitizer report disappears on that test path; result is correct.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Sanitizer report disappears on that test path; result is correct.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Absence of a report is bounded evidence.</p>
+<p><strong>Verify:</strong> Sanitizer report disappears on that test path; result is correct.</p>
+<p><strong>Progressive hints:</strong> Absence of a report is bounded evidence.</p>
 <h4 id="exercise-6-transfer-signed-arithmetic">Exercise 6: Transfer signed arithmetic<a class="heading-anchor" href="#exercise-6-transfer-signed-arithmetic" aria-label="Link to this section">#</a></h4>
 <p>Review INT_MAX+1 and use pre-add range validation.</p>
 <p><strong>Expected result/shape:</strong> Input rejected before overflow.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Input rejected before overflow.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Sanitizers diagnose executed undefined operations, not all possible inputs.</p>
+<p><strong>Verify:</strong> Input rejected before overflow.</p>
+<p><strong>Progressive hints:</strong> Sanitizers diagnose executed undefined operations, not all possible inputs.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: Index 1 selects 4. Then explain the changed condition in example 2 without opening the answer.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
-<p>Use a separate owned host build with -g -O1 -fsanitize=address,undefined -fno-omit-frame-pointer if the compiler/runtime supports it. Both compile and link need sanitizer flags. Do not execute an intentional invalid program through the ordinary unsanitized browser profile.</p>
-<p>If the result disagrees, preserve the original input and inspect the first differing value or condition. Keep the fault isolated from normal lesson execution.</p>
+<p>If at throws unexpectedly, compare the index with size, not capacity. If a sanitizer finds a use-after-free, trace the owner destruction and every retained borrow. If an instrumented link fails, check that sanitizer flags reached the link step too. If an uninstrumented invalid access seems fine, do not convert that observation into an expected output. Keep the reproducer isolated and repair the contract.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
 <p>Close the source. Reconstruct the reasoning for Exercise 6: Transfer signed arithmetic. Explain which assumptions would fail on a larger input or another runtime.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue with <a href="cpp-026.md.html">cpp-026</a> after saving the six observations.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<p><a href="https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html">GCC instrumentation options</a></p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach cpp-025.
 Read courses/cpp/guides/cpp-025.md and courses/cpp/lessons/cpp-025.cpp.

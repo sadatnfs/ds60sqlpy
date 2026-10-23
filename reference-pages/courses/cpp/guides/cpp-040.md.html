@@ -116,7 +116,6 @@
       <p class="source-path">Generated from <code>courses/cpp/guides/cpp-040.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-040-hardening-parsers-and-execution-boundaries">cpp-040: Hardening parsers and execution boundaries<a class="heading-anchor" href="#cpp-040-hardening-parsers-and-execution-boundaries" aria-label="Link to this section">#</a></h2>
-<p>Authored beta content. Content completion and runtime qualification are separate evidence.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Advanced; 135 minutes. Direct prerequisites: <code>cpp-022</code>, <code>cpp-024</code>, <code>cpp-025</code>, <code>cpp-032</code>.</p>
 <p>Learner artifact: <a href="../lessons/cpp-040.cpp.html">cpp-040.cpp</a>. Keep <a href="../solutions/cpp-040_solutions.md.html">official solutions</a> closed until an attempt. The immutable <a href="../fixtures/cpp-040-cases.json.html">case ledger</a> records exercise inputs and expected observations.</p>
@@ -128,55 +127,95 @@
 <p>Treat identifiers as an allowlisted alphabet instead of joining arbitrary user paths. Check string length before parsing. Lexical rejection of slash, backslash and dot-dot is not sufficient to secure a general filesystem browser against symlinks; this exercise deliberately accepts only a narrow filename identifier.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>The allowed identifier grammar avoids interpreting input as a path at all. batch_7 is a name; ../secret and a/b contain characters that cannot enter this narrow namespace. This does not solve the general problem of safe filesystem containment with symlinks and races. Keep that limitation explicit. Row and byte limits bound work before parsing, and publication should occur only after the accepted/rejected accounting meets the declared policy.</p>
+<h3 id="validation-budgets-and-safe-publication">Validation, budgets and safe publication<a class="heading-anchor" href="#validation-budgets-and-safe-publication" aria-label="Link to this section">#</a></h3>
+<p>Input validation is a translation from untrusted bytes into a deliberately smaller trusted domain. The identifier grammar here accepts a bounded name such as batch_7 and rejects separators or parent traversal syntax. It avoids interpreting arbitrary input as a filesystem path. That is a simpler and more reviewable contract than attempting to sanitize every possible path string after the fact.</p>
+<p>A narrow identifier check is not a general filesystem containment proof. Symlinks, races, mounts and platform path semantics can matter once a name is mapped to a real location. The lesson&#x27;s safe_id helper only establishes its documented character and length policy. Actual file opening should use an owned directory and a separately reviewed path/creation contract.</p>
+<p>Budgets belong before expensive work. Limit input bytes, record count and field length while reading, not after an unbounded file has already been loaded. A parser that rejects a million-character line only after allocating it may enforce a format rule but fail the intended resource bound. The capstone readers demonstrate incremental admission rather than merely checking final vector size.</p>
+<p>Validation should preserve the difference between a rejected record and a failed operation. A bad identifier can be reported without publishing an output file under a guessed alternate name. A fatal read or budget failure should prevent an apparently complete report. If partial acceptance is allowed, the accepted/rejected accounting and output schema must state that policy explicitly.</p>
+<p>A secure-looking function name is not evidence. Test exact length boundaries, empty input, allowed punctuation, slash/backslash and traversal strings as appropriate to the declared grammar. Keep the expected behavior independent of implementation details so a too-permissive mutation is caught. Do not add broad new input forms merely to make a single failing example convenient.</p>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">assert(safe_id(&quot;batch_7&quot;));</code></pre>
-<p><strong>Expected:</strong> The seven-character identifier uses only the allowed alphabet.</p>
+<p><a href="../examples/cpp-040-example-1.cpp.html">Complete program 1</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;string_view&gt;
+
+bool safe_id(std::string_view s) {
+    if(s.empty()||s.size()&gt;16)return false;
+    for(unsigned char c:s)if(!((c&gt;=&#x27;a&#x27;&amp;&amp;c&lt;=&#x27;z&#x27;)||(c&gt;=&#x27;0&#x27;&amp;&amp;c&lt;=&#x27;9&#x27;)||c==&#x27;_&#x27;))return false;
+    return true;
+}
+int main() {
+    assert(safe_id(&quot;batch_7&quot;));
+    std::cout &lt;&lt; &quot;cpp-040 example 1 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-040 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">assert(!safe_id(&quot;../secret&quot;));</code></pre>
-<p><strong>Expected:</strong> Dot and slash violate the narrow identifier grammar.</p>
+<p><a href="../examples/cpp-040-example-2.cpp.html">Complete program 2</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;string_view&gt;
+
+bool safe_id(std::string_view s) {
+    if(s.empty()||s.size()&gt;16)return false;
+    for(unsigned char c:s)if(!((c&gt;=&#x27;a&#x27;&amp;&amp;c&lt;=&#x27;z&#x27;)||(c&gt;=&#x27;0&#x27;&amp;&amp;c&lt;=&#x27;9&#x27;)||c==&#x27;_&#x27;))return false;
+    return true;
+}
+int main() {
+    assert(!safe_id(&quot;../secret&quot;));
+    std::cout &lt;&lt; &quot;cpp-040 example 2 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-040 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-write-the-grammar">Exercise 1: Write the grammar<a class="heading-anchor" href="#exercise-1-write-the-grammar" aria-label="Link to this section">#</a></h4>
 <p>Specify accepted identifier characters and length.</p>
 <p><strong>Expected result/shape:</strong> 1 to 16 lowercase ASCII letters, digits or underscore.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: 1 to 16 lowercase ASCII letters, digits or underscore.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: A narrow contract is easier to inspect than arbitrary path sanitization.</p>
+<p><strong>Verify:</strong> 1 to 16 lowercase ASCII letters, digits or underscore.</p>
+<p><strong>Progressive hints:</strong> A narrow contract is easier to inspect than arbitrary path sanitization.</p>
 <h4 id="exercise-2-test-normal-input">Exercise 2: Test normal input<a class="heading-anchor" href="#exercise-2-test-normal-input" aria-label="Link to this section">#</a></h4>
 <p>Validate batch_7 and 0.</p>
 <p><strong>Expected result/shape:</strong> Both accepted.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Both accepted.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: An identifier may be numeric without becoming a path.</p>
+<p><strong>Verify:</strong> Both accepted.</p>
+<p><strong>Progressive hints:</strong> An identifier may be numeric without becoming a path.</p>
 <h4 id="exercise-3-reject-traversal-shapes">Exercise 3: Reject traversal shapes<a class="heading-anchor" href="#exercise-3-reject-traversal-shapes" aria-label="Link to this section">#</a></h4>
 <p>Test ../secret, a/b and a backslash-separated path.</p>
 <p><strong>Expected result/shape:</strong> All rejected before filesystem access.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: All rejected before filesystem access.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Separators are outside the grammar.</p>
+<p><strong>Verify:</strong> All rejected before filesystem access.</p>
+<p><strong>Progressive hints:</strong> Separators are outside the grammar.</p>
 <h4 id="exercise-4-repair-overclaim">Exercise 4: Repair overclaim<a class="heading-anchor" href="#exercise-4-repair-overclaim" aria-label="Link to this section">#</a></h4>
 <p>Explain why this is not a general symlink-safe path sandbox.</p>
 <p><strong>Expected result/shape:</strong> No claim of arbitrary path containment; scope remains identifiers.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: No claim of arbitrary path containment; scope remains identifiers.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Filesystem races and links require stronger host operations.</p>
+<p><strong>Verify:</strong> No claim of arbitrary path containment; scope remains identifiers.</p>
+<p><strong>Progressive hints:</strong> Filesystem races and links require stronger host operations.</p>
 <h4 id="exercise-5-enforce-size">Exercise 5: Enforce size<a class="heading-anchor" href="#exercise-5-enforce-size" aria-label="Link to this section">#</a></h4>
 <p>Test empty, 16-character and 17-character strings.</p>
 <p><strong>Expected result/shape:</strong> Reject, accept, reject.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Reject, accept, reject.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Length is checked before per-character work.</p>
+<p><strong>Verify:</strong> Reject, accept, reject.</p>
+<p><strong>Progressive hints:</strong> Length is checked before per-character work.</p>
 <h4 id="exercise-6-transfer-row-budgets">Exercise 6: Transfer row budgets<a class="heading-anchor" href="#exercise-6-transfer-row-budgets" aria-label="Link to this section">#</a></h4>
 <p>Set max 100 rows and 256 bytes per row before parsing a file.</p>
 <p><strong>Expected result/shape:</strong> Oversized input rejected with counts and no partial publication.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Oversized input rejected with counts and no partial publication.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Input limits and output publication must form one contract.</p>
+<p><strong>Verify:</strong> Oversized input rejected with counts and no partial publication.</p>
+<p><strong>Progressive hints:</strong> Input limits and output publication must form one contract.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: The seven-character identifier uses only the allowed alphabet. Then explain the changed condition in example 2 without opening the answer.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
-<p>Treat identifiers as an allowlisted alphabet instead of joining arbitrary user paths. Check string length before parsing. Lexical rejection of slash, backslash and dot-dot is not sufficient to secure a general filesystem browser against symlinks; this exercise deliberately accepts only a narrow filename identifier.</p>
-<p>If the result disagrees, preserve the original input and inspect the first differing value or condition. Filesystem races and links require stronger host operations.</p>
+<p>If ../secret is accepted, inspect the actual allowed-character set rather than stripping one substring. If a path uses a symlink escape, the identifier helper alone is not the relevant containment control. If memory grows before a budget error, move the limit into the reading stage. If a failure still leaves a normal-looking report, repair publication semantics and exit status instead of relying on a warning line that callers may ignore.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
 <p>Close the source. Reconstruct the reasoning for Exercise 6: Transfer row budgets. Explain which assumptions would fail on a larger input or another runtime.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue with <a href="cpp-041.md.html">cpp-041</a> after saving the six observations.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines">C++ Core Guidelines</a></p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach cpp-040.
 Read courses/cpp/guides/cpp-040.md and courses/cpp/lessons/cpp-040.cpp.

@@ -116,28 +116,62 @@
       <p class="source-path">Generated from <code>courses/deep-learning-pytorch/guides/torch-010.md</code></p>
     </header>
     <article class="document"><h2 id="torch-010-datasets-held-out-families-and-leakage-controls">torch-010: Datasets, held-out families and leakage controls<a class="heading-anchor" href="#torch-010-datasets-held-out-families-and-leakage-controls" aria-label="Link to this section">#</a></h2>
-<p>Status: authored PyTorch course content. The manifest inventories complete teaching files; runtime readiness remains a separate, measured property.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Beginner; approximately 120 minutes. Direct prerequisites: <code>torch-009</code>. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
-<p>A Dataset is an interface for retrieving observations, not a guarantee that the experiment is leakage-free. The central investigation is concrete: Create eight records with groups A, A, B, B, C, C, D, D and values1, 3, 5, 7, 20, 22, 30, 32. The finish condition is length8; item0has ID0, group A, value 1. 16, 18, 26, 28. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
+<p>A Dataset is an interface for retrieving observations, not a guarantee that the experiment is leakage-free. The central investigation is concrete: Create eight records with groups A, A, B, B, C, C, D, D and values 1, 3, 5, 7, 20, 22, 30, 32. The finish condition is length 8; item 0 has ID 0, group A, value 1. 16, 18, 26, 28. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
 <h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>A Dataset is an interface for retrieving observations, not a guarantee that the experiment is leakage-free. Related records need a shared split unit, such as account or source document. Subset selects indices from a dataset, but choosing those indices is a statistical-design responsibility. Fit preprocessing only on the training subset and freeze it before transforming validation or holdout records. A validation-only extreme should not change a training mean.</p>
 <p>This lesson implements a tiny map-style Dataset over eight literal account records. Each item includes identity, group and numeric value so split and pairing checks remain possible. The dataset is deterministic and contains no file or network reads. Grouped splitting, training-only normalization and an explicit held-out perturbation distinguish data-interface correctness from evaluation validity.</p>
 <h3 id="design-decisions-and-when-to-use-this-method">Design decisions and when to use this method<a class="heading-anchor" href="#design-decisions-and-when-to-use-this-method" aria-label="Link to this section">#</a></h3>
+<p>Choose the split unit from the intended deployment claim. For new-account prediction, keep all records from each account on one side of the split. For a future-time claim, also respect when inputs and labels become available. A random row split is appropriate only when its independence and information assumptions match the task.</p>
+<p>Use Dataset and Subset to implement access after that design has been chosen. Fit normalization orother learned preprocessing from the training population and freeze it for the declared inductive assessment. A deliberately transductive method using target-population covariates is a different protocol and must be evaluated and reported as such, rather than quietly changing this training-only contract.</p>
 <h3 id="paired-tensorflow-comparison">Paired TensorFlow comparison<a class="heading-anchor" href="#paired-tensorflow-comparison" aria-label="Link to this section">#</a></h3>
 <p>Compare <a href="../../deep-learning-tensorflow/guides/tf-010.md.html">tf-010</a> after deriving the shared numerical contract.</p>
-<p>TensorFlow tf.data and PyTorch Dataset/Subset organize access to records, but neither chooses a valid statistical split automatically. The same held-out perturbation oracle applies. PyTorch Dataset commonly separates item retrieval from DataLoader batching, which is taught in lesson015.</p>
+<p>TensorFlow tf.data and PyTorch Dataset/Subset organize access to records, but neither chooses a valid statistical split automatically. The same held-out perturbation oracle applies. PyTorch Dataset commonly separates item retrieval from DataLoader batching, which is taught in lesson 015.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p><strong>Map-style Dataset:</strong> A dataset providing indexed item retrieval and a length.</p>
 <p><strong>Subset:</strong> An index selection over an existing dataset.</p>
-<p><strong>Split unit:</strong> The entity assigned who ll y to one partition.</p>
+<p><strong>Split unit:</strong> The entity assigned wholly to one partition.</p>
 <p><strong>Training-only fit:</strong> Estimating preprocessing state without assessment inputs.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Use a prepared <code>llm-torch-cpu</code> environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored <code>.learning/expansion/torch-010/</code> before editing, or use the application&#x27;s saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: <code>&amp; $CoursePython courses/deep-learning-pytorch/lessons/torch-010.py</code>. For macOS/Linux use <code>.venv/bin/python courses/deep-learning-pytorch/lessons/torch-010.py</code> from the repository root.</p>
-<p>Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.</p>
+<p>Use a prepared <code>llm-torch-cpu</code> environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored <code>.learning/expansion/torch-010/</code> before editing, or use the application&#x27;s saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: <code>&amp; $CoursePython courses/deep-learning-pytorch/lessons/torch-010.py</code>. For macOS/Linux, use the interpreter explicitly selected for a separately prepared native PyTorch environment, and invoke that interpreter on <code>courses/deep-learning-pytorch/lessons/torch-010.py</code> from the repository root. The repository&#x27;s general <code>.venv</code> is not assumed to contain PyTorch; the prepared classroom profile is the default execution route.</p>
+<p>Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the explicit tolerance in each assertion. Several analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone is not a universal numerical-error bound. Finite differences, reductions and conditioning can require different justified tolerances. Integer counts, identities and boolean decisions should be exact.</p>
 <h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
-<p>Subclass Dataset and implement<strong>len</strong> and<strong>get item</strong>. A Subset stores a sequence of indices and delegates item retrieval to the original dataset. Build training indices from whole account groups before calculating any statistic. Stack only selected training values to estimate the mean. Use sets of group IDs to check isolation; disjoint row indices alone are insufficient.</p>
+<p>Subclass Dataset and implement <strong>len</strong> and<strong>getitem</strong>. A Subset stores a sequence of indices and delegates item retrieval to the original dataset. Build training indices from whole account groups before calculating any statistic. Stack only selected training values to estimate the mean. Use sets of group IDs to check isolation; disjoint row indices alone are insufficient.</p>
+<h3 id="trace-selection-fitted-state-and-delegated-access">Trace selection, fitted state and delegated access<a class="heading-anchor" href="#trace-selection-fitted-state-and-delegated-access" aria-label="Link to this section">#</a></h3>
+<p>The eight literal records form four account groups. Training selects original indices 0, 1, 2, 3 fromA and B; assessment selects 4, 5, 6, 7 fromC and D. The two Subset objects do not copy orredefine those records. They map their local index into the original dataset. Thus assessment[0] returns original identity 4, accountC, value 20. A local batch position zero is not a replacement for the source identity.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Population</th>
+<th>Original identities</th>
+<th>Values</th>
+<th>Mean</th>
+</tr></thead><tbody>
+<tr>
+<td>Training accountsA, B</td>
+<td>0, 1, 2, 3</td>
+<td>1, 3, 5, 7</td>
+<td>4</td>
+</tr>
+<tr>
+<td>Assessment accountsC, D</td>
+<td>4, 5, 6, 7</td>
+<td>20, 22, 30, 32</td>
+<td>26</td>
+</tr>
+<tr>
+<td>All records</td>
+<td>0..7</td>
+<td>All eight values</td>
+<td>15</td>
+</tr>
+</tbody></table></div>
+<p>Each item returns a scalar tensor plus identity and group metadata. Stacking the four selected training scalars creates a tensor shaped(4, ), whose mean is the fitted normalization state. Applying that scalar to four assessment values yields[16, 18, 26, 28]. Those transformed assessment values do not have mean zero, and they should not be forced to. Their nonzero mean is information about the assessment population relative to the training baseline.</p>
+<p>The held-out perturbation is a direct test of the information boundary. Replacing only the final assessment value 32 with 3200 leaves the training values and mean four unchanged. The global mean changes from 15 to 411 because the total becomes 3288 over eight records. A preprocessing path whose fitted training mean changes under this perturbation has consumed assessment information, even if no target label was read.</p>
+<p>Alternating row indices produces superficially balanced four-row sets but puts one row from every account on each side. Row-ID intersections are empty while the account-group intersection isA, B, C, D. If the claim concerns new accounts, this is a failure before any neural layer is built. A stronger optimizer or more epochs cannot undo that information crossing.</p>
+<p>Dataset is an access interface, not an isolation orimmutability guarantee. Subset delegates to the underlying dataset, so later mutation of that object&#x27;s values can change what a subset returns. A retrieved scalar tensor may also share storage with its source. Use out-of-place transformations or an explicit ownership boundary when mutation is intended, and freeze the fitted preprocessing state independently of mutable dataset access. <a href="https://docs.pytorch.org/docs/2.9/data.html">PyTorch 2.9 Dataset, Subset and data loading</a>.</p>
+<p>Keeping identity and group fields does not require feeding them into the model as features. They support split checks, duplicate detection, pairing and error analysis. An account identifier used as an embedding feature would require a separate justification about availability and the meaning of unseen account IDs; it should not enter the model accidentally merely because it travels through the loader.</p>
+<p>Finally, four assessment rows here represent only two held-out account families. The fixture is too small and too structured to establish reliable population performance. Its useful evidence is that the access interface, group isolation and preprocessing boundary behave as declared. Later evaluation should preserve the relevant independent units when estimating uncertainty rather than treating correlated rows as additional independent accounts.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-inspect-a-literal-dataset">Example A: Inspect a literal Dataset<a class="heading-anchor" href="#example-a-inspect-a-literal-dataset" aria-label="Link to this section">#</a></h4>
 <p>The dataset returns metadata beside the tensor. A value-only interface would make it harder to audit group membership and record conservation.</p>
@@ -152,7 +186,7 @@ class Accounts(torch.utils.data.Dataset):
     def __getitem__(self,index): return index,self.groups[index],self.values[index]
 dataset=Accounts(); assert len(dataset)==8
 identity,group,value=dataset[0]; assert identity==0 and group==&#x27;A&#x27; and value.item()==1</code></pre>
-<p><strong>Expected:</strong> length8; item0has ID0, group A, value 1.</p>
+<p><strong>Expected:</strong> length 8; item 0 has ID 0, group A, value 1.</p>
 <h4 id="example-b-select-whole-groups">Example B: Select whole groups<a class="heading-anchor" href="#example-b-select-whole-groups" aria-label="Link to this section">#</a></h4>
 <p>The grouping policy precedes the subset construction. Subset itself would happily accept a leaking row-level split.</p>
 <pre><code class="language-python">train_ids=[i for i in range(len(dataset)) if dataset[i][1] in {&#x27;A&#x27;,&#x27;B&#x27;}]; test_ids=[i for i in range(len(dataset)) if i not in train_ids]
@@ -162,30 +196,31 @@ assert len(train)==len(test)==4 and not {row[1] for row in train}&amp;{row[1] fo
 <h4 id="example-c-fit-only-training-values">Example C: Fit only training values<a class="heading-anchor" href="#example-c-fit-only-training-values" aria-label="Link to this section">#</a></h4>
 <p>The statistic is fitted state. Even without labels, it would leak assessment information if computed over the entire dataset.</p>
 <pre><code class="language-python">mean=torch.stack([row[2] for row in train]).mean(); assert mean.item()==4</code></pre>
-<p><strong>Expected:</strong> mean4.</p>
+<p><strong>Expected:</strong> mean 4.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
-<p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: length8; item0has ID0, group A, value 1. 16, 18, 26, 28. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
+<p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: length 8; item 0 has ID 0, group A, value 1. 16, 18, 26, 28. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
-<li><strong>Inspect a literal Dataset.</strong> Create eight records with groups A, A, B, B, C, C, D, D and values1, 3, 5, 7, 20, 22, 30, 32. <strong>Expected:</strong> length8; item0has ID0, group A, value 1. <strong>Verify:</strong> Save the assertion results for exercise 1, including length8; item0has ID0, group A, value 1.</li>
+<li><strong>Inspect a literal Dataset.</strong> Create eight records with groups A, A, B, B, C, C, D, D and values 1, 3, 5, 7, 20, 22, 30, 32. <strong>Expected:</strong> length 8; item 0 has ID 0, group A, value 1. <strong>Verify:</strong> Save the assertion results for exercise 1, including length 8; item 0 has ID 0, group A, value 1.</li>
 </ol>
 <ol>
 <li><strong>Select whole groups.</strong> Train on accounts A, B and holdout C, D using Subset. <strong>Expected:</strong> four records each; group intersection empty. <strong>Verify:</strong> Save the assertion results for exercise 2, including four records each; group intersection empty.</li>
 </ol>
 <ol>
-<li><strong>Fit only training values.</strong> Calculate the mean from the four training tensors. <strong>Expected:</strong> mean4. <strong>Verify:</strong> Save the assertion results for exercise 3, including mean4.</li>
+<li><strong>Fit only training values.</strong> Calculate the mean from the four training tensors. <strong>Expected:</strong> mean 4. <strong>Verify:</strong> Save the assertion results for exercise 3, including mean 4.</li>
 </ol>
 <ol>
-<li><strong>Perturb only assessment values.</strong> Replace the final held-out value with 3200 in a copied dataset and recompute the training mean. <strong>Expected:</strong> training mean unchanged4; global mean changes. <strong>Verify:</strong> Save the assertion results for exercise 4, including training mean unchanged4; global mean changes.</li>
+<li><strong>Perturb only assessment values.</strong> Replace the final held-out value with 3200 in a copied dataset and recompute the training mean. <strong>Expected:</strong> training mean unchanged 4; global mean changes. <strong>Verify:</strong> Save the assertion results for exercise 4, including training mean unchanged 4; global mean changes.</li>
 </ol>
 <ol>
-<li><strong>Expose row-level leakage.</strong> Assign alter nat in g indices to train/test and inspect group intersection. <strong>Expected:</strong> allA, B, C, D cross. <strong>Verify:</strong> Save the assertion results for exercise 5, including allA, B, C, D cross.</li>
+<li><strong>Expose row-level leakage.</strong> Assign alternating indices to train/test and inspect group intersection. <strong>Expected:</strong> allA, B, C, D cross. <strong>Verify:</strong> Save the assertion results for exercise 5, including allA, B, C, D cross.</li>
 </ol>
 <ol>
 <li><strong>Apply the frozen transform.</strong> Center held-out values with the training mean. <strong>Expected:</strong> 16, 18, 26, 28. <strong>Verify:</strong> Save the assertion results for exercise 6, including 16, 18, 26, 28.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>When a result disagrees, locate the first intermediate value that violates this explanation. Inspect shapes and identities before aggregates, and inspect counts before averages. Preserve the original fixture and introduce only one controlled change at a time. If an arithmetic identity passes but a data-boundary condition fails, the experiment is still invalid. If a runtime is unavailable, record the unexecuted code as unverified rather than replacing its output with the expected text. The separate explanation discusses why the tempting alternative in each case changes the result.</p>
+<p>If a training statistic changes after an assessment-only perturbation, trace which index set was used during fitting and whether a shared preprocessing object was refit. If row IDs are disjoint but quality is suspiciously high, inspect source-family IDs and near-duplicate records rather than renaming rows. If assessment values unexpectedly become centered at zero, check for assessment-specific refitting.</p>
+<p>If a Subset returns an unexpected identity, distinguish its local index from the delegated source index. If an augmentation changes later reads, inspect tensor aliases and underlying dataset mutation. If a report calls four correlated assessment rows four independent accounts, repair the unit of inference before calculating uncertainty. Dataset correctness and evaluation validity must both pass; neither implies the other.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise&#x27;s expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.</p>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>

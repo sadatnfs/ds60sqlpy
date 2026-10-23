@@ -1,0 +1,38 @@
+{
+  "lesson_id": "k8s-029",
+  "provenance": "synthetic teaching cases, not runtime observations",
+  "capability": "host-registered LessonReport CRD and narrowly scoped namespaced instance operations",
+  "browser_source": false,
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Identify the registration object and instance scope from the fixtures.",
+      "expected": "CRD is cluster-scoped; hello-report is namespaced."
+    },
+    {
+      "exercise": 2,
+      "task": "Connect group, version, kind, plural and metadata.name.",
+      "expected": "learning.ds60sqlpy/v1, LessonReport, lessonreports and hello-report are distinct fields."
+    },
+    {
+      "exercise": 3,
+      "task": "Compare replicas1, string2, integer3 and a missing message.",
+      "expected": "Only integer1 with a present allowed message passes the stated complete spec."
+    },
+    {
+      "exercise": 4,
+      "task": "Use the supplied replcias typo in a qualified server request and readback.",
+      "expected": "Record validation mode and actual rejection or pruning; do not assume silently stored intent."
+    },
+    {
+      "exercise": 5,
+      "task": "Compare spec generation7 with status observedGeneration6 and ready true.",
+      "expected": "Current generation7 is not yet proven reconciled by that status."
+    },
+    {
+      "exercise": 6,
+      "task": "List which operations belong to learner instance cleanup and host API-registration cleanup.",
+      "expected": "Instance UID cleanup is separate from CRD removal; no learner privilege widening."
+    }
+  ]
+}

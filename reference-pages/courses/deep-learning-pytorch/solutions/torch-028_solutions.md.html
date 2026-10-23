@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>torch-028: explanatory solutions · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>torch-028: explanatory solutions</h1>
+      <p class="source-path">Generated from <code>courses/deep-learning-pytorch/solutions/torch-028_solutions.md</code></p>
+    </header>
+    <article class="document"><h2 id="torch-028-explanatory-solutions">torch-028: explanatory solutions<a class="heading-anchor" href="#torch-028-explanatory-solutions" aria-label="Link to this section">#</a></h2>
+<p>Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.</p>
+<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
+<p>Restartable training requires the state that determines the next update, not merely weights that reproduce the current prediction. Adam stores moment estimates and a step counter. Random draws can affect the next batch or target perturbation. Data position determines which observation comes next. A checkpoint contract must name all of these components and define what is fixed or restored. A weights-only restart can match immediate predictions while taking a different subsequent step.</p>
+<p>This lesson saves a small linear model, Adam state, CPU RNG state and an explicit data-position counter after two updates. It compares an uninterrupted next draw and update with a fresh interpreter restoring the trusted local checkpoint. The literal batch is fixed; this does not claim to restore a multiprocessing DataLoader or a distributed sampler. Temporary artifacts are owned and removed by the lesson. Float32 comparisons use a declared tolerance rather than promising cross-platform bitwise identity.</p>
+<p><strong>Training checkpoint:</strong> State sufficient for a declared continuation contract.</p>
+<p><strong>RNG state:</strong> The position of a pseudorandom generator used by future operations.</p>
+<p><strong>Data position:</strong> The declared next point in the training input sequence.</p>
+<p><strong>Next-step parity:</strong> Agreement after one identical restored and uninterrupted update.</p>
+<h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
+<p>Save a dictionary of model.state_dict, optimizer.state_dict, torch.get_rng_state and simple metadata. Reconstruct fresh objects before load_state_dict, and restore RNG after object construction so initialization draws do not advance the restored stream. torch.load uses weights_only=True for this trusted tensor-and-primitive checkpoint. The child program is dedented, compiled before launch, bounded by a timeout, and includes stderr in a failure.</p>
+<h3 id="reconstruct-the-next-state-transition-not-just-the-current-prediction">Reconstruct the next state transition, not just the current prediction<a class="heading-anchor" href="#reconstruct-the-next-state-transition-not-just-the-current-prediction" aria-label="Link to this section">#</a></h3>
+<p>Training state is the input to a transition. A useful inventory separates components by how they influence the next step:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Component</th>
+<th>Role in this fixture</th>
+<th>What weights alone omit</th>
+</tr></thead><tbody>
+<tr>
+<td>model tensors</td>
+<td>current scalar predictor</td>
+<td>current value if absent</td>
+</tr>
+<tr>
+<td>Adam moments and step</td>
+<td>update direction/normalization</td>
+<td>history-dependent next update</td>
+</tr>
+<tr>
+<td>optimizer group options</td>
+<td>rate and optimizer configuration</td>
+<td>the intended update policy</td>
+</tr>
+<tr>
+<td>CPU RNG state</td>
+<td>next probe and target-noise draws</td>
+<td>position in the random stream</td>
+</tr>
+<tr>
+<td>data_position=2</td>
+<td>declared completed-update marker</td>
+<td>progress metadata</td>
+</tr>
+<tr>
+<td>literal x and target rule</td>
+<td>fixed next-batch construction</td>
+<td>a reproducible input contract</td>
+</tr>
+</tbody></table></div>
+<p>Adam maintains m_t=beta 1<em>m_(t-1)+(1-beta 1)</em>g_t and v_t=beta 2<em>v_(t-1)+(1-beta 2)</em>g_t^2, then uses step-dependent bias correction and an epsilon-stabilized normalized update. Two models with identical weights but different m, v, t need not take the same next step. Saving after two real updates makes those histories nontrivial; checkpointing before any update would leave a much weaker test.</p>
+<p>The weights-only negative control is deliberately given the same next noise tensor as the uninterrupted run. Its different result therefore isolates missing optimizer history rather than simultaneously changing the batch and the optimizer. It is a stronger experiment than comparing two restarted jobs whose data order and RNG streams are also unknown. The paired TensorFlow chapter tests the same reconstruction principle, although its scalar objective and optimizer rate differ from this PyTorch fixture; their literal weights are not a cross-framework equality oracle.</p>
+<p>The RNG timeline has an easily missed construction step. torch.manual_seed(7) sets an initial stream. Creating nn.Linear consumes initialization randomness even though the code subsequently overwrites its weight with zero. The two initial updates use zero noise and no further random draws. The saved RNG state therefore represents a particular position after construction, not simply the number 7. The uninterrupted path next draws a three-value probe, then a2×1 noise tensor, and then updates.</p>
+<p>The child reconstructs the model and optimizer, loads their saved state, and only then restores torch RNG state. Restoring before constructing Linear would let initialization consume a draw from the restored stream. Setting the seed again would return to the stream&#x27;s beginning instead of its saved position. Matching the three-value probe checks this ordering directly before the weight comparison tests the next noisy update. <a href="https://docs.pytorch.org/docs/2.9/notes/randomness.html">PyTorch 2.9 reproducibility guidance</a>.</p>
+<p>Other randomness is absent from this particular continuation. Python random, NumPy Generator objects, DataLoader generators, worker processes and accelerator generators would need their own explicit treatment if used. A global torch seed does not automatically serialize every library&#x27;s current generator state. Likewise, a data_position integer does not restore a real iterator here: the next batch is always constructed from literal x=[1, 2]. Incrementing the marker to three proves the stated bookkeeping, not worker-prefetch or distributed-sampler recovery.</p>
+<p>State dictionaries also have ownership semantics. model.state_dict() provides references to model state tensors; holding that mapping in memory is not an immutable copy while later updates mutate the model. The example immediately serializes the mapping before continuation, so the file preserves that point. For an in-memory before/after comparison, clone the values; for a restore comparison, reload the completed saved file rather than assuming a still-live dictionary remained unchanged.</p>
+<p>Reconstruct the same architecture and optimizer parameter-group structure before loading. Optimizer state is associated with the supplied parameter groups and their ordering; similar tensor shapes do not prove the state was attached to the intended semantic parameter after an architecture edit. A scheduler, gradient scaler, EMA model or accumulated-but-not-yet-stepped gradients would add more continuation state when present. None is silently claimed restored by this small Adam example.</p>
+<p>weights_only=True restricts the object forms used by the local tensor-and-primitive checkpoint loader. It is not a publisher-authentication mechanism or a complete resource/shape validation policy for arbitrary outside files. map_location=&#x27;cpu&#x27; establishes the intended device boundary. The child process uses the existing interpreter, has a timeout and exposes stderr on failure, so a failed reconstruction is not replaced by expected output text.</p>
+<p>Finally, the tested boundary is a completed torch.save followed by a fresh-process load. It does not inject a crash halfway through writing or prove power-loss durability. A persistent production checkpoint needs its own staged-publication, integrity and retention procedure. The local directory is owned and disposable, and the successful test removes it. Next-step parity is valuable evidence for this exact transition and environment, not a promise of bitwise agreement across versions, hardware or nondeterministic pipelines.</p>
+<h3 id="exercise-1-create-nontrivial-training-state">Exercise 1: Create nontrivial training state<a class="heading-anchor" href="#exercise-1-create-nontrivial-training-state" aria-label="Link to this section">#</a></h3>
+<p>The question is: Take two Adam updates of a zero-weight linear model onx 1, 2 and y 2 x.</p>
+<p>Saving before any updates would not test nonzero optimizer moments. Two steps create history that a fresh optimizer lacks.</p>
+<pre><code class="language-python">torch.manual_seed(7); model,optimizer=make_state()
+for _ in range(2): step(model,optimizer,torch.zeros((2,1)))
+parameter=next(model.parameters()); assert optimizer.state[parameter][&#x27;step&#x27;].item()==2 and parameter.item()&gt;0</code></pre>
+<p><strong>Expected:</strong> optimizer step 2 and positive weight.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with optimizer step 2 and positive weight.</p>
+<h3 id="exercise-2-save-the-complete-local-contract">Exercise 2: Save the complete local contract<a class="heading-anchor" href="#exercise-2-save-the-complete-local-contract" aria-label="Link to this section">#</a></h3>
+<p>The question is: Write model, optimizer, RNG and data_position2 into an owned temporary checkpoint.</p>
+<p>The state dictionary values are serialized at this point. The checkpoint is local and trusted; the example does not load arbitrary external pick led objects.</p>
+<pre><code class="language-python">temporary=tempfile.TemporaryDirectory(); folder=Path(temporary.name); path=folder/&#x27;checkpoint.pt&#x27;
+checkpoint={&#x27;model&#x27;:model.state_dict(),&#x27;optimizer&#x27;:optimizer.state_dict(),&#x27;rng&#x27;:torch.get_rng_state(),&#x27;data_position&#x27;:2}
+torch.save(checkpoint,path); assert path.is_file() and checkpoint[&#x27;data_position&#x27;]==2</code></pre>
+<p><strong>Expected:</strong> file exists and metadata position 2.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with file exists and metadata position 2.</p>
+<h3 id="exercise-3-record-uninterrupted-continuation">Exercise 3: Record uninterrupted continuation<a class="heading-anchor" href="#exercise-3-record-uninterrupted-continuation" aria-label="Link to this section">#</a></h3>
+<p>The question is: Draw three random values, then a small target perturbation, and perform the third update.</p>
+<p>The order of random draws is part of the continuation contract. Restoring only the seed without the consumed generator state would not reproduce this point.</p>
+<pre><code class="language-python">probe=torch.rand(3); noise=torch.rand((2,1))*.01; step(model,optimizer,noise); expected=parameter.item()
+assert torch.isfinite(probe).all() and optimizer.state[parameter][&#x27;step&#x27;].item()==3 and np.isfinite(expected)</code></pre>
+<p><strong>Expected:</strong> finite weight, step 3, and saved three-value random probe.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with finite weight, step 3, and saved three-value random probe.</p>
+<h3 id="exercise-4-restore-in-a-fresh-interpreter">Exercise 4: Restore in a fresh interpreter<a class="heading-anchor" href="#exercise-4-restore-in-a-fresh-interpreter" aria-label="Link to this section">#</a></h3>
+<p>The question is: Recreate model and Adam, restore all state, repeat the same draws and update.</p>
+<p>A new process cannot accidentally reuse the parent&#x27;s optimizer or generator. The check therefore exercises reconstruction from the saved artifact.</p>
+<pre><code class="language-python">program=textwrap.dedent(&quot;&quot;&quot;
+import json,sys,torch
+from torch import nn
+state=torch.load(sys.argv[1],map_location=&#x27;cpu&#x27;,weights_only=True)
+model=nn.Linear(1,1,bias=False); optimizer=torch.optim.Adam(model.parameters(),lr=.05)
+model.load_state_dict(state[&#x27;model&#x27;]); optimizer.load_state_dict(state[&#x27;optimizer&#x27;]); torch.set_rng_state(state[&#x27;rng&#x27;])
+probe=torch.rand(3); noise=torch.rand((2,1))*.01; x=torch.tensor([[1.],[2.]]); y=2*x+noise
+optimizer.zero_grad(set_to_none=True); (model(x)-y).square().mean().backward(); optimizer.step()
+print(json.dumps({&#x27;probe&#x27;:probe.tolist(),&#x27;weight&#x27;:model.weight.item(),&#x27;position&#x27;:state[&#x27;data_position&#x27;]+1}))
+&quot;&quot;&quot;)
+compile(program,&#x27;torch-checkpoint-child&#x27;,&#x27;exec&#x27;)
+result=subprocess.run([sys.executable,&#x27;-c&#x27;,program,str(path)],capture_output=True,text=True,timeout=60,check=False)
+if result.returncode: raise RuntimeError(&#x27;checkpoint child failed: &#x27;+result.stderr)
+restored=json.loads(result.stdout.strip().splitlines()[-1])
+np.testing.assert_allclose(restored[&#x27;probe&#x27;],probe.tolist(),atol=0,rtol=0)
+np.testing.assert_allclose(restored[&#x27;weight&#x27;],expected,atol=1e-6,rtol=0); assert restored[&#x27;position&#x27;]==3</code></pre>
+<p><strong>Expected:</strong> probe matches and next weight agrees within 1e-6; position 3.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with probe matches and next weight agrees within 1e-6; position 3.</p>
+<h3 id="exercise-5-expose-a-weights-only-restart">Exercise 5: Expose a weights-only restart<a class="heading-anchor" href="#exercise-5-expose-a-weights-only-restart" aria-label="Link to this section">#</a></h3>
+<p>The question is: Restore only the saved model into fresh Adam and take the same third batch update.</p>
+<p>The immediate model function matches the saved state, but Adam&#x27;s moments and counter differ. Prediction parity is weaker than training-resumption parity.</p>
+<pre><code class="language-python">state=torch.load(path,map_location=&#x27;cpu&#x27;,weights_only=True); weights_only,fresh_optimizer=make_state(); weights_only.load_state_dict(state[&#x27;model&#x27;])
+step(weights_only,fresh_optimizer,noise)
+assert abs(weights_only.weight.item()-expected)&gt;1e-6</code></pre>
+<p><strong>Expected:</strong> next weight differs from full-state continuation.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with next weight differs from full-state continuation.</p>
+<h3 id="exercise-6-verify-cleanup-and-bounded-claims">Exercise 6: Verify cleanup and bounded claims<a class="heading-anchor" href="#exercise-6-verify-cleanup-and-bounded-claims" aria-label="Link to this section">#</a></h3>
+<p>The question is: Remove the owned checkpoint directory and report that the literal CPU batch contract was tested.</p>
+<p>A real training system must additionally preserve sampler, worker and external-data state appropriate to its architecture. This fixture names that boundary rather than implying it was tested.</p>
+<pre><code class="language-python">temporary.cleanup(); assert not folder.exists()
+receipt={&#x27;cpu_next_step_checked&#x27;:True,&#x27;multiprocess_loader_restored&#x27;:False,&#x27;distributed_restart_verified&#x27;:False}
+assert receipt[&#x27;cpu_next_step_checked&#x27;] and not receipt[&#x27;distributed_restart_verified&#x27;]</code></pre>
+<p><strong>Expected:</strong> directory absent; no distributed-loader claim.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with directory absent; no distributed-loader claim.</p>
+<h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
+<p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
+  </main>
+</body>
+</html>

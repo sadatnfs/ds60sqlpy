@@ -18,7 +18,31 @@ For data science, preserving units and uncertainty is essential. Purchases canno
 
 ## Reading the implementation
 
-Parse JSON into a dictionary, require exactly the allowed keys, and reject booleans where an integer count is required because Python bool is a subclass ofint. Validate0<=purchases<=visits and require a positive denominator before computing a rate. UseNone only where the schema explicitly permits missingness. The extract helper recognizes the authored grammar and returns source spans so a field can be traced to the exact characters that supplied it.
+Validate an already decoded dictionary, require exactly the allowed keys, and reject booleans where an integer count is required because Python bool is a subclass ofint. Validate0<=purchases<=visits and require a positive denominator before computing a rate. UseNone only where the schema explicitly permits missingness. The extract helper recognizes the authored grammar and returns source spans so a field can be traced to the exact characters that supplied it.
+
+## Follow one value from text to an analysis unit
+
+The helper extract recognizes a deliberately narrow source grammar. It uses a full-string regular expression and returns digit spans from the original string. The helper validate accepts an already decoded Python dictionary; it is not a JSON parser. A JSON response from a future language model would first need parsing and then the same independent acceptance checks. These interfaces should not be collapsed into the claim “the model returned valid data.”
+
+For the literal text `Visits: 10; Purchases: 3; Unit: account`, the visit digits occupy the half-open character interval[8, 10), the purchase digit[23, 24), and the unit[32, 39). Slicing the original string at those boundaries recovers10, 3 and account. The integer conversion changes representation, while the stored span keeps its provenance. If preprocessing removes spaces before extracting offsets, those new offsets cannot be applied directly to the original string without a mapping.
+
+The record check accepts exactly three keys and requires type(value) to be int for both counts. Python's Boolean subtype relationship makes this stricter than a plain isinstance(value, int) test. A True visit count would otherwise become one in arithmetic even though the source proposed a logical value. Extra fields are also rejected, so a model cannot quietly insert an unsupported p_value alongside otherwise valid counts.
+
+The domain constraint0<=purchases<=visits assumes at most one counted purchase per eligible visit. It is not a universal business rule. If the real outcome counts multiple items purchased in a visit, the ratio may legitimately exceed one and needs a different name and contract. A validator should make that modeling choice explicit instead of treating every ratio as a probability.
+
+For the valid fixture, 3/10=0.3 describes purchases per eligible visit. The assignment_unit field says the experimental assignment is by account. It does not transform the arithmetic denominator into accounts, nor does it make10 visits independently randomized. Repeated observations within accounts require account identities and a suitable analysis design for uncertainty. The three extracted fields alone cannot recover that information.
+
+Aggregation adds another distinction. Suppose one account has1 purchase in1 visit and another has1 purchase in9 visits. The pooled visit rate is2/10=0.2. The equally weighted mean of account-specific rates is(1+1/9)/2=5/9, about0.556. Both calculations are valid for their declared estimands; they answer different questions. Calling both “average conversion” hides the weighting rule. The extraction schema should preserve enough units and identities to support the intended calculation.
+
+Missingness and invalidity need explicit statuses. purchases=None is rejected by this strict count schema; purchases=0 is a real observed zero. A broader system could carry a separate unknown record with a source reason. It should not coerce unknown to zero, nor remove every hard-to-parse study and then report the remaining sample as representative.
+
+### Interview reasoning with explanatory answers
+
+**Why is schema validity insufficient?** It establishes structure and primitive types. A fabricated purchase count can still be an integer within the allowed range. Source support and semantic interpretation need separate checks.
+
+**Can the parser prove a statistical result?** It can recover the declared source fields under its grammar. A causal effect, standard error or p-value additionally needs actual analysis inputs and justified design assumptions. Preserve a source's claim as a claim until that separate computation is validated.
+
+**How should an extraction comparison be scored?** Align records and fields to held-out source families, count unsupported values and missing-field behavior, and report acceptance coverage beside accuracy. Otherwise a system can appear accurate by rejecting difficult documents or inventing easy defaults.
 
 ## Exercise 1: Validate a correct proposal
 

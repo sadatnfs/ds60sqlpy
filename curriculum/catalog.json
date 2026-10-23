@@ -30,6 +30,18 @@
       "targets": [
         "python-algo-04"
       ]
+    },
+    "sql-semantic-depth": {
+      "title": "SQL semantics, temporal metrics and mutation evidence",
+      "description": "Reason through NULL quantification, metric grain, peer-aware windows, recursive graphs, conditional writes and mature cohort denominators.",
+      "targets": [
+        "sql-deep-01",
+        "sql-deep-02",
+        "sql-deep-03",
+        "sql-deep-04",
+        "sql-deep-05",
+        "sql-deep-06"
+      ]
     }
   },
   "lessons": [
@@ -3673,6 +3685,194 @@
       "dependency_group": "postgres",
       "network": "offline",
       "runner": "sql"
+    },
+    {
+      "id": "sql-deep-01",
+      "track": "sql",
+      "day": 74,
+      "title": "NULL-Aware Quantification, Anti-Joins, and Relational Division",
+      "level": "advanced",
+      "phase": "SQL semantics, temporal metrics and correctness",
+      "estimated_minutes": 150,
+      "prerequisites": [
+        "sql-09",
+        "sql-quality-01"
+      ],
+      "lesson_path": "sql/professional/lessons/sql_deep_01.sql",
+      "guide_path": "sql/professional/companion-guides/sql_deep_01.md",
+      "solution_paths": [
+        "sql/professional/solutions/sql_deep_01_solutions.md",
+        "sql/professional/solutions/sql_deep_01_solutions.sql"
+      ],
+      "dependency_group": "core",
+      "network": "offline",
+      "runner": "sql",
+      "topics": [
+        "null-aware",
+        "quantification",
+        "anti-joins",
+        "and",
+        "relational",
+        "division"
+      ]
+    },
+    {
+      "id": "sql-deep-02",
+      "track": "sql",
+      "day": 75,
+      "title": "Metric Algebra Across Grains, Snapshots, and Weighted Bridges",
+      "level": "advanced",
+      "phase": "SQL semantics, temporal metrics and correctness",
+      "estimated_minutes": 150,
+      "prerequisites": [
+        "sql-quality-01",
+        "sql-analytics-01"
+      ],
+      "lesson_path": "sql/professional/lessons/sql_deep_02.sql",
+      "guide_path": "sql/professional/companion-guides/sql_deep_02.md",
+      "solution_paths": [
+        "sql/professional/solutions/sql_deep_02_solutions.md",
+        "sql/professional/solutions/sql_deep_02_solutions.sql"
+      ],
+      "dependency_group": "core",
+      "network": "offline",
+      "runner": "sql",
+      "topics": [
+        "metric",
+        "algebra",
+        "across",
+        "grains",
+        "snapshots",
+        "and",
+        "weighted",
+        "bridges"
+      ]
+    },
+    {
+      "id": "sql-deep-03",
+      "track": "sql",
+      "day": 76,
+      "title": "ROWS, RANGE, GROUPS, Exclusions, and Sessionization",
+      "level": "advanced",
+      "phase": "SQL semantics, temporal metrics and correctness",
+      "estimated_minutes": 150,
+      "prerequisites": [
+        "sql-22",
+        "sql-analytics-01"
+      ],
+      "lesson_path": "sql/professional/lessons/sql_deep_03.sql",
+      "guide_path": "sql/professional/companion-guides/sql_deep_03.md",
+      "solution_paths": [
+        "sql/professional/solutions/sql_deep_03_solutions.md",
+        "sql/professional/solutions/sql_deep_03_solutions.sql"
+      ],
+      "dependency_group": "core",
+      "network": "offline",
+      "runner": "sql",
+      "topics": [
+        "rows",
+        "range",
+        "groups",
+        "exclusions",
+        "and",
+        "sessionization"
+      ]
+    },
+    {
+      "id": "sql-deep-04",
+      "track": "sql",
+      "day": 77,
+      "title": "Recursive Graph Reachability, Paths, Cycles, and Dependency Order",
+      "level": "advanced",
+      "phase": "SQL semantics, temporal metrics and correctness",
+      "estimated_minutes": 150,
+      "prerequisites": [
+        "sql-24",
+        "sql-25"
+      ],
+      "lesson_path": "sql/professional/lessons/sql_deep_04.sql",
+      "guide_path": "sql/professional/companion-guides/sql_deep_04.md",
+      "solution_paths": [
+        "sql/professional/solutions/sql_deep_04_solutions.md",
+        "sql/professional/solutions/sql_deep_04_solutions.sql"
+      ],
+      "dependency_group": "core",
+      "network": "offline",
+      "runner": "sql",
+      "topics": [
+        "recursive",
+        "graph",
+        "reachability",
+        "paths",
+        "cycles",
+        "and",
+        "dependency",
+        "order"
+      ]
+    },
+    {
+      "id": "sql-deep-05",
+      "track": "sql",
+      "day": 78,
+      "title": "Predicate Proof, Partial Indexes, and Conditional Mutation Contracts",
+      "level": "advanced",
+      "phase": "SQL semantics, temporal metrics and correctness",
+      "estimated_minutes": 150,
+      "prerequisites": [
+        "sql-ops-01",
+        "sql-concurrency-01"
+      ],
+      "lesson_path": "sql/professional/lessons/sql_deep_05.sql",
+      "guide_path": "sql/professional/companion-guides/sql_deep_05.md",
+      "solution_paths": [
+        "sql/professional/solutions/sql_deep_05_solutions.md",
+        "sql/professional/solutions/sql_deep_05_solutions.sql"
+      ],
+      "dependency_group": "core",
+      "network": "offline",
+      "runner": "sql",
+      "topics": [
+        "predicate",
+        "proof",
+        "partial",
+        "indexes",
+        "and",
+        "conditional",
+        "mutation",
+        "contracts"
+      ]
+    },
+    {
+      "id": "sql-deep-06",
+      "track": "sql",
+      "day": 79,
+      "title": "Cohort Denominators, Follow-Up Maturity, and Point-in-Time Quality",
+      "level": "advanced",
+      "phase": "SQL semantics, temporal metrics and correctness",
+      "estimated_minutes": 150,
+      "prerequisites": [
+        "sql-analytics-01",
+        "sql-quality-01",
+        "sql-deep-03"
+      ],
+      "lesson_path": "sql/professional/lessons/sql_deep_06.sql",
+      "guide_path": "sql/professional/companion-guides/sql_deep_06.md",
+      "solution_paths": [
+        "sql/professional/solutions/sql_deep_06_solutions.md",
+        "sql/professional/solutions/sql_deep_06_solutions.sql"
+      ],
+      "dependency_group": "core",
+      "network": "offline",
+      "runner": "sql",
+      "topics": [
+        "cohort",
+        "denominators",
+        "follow-up",
+        "maturity",
+        "and",
+        "point-in-time",
+        "quality"
+      ]
     },
     {
       "id": "bridge-01",

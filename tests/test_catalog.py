@@ -4,6 +4,7 @@ from pathlib import Path
 
 from ds60sqlpy.catalog import Catalog, find_repo_root
 from ds60sqlpy.catalog_builder import PROFESSIONAL_LESSON_SPECS
+from ds60sqlpy.curriculum_framework import load_extensions
 
 
 def test_find_repo_root_from_nested_directory() -> None:
@@ -13,10 +14,11 @@ def test_find_repo_root_from_nested_directory() -> None:
 
 def test_catalog_has_all_complete_tracks() -> None:
     catalog = Catalog.load()
+    extensions = load_extensions(catalog.repo_root)
     for track, core in (("python", 60), ("sql", 60), ("bridge", 8)):
         assert len(catalog.lessons(track)) == core + sum(
             spec["track"] == track for spec in PROFESSIONAL_LESSON_SPECS
-        )
+        ) + sum(lesson["track"] == track for lesson in extensions.lessons)
     assert catalog.by_day("python", 1).id == "python-01"
     assert catalog.by_day("sql", 60).id == "sql-60"
     assert catalog.by_day("bridge", 8).id == "bridge-08"

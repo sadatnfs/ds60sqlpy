@@ -1,0 +1,38 @@
+{
+  "lesson_id": "k8s-010",
+  "provenance": "synthetic teaching cases, not runtime observations",
+  "capability": "fixed resource-bounded workload; separate quota/OOM host fixtures",
+  "browser_source": true,
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Identify the source request/limit fields and explain their roles.",
+      "expected": "10m/16Mi requests and100m/64Mi limits in the baseline;requests influence placement,limits constrain runtime."
+    },
+    {
+      "exercise": 2,
+      "task": "Sum requests for two replicas and convert64Mi to bytes.",
+      "expected": "20m CPU,32Mi memory and67,108,864 bytes for64Mi."
+    },
+    {
+      "exercise": 3,
+      "task": "Compare request200m with limit100m in a scratch source.",
+      "expected": "Broker refuses requests greater than limits before creating resources."
+    },
+    {
+      "exercise": 4,
+      "task": "Match Forbidden/exceeded quota and Pending/FailedScheduling to their stages.",
+      "expected": "Admission budget versus scheduler placement,with separate minimal investigations."
+    },
+    {
+      "exercise": 5,
+      "task": "Review a scoped synthetic OOMKilled record and a generic exit137 record.",
+      "expected": "OOMKilled is specific memory-enforcement evidence;exit137 alone is insufficient to prove that cause."
+    },
+    {
+      "exercise": 6,
+      "task": "Write a repair for one of the three failure records and its acceptance condition.",
+      "expected": "One justified source/resource change,phase-specific success evidence and owned cleanup."
+    }
+  ]
+}

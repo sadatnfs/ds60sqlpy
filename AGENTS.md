@@ -2,9 +2,9 @@
 
 ## Mission
 
-Maintain a beginner-friendly, offline-after-bootstrap Python/data-science,
-PostgreSQL, and application-engineering curriculum that runs on Windows,
-macOS, and Linux. Accuracy and reproducibility matter more than preserving the
+Maintain a beginner-friendly, offline-after-setup curriculum spanning data
+science, statistics, machine learning, languages and systems. The primary
+application is the Docker browser classroom on Windows, macOS and Linux. Accuracy and reproducibility matter more than preserving the
 historical “60-day” shape.
 
 ## Start here
@@ -14,7 +14,13 @@ historical “60-day” shape.
 3. Read the closest nested `AGENTS.md` for files under `python/`, `sql/`, or
    `bridge/`.
 4. Run commands from the repository root.
-5. Use `python scripts/course.py doctor` before diagnosing environment failures.
+5. Diagnose the selected route: Docker engine/Compose and the app profile
+   readiness for the classroom; `python scripts/course.py doctor` only for an
+   explicitly prepared native Python environment. Host Python is not a classroom
+   prerequisite.
+6. Use parallel agents for independent work with clear file ownership. Keep
+   image builds sequential and use grouped four-worker tests. Preserve human
+   Git actions and unrelated workloads. Do not use em dashes in authored prose.
 
 ## Sources of truth
 
@@ -49,8 +55,15 @@ historical “60-day” shape.
   `scripts/build_sql_lesson_notebook.py`: catalog-restricted generator and
   runner for learner-local SQL notebooks under `.learning/sql/`; never check
   generated workspaces into Git
-- `START_DOCKER_LAB.cmd` and `scripts/start_docker_windows.ps1`: Windows
-  beginner container entry point, including consented prerequisite setup.
+- `classroom` and `scripts/classroom.sh`: shared build/start/health/browser entrypoint
+  for macOS, Linux and Windows through WSL 2. It defaults to all ordinary profiles
+  and automatic loopback host ports. Preserve explicit overrides and named data.
+- `START_DOCKER_CLASSROOM.cmd`, `START_DOCKER_CLASSROOM.command` and
+  `compose.classroom.yaml`: primary Docker-only classroom and named-volume
+  persistence. See `docs/docker-classroom.md`; compiler/framework profiles run
+  inside images, and the thin launchers discover the actual published port.
+- `START_DOCKER_LAB.cmd` and `scripts/start_docker_windows.ps1`: optional older
+  Windows installation wizard, including consented prerequisite setup.
   Re-detect after a manual reboot; preserve existing engines and learner work.
 - `START_DS60.cmd` and `scripts/start_ds60.ps1`: optional Windows native entry point;
   keep it path-safe, PowerShell 5.1-compatible, and aligned with
@@ -287,8 +300,9 @@ Keep durable truth in checked-in artifacts, authoring metadata, docs, and the re
 ## Expansion implementation checkpoint
 
 Read [the implementation checkpoint](docs/implementation/CHECKPOINT.md) before
-continuing the five new modules. Read [the module authoring contract](docs/implementation/ADDING_A_MODULE.md)
-when extending a subject or adding a language. Authored beta files live in `courses/` and are
+continuing the expanded module and tutorial-book library. Read [the module authoring contract](docs/implementation/ADDING_A_MODULE.md)
+when extending a subject or adding a language. Authored lesson files live in
+`courses/` and are
 loaded by `modules.py`; they do not silently replace the published catalog.
 `module_jobs.py` owns persisted jobs, `module_service.py` authenticated app
 actions, and the optional `module_worker.py` / `worker_operations.py` pair owns

@@ -1,0 +1,78 @@
+{
+  "lesson_id": "spark-036",
+  "scope": "Tiny paired local contracts;root-owned runtime qualification is separate.",
+  "cases": [
+    {
+      "exercise": 1,
+      "title": "Define canonical bounded microbatch content",
+      "input_contract": "Validate the explicit bigint schema, nonnegative cents, positive IDs and at most 8 rows;return sorted id, cents newline records preserving multiplicity.",
+      "expected": "Exact text 1,100 newline 2,200 newline, with a stable SHA256 after repartitioning.",
+      "verification": "Compare exact bytes and reject NULL cents before publication."
+    },
+    {
+      "exercise": 2,
+      "title": "Publish one logical batch idempotently",
+      "input_contract": "Publish the same canonical content twice under identity manual-v1 and batch 7. Compare the existing receipt instead of appending.",
+      "expected": "First call publishes true;second returns false;exactly 2 logical rows remain.",
+      "verification": "Assert return values, unchanged receipt bytes and one batch file."
+    },
+    {
+      "exercise": 3,
+      "title": "Inject a real callback failure before publication",
+      "input_contract": "Run the actual foreachBatch query with failure after staging and before rename. Retain the wrapped streaming exception and attempted batch ID.",
+      "expected": "The query fails with injected_before_publication;no stream-v1 batch is visible and the attempted batch ID is 0.",
+      "verification": "Check the exception marker, empty published rows and inactive query."
+    },
+    {
+      "exercise": 4,
+      "title": "Recover the same checkpoint and observe replay",
+      "input_contract": "Restart the same source/checkpoint/query namespace without failure. Compare attempts and logical query/run IDs.",
+      "expected": "Batch 0 is attempted again and publishes 2 rows once. Query ID persists;run ID changes.",
+      "verification": "Assert attempt sequence 0,0, exact rows and corresponding identities."
+    },
+    {
+      "exercise": 5,
+      "title": "Expose a non-idempotent append counterexample",
+      "input_contract": "Append the same canonical batch text twice to a separate unsafe-demo file, then compare it with the idempotent published batch.",
+      "expected": "Unsafe append has 4 row occurrences;the committed batch remains 2.",
+      "verification": "Compare exact repeated lines and preserve the unsafe file as a separate diagnostic until owned cleanup."
+    },
+    {
+      "exercise": 6,
+      "title": "Reject identity collisions and admit the next batch",
+      "input_contract": "Reject different content under an existing batch key, then publish a new source file 3:300 and resume the real query.",
+      "expected": "The conflicting key fails without replacing its receipt. Stream batch 1 adds one row, leaving IDs 1,2,3 and total 600 across two batch files.",
+      "verification": "Assert collision rejection, old receipt equality, attempt sequence 0,0,1 and exact 3-row sink."
+    }
+  ],
+  "golden": {
+    "canonical_batch": "1,100\n2,200\n",
+    "attempt_batch_ids": [
+      0,
+      0,
+      1
+    ],
+    "published_rows": [
+      "1,100",
+      "2,200",
+      "3,300"
+    ],
+    "unsafe_append_rows": [
+      "1,100",
+      "2,200",
+      "1,100",
+      "2,200"
+    ],
+    "key": [
+      "application_query_identity",
+      "batch_id"
+    ],
+    "failure_point": "after stage before publication",
+    "limitations": [
+      "single local writer",
+      "atomic visibility only",
+      "no power-loss durability proof",
+      "no distributed transaction"
+    ]
+  }
+}

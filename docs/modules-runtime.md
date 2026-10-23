@@ -4,6 +4,10 @@ The module application sends source to explicitly prepared private workers.
 The original Python/SQL pads and the reading path continue to work without
 these profiles. Preparing one subject does not install every framework.
 
+For the primary Docker-only route, start with the [classroom walkthrough](docker-classroom.md).
+It uses named progress volumes and direct Compose commands. The launchers below
+are the optional host-folder route; do not mix their storage instructions.
+
 ## Prepare only the profiles you need
 
 Start the ordinary Docker lab first. From the extracted complete course folder,
@@ -39,6 +43,9 @@ Kubernetes uses its separate owned-cluster preparation and lease checks.
 | `scala-jvm` | `Main.scala`, compile then `Main` | Spark distribution's matched Scala 2.13 compiler/library and JDK 17 |
 | `spark-local-scala` | `Main.scala`, compile then local Spark submit | Spark 4.0.1, matched Scala 2.13, JDK 17, `local[2]` |
 | `spark-local-python` | `main.py`, local Spark submit | Same Spark/JDK, Python 3.12, `local[2]` |
+| `java21` | `Main.java`, compile then run `Main` | Java21, assertions enabled, prepared H2 JDBC teaching library |
+| `javascript-node` | `main.mjs`, Node ES module | Node24 with strict unhandled rejections |
+| `typescript-node` | `main.mts`, strict check/compile then execute | TypeScript5.9.3 and Node24 with NodeNext module rules |
 
 The NumPy attention foundation uses `python-core`; it does not require PyTorch.
 A successful fixed compiler operation does not establish a CMake/CTest project

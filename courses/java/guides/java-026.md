@@ -1,7 +1,5 @@
 # java-026: Packages, classpaths and modules
 
-Authored course content. Java21 runtime qualification and execution receipts are recorded separately in the implementation checkpoint. A saved source file is not proof that the code was compiled or that the learner understands it.
-
 ## Level and prerequisites
 
 Advanced, approximately 120 minutes. Direct prerequisites: `java-025`
@@ -37,11 +35,15 @@ javac --release 21 Main.java
 java -ea Main
 ```
 
-The public class name and source filename must agree. Each worked example below is a complete file. Example B includes the setup it needs from Example A, so it can be compiled by itself. The six exercise reference blocks form one complete program in the separate solution. Keep your original prediction, source and diagnostic text together. The default examples use only prepared JDK libraries and tiny local fixtures. Any lesson-specific library or additional file is named explicitly; do not download packages from inside a learner program. Resource examples close their owned files, executors or loopback servers.
+The public class name and source filename must agree. Each worked example below is a complete file. Example B includes the setup it needs from Example A, so it can be compiled by itself. The six exercise reference blocks form one complete program in the separate solution. Keep your original prediction, source and diagnostic text together. Most examples use prepared JDK libraries and tiny local fixtures; any additional dependency is specified in the lesson notes below. Any lesson-specific library or additional file is named explicitly; do not download packages from inside a learner program. Resource examples close their owned files, executors or loopback servers.
+
+## Manual module source tree
+
+The [two-module fixture](../fixtures/java-026/README.md) contains the exact source layout and repository-root compile/run commands. The default pad remains Main.java and creates an equivalent owned temporary fixture. No external dependency is required.
 
 ## Syntax anatomy and execution trace
 
-The source root contains one directory per module,each withmodule-info.java and package directories. javac --module-source-path selects that layout and-m names the modules tocompile. java --module-path selects compiled modules and-mmodule/class starts the application. ModuleFinder reads descriptors without treating filenames as module identities. The child process uses a fixed local Java executable andbounded wait.
+The source root contains one directory per module,each withmodule-info.java and package directories. javac --module-source-path selects that layout and-m names the modules tocompile. java --module-path selects compiled modules and-mmodule/class starts the application. ModuleFinder reads descriptors without treating filenames as module identities. The child process uses a fixed local Java executable andbounded wait. The child process inherits the prepared environment unchanged. JVM startup notices such as JAVA_TOOL_OPTIONS belong to stderr, while the application result belongs to stdout. Capture both streams separately in owned files so diagnostics cannot corrupt an exact output comparison; include stderr when a child fails. Do not remove inherited CPU or resource settings to make a test pass.
 
 ## Worked example / walkthrough
 
@@ -64,8 +66,17 @@ public class Main {
         }
         void write(String relative,String text) throws Exception {var path=source.resolve(relative);java.nio.file.Files.createDirectories(path.getParent());java.nio.file.Files.writeString(path,text);}
         int compile(){var compiler=javax.tools.ToolProvider.getSystemJavaCompiler();if(compiler==null)throw new IllegalStateException("JDK compiler required");var errors=new java.io.ByteArrayOutputStream();int code=compiler.run(null,errors,errors,"--release","21","--module-source-path",source.toString(),"-d",output.toString(),"-m","course.greeting,course.app");diagnostics=errors.toString(java.nio.charset.StandardCharsets.UTF_8);return code;}
-        String run() throws Exception {String executable=java.nio.file.Path.of(System.getProperty("java.home"),"bin","java").toString();var process=new ProcessBuilder(executable,"-ea","--module-path",output.toString(),"-m","course.app/edu.example.app.Main").redirectErrorStream(true).start();if(!process.waitFor(5,java.util.concurrent.TimeUnit.SECONDS)){process.destroyForcibly();throw new AssertionError("child JVM timeout");}String text=new String(process.getInputStream().readAllBytes(),java.nio.charset.StandardCharsets.UTF_8);if(process.exitValue()!=0)throw new AssertionError(text);return text;}
-        public void close() throws Exception {try(var paths=java.nio.file.Files.walk(root)){for(var path:paths.sorted(Comparator.reverseOrder()).toList())java.nio.file.Files.deleteIfExists(path);}}
+        String childStderr="";
+        String run() throws Exception {
+            String executable=java.nio.file.Path.of(System.getProperty("java.home"),"bin","java").toString();
+            var stdout=root.resolve("child.stdout");var stderr=root.resolve("child.stderr");
+            var process=new ProcessBuilder(executable,"-ea","--module-path",output.toString(),"-m","course.app/edu.example.app.Main").redirectOutput(stdout.toFile()).redirectError(stderr.toFile()).start();
+            if(!process.waitFor(5,java.util.concurrent.TimeUnit.SECONDS)){process.destroyForcibly();throw new AssertionError("child JVM timeout");}
+            String text=java.nio.file.Files.readString(stdout);childStderr=java.nio.file.Files.readString(stderr);
+            if(process.exitValue()!=0)throw new AssertionError("child exit "+process.exitValue()+": "+childStderr);
+            return text;
+        }
+        public void close() throws java.io.IOException {try(var paths=java.nio.file.Files.walk(root)){for(var path:paths.sorted(Comparator.reverseOrder()).toList())java.nio.file.Files.deleteIfExists(path);}}
     }
     public static void main(String[] args) throws Exception {
         assert String.class.getModule().getName().equals("java.base");assert String.class.getPackageName().equals("java.lang");
@@ -95,8 +106,17 @@ public class Main {
         }
         void write(String relative,String text) throws Exception {var path=source.resolve(relative);java.nio.file.Files.createDirectories(path.getParent());java.nio.file.Files.writeString(path,text);}
         int compile(){var compiler=javax.tools.ToolProvider.getSystemJavaCompiler();if(compiler==null)throw new IllegalStateException("JDK compiler required");var errors=new java.io.ByteArrayOutputStream();int code=compiler.run(null,errors,errors,"--release","21","--module-source-path",source.toString(),"-d",output.toString(),"-m","course.greeting,course.app");diagnostics=errors.toString(java.nio.charset.StandardCharsets.UTF_8);return code;}
-        String run() throws Exception {String executable=java.nio.file.Path.of(System.getProperty("java.home"),"bin","java").toString();var process=new ProcessBuilder(executable,"-ea","--module-path",output.toString(),"-m","course.app/edu.example.app.Main").redirectErrorStream(true).start();if(!process.waitFor(5,java.util.concurrent.TimeUnit.SECONDS)){process.destroyForcibly();throw new AssertionError("child JVM timeout");}String text=new String(process.getInputStream().readAllBytes(),java.nio.charset.StandardCharsets.UTF_8);if(process.exitValue()!=0)throw new AssertionError(text);return text;}
-        public void close() throws Exception {try(var paths=java.nio.file.Files.walk(root)){for(var path:paths.sorted(Comparator.reverseOrder()).toList())java.nio.file.Files.deleteIfExists(path);}}
+        String childStderr="";
+        String run() throws Exception {
+            String executable=java.nio.file.Path.of(System.getProperty("java.home"),"bin","java").toString();
+            var stdout=root.resolve("child.stdout");var stderr=root.resolve("child.stderr");
+            var process=new ProcessBuilder(executable,"-ea","--module-path",output.toString(),"-m","course.app/edu.example.app.Main").redirectOutput(stdout.toFile()).redirectError(stderr.toFile()).start();
+            if(!process.waitFor(5,java.util.concurrent.TimeUnit.SECONDS)){process.destroyForcibly();throw new AssertionError("child JVM timeout");}
+            String text=java.nio.file.Files.readString(stdout);childStderr=java.nio.file.Files.readString(stderr);
+            if(process.exitValue()!=0)throw new AssertionError("child exit "+process.exitValue()+": "+childStderr);
+            return text;
+        }
+        public void close() throws java.io.IOException {try(var paths=java.nio.file.Files.walk(root)){for(var path:paths.sorted(Comparator.reverseOrder()).toList())java.nio.file.Files.deleteIfExists(path);}}
     }
     public static void main(String[] args) throws Exception {
         assert String.class.getModule().getName().equals("java.base");assert String.class.getPackageName().equals("java.lang");

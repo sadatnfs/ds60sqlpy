@@ -24,7 +24,10 @@ precedence over exercise and solution-gate rules.
    repository exists. Read its track, runner, topics and dependency metadata. If it is not extracted yet, use the applicable setup guide
    from this course source and wait to select a lesson until the learner opens
    the cloned root.
-4. Prefer the Docker classroom in `docs/docker-classroom.md`. An installed
+4. Prefer `./classroom` and `docs/one-command-classroom.md`: one command builds,
+   starts, checks readiness and opens the actual classroom URL. Windows uses
+   Ubuntu in WSL 2 with engine integration; both platform wrappers delegate
+   to the shared Bash implementation. An installed
    Docker engine with Compose is the prerequisite; Windows uses Linux
    containers with the WSL 2 backend. `START_DOCKER_CLASSROOM.cmd` and
    `START_DOCKER_CLASSROOM.command` are thin optional launchers. The documented

@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>java-029: explanatory solutions · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>java-029: explanatory solutions</h1>
+      <p class="source-path">Generated from <code>courses/java/solutions/java-029_solutions.md</code></p>
+    </header>
+    <article class="document"><h2 id="java-029-explanatory-solutions">java-029: explanatory solutions<a class="heading-anchor" href="#java-029-explanatory-solutions" aria-label="Link to this section">#</a></h2>
+<p>Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as <code>Main.java</code>. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.</p>
+<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
+<p>JDBC is Java&#x27;s database-access API. AConnection represents a database session,PreparedStatement separates SQL structure from bound values,andResultSet exposes rows returned by a query. A connection normally starts in auto-commit mode,where each completed statement is committed independently. A multi-statement business operation needs an explicit transaction when its changes must succeed orfail together. Commit makes the transaction durable under the database contract;rollback discards its uncommitted changes.</p>
+<p>This lesson uses a real embedded H2 database in memory through the preparedH2JDBCdriver. Every exercise creates its own named in-memory database andcloses all connections. It doesnot connect toPostgreSQL,Oracle,a shared service ora file-backed database. The tiny account table has a nonnegative-balance constraint. Actual prepared queries,commit,rollback,constraint failure andREAD_COMMITTED visibility are tested. H2 behavior onthisfixture isnot presented as universal behavior ofevery database engine.</p>
+<p><strong>Connection:</strong> A database session carrying transaction andstatement state.</p>
+<p><strong>Prepared statement:</strong> SQL structure with separately bound parameter values.</p>
+<p><strong>Transaction:</strong> A group of changes committed orrolled back as one declared unit.</p>
+<p><strong>Isolation:</strong> Rules governing which concurrent transaction changes are visible.</p>
+<h3 id="reading-the-reference">Reading the reference<a class="heading-anchor" href="#reading-the-reference" aria-label="Link to this section">#</a></h3>
+<p>DriverManager.getConnection selects a loaded driver for thejdbc:h2:mem URL. Bind values withsetInt orsetString rather than concatenating them into SQL. Use setAutoCommit(false),commit androllback for transaction control. Close ResultSet,PreparedStatement andConnection withtry-with-resources. Check executeUpdate row counts so an unknown account isnot silently treated as a successful transfer. SetupDDL occurs before the tested transactions becauseDDL transaction behavior is engine-specific.</p>
+<h3 id="exercise-1-verify-a-real-local-database">Exercise 1: Verify a real local database<a class="heading-anchor" href="#exercise-1-verify-a-real-local-database" aria-label="Link to this section">#</a></h3>
+<p>Task: Open the fixture,inspect product metadata andcount the two account rows.</p>
+<p>Metadata andquery execution establish actualJDBCbehavior. A map pretending to be a database would not exercise driver loading,SQL parsing ortransaction state.</p>
+<pre><code class="language-java">try(java.sql.Connection connection=database()) {
+    assert connection.getMetaData().getDatabaseProductName().equals(&quot;H2&quot;) &amp;&amp; connection.getAutoCommit();
+    try(var statement=connection.prepareStatement(&quot;SELECT COUNT(*) FROM accounts&quot;);var rows=statement.executeQuery()){assert rows.next() &amp;&amp; rows.getInt(1)==2;}
+}</code></pre>
+<p><strong>Expected:</strong> database productH2;2 rows;auto-commit initiallytrue.</p>
+<p><strong>Verify:</strong> Compare the program values or named exception with database productH2;2 rows;auto-commit initiallytrue. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<h3 id="exercise-2-bind-an-injection-shaped-value-as-data">Exercise 2: Bind an injection-shaped value as data<a class="heading-anchor" href="#exercise-2-bind-an-injection-shaped-value-as-data" aria-label="Link to this section">#</a></h3>
+<p>Task: Query byname usingAlice andthenAlicequoteOR1=1-shaped text through the same prepared statement.</p>
+<p>The driver receives the value separately from the query structure. The test uses a valid normal lookup as well as the adversarial-looking value so blanket rejection isnot mistaken forcorrect binding.</p>
+<pre><code class="language-java">try(java.sql.Connection connection=database();var statement=connection.prepareStatement(&quot;SELECT COUNT(*) FROM accounts WHERE name = ?&quot;)) {
+    statement.setString(1,&quot;Alice&quot;);try(var rows=statement.executeQuery()){assert rows.next() &amp;&amp; rows.getInt(1)==1;}
+    statement.setString(1,&quot;Alice&#x27; OR &#x27;1&#x27;=&#x27;1&quot;);try(var rows=statement.executeQuery()){assert rows.next() &amp;&amp; rows.getInt(1)==0;}
+}</code></pre>
+<p><strong>Expected:</strong> Alice matches1row;the injection-shaped value matches0.</p>
+<p><strong>Verify:</strong> Compare the program values or named exception with Alice matches1row;the injection-shaped value matches0. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<h3 id="exercise-3-roll-back-a-transfer">Exercise 3: Roll back a transfer<a class="heading-anchor" href="#exercise-3-roll-back-a-transfer" aria-label="Link to this section">#</a></h3>
+<p>Task: Disableauto-commit,move20cents fromaccount1to2,inspect intermediate balances,androllback.</p>
+<p>Both changes belong to the same transaction. The intermediate state is visible to its own connection,but rollback restores the original fixture.</p>
+<pre><code class="language-java">try(java.sql.Connection connection=database()) {
+    connection.setAutoCommit(false);change(connection,1,-20);change(connection,2,20);
+    assert balance(connection,1)==80 &amp;&amp; balance(connection,2)==70;connection.rollback();
+    assert balance(connection,1)==100 &amp;&amp; balance(connection,2)==50;
+}</code></pre>
+<p><strong>Expected:</strong> inside80,70;afterrollback100,50.</p>
+<p><strong>Verify:</strong> Compare the program values or named exception with inside80,70;afterrollback100,50. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<h3 id="exercise-4-commit-andread-from-a-second-session">Exercise 4: Commit andread from a second session<a class="heading-anchor" href="#exercise-4-commit-andread-from-a-second-session" aria-label="Link to this section">#</a></h3>
+<p>Task: Transfer10cents,commit,andopen another connection to the same owned memory database.</p>
+<p>The first connection remains open while the second reads,keeping this in-memory database alive. No global database name orambient connection profile is used.</p>
+<pre><code class="language-java">try(java.sql.Connection connection=database()) {
+    connection.setAutoCommit(false);change(connection,1,-10);change(connection,2,10);connection.commit();
+    try(var second=java.sql.DriverManager.getConnection(connection.getMetaData().getURL())){assert balance(second,1)==90 &amp;&amp; balance(second,2)==60 &amp;&amp; balance(second,1)+balance(second,2)==150;}
+}</code></pre>
+<p><strong>Expected:</strong> second connection sees90,60 andtotal150.</p>
+<p><strong>Verify:</strong> Compare the program values or named exception with second connection sees90,60 andtotal150. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<h3 id="exercise-5-handle-a-constraint-failure-androllback">Exercise 5: Handle a constraint failure androllback<a class="heading-anchor" href="#exercise-5-handle-a-constraint-failure-androllback" aria-label="Link to this section">#</a></h3>
+<p>Task: Attempt tosubtract200frombalance100,catch theSQL integrity error,androllback.</p>
+<p>The database enforces its own invariant even if application validation is missing. The transaction must be resolved explicitly after the failure rather than reused in an unknown state.</p>
+<pre><code class="language-java">try(java.sql.Connection connection=database()) {
+    connection.setAutoCommit(false);boolean constraint=false;
+    try{change(connection,1,-200);}catch(java.sql.SQLException expected){constraint=expected.getSQLState()!=null &amp;&amp; expected.getSQLState().startsWith(&quot;23&quot;);connection.rollback();}
+    assert constraint &amp;&amp; balance(connection,1)==100;
+}</code></pre>
+<p><strong>Expected:</strong> SQLState class23;balance remains100 afterrollback.</p>
+<p><strong>Verify:</strong> Compare the program values or named exception with SQLState class23;balance remains100 afterrollback. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<h3 id="exercise-6-observe-committed-visibility-under-the-declared-isolation">Exercise 6: Observe committed visibility under the declared isolation<a class="heading-anchor" href="#exercise-6-observe-committed-visibility-under-the-declared-isolation" aria-label="Link to this section">#</a></h3>
+<p>Task: Use twoH2connections atREAD_COMMITTED;updateaccount1 withoutcommit,read fromtheother,thencommit andreadagain.</p>
+<p>This is an actual two-session observation for the preparedH2engine. Other engines orisolation levels canhave different snapshot andlocking behavior,so retain the database/version context.</p>
+<pre><code class="language-java">try(java.sql.Connection first=database();var second=java.sql.DriverManager.getConnection(first.getMetaData().getURL())) {
+    first.setTransactionIsolation(java.sql.Connection.TRANSACTION_READ_COMMITTED);second.setTransactionIsolation(java.sql.Connection.TRANSACTION_READ_COMMITTED);first.setAutoCommit(false);
+    change(first,1,-5);assert balance(second,1)==100;first.commit();assert balance(second,1)==95;
+}</code></pre>
+<p><strong>Expected:</strong> second session sees100beforecommit and95aftercommit.</p>
+<p><strong>Verify:</strong> Compare the program values or named exception with second session sees100beforecommit and95aftercommit. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<h3 id="after-comparing-the-answer">After comparing the answer<a class="heading-anchor" href="#after-comparing-the-answer" aria-label="Link to this section">#</a></h3>
+<p>Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.</p></article>
+  </main>
+</body>
+</html>

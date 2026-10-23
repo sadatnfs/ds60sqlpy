@@ -10,6 +10,24 @@ Reproducibility means another environment can reconstruct the same declared buil
 
 Rebuilding from local inputs requires more than listing a dependency name. Record the exact source content, relevant build options, compiler and architecture, then attempt a fresh build without fetching anything. Target-scoped include directories and features help another consumer inherit the contract. The tiny vendored namespace in the single-file example illustrates identity and behavior checks; it does not prove that a dependency package or offline installation was actually built.
 
+<!-- depth:start -->
+## Dependency identity and reproducible local builds
+
+A dependency is part of the program's input, not merely a name in a build file. Reproducibility requires identifying the exact source or binary artifact, version, build options and relevant toolchain. A local vendored dependency can support offline builds when its complete reviewed inputs are present. A declaration that fetches a dependency at configure time still has a network requirement, even if the main source is local.
+
+The tiny vendored namespace demonstrates a version constant and a behavior check. static_assert verifies the expected API version at compile time, and add(2, 3)==5 checks a concrete operation. Those checks do not prove that an external package was downloaded, installed or independently built. They deliberately separate the idea of dependency identity from a host packaging workflow.
+
+For a real local target, public include paths and required compile features belong to the target interface when consumers need them. Private implementation details should not leak into every consumer. A consumer that builds only because it happens to inherit a global include path is not a clean dependency contract. Test it from a fresh build directory with only the documented target relationship.
+
+Offline qualification means attempting the build without fetching missing inputs. A populated developer cache can hide an undeclared dependency. Record which artifacts were already present and distinguish an offline rebuild from the initial connected preparation. Hashes can identify bytes, but they do not by themselves establish publisher trust or acceptable licensing.
+
+Updating a dependency requires both compatibility and behavior review. An API-version constant may remain unchanged while behavior or ABI differs. Retain representative boundary tests and actual consumer acceptance for the supported platform. A successful single-file demonstration does not certify every architecture or toolchain mentioned in a README.
+
+## Debugging the contract
+
+If a clean build fails while a long-lived build succeeds, inspect undeclared generated files, caches and global include paths. If configure unexpectedly contacts the network, look for fetch commands and missing vendored inputs. If a consumer links but behaves differently, check the actual artifact identity and ABI configuration. Do not repair an offline failure by silently installing or downloading a new dependency during the lesson.
+<!-- depth:end -->
+
 ## Worked example 1
 
 ```cpp

@@ -181,12 +181,15 @@
 <span> </span>
 <span>    # Exercise 5: Evaluate the frozen held-out prompt</span>
 <span>    model.eval(); saved=model.output.weight.detach().clone()</span>
-<span>    with torch.no_grad(): final_held=objective(model,held[:,:-1],held_labels).item()</span>
+<span>    with torch.no_grad():</span>
+<span>        final_held=objective(model,held[:,:-1],held_labels).item()</span>
+<span>        final_train=objective(model,inputs,labels).item()</span>
 <span>    assert np.isfinite(final_held) and torch.equal(saved,model.output.weight.detach())</span>
 <span> </span>
 <span>    # Exercise 6: Write an honest adaptation receipt</span>
-<span>    receipt={&#x27;updates&#x27;:20,&#x27;active_training_targets&#x27;:4,&#x27;initial_train&#x27;:initial_train,&#x27;final_train&#x27;:curve[-1],&#x27;initial_held&#x27;:initial_held,&#x27;final_held&#x27;:final_held,&#x27;scope&#x27;:&#x27;literal token task, not a pretrained subject assistant&#x27;}</span>
+<span>    receipt={&#x27;updates&#x27;:20,&#x27;active_training_targets&#x27;:4,&#x27;initial_train&#x27;:initial_train,&#x27;final_train&#x27;:final_train,&#x27;initial_held&#x27;:initial_held,&#x27;final_held&#x27;:final_held,&#x27;scope&#x27;:&#x27;literal token task, not a pretrained subject assistant&#x27;}</span>
 <span>    assert receipt[&#x27;updates&#x27;]==20 and receipt[&#x27;active_training_targets&#x27;]==4 and &#x27;not a pretrained&#x27; in receipt[&#x27;scope&#x27;]</span>
+<span>    with torch.no_grad(): np.testing.assert_allclose(receipt[&#x27;final_train&#x27;],objective(model,inputs,labels).item(),atol=1e-12,rtol=0)</span>
 <span>    return {&quot;checks&quot;: 6, &quot;status&quot;: &quot;passed&quot;}</span>
 <span> </span>
 <span> </span>

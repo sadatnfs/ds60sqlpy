@@ -116,7 +116,6 @@
       <p class="source-path">Generated from <code>courses/cpp/guides/cpp-032.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-032-bounded-parallel-work-and-failure-propagation">cpp-032: Bounded parallel work and failure propagation<a class="heading-anchor" href="#cpp-032-bounded-parallel-work-and-failure-propagation" aria-label="Link to this section">#</a></h2>
-<p>Authored beta content. Content completion and runtime qualification are separate evidence.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Advanced; 135 minutes. Direct prerequisites: <code>cpp-017</code>, <code>cpp-030</code>.</p>
 <p>Learner artifact: <a href="../lessons/cpp-032.cpp.html">cpp-032.cpp</a>. Keep <a href="../solutions/cpp-032_solutions.md.html">official solutions</a> closed until an attempt. The immutable <a href="../fixtures/cpp-032-cases.json.html">case ledger</a> records exercise inputs and expected observations.</p>
@@ -128,55 +127,97 @@
 <p>Keep the worker count separate from input length. A future stores either a result or an exception; get observes it. The small demonstration launches exactly two async tasks, so it does not implement a general queue or prove an arbitrary task list is bounded.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>The two-task future example makes a fixed worker bound visible and propagates failure through get. It is deliberately smaller than a production executor. A real executor also needs a queue capacity, an admission policy and a rule for accepted work when one task fails. The owner must observe each result or exception and account for pending/cancelled work before publishing a total. Discarded exceptions and partial aggregates are not successful parallel execution.</p>
+<h3 id="futures-launch-policy-and-bounded-work-ownership">Futures, launch policy and bounded work ownership<a class="heading-anchor" href="#futures-launch-policy-and-bounded-work-ownership" aria-label="Link to this section">#</a></h3>
+<p>A future represents a result that may become available later. It carries either a value or an exception from the asynchronous operation. Calling get waits as needed and retrieves that outcome. A valid future is normally consumed once by get; treating it as a reusable result object can produce a no-state error on a later call.</p>
+<p>The examples use std::launch::async explicitly so the operation is launched asynchronously rather than leaving a deferred policy choice to the implementation. That still does not define a production thread pool. Launching one async task per row in a very large input can create an unacceptable amount of concurrency or resource pressure. The lesson uses a fixed small number of tasks so the ownership and result flow are visible.</p>
+<p>The success program computes the square of 3 and observes9 through get. The failure program launches a task with -1, where checked_square throws invalid_argument. The exception is stored and rethrown when main calls get. A flag confirms that the specific error was observed. Ignoring the future or never retrieving its outcome can hide a failed task from the application report.</p>
+<p>When combining multiple tasks, define whether one failure aborts the whole result or whether partial results have a valid meaning. A total assembled from successful tasks alone can look plausible while silently omitting failures. Keep accepted, completed, failed and cancelled work accounting explicit. Cancellation of pending work also needs a mechanism; future by itself is not a general cancel operation.</p>
+<p>A real executor has at least worker count, queue capacity, submission policy, result ownership and shutdown behavior. Those are separate choices. The fixed-two-task example illustrates result propagation but does not implement every executor feature. The final capstone returns to bounded admission and conservation of work so that a failed parallel computation cannot publish an unexplained partial total.</p>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">auto f=std::async(std::launch::async,checked_square,3); assert(f.get()==9);</code></pre>
-<p><strong>Expected:</strong> The future yields 9 and waits for completion if necessary.</p>
+<p><a href="../examples/cpp-032-example-1.cpp.html">Complete program 1</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;future&gt;
+#include &lt;iostream&gt;
+#include &lt;stdexcept&gt;
+
+int checked_square(int x) {
+    if(x&lt;0)throw std::invalid_argument(&quot;negative task&quot;);
+    return x*x;
+}
+int main() {
+    auto f=std::async(std::launch::async,checked_square,3); assert(f.get()==9);
+    std::cout &lt;&lt; &quot;cpp-032 example 1 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-032 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">auto f=std::async(std::launch::async,checked_square,-1); // get rethrows</code></pre>
-<p><strong>Expected:</strong> The worker failure is observed by the caller through get.</p>
+<p><a href="../examples/cpp-032-example-2.cpp.html">Complete program 2</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;future&gt;
+#include &lt;iostream&gt;
+#include &lt;stdexcept&gt;
+
+int checked_square(int x) {
+    if(x&lt;0)throw std::invalid_argument(&quot;negative task&quot;);
+    return x*x;
+}
+int main() {
+    auto result=std::async(std::launch::async,checked_square,-1);
+    bool rejected=false;
+    try { (void)result.get(); }
+    catch(const std::invalid_argument&amp;) { rejected=true; }
+    assert(rejected);
+    std::cout &lt;&lt; &quot;cpp-032 example 2 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-032 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-set-a-budget">Exercise 1: Set a budget<a class="heading-anchor" href="#exercise-1-set-a-budget" aria-label="Link to this section">#</a></h4>
 <p>Define maximum workers 2 and queued tasks 4.</p>
 <p><strong>Expected result/shape:</strong> Both bounds documented independently.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Both bounds documented independently.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Limiting workers alone can still allow an unbounded queue.</p>
+<p><strong>Verify:</strong> Both bounds documented independently.</p>
+<p><strong>Progressive hints:</strong> Limiting workers alone can still allow an unbounded queue.</p>
 <h4 id="exercise-2-compare-serial-results">Exercise 2: Compare serial results<a class="heading-anchor" href="#exercise-2-compare-serial-results" aria-label="Link to this section">#</a></h4>
 <p>Square 3 and 4 serially and in two futures.</p>
 <p><strong>Expected result/shape:</strong> Exact total 25 in both paths.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Exact total 25 in both paths.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Parallelism must preserve the correctness contract.</p>
+<p><strong>Verify:</strong> Exact total 25 in both paths.</p>
+<p><strong>Progressive hints:</strong> Parallelism must preserve the correctness contract.</p>
 <h4 id="exercise-3-propagate-a-failure">Exercise 3: Propagate a failure<a class="heading-anchor" href="#exercise-3-propagate-a-failure" aria-label="Link to this section">#</a></h4>
 <p>Include task -1 and call get.</p>
 <p><strong>Expected result/shape:</strong> invalid_argument reaches the owner.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: invalid_argument reaches the owner.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: A future carries exceptions as well as values.</p>
+<p><strong>Verify:</strong> invalid_argument reaches the owner.</p>
+<p><strong>Progressive hints:</strong> A future carries exceptions as well as values.</p>
 <h4 id="exercise-4-repair-fire-and-forget">Exercise 4: Repair fire-and-forget<a class="heading-anchor" href="#exercise-4-repair-fire-and-forget" aria-label="Link to this section">#</a></h4>
 <p>Review discarded futures and missing result accounting.</p>
 <p><strong>Expected result/shape:</strong> Observe every result or exception and join owned work.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Observe every result or exception and join owned work.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Unhandled failure cannot be labeled successful completion.</p>
+<p><strong>Verify:</strong> Observe every result or exception and join owned work.</p>
+<p><strong>Progressive hints:</strong> Unhandled failure cannot be labeled successful completion.</p>
 <h4 id="exercise-5-test-empty-workload">Exercise 5: Test empty workload<a class="heading-anchor" href="#exercise-5-test-empty-workload" aria-label="Link to this section">#</a></h4>
 <p>Run no tasks through the serial/reference contract.</p>
 <p><strong>Expected result/shape:</strong> Empty results and total 0.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Empty results and total 0.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Do not create unnecessary workers for no input.</p>
+<p><strong>Verify:</strong> Empty results and total 0.</p>
+<p><strong>Progressive hints:</strong> Do not create unnecessary workers for no input.</p>
 <h4 id="exercise-6-transfer-backpressure">Exercise 6: Transfer backpressure<a class="heading-anchor" href="#exercise-6-transfer-backpressure" aria-label="Link to this section">#</a></h4>
 <p>Sketch a capacity-4 queue for ten tasks and two consumers.</p>
 <p><strong>Expected result/shape:</strong> At most 2 running plus 4 queued, remaining producer work blocked.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: At most 2 running plus 4 queued, remaining producer work blocked.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Admission and completion counts provide inspectable bounds.</p>
+<p><strong>Verify:</strong> At most 2 running plus 4 queued, remaining producer work blocked.</p>
+<p><strong>Progressive hints:</strong> Admission and completion counts provide inspectable bounds.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: The future yields 9 and waits for completion if necessary. Then explain the changed condition in example 2 without opening the answer.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
-<p>Keep the worker count separate from input length. A future stores either a result or an exception; get observes it. The small demonstration launches exactly two async tasks, so it does not implement a general queue or prove an arbitrary task list is bounded.</p>
-<p>If the result disagrees, preserve the original input and inspect the first differing value or condition. Unhandled failure cannot be labeled successful completion.</p>
+<p>If an asynchronous error never appears, inspect whether every accepted task has its future observed. If too many threads appear, check whether input size is directly controlling async launch count. If get is called twice, store the first returned value rather than reusing a consumed future. If a partial aggregate is printed after one task fails, repair the publication and accounting policy before discussing performance.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
 <p>Close the source. Reconstruct the reasoning for Exercise 6: Transfer backpressure. Explain which assumptions would fail on a larger input or another runtime.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue with <a href="cpp-033.md.html">cpp-033</a> after saving the six observations.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines">C++ Core Guidelines</a></p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach cpp-032.
 Read courses/cpp/guides/cpp-032.md and courses/cpp/lessons/cpp-032.cpp.

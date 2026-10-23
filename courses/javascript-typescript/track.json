@@ -13,13 +13,12 @@
       "runtime": "javascript-node",
       "concepts": [
         "ECMAScript",
-        "host",
-        "ES module",
-        "console"
+        "Host",
+        "ES module"
       ],
-      "outcome": "Explain and apply javascript, node and the browser with explicit assumptions and failure handling.",
-      "lab": "Work through ECMAScript examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "JavaScript is a language; Node and browsers are hosts that provide different APIs around it.",
+      "lab": "Check that the prepared runtime is Node 24 and that process exists.",
+      "verification": "major version 24; process.release.name is node. observed value 7 after await."
     },
     {
       "id": "js-002",
@@ -31,16 +30,14 @@
       ],
       "runtime": "javascript-node",
       "concepts": [
-        "number",
-        "string",
-        "boolean",
-        "null",
-        "undefined",
-        "strict equality"
+        "Coercion",
+        "Strict equality",
+        "Safe integer",
+        "BigInt"
       ],
-      "outcome": "Explain and apply values, coercion and precise comparisons with explicit assumptions and failure handling.",
-      "lab": "Work through number examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "JavaScript values have runtime types, and operators can perform implicit conversion.",
+      "lab": "Compare 2+3, 2+string 3, and Number(string 3)+2.",
+      "verification": "5, string 23, and 5. valid 12 accepted; invalid cases throw."
     },
     {
       "id": "js-003",
@@ -52,14 +49,14 @@
       ],
       "runtime": "javascript-node",
       "concepts": [
-        "truthiness",
-        "short circuit",
-        "loop",
-        "invariant"
+        "Truthiness",
+        "Short circuit",
+        "Loop invariant",
+        "Nullish fallback"
       ],
-      "outcome": "Explain and apply control flow and loop boundaries with explicit assumptions and failure handling.",
-      "lab": "Work through truthiness examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "Control flow decides which expressions execute and how many times.",
+      "lab": "Inspect Boolean conversions of 0, empty string, empty array and empty object.",
+      "verification": "false, false, true, true. extra undefined element exposes the off-by-one."
     },
     {
       "id": "js-004",
@@ -71,14 +68,14 @@
       ],
       "runtime": "javascript-node",
       "concepts": [
-        "function",
-        "lexical scope",
-        "closure",
-        "default parameter"
+        "Lexical scope",
+        "Closure",
+        "Default parameter",
+        "Receiver"
       ],
-      "outcome": "Explain and apply functions, scope and closures with explicit assumptions and failure handling.",
-      "lab": "Work through function examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "Functions define reusable computations, and lexical scope determines which bindings a function can read.",
+      "lab": "Use add with 2, 3 and with negative 1, 1.",
+      "verification": "5 and 0. TypeError for 0 and 1.5; step 2 yields 2, 4."
     },
     {
       "id": "js-005",
@@ -90,15 +87,14 @@
       ],
       "runtime": "javascript-node",
       "concepts": [
-        "map",
-        "filter",
-        "reduce",
-        "sort",
-        "mutation"
+        "Transformation",
+        "Reduction",
+        "Shallow copy",
+        "Mutation"
       ],
-      "outcome": "Explain and apply arrays and immutable transformations with explicit assumptions and failure handling.",
-      "lab": "Work through map examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "Array operations differ in whether they mutate the container, return a new container or reuse referenced objects.",
+      "lab": "Double 1, 2, 3, 4 and keep results above 4.",
+      "verification": "6, 8; original array unchanged. edited record changes; original record stays 1."
     },
     {
       "id": "js-006",
@@ -110,14 +106,14 @@
       ],
       "runtime": "javascript-node",
       "concepts": [
-        "own property",
-        "prototype",
-        "destructuring",
-        "spread"
+        "Own property",
+        "Prototype chain",
+        "Destructuring",
+        "Shallow freeze"
       ],
-      "outcome": "Explain and apply objects, properties and prototypes with explicit assumptions and failure handling.",
-      "lab": "Work through own property examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "Objects associate property keys with values and can inherit properties through a prototype chain.",
+      "lab": "Create a child inheriting kind and owning name.",
+      "verification": "kind found by in but not hasOwn; name is own. values 1 then 2; getter executed twice."
     },
     {
       "id": "js-007",
@@ -129,14 +125,14 @@
       ],
       "runtime": "javascript-node",
       "concepts": [
-        "Map",
-        "Set",
-        "reference identity",
-        "lookup"
+        "Reference identity",
+        "SameValueZero",
+        "Multiplicity",
+        "Membership"
       ],
-      "outcome": "Explain and apply maps, sets and collection identity with explicit assumptions and failure handling.",
-      "lab": "Work through Map examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "Map and Set provide collection contracts different from plain object records.",
+      "lab": "Create two {id: 1} objects and use them as Map keys.",
+      "verification": "size 2 and separate values. b, a, c."
     },
     {
       "id": "js-008",
@@ -148,14 +144,14 @@
       ],
       "runtime": "javascript-node",
       "concepts": [
-        "code point",
-        "UTF-16",
-        "RegExp",
-        "escaping"
+        "UTF-16 code unit",
+        "Code point",
+        "Normalization",
+        "Pattern escaping"
       ],
-      "outcome": "Explain and apply strings, unicode and regular expressions with explicit assumptions and failure handling.",
-      "lab": "Work through code point examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "JavaScript strings are sequences of UTF-16 code units.",
+      "lab": "Inspect A followed by one emoji.",
+      "verification": "length 3; spread count 2. item_1 accepted; oversized input rejected."
     },
     {
       "id": "js-009",
@@ -167,14 +163,14 @@
       ],
       "runtime": "javascript-node",
       "concepts": [
-        "Error",
-        "throw",
-        "try catch",
-        "validation boundary"
+        "Validation boundary",
+        "Error cause",
+        "Domain invariant",
+        "Failure category"
       ],
-      "outcome": "Explain and apply errors and explicit validation with explicit assumptions and failure handling.",
-      "lab": "Work through Error examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "Errors should distinguish an invalid request from an expected missing result and an operational failure.",
+      "lab": "Validate id A, quantity 2, price 125 and calculate integer cents.",
+      "verification": "total 250; fresh accepted object. input unchanged."
     },
     {
       "id": "js-010",
@@ -186,15 +182,14 @@
       ],
       "runtime": "javascript-node",
       "concepts": [
-        "import",
-        "export",
-        "ESM",
-        "CommonJS",
-        "package"
+        "Live binding",
+        "Module namespace",
+        "Resolution",
+        "Module cache"
       ],
-      "outcome": "Explain and apply modules and dependency boundaries with explicit assumptions and failure handling.",
-      "lab": "Work through import examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "A module is both a namespace and a dependency boundary.",
+      "lab": "Import a mutable counter and its increment function, then inspect the count before and after incrementing.",
+      "verification": "count changes from 0 to 1 through the imported namespace. TypeError; exported value remains 3."
     },
     {
       "id": "js-011",
@@ -206,14 +201,14 @@
       ],
       "runtime": "javascript-node",
       "concepts": [
-        "Symbol.iterator",
-        "generator",
-        "lazy sequence",
-        "cleanup"
+        "Iterable",
+        "Iterator",
+        "Suspension",
+        "Iterator closing"
       ],
-      "outcome": "Explain and apply iterators and generators with explicit assumptions and failure handling.",
-      "lab": "Work through Symbol.iterator examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "An iterable describes how to obtain an iterator.",
+      "lab": "Create a generator, inspect its trace, then request one value.",
+      "verification": "trace is empty before next; then started, with value 2. empty array for 0; RangeError for -1 and 1.5."
     },
     {
       "id": "js-012",
@@ -225,14 +220,14 @@
       ],
       "runtime": "javascript-node",
       "concepts": [
-        "Promise",
-        "microtask",
-        "task",
-        "unhandled rejection"
+        "Settlement",
+        "Reaction",
+        "Microtask",
+        "Promise composition"
       ],
-      "outcome": "Explain and apply promises and the event loop with explicit assumptions and failure handling.",
-      "lab": "Work through Promise examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "A Promise records one eventual settlement: fulfillment with a value or rejection with a reason.",
+      "lab": "Record executor, synchronous continuation and then reaction.",
+      "verification": "executor, sync, reaction. sync,promise,microtask,timer."
     },
     {
       "id": "js-013",
@@ -244,14 +239,14 @@
       ],
       "runtime": "javascript-node",
       "concepts": [
-        "async",
-        "await",
-        "AbortController",
-        "timeout"
+        "Cooperative cancellation",
+        "Abort signal",
+        "Deadline",
+        "Cleanup ownership"
       ],
-      "outcome": "Explain and apply async functions and cancellation with explicit assumptions and failure handling.",
-      "lab": "Work through async examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "Cancellation is a request communicated to cooperating code.",
+      "lab": "Start a timer with a signal, abort it, and inspect the rejection.",
+      "verification": "AbortError with the original reason as cause. combined signal is aborted with deadline reason."
     },
     {
       "id": "js-014",
@@ -263,14 +258,14 @@
       ],
       "runtime": "javascript-node",
       "concepts": [
-        "binary search",
-        "hash index",
-        "heap",
-        "complexity"
+        "Complexity",
+        "Search invariant",
+        "Index",
+        "Heap invariant"
       ],
-      "outcome": "Explain and apply collections, search and algorithmic complexity with explicit assumptions and failure handling.",
-      "lab": "Work through binary search examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "An algorithm is a rule for transforming an input into a result; complexity describes how its required work grows with input size.",
+      "lab": "Find the first insertion position for 4 in 1,4,4,8 and inspect the visited intervals.",
+      "verification": "index 1; intervals shrink to the first duplicate. all invariants hold; invalid value throws."
     },
     {
       "id": "js-015",
@@ -282,15 +277,14 @@
       ],
       "runtime": "javascript-node",
       "concepts": [
-        "node:test",
-        "assert",
-        "fixture",
-        "table driven",
-        "negative test"
+        "Test oracle",
+        "Negative test",
+        "Regression",
+        "Async test lifetime"
       ],
-      "outcome": "Explain and apply testing with node built-ins with explicit assumptions and failure handling.",
-      "lab": "Work through node:test examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "Tests make a behavioral claim executable.",
+      "lab": "Start a real node --test process asserting add(2,3)=5.",
+      "verification": "child exit status 0; one passing test. two tests pass without shared mutable state."
     },
     {
       "id": "js-016",
@@ -302,14 +296,14 @@
       ],
       "runtime": "javascript-node",
       "concepts": [
-        "fs promises",
-        "Path",
-        "encoding",
-        "resource cleanup"
+        "Encoding",
+        "Chunk boundary",
+        "Exclusive creation",
+        "Resource lifetime"
       ],
-      "outcome": "Explain and apply files, paths and streaming text with explicit assumptions and failure handling.",
-      "lab": "Work through fs promises examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "A filesystem path names a resource in a host filesystem.",
+      "lab": "Write one line containing an emoji, then compare text length and byte length.",
+      "verification": "text round-trips; UTF-8 byte length exceeds code-unit length. no lines."
     },
     {
       "id": "js-017",
@@ -321,15 +315,14 @@
       ],
       "runtime": "javascript-node",
       "concepts": [
-        "fetch",
-        "URL",
-        "status",
-        "JSON",
-        "validation"
+        "HTTP status",
+        "Representation",
+        "Query encoding",
+        "Application validation"
       ],
-      "outcome": "Explain and apply http, urls and json boundaries with explicit assumptions and failure handling.",
-      "lab": "Work through fetch examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "HTTP transfers representations between a client and a server using a method, target, headers, status and body.",
+      "lab": "GET /sum with a=2 and b=3 and inspect status, content type and JSON.",
+      "verification": "status 200; application/json; total 5. status 400 rather than a rounded success value."
     },
     {
       "id": "js-018",
@@ -341,14 +334,14 @@
       ],
       "runtime": "javascript-node",
       "concepts": [
-        "arguments",
-        "exit code",
-        "error contract",
-        "composition"
+        "CLI contract",
+        "NDJSON",
+        "Failure atomicity",
+        "Process boundary"
       ],
-      "outcome": "Explain and apply a reliable command-line data tool with explicit assumptions and failure handling.",
-      "lab": "Work through arguments examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "A reliable command-line program has an input contract, an output contract and a failure contract.",
+      "lab": "Send two rows worth 250 and 300 cents to the CLI.",
+      "verification": "exit 0; stdout is exactly one JSON result with 2 rows and 550 cents; stderr empty. exit 2 with input limit diagnostic; stdout empty."
     },
     {
       "id": "js-019",
@@ -360,14 +353,14 @@
       ],
       "runtime": "typescript-node",
       "concepts": [
-        "annotation",
-        "inference",
-        "erasure",
-        "strict mode"
+        "Static type",
+        "Inference",
+        "Erasure",
+        "Unknown boundary"
       ],
-      "outcome": "Explain and apply typescript values and compile-time types with explicit assumptions and failure handling.",
-      "lab": "Work through annotation examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "TypeScript adds a static checker to JavaScript.",
+      "lab": "Define a function accepting two numbers and returning their sum; inspect its runtime value.",
+      "verification": "sum 5 with runtime typeof number. 12 doubles to 24; string 12 and Infinity reject."
     },
     {
       "id": "js-020",
@@ -379,14 +372,14 @@
       ],
       "runtime": "typescript-node",
       "concepts": [
-        "union",
-        "type guard",
-        "never",
-        "discriminant"
+        "Union",
+        "Narrowing",
+        "Discriminant",
+        "Exhaustiveness"
       ],
-      "outcome": "Explain and apply unions, narrowing and exhaustiveness with explicit assumptions and failure handling.",
-      "lab": "Work through union examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "A union type describes a value that may belong to one of several alternatives.",
+      "lab": "Format both successful value 7 and a failure message.",
+      "verification": "value:7 and error:offline. runtime fallback throws rather than fabricating success."
     },
     {
       "id": "js-021",
@@ -398,14 +391,14 @@
       ],
       "runtime": "typescript-node",
       "concepts": [
-        "interface",
-        "type alias",
-        "readonly",
-        "optional"
+        "Structural compatibility",
+        "Excess-property checking",
+        "Readonly view",
+        "Optional property"
       ],
-      "outcome": "Explain and apply object types and structural contracts with explicit assumptions and failure handling.",
-      "lab": "Work through interface examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "TypeScript object types describe the properties an operation requires.",
+      "lab": "Pass a wider named object with id and count to a function requiring only id.",
+      "verification": "label A; original count remains 2. new array 2,4; input remains 1,2."
     },
     {
       "id": "js-022",
@@ -417,14 +410,14 @@
       ],
       "runtime": "typescript-node",
       "concepts": [
-        "type parameter",
-        "keyof",
-        "constraint",
-        "inference"
+        "Type parameter",
+        "Constraint",
+        "Keyof",
+        "Indexed access type"
       ],
-      "outcome": "Explain and apply generic functions and constraints with explicit assumptions and failure handling.",
-      "lab": "Work through type parameter examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "Generics express a relationship between types across a reusable operation.",
+      "lab": "Pass a number and an object through identity.",
+      "verification": "number remains 7; object is the same reference. expected compile error for returning a fabricated length-only object."
     },
     {
       "id": "js-023",
@@ -436,14 +429,14 @@
       ],
       "runtime": "typescript-node",
       "concepts": [
-        "mapped type",
-        "conditional type",
-        "Pick",
-        "ReturnType"
+        "Mapped type",
+        "Conditional type",
+        "Distributivity",
+        "Type derivation"
       ],
-      "outcome": "Explain and apply mapped, conditional and utility types with explicit assumptions and failure handling.",
-      "lab": "Work through mapped type examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "Type operators can derive one static description from another, reducing duplicated declarations that drift apart.",
+      "lab": "Create a boolean flag type from id and count fields.",
+      "verification": "id true and count false; a missing flag is a compile error. valid table remains usable; misspelled literal key is a compiler error."
     },
     {
       "id": "js-024",
@@ -455,14 +448,14 @@
       ],
       "runtime": "typescript-node",
       "concepts": [
-        "unknown",
-        "validation",
-        "assertion",
-        "trust boundary"
+        "Unknown input",
+        "Schema validation",
+        "Domain validation",
+        "Diagnostic path"
       ],
-      "outcome": "Explain and apply runtime validation and unknown input with explicit assumptions and failure handling.",
-      "lab": "Work through unknown examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "An external payload should enter typed code as unknown.",
+      "lab": "Parse an order with two line items and inspect the typed success.",
+      "verification": "success with total quantity 5; independent copied item records. every malformed fixture is rejected; an empty items array remains valid."
     },
     {
       "id": "js-025",
@@ -474,14 +467,14 @@
       ],
       "runtime": "typescript-node",
       "concepts": [
-        "mts",
-        "mjs",
         "NodeNext",
-        "type only import"
+        "Type-only import",
+        "Emitted extension",
+        "NoEmitOnError"
       ],
-      "outcome": "Explain and apply typed modules and nodenext resolution with explicit assumptions and failure handling.",
-      "lab": "Work through mts examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "TypeScript source participates in two related dependency graphs: the compiler resolves source and declarations while checking, and Node resolves emitted JavaScript while running.",
+      "lab": "Compile a main module importing twice from ./math.mjs and run it.",
+      "verification": "both processes succeed; output 8; math.mjs is emitted. value dependency remains; runtime prints ready:A."
     },
     {
       "id": "js-026",
@@ -493,14 +486,14 @@
       ],
       "runtime": "typescript-node",
       "concepts": [
-        "class",
-        "private field",
-        "interface",
-        "composition"
+        "Encapsulation",
+        "Private field",
+        "Composition",
+        "Interface"
       ],
-      "outcome": "Explain and apply classes, composition and private state with explicit assumptions and failure handling.",
-      "lab": "Work through class examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "Classes combine state with operations that preserve invariants.",
+      "lab": "Start with 100 cents, deposit 50 and withdraw 30.",
+      "verification": "balance 120; no enumerable balance field. ordinary property 999; private cents remain 2."
     },
     {
       "id": "js-027",
@@ -512,14 +505,14 @@
       ],
       "runtime": "typescript-node",
       "concepts": [
-        "Result",
-        "Promise",
-        "cancellation",
-        "discriminated errors"
+        "Result channel",
+        "Rejection channel",
+        "Error translation",
+        "Batch outcome policy"
       ],
-      "outcome": "Explain and apply typed async workflows and errors with explicit assumptions and failure handling.",
-      "lab": "Work through Result examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "Promise<T> describes a fulfilled value.",
+      "lab": "Look up a known id and an absent id.",
+      "verification": "known value 7; absent error not_found. expected diagnostics for value before await or before narrowing."
     },
     {
       "id": "js-028",
@@ -531,14 +524,14 @@
       ],
       "runtime": "typescript-node",
       "concepts": [
-        "graph",
-        "BFS",
-        "memoization",
-        "state transition"
+        "Breadth-first search",
+        "Parent map",
+        "Dynamic programming",
+        "Recurrence"
       ],
-      "outcome": "Explain and apply data structures and dynamic programming with explicit assumptions and failure handling.",
-      "lab": "Work through graph examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "Types clarify an algorithm's interface, but correctness depends on its invariant.",
+      "lab": "Search a graph with two equal-length routes from A to D.",
+      "verification": "A,B,D under the stated neighbor order. RangeError for all invalid configurations; empty denominations cannot make 1."
     },
     {
       "id": "js-029",
@@ -550,14 +543,14 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "document",
-        "event delegation",
-        "focus",
-        "accessibility"
+        "DOM node",
+        "Event target",
+        "Delegation",
+        "Focus"
       ],
-      "outcome": "Explain and apply the dom, events and accessible interaction with explicit assumptions and failure handling.",
-      "lab": "Work through document examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "The Document Object Model is a live tree of nodes exposed by the browser.",
+      "lab": "Open the complete snippet, activate Add twice by pointer and once by keyboard, then inspect the count.",
+      "verification": "count 3; button remains keyboard reachable. null is detected before accessing a property."
     },
     {
       "id": "js-030",
@@ -569,14 +562,14 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "form",
-        "validation",
-        "localStorage",
-        "state transition"
+        "Form submission",
+        "Application state",
+        "Persistence",
+        "Origin"
       ],
-      "outcome": "Explain and apply forms, browser storage and application state with explicit assumptions and failure handling.",
-      "lab": "Work through form examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "A form is a structured input interface, not merely a collection of text boxes.",
+      "lab": "Save the snippet as HTML and submit name Ada and quantity 2, then try an invalid quantity.",
+      "verification": "valid output Ada: 2; invalid input produces no accepted state. owned key absent; unrelated key unchanged."
     },
     {
       "id": "js-031",
@@ -588,14 +581,14 @@
       ],
       "runtime": "reading",
       "concepts": [
-        "textContent",
-        "innerHTML",
-        "CSP",
-        "same origin"
+        "Injection boundary",
+        "Safe text insertion",
+        "URL policy",
+        "Content Security Policy"
       ],
-      "outcome": "Explain and apply safe browser rendering and security boundaries with explicit assumptions and failure handling.",
-      "lab": "Work through textContent examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "Rendering untrusted text is a data-versus-code boundary.",
+      "lab": "Save the snippet and inspect the resulting DOM and visible title.",
+      "verification": "the angle-bracket text is visible; no img element is created. no claim that CSP authenticates callers, CORS authorizes actions, or meta implements frame-ancestors."
     },
     {
       "id": "js-032",
@@ -607,14 +600,14 @@
       ],
       "runtime": "javascript-node",
       "concepts": [
-        "Readable",
-        "Writable",
-        "pipeline",
-        "highWaterMark"
+        "Backpressure",
+        "High-water mark",
+        "Pipeline",
+        "Partial output"
       ],
-      "outcome": "Explain and apply streams and backpressure with explicit assumptions and failure handling.",
-      "lab": "Work through Readable examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "A stream transports chunks incrementally between a producer and a consumer.",
+      "lab": "Uppercase two byte chunks and collect the transformed output.",
+      "verification": "ABCD after successful pipeline completion. pipeline rejects with AbortError; generator finally runs."
     },
     {
       "id": "js-033",
@@ -626,14 +619,14 @@
       ],
       "runtime": "javascript-node",
       "concepts": [
-        "Worker",
-        "message passing",
-        "transfer",
-        "termination"
+        "Worker thread",
+        "Structured clone",
+        "Transfer",
+        "Worker lifecycle"
       ],
-      "outcome": "Explain and apply worker threads and cpu-bound work with explicit assumptions and failure handling.",
-      "lab": "Work through Worker examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "An async function does not automatically move CPU work off the main JavaScript thread.",
+      "lab": "Sum integers 1 through 10000 in a worker and inspect its thread id.",
+      "verification": "sum 50005000; worker thread id positive. DataCloneError before useful worker execution."
     },
     {
       "id": "js-034",
@@ -645,14 +638,14 @@
       ],
       "runtime": "javascript-node",
       "concepts": [
-        "retained object",
-        "heap",
-        "event loop delay",
-        "measurement"
+        "Measurement boundary",
+        "Monotonic clock",
+        "Retention",
+        "Event-loop delay"
       ],
-      "outcome": "Explain and apply memory, performance and profiling with explicit assumptions and failure handling.",
-      "lab": "Work through retained object examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "Performance measurement begins with a correctness contract and a question.",
+      "lab": "Sum a fixed numeric range and record elapsed duration.",
+      "verification": "correct sum 50005000; finite nonnegative elapsed time. monitor disabled afterward; sample count reported honestly."
     },
     {
       "id": "js-035",
@@ -664,14 +657,14 @@
       ],
       "runtime": "javascript-node",
       "concepts": [
-        "Intl",
-        "Date",
-        "time zone",
-        "locale"
+        "Instant",
+        "Calendar date",
+        "Timezone",
+        "Locale formatting"
       ],
-      "outcome": "Explain and apply dates, internationalization and time zones with explicit assumptions and failure handling.",
-      "lab": "Work through Intl examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "A date-time problem can involve an instant, a calendar date, a local clock reading or a duration.",
+      "lab": "Parse UTC midnight and the equivalent previous-day offset representation.",
+      "verification": "equal timestamps and UTC ISO output. NaN timestamp; toISOString and invalid timezone construction throw RangeError."
     },
     {
       "id": "js-036",
@@ -683,14 +676,14 @@
       ],
       "runtime": "javascript-node",
       "concepts": [
-        "exports",
-        "semver",
-        "lockfile",
-        "supply chain"
+        "Exports map",
+        "Dependency lock",
+        "Engine declaration",
+        "Content identity"
       ],
-      "outcome": "Explain and apply package design and reproducible toolchains with explicit assumptions and failure handling.",
-      "lab": "Work through exports examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "A package is a public interface plus the files and metadata needed to implement it.",
+      "lab": "Create a package with exports pointing at index.mjs and import its version value.",
+      "verification": "actual child prints 1. child exits successfully for twice(0)=0 and twice(-2)=-4."
     },
     {
       "id": "js-037",
@@ -702,14 +695,14 @@
       ],
       "runtime": "javascript-node",
       "concepts": [
-        "retry budget",
-        "jitter",
-        "idempotency",
-        "queue"
+        "Retry classification",
+        "Backoff with jitter",
+        "Idempotency key",
+        "Bounded concurrency"
       ],
-      "outcome": "Explain and apply network retries, idempotency and bounded concurrency with explicit assumptions and failure handling.",
-      "lab": "Work through retry budget examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "A retry is a new attempt after an uncertain or failed operation.",
+      "lab": "Fail twice transiently, then succeed, using random value 0.5 and a recording wait.",
+      "verification": "three attempts; delays 50 and 100; result ready. original reason rejects; attempts remain 0."
     },
     {
       "id": "js-038",
@@ -721,14 +714,14 @@
       ],
       "runtime": "typescript-node",
       "concepts": [
-        "schema",
-        "endpoint",
-        "error envelope",
-        "contract"
+        "Envelope",
+        "Contract test",
+        "Versioned schema",
+        "Transport/domain agreement"
       ],
-      "outcome": "Explain and apply typed api design and contract testing with explicit assumptions and failure handling.",
-      "lab": "Work through schema examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "A typed API contract connects request validation, domain behavior, transport status and response decoding.",
+      "lab": "Send 2 and 3 through the handler, JSON round-trip its reply, then decode it.",
+      "verification": "status 200 and decoded total 5. bad_request response does not echo the supplied value."
     },
     {
       "id": "js-039",
@@ -740,14 +733,14 @@
       ],
       "runtime": "typescript-node",
       "concepts": [
-        "pure function",
-        "effect",
-        "transition",
-        "invariant"
+        "State machine",
+        "Event",
+        "Functional core",
+        "Replay"
       ],
-      "outcome": "Explain and apply functional core and state machines with explicit assumptions and failure handling.",
-      "lab": "Work through pure function examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "A state machine makes allowed transitions explicit.",
+      "lab": "Start a queued job and complete it with value 7.",
+      "verification": "succeeded with attempt 1 and value 7. input unchanged; new object returned; NaN rejects."
     },
     {
       "id": "js-040",
@@ -759,14 +752,14 @@
       ],
       "runtime": "javascript-node",
       "concepts": [
-        "HTTP",
-        "validation",
-        "shutdown",
-        "integration test"
+        "Transport integration",
+        "Repository lifetime",
+        "Conflict",
+        "Structured event"
       ],
-      "outcome": "Explain and apply a tested local javascript service with explicit assumptions and failure handling.",
-      "lab": "Work through HTTP examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "A local service combines transport handling with domain state and resource ownership.",
+      "lab": "POST item A with value 2, then GET the list.",
+      "verification": "201 created; subsequent 200 list contains exactly A. matching id and status; server no longer listening."
     },
     {
       "id": "js-041",
@@ -778,15 +771,14 @@
       ],
       "runtime": "typescript-node",
       "concepts": [
-        "parse",
-        "transform",
-        "aggregate",
-        "stream",
-        "diagnostics"
+        "Framing",
+        "Quarantine",
+        "Aggregation state",
+        "Resource budget"
       ],
-      "outcome": "Explain and apply a typed analytics pipeline with explicit assumptions and failure handling.",
-      "lab": "Work through parse examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "An analytics pipeline combines framing, parsing, validation and aggregation.",
+      "lab": "Decode rows for groups A and B from three-byte chunks and aggregate their values.",
+      "verification": "A count 2 sum 5; B count 1 sum 4; zero rejected. zero accepted with one rejected versus zero accepted with zero rejected."
     },
     {
       "id": "js-042",
@@ -798,15 +790,14 @@
       ],
       "runtime": "javascript-node",
       "concepts": [
-        "build",
-        "source map",
-        "logging",
-        "compatibility",
-        "operability"
+        "Release artifact",
+        "Smoke test",
+        "Artifact verification",
+        "Compatibility gate"
       ],
-      "outcome": "Explain and apply release, observability and maintenance with explicit assumptions and failure handling.",
-      "lab": "Work through build examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "A release is a specific artifact with a reproducible behavior contract, not merely a folder that once worked during development.",
+      "lab": "Create the authored bundle, verify hashes and run its self-test in a child.",
+      "verification": "three checks passed; actual Node version reported. matching policy passes; mismatched policy throws."
     }
   ],
   "sources": [

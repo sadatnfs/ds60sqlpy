@@ -20,6 +20,33 @@ For a data-science assistant, a current metric definition belongs in versioned r
 
 Represent a task as named fields rather than one free-form paragraph. A route decision should expose its reason and required evidence. Check exact-computation needs before choosing a text-generation strategy. Check freshness and citation needs before considering weight updates. Fine-tuning requires a stable behavioral target, sufficient governed examples and a held-out evaluation. A missing prerequisite produces a “measure baseline first” decision, not an automatic training job.
 
+## Trace a subject-assistant request through its evidence requirements
+
+Consider: “What is our current account conversion rate, and did the new checkout cause it to improve?” This contains several distinct claims. The word current requires the correct effective definition and data period. Account requires a denominator and grouping unit. Conversion rate requires validated counts and arithmetic. Cause requires treatment assignment or defensible identification assumptions. One well-formed generated sentence cannot establish all four.
+
+| Subtask | Required input | Inspectable output | Failure that belongs here |
+| --- | --- | --- | --- |
+| Find the definition | Authorized, effective source version | Source ID and supported formula | Wrong version or missing source |
+| Extract fields | Source text or structured observations | Typed fields with provenance | Unsupported count or wrong unit |
+| Calculate | Accepted inputs and declared formula | Reproducible numeric artifact | Wrong denominator or arithmetic |
+| Interpret | Population and study design | Bounded claim with assumptions | Unsupported causal conclusion |
+
+A trained model can participate in the first two interfaces or explain the last two, but its fluency does not replace their evidence. The routing helper returns one primary route, while the composed architecture may contain several stages. In particular, exact_computation takes precedence in the helper. That priority is a teaching decision about one requested operation; it does not mean a numerical tool can discover an unknown business definition on its own.
+
+A simple probability decomposition explains why adding components is not automatically an improvement. Let R mean sufficient admissible evidence reached the answer stage, A mean the answer is correct and supported given that evidence, and V mean the result meets the required validation contract. The success probability for this complete path is P(R) times P(A given R) times P(V given A and R). These conditional factors do not require an independence assumption. In an illustrative calculation, 0.9 times0.8 times0.95 is0.684. Those values are invented for arithmetic explanation, not measured model performance. Improving the last factor alone cannot recover all failures from missing evidence.
+
+Use controlled comparisons to choose an intervention. A prompt baseline can reveal whether the task is already expressible without training. An oracle-context control can show whether answer behavior improves when relevant evidence is supplied directly. A retrieval intervention holds the answering configuration fixed while changing evidence selection. An adaptation comparison holds evaluation families and access conditions fixed while changing learned behavior. If all of those change together, an improved score does not identify the useful component.
+
+Retrieval changes the inference evidence available to a model; adaptation changes the model's parameterized behavior. The original RAG work combined parametric generation with explicit retrieved memory, but this course's first route selector performs neither learned retrieval nor generation. Its role is to make decisions and prerequisites inspectable. [Retrieval-Augmented Generation](https://arxiv.org/abs/2005.11401).
+
+### Interview reasoning with explanatory answers
+
+**Why not fine-tune current policy documents directly into the model?** Updates, source attribution and per-request access remain separate problems. A memorized fact does not expose which version supports it or whether the current principal may see it. Adaptation may still improve a stable response behavior, while retrieved evidence supplies current facts.
+
+**When is a deterministic tool the right answer?** When the task requires an exact operation over validated inputs and a declared formula. The tool's correctness does not establish that the extracted inputs or chosen denominator were appropriate; retain those upstream contracts too.
+
+**What makes an adaptation experiment informative?** A measured behavior gap, governed examples, a frozen comparison policy, independent evaluation families and real outputs from both candidates. A training loss by itself measures fit to training targets, not domain-assistant utility.
+
 ## Exercise 1: Route a changing definition
 
 The question is: Describe a request for the current conversion-rate definition requiring a citation.
@@ -54,7 +81,7 @@ assert choose(task)==('deterministic_tool','exact computation')
 
 The question is: Describe a stable schema-formatting gap with zero governed examples, then with 120 reviewed examples.
 
-The threshold120 is a teaching admission rule, not a universal sample-size recommendation. A real decision needs learning curves, label quality and held-out task evidence.
+The example count 120 exceeds the helper's teaching admission threshold100; neither number is a universal sample-size recommendation. A real decision needs learning curves, label quality and held-out task evidence.
 
 ```python
 task={'exact_computation':False,'fresh_evidence':False,'citation_required':False,'stable_behavior_gap':True,'governed_examples':0}

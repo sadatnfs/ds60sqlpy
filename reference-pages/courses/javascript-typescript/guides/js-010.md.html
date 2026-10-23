@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>js-010: Modules and dependency boundaries · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>js-010: Modules and dependency boundaries</h1>
+      <p class="source-path">Generated from <code>courses/javascript-typescript/guides/js-010.md</code></p>
+    </header>
+    <article class="document"><h2 id="js-010-modules-and-dependency-boundaries">js-010: Modules and dependency boundaries<a class="heading-anchor" href="#js-010-modules-and-dependency-boundaries" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Beginner, approximately 90 minutes. Direct prerequisites: <code>js-009</code></p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Explain live binding, module namespace, resolution, module cache with a concrete program. Trace how the values change, identify the assumptions, and make a boundary or invalid case observable. The first investigation is: Import a mutable counter and its increment function, then inspect the count before and after incrementing. The final task tests respect namespace ownership.</p>
+<h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
+<p>A module is both a namespace and a dependency boundary. An ES module declares imports and exports before its body executes. The loader resolves dependencies, links the bindings, then evaluates the graph. An imported binding observes the exporting module&#x27;s current binding; it is not a copied snapshot. Importing the same resolved module URL again normally returns the cached module namespace and does not repeat its initialization.</p>
+<p>Node uses .mjs to select ES module syntax explicitly. Relative imports require the intended filename extension. Bare package names use package resolution rules; node: names identify built-in modules. CommonJS uses a different export object and loading model. Interoperability is useful, but guessing that an arbitrary CommonJS property will become a named ES export is fragile. This lesson imports a CommonJS default export deliberately and keeps ESM bindings explicit.</p>
+<p>The fixtures create tiny source files in a newly allocated temporary directory, import them, and remove only that directory afterward. They do not install a package or edit the repository. Unique directory URLs avoid accidental cache sharing between exercises. A production module should usually avoid expensive side effects at import time: top-level file writes, network requests or background listeners make dependency loading itself operational work.</p>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<p><strong>Live binding:</strong> An imported name observes updates made to the exporting binding.</p>
+<p><strong>Module namespace:</strong> The read-only view of a module&#x27;s exported bindings.</p>
+<p><strong>Resolution:</strong> Mapping a module specifier to the module that will be loaded.</p>
+<p><strong>Module cache:</strong> Reuse of an already loaded module for its resolved identity.</p>
+<h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
+<p>Use the prepared Node 24.22.1 profile. The classroom saves an ES module as main.mjs and executes it with Node. Only built-in Node or ECMAScript APIs are used. For a prepared native environment, node main.mjs is the same command on PowerShell and POSIX. Browser APIs have separate host requirements.</p>
+<p>Save your own learner copy under ignored <code>.learning/expansion/js-010/</code> or use a saved classroom pad. Record predictions before execution. Each worked program includes its helper definitions. The reference puts the six exercises in separate scopes, so a task cannot silently rely on a variable from a previous task. A successful assertion is silent; the final JSON receipt reports how many exercise blocks completed. A failing assertion must produce a failed process, not a generic success message.</p>
+<h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
+<p>An export declaration exposes a binding. import() returns a Promise for the module namespace, so asynchronous loading must be awaited. pathToFileURL converts a platform filesystem path to a correctly encoded file URL; concatenating file: with a raw path fails for spaces and reserved characters. A namespace property cannot be reassigned by the importer, although exported functions may update their own module state. finally runs cleanup after success and after an import rejection.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="example-a-observe-a-live-binding">Example A: Observe a live binding<a class="heading-anchor" href="#example-a-observe-a-live-binding" aria-label="Link to this section">#</a></h4>
+<p>The importer receives a binding view. Copying count into a local number would instead preserve the value read at that moment. The distinction becomes visible only after the exporter changes state.</p>
+<pre><code class="language-javascript">import { strict as assert } from &#x27;node:assert&#x27;;
+import { mkdtemp, writeFile, rm } from &#x27;node:fs/promises&#x27;;
+import { tmpdir } from &#x27;node:os&#x27;;
+import { join } from &#x27;node:path&#x27;;
+import { pathToFileURL } from &#x27;node:url&#x27;;
+
+async function withModules(files, use) {
+  const directory = await mkdtemp(join(tmpdir(), &#x27;course-modules-&#x27;));
+  try {
+    for (const [name, source] of Object.entries(files)) await writeFile(join(directory, name), source, &#x27;utf8&#x27;);
+    return await use(directory);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+}
+
+export async function verify() {
+  // Worked example
+  {
+    await withModules({ &#x27;counter.mjs&#x27;: &#x27;export let count = 0; export function increment() { count += 1; }&#x27; }, async directory =&gt; {
+      const module = await import(pathToFileURL(join(directory, &#x27;counter.mjs&#x27;)).href);
+      assert.equal(module.count, 0);
+      module.increment();
+      assert.equal(module.count, 1);
+    });
+  }
+
+  return { checks: 1, status: &quot;passed&quot; };
+}
+
+console.log(JSON.stringify(await verify()));
+</code></pre>
+<p><strong>Expected:</strong> count changes from 0 to 1 through the imported namespace.</p>
+<h4 id="example-b-resolve-a-relative-dependency">Example B: Resolve a relative dependency<a class="heading-anchor" href="#example-b-resolve-a-relative-dependency" aria-label="Link to this section">#</a></h4>
+<p>The relative path is resolved from the importing file, not from the process working directory. Naming the .mjs extension makes the loader contract explicit.</p>
+<pre><code class="language-javascript">import { strict as assert } from &#x27;node:assert&#x27;;
+import { mkdtemp, writeFile, rm } from &#x27;node:fs/promises&#x27;;
+import { tmpdir } from &#x27;node:os&#x27;;
+import { join } from &#x27;node:path&#x27;;
+import { pathToFileURL } from &#x27;node:url&#x27;;
+
+async function withModules(files, use) {
+  const directory = await mkdtemp(join(tmpdir(), &#x27;course-modules-&#x27;));
+  try {
+    for (const [name, source] of Object.entries(files)) await writeFile(join(directory, name), source, &#x27;utf8&#x27;);
+    return await use(directory);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+}
+
+export async function verify() {
+  // Worked example
+  {
+    await withModules({ &#x27;math.mjs&#x27;: &#x27;export const twice = value =&gt; 2 * value;&#x27;, &#x27;main.mjs&#x27;: &quot;import { twice } from &#x27;./math.mjs&#x27;; export const answer = twice(4);&quot; }, async directory =&gt; {
+      const module = await import(pathToFileURL(join(directory, &#x27;main.mjs&#x27;)).href);
+      assert.equal(module.answer, 8);
+    });
+  }
+
+  return { checks: 1, status: &quot;passed&quot; };
+}
+
+console.log(JSON.stringify(await verify()));
+</code></pre>
+<p><strong>Expected:</strong> answer equals 8.</p>
+<h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
+<p>Trace the entry point and identify the values that exist before each operation. Distinguish a value from a reference to an object, a returned Promise from its eventual result, and a compile-time type from a runtime check. Write down the first observation that would disprove your explanation. A useful prediction includes an expected value or failure category, not merely a claim that the program should work.</p>
+<p>For a loop, write the state before and after one iteration. For a callback, identify the caller and the arguments it supplies. For an asynchronous operation, identify who starts it, who awaits it, and who owns cleanup. These small traces make failures local: you can compare the first incorrect state instead of guessing from a much later symptom.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Observe a live binding.</strong> Import a mutable counter and its increment function, then inspect the count before and after incrementing. <strong>Expected:</strong> count changes from 0 to 1 through the imported namespace. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
+</ol>
+<ol>
+<li><strong>Resolve a relative dependency.</strong> Create a main module importing twice from ./math.mjs, then call its export. <strong>Expected:</strong> answer equals 8. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
+</ol>
+<ol>
+<li><strong>Prove cached module identity.</strong> Import one URL twice and compare the namespace and exported object. <strong>Expected:</strong> both namespace and object identities are shared. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
+</ol>
+<ol>
+<li><strong>Inspect CommonJS interoperability.</strong> Import a .cjs file exporting an object through its default binding. <strong>Expected:</strong> default.label equals legacy. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
+</ol>
+<ol>
+<li><strong>Reject a missing dependency.</strong> Import a module with a nonexistent relative dependency and preserve the loader error code. <strong>Expected:</strong> ERR_MODULE_NOT_FOUND. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
+</ol>
+<ol>
+<li><strong>Respect namespace ownership.</strong> Attempt to assign an exported binding from the importer. <strong>Expected:</strong> TypeError; exported value remains 3. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
+</ol>
+<h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
+<p>Keep the smallest fixture that distinguishes the intended behavior from a tempting alternative. Read the assertion message and inspect the input, return value and state at that point. Do not remove a failing check just to reach the success receipt. Preserve the original failure, repair the responsible assumption, then check the normal path and the negative case again.</p>
+<p>If a host API is absent, confirm the actual host and version before changing the algorithm. A successful parse does not prove that an API exists. Compiler success does not prove that external data satisfies a type. A browser interaction requires browser evidence. For resource-owning examples, inspect cleanup after failure as carefully as the happy path. The separate explanations discuss the specific mistaken inference in each exercise.</p>
+<h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
+<p>Start by comparing the actual value with the literal expected result. Next, isolate the expression that transforms it or the boundary where its type or ownership changes. If the discrepancy involves scheduling, replace unrelated work with a small trace array and await the exact completion you intend to observe. Finally, ask for one hint about the first incorrect assumption before opening the reference. Keep one controlled failure that would catch the same mistake returning.</p>
+<h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
+<p>Close the solution and explain Live binding, Module namespace, Resolution using the fixture. Reconstruct one example from a blank saved copy. Change a boundary input and predict the new result before running it. Explain the assumptions under which the mechanism is useful and a situation in which its cost or host requirements make another design preferable. A copied program is useful rehearsal; a fresh case demonstrates transfer.</p>
+<h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
+<p><a href="https://nodejs.org/docs/latest-v24.x/api/esm.html">Official language or host reference</a>. Fixtures and exercises are original course material. Actual prepared Node, TypeScript and browser execution evidence is tracked in <code>docs/implementation/javascript-content-status.md</code>. Manual-only steps remain unqualified until performed. No default lesson installs dependencies, downloads a model or contacts a shared service.</p>
+<h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning for js-010: Modules and dependency boundaries.
+Read courses/javascript-typescript/guides/js-010.md and courses/javascript-typescript/lessons/js-010.mjs. Direct prerequisites: `js-009`.
+Explain the mechanism, ask me to predict a value or failure, review my own attempt,
+give one hint, request compile/runtime/browser evidence, and ask a fresh retrieval question.
+Keep courses/javascript-typescript/solutions/ closed until I request comparison or show an attempt.
+Done when I can explain the state and host contracts, pass all six exercise checks,
+diagnose a controlled failure, and solve a new boundary case without copying the answer.</code></pre></article>
+  </main>
+</body>
+</html>

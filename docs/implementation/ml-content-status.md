@@ -1,73 +1,69 @@
-# ML content completion and verification checkpoint
+# TensorFlow and LLM theory: current content checkpoint
 
-Updated 2026-10-22. This checkpoint records authored source and actual checks separately from runtime qualification and learner mastery.
+Updated 2026-10-23. This is the current source and execution checkpoint, replacing earlier authoring-stage waiting lists. It distinguishes a complete lesson bundle, a successful bounded runtime check and evidence about a model's practical quality.
 
-## Authored inventory
+## Current inventory
 
-- TensorFlow: **36 of36 reviewed IDs**, `tf-001` through `tf-036`.
-- LLM mechanisms: **42 of42 reviewed IDs**, `llm-001` through `llm-042`.
-- This pass completed the previously missing `tf-009` through `tf-036` and `llm-010` through `llm-042`,61 lesson bundles.
-- Each guide includes a mechanism explanation, definitions, syntax or reasoning anatomy, two worked examples, six concrete exercises with Expected/Verify contracts, diagnosis, hints, retrieval and a copy-ready Codex prompt. Every code lesson has an answer-free learner worksheet, an executable reference with assertions, and a separate explanatory solution. Reading lessons have separate worksheets and explanations.
-- Guide word counts across the complete inventory range from1360 to2757. Counts are structural evidence; the per-topic calculations, counterexamples and independent assertions carry the teaching evidence.
-- The reviewed IDs, prerequisites and runtime profiles are preserved. Authored registration alone does not publish the active catalog or qualify a runtime.
+| Route | Complete IDs | Core / NumPy | TensorFlow CPU | PyTorch CPU | Reading |
+| --- | --- | --- | --- | --- | --- |
+| TensorFlow and Keras | `tf-001` through `tf-036` | 8 | 27 | 0 | 1 |
+| LLM mechanisms and evidence | `llm-001` through `llm-048` | 27 | 0 | 16 | 5 |
+| Combined | 84 chapters | 35 | 27 | 16 | 6 |
 
-## Actual checks in this pass
+Every chapter has a guide, an answer-free learner artifact and separate explained solutions with six distinct practice cases. Every executable chapter also has an assertion-bearing reference program. Reading IDs are `tf-001`, `llm-001`, `llm-029`, `llm-030`, `llm-039` and `llm-041`; they require written reasoning, not a fabricated execution receipt. Stable IDs, prerequisites and profiles remain in the reviewed plans and authored manifests.
 
-Command from the repository root, using the existing prepared Python environment:
+The [TensorFlow route](../../courses/deep-learning-tensorflow/README.md) and [48-chapter LLM route](../../courses/llm-theory/README.md) lead with the Docker classroom. [Inside a Transformer](../learning/inside-a-transformer.md) adds a connected numerical forward-pass companion. [Applied LLM systems](../../courses/llm-applied/README.md), [PyTorch](../../courses/deep-learning-pytorch/README.md) and [NLP](../../courses/nlp/README.md) have separate inventories and checkpoints; their counts are not folded into this table.
 
-```text
-python -m pytest tests/test_ml_module_lessons.py -q --disable-warnings
-```
+## Current executable evidence
 
-Result: **58 passed,42 skipped**. Skips are explicit optional heavy-runtime tests:1 existing TensorFlow foundation test,25 newly completed TensorFlow reference tests,15 PyTorch reference tests and1 additional decoder/cache negative-control test. The latest focused run completed without warnings. Three additional regressions compile embedded child programs without importing heavy frameworks.
+All **78 executable references** in these two routes have successful prepared-container receipts matching their current source hashes. The local consolidated index is `work/current-reference-evidence.json`; this review independently checked every matching record and recomputed every reference SHA-256 from the current files. It records 35 Core, 27 TensorFlow and 16 PyTorch cases for these routes, within the larger product inventory. Earlier awaited-runtime statements are superseded.
 
-The complete78-entry inventory passed the shared lesson depth and practice checks inside the focused test suite. All authored Python files parsed. Existing behavior tests were preserved; new tests cover full planned-ID coverage, core reference execution, tool proposal failures, retrieval tie behavior, tokenwise normalization and optional decoder/cache boundaries.
+Qualification used bounded offline CPU execution in the prepared Linux arm64 images. It does not establish Windows-native or amd64 execution, GPU performance, multi-device execution, production model quality or learner mastery. No default lesson downloads a dataset or model or calls an online model service.
 
-All30 `python-core` executable reference `verify()` functions were also executed directly and passed:
+Reference and worked-example execution are distinct checks. The guide program contracts are explicit:
 
-`tf-002`, `tf-003`, `tf-004`, `tf-005`, `tf-006`, `tf-010`, `tf-034`, `tf-035`, `llm-002`, `llm-003`, `llm-004`, `llm-005`, `llm-006`, `llm-007`, `llm-008`, `llm-009`, `llm-010`, `llm-011`, `llm-012`, `llm-013`, `llm-014`, `llm-021`, `llm-025`, `llm-027`, `llm-033`, `llm-034`, `llm-036`, `llm-037`, `llm-038`, `llm-040`
+- The initial runnable pilots use sequential A+B blocks in one fresh process. The six expert chapters use sequential A-C demonstrations. A later block may intentionally use the named state from the preceding one.
+- The original completion chapters use independently runnable worked programs. The renderer includes needed setup in each ordinary block, and custom examples can supply their own complete preamble.
+- The repaired 115 standalone worked programs passed actual fresh Docker processes: 35 Core, 50 TensorFlow and 30 PyTorch. Receipts are `work/ml-worked-python-core-acceptance.jsonl`, `work/ml-worked-tensorflow-cpu-acceptance.jsonl` and `work/ml-worked-llm-torch-cpu-acceptance.jsonl`.
+- The separate 43-program sequential qualification batch covers original pilots, expert chapters and applied examples under their declared sequential contracts. Its inventory is `work/ml-sequential-examples-manifest.json`; this count is cross-track and is not 43 additional theory chapters.
+- Subsequent mechanism rewrites have narrow replacement evidence: `llm-011` reference and two standalone examples passed in `work/ml-worked-heads-depth-acceptance.jsonl`; `llm-016` reference and two standalone examples passed the decoder qualification batch; `tf-018` and `tf-031` references and five worked programs passed in `work/ml-worked-tensorflow-depth-acceptance.jsonl`. These replace older worked hashes only for the changed programs.
 
-## Explicitly unexecuted surfaces in this pass
+The preserved subprocess checks distinguish restartable optimizer state from inference export. `tf-028`, `tf-032` and `llm-022` compile embedded child programs and report child stderr on failure. `tf-032` retains the loaded SavedModel owner while invoking its endpoint so captured variable resources remain alive. All repaired cases subsequently passed their actual framework runs.
 
-The27 TensorFlow and15 PyTorch lesson references require the corresponding prepared CPU runtime. They were authored and structurally checked, but were not executed in the host environment during this authoring pass. No host package installation, model download, data download, database action or Docker mutation occurred here. Root integration owns the prepared-image execution receipts.
+## Semantic explanation review
 
-Heavy-runtime IDs awaiting that execution receipt:
+All 36 TensorFlow chapters have received the topic-specific depth review recorded in [the TensorFlow ledger](tensorflow-depth-review.md). It includes the initial eight independently authored chapters, 26 prose additions and the two rewritten normalization/tracing chapters. The latter explicitly distinguish BatchNorm's retained channel axis from LayerNorm's reduced feature axis, asymmetric momentum conventions, and graph tracing from optional XLA compilation.
 
-`tf-007`, `tf-008`, `tf-009`, `tf-011`, `tf-012`, `tf-013`, `tf-014`, `tf-015`, `tf-016`, `tf-017`, `tf-018`, `tf-019`, `tf-020`, `tf-021`, `tf-022`, `tf-023`, `tf-024`, `tf-025`, `tf-026`, `tf-027`, `tf-028`, `tf-029`, `tf-030`, `tf-031`, `tf-032`, `tf-033`, `tf-036`, `llm-015`, `llm-016`, `llm-017`, `llm-018`, `llm-019`, `llm-020`, `llm-022`, `llm-023`, `llm-024`, `llm-026`, `llm-028`, `llm-031`, `llm-032`, `llm-035`, `llm-042`
+All 48 LLM theory chapters have completed substantive review: the ML author covered `llm-010` through `llm-042`, and the systems reviewer completed `llm-001` through `llm-009` and `llm-043` through `llm-048`. Current inspection and exact-code evidence are recorded in [the depth-review ledger](ml-depth-review.md) and [the expert checkpoint](llm-expert-status.md). The final attention guards in 043/046 and their changed worked programs passed a separate six-case Core Docker batch.
 
-Reading-only IDs require written reasoning rather than a fabricated execution receipt:
+The reviewed middle chapters now derive concrete probability, gradient, state and evaluation quantities. Examples include the exact 10,464-parameter decoder ledger, actual multi-head mixtures, shifted-token gradient denominators, Adam restart scope, top-p crossing-token logic, score/cache byte formulas, probe decodability versus causal use, calibration bin effects, a count-baseline held-out loss, the first scale-one LoRA update, quantizer error bounds and family-weighted evaluation. The capstone explicitly labels its saved candidate decisions as authored records, separate from its actual random-decoder cache check.
 
-`tf-001`, `llm-001`, `llm-029`, `llm-030`, `llm-039`, `llm-041`
+The limitations are stated where they affect interpretation: serial scheduling is not a batched GPU measurement; dequantized NumPy multiplication is not an integer kernel; two scaling points do not validate a law; a citation substring is not entailment; zero failures in a tiny sample do not imply zero population risk; a hash does not bind an unrelated answer ledger to a model. [The review ledger](ml-depth-review.md) records exact chapter batches and unchanged-code receipts.
 
-`tf-028`, `tf-032` and `llm-022` include same-interpreter fresh-process persistence checks with60-second subprocess bounds and owned TemporaryDirectory cleanup. Their source intentionally distinguishes prediction parity from next-update parity. `llm-024`, `llm-035` and `llm-042` compare full-prefix and incremental KV-cache outputs. The capstones permit a no-go decision and distinguish fixed saved answer records from actual model-generated outputs.
+## Focused host validation
 
-## Continue without losing authoring state
+The latest full focused run of `tests/test_ml_module_lessons.py` reports **110 passed and 125 explicit optional-runtime skips**. It covers complete planned-ID/path agreement, practice/depth contracts, core reference execution, independent numerical counterexamples, source parsing and fresh-process Core worked programs. The skipped framework cases require deliberately prepared TensorFlow/PyTorch dependencies; the successful Docker evidence above supplies their separate runtime tier. No host framework install was performed to bypass those switches.
 
-The portable original specifications and renderer are checked in under `courses/deep-learning-tensorflow/authoring/`. Run:
+The new prose calculations were checked independently with NumPy and the standard library. `work/ml-theory-review-arithmetic.json` records the scaling slope, LoRA update, preference losses, quantizer outputs/bounds, zero-failure interval calculation and family-weighted comparisons. This arithmetic record is not a population experiment.
+
+## Durable authoring and regeneration boundaries
+
+The first eight TensorFlow and first nine LLM bundles remain independently authored. Edit their Markdown and associated source directly; the completion generator intentionally preserves them.
+
+The next 61 bundles, `tf-009` through `tf-036` and `llm-010` through `llm-042`, are maintained under `courses/deep-learning-tensorflow/authoring/`. `tf.py` and `llm.py` register the specifications; dedicated modules retain the detailed rewrites; `depth_reviews_tf.py` and `depth_reviews_llm.py` supply topic-specific prose. From a prepared maintainer interpreter:
 
 ```text
 python courses/deep-learning-tensorflow/authoring/build.py
 ```
 
-The renderer preserves the earlier first8 TensorFlow and first9 LLM bundles and regenerates the61 completed bundles from topic-specific source. Edit the specifications when changing generated lesson text, then rerun the renderer and checks. It does not touch shared catalog generators, runtime adapters, learner state or the practice expansion registry.
+For a prose-only update, use the renderer's `write_all(only=selected_ids, guides_only=True)` after importing the appropriate specifications. Compare all Python fenced blocks and learner/solution artifacts before and after. The latest Docker-first refresh preserved all those bytes across 35 owned guides, recorded in `work/ml-owned-docker-paragraph-parity.json`.
 
-Prepared runtime test switches:
+The six expert bundles, `llm-043` through `llm-048`, have separate sources under `courses/llm-theory/authoring/`:
 
 ```text
-DS60_TEST_TENSORFLOW=1 python -m pytest tests/test_ml_module_lessons.py -q
-DS60_TEST_TORCH=1 python -m pytest tests/test_ml_module_lessons.py -q
+python courses/llm-theory/authoring/build.py
 ```
 
-Those are POSIX environment-prefix forms. In PowerShell set `$env:DS60_TEST_TENSORFLOW = "1"` or `$env:DS60_TEST_TORCH = "1"` before invoking the selected interpreter, then remove the temporary environment setting afterward. Use only a runtime whose dependencies were already deliberately prepared.
+That workflow preserves the earlier 42 bundles and derives the README index from the plan and manifest. `authoring/readme.py` can refresh that index alone. Neither course authoring workflow changes worker implementations, runtime credentials, learner state, shared catalog registration or the practice baseline. Root integration owns catalog/navigation/reader generation and final browser delivery checks.
 
-## Remaining integration work
-
-Run the full heavy reference suites in prepared containers, record failures and repairs, regenerate the shared dashboard/readers after root catalog integration, and inspect the actual browser lesson/solution flow. Current content completion must not be described as a live-runtime or production-quality acceptance result. Additional Python/SQL deepening remains a separate queued workstream owned by root; no such lesson was claimed complete by this ML pass.
-
-## Fresh-process repair checkpoint
-
-Root prepared-container execution reported25 of27 TensorFlow references passing and indentation failures in the embedded child programs of `tf-028` and `tf-032`. The authoring specifications and generated artifacts now use `textwrap.dedent` with a leading newline, compile the child source before launching it, and include child stderr in a failure. The same defect was proactively repaired in `llm-022`. Static child-source compilation regressions pass. Root will rerun the actual prepared-runtime cases; this paragraph does not claim the repaired subprocesses have executed.
-
-## Prepared-runtime acceptance readback
-
-Root integration subsequently executed all27 TensorFlow reference programs and all15 PyTorch reference programs successfully in the prepared Linux arm64 Docker images. Initial failures in TensorFlow028/032 and PyTorch022 were repaired and individually rerun. TensorFlow032 additionally retains the loaded SavedModel owner so its captured variables remain alive during serve. Receipts are the local implementation files `work/tensorflow-all-lessons-acceptance.jsonl`, `work/tensorflow-repaired-lessons-acceptance.jsonl`, `work/tensorflow-export-lifetime-acceptance.jsonl`, `work/torch-all-lessons-acceptance.jsonl` and `work/torch-repaired-lessons-acceptance.jsonl`. These establish bounded CPU reference execution on that image/architecture, not Windows-native, x86, GPU, production-quality or learner-mastery acceptance. Earlier unexecuted statements above describe the authoring pass before this integration run.
+When executable code changes, create a narrow inventory with the current source hashes and obtain a new matching runtime receipt. A prose-only guide hash change does not invalidate unchanged program bytes. Keep current status here coherent rather than appending contradictory historical waiting lists.

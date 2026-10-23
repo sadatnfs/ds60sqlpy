@@ -43,9 +43,9 @@ int main(){ const long long count=-1; if(count<0){std::cout<<"rejected\n"; retur
 
 ### Exercise 1: Predict integer division
 
-**Inputs/evidence:** For cpp-003 Exercise 1, 7/2 and7.0/2.0.
+**Inputs/evidence:** For cpp-003 Exercise 1, 7/2 and 7.0/2.0.
 
-**Expected result/shape:** For cpp-003 Exercise 1, 3 and3.5.
+**Expected result/shape:** For cpp-003 Exercise 1, 3 and 3.5.
 
 **Verify:** For cpp-003 Exercise 1, compare both numeric results and explain operand types.
 
@@ -59,7 +59,7 @@ Integer operands request integer division. One floating operand changes the oper
 
 **Verify:** For cpp-003 Exercise 2, assert both results and identify the inner expression evaluated first.
 
-The parentheses make the operation order explicit. The late cast converts the already computed3 to3.0; it cannot recreate a lost fractional part.
+The parentheses make the operation order explicit. The late cast converts the already computed3 to 3.0; it cannot recreate a lost fractional part.
 
 ### Exercise 3: Guard a signed count
 
@@ -83,7 +83,7 @@ The literal suffixes make the multiplication wide. A wide destination alone does
 
 ### Exercise 5: Use exact cents for this fixture
 
-**Inputs/evidence:** For cpp-003 Exercise 5, 125 cents and75 cents.
+**Inputs/evidence:** For cpp-003 Exercise 5, 125 cents and 75 cents.
 
 **Expected result/shape:** For cpp-003 Exercise 5, 200 cents.
 
@@ -95,9 +95,9 @@ An integer has an exact representation for these cents values. A later lesson ca
 
 **Inputs/evidence:** For cpp-003 Exercise 6, positive=3, known representable by size_t.
 
-**Expected result/shape:** For cpp-003 Exercise 6, count3; zero would also be valid, while-1 is not.
+**Expected result/shape:** For cpp-003 Exercise 6, count 3; zero would also be valid, while-1 is not.
 
-**Verify:** For cpp-003 Exercise 6, test3 and0 after validation and explain that arbitrary huge values still need a range check.
+**Verify:** For cpp-003 Exercise 6, test3 and 0 after validation and explain that arbitrary huge values still need a range check.
 
 This bounded control demonstrates an intentional conversion. It does not justify casting arbitrary external long long values on every platform without representability validation.
 

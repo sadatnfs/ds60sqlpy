@@ -1,0 +1,38 @@
+{
+  "lesson_id": "k8s-005",
+  "provenance": "synthetic teaching cases, not runtime observations",
+  "capability": "fixed Deployment baseline plus scoped host image/log observations",
+  "browser_source": true,
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Read the source image,pull policy,command and named port.",
+      "expected": "Image0.2.0,Never,fixed fixture server,port8080 named http."
+    },
+    {
+      "exercise": 2,
+      "task": "Classify the synthetic Running/Ready=False record.",
+      "expected": "Process running,readiness unproved,no ready-routing claim."
+    },
+    {
+      "exercise": 3,
+      "task": "Compare unapproved-image broker rejection with ErrImageNeverPull from a scoped host fixture.",
+      "expected": "Two different failure phases are named; neither is described as an application crash."
+    },
+    {
+      "exercise": 4,
+      "task": "Record a bounded synthetic log excerpt with Pod UID,container name and restart count.",
+      "expected": "An evidence record ties the line to the exact observed process instance."
+    },
+    {
+      "exercise": 5,
+      "task": "Compare same Pod UID with restartCount1 against a new Pod UID with restartCount0.",
+      "expected": "First is a container restart; second is a different Pod instance."
+    },
+    {
+      "exercise": 6,
+      "task": "Run the allowed source under a qualified lease and state what its result does and does not observe.",
+      "expected": "Controller/Ready Pod identities and owned cleanup are observed; Deployment-only run has no Service-client proof."
+    }
+  ]
+}

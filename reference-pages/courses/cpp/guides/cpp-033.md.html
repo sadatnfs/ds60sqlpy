@@ -116,7 +116,6 @@
       <p class="source-path">Generated from <code>courses/cpp/guides/cpp-033.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-033-testing-concurrent-code">cpp-033: Testing concurrent code<a class="heading-anchor" href="#cpp-033-testing-concurrent-code" aria-label="Link to this section">#</a></h2>
-<p>Authored beta content. Content completion and runtime qualification are separate evidence.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Advanced; 120 minutes. Direct prerequisites: <code>cpp-025</code>, <code>cpp-031</code>, <code>cpp-032</code>.</p>
 <p>Learner artifact: <a href="../lessons/cpp-033.cpp.html">cpp-033.cpp</a>. Keep <a href="../solutions/cpp-033_solutions.md.html">official solutions</a> closed until an attempt. The immutable <a href="../fixtures/cpp-033-cases.json.html">case ledger</a> records exercise inputs and expected observations.</p>
@@ -128,55 +127,94 @@
 <p>Use promises, barriers or condition predicates to establish test phases instead of sleeping for guessed startup. A fixed final count checks an invariant after join. Preserve failed inputs, iteration number, compiler and sanitizer output so a race report can be investigated.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>A concurrency test must know which state it is waiting for. The readiness future observes one explicit worker event; join observes termination. The test repeats a fixed 200-increment invariant twenty times, which is useful bounded stress but does not enumerate all schedules. A separate supervisor deadline turns deadlock into a finite failure. TSan evidence requires an instrumented supported host run and should remain distinct from normal execution results.</p>
+<h3 id="testing-concurrency-without-guessing-the-schedule">Testing concurrency without guessing the schedule<a class="heading-anchor" href="#testing-concurrency-without-guessing-the-schedule" aria-label="Link to this section">#</a></h3>
+<p>A concurrency test needs observable synchronization points. A promise/future pair can signal that a worker reached a chosen state. join confirms that a worker has terminated. These facts are stronger than waiting an arbitrary number of milliseconds. A sleep changes the chance of an ordering but does not establish that the expected event happened.</p>
+<p>In the first program, the worker assigns42 and then fulfills a promise. Waiting on the future establishes the result&#x27;s availability before main checks it. The worker is still joined to close its lifetime. Startup, publication and termination are separate events even when they occur close together in a tiny example.</p>
+<p>The second program repeats a fixed invariant twenty times:two participants each increment the same atomic counter100 times, and the joined result must be200. Repetition can expose some timing-sensitive defects, but it does not enumerate all possible schedules. A passing stress loop is bounded evidence, not proof that a race is impossible. The synchronization argument remains necessary.</p>
+<p>A supervisor timeout makes a deadlock or unresponsive worker a finite test failure. The timeout belongs outside the potentially stuck code path when necessary; a worker that never returns cannot reliably report its own timeout after the fact. Retain the phase, last observed synchronization point and cancellation outcome so the failure is diagnosable.</p>
+<p>ThreadSanitizer is a separate instrumented execution path with toolchain and platform requirements. It can detect many data races in exercised code, but cannot prove all schedules or all code paths safe. Normal execution, stress repetition and sanitizer reports should be recorded separately. Do not add an intentional race to the ordinary browser source and then interpret one successful run as a detector test.</p>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">ready.set_value(); // owner waits on ready.get_future().get()</code></pre>
-<p><strong>Expected:</strong> The owner receives explicit evidence that the worker reached the named phase.</p>
+<p><a href="../examples/cpp-033-example-1.cpp.html">Complete program 1</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;future&gt;
+#include &lt;iostream&gt;
+#include &lt;thread&gt;
+
+
+int main() {
+    std::promise&lt;void&gt; ready;
+    auto started=ready.get_future();
+    int result=0;
+    std::thread worker([&amp;]{result=42; ready.set_value();});
+    started.get();
+    assert(result==42);
+    worker.join();
+    std::cout &lt;&lt; &quot;cpp-033 example 1 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-033 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">t.join(); assert(count==200);</code></pre>
-<p><strong>Expected:</strong> Two sets of 100 atomic increments must total 200 in each trial.</p>
+<p><a href="../examples/cpp-033-example-2.cpp.html">Complete program 2</a></p>
+<pre><code class="language-cpp">#include &lt;atomic&gt;
+#include &lt;cassert&gt;
+#include &lt;future&gt;
+#include &lt;iostream&gt;
+#include &lt;thread&gt;
+
+
+int main() {
+    for(int trial=0;trial&lt;20;++trial){std::atomic&lt;int&gt; count{0};std::promise&lt;void&gt; ready;auto started=ready.get_future();std::thread t([&amp;]{ready.set_value();for(int i=0;i&lt;100;++i)++count;});started.get();for(int i=0;i&lt;100;++i)++count;t.join();assert(count==200);}
+    std::cout &lt;&lt; &quot;cpp-033 example 2 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-033 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-identify-the-schedule-point">Exercise 1: Identify the schedule point<a class="heading-anchor" href="#exercise-1-identify-the-schedule-point" aria-label="Link to this section">#</a></h4>
 <p>Name the purpose of the ready handshake.</p>
 <p><strong>Expected result/shape:</strong> It proves worker startup, not worker completion.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: It proves worker startup, not worker completion.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: join remains necessary for the final assertion.</p>
+<p><strong>Verify:</strong> It proves worker startup, not worker completion.</p>
+<p><strong>Progressive hints:</strong> join remains necessary for the final assertion.</p>
 <h4 id="exercise-2-run-bounded-stress">Exercise 2: Run bounded stress<a class="heading-anchor" href="#exercise-2-run-bounded-stress" aria-label="Link to this section">#</a></h4>
 <p>Repeat the 200-count scenario 20 times.</p>
 <p><strong>Expected result/shape:</strong> 20 exact invariant passes, no sleeps.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: 20 exact invariant passes, no sleeps.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: A finite repetition count gives a declared work budget.</p>
+<p><strong>Verify:</strong> 20 exact invariant passes, no sleeps.</p>
+<p><strong>Progressive hints:</strong> A finite repetition count gives a declared work budget.</p>
 <h4 id="exercise-3-add-a-timeout-contract">Exercise 3: Add a timeout contract<a class="heading-anchor" href="#exercise-3-add-a-timeout-contract" aria-label="Link to this section">#</a></h4>
 <p>Wrap the host test process in a finite supervisor deadline.</p>
 <p><strong>Expected result/shape:</strong> A deadlock is reported as timeout rather than hanging indefinitely.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: A deadlock is reported as timeout rather than hanging indefinitely.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: The timeout belongs outside potentially deadlocked worker code.</p>
+<p><strong>Verify:</strong> A deadlock is reported as timeout rather than hanging indefinitely.</p>
+<p><strong>Progressive hints:</strong> The timeout belongs outside potentially deadlocked worker code.</p>
 <h4 id="exercise-4-repair-timing-assumptions">Exercise 4: Repair timing assumptions<a class="heading-anchor" href="#exercise-4-repair-timing-assumptions" aria-label="Link to this section">#</a></h4>
 <p>Replace a fixed sleep used to infer startup with a promise.</p>
 <p><strong>Expected result/shape:</strong> Test proceeds only after the readiness event.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Test proceeds only after the readiness event.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Wall-clock delay cannot prove a state transition.</p>
+<p><strong>Verify:</strong> Test proceeds only after the readiness event.</p>
+<p><strong>Progressive hints:</strong> Wall-clock delay cannot prove a state transition.</p>
 <h4 id="exercise-5-qualify-tsan-separately">Exercise 5: Qualify TSan separately<a class="heading-anchor" href="#exercise-5-qualify-tsan-separately" aria-label="Link to this section">#</a></h4>
 <p>Use an existing supported compiler with -fsanitize=thread on an owned host copy.</p>
 <p><strong>Expected result/shape:</strong> Actual build/run receipt or explicit unavailable status.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Actual build/run receipt or explicit unavailable status.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: The browser normal profile does not claim TSan coverage.</p>
+<p><strong>Verify:</strong> Actual build/run receipt or explicit unavailable status.</p>
+<p><strong>Progressive hints:</strong> The browser normal profile does not claim TSan coverage.</p>
 <h4 id="exercise-6-transfer-negative-control">Exercise 6: Transfer negative control<a class="heading-anchor" href="#exercise-6-transfer-negative-control" aria-label="Link to this section">#</a></h4>
 <p>Introduce a plain counter race only in a separately instrumented scratch test.</p>
 <p><strong>Expected result/shape:</strong> TSan finding expected; production example stays race-free.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: TSan finding expected; production example stays race-free.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: A clean correct example alone does not demonstrate detector sensitivity.</p>
+<p><strong>Verify:</strong> TSan finding expected; production example stays race-free.</p>
+<p><strong>Progressive hints:</strong> A clean correct example alone does not demonstrate detector sensitivity.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: The owner receives explicit evidence that the worker reached the named phase. Then explain the changed condition in example 2 without opening the answer.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
-<p>Use promises, barriers or condition predicates to establish test phases instead of sleeping for guessed startup. A fixed final count checks an invariant after join. Preserve failed inputs, iteration number, compiler and sanitizer output so a race report can be investigated.</p>
-<p>If the result disagrees, preserve the original input and inspect the first differing value or condition. Wall-clock delay cannot prove a state transition.</p>
+<p>If a test flakes under load, replace timing assumptions with explicit state signals. If it hangs, identify the last completed promise/condition/join boundary and use the external timeout receipt. If a stress test passes a deliberately racy mutation, that shows limited schedule coverage rather than correctness. If TSan is unavailable on a platform, leave that row unqualified instead of treating the normal binary as equivalent instrumentation.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
 <p>Close the source. Reconstruct the reasoning for Exercise 6: Transfer negative control. Explain which assumptions would fail on a larger input or another runtime.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue with <a href="cpp-034.md.html">cpp-034</a> after saving the six observations.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<p><a href="https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html">GCC instrumentation options</a></p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach cpp-033.
 Read courses/cpp/guides/cpp-033.md and courses/cpp/lessons/cpp-033.cpp.

@@ -1,0 +1,38 @@
+{
+  "lesson_id": "k8s-039",
+  "provenance": "synthetic teaching cases, not runtime observations",
+  "capability": "exclusive synthetic threat fixtures with separate parser, RBAC, admission and CNI evidence",
+  "browser_source": false,
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Name learner,host operator and unrelated tenant, with their trusted capabilities.",
+      "expected": "Actors and assets are explicit rather than a blanket secure claim."
+    },
+    {
+      "exercise": 2,
+      "task": "Map foreign namespace,privileged,hostPath,unapproved image,foreign service account and shell command to rejections.",
+      "expected": "Every field has a named closed-schema or ownership rule."
+    },
+    {
+      "exercise": 3,
+      "task": "Explain why tokens,engine sockets and ambient kubeconfig stay outside learner artifacts.",
+      "expected": "No alternate path around the bounded operation API."
+    },
+    {
+      "exercise": 4,
+      "task": "Compare CPU limits,quota,deadlines and NetworkPolicy.",
+      "expected": "Each constrains a different resource or traffic dimension."
+    },
+    {
+      "exercise": 5,
+      "task": "Compare a same-name object with a different UID/nonce to the operation receipt.",
+      "expected": "Foreign object preserved and cleanup reports the mismatch."
+    },
+    {
+      "exercise": 6,
+      "task": "Write the final classroom isolation statement and untested threats.",
+      "expected": "No arbitrary-code or VM-equivalent isolation claim; host trust and qualified controls are named."
+    }
+  ]
+}

@@ -116,7 +116,6 @@
       <p class="source-path">Generated from <code>courses/cpp/guides/cpp-022.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-022-portable-files-and-serialization">cpp-022: Portable files and serialization<a class="heading-anchor" href="#cpp-022-portable-files-and-serialization" aria-label="Link to this section">#</a></h2>
-<p>Authored beta content. Content completion and runtime qualification are separate evidence.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Intermediate; 120 minutes. Direct prerequisites: <code>cpp-011</code>, <code>cpp-017</code>.</p>
 <p>Learner artifact: <a href="../lessons/cpp-022.cpp.html">cpp-022.cpp</a>. Keep <a href="../solutions/cpp-022_solutions.md.html">official solutions</a> closed until an attempt. The immutable <a href="../fixtures/cpp-022-cases.json.html">case ledger</a> records exercise inputs and expected observations.</p>
@@ -125,58 +124,95 @@
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>Portable serialization converts a value into a documented byte or text format. A filesystem path describes a location in the current platform, not a portable file format. Endianness is byte ordering in multi-byte values. A version marker lets a reader reject incompatible representations instead of silently misinterpreting them.</p>
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
-<p>Write field values explicitly with separators and a version tag. Dumping sizeof(struct) bytes also writes padding and host layout. A text record such as v1,7,125 declares field order but still needs length, numeric and trailing-input validation.</p>
+<p>Write field values explicitly with separators and a version tag. Dumping sizeof(struct) bytes also writes padding and host layout. A text record such as v1, 7, 125 declares field order but still needs length, numeric and trailing-input validation.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>
-<p>A serializer chooses a representation that survives a different compiler or machine. The text v1,7,125 has a version, field order and unit interpretation; a raw struct dump has unspecified padding and platform-specific layout. A decoder must validate the version, exact field count, complete integer syntax and value ranges separately. The executable reference separates a shape-only illustration from decode, which also checks both integer conversions, full consumption and nonnegative ranges. The malformed suffix case must fail the full decoder even though its field count looks correct.</p>
+<p>A serializer chooses a representation that survives a different compiler or machine. The text v1, 7, 125 has a version, field order and unit interpretation; a raw struct dump has unspecified padding and platform-specific layout. A decoder must validate the version, exact field count, complete integer syntax and value ranges separately. The executable reference separates a shape-only illustration from decode, which also checks both integer conversions, full consumption and nonnegative ranges. The malformed suffix case must fail the full decoder even though its field count looks correct.</p>
+<h3 id="paths-serialized-bytes-and-versioned-records">Paths, serialized bytes and versioned records<a class="heading-anchor" href="#paths-serialized-bytes-and-versioned-records" aria-label="Link to this section">#</a></h3>
+<p>A filesystem path describes a location; a serialized record describes data. Joining records and batch.csv with filesystem::path uses platform-aware path composition. It does not open the file, create directories or validate the record bytes. A .csv suffix is a naming convention, not a parser implementation or a guarantee about quoting and delimiters.</p>
+<p>The record format in this lesson is intentionally narrow: v1, id, cents with exactly three fields, decimal integer values and nonnegative domain constraints. The version tag is part of the data contract. A decoder should reject an unsupported version rather than guessing that a future format has the same meaning. A writer and reader can round-trip a value only when they agree on those details.</p>
+<p>Shape validation checks delimiters and field count; value validation checks each field&#x27;s full conversion and range. The reference contains both an introductory shape illustration and a strict decoder. A string such as v1, 7, 125x has the right number of fields but fails full numeric consumption. A negative amount can parse as an integer while failing the domain rule. Keep those reasons distinct when debugging.</p>
+<p>Text serialization avoids some machine-layout hazards but still needs explicit rules for encoding, line endings, whitespace and maximum size. Writing the raw bytes of a C++ struct is not a portable substitute: padding, endianness, integer width and ABI layout can differ. Even on the same machine, uninitialized padding is not a stable public format.</p>
+<p>Path safety is also separate from grammar. A correctly parsed record can be written to the wrong location if the working directory or user-controlled path is misunderstood. The examples only construct a relative path and inspect filename/parent components. Actual file creation belongs to an owned host directory with explicit failure handling. Later lessons restrict identifiers before mapping them into filenames.</p>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">assert(encode(7,125)==&quot;v1,7,125&quot;);</code></pre>
-<p><strong>Expected:</strong> The exact wire text is independent of struct padding.</p>
+<p><a href="../examples/cpp-022-example-1.cpp.html">Complete program 1</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+
+std::string encode(int id,int cents) {
+    return &quot;v1,&quot;+std::to_string(id)+&quot;,&quot;+std::to_string(cents);
+}
+int main() {
+    assert(encode(7,125)==&quot;v1,7,125&quot;);
+    std::cout &lt;&lt; &quot;cpp-022 example 1 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-022 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">auto p=std::filesystem::path(&quot;records&quot;)/&quot;batch.csv&quot;;</code></pre>
-<p><strong>Expected:</strong> The path joins components using platform rules; filename is batch.csv.</p>
+<p><a href="../examples/cpp-022-example-2.cpp.html">Complete program 2</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;filesystem&gt;
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+
+std::string encode(int id,int cents) {
+    return &quot;v1,&quot;+std::to_string(id)+&quot;,&quot;+std::to_string(cents);
+}
+int main() {
+    auto path=std::filesystem::path(&quot;records&quot;)/&quot;batch.csv&quot;;
+    assert(path.filename()==&quot;batch.csv&quot;);
+    assert(path.parent_path()==&quot;records&quot;);
+    std::cout &lt;&lt; &quot;cpp-022 example 2 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-022 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-specify-the-wire-format">Exercise 1: Specify the wire format<a class="heading-anchor" href="#exercise-1-specify-the-wire-format" aria-label="Link to this section">#</a></h4>
-<p>Document v1,7,125 field order and units.</p>
+<p>Document v1, 7, 125 field order and units.</p>
 <p><strong>Expected result/shape:</strong> Version v1, ID 7, cents 125, three fields.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Version v1, ID 7, cents 125, three fields.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Representation should be interpretable without the original struct.</p>
+<p><strong>Verify:</strong> Version v1, ID 7, cents 125, three fields.</p>
+<p><strong>Progressive hints:</strong> Representation should be interpretable without the original struct.</p>
 <h4 id="exercise-2-check-zero-values">Exercise 2: Check zero values<a class="heading-anchor" href="#exercise-2-check-zero-values" aria-label="Link to this section">#</a></h4>
 <p>Encode ID 0 and cents 0.</p>
-<p><strong>Expected result/shape:</strong> v1,0,0.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: v1,0,0.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Zero must survive round-trip as data.</p>
+<p><strong>Expected result/shape:</strong> v1, 0, 0.</p>
+<p><strong>Verify:</strong> v1, 0, 0.</p>
+<p><strong>Progressive hints:</strong> Zero must survive round-trip as data.</p>
 <h4 id="exercise-3-build-a-strict-decoder">Exercise 3: Build a strict decoder<a class="heading-anchor" href="#exercise-3-build-a-strict-decoder" aria-label="Link to this section">#</a></h4>
 <p>Require v1 and exactly three comma-separated fields.</p>
-<p><strong>Expected result/shape:</strong> v2,7,125 and v1,7,125,junk rejected.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: v2,7,125 and v1,7,125,junk rejected.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Version and full-field-count checks prevent ambiguity.</p>
+<p><strong>Expected result/shape:</strong> v2, 7, 125 and v1, 7, 125, junk rejected.</p>
+<p><strong>Verify:</strong> v2, 7, 125 and v1, 7, 125, junk rejected.</p>
+<p><strong>Progressive hints:</strong> Version and full-field-count checks prevent ambiguity.</p>
 <h4 id="exercise-4-reject-raw-layout">Exercise 4: Reject raw layout<a class="heading-anchor" href="#exercise-4-reject-raw-layout" aria-label="Link to this section">#</a></h4>
 <p>Explain why writing sizeof(record) is not a portable format.</p>
 <p><strong>Expected result/shape:</strong> Padding, type width and byte order named.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Padding, type width and byte order named.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: A memory representation is not a schema.</p>
+<p><strong>Verify:</strong> Padding, type width and byte order named.</p>
+<p><strong>Progressive hints:</strong> A memory representation is not a schema.</p>
 <h4 id="exercise-5-resolve-a-path">Exercise 5: Resolve a path<a class="heading-anchor" href="#exercise-5-resolve-a-path" aria-label="Link to this section">#</a></h4>
 <p>Print current_path and records/batch.csv absolute resolution in an owned directory.</p>
 <p><strong>Expected result/shape:</strong> Both anchor and resolved file documented.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Both anchor and resolved file documented.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Relative locations depend on the working directory.</p>
+<p><strong>Verify:</strong> Both anchor and resolved file documented.</p>
+<p><strong>Progressive hints:</strong> Relative locations depend on the working directory.</p>
 <h4 id="exercise-6-transfer-versioning">Exercise 6: Transfer versioning<a class="heading-anchor" href="#exercise-6-transfer-versioning" aria-label="Link to this section">#</a></h4>
 <p>Design v2 with a fourth status field.</p>
 <p><strong>Expected result/shape:</strong> Explicit v2 reader or rejection, never v1 silent truncation.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Explicit v2 reader or rejection, never v1 silent truncation.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Schema changes need compatibility decisions.</p>
+<p><strong>Verify:</strong> Explicit v2 reader or rejection, never v1 silent truncation.</p>
+<p><strong>Progressive hints:</strong> Schema changes need compatibility decisions.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: The exact wire text is independent of struct padding. Then explain the changed condition in example 2 without opening the answer.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
-<p>Write field values explicitly with separators and a version tag. Dumping sizeof(struct) bytes also writes padding and host layout. A text record such as v1,7,125 declares field order but still needs length, numeric and trailing-input validation.</p>
-<p>If the result disagrees, preserve the original input and inspect the first differing value or condition. A memory representation is not a schema.</p>
+<p>If a round-trip passes only because both writer and reader share the same bug, add independent known-byte fixtures. If a suffix slips through, inspect conversion end pointers. If a file appears in an unexpected folder, record the process working directory and resolved input/output paths. If a version mismatch is silently accepted, restore an explicit version gate rather than treating every three-field string as v1.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
 <p>Close the source. Reconstruct the reasoning for Exercise 6: Transfer versioning. Explain which assumptions would fail on a larger input or another runtime.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue with <a href="cpp-023.md.html">cpp-023</a> after saving the six observations.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines">C++ Core Guidelines</a></p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach cpp-022.
 Read courses/cpp/guides/cpp-022.md and courses/cpp/lessons/cpp-022.cpp.

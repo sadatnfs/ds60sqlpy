@@ -552,9 +552,9 @@
         "rollback",
         "isolation"
       ],
-      "outcome": "Explain and apply jdbc and transactions with explicit assumptions and failure handling.",
-      "lab": "Work through prepared statement examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "JDBC is Java's database-access API.",
+      "lab": "Open the fixture,inspect product metadata andcount the two account rows.",
+      "verification": "database productH2;2 rows;auto-commit initiallytrue. second session sees100beforecommit and95aftercommit."
     },
     {
       "id": "java-030",
@@ -571,9 +571,9 @@
         "validation",
         "deserialization"
       ],
-      "outcome": "Explain and apply serialization and schema evolution with explicit assumptions and failure handling.",
-      "lab": "Work through data boundary examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "Serialization turns domain values into a representation that another process orversion can read.",
+      "lab": "Encode accounta1,balance125,noteCaf\u00e9 withversion2 anddecode.",
+      "verification": "equal domain record andexact Unicode note. trailing payloadIOException;negative balanceIllegalArgumentException."
     },
     {
       "id": "java-031",
@@ -590,9 +590,9 @@
         "ServiceLoader",
         "encapsulation"
       ],
-      "outcome": "Explain and apply reflection, annotations and service loading with explicit assumptions and failure handling.",
-      "lab": "Work through reflection examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "Reflection inspects orinvokes program elements through metadata rather than ordinary compile-time calls.",
+      "lab": "ReadVersion on the knownFriendly provider.",
+      "verification": "version2. version2accepted;version3rejected."
     },
     {
       "id": "java-032",
@@ -609,9 +609,9 @@
         "JIT",
         "measurement bias"
       ],
-      "outcome": "Explain and apply profiling and benchmark reasoning with explicit assumptions and failure handling.",
-      "lab": "Work through JFR examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "Performance measurement starts with a correct,representative workload.",
+      "lab": "Sum1..1000 with a loop andcompare withn*(n+1)/2.",
+      "verification": "500500. metadata names100warmups andprofilingfalse;universal claimfalse."
     },
     {
       "id": "java-033",
@@ -628,9 +628,9 @@
         "resource limits",
         "secrets"
       ],
-      "outcome": "Explain and apply secure application boundaries with explicit assumptions and failure handling.",
-      "lab": "Work through untrusted input examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "An application boundary converts untrusted input into a limited set of permitted operations.",
+      "lab": "Createinput.txt inside anownedroot andread atmost10bytes.",
+      "verification": "contenthello. diagnostic excludes both sensitive fields."
     },
     {
       "id": "java-034",
@@ -647,9 +647,9 @@
         "adapters",
         "pure core"
       ],
-      "outcome": "Explain and apply application design and dependency boundaries with explicit assumptions and failure handling.",
-      "lab": "Work through dependency inversion examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "Application design separates domain decisions from the mechanisms that supply data,time orside effects.",
+      "lab": "Compute3items at125cents andcheckzero/negativequantity policy.",
+      "verification": "375cents;nonpositivequantityrejected. ArithmeticException;auditsinkunused."
     },
     {
       "id": "java-035",
@@ -666,9 +666,9 @@
         "HTTP",
         "contract tests"
       ],
-      "outcome": "Explain and apply build a tested local data service with explicit assumptions and failure handling.",
-      "lab": "Work through domain model examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "A small data service combines domain rules,storage andtransport contracts.",
+      "lab": "SummarizegroupAoveramounts10,20 andgroupBover5.",
+      "verification": "Acount2,total30;Bcount1,total5. 3unchangedrecords;closedflagtrue."
     },
     {
       "id": "java-036",
@@ -686,9 +686,9 @@
         "compatibility",
         "release checklist"
       ],
-      "outcome": "Explain and apply package, diagnose and maintain a release with explicit assumptions and failure handling.",
-      "lab": "Work through jar examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "A release is a reproducible artifact plus evidence about how it starts,what contracts it accepts andhow failures are diagnosed.",
+      "lab": "Compile thefixture with--release21 andinspect itsclassheader.",
+      "verification": "magicCAFEBABE;majorversion65. previousartifactv1 retained;custom_runtime_builtFalse."
     }
   ],
   "sources": [

@@ -119,33 +119,106 @@
 <span> </span>
 <span>import numpy as np</span>
 <span> </span>
+<span>def split_heads(values, heads):</span>
+<span>    values = np.asarray(values)</span>
+<span>    if values.ndim != 2 or min(values.shape) == 0:</span>
+<span>        raise ValueError(&#x27;nonempty token-by-feature input required&#x27;)</span>
+<span>    if type(heads) is not int or heads &lt;= 0 or values.shape[1] % heads != 0:</span>
+<span>        raise ValueError(&#x27;positive head count must divide feature width&#x27;)</span>
+<span>    time, width = values.shape</span>
+<span>    head_width = width // heads</span>
+<span>    return values.reshape(time, heads, head_width).transpose(1, 0, 2)</span>
 <span> </span>
+<span> </span>
+<span>def join_heads(values):</span>
+<span>    values = np.asarray(values)</span>
+<span>    if values.ndim != 3 or min(values.shape) == 0:</span>
+<span>        raise ValueError(&#x27;nonempty head-by-token-by-feature input required&#x27;)</span>
+<span>    heads, time, head_width = values.shape</span>
+<span>    return values.transpose(1, 0, 2).reshape(time, heads * head_width)</span>
+<span> </span>
+<span> </span>
+<span>def multihead(values, heads=2, causal=True):</span>
+<span>    values = np.asarray(values, dtype=np.float64)</span>
+<span>    if not np.isfinite(values).all():</span>
+<span>        raise ValueError(&#x27;finite values required&#x27;)</span>
+<span>    projected = split_heads(values, heads)</span>
+<span>    head_width = projected.shape[-1]</span>
+<span>    scores = projected @ projected.transpose(0, 2, 1) / np.sqrt(head_width)</span>
+<span>    time = values.shape[0]</span>
+<span>    allowed = np.tri(time, dtype=bool) if causal else np.ones((time, time), dtype=bool)</span>
+<span>    masked = np.where(allowed[None, :, :], scores, -np.inf)</span>
+<span>    mass = np.exp(masked - masked.max(axis=-1, keepdims=True))</span>
+<span>    weights = mass / mass.sum(axis=-1, keepdims=True)</span>
+<span>    head_outputs = weights @ projected</span>
+<span>    return join_heads(head_outputs), weights</span>
+<span> </span>
+<span> </span>
+<span>def tokenwise_feed_forward(values):</span>
+<span>    values = np.asarray(values, dtype=np.float64)</span>
+<span>    width = values.shape[-1]</span>
+<span>    first_weight = np.eye(width)</span>
+<span>    first_bias = np.full(width, -2.0)</span>
+<span>    second_weight = np.eye(width)</span>
+<span>    hidden = np.maximum(values @ first_weight + first_bias, 0)</span>
+<span>    return hidden @ second_weight</span>
 <span> </span>
 <span> </span>
 <span>def verify():</span>
 <span>    # Exercise 1: Split and rejoin</span>
-<span>    x=np.arange(8).reshape(2,4); heads=x.reshape(2,2,2).transpose(1,0,2)</span>
-<span>    restored=heads.transpose(1,0,2).reshape(2,4)</span>
-<span>    np.testing.assert_array_equal(restored,x); assert heads.shape==(2,2,2)</span>
+<span>    values = np.arange(8).reshape(2, 4)</span>
+<span>    heads = split_heads(values, 2)</span>
+<span>    np.testing.assert_array_equal(heads[0], [[0, 1], [4, 5]])</span>
+<span>    np.testing.assert_array_equal(heads[1], [[2, 3], [6, 7]])</span>
+<span>    np.testing.assert_array_equal(join_heads(heads), values)</span>
+<span>    assert heads.shape == (2, 2, 2)</span>
 <span> </span>
 <span>    # Exercise 2: Calculate a residual</span>
-<span>    branch=2*x; residual=x+branch</span>
-<span>    np.testing.assert_array_equal(residual,3*x); assert residual.shape==x.shape</span>
+<span>    values = np.arange(8).reshape(2, 4)</span>
+<span>    branch = 2 * values</span>
+<span>    residual = values + branch</span>
+<span>    np.testing.assert_array_equal(residual, 3 * values)</span>
+<span>    np.testing.assert_array_equal(values + np.zeros_like(values), values)</span>
+<span>    np.testing.assert_array_equal(values + (-values), np.zeros_like(values))</span>
+<span>    assert residual.shape == values.shape</span>
 <span> </span>
 <span>    # Exercise 3: Use a tokenwise nonlinear block</span>
-<span>    feed=np.maximum(x-2,0)@np.eye(4)</span>
-<span>    np.testing.assert_array_equal(feed[0],[0,0,0,1])</span>
+<span>    values = np.arange(8, dtype=np.float64).reshape(2, 4)</span>
+<span>    output = tokenwise_feed_forward(values)</span>
+<span>    np.testing.assert_array_equal(output[0], [0, 0, 0, 1])</span>
+<span>    changed = values.copy()</span>
+<span>    changed[1] = [100, 200, 300, 400]</span>
+<span>    np.testing.assert_array_equal(tokenwise_feed_forward(changed)[0], output[0])</span>
 <span> </span>
-<span>    # Exercise 4: Test a prefix</span>
-<span>    np.testing.assert_array_equal(np.maximum(x[:1]-2,0)@np.eye(4),feed[:1])</span>
+<span>    # Exercise 4: Test actual head mixtures and causal prefixes</span>
+<span>    values = np.array([[1., 0., 1., 1.], [0., 1., 1., 0.], [1., 1., 0., 1.]])</span>
+<span>    output, weights = multihead(values, heads=2, causal=True)</span>
+<span>    a = np.exp(1 / np.sqrt(2))</span>
+<span>    np.testing.assert_allclose(weights[0, 1, :2], [1 / (1 + a), a / (1 + a)], atol=1e-12, rtol=0)</span>
+<span>    np.testing.assert_allclose(weights[1, 1, :2], [0.5, 0.5], atol=1e-12, rtol=0)</span>
+<span>    np.testing.assert_array_equal(weights[:, 1, 2], [0, 0])</span>
+<span>    np.testing.assert_allclose(output[1], [1 / (1 + a), a / (1 + a), 1, 0.5], atol=1e-12, rtol=0)</span>
+<span>    for length in [1, 2, 3]:</span>
+<span>        prefix, _ = multihead(values[:length], heads=2, causal=True)</span>
+<span>        np.testing.assert_allclose(prefix, output[:length], atol=1e-12, rtol=0)</span>
 <span> </span>
 <span>    # Exercise 5: Reject an indivisible width</span>
-<span>    width,head_count=5,2</span>
-<span>    assert width%head_count!=0</span>
+<span>    for values, count in [(np.zeros((2, 5)), 2), (np.zeros((2, 4)), 0), (np.zeros((0, 4)), 2)]:</span>
+<span>        try:</span>
+<span>            split_heads(values, count)</span>
+<span>        except ValueError:</span>
+<span>            pass</span>
+<span>        else:</span>
+<span>            raise AssertionError(&#x27;invalid head layout accepted&#x27;)</span>
 <span> </span>
 <span>    # Exercise 6: Detect a wrong rejoin</span>
-<span>    wrong=heads.reshape(2,4)</span>
-<span>    assert not np.array_equal(wrong,x)</span>
+<span>    values = np.arange(8).reshape(2, 4)</span>
+<span>    heads = split_heads(values, 2)</span>
+<span>    wrong = heads.reshape(2, 4)</span>
+<span>    np.testing.assert_array_equal(wrong, [[0, 1, 4, 5], [2, 3, 6, 7]])</span>
+<span>    assert wrong.shape == values.shape</span>
+<span>    assert not np.array_equal(wrong, values)</span>
+<span>    np.testing.assert_array_equal(join_heads(heads), values)</span>
 <span>    return {&quot;checks&quot;: 6, &quot;status&quot;: &quot;passed&quot;}</span>
 <span> </span>
 <span> </span>

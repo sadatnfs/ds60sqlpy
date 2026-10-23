@@ -1,0 +1,65 @@
+{
+  "lesson_id": "spark-009",
+  "scope": "Tiny deterministic local contracts; runtime qualification is separate.",
+  "cases": [
+    {
+      "exercise": 1,
+      "title": "Validate the prepared dependency family",
+      "input_contract": "Construct an org.apache.spark coordinate for a lowercase hyphenated artifact base, requiring Scala binary 2.13 and Spark target 4.0.1. Reject other binary/version tuples and malformed base names. Do not download anything.",
+      "expected": "spark-sql,2.13,4.0.1 yields org.apache.spark:spark-sql_2.13:4.0.1. Binary 3 or 2.12 and version 4.2.0 are outside this prepared target contract.",
+      "verification": "Assert the exact coordinate and catch each unsupported tuple or malformed artifact base."
+    },
+    {
+      "exercise": 2,
+      "title": "Keep execution local and bounded",
+      "input_contract": "Accept exactly local[2] as the course master and reject remote addresses, local[*] and null. Return the accepted value without starting a session.",
+      "expected": "local[2] passes;local[*], spark://example:7077 and null raise IllegalArgumentException.",
+      "verification": "Assert the accepted literal and all three rejected values with no network action."
+    },
+    {
+      "exercise": 3,
+      "title": "Capture data instead of a resource owner",
+      "input_contract": "Return a multiplier closure that copies only owner.factor into a local immutable value. Require factor and input magnitude at most 1000000 so multiplication is within Long range. Do not retain owner or its nonserializable resource.",
+      "expected": "Owner factor 3 produces 7->21 and-2->-6. An input outside the bounded domain is rejected. The function is suitable for the later serialization check.",
+      "verification": "Assert both signed results and the domain rejection, then compare serializability with owner.bad in Exercise 4."
+    },
+    {
+      "exercise": 4,
+      "title": "Observe the captured object graph",
+      "input_contract": "Serialize a locally constructed object into an in-memory byte array and return its byte size, closing the stream. Demonstrate that the safe closure serializes and owner.bad fails with NotSerializableException.",
+      "expected": "The safe closure produces a positive byte count; the bad closure retaining Owner raises NotSerializableException. No file or external service is used.",
+      "verification": "Assert positive size for safe and catch the exact serialization exception for owner.bad."
+    },
+    {
+      "exercise": 5,
+      "title": "Verify behavior after a local serialization round trip",
+      "input_contract": "Serialize the supplied local function to memory, deserialize only those self-produced bytes and return the recovered function. Close both streams. Compare original and recovered outputs on a bounded fixture.",
+      "expected": "The safe factor 3 closure returns identical results after round trip for-2,0,7. The check proves more than a nonempty byte array.",
+      "verification": "Assert exact output equality for all three inputs and an expected 21 result for 7."
+    },
+    {
+      "exercise": 6,
+      "title": "Separate runtime readback from a target declaration",
+      "input_contract": "Return actual Scala version and Java specification version plus the declared spark_target4.0.1. Do not label the target string as an observed Spark runtime version. The prepared foundation profile should report Scala 2.13 and Java 17.",
+      "expected": "Keys are scala_actual, java_actual, spark_target. Scala starts with 2.13., Java is 17, and target is 4.0.1. Exact Scala patch comes from the run.",
+      "verification": "Assert the keys and version families, then retain the printed runtime line as platform-specific evidence."
+    }
+  ],
+  "golden": {
+    "coordinate": "org.apache.spark:spark-sql_2.13:4.0.1",
+    "master": "local[2]",
+    "factor": 3,
+    "inputs": [
+      -2,
+      0,
+      7
+    ],
+    "expected_outputs": [
+      -6,
+      0,
+      21
+    ],
+    "java_target": "17",
+    "scala_binary_target": "2.13"
+  }
+}

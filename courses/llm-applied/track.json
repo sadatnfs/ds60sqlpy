@@ -306,9 +306,9 @@
         "Frozen base",
         "Merged inference"
       ],
-      "outcome": "Low-rank adaptation freezes a base weight matrix and learns a smaller additive update.",
-      "lab": "ConstructW=I8, A=ones(8, 2)/8, B=zeros(2, 8), rank 2, alpha 4.",
-      "verification": "base64 entries; adapter32; scale2. rank at most2; delta atalpha4 is twice delta atalpha2."
+      "outcome": "Low-rank adaptation, or LoRA, freezes a base linear weight and learns an additive update represented by two smaller matrices.",
+      "lab": "Construct W=I8, A=ones(8, 2)/8, B=zeros(2, 8), rank 2 and alpha 4, then count stored entries.",
+      "verification": "64 base entries, 32 trainable adapter entries and scale 2. The actual update has rank 1, within the configured bound 2; alpha 4 gives twice the alpha-2 delta."
     },
     {
       "id": "llm-applied-017",

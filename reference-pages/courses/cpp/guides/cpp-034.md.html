@@ -116,7 +116,6 @@
       <p class="source-path">Generated from <code>courses/cpp/guides/cpp-034.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-034-data-layout-allocation-and-locality">cpp-034: Data layout, allocation and locality<a class="heading-anchor" href="#cpp-034-data-layout-allocation-and-locality" aria-label="Link to this section">#</a></h2>
-<p>Authored beta content. Content completion and runtime qualification are separate evidence.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Advanced; 120 minutes. Direct prerequisites: <code>cpp-019</code>, <code>cpp-026</code>.</p>
 <p>Learner artifact: <a href="../lessons/cpp-034.cpp.html">cpp-034.cpp</a>. Keep <a href="../solutions/cpp-034_solutions.md.html">official solutions</a> closed until an attempt. The immutable <a href="../fixtures/cpp-034-cases.json.html">case ledger</a> records exercise inputs and expected observations.</p>
@@ -128,55 +127,95 @@
 <p>Compare equivalent values before measuring layout. Reserve can reduce vector reallocations but does not change size. A local benchmark must retain the same row count, arithmetic and checksum, with measured units and build mode. No fixed speedup is promised by these tiny fixtures.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Physical grouping should follow the access pattern being measured. Summing only values may benefit from keeping those values together, while a routine consuming full records may prefer another layout. The reference proves that both forms still represent the same three values and sum to 60. reserve changes capacity, not size, so writing through index zero after reserve alone is invalid. Populate elements through push_back or resize before accessing them.</p>
+<h3 id="data-layout-follows-the-access-pattern">Data layout follows the access pattern<a class="heading-anchor" href="#data-layout-follows-the-access-pattern" aria-label="Link to this section">#</a></h3>
+<p>An array of structures stores complete records together. A structure-of-arrays layout stores each field in its own sequence. Neither layout is universally faster. The useful question is which fields the operation reads and in what order. Summing only value can benefit from dense values, while operations that need id and value together may favor a record layout.</p>
+<p>The first example stores three Sample records with IDs1, 2, 3 and values 10, 20, 30. It visits each record and adds value. The second stores just the values and uses accumulation. Both must produce60 before any timing comparison is meaningful. Equal totals are a basic correctness check; in a richer transformation, also verify that identity-to-value relationships remain intact.</p>
+<p>reserve(rows.size()) can avoid repeated growth allocations while materializing a values vector. It changes capacity, not size. push_back constructs the actual elements. Writing values[0] immediately after reserve on an empty vector would violate the element-access contract. This is a concrete link between performance-oriented allocation control and the ownership rules from cpp-007.</p>
+<p>Data movement has a cost. Creating a separate values sequence may improve repeated scans but require an upfront copy and additional memory. If only one tiny scan is performed, the conversion cost can dominate. A benchmark should state whether layout conversion is included and how many queries reuse the result. Otherwise two timings can describe different amounts of work.</p>
+<p>Hardware cache behavior, alignment, compiler vectorization and input size influence performance. The tiny fixture teaches representation and equality of results, not a cache-speed claim. Measure a representative bounded workload in the intended build configuration, and keep the original data contract visible while changing layout.</p>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">std::vector&lt;Sample&gt; rows{{1,10},{2,20},{3,30}};</code></pre>
-<p><strong>Expected:</strong> Three full records retain the relationship between identity and value.</p>
+<p><a href="../examples/cpp-034-example-1.cpp.html">Complete program 1</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;iostream&gt;
+#include &lt;vector&gt;
+
+struct Sample  {
+     int id;
+     int value;
+};
+int main() {
+    std::vector&lt;Sample&gt; rows{{1,10},{2,20},{3,30}};
+    int sum=0;
+    for(const auto&amp; row:rows) sum+=row.value;
+    assert(sum==60);
+    std::cout &lt;&lt; &quot;cpp-034 example 1 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-034 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">std::vector&lt;int&gt; values{10,20,30}; assert(std::accumulate(values.begin(),values.end(),0)==60);</code></pre>
-<p><strong>Expected:</strong> The value-only representation yields the same total 60.</p>
+<p><a href="../examples/cpp-034-example-2.cpp.html">Complete program 2</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;iostream&gt;
+#include &lt;numeric&gt;
+#include &lt;vector&gt;
+
+struct Sample  {
+     int id;
+     int value;
+};
+int main() {
+    std::vector&lt;int&gt; values{10,20,30}; assert(std::accumulate(values.begin(),values.end(),0)==60);
+    std::cout &lt;&lt; &quot;cpp-034 example 2 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-034 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-draw-both-layouts">Exercise 1: Draw both layouts<a class="heading-anchor" href="#exercise-1-draw-both-layouts" aria-label="Link to this section">#</a></h4>
 <p>Sketch three records as AoS and as separate ID/value vectors.</p>
 <p><strong>Expected result/shape:</strong> Same three logical rows with different physical grouping.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Same three logical rows with different physical grouping.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Representation must preserve the row relationship.</p>
+<p><strong>Verify:</strong> Same three logical rows with different physical grouping.</p>
+<p><strong>Progressive hints:</strong> Representation must preserve the row relationship.</p>
 <h4 id="exercise-2-prove-result-equality">Exercise 2: Prove result equality<a class="heading-anchor" href="#exercise-2-prove-result-equality" aria-label="Link to this section">#</a></h4>
 <p>Sum values in both representations.</p>
 <p><strong>Expected result/shape:</strong> 60 from each.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: 60 from each.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Correctness is checked before performance.</p>
+<p><strong>Verify:</strong> 60 from each.</p>
+<p><strong>Progressive hints:</strong> Correctness is checked before performance.</p>
 <h4 id="exercise-3-inspect-reserve">Exercise 3: Inspect reserve<a class="heading-anchor" href="#exercise-3-inspect-reserve" aria-label="Link to this section">#</a></h4>
 <p>Reserve 100 on an empty vector, then inspect size.</p>
 <p><strong>Expected result/shape:</strong> Size 0; capacity at least 100.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Size 0; capacity at least 100.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Reserved storage is not constructed logical elements.</p>
+<p><strong>Verify:</strong> Size 0; capacity at least 100.</p>
+<p><strong>Progressive hints:</strong> Reserved storage is not constructed logical elements.</p>
 <h4 id="exercise-4-repair-an-unfair-comparison">Exercise 4: Repair an unfair comparison<a class="heading-anchor" href="#exercise-4-repair-an-unfair-comparison" aria-label="Link to this section">#</a></h4>
 <p>One candidate omits the value 30.</p>
 <p><strong>Expected result/shape:</strong> Reject timing comparison until both checksums equal 60.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Reject timing comparison until both checksums equal 60.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Doing less work can falsely look faster.</p>
+<p><strong>Verify:</strong> Reject timing comparison until both checksums equal 60.</p>
+<p><strong>Progressive hints:</strong> Doing less work can falsely look faster.</p>
 <h4 id="exercise-5-measure-bounded-work">Exercise 5: Measure bounded work<a class="heading-anchor" href="#exercise-5-measure-bounded-work" aria-label="Link to this section">#</a></h4>
 <p>Repeat one-field summation with a fixed row cap and build mode.</p>
 <p><strong>Expected result/shape:</strong> Same checksum, duration units and repetitions recorded.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Same checksum, duration units and repetitions recorded.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Layout benefits depend on access pattern and hardware.</p>
+<p><strong>Verify:</strong> Same checksum, duration units and repetitions recorded.</p>
+<p><strong>Progressive hints:</strong> Layout benefits depend on access pattern and hardware.</p>
 <h4 id="exercise-6-transfer-the-workload">Exercise 6: Transfer the workload<a class="heading-anchor" href="#exercise-6-transfer-the-workload" aria-label="Link to this section">#</a></h4>
 <p>Now request ID and value together for every row.</p>
 <p><strong>Expected result/shape:</strong> Reassess the locality hypothesis without assuming SoA always wins.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Reassess the locality hypothesis without assuming SoA always wins.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: The useful representation follows the query pattern.</p>
+<p><strong>Verify:</strong> Reassess the locality hypothesis without assuming SoA always wins.</p>
+<p><strong>Progressive hints:</strong> The useful representation follows the query pattern.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: Three full records retain the relationship between identity and value. Then explain the changed condition in example 2 without opening the answer.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
-<p>Compare equivalent values before measuring layout. Reserve can reduce vector reallocations but does not change size. A local benchmark must retain the same row count, arithmetic and checksum, with measured units and build mode. No fixed speedup is promised by these tiny fixtures.</p>
-<p>If the result disagrees, preserve the original input and inspect the first differing value or condition. Doing less work can falsely look faster.</p>
+<p>If a layout optimization changes which value belongs to an ID, the transformation is wrong even when the total happens to match. If reserve appears to create elements, inspect size separately. If a benchmark excludes conversion for one layout but includes it for another, state that asymmetry before comparing. If a tiny fixture shows unstable timing, do not extrapolate a production speedup from it.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
 <p>Close the source. Reconstruct the reasoning for Exercise 6: Transfer the workload. Explain which assumptions would fail on a larger input or another runtime.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue with <a href="cpp-035.md.html">cpp-035</a> after saving the six observations.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines">C++ Core Guidelines</a></p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach cpp-034.
 Read courses/cpp/guides/cpp-034.md and courses/cpp/lessons/cpp-034.cpp.

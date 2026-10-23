@@ -118,7 +118,551 @@
     <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-json"><code><span>{</span>
 <span>  &quot;schema_version&quot;: 1,</span>
 <span>  &quot;track_id&quot;: &quot;javascript-typescript&quot;,</span>
-<span>  &quot;lessons&quot;: []</span>
+<span>  &quot;lessons&quot;: [</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-001&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;javascript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;javascript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-001.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-001.mjs&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-001_solution.mjs&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-001_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-002&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;javascript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;javascript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-002.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-002.mjs&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-002_solution.mjs&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-002_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-003&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;javascript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;javascript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-003.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-003.mjs&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-003_solution.mjs&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-003_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-004&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;javascript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;javascript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-004.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-004.mjs&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-004_solution.mjs&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-004_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-005&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;javascript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;javascript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-005.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-005.mjs&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-005_solution.mjs&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-005_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-006&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;javascript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;javascript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-006.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-006.mjs&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-006_solution.mjs&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-006_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-007&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;javascript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;javascript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-007.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-007.mjs&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-007_solution.mjs&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-007_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-008&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;javascript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;javascript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-008.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-008.mjs&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-008_solution.mjs&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-008_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-009&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;javascript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;javascript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-009.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-009.mjs&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-009_solution.mjs&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-009_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-010&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;javascript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;javascript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-010.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-010.mjs&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-010_solution.mjs&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-010_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-011&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;javascript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;javascript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-011.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-011.mjs&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-011_solution.mjs&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-011_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-012&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;javascript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;javascript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-012.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-012.mjs&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-012_solution.mjs&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-012_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-013&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;javascript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;javascript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-013.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-013.mjs&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-013_solution.mjs&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-013_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-014&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;javascript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;javascript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-014.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-014.mjs&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-014_solution.mjs&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-014_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-015&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;javascript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;javascript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-015.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-015.mjs&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-015_solution.mjs&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-015_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-016&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;javascript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;javascript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-016.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-016.mjs&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-016_solution.mjs&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-016_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-017&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;javascript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;javascript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-017.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-017.mjs&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-017_solution.mjs&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-017_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-018&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;javascript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;javascript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-018.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-018.mjs&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-018_solution.mjs&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-018_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-019&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;typescript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;typescript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-019.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-019.mts&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-019_solution.mts&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-019_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-020&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;typescript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;typescript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-020.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-020.mts&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-020_solution.mts&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-020_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-021&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;typescript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;typescript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-021.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-021.mts&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-021_solution.mts&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-021_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-022&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;typescript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;typescript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-022.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-022.mts&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-022_solution.mts&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-022_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-023&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;typescript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;typescript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-023.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-023.mts&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-023_solution.mts&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-023_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-024&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;typescript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;typescript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-024.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-024.mts&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-024_solution.mts&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-024_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-025&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;typescript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;typescript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-025.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-025.mts&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-025_solution.mts&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-025_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-026&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;typescript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;typescript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-026.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-026.mts&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-026_solution.mts&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-026_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-027&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;typescript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;typescript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-027.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-027.mts&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-027_solution.mts&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-027_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-028&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;typescript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;typescript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-028.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-028.mts&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-028_solution.mts&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-028_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-029&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;markdown&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;reading&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-029.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-029.md&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-029_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-030&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;markdown&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;reading&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-030.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-030.md&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-030_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-031&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;markdown&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;reading&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-031.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-031.md&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-031_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-032&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;javascript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;javascript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-032.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-032.mjs&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-032_solution.mjs&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-032_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-033&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;javascript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;javascript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-033.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-033.mjs&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-033_solution.mjs&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-033_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-034&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;javascript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;javascript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-034.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-034.mjs&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-034_solution.mjs&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-034_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-035&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;javascript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;javascript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-035.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-035.mjs&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-035_solution.mjs&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-035_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-036&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;javascript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;javascript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-036.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-036.mjs&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-036_solution.mjs&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-036_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-037&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;javascript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;javascript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-037.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-037.mjs&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-037_solution.mjs&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-037_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-038&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;typescript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;typescript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-038.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-038.mts&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-038_solution.mts&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-038_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-039&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;typescript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;typescript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-039.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-039.mts&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-039_solution.mts&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-039_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-040&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;javascript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;javascript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-040.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-040.mjs&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-040_solution.mjs&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-040_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-041&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;typescript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;typescript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-041.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-041.mts&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-041_solution.mts&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-041_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;js-042&quot;,</span>
+<span>      &quot;status&quot;: &quot;authored&quot;,</span>
+<span>      &quot;language&quot;: &quot;javascript&quot;,</span>
+<span>      &quot;runtime_profile&quot;: &quot;javascript-node&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;courses/javascript-typescript/guides/js-042.md&quot;,</span>
+<span>      &quot;source_path&quot;: &quot;courses/javascript-typescript/lessons/js-042.mjs&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-042_solution.mjs&quot;,</span>
+<span>        &quot;courses/javascript-typescript/solutions/js-042_solutions.md&quot;</span>
+<span>      ],</span>
+<span>      &quot;verification_id&quot;: null</span>
+<span>    }</span>
+<span>  ]</span>
 <span>}</span>
 <span> </span></code></pre></article>
   </main>

@@ -10,6 +10,24 @@ RAII means acquiring a resource in an object and releasing it when that object l
 
 At scope entry the unique_ptr becomes responsible for one allocation. Moving it hands that responsibility to another owner; the moved-from pointer no longer releases the object. During exception unwinding the current owner still runs its destructor, which reduces the live count. Count resources at scope boundaries rather than depending on an informal promise to call delete later. Resource lifetime and the lifetime of a borrowed pointer must be drawn separately.
 
+<!-- depth:start -->
+## Exclusive ownership and deterministic destruction
+
+A unique_ptr represents one owning responsibility for a dynamically allocated object. The pointee can be borrowed through a raw pointer or reference, but those borrows do not become additional owners. When the unique_ptr is destroyed, its deleter releases the resource. The useful property is not that delete disappeared syntactically; it is that cleanup follows the lifetime of a visible owner on every ordinary scope-exit path.
+
+make_unique<int>(7) constructs an int and returns its owner. Moving p into q transfers that owning responsibility, leaving p empty for unique_ptr's specified move behavior. It does not move the integer 7 to a different allocation in this example. The address can stay the same while the object responsible for cleanup changes. Dereferencing the moved-from p would be invalid because it no longer owns or points to the integer.
+
+The Tracked fixture uses a counter to make lifetime observable. Construction increments live and destruction decrements it. Inside the owner scope, live is 1; after the scope, it is 0. The counter itself must outlive Tracked because Tracked borrows its address. A resource wrapper can still contain an unsafe borrow if that dependency is ignored. RAII solves cleanup ownership, not every possible lifetime relationship automatically.
+
+Exception unwinding destroys fully constructed local owners. If a later operation throws, a unique_ptr already in scope still releases its pointee. By contrast, a raw new followed by a throwing operation before a matching delete can leak. The correct fix is to establish ownership immediately, not to add a delete to one guessed error branch. For non-memory resources, the same structure can use an appropriate custom deleter.
+
+Exclusive ownership is not appropriate for every graph. shared_ptr introduces shared lifetime responsibility and additional costs, while raw pointers can express non-owning access. Choose based on who must keep the object alive, not on which pointer syntax seems easiest. The examples deliberately avoid shared ownership so the transfer and destruction points are inspectable.
+
+## Debugging the contract
+
+If live remains1 after the scope, inspect whether ownership escaped or was released without cleanup. If a moved-from unique_ptr is dereferenced, test its empty state and use the new owner instead. Do not construct two unique_ptr objects from the same raw pointer: that creates two deletion responsibilities for one allocation. A destructor counter proves the fixture lifecycle, not the safety of every borrowed pointer elsewhere in the program.
+<!-- depth:end -->
+
 ## Worked example 1
 
 ```cpp

@@ -125,9 +125,9 @@
 <span># Evaluate x*x+1 at float32[1,2].</span>
 <span># Expected: output[2,5].</span>
 <span> </span>
-<span># Exercise 2: Compile and compare</span>
-<span># Wrap the same expression in tf.function and compare output.</span>
-<span># Expected: graph output equals eager output.</span>
+<span># Exercise 2: Trace a graph and compare</span>
+<span># Wrap the expression in plain tf.function, run it and inspect the initial trace count.</span>
+<span># Expected: Graph output equals eager output; at least one trace exists. No XLA compilation is requested.</span>
 <span> </span>
 <span># Exercise 3: Reuse an equal signature</span>
 <span># Call with float32[3,4] and inspect trace count.</span>
@@ -138,12 +138,13 @@
 <span># Expected: float64 result[2,5]; at least one new trace.</span>
 <span> </span>
 <span># Exercise 5: Measure only warmed calls</span>
-<span># After warmup, time10 repeated float32 calls and materialize outputs.</span>
-<span># Expected: 10 finite outputs and nonnegative elapsed time.</span>
+<span># Warm the float32 graph, time ten completed calls, then check every collected result.</span>
+<span># Expected: Ten finite [2,5] results and a nonnegative measured interval, without a speed-ranking claim.</span>
 <span> </span>
 <span># Exercise 6: Separate shape contracts</span>
-<span># Create a function with a variable-length float32 vector signature; call lengths2 and3.</span>
-<span># Expected: one trace reused; outputs have lengths2 and3.</span>
+<span># Reuse a variable-length float32 vector signature at lengths two and three, then reject</span>
+<span># wrong rank and dtype.</span>
+<span># Expected: One declared trace is reused for both lengths; incompatible rank or dtype is rejected.</span>
 <span> </span>
 <span>if __name__ == &quot;__main__&quot;:</span>
 <span>    print(&quot;Read the guide and implement the six exercises in your saved copy.&quot;)</span>

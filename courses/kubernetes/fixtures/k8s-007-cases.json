@@ -1,0 +1,38 @@
+{
+  "lesson_id": "k8s-007",
+  "provenance": "synthetic teaching cases, not runtime observations",
+  "capability": "fixed Deployment/Service baseline and selector negative case",
+  "browser_source": true,
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Compare Deployment template app=hello with Service selector app=hello and app=wrong.",
+      "expected": "Matching selector finds the intended set;wrong selector has no intended backends."
+    },
+    {
+      "exercise": 2,
+      "task": "Read Service port,targetPort and container port name/number.",
+      "expected": "Client8080 -> targetPort http -> container8080."
+    },
+    {
+      "exercise": 3,
+      "task": "Deduplicate the four synthetic EndpointSlice entries.",
+      "expected": "Exactly two unique Pod UIDs matching the owned Ready set."
+    },
+    {
+      "exercise": 4,
+      "task": "Change only the allowed Service selector to app=wrong in an owned Run,then restore it.",
+      "expected": "No matching ready backends;bounded failure and cleanup;restored source can pass separately."
+    },
+    {
+      "exercise": 5,
+      "task": "Inspect the fresh client Job and exact /version result after backend checks.",
+      "expected": "Job/Pod ownership and exit0 accompany the expected ds60-fixture-v1 payload contract."
+    },
+    {
+      "exercise": 6,
+      "task": "Explain a scoped host experiment using another Service without touching unrelated objects.",
+      "expected": "A separate capability,unique owned resource receipt,selector/port/backend/client checks and UID-aware cleanup are specified."
+    }
+  ]
+}

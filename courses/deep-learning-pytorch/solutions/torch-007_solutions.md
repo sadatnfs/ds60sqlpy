@@ -20,9 +20,35 @@ Detach removes a value from its current graph while sharing storage; clone copie
 
 Set requires_grad on floating-point inputs that need derivatives. Use backward for accumulated leaf gradients and zero_grad(set_to_none=True) between independent optimizer steps. detached=value.detach() does not allocate independent storage; use value.detach().clone() for an owned logging snapshot. Check is_leaf and grad_fn to understand the graph role rather than guessing from a variable name.
 
+## Separate four kinds of state
+
+A tensor's value, storage aliases, graph role and stored gradient are related but different facts. Module mode adds another independent control:
+
+| Control or observation | What it changes or reports | What it does not establish |
+| --- | --- | --- |
+| requires_grad | Whether relevant operations can be tracked for derivatives | Independent storage or optimizer membership |
+| is_leaf and grad_fn | Role in the recorded graph | Whether the Python variable name sounds like a parameter |
+| backward | Adds derivative contributions to eligible stored gradients | A parameter update |
+| detach | Removes the current differentiation connection | A copy of storage |
+| clone | Copies storage | A detached gradient history |
+| no_grad | Suppresses recording for ordinary operations in its scope | Evaluation behavior of Dropout or BatchNorm |
+| eval | Selects evaluation behavior of affected modules | Disabled autograd or cleared gradients |
+
+For tensors requiring gradients, a leaf is not the result of a tracked differentiable operation. An intermediate such as 2 w has an operation history even when assigned to a named variable. Tensors not requiring gradients are treated as leaves by convention. A conversion or copy operation can therefore change the graph role of a tracked tensor; inspect the actual metadata instead of assuming every user-named tensor is a leaf. [PyTorch 2.9 is_leaf](https://docs.pytorch.org/docs/2.9/generated/torch.Tensor.is_leaf.html).
+
+The first fixture has w=0 and intermediate=2w. Backpropagating that scalar gives incoming sensitivity one at the intermediate and sensitivity two at w. The intermediate's gradient is visible only because retain_grad was requested. Its absence by default would be a storage-policy observation, not evidence that the chain rule failed.
+
+Now reset w.grad to None and compute(w-2)². The new contribution is -4. Building the same expression again creates a fresh graph, but backward adds another -4 into the existing gradient buffer, leaving -8. A fresh graph does not clear a previous buffer. Resetting to None before the third computation gives -4 again without changing w itself.
+
+None and numeric zero have different meanings. None may indicate that no gradient has been stored, that a reset occurred, that the tensor was unused, or that an intermediate was not retained. A numeric zero can be the correct derivative of a connected path. Optimizers can also treat them differently: parameters with None gradients are commonly skipped, whereas zero gradients may still interact with momentum or weight decay. This distinction is documented for zero_grad rather than being merely a display detail. [PyTorch 2.9 zero_grad](https://docs.pytorch.org/docs/2.9/generated/torch.optim.Optimizer.zero_grad.html).
+
+The detach example changes shared storage. After detached=source.detach(), writing detached[0]=9 changes source[0] as well. The earlier source.detach().clone() snapshot remains one because it owns a copy. The snapshot is suitable for comparing later mutation, but detaching a value that the objective actually needs can break learning. Ownership and differentiation must both match the intended interface.
+
+Finally, model.eval() does not stop derivatives through a Linear layer. It changes a module's training flag and the behavior of layers that consult it. no_grad affects ordinary operation recording while leaving the original tensor's requires_grad flag unchanged; factory operations with an explicit requires_grad argument are a documented exception to treating the scope as a blanket flag rewrite. Keep mode, recording and gradient-buffer decisions separate in the surrounding training or inference function.
+
 ## Exercise 1: Inspect leaf and nonleaf state
 
-The question is: Create leaf w0 and intermediate2 w, retain the intermediate gradient and backpropagate its sum.
+The question is: Create leaf w0 and intermediate 2 w, retain the intermediate gradient and backpropagate its sum.
 
 Leaf status follows graph construction, not whether a tensor is assigned to a Python variable. retain_grad explicitly requests storage for the intermediate diagnostic.
 
@@ -31,9 +57,9 @@ w=torch.tensor(0.,requires_grad=True); intermediate=2*w; intermediate.retain_gra
 assert w.is_leaf and not intermediate.is_leaf and w.grad.item()==2 and intermediate.grad.item()==1
 ```
 
-**Expected:** w leaf True; intermediate False; gradients2 and1.
+**Expected:** w leaf True; intermediate False; gradients 2 and 1.
 
-**Verify:** Compare the computed values or written argument with w leaf True; intermediate False; gradients2 and1.
+**Verify:** Compare the computed values or written argument with w leaf True; intermediate False; gradients 2 and 1.
 
 ## Exercise 2: Observe accumulation across fresh graphs
 

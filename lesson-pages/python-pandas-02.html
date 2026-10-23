@@ -363,24 +363,34 @@
 <p>All timestamps in these fixtures are already timezone-aware UTC. The functions reject naive or missing timestamps instead of silently assigning a zone. This strict teaching boundary keeps identity, ordering, staleness and interval ownership observable. Production multi-entity histories also require grouping by entity and the same checks within each group.</p>
 <h4 id="guide--worked-examples-and-syntax-anatomy">Worked examples and syntax anatomy<a class="heading-anchor" href="#guide--worked-examples-and-syntax-anatomy" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">import numpy as np
-import pandas as pd
-
-events=pd.DataFrame({&quot;event_id&quot;:[1,2,3],&quot;customer_id&quot;:[&quot;a&quot;,&quot;b&quot;,&quot;c&quot;]})
-dimension=pd.DataFrame({&quot;customer_id&quot;:[&quot;a&quot;,&quot;b&quot;],&quot;segment&quot;:[&quot;small&quot;,&quot;large&quot;]})
-joined=events.merge(dimension,on=&quot;customer_id&quot;,how=&quot;left&quot;,validate=&quot;many_to_one&quot;,indicator=True)
-assert len(joined)==3 and joined.loc[joined.event_id==3,&quot;_merge&quot;].iloc[0]==&quot;left_only&quot;
-print(&quot;Join coverage:&quot;,joined[[&quot;event_id&quot;,&quot;_merge&quot;]].astype(str).values.tolist())</code></pre>
+<pre><code class="language-python">events = pd.DataFrame({&quot;event_id&quot;: [1, 2, 3], &quot;customer_id&quot;: [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]})
+dimension = pd.DataFrame({&quot;customer_id&quot;: [&quot;a&quot;, &quot;b&quot;], &quot;segment&quot;: [&quot;small&quot;, &quot;large&quot;]})
+joined = events.merge(
+    dimension, on=&quot;customer_id&quot;, how=&quot;left&quot;, validate=&quot;many_to_one&quot;, indicator=True
+)
+assert len(joined) == 3 and joined.loc[joined.event_id == 3, &quot;_merge&quot;].iloc[0] == &quot;left_only&quot;
+print(&quot;Join coverage:&quot;, joined[[&quot;event_id&quot;, &quot;_merge&quot;]].astype(str).values.tolist())</code></pre>
 <p>The left join retains every event. Cardinality validation protects against multiplying rows, while the indicator distinguishes a missing dimension match from a successfully attached segment. An inner join would quietly remove customer c and change the population.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">import numpy as np
-import pandas as pd
-
-requests=pd.DataFrame({&quot;request_id&quot;:[1,2],&quot;at&quot;:pd.to_datetime([&quot;2026-01-01T10:30Z&quot;,&quot;2026-01-01T12:00Z&quot;])})
-history=pd.DataFrame({&quot;available_at&quot;:pd.to_datetime([&quot;2026-01-01T10:00Z&quot;,&quot;2026-01-01T11:00Z&quot;]),&quot;value&quot;:[10.,20.]})
-joined=pd.merge_asof(requests,history,left_on=&quot;at&quot;,right_on=&quot;available_at&quot;,direction=&quot;backward&quot;,tolerance=pd.Timedelta(&quot;45min&quot;))
-assert joined.loc[0,&quot;value&quot;]==10 and pd.isna(joined.loc[1,&quot;value&quot;])
-print(&quot;Bounded availability lookup:&quot;,joined[&quot;value&quot;].tolist())</code></pre>
+<pre><code class="language-python">requests = pd.DataFrame(
+    {&quot;request_id&quot;: [1, 2], &quot;at&quot;: pd.to_datetime([&quot;2026-01-01T10:30Z&quot;, &quot;2026-01-01T12:00Z&quot;])}
+)
+history = pd.DataFrame(
+    {
+        &quot;available_at&quot;: pd.to_datetime([&quot;2026-01-01T10:00Z&quot;, &quot;2026-01-01T11:00Z&quot;]),
+        &quot;value&quot;: [10.0, 20.0],
+    }
+)
+joined = pd.merge_asof(
+    requests,
+    history,
+    left_on=&quot;at&quot;,
+    right_on=&quot;available_at&quot;,
+    direction=&quot;backward&quot;,
+    tolerance=pd.Timedelta(&quot;45min&quot;),
+)
+assert joined.loc[0, &quot;value&quot;] == 10 and pd.isna(joined.loc[1, &quot;value&quot;])
+print(&quot;Bounded availability lookup:&quot;, joined[&quot;value&quot;].tolist())</code></pre>
 <p>The second request is one hour after the last available value, exceeding the 45-minute freshness policy. Returning missing is the correct result, not an execution failure. A forward direction would introduce future information and a missing tolerance would silently change the policy.</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <ol>
@@ -463,73 +473,144 @@ Done when all six contracts and their boundary cases have inspected evidence and
 <span>Official implementations remain in solutions/.</span>
 <span>&quot;&quot;&quot;</span>
 <span> </span>
-<span>import numpy as np</span>
-<span>import pandas as pd</span>
+<span>import pandas as pd  # type: ignore[import-untyped]</span>
+<span> </span>
 <span> </span>
 <span>def validate_dimension(frame: pd.DataFrame, key: str) -&gt; None:</span>
-<span>    &quot;&quot;&quot;Validate that key exists, contains no missing values and is unique. Raise ValueError for a missing column, null key or repeated key. An empty frame with the key column is a valid empty dimension.&quot;&quot;&quot;</span>
+<span>    &quot;&quot;&quot;</span>
+<span>    Validate that key exists, contains no missing values and is unique. Raise ValueError for</span>
+<span>    a missing column, null key or repeated key. An empty frame with the key column is a</span>
+<span>    valid empty dimension.</span>
+<span>    &quot;&quot;&quot;</span>
 <span>    raise NotImplementedError(&quot;Implement validate_dimension&quot;)</span>
 <span> </span>
+<span> </span>
 <span>def enrich_events(events: pd.DataFrame, dimension: pd.DataFrame) -&gt; pd.DataFrame:</span>
-<span>    &quot;&quot;&quot;Require unique nonmissing event_id and a valid customer_id dimension. Left-join dimension segment onto event_id, customer_id, amount events with many-to-one validation and a match indicator. Preserve input event order and do not mutate either frame.&quot;&quot;&quot;</span>
+<span>    &quot;&quot;&quot;</span>
+<span>    Require unique nonmissing event_id and a valid customer_id dimension. Left-join</span>
+<span>    dimension segment onto event_id, customer_id, amount events with many-to-one validation</span>
+<span>    and a match indicator. Preserve input event order and do not mutate either frame.</span>
+<span>    &quot;&quot;&quot;</span>
 <span>    raise NotImplementedError(&quot;Implement enrich_events&quot;)</span>
 <span> </span>
+<span> </span>
 <span>def missing_key_report(events: pd.DataFrame, dimension: pd.DataFrame) -&gt; pd.DataFrame:</span>
-<span>    &quot;&quot;&quot;Return one diagnostic row per unmatched event with columns event_id and reason, sorted by event_id. Label null customer identifiers missing_key and nonnull identifiers absent from the dimension unknown_key. Validate event and dimension identities first.&quot;&quot;&quot;</span>
+<span>    &quot;&quot;&quot;</span>
+<span>    Return one diagnostic row per unmatched event with columns event_id and reason, sorted</span>
+<span>    by event_id. Label null customer identifiers missing_key and nonnull identifiers absent</span>
+<span>    from the dimension unknown_key. Validate event and dimension identities first.</span>
+<span>    &quot;&quot;&quot;</span>
 <span>    raise NotImplementedError(&quot;Implement missing_key_report&quot;)</span>
 <span> </span>
-<span>def latest_available(requests: pd.DataFrame, history: pd.DataFrame, tolerance: pd.Timedelta) -&gt; pd.DataFrame:</span>
-<span>    &quot;&quot;&quot;For a single history, attach the latest available_at, value no later than each request at time, within a nonnegative tolerance. Require unique request_id and unique history available_at, with nonmissing timezone-aware UTC time columns. Return original request order and preserve unmatched values as missing.&quot;&quot;&quot;</span>
+<span> </span>
+<span>def latest_available(</span>
+<span>    requests: pd.DataFrame, history: pd.DataFrame, tolerance: pd.Timedelta</span>
+<span>) -&gt; pd.DataFrame:</span>
+<span>    &quot;&quot;&quot;</span>
+<span>    For a single history, attach the latest available_at, value no later than each request</span>
+<span>    at time, within a nonnegative tolerance. Require unique request_id and unique history</span>
+<span>    available_at, with nonmissing timezone-aware UTC time columns. Return original request</span>
+<span>    order and preserve unmatched values as missing.</span>
+<span>    &quot;&quot;&quot;</span>
 <span>    raise NotImplementedError(&quot;Implement latest_available&quot;)</span>
 <span> </span>
+<span> </span>
 <span>def validate_intervals(history: pd.DataFrame) -&gt; pd.DataFrame:</span>
-<span>    &quot;&quot;&quot;Validate a single version history with unique version_id and finite UTC start, end times satisfying start&lt;end. Return it sorted by start. Reject any overlap, while permitting adjacent intervals where one end equals the next start.&quot;&quot;&quot;</span>
+<span>    &quot;&quot;&quot;</span>
+<span>    Validate a single version history with unique version_id and finite UTC start, end times</span>
+<span>    satisfying start&lt;end. Return it sorted by start. Reject any overlap, while permitting</span>
+<span>    adjacent intervals where one end equals the next start.</span>
+<span>    &quot;&quot;&quot;</span>
 <span>    raise NotImplementedError(&quot;Implement validate_intervals&quot;)</span>
 <span> </span>
+<span> </span>
 <span>def validity_lookup(events: pd.DataFrame, history: pd.DataFrame) -&gt; pd.DataFrame:</span>
-<span>    &quot;&quot;&quot;Use validated single-history half-open intervals to attach version_id, value to uniquely identified events at UTC instants. Return event_id, version_id, value in input event order. Preserve uncovered events with missing version/value and reject ambiguous histories.&quot;&quot;&quot;</span>
+<span>    &quot;&quot;&quot;</span>
+<span>    Use validated single-history half-open intervals to attach version_id, value to uniquely</span>
+<span>    identified events at UTC instants. Return event_id, version_id, value in input event</span>
+<span>    order. Preserve uncovered events with missing version/value and reject ambiguous</span>
+<span>    histories.</span>
+<span>    &quot;&quot;&quot;</span>
 <span>    raise NotImplementedError(&quot;Implement validity_lookup&quot;)</span>
 <span> </span>
-<span>def worked_examples():</span>
-<span>    events=pd.DataFrame({&quot;event_id&quot;:[1,2,3],&quot;customer_id&quot;:[&quot;a&quot;,&quot;b&quot;,&quot;c&quot;]})</span>
-<span>    dimension=pd.DataFrame({&quot;customer_id&quot;:[&quot;a&quot;,&quot;b&quot;],&quot;segment&quot;:[&quot;small&quot;,&quot;large&quot;]})</span>
-<span>    joined=events.merge(dimension,on=&quot;customer_id&quot;,how=&quot;left&quot;,validate=&quot;many_to_one&quot;,indicator=True)</span>
-<span>    assert len(joined)==3 and joined.loc[joined.event_id==3,&quot;_merge&quot;].iloc[0]==&quot;left_only&quot;</span>
-<span>    print(&quot;Join coverage:&quot;,joined[[&quot;event_id&quot;,&quot;_merge&quot;]].astype(str).values.tolist())</span>
 <span> </span>
-<span>    requests=pd.DataFrame({&quot;request_id&quot;:[1,2],&quot;at&quot;:pd.to_datetime([&quot;2026-01-01T10:30Z&quot;,&quot;2026-01-01T12:00Z&quot;])})</span>
-<span>    history=pd.DataFrame({&quot;available_at&quot;:pd.to_datetime([&quot;2026-01-01T10:00Z&quot;,&quot;2026-01-01T11:00Z&quot;]),&quot;value&quot;:[10.,20.]})</span>
-<span>    joined=pd.merge_asof(requests,history,left_on=&quot;at&quot;,right_on=&quot;available_at&quot;,direction=&quot;backward&quot;,tolerance=pd.Timedelta(&quot;45min&quot;))</span>
-<span>    assert joined.loc[0,&quot;value&quot;]==10 and pd.isna(joined.loc[1,&quot;value&quot;])</span>
-<span>    print(&quot;Bounded availability lookup:&quot;,joined[&quot;value&quot;].tolist())</span>
+<span>def worked_examples() -&gt; None:</span>
+<span>    events = pd.DataFrame({&quot;event_id&quot;: [1, 2, 3], &quot;customer_id&quot;: [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]})</span>
+<span>    dimension = pd.DataFrame({&quot;customer_id&quot;: [&quot;a&quot;, &quot;b&quot;], &quot;segment&quot;: [&quot;small&quot;, &quot;large&quot;]})</span>
+<span>    joined = events.merge(</span>
+<span>        dimension, on=&quot;customer_id&quot;, how=&quot;left&quot;, validate=&quot;many_to_one&quot;, indicator=True</span>
+<span>    )</span>
+<span>    assert len(joined) == 3 and joined.loc[joined.event_id == 3, &quot;_merge&quot;].iloc[0] == &quot;left_only&quot;</span>
+<span>    print(&quot;Join coverage:&quot;, joined[[&quot;event_id&quot;, &quot;_merge&quot;]].astype(str).values.tolist())</span>
+<span> </span>
+<span>    requests = pd.DataFrame(</span>
+<span>        {&quot;request_id&quot;: [1, 2], &quot;at&quot;: pd.to_datetime([&quot;2026-01-01T10:30Z&quot;, &quot;2026-01-01T12:00Z&quot;])}</span>
+<span>    )</span>
+<span>    history = pd.DataFrame(</span>
+<span>        {</span>
+<span>            &quot;available_at&quot;: pd.to_datetime([&quot;2026-01-01T10:00Z&quot;, &quot;2026-01-01T11:00Z&quot;]),</span>
+<span>            &quot;value&quot;: [10.0, 20.0],</span>
+<span>        }</span>
+<span>    )</span>
+<span>    joined = pd.merge_asof(</span>
+<span>        requests,</span>
+<span>        history,</span>
+<span>        left_on=&quot;at&quot;,</span>
+<span>        right_on=&quot;available_at&quot;,</span>
+<span>        direction=&quot;backward&quot;,</span>
+<span>        tolerance=pd.Timedelta(&quot;45min&quot;),</span>
+<span>    )</span>
+<span>    assert joined.loc[0, &quot;value&quot;] == 10 and pd.isna(joined.loc[1, &quot;value&quot;])</span>
+<span>    print(&quot;Bounded availability lookup:&quot;, joined[&quot;value&quot;].tolist())</span>
+<span> </span>
 <span> </span>
 <span>if __name__ == &quot;__main__&quot;:</span>
 <span>    worked_examples()</span>
 <span>    print(&quot;Worked examples passed. Complete the six task functions and their boundary checks.&quot;)</span>
 <span> </span>
 <span># Exercise 1: Require one real identity per dimension row</span>
-<span># Prompt: Validate that key exists, contains no missing values and is unique. Raise ValueError for a missing column, null key or repeated key. An empty frame with the key column is a valid empty dimension.</span>
-<span># Expected: Keys[a, b] pass; [a, a], [a, None] and a frame without key fail. An empty customer_id column passes.</span>
+<span># Prompt: Validate that key exists, contains no missing values and is unique. Raise ValueError for</span>
+<span># a missing column, null key or repeated key. An empty frame with the key column is a valid empty</span>
+<span># dimension.</span>
+<span># Expected: Keys[a, b] pass; [a, a], [a, None] and a frame without key fail. An empty customer_id</span>
+<span># column passes.</span>
 <span> </span>
 <span># Exercise 2: Preserve event grain during enrichment</span>
-<span># Prompt: Require unique nonmissing event_id and a valid customer_id dimension. Left-join dimension segment onto event_id, customer_id, amount events with many-to-one validation and a match indicator. Preserve input event order and do not mutate either frame.</span>
-<span># Expected: Events for customers a, c, b keep all three event_id values in input order; c has missing segment and left_only status. Duplicate dimension a raises ValueError.</span>
+<span># Prompt: Require unique nonmissing event_id and a valid customer_id dimension. Left-join</span>
+<span># dimension segment onto event_id, customer_id, amount events with many-to-one validation and a</span>
+<span># match indicator. Preserve input event order and do not mutate either frame.</span>
+<span># Expected: Events for customers a, c, b keep all three event_id values in input order; c has</span>
+<span># missing segment and left_only status. Duplicate dimension a raises ValueError.</span>
 <span> </span>
 <span># Exercise 3: Separate absent identifiers from unknown identifiers</span>
-<span># Prompt: Return one diagnostic row per unmatched event with columns event_id and reason, sorted by event_id. Label null customer identifiers missing_key and nonnull identifiers absent from the dimension unknown_key. Validate event and dimension identities first.</span>
-<span># Expected: Events 1:a,2:None,3:z with dimension[a] yield (2, missing_key),(3, unknown_key). A fully matched event yields an empty frame with both output columns.</span>
+<span># Prompt: Return one diagnostic row per unmatched event with columns event_id and reason, sorted</span>
+<span># by event_id. Label null customer identifiers missing_key and nonnull identifiers absent from the</span>
+<span># dimension unknown_key. Validate event and dimension identities first.</span>
+<span># Expected: Events 1:a,2:None,3:z with dimension[a] yield (2, missing_key),(3, unknown_key). A</span>
+<span># fully matched event yields an empty frame with both output columns.</span>
 <span> </span>
 <span># Exercise 4: Look backward within a freshness limit</span>
-<span># Prompt: For a single history, attach the latest available_at, value no later than each request at time, within a nonnegative tolerance. Require unique request_id and unique history available_at, with nonmissing timezone-aware UTC time columns. Return original request order and preserve unmatched values as missing.</span>
-<span># Expected: Requests at 10:30 and 15:00 with history at 10:00, value 10 and 12:00, value 20, tolerance 2 hours, yield 10 andmissing. Unsorted requests are restored to their original order; naive times fail.</span>
+<span># Prompt: For a single history, attach the latest available_at, value no later than each request</span>
+<span># at time, within a nonnegative tolerance. Require unique request_id and unique history</span>
+<span># available_at, with nonmissing timezone-aware UTC time columns. Return original request order and</span>
+<span># preserve unmatched values as missing.</span>
+<span># Expected: Requests at 10:30 and 15:00 with history at 10:00, value 10 and 12:00, value 20,</span>
+<span># tolerance 2 hours, yield 10 andmissing. Unsorted requests are restored to their original order;</span>
+<span># naive times fail.</span>
 <span> </span>
 <span># Exercise 5: Reject overlapping validity versions</span>
-<span># Prompt: Validate a single version history with unique version_id and finite UTC start, end times satisfying start&lt;end. Return it sorted by start. Reject any overlap, while permitting adjacent intervals where one end equals the next start.</span>
-<span># Expected: Versions[10:00,11:00) and [11:00,12:00) pass; changing the second start to 10:59 raises ValueError. A zero-width interval also fails.</span>
+<span># Prompt: Validate a single version history with unique version_id and finite UTC start, end times</span>
+<span># satisfying start&lt;end. Return it sorted by start. Reject any overlap, while permitting adjacent</span>
+<span># intervals where one end equals the next start.</span>
+<span># Expected: Versions[10:00,11:00) and [11:00,12:00) pass; changing the second start to 10:59</span>
+<span># raises ValueError. A zero-width interval also fails.</span>
 <span> </span>
 <span># Exercise 6: Assign an instant to at most one version</span>
-<span># Prompt: Use validated single-history half-open intervals to attach version_id, value to uniquely identified events at UTC instants. Return event_id, version_id, value in input event order. Preserve uncovered events with missing version/value and reject ambiguous histories.</span>
-<span># Expected: Events at 10:00,11:00,12:00 against adjacent hourly versions 1,2 yield version 1, version 2, missing. The exact final end is excluded; gaps are not filled by nearest lookup.</span>
+<span># Prompt: Use validated single-history half-open intervals to attach version_id, value to uniquely</span>
+<span># identified events at UTC instants. Return event_id, version_id, value in input event order.</span>
+<span># Preserve uncovered events with missing version/value and reject ambiguous histories.</span>
+<span># Expected: Events at 10:00,11:00,12:00 against adjacent hourly versions 1,2 yield version 1,</span>
+<span># version 2, missing. The exact final end is excluded; gaps are not filled by nearest lookup.</span>
 <span> </span></code></pre></div>
       </section>
 
@@ -573,102 +654,176 @@ Done when all six contracts and their boundary cases have inspected evidence and
     if key not in frame or frame[key].isna().any() or frame[key].duplicated().any():
         raise ValueError(&quot;Dimension keys must exist, be nonmissing and be unique&quot;)</code></pre>
 <p>Uniqueness alone would permit one missing key, but that missing value is not a trustworthy entity identity. Rejecting it prevents pandas null-to-null merge behavior from manufacturing a relationship between unknown entities. An empty dimension has no conflicting identities and is allowed so coverage can be reported downstream. The function checks a structural prerequisite; it does not prove that the chosen key corresponds to the correct business entity.</p>
-<pre><code class="language-python">validate_dimension(pd.DataFrame({&quot;customer_id&quot;:[&quot;a&quot;,&quot;b&quot;]}),&quot;customer_id&quot;)
-validate_dimension(pd.DataFrame({&quot;customer_id&quot;:[]}),&quot;customer_id&quot;)
-expect_value_error(lambda:validate_dimension(pd.DataFrame({&quot;customer_id&quot;:[&quot;a&quot;,&quot;a&quot;]}),&quot;customer_id&quot;))
-expect_value_error(lambda:validate_dimension(pd.DataFrame({&quot;customer_id&quot;:[None]}),&quot;customer_id&quot;))
-expect_value_error(lambda:validate_dimension(pd.DataFrame({&quot;x&quot;:[1]}),&quot;customer_id&quot;))</code></pre>
+<pre><code class="language-python">validate_dimension(pd.DataFrame({&quot;customer_id&quot;: [&quot;a&quot;, &quot;b&quot;]}), &quot;customer_id&quot;)
+validate_dimension(pd.DataFrame({&quot;customer_id&quot;: []}), &quot;customer_id&quot;)
+expect_value_error(
+    lambda: validate_dimension(pd.DataFrame({&quot;customer_id&quot;: [&quot;a&quot;, &quot;a&quot;]}), &quot;customer_id&quot;)
+)
+expect_value_error(lambda: validate_dimension(pd.DataFrame({&quot;customer_id&quot;: [None]}), &quot;customer_id&quot;))
+expect_value_error(lambda: validate_dimension(pd.DataFrame({&quot;x&quot;: [1]}), &quot;customer_id&quot;))</code></pre>
 <h5 id="solution-1--exercise-2-preserve-event-grain-during-enrichment">Exercise 2: Preserve event grain during enrichment<a class="heading-anchor" href="#solution-1--exercise-2-preserve-event-grain-during-enrichment" aria-label="Link to this section">#</a></h5>
 <p>Require unique nonmissing event_id and a valid customer_id dimension. Left-join dimension segment onto event_id, customer_id, amount events with many-to-one validation and a match indicator. Preserve input event order and do not mutate either frame.</p>
 <p><strong>Expected:</strong> Events for customers a, c, b keep all three event_id values in input order; c has missing segment and left_only status. Duplicate dimension a raises ValueError.</p>
 <pre><code class="language-python">def enrich_events(events: pd.DataFrame, dimension: pd.DataFrame) -&gt; pd.DataFrame:
-    validate_dimension(events,&quot;event_id&quot;);validate_dimension(dimension,&quot;customer_id&quot;)
-    if not {&quot;customer_id&quot;,&quot;amount&quot;}.issubset(events.columns) or &quot;segment&quot; not in dimension:
+    validate_dimension(events, &quot;event_id&quot;)
+    validate_dimension(dimension, &quot;customer_id&quot;)
+    if not {&quot;customer_id&quot;, &quot;amount&quot;}.issubset(events.columns) or &quot;segment&quot; not in dimension:
         raise ValueError(&quot;Expected event amount and dimension segment&quot;)
-    return events[[&quot;event_id&quot;,&quot;customer_id&quot;,&quot;amount&quot;]].merge(dimension[[&quot;customer_id&quot;,&quot;segment&quot;]],on=&quot;customer_id&quot;,how=&quot;left&quot;,sort=False,validate=&quot;many_to_one&quot;,indicator=&quot;dimension_status&quot;)</code></pre>
+    return events[[&quot;event_id&quot;, &quot;customer_id&quot;, &quot;amount&quot;]].merge(
+        dimension[[&quot;customer_id&quot;, &quot;segment&quot;]],
+        on=&quot;customer_id&quot;,
+        how=&quot;left&quot;,
+        sort=False,
+        validate=&quot;many_to_one&quot;,
+        indicator=&quot;dimension_status&quot;,
+    )</code></pre>
 <p>The merge selects only the declared input columns to avoid accidental suffix collisions with unrelated fields. many_to_one permits multiple events for a customer while requiring one dimension record. A left join preserves event population, and the indicator retains coverage evidence. The output row count and event order are checked independently of segment values, because correct-looking attributes do not prove that events were preserved exactly once.</p>
-<pre><code class="language-python">e=pd.DataFrame({&quot;event_id&quot;:[3,1,2],&quot;customer_id&quot;:[&quot;a&quot;,&quot;c&quot;,&quot;b&quot;],&quot;amount&quot;:[10,20,30]});d=pd.DataFrame({&quot;customer_id&quot;:[&quot;a&quot;,&quot;b&quot;],&quot;segment&quot;:[&quot;x&quot;,&quot;y&quot;]})
-r=enrich_events(e,d)
-assert r.event_id.tolist()==[3,1,2] and r.dimension_status.astype(str).tolist()==[&quot;both&quot;,&quot;left_only&quot;,&quot;both&quot;]
-assert len(r)==len(e) and &quot;segment&quot; not in e
-expect_value_error(lambda:enrich_events(e,pd.concat([d,d.iloc[:1]])))</code></pre>
+<pre><code class="language-python">e = pd.DataFrame({&quot;event_id&quot;: [3, 1, 2], &quot;customer_id&quot;: [&quot;a&quot;, &quot;c&quot;, &quot;b&quot;], &quot;amount&quot;: [10, 20, 30]})
+d = pd.DataFrame({&quot;customer_id&quot;: [&quot;a&quot;, &quot;b&quot;], &quot;segment&quot;: [&quot;x&quot;, &quot;y&quot;]})
+r = enrich_events(e, d)
+assert r.event_id.tolist() == [3, 1, 2] and r.dimension_status.astype(str).tolist() == [
+    &quot;both&quot;,
+    &quot;left_only&quot;,
+    &quot;both&quot;,
+]
+assert len(r) == len(e) and &quot;segment&quot; not in e
+expect_value_error(lambda: enrich_events(e, pd.concat([d, d.iloc[:1]])))</code></pre>
 <h5 id="solution-1--exercise-3-separate-absent-identifiers-from-unknown-identifiers">Exercise 3: Separate absent identifiers from unknown identifiers<a class="heading-anchor" href="#solution-1--exercise-3-separate-absent-identifiers-from-unknown-identifiers" aria-label="Link to this section">#</a></h5>
 <p>Return one diagnostic row per unmatched event with columns event_id and reason, sorted by event_id. Label null customer identifiers missing_key and nonnull identifiers absent from the dimension unknown_key. Validate event and dimension identities first.</p>
 <p><strong>Expected:</strong> Events 1:a,2:None,3:z with dimension[a] yield (2, missing_key),(3, unknown_key). A fully matched event yields an empty frame with both output columns.</p>
 <pre><code class="language-python">def missing_key_report(events: pd.DataFrame, dimension: pd.DataFrame) -&gt; pd.DataFrame:
-    validate_dimension(events,&quot;event_id&quot;);validate_dimension(dimension,&quot;customer_id&quot;)
-    events=events.reset_index(drop=True)
-    missing=events[&quot;customer_id&quot;].isna()
-    unknown=~events[&quot;customer_id&quot;].isin(dimension[&quot;customer_id&quot;]) &amp; ~missing
-    result=events.loc[missing|unknown,[&quot;event_id&quot;]].copy()
-    result[&quot;reason&quot;]=np.where(missing.loc[result.index],&quot;missing_key&quot;,&quot;unknown_key&quot;)
-    return result.sort_values(&quot;event_id&quot;,kind=&quot;stable&quot;).reset_index(drop=True)</code></pre>
+    validate_dimension(events, &quot;event_id&quot;)
+    validate_dimension(dimension, &quot;customer_id&quot;)
+    events = events.reset_index(drop=True)
+    missing = events[&quot;customer_id&quot;].isna()
+    unknown = ~events[&quot;customer_id&quot;].isin(dimension[&quot;customer_id&quot;]) &amp; ~missing
+    result = events.loc[missing | unknown, [&quot;event_id&quot;]].copy()
+    result[&quot;reason&quot;] = np.where(missing.loc[result.index], &quot;missing_key&quot;, &quot;unknown_key&quot;)
+    return result.sort_values(&quot;event_id&quot;, kind=&quot;stable&quot;).reset_index(drop=True)</code></pre>
 <p>The two reasons lead to different repairs. A missing identifier may require source correction, while an unknown identifier may indicate a late dimension update or a population mismatch. Testing membership alone collapses both into unmatched, so the missing mask is evaluated separately. Sorting by the durable event_id makes diagnostics reproducible without assuming that the DataFrame index is the event identity.</p>
-<pre><code class="language-python">e=pd.DataFrame({&quot;event_id&quot;:[3,1,2],&quot;customer_id&quot;:[&quot;z&quot;,&quot;a&quot;,None]});d=pd.DataFrame({&quot;customer_id&quot;:[&quot;a&quot;]})
-r=missing_key_report(e,d)
-assert list(r.itertuples(index=False,name=None))==[(2,&quot;missing_key&quot;),(3,&quot;unknown_key&quot;)]
-e.index=[0,0,0]
-assert list(missing_key_report(e,d).itertuples(index=False,name=None))==[(2,&quot;missing_key&quot;),(3,&quot;unknown_key&quot;)]
-assert missing_key_report(e[e.event_id==1],d).columns.tolist()==[&quot;event_id&quot;,&quot;reason&quot;]</code></pre>
+<pre><code class="language-python">e = pd.DataFrame({&quot;event_id&quot;: [3, 1, 2], &quot;customer_id&quot;: [&quot;z&quot;, &quot;a&quot;, None]})
+d = pd.DataFrame({&quot;customer_id&quot;: [&quot;a&quot;]})
+r = missing_key_report(e, d)
+assert list(r.itertuples(index=False, name=None)) == [(2, &quot;missing_key&quot;), (3, &quot;unknown_key&quot;)]
+e.index = [0, 0, 0]
+assert list(missing_key_report(e, d).itertuples(index=False, name=None)) == [
+    (2, &quot;missing_key&quot;),
+    (3, &quot;unknown_key&quot;),
+]
+assert missing_key_report(e[e.event_id == 1], d).columns.tolist() == [&quot;event_id&quot;, &quot;reason&quot;]</code></pre>
 <h5 id="solution-1--exercise-4-look-backward-within-a-freshness-limit">Exercise 4: Look backward within a freshness limit<a class="heading-anchor" href="#solution-1--exercise-4-look-backward-within-a-freshness-limit" aria-label="Link to this section">#</a></h5>
 <p>For a single history, attach the latest available_at, value no later than each request at time, within a nonnegative tolerance. Require unique request_id and unique history available_at, with nonmissing timezone-aware UTC time columns. Return original request order and preserve unmatched values as missing.</p>
 <p><strong>Expected:</strong> Requests at 10:30 and 15:00 with history at 10:00, value 10 and 12:00, value 20, tolerance 2 hours, yield 10 andmissing. Unsorted requests are restored to their original order; naive times fail.</p>
-<pre><code class="language-python">def latest_available(requests: pd.DataFrame, history: pd.DataFrame, tolerance: pd.Timedelta) -&gt; pd.DataFrame:
-    validate_dimension(requests,&quot;request_id&quot;);validate_dimension(history,&quot;available_at&quot;)
-    for series in [requests[&quot;at&quot;],history[&quot;available_at&quot;]]:
-        if not isinstance(series.dtype,pd.DatetimeTZDtype) or str(series.dt.tz)!=&quot;UTC&quot; or series.isna().any():
+<pre><code class="language-python">def latest_available(
+    requests: pd.DataFrame, history: pd.DataFrame, tolerance: pd.Timedelta
+) -&gt; pd.DataFrame:
+    validate_dimension(requests, &quot;request_id&quot;)
+    validate_dimension(history, &quot;available_at&quot;)
+    for series in [requests[&quot;at&quot;], history[&quot;available_at&quot;]]:
+        if (
+            not isinstance(series.dtype, pd.DatetimeTZDtype)
+            or str(series.dt.tz) != &quot;UTC&quot;
+            or series.isna().any()
+        ):
             raise ValueError(&quot;Expected nonmissing timezone-aware UTC times&quot;)
-    if pd.isna(tolerance) or tolerance&lt;pd.Timedelta(0):
+    if pd.isna(tolerance) or tolerance &lt; pd.Timedelta(0):
         raise ValueError(&quot;Expected a nonnegative freshness tolerance&quot;)
-    left=requests[[&quot;request_id&quot;,&quot;at&quot;]].copy();left[&quot;_position&quot;]=np.arange(len(left))
-    right=history[[&quot;available_at&quot;,&quot;value&quot;]].sort_values(&quot;available_at&quot;)
-    joined=pd.merge_asof(left.sort_values(&quot;at&quot;),right,left_on=&quot;at&quot;,right_on=&quot;available_at&quot;,direction=&quot;backward&quot;,tolerance=tolerance)
+    left = requests[[&quot;request_id&quot;, &quot;at&quot;]].copy()
+    left[&quot;_position&quot;] = np.arange(len(left))
+    right = history[[&quot;available_at&quot;, &quot;value&quot;]].sort_values(&quot;available_at&quot;)
+    joined = pd.merge_asof(
+        left.sort_values(&quot;at&quot;),
+        right,
+        left_on=&quot;at&quot;,
+        right_on=&quot;available_at&quot;,
+        direction=&quot;backward&quot;,
+        tolerance=tolerance,
+    )
     return joined.sort_values(&quot;_position&quot;).drop(columns=&quot;_position&quot;).reset_index(drop=True)</code></pre>
 <p>Sorting is necessary for the temporal algorithm but is not the output identity policy, so an explicit source position restores request order. Backward direction prevents future availability from entering a prediction; tolerance separately enforces freshness. UTC dtype checks refuse silent timezone interpretation. This single-history function must not be applied to several entities without a grouped key, because timestamps alone do not identify whose feature is being retrieved.</p>
-<pre><code class="language-python">r=pd.DataFrame({&quot;request_id&quot;:[2,1],&quot;at&quot;:pd.to_datetime([&quot;2026-01-01T15:00Z&quot;,&quot;2026-01-01T10:30Z&quot;])});h=pd.DataFrame({&quot;available_at&quot;:pd.to_datetime([&quot;2026-01-01T12:00Z&quot;,&quot;2026-01-01T10:00Z&quot;]),&quot;value&quot;:[20.,10.]})
-x=latest_available(r,h,pd.Timedelta(&quot;2h&quot;))
-assert x.request_id.tolist()==[2,1] and pd.isna(x.loc[0,&quot;value&quot;]) and x.loc[1,&quot;value&quot;]==10
-naive=r.copy();naive[&quot;at&quot;]=naive[&quot;at&quot;].dt.tz_localize(None)
-expect_value_error(lambda:latest_available(naive,h,pd.Timedelta(&quot;2h&quot;)))</code></pre>
+<pre><code class="language-python">r = pd.DataFrame(
+    {&quot;request_id&quot;: [2, 1], &quot;at&quot;: pd.to_datetime([&quot;2026-01-01T15:00Z&quot;, &quot;2026-01-01T10:30Z&quot;])}
+)
+h = pd.DataFrame(
+    {
+        &quot;available_at&quot;: pd.to_datetime([&quot;2026-01-01T12:00Z&quot;, &quot;2026-01-01T10:00Z&quot;]),
+        &quot;value&quot;: [20.0, 10.0],
+    }
+)
+x = latest_available(r, h, pd.Timedelta(&quot;2h&quot;))
+assert x.request_id.tolist() == [2, 1] and pd.isna(x.loc[0, &quot;value&quot;]) and x.loc[1, &quot;value&quot;] == 10
+naive = r.copy()
+naive[&quot;at&quot;] = naive[&quot;at&quot;].dt.tz_localize(None)
+expect_value_error(lambda: latest_available(naive, h, pd.Timedelta(&quot;2h&quot;)))</code></pre>
 <h5 id="solution-1--exercise-5-reject-overlapping-validity-versions">Exercise 5: Reject overlapping validity versions<a class="heading-anchor" href="#solution-1--exercise-5-reject-overlapping-validity-versions" aria-label="Link to this section">#</a></h5>
 <p>Validate a single version history with unique version_id and finite UTC start, end times satisfying start&lt;end. Return it sorted by start. Reject any overlap, while permitting adjacent intervals where one end equals the next start.</p>
 <p><strong>Expected:</strong> Versions[10:00,11:00) and [11:00,12:00) pass; changing the second start to 10:59 raises ValueError. A zero-width interval also fails.</p>
 <pre><code class="language-python">def validate_intervals(history: pd.DataFrame) -&gt; pd.DataFrame:
-    validate_dimension(history,&quot;version_id&quot;)
-    for series in [history[&quot;start&quot;],history[&quot;end&quot;]]:
-        if not isinstance(series.dtype,pd.DatetimeTZDtype) or str(series.dt.tz)!=&quot;UTC&quot; or series.isna().any():
+    validate_dimension(history, &quot;version_id&quot;)
+    for series in [history[&quot;start&quot;], history[&quot;end&quot;]]:
+        if (
+            not isinstance(series.dtype, pd.DatetimeTZDtype)
+            or str(series.dt.tz) != &quot;UTC&quot;
+            or series.isna().any()
+        ):
             raise ValueError(&quot;Expected finite UTC interval endpoints&quot;)
-    ordered=history.sort_values(&quot;start&quot;,kind=&quot;stable&quot;).copy()
-    if (ordered[&quot;start&quot;]&gt;=ordered[&quot;end&quot;]).any() or (ordered[&quot;start&quot;].iloc[1:].to_numpy()&lt;ordered[&quot;end&quot;].iloc[:-1].to_numpy()).any():
+    ordered = history.sort_values(&quot;start&quot;, kind=&quot;stable&quot;).copy()
+    if (ordered[&quot;start&quot;] &gt;= ordered[&quot;end&quot;]).any() or (
+        ordered[&quot;start&quot;].iloc[1:].to_numpy() &lt; ordered[&quot;end&quot;].iloc[:-1].to_numpy()
+    ).any():
         raise ValueError(&quot;Intervals must be positive and nonoverlapping&quot;)
     return ordered</code></pre>
 <p>After sorting positive intervals by start, any overlap must appear when a later start precedes the preceding interval&#x27;s end; earlier invalid overlaps are already detected at their adjacent boundary. Equality is permitted because half-open intervals do not both own that instant. Rejecting ambiguity before lookup prevents a last-row-wins rule from silently choosing a version based on storage order. The returned copy allows inspection without mutating the supplied history.</p>
-<pre><code class="language-python">h=pd.DataFrame({&quot;version_id&quot;:[1,2],&quot;start&quot;:pd.to_datetime([&quot;2026-01-01T10:00Z&quot;,&quot;2026-01-01T11:00Z&quot;]),&quot;end&quot;:pd.to_datetime([&quot;2026-01-01T11:00Z&quot;,&quot;2026-01-01T12:00Z&quot;]),&quot;value&quot;:[10,20]})
-assert len(validate_intervals(h))==2
-bad=h.copy();bad.loc[1,&quot;start&quot;]=pd.Timestamp(&quot;2026-01-01T10:59Z&quot;)
-expect_value_error(lambda:validate_intervals(bad))
-bad=h.copy();bad.loc[0,&quot;end&quot;]=bad.loc[0,&quot;start&quot;]
-expect_value_error(lambda:validate_intervals(bad))</code></pre>
+<pre><code class="language-python">h = pd.DataFrame(
+    {
+        &quot;version_id&quot;: [1, 2],
+        &quot;start&quot;: pd.to_datetime([&quot;2026-01-01T10:00Z&quot;, &quot;2026-01-01T11:00Z&quot;]),
+        &quot;end&quot;: pd.to_datetime([&quot;2026-01-01T11:00Z&quot;, &quot;2026-01-01T12:00Z&quot;]),
+        &quot;value&quot;: [10, 20],
+    }
+)
+assert len(validate_intervals(h)) == 2
+bad = h.copy()
+bad.loc[1, &quot;start&quot;] = pd.Timestamp(&quot;2026-01-01T10:59Z&quot;)
+expect_value_error(lambda: validate_intervals(bad))
+bad = h.copy()
+bad.loc[0, &quot;end&quot;] = bad.loc[0, &quot;start&quot;]
+expect_value_error(lambda: validate_intervals(bad))</code></pre>
 <h5 id="solution-1--exercise-6-assign-an-instant-to-at-most-one-version">Exercise 6: Assign an instant to at most one version<a class="heading-anchor" href="#solution-1--exercise-6-assign-an-instant-to-at-most-one-version" aria-label="Link to this section">#</a></h5>
 <p>Use validated single-history half-open intervals to attach version_id, value to uniquely identified events at UTC instants. Return event_id, version_id, value in input event order. Preserve uncovered events with missing version/value and reject ambiguous histories.</p>
 <p><strong>Expected:</strong> Events at 10:00,11:00,12:00 against adjacent hourly versions 1,2 yield version 1, version 2, missing. The exact final end is excluded; gaps are not filled by nearest lookup.</p>
 <pre><code class="language-python">def validity_lookup(events: pd.DataFrame, history: pd.DataFrame) -&gt; pd.DataFrame:
-    validate_dimension(events,&quot;event_id&quot;);ordered=validate_intervals(history)
-    if not isinstance(events[&quot;at&quot;].dtype,pd.DatetimeTZDtype) or str(events[&quot;at&quot;].dt.tz)!=&quot;UTC&quot; or events[&quot;at&quot;].isna().any():
+    validate_dimension(events, &quot;event_id&quot;)
+    ordered = validate_intervals(history)
+    if (
+        not isinstance(events[&quot;at&quot;].dtype, pd.DatetimeTZDtype)
+        or str(events[&quot;at&quot;].dt.tz) != &quot;UTC&quot;
+        or events[&quot;at&quot;].isna().any()
+    ):
         raise ValueError(&quot;Expected UTC event instants&quot;)
-    rows=[]
-    for event in events[[&quot;event_id&quot;,&quot;at&quot;]].itertuples(index=False):
-        match=ordered.loc[(ordered[&quot;start&quot;]&lt;=event.at)&amp;(event.at&lt;ordered[&quot;end&quot;])]
+    rows = []
+    for event in events[[&quot;event_id&quot;, &quot;at&quot;]].itertuples(index=False):
+        match = ordered.loc[(ordered[&quot;start&quot;] &lt;= event.at) &amp; (event.at &lt; ordered[&quot;end&quot;])]
         if match.empty:
-            rows.append((event.event_id,pd.NA,np.nan))
+            rows.append((event.event_id, pd.NA, np.nan))
         else:
-            rows.append((event.event_id,match.iloc[0][&quot;version_id&quot;],match.iloc[0][&quot;value&quot;]))
-    return pd.DataFrame(rows,columns=[&quot;event_id&quot;,&quot;version_id&quot;,&quot;value&quot;])</code></pre>
+            rows.append((event.event_id, match.iloc[0][&quot;version_id&quot;], match.iloc[0][&quot;value&quot;]))
+    return pd.DataFrame(rows, columns=[&quot;event_id&quot;, &quot;version_id&quot;, &quot;value&quot;])</code></pre>
 <p>The lookup expresses both inequalities explicitly, making endpoint ownership visible. Validated nonoverlap ensures that taking the sole matching row is legitimate rather than an arbitrary tie break. Uncovered events remain in the result so absence can be reviewed. The simple row loop is intentional for a tiny fixture; scaling it requires an algorithm preserving the same interval semantics, not replacing the condition with unrestricted nearest-time matching.</p>
-<pre><code class="language-python">e=pd.DataFrame({&quot;event_id&quot;:[1,2,3],&quot;at&quot;:pd.to_datetime([&quot;2026-01-01T10:00Z&quot;,&quot;2026-01-01T11:00Z&quot;,&quot;2026-01-01T12:00Z&quot;])})
-r=validity_lookup(e,h)
-assert r.event_id.tolist()==[1,2,3] and r.loc[0,&quot;version_id&quot;]==1 and r.loc[1,&quot;version_id&quot;]==2 and pd.isna(r.loc[2,&quot;version_id&quot;])
-assert pd.isna(r.loc[2,&quot;value&quot;])</code></pre>
+<pre><code class="language-python">e = pd.DataFrame(
+    {
+        &quot;event_id&quot;: [1, 2, 3],
+        &quot;at&quot;: pd.to_datetime([&quot;2026-01-01T10:00Z&quot;, &quot;2026-01-01T11:00Z&quot;, &quot;2026-01-01T12:00Z&quot;]),
+    }
+)
+r = validity_lookup(e, h)
+assert (
+    r.event_id.tolist() == [1, 2, 3]
+    and r.loc[0, &quot;version_id&quot;] == 1
+    and r.loc[1, &quot;version_id&quot;] == 2
+    and pd.isna(r.loc[2, &quot;version_id&quot;])
+)
+assert pd.isna(r.loc[2, &quot;value&quot;])</code></pre>
 <h4 id="solution-1--verification-and-interpretation">Verification and interpretation<a class="heading-anchor" href="#solution-1--verification-and-interpretation" aria-label="Link to this section">#</a></h4>
 <p>Run <code>python python/professional/solutions/py_pandas_02_solution.py</code> from the repository root with the prepared interpreter. The code checks normal inputs and explicit edge cases before printing its success line. Assertions are the evidence; the printed sentence alone is not. The helper <code>expect_value_error</code> requires an actual <code>ValueError</code> and fails if a function silently accepts an invalid input. Inspect each function&#x27;s mutation and ordering behavior as part of its contract.</p></div>
       </section>
@@ -705,109 +860,200 @@ assert pd.isna(r.loc[2,&quot;value&quot;])</code></pre>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Reference implementation and exact boundary checks for python-pandas-02.&quot;&quot;&quot;</span>
 <span> </span>
+<span>from collections.abc import Callable</span>
+<span> </span>
 <span>import numpy as np</span>
-<span>import pandas as pd</span>
+<span>import pandas as pd  # type: ignore[import-untyped]</span>
+<span> </span>
 <span> </span>
 <span>def validate_dimension(frame: pd.DataFrame, key: str) -&gt; None:</span>
 <span>    if key not in frame or frame[key].isna().any() or frame[key].duplicated().any():</span>
 <span>        raise ValueError(&quot;Dimension keys must exist, be nonmissing and be unique&quot;)</span>
 <span> </span>
+<span> </span>
 <span>def enrich_events(events: pd.DataFrame, dimension: pd.DataFrame) -&gt; pd.DataFrame:</span>
-<span>    validate_dimension(events,&quot;event_id&quot;);validate_dimension(dimension,&quot;customer_id&quot;)</span>
-<span>    if not {&quot;customer_id&quot;,&quot;amount&quot;}.issubset(events.columns) or &quot;segment&quot; not in dimension:</span>
+<span>    validate_dimension(events, &quot;event_id&quot;)</span>
+<span>    validate_dimension(dimension, &quot;customer_id&quot;)</span>
+<span>    if not {&quot;customer_id&quot;, &quot;amount&quot;}.issubset(events.columns) or &quot;segment&quot; not in dimension:</span>
 <span>        raise ValueError(&quot;Expected event amount and dimension segment&quot;)</span>
-<span>    return events[[&quot;event_id&quot;,&quot;customer_id&quot;,&quot;amount&quot;]].merge(dimension[[&quot;customer_id&quot;,&quot;segment&quot;]],on=&quot;customer_id&quot;,how=&quot;left&quot;,sort=False,validate=&quot;many_to_one&quot;,indicator=&quot;dimension_status&quot;)</span>
+<span>    return events[[&quot;event_id&quot;, &quot;customer_id&quot;, &quot;amount&quot;]].merge(</span>
+<span>        dimension[[&quot;customer_id&quot;, &quot;segment&quot;]],</span>
+<span>        on=&quot;customer_id&quot;,</span>
+<span>        how=&quot;left&quot;,</span>
+<span>        sort=False,</span>
+<span>        validate=&quot;many_to_one&quot;,</span>
+<span>        indicator=&quot;dimension_status&quot;,</span>
+<span>    )</span>
+<span> </span>
 <span> </span>
 <span>def missing_key_report(events: pd.DataFrame, dimension: pd.DataFrame) -&gt; pd.DataFrame:</span>
-<span>    validate_dimension(events,&quot;event_id&quot;);validate_dimension(dimension,&quot;customer_id&quot;)</span>
-<span>    events=events.reset_index(drop=True)</span>
-<span>    missing=events[&quot;customer_id&quot;].isna()</span>
-<span>    unknown=~events[&quot;customer_id&quot;].isin(dimension[&quot;customer_id&quot;]) &amp; ~missing</span>
-<span>    result=events.loc[missing|unknown,[&quot;event_id&quot;]].copy()</span>
-<span>    result[&quot;reason&quot;]=np.where(missing.loc[result.index],&quot;missing_key&quot;,&quot;unknown_key&quot;)</span>
-<span>    return result.sort_values(&quot;event_id&quot;,kind=&quot;stable&quot;).reset_index(drop=True)</span>
+<span>    validate_dimension(events, &quot;event_id&quot;)</span>
+<span>    validate_dimension(dimension, &quot;customer_id&quot;)</span>
+<span>    events = events.reset_index(drop=True)</span>
+<span>    missing = events[&quot;customer_id&quot;].isna()</span>
+<span>    unknown = ~events[&quot;customer_id&quot;].isin(dimension[&quot;customer_id&quot;]) &amp; ~missing</span>
+<span>    result = events.loc[missing | unknown, [&quot;event_id&quot;]].copy()</span>
+<span>    result[&quot;reason&quot;] = np.where(missing.loc[result.index], &quot;missing_key&quot;, &quot;unknown_key&quot;)</span>
+<span>    return result.sort_values(&quot;event_id&quot;, kind=&quot;stable&quot;).reset_index(drop=True)</span>
 <span> </span>
-<span>def latest_available(requests: pd.DataFrame, history: pd.DataFrame, tolerance: pd.Timedelta) -&gt; pd.DataFrame:</span>
-<span>    validate_dimension(requests,&quot;request_id&quot;);validate_dimension(history,&quot;available_at&quot;)</span>
-<span>    for series in [requests[&quot;at&quot;],history[&quot;available_at&quot;]]:</span>
-<span>        if not isinstance(series.dtype,pd.DatetimeTZDtype) or str(series.dt.tz)!=&quot;UTC&quot; or series.isna().any():</span>
+<span> </span>
+<span>def latest_available(</span>
+<span>    requests: pd.DataFrame, history: pd.DataFrame, tolerance: pd.Timedelta</span>
+<span>) -&gt; pd.DataFrame:</span>
+<span>    validate_dimension(requests, &quot;request_id&quot;)</span>
+<span>    validate_dimension(history, &quot;available_at&quot;)</span>
+<span>    for series in [requests[&quot;at&quot;], history[&quot;available_at&quot;]]:</span>
+<span>        if (</span>
+<span>            not isinstance(series.dtype, pd.DatetimeTZDtype)</span>
+<span>            or str(series.dt.tz) != &quot;UTC&quot;</span>
+<span>            or series.isna().any()</span>
+<span>        ):</span>
 <span>            raise ValueError(&quot;Expected nonmissing timezone-aware UTC times&quot;)</span>
-<span>    if pd.isna(tolerance) or tolerance&lt;pd.Timedelta(0):</span>
+<span>    if pd.isna(tolerance) or tolerance &lt; pd.Timedelta(0):</span>
 <span>        raise ValueError(&quot;Expected a nonnegative freshness tolerance&quot;)</span>
-<span>    left=requests[[&quot;request_id&quot;,&quot;at&quot;]].copy();left[&quot;_position&quot;]=np.arange(len(left))</span>
-<span>    right=history[[&quot;available_at&quot;,&quot;value&quot;]].sort_values(&quot;available_at&quot;)</span>
-<span>    joined=pd.merge_asof(left.sort_values(&quot;at&quot;),right,left_on=&quot;at&quot;,right_on=&quot;available_at&quot;,direction=&quot;backward&quot;,tolerance=tolerance)</span>
+<span>    left = requests[[&quot;request_id&quot;, &quot;at&quot;]].copy()</span>
+<span>    left[&quot;_position&quot;] = np.arange(len(left))</span>
+<span>    right = history[[&quot;available_at&quot;, &quot;value&quot;]].sort_values(&quot;available_at&quot;)</span>
+<span>    joined = pd.merge_asof(</span>
+<span>        left.sort_values(&quot;at&quot;),</span>
+<span>        right,</span>
+<span>        left_on=&quot;at&quot;,</span>
+<span>        right_on=&quot;available_at&quot;,</span>
+<span>        direction=&quot;backward&quot;,</span>
+<span>        tolerance=tolerance,</span>
+<span>    )</span>
 <span>    return joined.sort_values(&quot;_position&quot;).drop(columns=&quot;_position&quot;).reset_index(drop=True)</span>
 <span> </span>
+<span> </span>
 <span>def validate_intervals(history: pd.DataFrame) -&gt; pd.DataFrame:</span>
-<span>    validate_dimension(history,&quot;version_id&quot;)</span>
-<span>    for series in [history[&quot;start&quot;],history[&quot;end&quot;]]:</span>
-<span>        if not isinstance(series.dtype,pd.DatetimeTZDtype) or str(series.dt.tz)!=&quot;UTC&quot; or series.isna().any():</span>
+<span>    validate_dimension(history, &quot;version_id&quot;)</span>
+<span>    for series in [history[&quot;start&quot;], history[&quot;end&quot;]]:</span>
+<span>        if (</span>
+<span>            not isinstance(series.dtype, pd.DatetimeTZDtype)</span>
+<span>            or str(series.dt.tz) != &quot;UTC&quot;</span>
+<span>            or series.isna().any()</span>
+<span>        ):</span>
 <span>            raise ValueError(&quot;Expected finite UTC interval endpoints&quot;)</span>
-<span>    ordered=history.sort_values(&quot;start&quot;,kind=&quot;stable&quot;).copy()</span>
-<span>    if (ordered[&quot;start&quot;]&gt;=ordered[&quot;end&quot;]).any() or (ordered[&quot;start&quot;].iloc[1:].to_numpy()&lt;ordered[&quot;end&quot;].iloc[:-1].to_numpy()).any():</span>
+<span>    ordered = history.sort_values(&quot;start&quot;, kind=&quot;stable&quot;).copy()</span>
+<span>    if (ordered[&quot;start&quot;] &gt;= ordered[&quot;end&quot;]).any() or (</span>
+<span>        ordered[&quot;start&quot;].iloc[1:].to_numpy() &lt; ordered[&quot;end&quot;].iloc[:-1].to_numpy()</span>
+<span>    ).any():</span>
 <span>        raise ValueError(&quot;Intervals must be positive and nonoverlapping&quot;)</span>
 <span>    return ordered</span>
 <span> </span>
-<span>def validity_lookup(events: pd.DataFrame, history: pd.DataFrame) -&gt; pd.DataFrame:</span>
-<span>    validate_dimension(events,&quot;event_id&quot;);ordered=validate_intervals(history)</span>
-<span>    if not isinstance(events[&quot;at&quot;].dtype,pd.DatetimeTZDtype) or str(events[&quot;at&quot;].dt.tz)!=&quot;UTC&quot; or events[&quot;at&quot;].isna().any():</span>
-<span>        raise ValueError(&quot;Expected UTC event instants&quot;)</span>
-<span>    rows=[]</span>
-<span>    for event in events[[&quot;event_id&quot;,&quot;at&quot;]].itertuples(index=False):</span>
-<span>        match=ordered.loc[(ordered[&quot;start&quot;]&lt;=event.at)&amp;(event.at&lt;ordered[&quot;end&quot;])]</span>
-<span>        if match.empty:</span>
-<span>            rows.append((event.event_id,pd.NA,np.nan))</span>
-<span>        else:</span>
-<span>            rows.append((event.event_id,match.iloc[0][&quot;version_id&quot;],match.iloc[0][&quot;value&quot;]))</span>
-<span>    return pd.DataFrame(rows,columns=[&quot;event_id&quot;,&quot;version_id&quot;,&quot;value&quot;])</span>
 <span> </span>
-<span>def expect_value_error(call):</span>
+<span>def validity_lookup(events: pd.DataFrame, history: pd.DataFrame) -&gt; pd.DataFrame:</span>
+<span>    validate_dimension(events, &quot;event_id&quot;)</span>
+<span>    ordered = validate_intervals(history)</span>
+<span>    if (</span>
+<span>        not isinstance(events[&quot;at&quot;].dtype, pd.DatetimeTZDtype)</span>
+<span>        or str(events[&quot;at&quot;].dt.tz) != &quot;UTC&quot;</span>
+<span>        or events[&quot;at&quot;].isna().any()</span>
+<span>    ):</span>
+<span>        raise ValueError(&quot;Expected UTC event instants&quot;)</span>
+<span>    rows = []</span>
+<span>    for event in events[[&quot;event_id&quot;, &quot;at&quot;]].itertuples(index=False):</span>
+<span>        match = ordered.loc[(ordered[&quot;start&quot;] &lt;= event.at) &amp; (event.at &lt; ordered[&quot;end&quot;])]</span>
+<span>        if match.empty:</span>
+<span>            rows.append((event.event_id, pd.NA, np.nan))</span>
+<span>        else:</span>
+<span>            rows.append((event.event_id, match.iloc[0][&quot;version_id&quot;], match.iloc[0][&quot;value&quot;]))</span>
+<span>    return pd.DataFrame(rows, columns=[&quot;event_id&quot;, &quot;version_id&quot;, &quot;value&quot;])</span>
+<span> </span>
+<span> </span>
+<span>def expect_value_error(call: Callable[[], object]) -&gt; None:</span>
 <span>    try:</span>
 <span>        call()</span>
 <span>    except ValueError:</span>
 <span>        return</span>
 <span>    raise AssertionError(&quot;Expected ValueError&quot;)</span>
 <span> </span>
-<span>def main():</span>
+<span> </span>
+<span>def main() -&gt; None:</span>
 <span>    # Exercise 1: Require one real identity per dimension row</span>
-<span>    validate_dimension(pd.DataFrame({&quot;customer_id&quot;:[&quot;a&quot;,&quot;b&quot;]}),&quot;customer_id&quot;)</span>
-<span>    validate_dimension(pd.DataFrame({&quot;customer_id&quot;:[]}),&quot;customer_id&quot;)</span>
-<span>    expect_value_error(lambda:validate_dimension(pd.DataFrame({&quot;customer_id&quot;:[&quot;a&quot;,&quot;a&quot;]}),&quot;customer_id&quot;))</span>
-<span>    expect_value_error(lambda:validate_dimension(pd.DataFrame({&quot;customer_id&quot;:[None]}),&quot;customer_id&quot;))</span>
-<span>    expect_value_error(lambda:validate_dimension(pd.DataFrame({&quot;x&quot;:[1]}),&quot;customer_id&quot;))</span>
+<span>    validate_dimension(pd.DataFrame({&quot;customer_id&quot;: [&quot;a&quot;, &quot;b&quot;]}), &quot;customer_id&quot;)</span>
+<span>    validate_dimension(pd.DataFrame({&quot;customer_id&quot;: []}), &quot;customer_id&quot;)</span>
+<span>    expect_value_error(</span>
+<span>        lambda: validate_dimension(pd.DataFrame({&quot;customer_id&quot;: [&quot;a&quot;, &quot;a&quot;]}), &quot;customer_id&quot;)</span>
+<span>    )</span>
+<span>    expect_value_error(</span>
+<span>        lambda: validate_dimension(pd.DataFrame({&quot;customer_id&quot;: [None]}), &quot;customer_id&quot;)</span>
+<span>    )</span>
+<span>    expect_value_error(lambda: validate_dimension(pd.DataFrame({&quot;x&quot;: [1]}), &quot;customer_id&quot;))</span>
 <span>    # Exercise 2: Preserve event grain during enrichment</span>
-<span>    e=pd.DataFrame({&quot;event_id&quot;:[3,1,2],&quot;customer_id&quot;:[&quot;a&quot;,&quot;c&quot;,&quot;b&quot;],&quot;amount&quot;:[10,20,30]});d=pd.DataFrame({&quot;customer_id&quot;:[&quot;a&quot;,&quot;b&quot;],&quot;segment&quot;:[&quot;x&quot;,&quot;y&quot;]})</span>
-<span>    r=enrich_events(e,d)</span>
-<span>    assert r.event_id.tolist()==[3,1,2] and r.dimension_status.astype(str).tolist()==[&quot;both&quot;,&quot;left_only&quot;,&quot;both&quot;]</span>
-<span>    assert len(r)==len(e) and &quot;segment&quot; not in e</span>
-<span>    expect_value_error(lambda:enrich_events(e,pd.concat([d,d.iloc[:1]])))</span>
+<span>    e = pd.DataFrame(</span>
+<span>        {&quot;event_id&quot;: [3, 1, 2], &quot;customer_id&quot;: [&quot;a&quot;, &quot;c&quot;, &quot;b&quot;], &quot;amount&quot;: [10, 20, 30]}</span>
+<span>    )</span>
+<span>    d = pd.DataFrame({&quot;customer_id&quot;: [&quot;a&quot;, &quot;b&quot;], &quot;segment&quot;: [&quot;x&quot;, &quot;y&quot;]})</span>
+<span>    r = enrich_events(e, d)</span>
+<span>    assert r.event_id.tolist() == [3, 1, 2] and r.dimension_status.astype(str).tolist() == [</span>
+<span>        &quot;both&quot;,</span>
+<span>        &quot;left_only&quot;,</span>
+<span>        &quot;both&quot;,</span>
+<span>    ]</span>
+<span>    assert len(r) == len(e) and &quot;segment&quot; not in e</span>
+<span>    expect_value_error(lambda: enrich_events(e, pd.concat([d, d.iloc[:1]])))</span>
 <span>    # Exercise 3: Separate absent identifiers from unknown identifiers</span>
-<span>    e=pd.DataFrame({&quot;event_id&quot;:[3,1,2],&quot;customer_id&quot;:[&quot;z&quot;,&quot;a&quot;,None]});d=pd.DataFrame({&quot;customer_id&quot;:[&quot;a&quot;]})</span>
-<span>    r=missing_key_report(e,d)</span>
-<span>    assert list(r.itertuples(index=False,name=None))==[(2,&quot;missing_key&quot;),(3,&quot;unknown_key&quot;)]</span>
-<span>    e.index=[0,0,0]</span>
-<span>    assert list(missing_key_report(e,d).itertuples(index=False,name=None))==[(2,&quot;missing_key&quot;),(3,&quot;unknown_key&quot;)]</span>
-<span>    assert missing_key_report(e[e.event_id==1],d).columns.tolist()==[&quot;event_id&quot;,&quot;reason&quot;]</span>
+<span>    e = pd.DataFrame({&quot;event_id&quot;: [3, 1, 2], &quot;customer_id&quot;: [&quot;z&quot;, &quot;a&quot;, None]})</span>
+<span>    d = pd.DataFrame({&quot;customer_id&quot;: [&quot;a&quot;]})</span>
+<span>    r = missing_key_report(e, d)</span>
+<span>    assert list(r.itertuples(index=False, name=None)) == [(2, &quot;missing_key&quot;), (3, &quot;unknown_key&quot;)]</span>
+<span>    e.index = [0, 0, 0]</span>
+<span>    assert list(missing_key_report(e, d).itertuples(index=False, name=None)) == [</span>
+<span>        (2, &quot;missing_key&quot;),</span>
+<span>        (3, &quot;unknown_key&quot;),</span>
+<span>    ]</span>
+<span>    assert missing_key_report(e[e.event_id == 1], d).columns.tolist() == [&quot;event_id&quot;, &quot;reason&quot;]</span>
 <span>    # Exercise 4: Look backward within a freshness limit</span>
-<span>    r=pd.DataFrame({&quot;request_id&quot;:[2,1],&quot;at&quot;:pd.to_datetime([&quot;2026-01-01T15:00Z&quot;,&quot;2026-01-01T10:30Z&quot;])});h=pd.DataFrame({&quot;available_at&quot;:pd.to_datetime([&quot;2026-01-01T12:00Z&quot;,&quot;2026-01-01T10:00Z&quot;]),&quot;value&quot;:[20.,10.]})</span>
-<span>    x=latest_available(r,h,pd.Timedelta(&quot;2h&quot;))</span>
-<span>    assert x.request_id.tolist()==[2,1] and pd.isna(x.loc[0,&quot;value&quot;]) and x.loc[1,&quot;value&quot;]==10</span>
-<span>    naive=r.copy();naive[&quot;at&quot;]=naive[&quot;at&quot;].dt.tz_localize(None)</span>
-<span>    expect_value_error(lambda:latest_available(naive,h,pd.Timedelta(&quot;2h&quot;)))</span>
+<span>    r = pd.DataFrame(</span>
+<span>        {&quot;request_id&quot;: [2, 1], &quot;at&quot;: pd.to_datetime([&quot;2026-01-01T15:00Z&quot;, &quot;2026-01-01T10:30Z&quot;])}</span>
+<span>    )</span>
+<span>    h = pd.DataFrame(</span>
+<span>        {</span>
+<span>            &quot;available_at&quot;: pd.to_datetime([&quot;2026-01-01T12:00Z&quot;, &quot;2026-01-01T10:00Z&quot;]),</span>
+<span>            &quot;value&quot;: [20.0, 10.0],</span>
+<span>        }</span>
+<span>    )</span>
+<span>    x = latest_available(r, h, pd.Timedelta(&quot;2h&quot;))</span>
+<span>    assert (</span>
+<span>        x.request_id.tolist() == [2, 1] and pd.isna(x.loc[0, &quot;value&quot;]) and x.loc[1, &quot;value&quot;] == 10</span>
+<span>    )</span>
+<span>    naive = r.copy()</span>
+<span>    naive[&quot;at&quot;] = naive[&quot;at&quot;].dt.tz_localize(None)</span>
+<span>    expect_value_error(lambda: latest_available(naive, h, pd.Timedelta(&quot;2h&quot;)))</span>
 <span>    # Exercise 5: Reject overlapping validity versions</span>
-<span>    h=pd.DataFrame({&quot;version_id&quot;:[1,2],&quot;start&quot;:pd.to_datetime([&quot;2026-01-01T10:00Z&quot;,&quot;2026-01-01T11:00Z&quot;]),&quot;end&quot;:pd.to_datetime([&quot;2026-01-01T11:00Z&quot;,&quot;2026-01-01T12:00Z&quot;]),&quot;value&quot;:[10,20]})</span>
-<span>    assert len(validate_intervals(h))==2</span>
-<span>    bad=h.copy();bad.loc[1,&quot;start&quot;]=pd.Timestamp(&quot;2026-01-01T10:59Z&quot;)</span>
-<span>    expect_value_error(lambda:validate_intervals(bad))</span>
-<span>    bad=h.copy();bad.loc[0,&quot;end&quot;]=bad.loc[0,&quot;start&quot;]</span>
-<span>    expect_value_error(lambda:validate_intervals(bad))</span>
+<span>    h = pd.DataFrame(</span>
+<span>        {</span>
+<span>            &quot;version_id&quot;: [1, 2],</span>
+<span>            &quot;start&quot;: pd.to_datetime([&quot;2026-01-01T10:00Z&quot;, &quot;2026-01-01T11:00Z&quot;]),</span>
+<span>            &quot;end&quot;: pd.to_datetime([&quot;2026-01-01T11:00Z&quot;, &quot;2026-01-01T12:00Z&quot;]),</span>
+<span>            &quot;value&quot;: [10, 20],</span>
+<span>        }</span>
+<span>    )</span>
+<span>    assert len(validate_intervals(h)) == 2</span>
+<span>    bad = h.copy()</span>
+<span>    bad.loc[1, &quot;start&quot;] = pd.Timestamp(&quot;2026-01-01T10:59Z&quot;)</span>
+<span>    expect_value_error(lambda: validate_intervals(bad))</span>
+<span>    bad = h.copy()</span>
+<span>    bad.loc[0, &quot;end&quot;] = bad.loc[0, &quot;start&quot;]</span>
+<span>    expect_value_error(lambda: validate_intervals(bad))</span>
 <span>    # Exercise 6: Assign an instant to at most one version</span>
-<span>    e=pd.DataFrame({&quot;event_id&quot;:[1,2,3],&quot;at&quot;:pd.to_datetime([&quot;2026-01-01T10:00Z&quot;,&quot;2026-01-01T11:00Z&quot;,&quot;2026-01-01T12:00Z&quot;])})</span>
-<span>    r=validity_lookup(e,h)</span>
-<span>    assert r.event_id.tolist()==[1,2,3] and r.loc[0,&quot;version_id&quot;]==1 and r.loc[1,&quot;version_id&quot;]==2 and pd.isna(r.loc[2,&quot;version_id&quot;])</span>
-<span>    assert pd.isna(r.loc[2,&quot;value&quot;])</span>
+<span>    e = pd.DataFrame(</span>
+<span>        {</span>
+<span>            &quot;event_id&quot;: [1, 2, 3],</span>
+<span>            &quot;at&quot;: pd.to_datetime([&quot;2026-01-01T10:00Z&quot;, &quot;2026-01-01T11:00Z&quot;, &quot;2026-01-01T12:00Z&quot;]),</span>
+<span>        }</span>
+<span>    )</span>
+<span>    r = validity_lookup(e, h)</span>
+<span>    assert (</span>
+<span>        r.event_id.tolist() == [1, 2, 3]</span>
+<span>        and r.loc[0, &quot;version_id&quot;] == 1</span>
+<span>        and r.loc[1, &quot;version_id&quot;] == 2</span>
+<span>        and pd.isna(r.loc[2, &quot;version_id&quot;])</span>
+<span>    )</span>
+<span>    assert pd.isna(r.loc[2, &quot;value&quot;])</span>
 <span>    print(&quot;python-pandas-02: all six normal and boundary contracts passed&quot;)</span>
+<span> </span>
 <span> </span>
 <span>if __name__ == &quot;__main__&quot;:</span>
 <span>    main()</span>

@@ -121,6 +121,14 @@
 <p>A view borrows a region owned elsewhere. span observes contiguous elements and string_view observes characters. An iterator can be invalidated when its container reallocates or erases elements. None of these lightweight handles extends the owner lifetime, and const views do not prevent the owner from changing through another path.</p>
 <h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>
 <p>A span consists conceptually of an address and a count. Copying a span copies that description, not the elements. Vector growth can replace the allocation while leaving the copied descriptions unchanged. This is why even a const span may dangle after mutation through the owner. For subranges, first establish offset&lt;=size, then count&lt;=size-offset; subtracting only after the first check avoids unsigned underflow in the validation itself.</p>
+<h3 id="views-describe-storage-without-owning-it">Views describe storage without owning it<a class="heading-anchor" href="#views-describe-storage-without-owning-it" aria-label="Link to this section">#</a></h3>
+<p>A span describes a contiguous sequence using an address and an extent. A string_view describes characters similarly. Neither owns the underlying storage. Copying a view copies that description, not the elements, so the owner must remain alive and its storage valid for every use. A view is useful for avoiding unnecessary copies only when that lifetime relationship is clear.</p>
+<p>The first program borrows a vector through span&lt;const int&gt; and selects subspan(1, 2). The offset1 skips the first element and count 2 selects4 and 6. The sum is 10. The operation does not allocate a new vector. The caller must satisfy the subspan bounds; a view type does not make every offset/count automatically safe. Validate externally supplied ranges before constructing or slicing views.</p>
+<p>The second program creates a two-character view over alpha. Changing the first character of the owning string in place makes the view observe Al. This illustrates aliasing: the view is not a frozen snapshot. A string reallocation or destruction would instead invalidate the view. The safe example changes an existing character without altering storage capacity and checks the result while the owner remains in scope.</p>
+<p>Const in span&lt;const int&gt; blocks writing elements through that view. It does not prevent another mutable alias from changing the same vector. A function that needs a stable snapshot across later mutation should own a copy or establish a stronger synchronization/lifetime contract. Read-only access and immutable data are different promises.</p>
+<p>Returning a view requires identifying an owner that survives the function. Returning a span into a local vector is dangling immediately after return. Returning an owning vector is often the clearer result when the function creates new data. A view into a caller-owned object can be appropriate, but the caller must know which later edits or destruction invalidate it. Document those operations alongside the return type.</p>
+<h3 id="debugging-the-contract">Debugging the contract<a class="heading-anchor" href="#debugging-the-contract" aria-label="Link to this section">#</a></h3>
+<p>A view that worked once can still be dangling. Inspect owner scope and reallocating operations rather than trusting printed bytes. If a returned view points into a local temporary, change the ownership design. If a span slice is out of range, fix the offset/count contract before access. If a supposedly constant result changes, check whether the program borrowed a mutable owner instead of taking a snapshot.</p>
 <h3 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-cpp">std::vector&lt;int&gt; xs{2,4,6}; assert(sum_view(std::span&lt;const int&gt;(xs).subspan(1,2))==10);</code></pre>
 <p>Expected: The view of positions 1 and 2 sums to 10.</p>
@@ -133,12 +141,12 @@
 <p><strong>Reasoning:</strong> A view stores a location and length.</p>
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
 <h3 id="exercise-2-select-a-subrange">Exercise 2: Select a subrange<a class="heading-anchor" href="#exercise-2-select-a-subrange" aria-label="Link to this section">#</a></h3>
-<p>Sum the final two values of [2,4,6].</p>
+<p>Sum the final two values of [2, 4, 6].</p>
 <p><strong>Expected:</strong> 10 with original vector unchanged.</p>
 <p><strong>Reasoning:</strong> The borrowed slice starts at offset 1.</p>
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
 <h3 id="exercise-3-write-a-bounds-guard">Exercise 3: Write a bounds guard<a class="heading-anchor" href="#exercise-3-write-a-bounds-guard" aria-label="Link to this section">#</a></h3>
-<p>Validate offset=2,count=2 for size=3 before subspan.</p>
+<p>Validate offset=2, count=2 for size=3 before subspan.</p>
 <p><strong>Expected:</strong> Reject because only one value remains.</p>
 <p><strong>Reasoning:</strong> Avoid overflow by checking count&lt;=size-offset after offset&lt;=size.</p>
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>

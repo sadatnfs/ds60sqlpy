@@ -12,21 +12,28 @@ Gather a one-dimensional source using a one-dimensional integer index array. All
 
 ```python
 def gather_positions(values: np.ndarray, positions: np.ndarray) -> np.ndarray:
-    p=np.asarray(positions)
-    if values.ndim!=1 or p.ndim!=1 or not np.issubdtype(p.dtype,np.integer) or np.any(p < -len(values)) or np.any(p >= len(values)):
+    p = np.asarray(positions)
+    if (
+        values.ndim != 1
+        or p.ndim != 1
+        or not np.issubdtype(p.dtype, np.integer)
+        or np.any(p < -len(values))
+        or np.any(p >= len(values))
+    ):
         raise ValueError("Expected in-range one-dimensional integer positions")
-    return values[p]
+    return np.asarray(values[p])
 ```
 
 The dtype check distinguishes positional indices from Boolean masks, which have a different meaning despite often containing zero/one-like values. Negative positions are validated against the actual source length rather than normalized without bounds. Advanced indexing creates the gathered output in the index-array order, retaining duplicate requests. An empty integer request is valid even for an empty source because no position is accessed.
 
 ```python
-a=np.array([10,20,30]);r=gather_positions(a,np.array([2,-1,0]))
-assert r.tolist()==[30,30,10] and not np.shares_memory(a,r)
-assert gather_positions(a,np.array([],dtype=int)).shape==(0,)
-expect_value_error(lambda:gather_positions(a,np.array([3])))
-expect_value_error(lambda:gather_positions(a,np.array([1.])))
-expect_value_error(lambda:gather_positions(a,np.array([True])))
+a = np.array([10, 20, 30])
+r = gather_positions(a, np.array([2, -1, 0]))
+assert r.tolist() == [30, 30, 10] and not np.shares_memory(a, r)
+assert gather_positions(a, np.array([], dtype=int)).shape == (0,)
+expect_value_error(lambda: gather_positions(a, np.array([3])))
+expect_value_error(lambda: gather_positions(a, np.array([1.0])))
+expect_value_error(lambda: gather_positions(a, np.array([True])))
 ```
 
 ### Exercise 2: Accumulate repeated category codes
@@ -37,21 +44,33 @@ Sum finite one-dimensional values into bins using one nonnegative integer code p
 
 ```python
 def sum_by_code(values: np.ndarray, codes: np.ndarray, bins: int) -> np.ndarray:
-    v=np.asarray(values,dtype=float);c=np.asarray(codes)
-    if isinstance(bins,bool) or not isinstance(bins,(int,np.integer)) or bins<0 or v.ndim!=1 or c.ndim!=1 or len(v)!=len(c) or not np.isfinite(v).all() or not np.issubdtype(c.dtype,np.integer) or np.any(c<0) or np.any(c>=bins):
+    v = np.asarray(values, dtype=float)
+    c = np.asarray(codes)
+    if (
+        isinstance(bins, bool)
+        or not isinstance(bins, (int, np.integer))
+        or bins < 0
+        or v.ndim != 1
+        or c.ndim != 1
+        or len(v) != len(c)
+        or not np.isfinite(v).all()
+        or not np.issubdtype(c.dtype, np.integer)
+        or np.any(c < 0)
+        or np.any(c >= bins)
+    ):
         raise ValueError("Expected finite values and valid category codes")
-    result=np.zeros(bins,dtype=float)
-    np.add.at(result,c,v)
-    return result
+    result = np.zeros(bins, dtype=float)
+    np.add.at(result, c, v)
+    return np.asarray(result)
 ```
 
 The category vector names destinations, and multiple observations can legitimately share a destination. add.at implements the required accumulation rather than a buffered overwrite-like update. Starting from zeros also defines absent categories as known zero totals in this synthetic complete-input contract. Missing observations would require a separate count or missingness policy instead of assuming their absence means zero.
 
 ```python
-assert sum_by_code(np.array([1,2,5]),np.array([0,0,2]),3).tolist()==[3,0,5]
-assert sum_by_code(np.array([]),np.array([],dtype=int),0).shape==(0,)
-expect_value_error(lambda:sum_by_code(np.array([1]),np.array([3]),3))
-expect_value_error(lambda:sum_by_code(np.array([1]),np.array([0]),True))
+assert sum_by_code(np.array([1, 2, 5]), np.array([0, 0, 2]), 3).tolist() == [3, 0, 5]
+assert sum_by_code(np.array([]), np.array([], dtype=int), 0).shape == (0,)
+expect_value_error(lambda: sum_by_code(np.array([1]), np.array([3]), 3))
+expect_value_error(lambda: sum_by_code(np.array([1]), np.array([0]), True))
 ```
 
 ### Exercise 3: Validate a row mask
@@ -62,21 +81,21 @@ Filter a matrix using an exactly matching one-dimensional Boolean row mask. Pres
 
 ```python
 def select_rows(values: np.ndarray, mask: np.ndarray) -> np.ndarray:
-    m=np.asarray(mask)
-    if values.ndim!=2 or m.ndim!=1 or m.dtype!=np.bool_ or len(m)!=values.shape[0]:
+    m = np.asarray(mask)
+    if values.ndim != 2 or m.ndim != 1 or m.dtype != np.bool_ or len(m) != values.shape[0]:
         raise ValueError("Expected one Boolean value per row")
-    return values[m]
+    return np.asarray(values[m])
 ```
 
 Requiring Boolean dtype prevents an integer array from being interpreted as positional advanced indexing. Requiring one dimension prevents a cell mask from flattening selected entries and losing the row grain. The all-false case preserves the feature count in an empty matrix, which is essential for downstream schema consistency. The gathered result is detached, so a caller can transform it without modifying the original table.
 
 ```python
-a=np.array([[1,2],[3,4],[5,6]])
-r=select_rows(a,np.array([True,False,True]))
-assert r.tolist()==[[1,2],[5,6]] and not np.shares_memory(a,r)
-assert select_rows(a,np.zeros(3,dtype=bool)).shape==(0,2)
-expect_value_error(lambda:select_rows(a,np.array([1,0,1])))
-expect_value_error(lambda:select_rows(a,np.ones((3,2),dtype=bool)))
+a = np.array([[1, 2], [3, 4], [5, 6]])
+r = select_rows(a, np.array([True, False, True]))
+assert r.tolist() == [[1, 2], [5, 6]] and not np.shares_memory(a, r)
+assert select_rows(a, np.zeros(3, dtype=bool)).shape == (0, 2)
+expect_value_error(lambda: select_rows(a, np.array([1, 0, 1])))
+expect_value_error(lambda: select_rows(a, np.ones((3, 2), dtype=bool)))
 ```
 
 ### Exercise 4: Select every row-column combination
@@ -87,19 +106,30 @@ Return a Cartesian submatrix from nonnegative integer row and column arrays. Pre
 
 ```python
 def cartesian_submatrix(values: np.ndarray, rows: np.ndarray, columns: np.ndarray) -> np.ndarray:
-    r=np.asarray(rows);c=np.asarray(columns)
-    if values.ndim!=2 or r.ndim!=1 or c.ndim!=1 or not np.issubdtype(r.dtype,np.integer) or not np.issubdtype(c.dtype,np.integer) or np.any(r<0) or np.any(c<0) or np.any(r>=values.shape[0]) or np.any(c>=values.shape[1]):
+    r = np.asarray(rows)
+    c = np.asarray(columns)
+    if (
+        values.ndim != 2
+        or r.ndim != 1
+        or c.ndim != 1
+        or not np.issubdtype(r.dtype, np.integer)
+        or not np.issubdtype(c.dtype, np.integer)
+        or np.any(r < 0)
+        or np.any(c < 0)
+        or np.any(r >= values.shape[0])
+        or np.any(c >= values.shape[1])
+    ):
         raise ValueError("Expected valid nonnegative row and column positions")
-    return values[np.ix_(r,c)]
+    return np.asarray(values[np.ix_(r, c)])
 ```
 
 ix_ constructs index arrays with complementary singleton dimensions, so broadcasting produces every pair. Direct values[rows, columns] instead pairs corresponding positions and would return only two values for the normal fixture. Preserving output axes makes the result usable as a smaller matrix, including empty selections. Duplicate requests intentionally repeat rows or columns and must not be removed with unique unless the contract changes.
 
 ```python
-a=np.arange(12).reshape(3,4)
-assert cartesian_submatrix(a,np.array([2,0]),np.array([3,1])).tolist()==[[11,9],[3,1]]
-assert cartesian_submatrix(a,np.array([],dtype=int),np.array([3,1])).shape==(0,2)
-expect_value_error(lambda:cartesian_submatrix(a,np.array([3]),np.array([0])))
+a = np.arange(12).reshape(3, 4)
+assert cartesian_submatrix(a, np.array([2, 0]), np.array([3, 1])).tolist() == [[11, 9], [3, 1]]
+assert cartesian_submatrix(a, np.array([], dtype=int), np.array([3, 1])).shape == (0, 2)
+expect_value_error(lambda: cartesian_submatrix(a, np.array([3]), np.array([0])))
 ```
 
 ### Exercise 5: Make top-k ties deterministic
@@ -110,20 +140,26 @@ Return indices of the k largest finite one-dimensional scores in descending scor
 
 ```python
 def stable_top_indices(scores: np.ndarray, k: int) -> np.ndarray:
-    s=np.asarray(scores,dtype=float)
-    if s.ndim!=1 or not np.isfinite(s).all() or isinstance(k,bool) or not isinstance(k,(int,np.integer)) or not 0<=k<=len(s):
+    s = np.asarray(scores, dtype=float)
+    if (
+        s.ndim != 1
+        or not np.isfinite(s).all()
+        or isinstance(k, bool)
+        or not isinstance(k, (int, np.integer))
+        or not 0 <= k <= len(s)
+    ):
         raise ValueError("Expected finite scores and a valid integer k")
-    return np.argsort(-s,kind="stable")[:k]
+    return np.asarray(np.argsort(-s, kind="stable")[:k])
 ```
 
 Negating finite floating scores converts descending ranking into ascending sorting. Stable sorting retains input position among equal keys, making the boundary tie policy explicit. A full sort is intentionally used before introducing partial selection optimization. Returning indices preserves access to associated records and avoids confusing a score value with a unique record identity.
 
 ```python
-s=np.array([5.,9.,9.,1.])
-assert stable_top_indices(s,3).tolist()==[1,2,0] and s.tolist()==[5,9,9,1]
-assert stable_top_indices(s,0).size==0
-expect_value_error(lambda:stable_top_indices(s,5))
-expect_value_error(lambda:stable_top_indices(np.array([np.nan]),1))
+s = np.array([5.0, 9.0, 9.0, 1.0])
+assert stable_top_indices(s, 3).tolist() == [1, 2, 0] and s.tolist() == [5, 9, 9, 1]
+assert stable_top_indices(s, 0).size == 0
+expect_value_error(lambda: stable_top_indices(s, 5))
+expect_value_error(lambda: stable_top_indices(np.array([np.nan]), 1))
 ```
 
 ### Exercise 6: Restore original observation order
@@ -134,20 +170,26 @@ Return the inverse of a one-dimensional integer permutation of 0 through n-1. Re
 
 ```python
 def inverse_permutation(order: np.ndarray) -> np.ndarray:
-    p=np.asarray(order)
-    if p.ndim!=1 or not np.issubdtype(p.dtype,np.integer) or not np.array_equal(np.sort(p),np.arange(len(p))):
+    p = np.asarray(order)
+    if (
+        p.ndim != 1
+        or not np.issubdtype(p.dtype, np.integer)
+        or not np.array_equal(np.sort(p), np.arange(len(p)))
+    ):
         raise ValueError("Expected a permutation of every original position")
-    return np.argsort(p)
+    return np.asarray(np.argsort(p))
 ```
 
 A true permutation has exactly one occurrence of every original position, which is verified by comparing its sorted values with arange(n). argsort then maps each original position back to the place where it appears in the reordered array. The round-trip identity is the independent correctness criterion. A selection with duplicates cannot be inverted because information was repeated or discarded, so it must be rejected rather than guessed.
 
 ```python
-p=np.array([2,0,1]);inverse=inverse_permutation(p);a=np.array([10,20,30])
-assert inverse.tolist()==[1,2,0] and np.array_equal(a[p][inverse],a)
-assert inverse_permutation(np.array([],dtype=int)).size==0
-expect_value_error(lambda:inverse_permutation(np.array([0,0])))
-expect_value_error(lambda:inverse_permutation(np.array([0.,1.])))
+p = np.array([2, 0, 1])
+inverse = inverse_permutation(p)
+a = np.array([10, 20, 30])
+assert inverse.tolist() == [1, 2, 0] and np.array_equal(a[p][inverse], a)
+assert inverse_permutation(np.array([], dtype=int)).size == 0
+expect_value_error(lambda: inverse_permutation(np.array([0, 0])))
+expect_value_error(lambda: inverse_permutation(np.array([0.0, 1.0])))
 ```
 
 ## Verification and interpretation

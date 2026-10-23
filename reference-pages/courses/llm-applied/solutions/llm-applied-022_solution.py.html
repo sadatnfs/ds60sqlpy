@@ -132,7 +132,13 @@
 <span>        if type(value) not in (int,float): raise TypeError(&#x27;numeric value required&#x27;)</span>
 <span>        if not math.isfinite(value): raise ValueError(&#x27;finite value required&#x27;)</span>
 <span>        groups[row[&#x27;group&#x27;]].append(value)</span>
-<span>    return [{&#x27;group&#x27;:key,&#x27;count&#x27;:len(values),&#x27;mean&#x27;:sum(values)/len(values)} for key,values in sorted(groups.items())]</span>
+<span>    result=[]</span>
+<span>    for key,values in sorted(groups.items()):</span>
+<span>        scale=max(abs(value) for value in values)</span>
+<span>        mean=0.0 if scale==0 else scale*(math.fsum(value/scale for value in values)/len(values))</span>
+<span>        if not math.isfinite(mean): raise ValueError(&#x27;finite group mean required&#x27;)</span>
+<span>        result.append({&#x27;group&#x27;:key,&#x27;count&#x27;:len(values),&#x27;mean&#x27;:mean})</span>
+<span>    return result</span>
 <span> </span>
 <span> </span>
 <span>def verify():</span>
@@ -154,6 +160,10 @@
 <span>        try: dispatch(request,changed)</span>
 <span>        except (TypeError,ValueError): pass</span>
 <span>        else: raise AssertionError(&#x27;invalid numeric value accepted&#x27;)</span>
+<span>    huge=[{&#x27;id&#x27;:&#x27;h1&#x27;,&#x27;group&#x27;:&#x27;A&#x27;,&#x27;value&#x27;:1e308},{&#x27;id&#x27;:&#x27;h2&#x27;,&#x27;group&#x27;:&#x27;A&#x27;,&#x27;value&#x27;:1e308}]</span>
+<span>    assert dispatch(request,huge)==[{&#x27;group&#x27;:&#x27;A&#x27;,&#x27;count&#x27;:2,&#x27;mean&#x27;:1e308}]</span>
+<span>    huge[1][&#x27;value&#x27;]=-1e308</span>
+<span>    assert dispatch(request,huge)[0][&#x27;mean&#x27;]==0.0</span>
 <span> </span>
 <span>    # Exercise 4: Enforce identity and work limits</span>
 <span>    too_many=[{&#x27;id&#x27;:str(i),&#x27;group&#x27;:&#x27;A&#x27;,&#x27;value&#x27;:1.} for i in range(21)]</span>

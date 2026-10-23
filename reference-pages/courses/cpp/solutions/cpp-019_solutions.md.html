@@ -120,16 +120,24 @@
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>A range combines an iterable start and end. A view can lazily filter or transform a range without owning a new collection. Laziness means the work happens during traversal, so later owner changes can affect what is seen. A projection selects a member for an algorithm without changing the record.</p>
 <h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>
-<p>A lazy filter does not produce a new vector when it is declared. Iteration asks the source for successive values, applies the predicate and then transforms accepted values. The view therefore shares the source lifetime and may observe source changes. Materializing [0,6] makes a stable owned result. Sorting Score by a projection reorders whole records rather than sorting a detached points column, which preserves each ID-to-points relationship.</p>
+<p>A lazy filter does not produce a new vector when it is declared. Iteration asks the source for successive values, applies the predicate and then transforms accepted values. The view therefore shares the source lifetime and may observe source changes. Materializing [0, 6] makes a stable owned result. Sorting Score by a projection reorders whole records rather than sorting a detached points column, which preserves each ID-to-points relationship.</p>
+<h3 id="lazy-ranges-predicates-and-projections">Lazy ranges, predicates and projections<a class="heading-anchor" href="#lazy-ranges-predicates-and-projections" aria-label="Link to this section">#</a></h3>
+<p>A range provides a sequence to traverse. A view is commonly a lightweight, lazy description of a transformation over a range. Building a filter view does not necessarily evaluate the predicate for every element immediately. Iteration performs the work needed to produce values. This distinction matters when the underlying data changes or a predicate has side effects.</p>
+<p>The first program filters [-1, 0, 3] with x&gt;=0 and materializes the observed result into a vector. Zero is retained because the boundary is inclusive. The view itself does not erase -1 from the original vector. Materialization creates an owning result with a stable sequence independent of later changes to the input. Without that step, the view remains coupled to its source and its lifetime/invalidation rules.</p>
+<p>The projection in ranges::sort(scores, {}, &amp;Score::points) selects which member participates in comparison. The empty braces choose the default comparator; the member pointer supplies a projection from Score to points. Sorting moves whole Score values, so IDs remain attached to their corresponding points. Sorting a separate points vector without preserving identity would answer a different question.</p>
+<p>A predicate should be understandable as a rule over an element. Side effects such as incrementing an external counter can make the result depend on how often and when the range implementation evaluates it. Do not use an assumed predicate-call count as a business result unless the algorithm explicitly guarantees it. Keep counting as a separate deliberate operation when that count is part of the contract.</p>
+<p>Views also require care around temporary owners. A pipeline that safely owns or references its source under one type combination is not proof that every returned view survives. When a function returns a filtered result for later use, an owning vector may be the simplest correct interface. The later generic-pipeline lesson develops this boundary for single-pass input ranges.</p>
+<h3 id="debugging-the-contract">Debugging the contract<a class="heading-anchor" href="#debugging-the-contract" aria-label="Link to this section">#</a></h3>
+<p>If the original vector changed after filtering, inspect whether the code actually used an erasing algorithm. If a view later reads garbage, trace its owner lifetime and invalidation. If IDs no longer match scores, check whether fields were sorted separately. If a lambda counter produces a surprising total, remove side effects and reason from the algorithm&#x27;s traversal contract rather than guessing how many times the predicate runs.</p>
 <h3 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-cpp">auto view=xs|std::views::filter([](int x){return x&gt;=0;});</code></pre>
-<p>Expected: For [-1,0,3], traversal yields 0 and 3.</p>
+<p>Expected: For [-1, 0, 3], traversal yields 0 and 3.</p>
 <h3 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-cpp">std::ranges::sort(scores,{},&amp;Score::points);</code></pre>
 <p>Expected: Records order by points while carrying their original IDs.</p>
 <h3 id="exercise-1-predict-lazy-output">Exercise 1: Predict lazy output<a class="heading-anchor" href="#exercise-1-predict-lazy-output" aria-label="Link to this section">#</a></h3>
-<p>Filter &gt;=0 then double [-1,0,3].</p>
-<p><strong>Expected:</strong> [0,6].</p>
+<p>Filter &gt;=0 then double [-1, 0, 3].</p>
+<p><strong>Expected:</strong> [0, 6].</p>
 <p><strong>Reasoning:</strong> The predicate runs before transformation.</p>
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
 <h3 id="exercise-2-change-composition">Exercise 2: Change composition<a class="heading-anchor" href="#exercise-2-change-composition" aria-label="Link to this section">#</a></h3>
@@ -139,7 +147,7 @@
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
 <h3 id="exercise-3-materialize-ownership">Exercise 3: Materialize ownership<a class="heading-anchor" href="#exercise-3-materialize-ownership" aria-label="Link to this section">#</a></h3>
 <p>Collect the view into vector&lt;int&gt;.</p>
-<p><strong>Expected:</strong> Stored [0,6] remains independent of later source changes.</p>
+<p><strong>Expected:</strong> Stored [0, 6] remains independent of later source changes.</p>
 <p><strong>Reasoning:</strong> Materialization gives the result ownership.</p>
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
 <h3 id="exercise-4-repair-dangling-view">Exercise 4: Repair dangling view<a class="heading-anchor" href="#exercise-4-repair-dangling-view" aria-label="Link to this section">#</a></h3>
@@ -148,13 +156,13 @@
 <p><strong>Reasoning:</strong> A lazy pipeline still borrows the original storage.</p>
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
 <h3 id="exercise-5-sort-records">Exercise 5: Sort records<a class="heading-anchor" href="#exercise-5-sort-records" aria-label="Link to this section">#</a></h3>
-<p>Sort scores (id1,9),(id2,4) by points.</p>
-<p><strong>Expected:</strong> ID order [2,1].</p>
+<p>Sort scores (id1, 9), (id2, 4) by points.</p>
+<p><strong>Expected:</strong> ID order [2, 1].</p>
 <p><strong>Reasoning:</strong> Projection selects the comparison key, not the output type.</p>
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
 <h3 id="exercise-6-transfer-stable-ties">Exercise 6: Transfer stable ties<a class="heading-anchor" href="#exercise-6-transfer-stable-ties" aria-label="Link to this section">#</a></h3>
-<p>Add (id3,4) and define deterministic ordering by points then ID.</p>
-<p><strong>Expected:</strong> ID order [2,3,1].</p>
+<p>Add (id3, 4) and define deterministic ordering by points then ID.</p>
+<p><strong>Expected:</strong> ID order [2, 3, 1].</p>
 <p><strong>Reasoning:</strong> A tie-breaker makes equal-key order explicit.</p>
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p></article>
   </main>

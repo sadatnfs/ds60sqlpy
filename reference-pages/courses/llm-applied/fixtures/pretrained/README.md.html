@@ -8,7 +8,7 @@
     http-equiv="Content-Security-Policy"
     content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
   >
-  <title>Optional pinned pretrained-model experiment · DS60 reference</title>
+  <title>Optional pretrained-model adaptation, fully local after preparation · DS60 reference</title>
   <style>
     :root {
       --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
@@ -112,54 +112,83 @@
   <main class="shell">
     <header class="hero">
       <p class="eyebrow">Rendered course document</p>
-      <h1>Optional pinned pretrained-model experiment</h1>
+      <h1>Optional pretrained-model adaptation, fully local after preparation</h1>
       <p class="source-path">Generated from <code>courses/llm-applied/fixtures/pretrained/README.md</code></p>
     </header>
-    <article class="document"><h2 id="optional-pinned-pretrained-model-experiment">Optional pinned pretrained-model experiment<a class="heading-anchor" href="#optional-pinned-pretrained-model-experiment" aria-label="Link to this section">#</a></h2>
-<p>This optional recipe is authored and statically checked. No pretrained weights were downloaded and no pretrained training was run during course authoring. The default lessons remain offline and use literal data or the tiny PyTorch decoder.</p>
-<p>The model is <code>HuggingFaceTB/SmolLM2-135M-Instruct</code>, pinned to revision <code>12fd25f77366fa6b3b4b768ec3050bf629380bac</code>. Its model card reported <code>apache-2.0</code> when checked on2026-10-22. Review the actual model license and your own training-data permissions before choosing an intended use. The small fixture is a mechanics experiment, not a domain-assistant quality benchmark.</p>
-<h3 id="files-and-contracts">Files and contracts<a class="heading-anchor" href="#files-and-contracts" aria-label="Link to this section">#</a></h3>
-<ul>
-<li><a href="requirements.txt.html">requirements.txt</a> pins direct packages for a separate Python3.12 environment. These are real released versions checked against package metadata. This is not a complete transitive lock or a claim that this exact platform combination has executed. Resolve and retain a platform-specific hash lock and wheels before sharing a qualified environment.</li>
-<li><a href="asset_contract.json.html">asset_contract.json</a> fixes model identity and the default10-step/128-token budget.</li>
-<li><a href="prepare_assets.py.html">prepare_assets.py</a> is the only connected acquisition entry point. It refuses to run without <code>--acknowledge-network</code>, refuses an existing destination, downloads the pinned snapshot and writes a local SHA256 manifest. It is never imported or invoked by a default lesson.</li>
-<li><a href="verify_assets.py.html">verify_assets.py</a> checks revision, license metadata, safe paths and every recorded file hash using only local reads.</li>
-<li><a href="train_local.py.html">train_local.py</a> supports full SFT or LoRA on local assets, checks family isolation, template prefix alignment, completion masks and collated labels, then performs exactly10 CPU updates and writes an actual receipt only after execution.</li>
-<li><a href="infer_local.py.html">infer_local.py</a> performs optional bounded local generation from the pinned base and an optional local adapter. Its output is explicitly an unvalidated proposal. Citation and support validation remain required before treating it as an answer.</li>
-<li><a href="../../../../../courses/llm-applied/fixtures/pretrained/train.jsonl">train.jsonl</a> and <a href="../../../../../courses/llm-applied/fixtures/pretrained/eval.jsonl">eval.jsonl</a> are authored prompt/completion fixtures with disjoint families. Four training records and one evaluation record are far too small to establish useful domain performance.</li>
-</ul>
-<h3 id="separate-preparation-from-offline-work">Separate preparation from offline work<a class="heading-anchor" href="#separate-preparation-from-offline-work" aria-label="Link to this section">#</a></h3>
-<p>Choose a new learner-owned directory under <code>.learning/optional-models/</code>. Prepare dependencies in a separate environment using the interpreter selected by your setup. Do not replace the main classroom environment. The following package installation is an optional connected setup action, not part of default lesson execution:</p>
-<pre><code class="language-text">python -m pip install -r courses/llm-applied/fixtures/pretrained/requirements.txt</code></pre>
-<p>Acquire the model only when you deliberately choose the connected step. From the repository root, PowerShell and POSIX can use the same argument structure with their selected interpreter:</p>
-<pre><code class="language-text">python courses/llm-applied/fixtures/pretrained/prepare_assets.py --destination .learning/optional-models/smollm2-135m-pinned --acknowledge-network</code></pre>
-<p>The destination must not already exist. A failed partial acquisition is retained for inspection; the script does not delete or overwrite it. Resolve the failure deliberately and use a new destination for another acquisition. No credentials are printed or written by the course code.</p>
-<p>Once dependencies and assets exist, the training script sets Hugging Face offline flags before importing model libraries. It calls every <code>from_pretrained</code> with a local directory and <code>local_files_only=True</code>; model loading also uses <code>trust_remote_code=False</code>. Missing or modified files fail instead of triggering a network fallback.</p>
-<pre><code class="language-text">python courses/llm-applied/fixtures/pretrained/train_local.py --model-dir .learning/optional-models/smollm2-135m-pinned --output-dir .learning/optional-models/run-lora-001 --mode lora</code></pre>
-<p>Use a different empty output directory and <code>--mode full</code> for a controlled full-SFT comparison. The scripts are CPU-first, <code>float32</code>, batch1, maximum length128, seed7 and maximum10 updates. LoRA uses rank4, alpha8, no adapter dropout and <code>q_proj</code>/<code>v_proj</code> targets. No GPU speed or memory claim is made. The resource requirement includes the pretrained base, activations, gradients and optimizer state, so it is substantially larger than the default tiny decoder.</p>
-<h3 id="inspect-the-mask-before-trusting-the-objective">Inspect the mask before trusting the objective<a class="heading-anchor" href="#inspect-the-mask-before-trusting-the-objective" aria-label="Link to this section">#</a></h3>
-<p>The fixture uses conversational prompt/completion records. The tokenizer renders the prompt with <code>add_generation_prompt=True</code> and the full conversation with <code>add_generation_prompt=False</code>. The script requires the prompt IDs to be an exact prefix of the full IDs and refuses examples longer than128 tokens. This avoids silently truncating every answer target.</p>
-<p>TRL processes the same records with <code>completion_only_loss=True</code> and <code>packing=False</code>. The script requires a completion mask containing both ignored prompt and active completion positions, then inspects an actual collated batch. Active labels must equal input token IDs at the same positions. The causal model performs its own next-token shift internally. Manually shifting these labels again would train on the wrong positions.</p>
-<p>These checks can fail if a model template or library behavior differs from the expected contract. Preserve the failure and inspect the exact template and processed example. Do not replace missing masks with all-ones labels to make training run. The PEFT0.17.1 package pin was verified from release metadata; the official0.17.0 LoRA reference documents the relevant configuration fields.</p>
-<h3 id="evaluate-and-preserve-actual-evidence">Evaluate and preserve actual evidence<a class="heading-anchor" href="#evaluate-and-preserve-actual-evidence" aria-label="Link to this section">#</a></h3>
-<p>The script records pre/post held-out loss, exact update count, template lengths, trainable parameter count, data hashes, base revision and installed versions. It saves the model or adapter plus tokenizer into the new output directory. A receipt is written only after an actual run; this repository does not contain a fabricated pretrained success receipt.</p>
-<p>For local generation after a LoRA run:</p>
-<pre><code class="language-text">python courses/llm-applied/fixtures/pretrained/infer_local.py --model-dir .learning/optional-models/smollm2-135m-pinned --adapter-dir .learning/optional-models/run-lora-001/model --question &quot;How is conversion rate defined?&quot;</code></pre>
-<p>The probe supplies one public fixture source, uses greedy generation and caps new tokens at64. It does not implement real authentication, a production retriever or a complete semantic-support checker. Treat output as a proposal and validate it through the citation, abstention and tool contracts in lessons011,022 and024. Evaluate supported, unsupported, stale, contradictory and access-restricted questions before making any subject-assistant claim.</p>
-<p>Sources: <a href="https://huggingface.co/docs/transformers/v4.57.1/en/chat_templating">versioned Transformers chat templates</a>, <a href="https://huggingface.co/docs/trl/v0.24.0/en/sft_trainer">TRL0.24 SFTTrainer</a>, <a href="https://huggingface.co/docs/peft/v0.17.0/en/package_reference/lora">PEFT LoRA configuration</a>, and the <a href="https://huggingface.co/HuggingFaceTB/SmolLM2-135M-Instruct/tree/12fd25f77366fa6b3b4b768ec3050bf629380bac">pinned model card</a>.</p>
-<h3 id="size-and-memory-planning">Size and memory planning<a class="heading-anchor" href="#size-and-memory-planning" aria-label="Link to this section">#</a></h3>
-<p>The pinned model tree reports <code>model.safetensors</code> as269,060,552 bytes, about257MiB, before tokenizer/configuration files. This value was read from repository metadata without downloading the weights. The optional environment and package wheels require additional disk space, often severalGiB depending on platform and Torch distribution.</p>
-<p>The model has roughly135million parameters. A float32 base alone is approximately540million bytes. Full-SFT parameter,gradient and two Adam-moment arrays alone are approximately2.16billion bytes before activations,temporary tensors and framework overhead. A4-8GiB CPU memory budget is a planning estimate for this small batch/context recipe,not a measured requirement or guarantee. LoRA reduces trainable gradient/optimizer state but retains the base and activations. Measure actual peak memory in the prepared environment before increasing lengths or batches.</p>
-<h3 id="optional-container-with-persistent-learner-owned-artifacts">Optional container with persistent learner-owned artifacts<a class="heading-anchor" href="#optional-container-with-persistent-learner-owned-artifacts" aria-label="Link to this section">#</a></h3>
-<p>The <a href="../../../../../courses/llm-applied/fixtures/pretrained/Dockerfile.optional">optional Dockerfile</a> is separate from the classroom images and has not been built by this authoring pass. Supply a reviewed,digest-pinned Python3.12 base image through <code>PYTHON_BASE_IMAGE</code>; no floating base tag is silently selected. Image preparation is connected because it installs the pinned direct dependencies. A qualified release should additionally use a complete platform-specific hash lock.</p>
-<pre><code class="language-text">docker build --build-arg PYTHON_BASE_IMAGE=&lt;reviewed-python312-image@sha256:digest&gt; -f courses/llm-applied/fixtures/pretrained/Dockerfile.optional -t ds60-pretrained-recipe:local courses/llm-applied/fixtures/pretrained</code></pre>
-<p>After explicit asset acquisition, mount a learner-owned model/run directory. Do not save downloaded weights or trained adapters in an ephemeral browser pad. The following offline run keeps both base artifacts and training outputs in the mounted host directory.</p>
-<p>POSIX,from the repository root:</p>
-<pre><code class="language-bash">docker run --rm --network none --mount &quot;type=bind,source=$(pwd)/.learning/optional-models,target=/models&quot; ds60-pretrained-recipe:local /recipe/train_local.py --model-dir /models/smollm2-135m-pinned --output-dir /models/run-lora-001 --mode lora</code></pre>
-<p>PowerShell,from the repository root:</p>
-<pre><code class="language-powershell">$ModelRoot = (Resolve-Path .learning\optional-models).Path
-docker run --rm --network none --mount &quot;type=bind,source=$ModelRoot,target=/models&quot; ds60-pretrained-recipe:local /recipe/train_local.py --model-dir /models/smollm2-135m-pinned --output-dir /models/run-lora-001 --mode lora</code></pre>
-<p>The directory must already exist and contain the verified model snapshot. The new run directory must be absent or empty. These are manual commands for the optional prepared image,not a claim that the default classroom includes Transformers/TRL/PEFT or that this recipe has executed.</p></article>
+    <article class="document"><h2 id="optional-pretrained-model-adaptation-fully-local-after-preparation">Optional pretrained-model adaptation, fully local after preparation<a class="heading-anchor" href="#optional-pretrained-model-adaptation-fully-local-after-preparation" aria-label="Link to this section">#</a></h2>
+<p>This recipe fine-tunes a small real pretrained language model on a deliberately tiny authored dataset. It is separate from the ordinary classroom. After the explicit dependency and model downloads, training and generation run with Docker networking disabled. No API account, API key or GPU is required.</p>
+<p>The pinned model is <code>HuggingFaceTB/SmolLM2-135M-Instruct</code>, revision <code>12fd25f77366fa6b3b4b768ec3050bf629380bac</code>. Its model card identifies the license as Apache 2.0. The weights are 269, 060, 552 bytes, about 257 MiB. Review the <a href="https://huggingface.co/HuggingFaceTB/SmolLM2-135M-Instruct/tree/12fd25f77366fa6b3b4b768ec3050bf629380bac">pinned model card</a> for its intended scope and limitations.</p>
+<h3 id="what-has-actually-been-tested">What has actually been tested<a class="heading-anchor" href="#what-has-actually-been-tested" aria-label="Link to this section">#</a></h3>
+<p>On 23 October 2026, the Linux arm64 Docker image built successfully with a full hashed dependency lock. Pinned acquisition recorded 13 files. Both full fine-tuning and LoRA completed exactly 10 CPU updates with maximum sequence length 128, and the saved LoRA adapter reloaded for offline generation.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Check</th>
+<th>Observed result</th>
+</tr></thead><tbody>
+<tr>
+<td>Full fine-tuning</td>
+<td>134, 515, 008 trainable parameters;10 updates</td>
+</tr>
+<tr>
+<td>LoRA</td>
+<td>230, 400 trainable parameters;10 updates</td>
+</tr>
+<tr>
+<td>LoRA held-out token loss</td>
+<td>6.721148 before;6.474194 after</td>
+</tr>
+<tr>
+<td>Full fine-tuning held-out token loss</td>
+<td>6.721148 before;0.008058 after</td>
+</tr>
+<tr>
+<td>Saved-adapter generation</td>
+<td>Executed offline; factual answer was not accepted</td>
+</tr>
+</tbody></table></div>
+<p>These results establish that the preparation, masks, optimization and saved artifact paths execute. They do not establish useful domain-assistant quality. Two fresh LoRA runs in the same qualified image produced identical adapter file hashes and identical evaluation loss. The seed is set before adapter construction: setting only the trainer seed happens too late for matrices that were already initialized. This is a same-environment repeatability check, not a promise of bitwise equality across CPUs, libraries or precision settings.</p>
+<p>The data contains four training records and one evaluation record. Their <code>family</code> fields separate authored labels, but the examples share an assignment unit extraction task and prompt template. The one held-out entity label is a mechanics check, not an independent sample of business-question families. The large loss drop in full fine-tuning must be read in that narrow context.</p>
+<p>The generation probe supplies the correct conversion-rate definition as evidence. The first qualified adapter produced a fluent answer that incorrectly described eligible visits divided by eligible visits. It also did not establish claim-level citation support. This is a concrete example of why a completed training run, lower token loss and fluent prose are insufficient acceptance criteria. The JSON marks the answer as unvalidated and distinguishes supplied evidence IDs from verified citations.</p>
+<p>Linux amd64 dependency resolution is prepared separately; native execution on amd64 and Windows/WSL 2 has not been established by this arm64 run. The same Linux-container commands are intended for local Docker engines on all OSes.</p>
+<h3 id="1-build-the-optional-environment">1. Build the optional environment<a class="heading-anchor" href="#1-build-the-optional-environment" aria-label="Link to this section">#</a></h3>
+<p>Use Docker with Linux containers and Compose, as described in the <a href="../../../../docs/docker-classroom.md.html">classroom guide</a>. Open a terminal in the repository root. On Windows, the engine uses its WSL 2 backend. Run each command separately and stop if it fails. These commands work in Command Prompt, PowerShell and macOS/Linux terminals without host Python.</p>
+<p>First build the CPU PyTorch worker that supplies the optional image&#x27;s base:</p>
+<pre><code class="language-text">docker compose --progress plain -f compose.classroom.yaml --profile llm-torch-cpu --parallel 1 build llm-worker</code></pre>
+<p>Then build the separate recipe image:</p>
+<pre><code class="language-text">docker build --progress=plain -f courses/llm-applied/fixtures/pretrained/Dockerfile.optional -t ds60-pretrained-recipe:local courses/llm-applied/fixtures/pretrained</code></pre>
+<p>The image reuses local <code>ds60sqlpy-worker-llm-torch-cpu:0.3.0</code>, then installs the complete <code>requirements.arm64.lock</code> or <code>requirements.amd64.lock</code> with required hashes and binary wheels. Torch 2.9.1 is CPU-only. Transformers 4.57.1, TRL 0.24.0 and PEFT 0.17.1 are explicit version choices. No CUDA dependency tree is installed by this recipe. <code>pip check</code> must pass during the build.</p>
+<p>The <a href="pyproject.toml.html">direct declaration</a>, <a href="requirements.arm64.lock.html">full arm64 lock</a> and <a href="requirements.amd64.lock.html">full amd64 lock</a> are distinct: the declaration expresses intended top-level dependencies, while a lock records every resolved package and accepted artifact hashes. Maintainers regenerate locks with <code>python courses/llm-applied/fixtures/pretrained/lock_dependencies.py</code> using uv. Changing a lock requires a fresh image build and runtime qualification.</p>
+<h3 id="2-acquire-the-pinned-model-deliberately">2. Acquire the pinned model deliberately<a class="heading-anchor" href="#2-acquire-the-pinned-model-deliberately" aria-label="Link to this section">#</a></h3>
+<p>Create a named Docker volume for downloaded assets and saved training outputs:</p>
+<pre><code class="language-text">docker volume create ds60-pretrained-learning</code></pre>
+<p>This data is local to the Docker engine and persists when a run container is removed. Reusing this volume name selects the same artifacts. It is separate from the ordinary classroom&#x27;s progress volume. Do not remove it to diagnose a training error.</p>
+<p>The next command is the connected model acquisition step. It explicitly enables the Hub download client and acknowledges network access:</p>
+<pre><code class="language-text">docker run --rm --cpus 2 --memory 2g --mount type=volume,source=ds60-pretrained-learning,target=/models --env HF_HUB_OFFLINE=0 ds60-pretrained-recipe:local /recipe/prepare_assets.py --destination /models/smollm2-pinned --acknowledge-network</code></pre>
+<p>The destination must not exist. The script downloads only the fixed revision and writes <code>course-assets.json</code> with file hashes. A partial acquisition is retained for inspection. It does not overwrite or delete an earlier model. Use a new destination name for a deliberate retry, then use that same name in later commands. A network failure must be fixed before attempting training.</p>
+<p>The scripts do not use paid services or automatically download a replacement model. Verification checks the exact local artifact inventory, rejects unsafe paths and unlisted files, and detects modified bytes before loading weights.</p>
+<h3 id="3-train-offline-and-preserve-a-receipt">3. Train offline and preserve a receipt<a class="heading-anchor" href="#3-train-offline-and-preserve-a-receipt" aria-label="Link to this section">#</a></h3>
+<p>Run the LoRA path with a bounded CPU and memory budget:</p>
+<pre><code class="language-text">docker run --rm --network none --cpus 2 --memory 6g --pids-limit 128 --mount type=volume,source=ds60-pretrained-learning,target=/models ds60-pretrained-recipe:local /recipe/train_local.py --model-dir /models/smollm2-pinned --output-dir /models/run-lora-001 --mode lora</code></pre>
+<p>For the full fine-tuning comparison, use another new output directory:</p>
+<pre><code class="language-text">docker run --rm --network none --cpus 2 --memory 6g --pids-limit 128 --mount type=volume,source=ds60-pretrained-learning,target=/models ds60-pretrained-recipe:local /recipe/train_local.py --model-dir /models/smollm2-pinned --output-dir /models/run-full-001 --mode full</code></pre>
+<p>Each run uses float 32, batch 1, seed 7 and exactly 10 updates. LoRA uses rank 4, alpha 8, zero adapter dropout and <code>q_proj</code>/<code>v_proj</code> targets. The output directory must be absent or empty. A repeated run needs a new name so previous models, logs and receipts remain intact.</p>
+<p>The 6 GiB limit is a chosen resource boundary for this short fixture, not a promise that any model or dataset will fit. Full fine-tuning stores parameter gradients and optimizer state. LoRA reduces trainable state but still retains the base model and intermediate activations. Longer sequences, larger batches and other models require new measurements. This recipe makes no GPU speed claim.</p>
+<h3 id="4-understand-the-training-mask">4. Understand the training mask<a class="heading-anchor" href="#4-understand-the-training-mask" aria-label="Link to this section">#</a></h3>
+<p>The training fixture uses conversational prompt/completion records. The tokenizer renders the prompt with <code>add_generation_prompt=True</code> and the complete conversation without an extra generation prompt. The script requires the prompt token IDs to be an exact prefix of the full token IDs. It rejects any example longer than 128 tokens, rather than truncating away its answer targets.</p>
+<p>TRL receives <code>completion_only_loss=True</code> and <code>packing=False</code>. The processed dataset must contain both ignored prompt positions and active completion positions. The script then inspects an actual collated batch: ignored labels are <code>-100</code>, and active labels equal the input token IDs at those positions. The causal model performs the next-token shift internally. Shifting labels again would optimize the wrong prediction target.</p>
+<p>An attention mask controls which context positions are available; a loss mask controls which targets contribute to optimization. Prompt tokens can provide context without receiving a direct completion-loss term. Missing masks or an all-active target mask fail visibly. Do not substitute all-ones labels merely to make a run succeed.</p>
+<p>Every completed run saves a model or adapter, a tokenizer directory and a <code>receipt.json</code>. The receipt records update count, template lengths, trainable parameter count, before/after evaluation losses, installed versions, source data hashes and the pinned base revision. It is written after actual training. An authored script or failed run does not produce a success receipt.</p>
+<h3 id="5-reload-an-adapter-and-inspect-the-proposal">5. Reload an adapter and inspect the proposal<a class="heading-anchor" href="#5-reload-an-adapter-and-inspect-the-proposal" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-text">docker run --rm --network none --cpus 2 --memory 3g --mount type=volume,source=ds60-pretrained-learning,target=/models,readonly ds60-pretrained-recipe:local /recipe/infer_local.py --model-dir /models/smollm2-pinned --adapter-dir /models/run-lora-001/model --question &quot;How is conversion rate defined?&quot;</code></pre>
+<p>The probe uses the pinned base, the saved adapter, a public evidence sentence, greedy decoding and at most 64 new tokens. The tokenizer&#x27;s explicit attention mask is passed into generation. The output is a proposed answer, not a validated metric definition. Check the formula, eligibility rule and citation against the provided source. A truncated or unsupported answer should fail evaluation.</p>
+<p>The tiny training task is assignment-unit extraction; it does not train a conversion-rate assistant. The generation question deliberately tests a different use of the model. Build a real evaluation corpus before treating an adapted model as a subject expert. Lessons 011, 012, 022 and 024 of the applied LLM journey explain evidence support, separated evaluation, reviewed tools and the full assistant decision.</p>
+<h3 id="6-export-your-artifacts">6. Export your artifacts<a class="heading-anchor" href="#6-export-your-artifacts" aria-label="Link to this section">#</a></h3>
+<p>Use a temporary helper to access the persistent volume. Choose a helper name that is not already used. These copy commands create ordinary local files:</p>
+<pre><code class="language-text">docker create --name ds60-pretrained-export --network none --mount type=volume,source=ds60-pretrained-learning,target=/models,readonly ds60-pretrained-recipe:local -c &quot;print(&#x27;export helper&#x27;)&quot;
+docker cp ds60-pretrained-export:/models/run-lora-001 ./run-lora-001-export
+docker cp ds60-pretrained-export:/models/run-full-001 ./run-full-001-export
+docker rm ds60-pretrained-export</code></pre>
+<p>The helper need not run. Its mount is read-only. Verify the copied receipt and model files before moving them to another machine. Retain the pinned base identity and dependency lock with the adapter; an adapter alone is not the complete model. If a local export destination exists, choose a new destination name instead of mixing two runs.</p>
+<p>Sources: <a href="https://huggingface.co/docs/transformers/v4.57.1/en/chat_templating">Transformers 4.57 chat templates</a>, <a href="https://huggingface.co/docs/trl/v0.24.0/en/sft_trainer">TRL 0.24 SFTTrainer</a>, and <a href="https://huggingface.co/docs/peft/v0.17.0/en/package_reference/lora">PEFT LoRA configuration</a>.</p></article>
   </main>
 </body>
 </html>

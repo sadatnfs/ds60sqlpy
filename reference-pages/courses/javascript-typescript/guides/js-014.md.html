@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>js-014: Collections, search and algorithmic complexity · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>js-014: Collections, search and algorithmic complexity</h1>
+      <p class="source-path">Generated from <code>courses/javascript-typescript/guides/js-014.md</code></p>
+    </header>
+    <article class="document"><h2 id="js-014-collections-search-and-algorithmic-complexity">js-014: Collections, search and algorithmic complexity<a class="heading-anchor" href="#js-014-collections-search-and-algorithmic-complexity" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Intermediate, approximately 90 minutes. Direct prerequisites: <code>js-013</code></p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Explain complexity, search invariant, index, heap invariant with a concrete program. Trace how the values change, identify the assumptions, and make a boundary or invalid case observable. The first investigation is: Find the first insertion position for 4 in 1,4,4,8 and inspect the visited intervals. The final task tests check the heap invariant after every update.</p>
+<h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
+<p>An algorithm is a rule for transforming an input into a result; complexity describes how its required work grows with input size. Counting comparisons on controlled inputs explains a growth claim better than a single timing measurement. Linear search may inspect every item. Binary search discards approximately half of a sorted interval at each step, requiring logarithmically many comparisons. Sorting or building an index also has a cost, so binary search is not automatically the best choice for one lookup in unsorted data.</p>
+<p>This lesson implements lower_bound: the first position at which a target could be inserted without breaking sorted order. The half-open interval [low, high) always contains the answer. If values[mid] is less than the target, all positions through mid are too early, so low becomes mid+1. Otherwise high becomes mid. The interval shrinks on every iteration, preventing a duplicate value from trapping the loop.</p>
+<p>A Map can index records by key when repeated lookups justify an extra structure. Duplicate-key policy must be explicit because silently overwriting records loses information. A binary min-heap supports repeated access to the smallest item without fully sorting every update. Its shape is an array-backed complete tree; the parent of index i is floor((i-1)/2), and children are 2i+1 and 2i+2. Restoring the parent-before-child invariant takes logarithmic height. Map performance guarantees are implementation dependent, so this lesson does not promise worst-case constant time for every lookup.</p>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<p><strong>Complexity:</strong> How operation count or storage grows with input size.</p>
+<p><strong>Search invariant:</strong> A property keeping the possible answer inside a shrinking interval.</p>
+<p><strong>Index:</strong> A structure trading construction and storage for later lookup convenience.</p>
+<p><strong>Heap invariant:</strong> Every parent is no larger than either child in a min-heap.</p>
+<h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
+<p>Use the prepared Node 24.22.1 profile. The classroom saves an ES module as main.mjs and executes it with Node. Only built-in Node or ECMAScript APIs are used. For a prepared native environment, node main.mjs is the same command on PowerShell and POSIX. Browser APIs have separate host requirements.</p>
+<p>Save your own learner copy under ignored <code>.learning/expansion/js-014/</code> or use a saved classroom pad. Record predictions before execution. Each worked program includes its helper definitions. The reference puts the six exercises in separate scopes, so a task cannot silently rely on a variable from a previous task. A successful assertion is silent; the final JSON receipt reports how many exercise blocks completed. A failing assertion must produce a failed process, not a generic success message.</p>
+<h4 id="choosing-the-structure">Choosing the structure<a class="heading-anchor" href="#choosing-the-structure" aria-label="Link to this section">#</a></h4>
+<p>For one lookup in ten unsorted rows, a linear scan is often clearest. For repeated lookups in stable sorted data, binary search avoids building another index. For keyed mutable records, a Map can simplify retrieval, provided updates keep the index consistent. For a scheduler that repeatedly removes the next smallest priority, a heap avoids sorting the entire queue after each insertion. Count both maintained structures and invalidation responsibilities when comparing designs. These examples are algorithm demonstrations, not microbenchmarks of a particular JavaScript engine.</p>
+<h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
+<p>lowerBound returns an insertion position from 0 through length, including length when the target exceeds all values. Finding equality requires a separate comparison at that position. Heap push bubbles a new value toward its parent; pop moves the last value to the root and sinks it toward the smaller child. An empty heap returns undefined under this API. The algorithms assume finite numeric values and sorted search input; accepting NaN would break the ordering relation.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="example-a-trace-lower-bound-with-duplicates">Example A: Trace lower bound with duplicates<a class="heading-anchor" href="#example-a-trace-lower-bound-with-duplicates" aria-label="Link to this section">#</a></h4>
+<p>The equality branch moves high leftward rather than returning an arbitrary match. That is why lower bound finds the first duplicate and remains useful for insertion and range queries.</p>
+<pre><code class="language-javascript">import { strict as assert } from &#x27;node:assert&#x27;;
+
+function lowerBound(values, target, trace = []) {
+  let low = 0;
+  let high = values.length;
+  while (low &lt; high) {
+    const middle = low + Math.floor((high - low) / 2);
+    trace.push([low, high, middle]);
+    if (values[middle] &lt; target) low = middle + 1;
+    else high = middle;
+  }
+  return low;
+}
+function uniqueIndex(rows) {
+  const index = new Map();
+  for (const row of rows) {
+    if (index.has(row.id)) throw new Error(`duplicate id ${row.id}`);
+    index.set(row.id, row);
+  }
+  return index;
+}
+class MinHeap {
+  values = [];
+  push(value) {
+    if (!Number.isFinite(value)) throw new TypeError(&#x27;finite value required&#x27;);
+    const values = this.values;
+    values.push(value);
+    let index = values.length - 1;
+    while (index &gt; 0) {
+      const parent = Math.floor((index - 1) / 2);
+      if (values[parent] &lt;= values[index]) break;
+      [values[parent], values[index]] = [values[index], values[parent]];
+      index = parent;
+    }
+  }
+  pop() {
+    const values = this.values;
+    if (values.length === 0) return undefined;
+    const minimum = values[0];
+    const last = values.pop();
+    if (values.length === 0) return minimum;
+    values[0] = last;
+    let index = 0;
+    while (2 * index + 1 &lt; values.length) {
+      let child = 2 * index + 1;
+      if (child + 1 &lt; values.length &amp;&amp; values[child + 1] &lt; values[child]) child += 1;
+      if (values[index] &lt;= values[child]) break;
+      [values[index], values[child]] = [values[child], values[index]];
+      index = child;
+    }
+    return minimum;
+  }
+}
+
+export async function verify() {
+  // Worked example
+  {
+    const trace = [];
+    assert.equal(lowerBound([1, 4, 4, 8], 4, trace), 1);
+    assert.deepEqual(trace, [[0, 4, 2], [0, 2, 1], [0, 1, 0]]);
+  }
+
+  return { checks: 1, status: &quot;passed&quot; };
+}
+
+console.log(JSON.stringify(await verify()));
+</code></pre>
+<p><strong>Expected:</strong> index 1; intervals shrink to the first duplicate.</p>
+<h4 id="example-b-use-a-heap-for-repeated-minimum-extraction">Example B: Use a heap for repeated minimum extraction<a class="heading-anchor" href="#example-b-use-a-heap-for-repeated-minimum-extraction" aria-label="Link to this section">#</a></h4>
+<p>The heap maintains only the order needed at its root, not a fully sorted array. Equal priorities remain valid, but this numeric heap does not promise stable ordering among associated records.</p>
+<pre><code class="language-javascript">import { strict as assert } from &#x27;node:assert&#x27;;
+
+function lowerBound(values, target, trace = []) {
+  let low = 0;
+  let high = values.length;
+  while (low &lt; high) {
+    const middle = low + Math.floor((high - low) / 2);
+    trace.push([low, high, middle]);
+    if (values[middle] &lt; target) low = middle + 1;
+    else high = middle;
+  }
+  return low;
+}
+function uniqueIndex(rows) {
+  const index = new Map();
+  for (const row of rows) {
+    if (index.has(row.id)) throw new Error(`duplicate id ${row.id}`);
+    index.set(row.id, row);
+  }
+  return index;
+}
+class MinHeap {
+  values = [];
+  push(value) {
+    if (!Number.isFinite(value)) throw new TypeError(&#x27;finite value required&#x27;);
+    const values = this.values;
+    values.push(value);
+    let index = values.length - 1;
+    while (index &gt; 0) {
+      const parent = Math.floor((index - 1) / 2);
+      if (values[parent] &lt;= values[index]) break;
+      [values[parent], values[index]] = [values[index], values[parent]];
+      index = parent;
+    }
+  }
+  pop() {
+    const values = this.values;
+    if (values.length === 0) return undefined;
+    const minimum = values[0];
+    const last = values.pop();
+    if (values.length === 0) return minimum;
+    values[0] = last;
+    let index = 0;
+    while (2 * index + 1 &lt; values.length) {
+      let child = 2 * index + 1;
+      if (child + 1 &lt; values.length &amp;&amp; values[child + 1] &lt; values[child]) child += 1;
+      if (values[index] &lt;= values[child]) break;
+      [values[index], values[child]] = [values[child], values[index]];
+      index = child;
+    }
+    return minimum;
+  }
+}
+
+export async function verify() {
+  // Worked example
+  {
+    const heap = new MinHeap();
+    for (const value of [5, 1, 3, 1]) heap.push(value);
+    assert.deepEqual([heap.pop(), heap.pop(), heap.pop(), heap.pop()], [1, 1, 3, 5]);
+    assert.equal(heap.pop(), undefined);
+  }
+
+  return { checks: 1, status: &quot;passed&quot; };
+}
+
+console.log(JSON.stringify(await verify()));
+</code></pre>
+<p><strong>Expected:</strong> pops 1,1,3,5, then undefined.</p>
+<h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
+<p>Trace the entry point and identify the values that exist before each operation. Distinguish a value from a reference to an object, a returned Promise from its eventual result, and a compile-time type from a runtime check. Write down the first observation that would disprove your explanation. A useful prediction includes an expected value or failure category, not merely a claim that the program should work.</p>
+<p>For a loop, write the state before and after one iteration. For a callback, identify the caller and the arguments it supplies. For an asynchronous operation, identify who starts it, who awaits it, and who owns cleanup. These small traces make failures local: you can compare the first incorrect state instead of guessing from a much later symptom.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Trace lower bound with duplicates.</strong> Find the first insertion position for 4 in 1,4,4,8 and inspect the visited intervals. <strong>Expected:</strong> index 1; intervals shrink to the first duplicate. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
+</ol>
+<ol>
+<li><strong>Use a heap for repeated minimum extraction.</strong> Insert 5,1,3,1 and remove all values. <strong>Expected:</strong> pops 1,1,3,5, then undefined. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
+</ol>
+<ol>
+<li><strong>Cover empty and outside search boundaries.</strong> Search empty input, then targets below and above a sorted input. <strong>Expected:</strong> positions 0,0,3. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
+</ol>
+<ol>
+<li><strong>Measure comparisons without a timing claim.</strong> Search 1024 even integers for a missing value between two entries. <strong>Expected:</strong> insertion position 501 with no more than 11 comparisons. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
+</ol>
+<ol>
+<li><strong>Reject duplicate index keys.</strong> Build a Map keyed by id and reject repeated ids rather than silently replacing a row. <strong>Expected:</strong> valid lookup returns 7; duplicate id throws. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
+</ol>
+<ol>
+<li><strong>Check the heap invariant after every update.</strong> Push descending values and check each parent/child relation; reject NaN. <strong>Expected:</strong> all invariants hold; invalid value throws. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
+</ol>
+<h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
+<p>Keep the smallest fixture that distinguishes the intended behavior from a tempting alternative. Read the assertion message and inspect the input, return value and state at that point. Do not remove a failing check just to reach the success receipt. Preserve the original failure, repair the responsible assumption, then check the normal path and the negative case again.</p>
+<p>If a host API is absent, confirm the actual host and version before changing the algorithm. A successful parse does not prove that an API exists. Compiler success does not prove that external data satisfies a type. A browser interaction requires browser evidence. For resource-owning examples, inspect cleanup after failure as carefully as the happy path. The separate explanations discuss the specific mistaken inference in each exercise.</p>
+<h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
+<p>Start by comparing the actual value with the literal expected result. Next, isolate the expression that transforms it or the boundary where its type or ownership changes. If the discrepancy involves scheduling, replace unrelated work with a small trace array and await the exact completion you intend to observe. Finally, ask for one hint about the first incorrect assumption before opening the reference. Keep one controlled failure that would catch the same mistake returning.</p>
+<h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
+<p>Close the solution and explain Complexity, Search invariant, Index using the fixture. Reconstruct one example from a blank saved copy. Change a boundary input and predict the new result before running it. Explain the assumptions under which the mechanism is useful and a situation in which its cost or host requirements make another design preferable. A copied program is useful rehearsal; a fresh case demonstrates transfer.</p>
+<h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
+<p><a href="https://tc39.es/ecma262/multipage/keyed-collections.html">Official language or host reference</a>. Fixtures and exercises are original course material. Actual prepared Node, TypeScript and browser execution evidence is tracked in <code>docs/implementation/javascript-content-status.md</code>. Manual-only steps remain unqualified until performed. No default lesson installs dependencies, downloads a model or contacts a shared service.</p>
+<h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning for js-014: Collections, search and algorithmic complexity.
+Read courses/javascript-typescript/guides/js-014.md and courses/javascript-typescript/lessons/js-014.mjs. Direct prerequisites: `js-013`.
+Explain the mechanism, ask me to predict a value or failure, review my own attempt,
+give one hint, request compile/runtime/browser evidence, and ask a fresh retrieval question.
+Keep courses/javascript-typescript/solutions/ closed until I request comparison or show an attempt.
+Done when I can explain the state and host contracts, pass all six exercise checks,
+diagnose a controlled failure, and solve a new boundary case without copying the answer.</code></pre></article>
+  </main>
+</body>
+</html>

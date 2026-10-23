@@ -123,7 +123,7 @@
 <p><strong>Answer-only mask:</strong> A target participation rule excluding prompt prediction events.</p>
 <p><strong>Template family:</strong> Related prompt forms grouped for evaluation isolation.</p>
 <h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
-<p>Use a sequence with two prompt tokens followed by three answer tokens. Shift to four targets, then mark only target positions belonging to the answer. Replace excluded labels with-100 before cross entropy. The mask applies to targets, not input padding alone. Verify gradients at ignored logit positions and count the three active answer targets explicitly.</p>
+<p>Use a sequence with two prompt tokens followed by three answer tokens. Shift to four targets, then mark only target positions belonging to the answer. Replace excluded labels with -100 before cross entropy. The mask applies to targets, not input padding alone. Verify gradients at ignored logit positions and count the three active answer targets explicitly.</p>
 <h3 id="exercise-1-align-the-target-mask">Exercise 1: Align the target mask<a class="heading-anchor" href="#exercise-1-align-the-target-mask" aria-label="Link to this section">#</a></h3>
 <p>The question is: Use sequence[1,2,5,6,3], where1,2 are prompt and5,6,3 answer.</p>
 <p>The first answer token5 is a target at position1 in the shifted array. Masking by unshifted input positions would introduce an off-by-one error.</p>
@@ -132,7 +132,7 @@ assert targets.tolist()==[[2,5,6,3]] and int(answer.sum())==3</code></pre>
 <p><strong>Expected:</strong> targets[2,5,6,3];mask[False,True,True,True].</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with targets[2,5,6,3];mask[False,True,True,True].</p>
 <h3 id="exercise-2-compute-answer-only-loss">Exercise 2: Compute answer-only loss<a class="heading-anchor" href="#exercise-2-compute-answer-only-loss" aria-label="Link to this section">#</a></h3>
-<p>The question is: Use zero vocabulary8 logits and replace prompt targets with-100.</p>
+<p>The question is: Use zero vocabulary8 logits and replace prompt targets with -100.</p>
 <p>Uniform logits make each target loss identical. The mean stayslog8, but the active count differs from full-sequence training and affects summed objectives.</p>
 <pre><code class="language-python">logits=torch.zeros((1,4,8)); masked=targets.masked_fill(~answer,-100)
 loss=F.cross_entropy(logits.reshape(-1,8),masked.reshape(-1),ignore_index=-100)

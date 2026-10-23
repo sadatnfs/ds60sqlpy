@@ -116,7 +116,6 @@
       <p class="source-path">Generated from <code>courses/cpp/guides/cpp-004.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-004-branches-loops-and-state-traces">cpp-004: Branches, loops and state traces<a class="heading-anchor" href="#cpp-004-branches-loops-and-state-traces" aria-label="Link to this section">#</a></h2>
-<p>Authored beta content. Content completion and runtime qualification are separate evidence.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Beginner; 90 minutes. Direct prerequisites: <code>cpp-003</code>.</p>
 <p>Learner artifact: <a href="../lessons/cpp-004.cpp.html">cpp-004.cpp</a>. Keep <a href="../solutions/cpp-004_solutions.md.html">official solutions</a> closed until an attempt. The immutable <a href="../fixtures/cpp-004-cases.json.html">case ledger</a> records exercise inputs and expected observations.</p>
@@ -127,56 +126,96 @@
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>In <code>for (int value : readings)</code>, the colon means visit each element by value. <code>if (value &gt;= 0)</code> includes zero. The accumulator must start at zero before the loop, otherwise it is either uninitialized or reset on every iteration.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>
-<p>Trace [4,-2,0,6] as four transitions. Starting total 0 becomes 4 after the first item, stays 4 for the rejected -2, stays 4 for the accepted zero and becomes 10 for 6. The zero step explains why comparing totals alone cannot detect &gt;0 versus &gt;=0: acceptance counts expose the difference. An index loop should state a half-open interval such as [0,size), so an empty input naturally executes zero iterations.</p>
+<p>Trace [4, -2, 0, 6] as four transitions. Starting total 0 becomes 4 after the first item, stays 4 for the rejected -2, stays 4 for the accepted zero and becomes 10 for 6. The zero step explains why comparing totals alone cannot detect &gt;0 versus &gt;=0: acceptance counts expose the difference. An index loop should state a half-open interval such as [0, size), so an empty input naturally executes zero iterations.</p>
+<h3 id="state-boundaries-and-loop-progress">State, boundaries and loop progress<a class="heading-anchor" href="#state-boundaries-and-loop-progress" aria-label="Link to this section">#</a></h3>
+<p>A loop has three questions: what state is carried, which element is visited next, and why does the process terminate? In nonnegative_sum, the carried state is total. Immediately before each iteration, total equals the sum of the nonnegative values in the already visited prefix. Initially that prefix is empty, so zero is the correct state. After processing4 the prefix sum is 4; after -2 it stays4; after 0 it stays4; after 6 it becomes10. This is an invariant, not merely a description of one lucky output.</p>
+<p>The range-for declaration <code>int x : xs</code> copies the current integer into x. Changing x would not change the vector element. The body executes once per element and never for an empty vector. No special empty-case index is needed because the traversal contract already handles zero elements. An index loop requires more care: for a vector of size n, valid indices are0 through n-1, while n is the past-the-end position. Using &lt;=size instead of &lt;size creates an invalid access on the final iteration.</p>
+<p>A boundary bug can be hidden by an aggregate. Replacing &gt;=0 with &gt;0 changes whether zero is retained, but adding zero does not change the total. Therefore a total-only test cannot distinguish those predicates. Track both accepted count and sum when the policy cares about membership. The empty, all-negative and mixed fixtures exercise different paths; none substitutes for the exact zero boundary.</p>
+<p>Loop initialization belongs outside the repeated body when it represents accumulated history. If total is reset to zero at each iteration, the program forgets every prior contribution and may return only the last accepted value. A trace table exposes that defect immediately. The same principle applies to counters, maximum-so-far values and parser state: choose an initial identity and explain the transition before writing the loop.</p>
+<p>Termination also has an input-budget dimension. The vector example is finite and bounded, while a stream loop can continue as long as data arrives. A production reader therefore needs a declared row or byte budget as well as a correct loop condition. These small values fit in int; a later lesson addresses overflow. Correct traversal alone does not make unbounded arithmetic safe.</p>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">assert(nonnegative_sum({4,-2,0,6})==10);</code></pre>
-<p><strong>Expected:</strong> The running total is 4, 4, 4, 10.</p>
+<p><a href="../examples/cpp-004-example-1.cpp.html">Complete program 1</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;iostream&gt;
+#include &lt;vector&gt;
+
+int nonnegative_sum(const std::vector&lt;int&gt;&amp; xs)  {
+     int total=0;
+     for(int x:xs)  {
+         if(x&gt;=0) total+=x;
+    } return total;
+}
+int main() {
+    assert(nonnegative_sum({4,-2,0,6})==10);
+    std::cout &lt;&lt; &quot;cpp-004 example 1 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-004 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">assert(nonnegative_sum({})==0);</code></pre>
-<p><strong>Expected:</strong> The body runs zero times; the initial total is the result.</p>
+<p><a href="../examples/cpp-004-example-2.cpp.html">Complete program 2</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;iostream&gt;
+#include &lt;vector&gt;
+
+int nonnegative_sum(const std::vector&lt;int&gt;&amp; xs)  {
+     int total=0;
+     for(int x:xs)  {
+         if(x&gt;=0) total+=x;
+    } return total;
+}
+int main() {
+    assert(nonnegative_sum({})==0);
+    std::cout &lt;&lt; &quot;cpp-004 example 2 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-004 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-trace-state">Exercise 1: Trace state<a class="heading-anchor" href="#exercise-1-trace-state" aria-label="Link to this section">#</a></h4>
-<p>Trace [4,-2,0,6] with a row for each input.</p>
-<p><strong>Expected result/shape:</strong> Totals [4,4,4,10], four visits.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Totals [4,4,4,10], four visits.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Only the negative value is excluded.</p>
+<p>Trace [4, -2, 0, 6] with a row for each input.</p>
+<p><strong>Expected result/shape:</strong> Totals [4, 4, 4, 10], four visits.</p>
+<p><strong>Verify:</strong> Totals [4, 4, 4, 10], four visits.</p>
+<p><strong>Progressive hints:</strong> Only the negative value is excluded.</p>
 <h4 id="exercise-2-change-the-threshold">Exercise 2: Change the threshold<a class="heading-anchor" href="#exercise-2-change-the-threshold" aria-label="Link to this section">#</a></h4>
-<p>Count retained values for &gt;=0 and &gt;0 on [4,-2,0,6].</p>
+<p>Count retained values for &gt;=0 and &gt;0 on [4, -2, 0, 6].</p>
 <p><strong>Expected result/shape:</strong> Counts 3 and 2; both sums 10.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Counts 3 and 2; both sums 10.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: A sum can hide a zero-boundary error.</p>
+<p><strong>Verify:</strong> Counts 3 and 2; both sums 10.</p>
+<p><strong>Progressive hints:</strong> A sum can hide a zero-boundary error.</p>
 <h4 id="exercise-3-construct-a-bounded-loop">Exercise 3: Construct a bounded loop<a class="heading-anchor" href="#exercise-3-construct-a-bounded-loop" aria-label="Link to this section">#</a></h4>
 <p>Sum integers 1 through 4 with an index loop.</p>
 <p><strong>Expected result/shape:</strong> 10 from exactly four iterations.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: 10 from exactly four iterations.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Use i&lt;=4 or an equivalent half-open range.</p>
+<p><strong>Verify:</strong> 10 from exactly four iterations.</p>
+<p><strong>Progressive hints:</strong> Use i&lt;=4 or an equivalent half-open range.</p>
 <h4 id="exercise-4-repair-a-reset">Exercise 4: Repair a reset<a class="heading-anchor" href="#exercise-4-repair-a-reset" aria-label="Link to this section">#</a></h4>
 <p>Move total=0 into the loop, predict, then repair the scratch copy.</p>
 <p><strong>Expected result/shape:</strong> Broken final total 6; repaired total 10.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Broken final total 6; repaired total 10.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Initialization inside the loop forgets earlier state.</p>
+<p><strong>Verify:</strong> Broken final total 6; repaired total 10.</p>
+<p><strong>Progressive hints:</strong> Initialization inside the loop forgets earlier state.</p>
 <h4 id="exercise-5-test-the-empty-boundary">Exercise 5: Test the empty boundary<a class="heading-anchor" href="#exercise-5-test-the-empty-boundary" aria-label="Link to this section">#</a></h4>
 <p>Run empty and all-negative vectors.</p>
 <p><strong>Expected result/shape:</strong> Both totals 0; no element access.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Both totals 0; no element access.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: The invariant starts valid before any iteration.</p>
+<p><strong>Verify:</strong> Both totals 0; no element access.</p>
+<p><strong>Progressive hints:</strong> The invariant starts valid before any iteration.</p>
 <h4 id="exercise-6-transfer-the-predicate">Exercise 6: Transfer the predicate<a class="heading-anchor" href="#exercise-6-transfer-the-predicate" aria-label="Link to this section">#</a></h4>
-<p>Keep readings in [0,5] from [-1,0,4,5,6].</p>
-<p><strong>Expected result/shape:</strong> Values [0,4,5], total 9.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Values [0,4,5], total 9.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Use conjunction with both inclusive boundaries.</p>
+<p>Keep readings in [0, 5] from [-1, 0, 4, 5, 6].</p>
+<p><strong>Expected result/shape:</strong> Values [0, 4, 5], total 9.</p>
+<p><strong>Verify:</strong> Values [0, 4, 5], total 9.</p>
+<p><strong>Progressive hints:</strong> Use conjunction with both inclusive boundaries.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: The running total is 4, 4, 4, 10. Then explain the changed condition in example 2 without opening the answer.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
-<p>In <code>for (int value : readings)</code>, the colon means visit each element by value. <code>if (value &gt;= 0)</code> includes zero. The accumulator must start at zero before the loop, otherwise it is either uninitialized or reset on every iteration.</p>
-<p>If the result disagrees, preserve the original input and inspect the first differing value or condition. Initialization inside the loop forgets earlier state.</p>
+<p>When the sum is wrong, inspect the first iteration where the invariant fails. Keep columns for index, current value, predicate result and total before/after. If the total is correct but the accepted count is wrong, test zero specifically. If a loop crashes only on empty input, look for an unconditional first-element access or unsigned size-1 calculation. Do not repair a boundary failure by discarding the failing row without defining that input policy.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
 <p>Close the source. Reconstruct the reasoning for Exercise 6: Transfer the predicate. Explain which assumptions would fail on a larger input or another runtime.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue with <a href="cpp-005.md.html">cpp-005</a> after saving the six observations.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines">C++ Core Guidelines</a></p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach cpp-004.
 Read courses/cpp/guides/cpp-004.md and courses/cpp/lessons/cpp-004.cpp.

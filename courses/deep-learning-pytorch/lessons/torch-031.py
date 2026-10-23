@@ -17,12 +17,12 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Expected: same signature reuses capture; changed dtype adds a graph.
 
 # Exercise 4: Measure warmed calls honestly
-# Warm the float32 path, then execute20 calls and record elapsed time.
+# Warm the float32 path, then execute 20 calls and record elapsed time.
 # Expected: 20 correct outputs and nonnegative elapsed time.
 
 # Exercise 5: Inspect actual CPU operations
 # Profile one eager call and inspect operation names.
-# Expected: aten::mul and a ten::add appear.
+# Expected: aten:: mul and aten:: add appear.
 
 # Exercise 6: State the backend limitation
 # Record graph capture True, optimizing native backend False and GPU benchmark False.

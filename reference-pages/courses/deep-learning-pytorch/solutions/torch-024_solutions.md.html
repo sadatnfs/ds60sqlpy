@@ -125,9 +125,38 @@
 <p><strong>Population standard deviation:</strong> A variance calculation dividing by N rather than N-1.</p>
 <p><strong>Subgroup evidence:</strong> Errors and counts reported for a declared subset.</p>
 <h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
-<p>UseX shaped(4, 1), floating binary targets and nn.Linear(1, 1, bias=False). Calculate x.std(dim=0, correction=0)to match the declared population normalization fixture. Train with BCEWithLogitsLoss for40fixed SGD updates. Evaluate with model.eval and no_grad, then classify logits&gt;=0. Count TP, TN, FP, FN with boolean masks and verify their sum.</p>
+<p>UseX shaped(4, 1), floating binary targets and nn.Linear(1, 1, bias=False). Calculate x.std(dim=0, correction=0)to match the declared population normalization fixture. Train with BCEWithLogitsLoss for 40 fixed SGD updates. Evaluate with model.eval and no_grad, then classify logits&gt;=0. Count TP, TN, FP, FN with boolean masks and verify their sum.</p>
+<h3 id="derive-the-classifier-and-audit-every-assessment-row">Derive the classifier and audit every assessment row<a class="heading-anchor" href="#derive-the-classifier-and-audit-every-assessment-row" aria-label="Link to this section">#</a></h3>
+<p>The training values[-2, -1, 1, 2] have mean zero and squared deviations summing to ten. Population variance divides by four, giving 2.5 and scale sqrt(2.5). PyTorch&#x27;s correction=0 matches NumPy&#x27;s default used in the paired TensorFlow guide. Using the default sample correction would divide by three and produce sqrt(10/3). Both scales are mathematically meaningful statistics, but they define different model inputs and update trajectories. Equal final class labels would not prove framework parity.</p>
+<p>The stored model weight has shape(1, 1), inputs and targets have shape(4, 1), and logits have shape(4, 1). The bias is deliberately absent. Binary cross-entropy with logits is applied directly to those logits. Applying sigmoid first and then passing its output to the logits loss would change the objective. A target shaped(4, ) is also a different interface from(4, 1), even when it contains the same four numbers; preserve the declared axes rather than relying on broadcasting or reshaping after a failure.</p>
+<p>For one normalized feature t and label y, the logit is z=wt and the loss derivative with respect to w is(sigmoid(z)-y)t. At w=0, all probabilities are one-half. Writing s=sqrt(2.5), the four derivative contributions are -1/s, -1/(2s), -1/(2s), -1/s. Their mean is -3/(4s), approximately-0.474342. The first SGD step at 0.1 therefore makes w approximately 0.0474342. This analytic sign and scale explain why the later fixed 40-step run should have a positive finite weight.</p>
+<p>The data are separable under this one-feature rule. In an unregularized logistic model, continued loss reduction can push the weight larger without a finite optimum that must be reached. Forty steps are a declared computational budget, not evidence of convergence or a reason to repeat training until a preferred test score appears. If early stopping or hyperparameters are to be selected, they need a separate selection procedure and data boundary.</p>
+<p>The decision rule is logit&gt;=0, which corresponds to probability&gt;=0.5. At the zero initial weight, both test logits are exactly zero and this tie convention predicts the positive class for both rows. After a positive weight, the transformed-3 point has a negative logit and the+3 point a positive one. The final confusion table is:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Test input</th>
+<th>Truth</th>
+<th>Decision</th>
+<th>Count category</th>
+</tr></thead><tbody>
+<tr>
+<td>-3</td>
+<td>negative</td>
+<td>negative</td>
+<td>TN=1</td>
+</tr>
+<tr>
+<td>+3</td>
+<td>positive</td>
+<td>positive</td>
+<td>TP=1</td>
+</tr>
+</tbody></table></div>
+<p>FP and FN are zero, and the four counts sum to two. The fixed class-zero baseline instead has TN=1, FN=1. Its one error and the model&#x27;s zero errors are evaluated on the same two units. This is a useful paired comparison, but one changed decision would move accuracy by 50 percentage points, so the apparent difference is not a stable population estimate.</p>
+<p>The subgroup counterexample changes only the positive row&#x27;s decision. The negative group then has 0 errors out of 1 and the positive group 1 out of 1. Reporting only an aggregate error rate of 1/2 hides which group failed. At the same time, one observation per group is not sufficient for a reliable subgroup performance claim. These sign-based teaching groups are not a demonstrated fairness analysis of a real population.</p>
+<p>Distinct train/test IDs are necessary but not sufficient for independence. Real data can contain copied examples, shared source families, temporal leakage or features only available after the decision. The literal fixture has none of those hidden sources by construction, but its rule is already visible to the learner. Preserve this difference between a procedure test and an undisclosed final assessment.</p>
+<p>Finally, normalization parameters belong to the fitted artifact. The test coordinates must reuse the training mean and scale. Recomputing statistics on each inference batch changes predictions according to which other rows arrived together. A release should save feature order, units, mean, scale, dtype and threshold with the model state, and compare a known input through the complete preprocessing-and-model path. Model weights alone are not the whole predictor.</p>
 <h3 id="exercise-1-freeze-the-geometric-task">Exercise 1: Freeze the geometric task<a class="heading-anchor" href="#exercise-1-freeze-the-geometric-task" aria-label="Link to this section">#</a></h3>
-<p>The question is: Use training x-2, -1, 1, 2 with labels0, 0, 1, 1 and test x-3, 3.</p>
+<p>The question is: Use training x-2, -1, 1, 2 with labels 0, 0, 1, 1 and test x-3, 3.</p>
 <p>The labels are defined from the fixture geometry before training. The holdout is not used to design a different target after seeing predictions.</p>
 <pre><code class="language-python">x=torch.tensor([[-2.],[-1.],[1.],[2.]]); y=torch.tensor([[0.],[0.],[1.],[1.]])
 test_x=torch.tensor([[-3.],[3.]]); truth=torch.tensor([False,True]); train_ids={&#x27;a&#x27;,&#x27;b&#x27;,&#x27;c&#x27;,&#x27;d&#x27;}; test_ids={&#x27;e&#x27;,&#x27;f&#x27;}
@@ -136,13 +165,13 @@ assert not train_ids&amp;test_ids and len(test_ids)==2</code></pre>
 <p><strong>Verify:</strong> Compare the computed values or written argument with 4training records, 2test records.</p>
 <h3 id="exercise-2-fit-explicit-normalization">Exercise 2: Fit explicit normalization<a class="heading-anchor" href="#exercise-2-fit-explicit-normalization" aria-label="Link to this section">#</a></h3>
 <p>The question is: Calculate training mean and population standard deviation.</p>
-<p>PyTorch&#x27;s default sample correction would produce a different scale. Specifying correction0aligns this fixture with the paired TensorFlow/NumPy calculation.</p>
+<p>PyTorch&#x27;s default sample correction would produce a different scale. Specifying correction 0 aligns this fixture with the paired TensorFlow/NumPy calculation.</p>
 <pre><code class="language-python">mean=x.mean(0); scale=x.std(0,correction=0); tx=(x-mean)/scale; vx=(test_x-mean)/scale
 assert mean.item()==0; np.testing.assert_allclose(scale.item(),np.sqrt(2.5),atol=1e-6,rtol=0)</code></pre>
-<p><strong>Expected:</strong> mean0; scale sqrt2.5.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with mean0; scale sqrt2.5.</p>
+<p><strong>Expected:</strong> mean 0; scale sqrt 2.5.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with mean 0; scale sqrt 2.5.</p>
 <h3 id="exercise-3-train-a-fixed-classifier">Exercise 3: Train a fixed classifier<a class="heading-anchor" href="#exercise-3-train-a-fixed-classifier" aria-label="Link to this section">#</a></h3>
-<p>The question is: Zero-initialize the weight and run40SGD.1 steps with binary logits loss.</p>
+<p>The question is: Zero-initialize the weight and run 40 SGD.1 steps with binary logits loss.</p>
 <p>The fixed budget is part of the experiment. It is not repeated until the test happens to look favorable.</p>
 <pre><code class="language-python">model=nn.Linear(1,1,bias=False)
 with torch.no_grad(): model.weight.zero_()
@@ -150,32 +179,32 @@ optimizer=torch.optim.SGD(model.parameters(),lr=.1)
 for _ in range(40):
     optimizer.zero_grad(set_to_none=True); loss=F.binary_cross_entropy_with_logits(model(tx),y); loss.backward(); optimizer.step()
 assert model.weight.item()&gt;0 and torch.isfinite(model.weight).all()</code></pre>
-<p><strong>Expected:</strong> positive finite weight after40 updates.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with positive finite weight after40 updates.</p>
+<p><strong>Expected:</strong> positive finite weight after 40 updates.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with positive finite weight after 40 updates.</p>
 <h3 id="exercise-4-account-for-every-test-prediction">Exercise 4: Account for every test prediction<a class="heading-anchor" href="#exercise-4-account-for-every-test-prediction" aria-label="Link to this section">#</a></h3>
-<p>The question is: Threshold test logits at0 and calculate confusion counts.</p>
+<p>The question is: Threshold test logits at 0 and calculate confusion counts.</p>
 <p>The conservation check prevents dropped or duplicated test rows from silently changing the metric.</p>
 <pre><code class="language-python">model.eval()
 with torch.no_grad(): prediction=model(vx).ravel()&gt;=0
 counts={&#x27;tp&#x27;:int((prediction&amp;truth).sum()),&#x27;tn&#x27;:int((~prediction&amp;~truth).sum()),&#x27;fp&#x27;:int((prediction&amp;~truth).sum()),&#x27;fn&#x27;:int((~prediction&amp;truth).sum())}
 assert counts=={&#x27;tp&#x27;:1,&#x27;tn&#x27;:1,&#x27;fp&#x27;:0,&#x27;fn&#x27;:0} and sum(counts.values())==2</code></pre>
-<p><strong>Expected:</strong> TP1, TN1, FP0, FN0, total2.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with TP1, TN1, FP0, FN0, total2.</p>
+<p><strong>Expected:</strong> TP 1, TN 1, FP 0, FN 0, total 2.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with TP 1, TN 1, FP 0, FN 0, total 2.</p>
 <h3 id="exercise-5-compare-a-constant-baseline">Exercise 5: Compare a constant baseline<a class="heading-anchor" href="#exercise-5-compare-a-constant-baseline" aria-label="Link to this section">#</a></h3>
-<p>The question is: Predict class0for both test rows and count mistakes.</p>
+<p>The question is: Predict class 0 for both test rows and count mistakes.</p>
 <p>The comparison uses identical test units. It does not justify a population claim from two cases.</p>
 <pre><code class="language-python">baseline=torch.zeros(2,dtype=torch.bool)
 assert int((baseline!=truth).sum())==1 and int((prediction!=truth).sum())==0</code></pre>
-<p><strong>Expected:</strong> baseline1error; model0on this fixture.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with baseline1error; model0on this fixture.</p>
+<p><strong>Expected:</strong> baseline 1 error; model 0 on this fixture.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with baseline 1 error; model 0 on this fixture.</p>
 <h3 id="exercise-6-reveal-a-group-specific-failure">Exercise 6: Reveal a group-specific failure<a class="heading-anchor" href="#exercise-6-reveal-a-group-specific-failure" aria-label="Link to this section">#</a></h3>
 <p>The question is: Flip only the positive group decision and report group counts.</p>
 <p>A global error rate of one-half would hide the entire failure in the positive group. Counts and group meaning belong beside the aggregate.</p>
 <pre><code class="language-python">broken=prediction.clone(); broken[1]=False
 report={group:(int(broken[i]!=truth[i]),1) for i,group in enumerate([&#x27;negative&#x27;,&#x27;positive&#x27;])}
 assert report=={&#x27;negative&#x27;:(0,1),&#x27;positive&#x27;:(1,1)}</code></pre>
-<p><strong>Expected:</strong> negative0/1errors; positive1/1.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with negative0/1errors; positive1/1.</p>
+<p><strong>Expected:</strong> negative 0/1errors; positive 1/1.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with negative 0/1errors; positive 1/1.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
 <p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
   </main>

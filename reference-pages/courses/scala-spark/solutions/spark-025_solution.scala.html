@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Spark 025 Solution · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course artifact</p>
+      <h1>Spark 025 Solution</h1>
+      <p class="source-path">Generated from <code>courses/scala-spark/solutions/spark-025_solution.scala</code></p>
+    </header>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-scala"><code><span>import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}</span>
+<span>import org.apache.spark.sql.functions._</span>
+<span>import org.apache.spark.sql.types._</span>
+<span>import java.nio.file.{Files,Path,Paths}</span>
+<span>import scala.jdk.CollectionConverters._</span>
+<span> </span>
+<span>object Main {</span>
+<span>  def deleteOwned(root: Path): Unit = {</span>
+<span>    val paths = Files.walk(root)</span>
+<span>    try paths.iterator().asScala.toSeq.sortBy(_.getNameCount).reverse.foreach(p =&gt; Files.delete(p))</span>
+<span>    finally paths.close()</span>
+<span>  }</span>
+<span>  def sameBag(left: DataFrame, right: DataFrame): Boolean = {</span>
+<span>    val columns = Seq(&quot;id&quot;,&quot;day&quot;,&quot;amount&quot;,&quot;payload&quot;)</span>
+<span>    val a = left.select(columns.map(col):_*);val b = right.select(columns.map(col):_*)</span>
+<span>    a.exceptAll(b).count() == 0L &amp;&amp; b.exceptAll(a).count() == 0L</span>
+<span>  }</span>
+<span> </span>
+<span>  def writeCompact(source: DataFrame, path: String): DataFrame = {</span>
+<span>    source.repartition(2,col(&quot;day&quot;)).write.mode(&quot;errorifexists&quot;).partitionBy(&quot;day&quot;).parquet(path)</span>
+<span>    source.sparkSession.read.parquet(path)</span>
+<span>  }</span>
+<span> </span>
+<span>  def filteredProduct(frame: DataFrame): DataFrame = {</span>
+<span>    frame.filter(col(&quot;day&quot;) === &quot;even&quot; &amp;&amp; col(&quot;id&quot;) &gt;= 1990L).select(&quot;id&quot;,&quot;amount&quot;)</span>
+<span>  }</span>
+<span> </span>
+<span>  def scanEvidence(frame: DataFrame): Map[String,String] = {</span>
+<span>    frame.createOrReplaceTempView(&quot;ds60_spark_025_read&quot;)</span>
+<span>    val text = frame.sparkSession.sql(&quot;EXPLAIN FORMATTED SELECT id,amount FROM ds60_spark_025_read WHERE day=&#x27;even&#x27; AND id&gt;=1990&quot;).collect().map(_.getString(0)).mkString(&quot;\n&quot;)</span>
+<span>    Seq(&quot;ReadSchema&quot;,&quot;PartitionFilters&quot;,&quot;PushedFilters&quot;).map(name =&gt; name -&gt; text.linesIterator.filter(_.contains(name)).mkString(&quot;\n&quot;)).toMap</span>
+<span>  }</span>
+<span> </span>
+<span>  def fileInventory(path: String): (Int,Long) = {</span>
+<span>    val stream = Files.walk(Paths.get(path))</span>
+<span>    try {</span>
+<span>     val files = stream.iterator().asScala.filter(p =&gt; Files.isRegularFile(p) &amp;&amp; p.getFileName.toString.endsWith(&quot;.parquet&quot;)).toSeq</span>
+<span>     (files.size,files.map(p =&gt; Files.size(p)).sum)</span>
+<span>    } finally stream.close()</span>
+<span>  }</span>
+<span> </span>
+<span>  def layoutReceipt(frame: DataFrame, path: String): (Int,Int,Int) = {</span>
+<span>    val stream = Files.list(Paths.get(path))</span>
+<span>    val directories = try stream.iterator().asScala.count(p =&gt; Files.isDirectory(p) &amp;&amp; p.getFileName.toString.startsWith(&quot;day=&quot;)) finally stream.close()</span>
+<span>    (directories,fileInventory(path)._1,frame.rdd.getNumPartitions)</span>
+<span>  }</span>
+<span> </span>
+<span>  def rejectExisting(source: DataFrame, path: String): Unit = {</span>
+<span>    var rejected = false</span>
+<span>    try source.write.mode(&quot;errorifexists&quot;).parquet(path) catch { case _: org.apache.spark.sql.AnalysisException =&gt; rejected = true }</span>
+<span>    require(rejected,&quot;Existing path unexpectedly accepted&quot;)</span>
+<span>  }</span>
+<span> </span>
+<span>  def main(args: Array[String]): Unit = {</span>
+<span>    var ownedRoot: Path = null</span>
+<span>    val spark = SparkSession.builder().appName(&quot;ds60-spark-025&quot;).master(&quot;local[2]&quot;)</span>
+<span>      .config(&quot;spark.ui.enabled&quot;,&quot;false&quot;)</span>
+<span>      .config(&quot;spark.driver.host&quot;,&quot;127.0.0.1&quot;)</span>
+<span>      .config(&quot;spark.driver.bindAddress&quot;,&quot;127.0.0.1&quot;)</span>
+<span>      .config(&quot;spark.sql.shuffle.partitions&quot;,&quot;2&quot;)</span>
+<span>      .config(&quot;spark.sql.adaptive.enabled&quot;,&quot;false&quot;)</span>
+<span>      .config(&quot;spark.sql.ansi.enabled&quot;,&quot;true&quot;)</span>
+<span>      .config(&quot;spark.sql.session.timeZone&quot;,&quot;UTC&quot;).getOrCreate()</span>
+<span>    try {</span>
+<span>      require(spark.sparkContext.master == &quot;local[2]&quot;, &quot;local-only course session&quot;)</span>
+<span>      spark.sparkContext.setLogLevel(&quot;ERROR&quot;)</span>
+<span>      ownedRoot = Files.createTempDirectory(Paths.get(&quot;.&quot;).toAbsolutePath.normalize(),&quot;.ds60-spark-025-&quot;)</span>
+<span>      val schema = StructType(Seq(StructField(&quot;id&quot;,LongType,false),StructField(&quot;day&quot;,StringType,false),StructField(&quot;amount&quot;,LongType,false),StructField(&quot;payload&quot;,StringType,false)))</span>
+<span>      val source = spark.createDataFrame(spark.sparkContext.parallelize((0L until 2000L).map(id =&gt; Row(id,if(id%2L==0L) &quot;even&quot; else &quot;odd&quot;,id*7L,&quot;xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx&quot;)),4),schema)</span>
+<span>      val compactPath = ownedRoot.resolve(&quot;compact&quot;).toString</span>
+<span>      val manyPath = ownedRoot.resolve(&quot;many&quot;).toString</span>
+<span>      // Exercise 1: Write and validate a compact partitioned round trip</span>
+<span>      val compact = writeCompact(source,compactPath)</span>
+<span>      assert(sameBag(source,compact) &amp;&amp; compact.count() == 2000L)</span>
+<span>      assert(compact.schema.fields.map(f =&gt; f.name-&gt;f.dataType.typeName).toMap == Map(&quot;id&quot;-&gt;&quot;long&quot;,&quot;day&quot;-&gt;&quot;string&quot;,&quot;amount&quot;-&gt;&quot;long&quot;,&quot;payload&quot;-&gt;&quot;string&quot;))</span>
+<span>      assert(compact.agg(sum(&quot;amount&quot;)).first().getLong(0) == 13993000L)</span>
+<span>      // Exercise 2: Read a narrow filtered projection with an independent oracle</span>
+<span>      val selected = filteredProduct(compact)</span>
+<span>      assert(selected.columns.toSeq == Seq(&quot;id&quot;,&quot;amount&quot;))</span>
+<span>      assert(selected.orderBy(&quot;id&quot;).collect().toSeq.map(r =&gt; (r.getLong(0),r.getLong(1))) == Seq(1990L,1992L,1994L,1996L,1998L).map(id =&gt; (id,id*7L)))</span>
+<span>      // Exercise 3: Locate partition, column and predicate evidence in the scan</span>
+<span>      val evidence = scanEvidence(compact)</span>
+<span>      assert(evidence(&quot;ReadSchema&quot;).contains(&quot;id:bigint&quot;) &amp;&amp; evidence(&quot;ReadSchema&quot;).contains(&quot;amount:bigint&quot;) &amp;&amp; !evidence(&quot;ReadSchema&quot;).contains(&quot;payload&quot;))</span>
+<span>      assert(evidence(&quot;PartitionFilters&quot;).contains(&quot;day&quot;) &amp;&amp; evidence(&quot;PartitionFilters&quot;).contains(&quot;even&quot;))</span>
+<span>      assert(evidence(&quot;PushedFilters&quot;).contains(&quot;GreaterThanOrEqual(id,1990)&quot;))</span>
+<span>      println(evidence)</span>
+<span>      // Exercise 4: Compare a deliberately larger file count without changing data</span>
+<span>      source.repartition(12).write.mode(&quot;errorifexists&quot;).partitionBy(&quot;day&quot;).parquet(manyPath)</span>
+<span>      val many = spark.read.parquet(manyPath)</span>
+<span>      assert(sameBag(source,many))</span>
+<span>      val compactFiles = fileInventory(compactPath);val manyFiles = fileInventory(manyPath)</span>
+<span>      assert(compactFiles._1 &gt; 0 &amp;&amp; manyFiles._1 &gt; compactFiles._1)</span>
+<span>      assert(compactFiles._2 &gt; 0L &amp;&amp; manyFiles._2 &gt; 0L &amp;&amp; compactFiles._2 + manyFiles._2 &lt; 32L*1024L*1024L)</span>
+<span>      println(&quot;compact_data_files_bytes=&quot; + compactFiles + &quot;;many_data_files_bytes=&quot; + manyFiles)</span>
+<span>      // Exercise 5: Report storage partitions, files and scan partitions separately</span>
+<span>      val compactReceipt = layoutReceipt(compact,compactPath);val manyReceipt = layoutReceipt(many,manyPath)</span>
+<span>      assert(compactReceipt._1 == 2 &amp;&amp; manyReceipt._1 == 2 &amp;&amp; compactReceipt._2 == compactFiles._1 &amp;&amp; manyReceipt._2 == manyFiles._1)</span>
+<span>      assert(compactReceipt._3 &gt; 0 &amp;&amp; manyReceipt._3 &gt; 0)</span>
+<span>      println(&quot;layout_directory_file_scan_counts=&quot; + Seq(compactReceipt,manyReceipt))</span>
+<span>      // Exercise 6: Reject an existing target and preserve its product</span>
+<span>      rejectExisting(source,compactPath)</span>
+<span>      assert(sameBag(source,spark.read.parquet(compactPath)))</span>
+<span>      println(&quot;spark-025: six Scala reference contracts passed; Spark=&quot; + spark.version + &quot;; Scala=&quot; + scala.util.Properties.versionNumberString)</span>
+<span>    } finally { try { if(ownedRoot != null) deleteOwned(ownedRoot) } finally { spark.stop() } }</span>
+<span>  }</span>
+<span>}</span>
+<span> </span>
+<span>// Exercise 1: Write and validate a compact partitioned round trip. Inputs/task: Repartition source by day into 2 execution partitions, write Parquet with error-if-exists and partitionBy(day), then read it back. Compare field types and the complete duplicate-sensitive bag. Expected: 2000 rows and total 13993000 survive. Types remain id/amount bigints and day/payload strings;read nullability may differ. Verify: Assert type mapping and exceptAll emptiness in both directions, plus row count and amount total.</span>
+<span>// Exercise 2: Read a narrow filtered projection with an independent oracle. Inputs/task: Select only id and amount for day=even and id&gt;=1990. Return the five ordered tuples. Expected: (1990,13930),(1992,13944),(1994,13958),(1996,13972),(1998,13986). No payload column is requested. Verify: Assert every projected identity and amount and exact two-column output schema.</span>
+<span>// Exercise 3: Locate partition, column and predicate evidence in the scan. Inputs/task: Capture a FORMATTED plan for the selected query on the owned Parquet view. Extract ReadSchema, PartitionFilters and PushedFilters lines and interpret each scope. Expected: ReadSchema has id and amount but not payload;PartitionFilters mentions day/even;PushedFilters includes the id lower bound. Verify: Assert the relevant field/predicate markers and retain the exact five-row output oracle;do not claim bytes skipped from the plan alone.</span>
+<span>// Exercise 4: Compare a deliberately larger file count without changing data. Inputs/task: Write the same source after repartition 12 using the same day directory partitioning. Inventory only.parquet data files and their actual byte sizes for both layouts. Expected: Both round trips match the source bag. The many layout has more data files than compact;both byte totals are positive and below 32 MiB. Verify: Assert bag parity, file-count inequality and measured data-byte bounds. Ignore checksum and success-marker files in data counts.</span>
+<span>// Exercise 5: Report storage partitions, files and scan partitions separately. Inputs/task: Return a receipt with the number of day= directories, the data-file count and the read DataFrame execution-partition count for each layout. Expected: Both layouts have 2 day directories. Data-file counts are the measured inventory values. Scan partitions are positive observed values and need not equal either other count. Verify: Assert two directory partitions and independent file-count consistency;print actual scan partition counts without imposing equality.</span>
+<span>// Exercise 6: Reject an existing target and preserve its product. Inputs/task: Attempt a second error-if-exists write to the already owned compact path. Require the expected analysis error, then read the original product and reconcile its bag. Expected: The second write fails with an existing-path analysis exception;the original 2000-row product remains unchanged. Verify: Assert the exception and full original bag after the failed write. Do not delete or overwrite the target to make the retry succeed.</span>
+<span> </span></code></pre></article>
+  </main>
+</body>
+</html>

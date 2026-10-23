@@ -62,15 +62,12 @@ Finally, concatenation appends rows but does not guarantee that keys remain uniq
 ### Example 1
 
 ```python
-import numpy as np
-import pandas as pd
-
-left=pd.Series([20,10],index=["b","a"])
-right=pd.Series([1,2],index=["a","b"])
-result=left-right
-assert result.to_dict()=={"a":9,"b":18}
-assert (left.to_numpy()-right.to_numpy()).tolist()==[19,8]
-print("Label subtraction:",result.to_dict())
+left = pd.Series([20, 10], index=["b", "a"])
+right = pd.Series([1, 2], index=["a", "b"])
+result = left - right
+assert result.to_dict() == {"a": 9, "b": 18}
+assert (left.to_numpy() - right.to_numpy()).tolist() == [19, 8]
+print("Label subtraction:", result.to_dict())
 ```
 
 The two arithmetic expressions answer different questions. Series subtraction matches a with a and b with b, while array subtraction pairs the first elements regardless of identity. The resulting numbers differ even though every input has length two. Labels are part of the data contract.
@@ -78,15 +75,12 @@ The two arithmetic expressions answer different questions. Series subtraction ma
 ### Example 2
 
 ```python
-import numpy as np
-import pandas as pd
-
-values=pd.Series([1,pd.NA,-2],dtype="Int64",index=["a","b","c"])
-mask=values.gt(0)
-assert str(mask.dtype)=="boolean" and pd.isna(mask.loc["b"])
-selected=values.loc[mask.fillna(False)]
-assert selected.index.tolist()==["a"]
-print("Known positive rows:",selected.to_dict())
+values = pd.Series([1, pd.NA, -2], dtype="Int64", index=["a", "b", "c"])
+mask = values.gt(0)
+assert str(mask.dtype) == "boolean" and pd.isna(mask.loc["b"])
+selected = values.loc[mask.fillna(False)]
+assert selected.index.tolist() == ["a"]
+print("Known positive rows:", selected.to_dict())
 ```
 
 The comparison preserves uncertainty for b rather than inventing a negative measurement. The filter then explicitly chooses to retain only known True rows. Filling the mask is a decision policy at the selection boundary, not an instruction to replace missing source values with zero.

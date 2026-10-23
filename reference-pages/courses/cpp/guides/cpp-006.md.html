@@ -116,7 +116,6 @@
       <p class="source-path">Generated from <code>courses/cpp/guides/cpp-006.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-006-strings-and-trustworthy-integer-input">cpp-006: Strings and trustworthy integer input<a class="heading-anchor" href="#cpp-006-strings-and-trustworthy-integer-input" aria-label="Link to this section">#</a></h2>
-<p>Authored beta content. Content completion and runtime qualification are separate evidence.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Beginner; 105 minutes. Direct prerequisites: <code>cpp-005</code>.</p>
 <p>Learner artifact: <a href="../lessons/cpp-006.cpp.html">cpp-006.cpp</a>. Keep <a href="../solutions/cpp-006_solutions.md.html">official solutions</a> closed until an attempt. The immutable <a href="../fixtures/cpp-006-cases.json.html">case ledger</a> records exercise inputs and expected observations.</p>
@@ -128,55 +127,105 @@
 <p><code>std::from_chars(begin,end,value)</code> uses a half-open character range. Check <code>ec == std::errc{}</code> and <code>ptr == end</code>. A prefix such as 12x can convert 12 while still violating the whole-field contract.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>For 12x, from_chars can store 12 and report no conversion error, yet its pointer stops at x. The parser therefore treats error-code success as only the first condition. The second condition compares the pointer with end. Empty input has no digits; huge input exceeds int range; whitespace is outside this deliberately strict grammar. Keep these reasons separate in a production ledger so a user can distinguish syntax, range and policy rejection.</p>
+<h3 id="parsing-as-a-trust-boundary">Parsing as a trust boundary<a class="heading-anchor" href="#parsing-as-a-trust-boundary" aria-label="Link to this section">#</a></h3>
+<p>Parsing converts a sequence of characters into a value under a grammar. The grammar here is deliberately strict: an optional minus sign followed by decimal digits represent an int, with no surrounding whitespace, plus sign or trailing suffix accepted by this wrapper. The raw string remains evidence until the entire field is accepted. A useful parser does not publish a partially parsed prefix as a trusted record.</p>
+<p>from_chars returns two pieces of information. The error code tells whether conversion was possible and within range. The pointer identifies where conversion stopped. For42, the pointer reaches the end. For12x, conversion can succeed for12 while the pointer stops before x. The wrapper requires both success and full consumption. This is why checking only the error code admits a malformed business field.</p>
+<p>optional&lt;int&gt; separates absence from a present number. A present zero is valid and must not be confused with rejection. Test the optional itself for presence, then read its value. Testing <code>*result != 0</code> as though it meant success changes the input policy and loses legitimate zero records. Dereferencing an absent optional is also outside the intended contract, so branch on presence first.</p>
+<p>The string_view parameter borrows characters only for the duration of the call. The returned int owns its value and does not refer back to those characters. That makes a parsed result safe after the input string changes or dies. Returning a view into a temporary normalization buffer would have a very different lifetime problem, even though the parser computation looked correct.</p>
+<p>Whitespace normalization is a separate policy. If the data contract allows trimming, perform it explicitly before strict conversion and retain enough raw context to explain rejections. Do not silently switch to a parser that skips spaces or accepts prefixes just to make a failing fixture pass. Overflow is another distinct rejection: twenty-one decimal nines must not wrap into a plausible small int. The error result is safer than performing unchecked arithmetic while building the value.</p>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">assert(parse_int(&quot;42&quot;)==42);</code></pre>
-<p><strong>Expected:</strong> All two characters are consumed, yielding 42.</p>
+<p><a href="../examples/cpp-006-example-1.cpp.html">Complete program 1</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;charconv&gt;
+#include &lt;iostream&gt;
+#include &lt;optional&gt;
+#include &lt;string&gt;
+#include &lt;string_view&gt;
+#include &lt;system_error&gt;
+
+std::optional&lt;int&gt; parse_int(std::string_view s)  {
+     int out=0;
+     auto [ptr,ec]=std::from_chars(s.data(),s.data()+s.size(),out);
+     if(ec!=std::errc {
+    } || ptr!=s.data()+s.size()) return std::nullopt;
+     return out;
+}
+int main() {
+    assert(parse_int(&quot;42&quot;)==42);
+    std::cout &lt;&lt; &quot;cpp-006 example 1 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-006 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">assert(!parse_int(&quot;12x&quot;));</code></pre>
-<p><strong>Expected:</strong> The x remains, so the field is rejected despite a valid numeric prefix.</p>
+<p><a href="../examples/cpp-006-example-2.cpp.html">Complete program 2</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;charconv&gt;
+#include &lt;iostream&gt;
+#include &lt;optional&gt;
+#include &lt;string&gt;
+#include &lt;string_view&gt;
+#include &lt;system_error&gt;
+
+std::optional&lt;int&gt; parse_int(std::string_view s)  {
+     int out=0;
+     auto [ptr,ec]=std::from_chars(s.data(),s.data()+s.size(),out);
+     if(ec!=std::errc {
+    } || ptr!=s.data()+s.size()) return std::nullopt;
+     return out;
+}
+int main() {
+    assert(!parse_int(&quot;12x&quot;));
+    std::cout &lt;&lt; &quot;cpp-006 example 2 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-006 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-trace-consumption">Exercise 1: Trace consumption<a class="heading-anchor" href="#exercise-1-trace-consumption" aria-label="Link to this section">#</a></h4>
 <p>Parse 42 and 12x and inspect pointer distance.</p>
 <p><strong>Expected result/shape:</strong> 42 consumes 2; 12x consumes 2 of 3 and is rejected.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: 42 consumes 2; 12x consumes 2 of 3 and is rejected.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Conversion success alone is insufficient.</p>
+<p><strong>Verify:</strong> 42 consumes 2; 12x consumes 2 of 3 and is rejected.</p>
+<p><strong>Progressive hints:</strong> Conversion success alone is insufficient.</p>
 <h4 id="exercise-2-retain-zero">Exercise 2: Retain zero<a class="heading-anchor" href="#exercise-2-retain-zero" aria-label="Link to this section">#</a></h4>
 <p>Parse 0 and -7 through optional&lt;int&gt;.</p>
 <p><strong>Expected result/shape:</strong> Both are present values.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Both are present values.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: A zero value is not an absent optional.</p>
+<p><strong>Verify:</strong> Both are present values.</p>
+<p><strong>Progressive hints:</strong> A zero value is not an absent optional.</p>
 <h4 id="exercise-3-build-a-ledger">Exercise 3: Build a ledger<a class="heading-anchor" href="#exercise-3-build-a-ledger" aria-label="Link to this section">#</a></h4>
-<p>Classify [12,12x,empty,0] as raw strings.</p>
-<p><strong>Expected result/shape:</strong> Two accepted values [12,0], two rejected records.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Two accepted values [12,0], two rejected records.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Preserve rejected raw input and reason.</p>
+<p>Classify [12, 12x, empty, 0] as raw strings.</p>
+<p><strong>Expected result/shape:</strong> Two accepted values [12, 0], two rejected records.</p>
+<p><strong>Verify:</strong> Two accepted values [12, 0], two rejected records.</p>
+<p><strong>Progressive hints:</strong> Preserve rejected raw input and reason.</p>
 <h4 id="exercise-4-repair-prefix-acceptance">Exercise 4: Repair prefix acceptance<a class="heading-anchor" href="#exercise-4-repair-prefix-acceptance" aria-label="Link to this section">#</a></h4>
 <p>Change the condition to check only ec in a scratch copy.</p>
 <p><strong>Expected result/shape:</strong> 12x is incorrectly accepted until ptr==end is restored.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: 12x is incorrectly accepted until ptr==end is restored.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Inspect the unconsumed suffix.</p>
+<p><strong>Verify:</strong> 12x is incorrectly accepted until ptr==end is restored.</p>
+<p><strong>Progressive hints:</strong> Inspect the unconsumed suffix.</p>
 <h4 id="exercise-5-reject-overflow">Exercise 5: Reject overflow<a class="heading-anchor" href="#exercise-5-reject-overflow" aria-label="Link to this section">#</a></h4>
 <p>Parse 21 decimal nines.</p>
 <p><strong>Expected result/shape:</strong> Absent result with out-of-range conversion, never a wrapped integer.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Absent result with out-of-range conversion, never a wrapped integer.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: The range error occurs before publishing a trusted value.</p>
+<p><strong>Verify:</strong> Absent result with out-of-range conversion, never a wrapped integer.</p>
+<p><strong>Progressive hints:</strong> The range error occurs before publishing a trusted value.</p>
 <h4 id="exercise-6-define-whitespace-policy">Exercise 6: Define whitespace policy<a class="heading-anchor" href="#exercise-6-define-whitespace-policy" aria-label="Link to this section">#</a></h4>
 <p>Compare literal space-42-space with a deliberately trimmed copy.</p>
 <p><strong>Expected result/shape:</strong> Strict parser rejects original; explicit trim accepts 42.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Strict parser rejects original; explicit trim accepts 42.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Trimming is an input policy that belongs before parsing.</p>
+<p><strong>Verify:</strong> Strict parser rejects original; explicit trim accepts 42.</p>
+<p><strong>Progressive hints:</strong> Trimming is an input policy that belongs before parsing.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: All two characters are consumed, yielding 42. Then explain the changed condition in example 2 without opening the answer.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
-<p><code>std::from_chars(begin,end,value)</code> uses a half-open character range. Check <code>ec == std::errc{}</code> and <code>ptr == end</code>. A prefix such as 12x can convert 12 while still violating the whole-field contract.</p>
-<p>If the result disagrees, preserve the original input and inspect the first differing value or condition. Inspect the unconsumed suffix.</p>
+<p>When a malformed suffix is accepted, print or inspect the consumed-character count and compare it with the field length. When zero disappears, inspect whether value truthiness was confused with optional presence. When a long number fails, preserve the out-of-range reason rather than treating it as empty input. Empty input should be rejected before any value is published; callers should pass a valid character range, not manufacture an invalid pointer pair.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
 <p>Close the source. Reconstruct the reasoning for Exercise 6: Define whitespace policy. Explain which assumptions would fail on a larger input or another runtime.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue with <a href="cpp-007.md.html">cpp-007</a> after saving the six observations.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<p><a href="https://eel.is/c++draft/charconv.from.chars">Numeric conversion contract</a></p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach cpp-006.
 Read courses/cpp/guides/cpp-006.md and courses/cpp/lessons/cpp-006.cpp.

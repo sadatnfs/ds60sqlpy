@@ -118,15 +118,53 @@
     <article class="document"><h2 id="torch-009-explanatory-solutions">torch-009: explanatory solutions<a class="heading-anchor" href="#torch-009-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <p>Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>An epoch is a traversal of selected records; a batch is the set reduced before an update; an optimizer step changes parameters once. These counts differ. Six records with batch size 2 produce three updates per epoch, while batch size 1 produces six. Later batches see weights changed by earlier updates, so equal epochs do not imply equal trajectories. PyTorch also accumulates gradients unless they are clear e d, which can accidentally turn a minibatch loop into an unplanned accumulation scheme.</p>
+<p>An epoch is a traversal of selected records; a batch is the set reduced before an update; an optimizer step changes parameters once. These counts differ. Six records with batch size 2 produce three updates per epoch, while batch size 1 produces six. Later batches see weights changed by earlier updates, so equal epochs do not imply equal trajectories. PyTorch also accumulates gradients unless they are cleared, which can accidentally turn a minibatch loop into an unplanned accumulation scheme.</p>
 <p>Record IDs should travel with features and targets. A final short batch is retained unless drop_last is explicitly chosen. Its mean loss uses its own number of examples. To report an epoch mean from unequal batches, accumulate loss sums and counts rather than averaging batch means equally. This lesson makes the loop explicit before introducing DataLoader configuration.</p>
 <p><strong>Epoch:</strong> One traversal of the chosen observation set.</p>
 <p><strong>Batch:</strong> The observations contributing to one gradient reduction.</p>
 <p><strong>Gradient reset:</strong> Clearing stored derivatives before an independent update.</p>
 <h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
 <p>Slice the leading observation axis into batches. For each independent update, call zero_grad(set_to_none=True), compute the current mean loss, backward and step. Log parameter values after each step and counts separately from epochs. A shared index permutation preserves x/y pairing. Changing only one side creates a different learning task even when marginal distributions remain unchanged.</p>
+<h3 id="trace-every-update-at-the-state-where-its-gradient-was-computed">Trace every update at the state where its gradient was computed<a class="heading-anchor" href="#trace-every-update-at-the-state-where-its-gradient-was-computed" aria-label="Link to this section">#</a></h3>
+<p>Six records with batch size two produce three batches per epoch: IDs[1, 2], [3, 4], [5, 6]. With one optimizer step per batch, one epoch means three updates. At batch size one, the same epoch means six updates. Neither count identifies the resulting parameter trajectory without the data order, loss reduction and learning rate.</p>
+<p>For this scalar fixture, y=2x and each batch mean loss has derivative 2 mean(x²)(w-2). With rate 0.01, the exact correct trajectory is:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Batch inputs</th>
+<th>mean(x²)</th>
+<th>Weight before</th>
+<th>Fresh gradient</th>
+<th>Weight after</th>
+</tr></thead><tbody>
+<tr>
+<td>[1, 2]</td>
+<td>2.5</td>
+<td>0</td>
+<td>-10</td>
+<td>0.1</td>
+</tr>
+<tr>
+<td>[3, 4]</td>
+<td>12.5</td>
+<td>0.1</td>
+<td>-47.5</td>
+<td>0.575</td>
+</tr>
+<tr>
+<td>[5, 6]</td>
+<td>30.5</td>
+<td>0.575</td>
+<td>-86.925</td>
+<td>1.44425</td>
+</tr>
+</tbody></table></div>
+<p>Each gradient uses the latest weight. Clearing the buffer before each backward ensures that the applied gradient is precisely the one shown in its row. The same records in a different order can yield another trajectory because their local curvature and current parameter state differ.</p>
+<p>Without clearing, the first step is still 0.1. The next backward adds -47.5 to the stored -10, giving -57.5, and the second weight becomes 0.675. The final fresh derivative is -80.825, but the accumulated buffer becomes -138.325 and the final weight 2.05825. These are derivatives evaluated at different historical weights. A single constant learning-rate adjustment does not turn this procedure into the intended minibatch algorithm.</p>
+<p>Interestingly, the incorrect endpoint happens to lie closer to the known optimum two on this tiny sequence. That does not make the implementation correct. It violated the declared update rule, and another sequence can behave very differently. An acceptance test must inspect the mechanism and state trace rather than reward whichever accidental final training loss is smaller.</p>
+<p>Intentional accumulation is different. Hold w fixed, compute each microbatch&#x27;s contribution to one declared objective, accumulate the scaled gradients, and call step once. For the full six-record mean at w=0, the gradient is 2 mean(x²)(-2)=-182/3. One rate 0.01 step gives 91/150, about 0.606667. This differs from the three-step minibatch result because it is one update from one fixed state. When microbatch sizes differ, weight each microbatch mean by its participating count divided by the total count.</p>
+<p>Metric reporting needs the same denominator discipline. A mean loss two from two records contributes numerator four; mean loss eight from one record contributes numerator eight. The record-weighted mean is(4+8)/3=4, not the unweighted batch-mean average five. But there is another interpretation boundary: losses measured before successive updates belong to different model states. Their weighted average is an online training statistic, not necessarily the loss of the final model. A final-model metric requires a separate fixed-state evaluation pass.</p>
+<p>Record identities protect the training population. A shared permutation of x and y preserves y=2x after shuffling. Independently permuting either side changes the prediction task while leaving each marginal array plausible. For five records at batch size two, the tail has one record; dropping it changes which observations participated in the epoch. The loop should retain that decision in its budget and denominator report.</p>
 <h3 id="exercise-1-count-batches-and-updates">Exercise 1: Count batches and updates<a class="heading-anchor" href="#exercise-1-count-batches-and-updates" aria-label="Link to this section">#</a></h3>
-<p>The question is: Partition IDs1..6 into batches of 2.</p>
+<p>The question is: Partition IDs 1..6 into batches of 2.</p>
 <p>The update count is the number of batches when there is one step per batch. It is neither the number of examples nor the number of epochs.</p>
 <pre><code class="language-python">ids=list(range(1,7)); batches=[ids[i:i+2] for i in range(0,len(ids),2)]
 assert batches==[[1,2],[3,4],[5,6]]</code></pre>
@@ -137,8 +175,8 @@ assert batches==[[1,2],[3,4],[5,6]]</code></pre>
 <p>Dropping the last singleton would change the effective training set. Record that choice explicitly when fixed batch shapes are required.</p>
 <pre><code class="language-python">short=[list(range(5))[i:i+2] for i in range(0,5,2)]
 assert [len(batch) for batch in short]==[2,2,1]</code></pre>
-<p><strong>Expected:</strong> batch sizes2, 2, 1.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with batch sizes2, 2, 1.</p>
+<p><strong>Expected:</strong> batch sizes 2, 2, 1.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with batch sizes 2, 2, 1.</p>
 <h3 id="exercise-3-run-three-independent-updates">Exercise 3: Run three independent updates<a class="heading-anchor" href="#exercise-3-run-three-independent-updates" aria-label="Link to this section">#</a></h3>
 <p>The question is: Train x1..6, y2x, w0 with batch size 2, rate.01, clearing gradients each batch.</p>
 <p>Each derivative is evaluated at the latest weight. Clearing the gradient prevents earlier batches from being counted again accidentally.</p>
@@ -158,18 +196,18 @@ assert abs(bad.item()-history[-1])&gt;1e-6</code></pre>
 <p><strong>Expected:</strong> different endpoint.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with different endpoint.</p>
 <h3 id="exercise-5-shuffle-paired-records-together">Exercise 5: Shuffle paired records together<a class="heading-anchor" href="#exercise-5-shuffle-paired-records-together" aria-label="Link to this section">#</a></h3>
-<p>The question is: Use permutation5, 0, 4, 1, 3, 2 for both x andy.</p>
+<p>The question is: Use permutation 5, 0, 4, 1, 3, 2 for both x and y.</p>
 <p>A shared identity permutation preserves pairs. Independent shuffles would train on unrelated targets while retaining plausible-looking individual arrays.</p>
 <pre><code class="language-python">order=torch.tensor([5,0,4,1,3,2]); sx=x[order]; sy=y[order]
 torch.testing.assert_close(sy,2*sx,atol=0,rtol=0)</code></pre>
 <p><strong>Expected:</strong> every shuffled target equals twice its input.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with every shuffled target equals twice its input.</p>
 <h3 id="exercise-6-aggregate-unequal-batch-means">Exercise 6: Aggregate unequal batch means<a class="heading-anchor" href="#exercise-6-aggregate-unequal-batch-means" aria-label="Link to this section">#</a></h3>
-<p>The question is: Combine mean loss2 over2examples and mean loss8 over1example.</p>
+<p>The question is: Combine mean loss 2 over 2 examples and mean loss 8 over 1 example.</p>
 <p>Reconstruct numerators before combining means. This denominator discipline applies to reported metrics as well as gradients.</p>
 <pre><code class="language-python">assert (2*2+8*1)/3==4 and (2+8)/2==5</code></pre>
-<p><strong>Expected:</strong> epoch mean4, not5.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with epoch mean4, not5.</p>
+<p><strong>Expected:</strong> epoch mean 4, not 5.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with epoch mean 4, not 5.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
 <p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
   </main>

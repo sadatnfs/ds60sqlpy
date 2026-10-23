@@ -6,6 +6,7 @@ from torch import nn
 from torch.nn import functional as F
 
 def central(function,value,h):
+    if not np.isfinite(value): raise ValueError('finite probe point required')
     if not np.isfinite(h) or h<=0: raise ValueError('positive finite step required')
     left,right=function(value-h),function(value+h)
     if not np.isfinite([left,right]).all(): raise ValueError('finite probe values required')
@@ -41,6 +42,9 @@ def verify():
         try: central(function,0.,h)
         except ValueError: pass
         else: raise AssertionError('invalid derivative probe accepted')
+    try: central(lambda value:0.0,float('nan'),.1)
+    except ValueError: pass
+    else: raise AssertionError('nonfinite probe point accepted')
     return {"checks": 6, "status": "passed"}
 
 

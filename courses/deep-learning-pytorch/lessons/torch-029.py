@@ -9,20 +9,20 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Expected: both exponentials infinite.
 
 # Exercise 2: Compute a stable class loss
-# Use target0 with the same logits.
-# Expected: loss log(1+exp(-1)) within1e-6.
+# Use target 0 with the same logits.
+# Expected: loss log(1+exp(-1)) within 1e-6.
 
 # Exercise 3: Check shift invariance
-# Compare softmax1000, 999 with softmax0, -1.
-# Expected: probabilities match within1e-6.
+# Compare softmax 1000, 999 with softmax 0, -1.
+# Expected: probabilities match within 1e-6.
 
 # Exercise 4: Inspect stable gradients
-# Differentiate the target0 loss with respect to both logits.
-# Expected: finite gradients summing approximately0.
+# Differentiate the target 0 loss with respect to both logits.
+# Expected: finite gradients summing approximately 0.
 
 # Exercise 5: Compare dtype ranges explicitly
-# Inspect float16 andbfloat16 maximum values and float32 epsilon.
-# Expected: bfloat16 range exceeds float16; float32 epsilon positive.
+# Inspect float16 and bfloat 16 maximum values and float32 epsilon.
+# Expected: bfloat 16 range exceeds float16; float32 epsilon positive.
 
 # Exercise 6: Reject a nonfinite input contract
 # Pass aN aN logit through an explicit finite-input validator.

@@ -1,14 +1,16 @@
 """The source outline is a complete, executable tutorial-book contract."""
+
 from __future__ import annotations
 
 import ast
 import hashlib
 import json
-from pathlib import Path
 import re
 import runpy
 import socket
 import sys
+from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -19,24 +21,28 @@ COVERAGE = json.loads((BOOK / "coverage.json").read_text(encoding="utf-8"))
 CHAPTERS = MANIFEST["chapters"]
 
 
-def test_source_provenance_and_every_method_has_one_stable_mapping():
+def test_source_provenance_and_every_method_has_one_stable_mapping() -> None:
     source = (ROOT / MANIFEST["source"]["path"]).read_bytes()
     digest = hashlib.sha256(source).hexdigest()
     assert digest == MANIFEST["source"]["sha256"] == COVERAGE["source_sha256"]
     sections = re.findall(r"## (\d+)\. (.*?)\n(.*?)(?=\n## |\Z)", source.decode(), re.S)
-    expected = []
-    for section, title, body in sections:
+    expected: list[tuple[str, str]] = []
+    for section, _title, body in sections:
         labels = re.findall(r"^- \*\*(.*?):\*\*", body, re.M)
-        expected.extend((f"stat-{int(section):02d}-{index:02d}", label) for index, label in enumerate(labels, 1))
+        expected.extend(
+            (f"stat-{int(section):02d}-{index:02d}", label) for index, label in enumerate(labels, 1)
+        )
     actual = [(topic["id"], topic["label"]) for topic in COVERAGE["topics"]]
     assert actual == expected
     assert len(sections) == len(CHAPTERS) == 40
-    assert len(actual) == len(set(topic_id for topic_id, _ in actual)) == 1005
+    assert len(actual) == len({topic_id for topic_id, _ in actual}) == 1005
     assert MANIFEST["mode"] == "tutorial"
 
 
 @pytest.mark.parametrize("chapter", CHAPTERS, ids=lambda item: item["id"])
-def test_chapter_has_substantive_method_bodies_and_complete_worked_code(chapter):
+def test_chapter_has_substantive_method_bodies_and_complete_worked_code(
+    chapter: dict[str, Any],
+) -> None:
     path = ROOT / chapter["chapter_path"]
     assert path.is_relative_to(BOOK)
     text = path.read_text(encoding="utf-8")
@@ -58,16 +64,32 @@ def test_chapter_has_substantive_method_bodies_and_complete_worked_code(chapter)
         assert program.rstrip() in text
         tree = ast.parse(program)
         assert sum(isinstance(node, ast.Assert) for node in ast.walk(tree)) >= 2
-        assert any(isinstance(node, ast.If) and "__name__" in ast.unparse(node.test) for node in tree.body)
-        imports = {node.names[0].name.split(".")[0] if isinstance(node, ast.Import) else (node.module or "").split(".")[0] for node in ast.walk(tree) if isinstance(node, (ast.Import, ast.ImportFrom))}
-        assert imports <= sys.stdlib_module_names | {"numpy", "pandas", "scipy", "sklearn", "statsmodels"}
+        assert any(
+            isinstance(node, ast.If) and "__name__" in ast.unparse(node.test) for node in tree.body
+        )
+        imports = {
+            node.names[0].name.split(".")[0]
+            if isinstance(node, ast.Import)
+            else (node.module or "").split(".")[0]
+            for node in ast.walk(tree)
+            if isinstance(node, (ast.Import, ast.ImportFrom))
+        }
+        assert imports <= sys.stdlib_module_names | {
+            "numpy",
+            "pandas",
+            "scipy",
+            "sklearn",
+            "statsmodels",
+        }
         assert not imports & {"socket", "urllib", "http", "ftplib", "requests"}
         assert "\u2014" not in program
 
 
 @pytest.mark.parametrize("chapter", CHAPTERS, ids=lambda item: item["id"])
-def test_worked_examples_execute_offline_and_check_their_numerical_claims(chapter, monkeypatch, capsys):
-    def no_network(*args, **kwargs):
+def test_worked_examples_execute_offline_and_check_their_numerical_claims(
+    chapter: dict[str, Any], monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    def no_network(*args: object, **kwargs: object) -> None:
         raise AssertionError("A statistics book demonstration attempted network access")
 
     monkeypatch.setattr(socket.socket, "connect", no_network)
@@ -78,7 +100,7 @@ def test_worked_examples_execute_offline_and_check_their_numerical_claims(chapte
     assert capsys.readouterr().out.strip()
 
 
-def test_relative_book_links_resolve_inside_repository():
+def test_relative_book_links_resolve_inside_repository() -> None:
     missing = []
     for path in [BOOK / "README.md", *(ROOT / c["chapter_path"] for c in CHAPTERS)]:
         for target in re.findall(r"\[[^\]]*\]\(([^)]+)\)", path.read_text(encoding="utf-8")):

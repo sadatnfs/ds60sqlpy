@@ -1,24 +1,24 @@
 # torch-017: Dropout, regularization, train and eval modes
 
-Status: authored PyTorch course content. The manifest inventories complete teaching files; runtime readiness remains a separate, measured property.
-
 ## Level and prerequisites
 
 Intermediate; approximately 120 minutes. Direct prerequisites: `torch-016`. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
 
 ## Learning objectives
 
-Regularization and training mode affect different parts of the experiment. The central investigation is concrete: Use weights1, -2 and compute L1 and squared L2 sums. The finish condition is L1=3; squared L2=5. output still requires grad; backward gives ones. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Regularization and training mode affect different parts of the experiment. The central investigation is concrete: Use weights 1, -2 and compute L1and squared L2sums. The finish condition is L1=3; squared L2=5. output still requires grad; backward gives ones. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
-Regularization and training mode affect different parts of the experiment. An explicit L1 orL2 penalty adds a term to the objective. Dropout randomly zeroes activations during training and rescales retained values; in evaluation it returns the unmodified input. model.train and model.eval recursively set module behavior, but neither changes whether autograd records operations. Optimizer weight decay and an explicit penalty can have different semantics, especially for adaptive optimizers, so their names do not establish equivalence.
+Regularization and training mode affect different parts of the experiment. An explicit L1orL2penalty adds a term to the objective. Dropout randomly zeroes activations during training and rescales retained values; in evaluation it returns the unmodified input. model.train and model.eval recursively set module behavior, but neither changes whether autograd records operations. Optimizer weight decay and an explicit penalty can have different semantics, especially for adaptive optimizers, so their names do not establish equivalence.
 
-The fixture uses weights1, -2 and unit activations. It separates data loss from penalty, checks stochastic outputs by allowed values rather than a fixed random mask, and confirms deterministic evaluation. None of these checks proves that regularization improves held-out quality; that requires a controlled validation comparison.
+The fixture uses weights 1, -2 and unit activations. It separates data loss from penalty, checks stochastic outputs by allowed values rather than a fixed random mask, and confirms deterministic evaluation. None of these checks proves that regularization improves held-out quality; that requires a controlled validation comparison.
 
 ## Design decisions and when to use this method
 
+Select a regularizer against a held-out criterion that reflects the intended task, and keep the data-loss term visible. A smaller parameter norm or a stochastic training curve is mechanism evidence, not evidence that prediction improved. Compare a declared baseline, coefficient, seed policy and stopping rule before attributing a change to regularization.
 
+Use model mode to control stochastic modules and gradient mode to control differentiation. These controls serve different purposes. Evaluation with gradients is appropriate for sensitivity analysis, while no_grad on a model left in training mode can still sample Dropout and update BatchNorm buffers. When choosing optimizer weight decay, inspect the actual update rule and the parameter groups to which it applies.
 
 ## Paired TensorFlow comparison
 
@@ -36,19 +36,48 @@ Keras commonly receives training=True/False per call; PyTorch modules store trai
 
 ## How to run this lesson
 
-Use a prepared `llm-torch-cpu` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/torch-017/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: `& $CoursePython courses/deep-learning-pytorch/lessons/torch-017.py`. For macOS/Linux use `.venv/bin/python courses/deep-learning-pytorch/lessons/torch-017.py` from the repository root.
+Use a prepared `llm-torch-cpu` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/torch-017/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: `& $CoursePython courses/deep-learning-pytorch/lessons/torch-017.py`. For macOS/Linux, use the interpreter explicitly selected for a separately prepared native PyTorch environment, and invoke that interpreter on `courses/deep-learning-pytorch/lessons/torch-017.py` from the repository root. The repository's general `.venv` is not assumed to contain PyTorch; the prepared classroom profile is the default execution route.
 
-Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.
+Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the explicit tolerance in each assertion. Several analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone is not a universal numerical-error bound. Finite differences, reductions and conditioning can require different justified tolerances. Integer counts, identities and boolean decisions should be exact.
 
 ## Syntax anatomy and reasoning sequence
 
 nn.Dropout(p=.5) scales retained training activations by 1/(1-p). Call train or eval to select behavior. Compute sum(abs(w)) and sum(w²) for declared penalty conventions, then multiply by an explicit coefficient. A half-scaled squared penalty would have a different derivative. Keep metrics and penalty components separate in logs.
 
+## Derive the objective, random transformation and gradient
+
+The fixture has w=[1, -2]. The absolute-value sum is three, the squared-value sum is five, and the Euclidean norm is sqrt(5). These are different quantities. This chapter's squared L2 penalty is lambda times the sum of squared weights, without a one-half factor. At lambda=0.1 it contributes 0.5 to the objective and gradient[0.2, -0.4]. Doubling both weights doubles the L1 sum to six but quadruples the squared sum to twenty. That scale dependence matters when preprocessing changes the meaning of a unit weight.
+
+Suppose one coordinate has data gradient g=0.3, parameter w=1 and learning rate eta=0.1. Ordinary SGD on data loss plus 0.1*w² uses total gradient 0.3+0.2=0.5 and gives w'=0.95. The update can also be written (1-2*eta*lambda)w-eta*g. An SGD weight-decay coefficient 0.2 corresponds to this particular explicit penalty convention. A coefficient 0.1 would correspond to a half-scaled objective and would instead give 0.96 for this example. A shared name or numeric coefficient does not fix the objective's convention.
+
+For an adaptive optimizer, adding 2*lambda*w to g also changes the moment estimates and coordinatewise scaling. Decoupled AdamW applies its decay separately from those moment calculations. Consequently the SGD algebra above does not establish an Adam/AdamW equivalence. Compare the optimizer formula, update count, learning-rate schedule and decayed parameter groups. [PyTorch 2.9 AdamW](https://docs.pytorch.org/docs/2.9/generated/torch.optim.AdamW.html).
+
+Loss reduction adds another scale choice. Replacing a mean over B observations with a sum multiplies the data gradient by B but leaves a separately added fixed penalty unchanged. That reduces the relative penalty strength unless its coefficient is adjusted. Repeating the full penalty at each microbatch also changes its total contribution if the intent was one large-batch objective. Specify whether the penalty is applied once per optimizer step and how accumulated data gradients are normalized.
+
+For Dropout probability p<1, let m be a Bernoulli keep indicator with probability q=1-p. Inverted Dropout computes y=m*x/q during training. Thus E[y]=x and Var(y)=x²*p/q. This statement conditions on the input value; it does not assert that a finite collection of outputs has exactly the same mean. At p=0.5 and x=1, each output is zero or two, each with probability one-half. The derivative with respect to x is the same multiplier m/q, so the sampled backward path is either zero or two. During evaluation the transformation is identity. [PyTorch 2.9 Dropout](https://docs.pytorch.org/docs/2.9/generated/torch.nn.Dropout.html).
+
+The fixture contains 32 unit activations. Under independent elementwise masking, the count K of retained values has mean 16 and variance 8. The observed tensor mean is 2 K/32, so its expectation is one and its variance is 1/32. Its standard deviation is about 0.177. A particular call can retain 15 or 18 values without violating the contract. Even all-zero and all-two tensors are possible, though rare. That is why the executable assertion checks shape and allowed values rather than requiring exactly 16 survivors or a particular cross-platform random mask.
+
+Expected activation preservation also does not imply preservation after nonlinear downstream operations. If a scalar activation is always one without Dropout, its square is one. With p=0.5, its squared dropped value is zero or four and has expectation two. Therefore a model's expected squared loss need not equal its loss at the expected activation. Dropout changes the stochastic training objective, not just the way an unchanged loss is sampled.
+
+The state table helps prevent accidental coupling of unrelated controls:
+
+| Configuration | Dropout mask | Autograd recording for eligible inputs |
+| --- | --- | --- |
+| train mode, ordinary grad mode | Sampled | Enabled |
+| eval mode, ordinary grad mode | Identity | Enabled |
+| train mode inside no_grad | Sampled | Disabled |
+| eval mode inside no_grad | Identity | Disabled |
+
+Exercise six deliberately uses the second row: an evaluation-mode Dropout still carries derivatives, and summing its identity output gives an all-ones input gradient. An inference service commonly uses the fourth row, but gradient-based explanation or adversarial sensitivity analysis may intentionally use the second. Monte Carlo Dropout requires its own deliberate mode policy; simply switching an entire model to train can also change unrelated BatchNorm state.
+
+For an interview, explain why a training loss can rise after regularization while validation loss improves: the optimized objective includes a penalty or stochastic computation, so it is not the same measured quantity as deterministic predictive loss. Then ask whether the validation comparison was selected repeatedly and whether independent evidence remains. Conversely, lower weight norm by itself does not establish better calibrated probabilities, useful rankings or smaller out-of-population error.
+
 ## Worked example / walkthrough
 
 ### Example A: Calculate two penalties
 
-The squared L2 penalty is not the square root norm. Naming the convention avoids a factor or square-root mismatch when comparing implementations.
+The squared L2penalty is not the square root norm. Naming the convention avoids a factor or square-root mismatch when comparing implementations.
 
 ```python
 import numpy as np
@@ -81,7 +110,7 @@ drop.train(); sampled=drop(x)
 assert tuple(sampled.shape)==(4,8) and set(sampled.unique().tolist())<={0.,2.}
 ```
 
-**Expected:** shape(4, 8); only0 or2.
+**Expected:** shape(4, 8); only 0 or2.
 
 ## Prediction before your attempt
 
@@ -89,7 +118,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Exercises
 
-1. **Calculate two penalties.** Use weights1, -2 and compute L1 and squared L2 sums.
+1. **Calculate two penalties.** Use weights 1, -2 and compute L1and squared L2sums.
    **Expected:** L1=3; squared L2=5.
    **Verify:** Save the assertion results for exercise 1, including L1=3; squared L2=5.
 
@@ -98,12 +127,12 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Verify:** Save the assertion results for exercise 2, including both outputs exactly ones.
 
 3. **Check training invariants.** Switch the same layer to train mode and inspect output values.
-   **Expected:** shape(4, 8); only0 or2.
-   **Verify:** Save the assertion results for exercise 3, including shape(4, 8); only0 or2.
+   **Expected:** shape(4, 8); only 0 or2.
+   **Verify:** Save the assertion results for exercise 3, including shape(4, 8); only 0 or2.
 
-4. **Separate data and penalty terms.** Combine data loss2 with coefficient.1 times squared L2.
-   **Expected:** penalty.5; total2.5.
-   **Verify:** Save the assertion results for exercise 4, including penalty.5; total2.5.
+4. **Separate data and penalty terms.** Combine data loss 2 with coefficient.1 times squared L2.
+   **Expected:** penalty.5; total 2.5.
+   **Verify:** Save the assertion results for exercise 4, including penalty.5; total 2.5.
 
 5. **Differentiate the explicit penalty.** Differentiate .1*sum(v*v) at v=[1, -2].
    **Expected:** gradient [.2, -.4].
@@ -115,7 +144,9 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Common pitfalls and diagnosis
 
-When a result disagrees, locate the first intermediate value that violates this explanation. Inspect shapes and identities before aggregates, and inspect counts before averages. Preserve the original fixture and introduce only one controlled change at a time. If an arithmetic identity passes but a data-boundary condition fails, the experiment is still invalid. If a runtime is unavailable, record the unexecuted code as unverified rather than replacing its output with the expected text. The separate explanation discusses why the tempting alternative in each case changes the result.
+If evaluation predictions vary, inspect every stochastic input transformation and module's mode before blaming numerical precision. If no_grad did not stop the variation, remember that it does not switch Dropout into evaluation. If a frozen feature extractor changes behavior, inspect both its mode and its buffers rather than only requires_grad flags.
+
+If a regularization coefficient behaves differently after changing batch size or accumulation steps, write the complete numerator, denominator and penalty frequency. If two optimizers disagree, compare their state updates and whether decay enters the moments. If Dropout tests fail only because a different mask appears, replace the random-pattern expectation with the declared shape/value invariants. If the objective improves but prediction quality does not, inspect the separately logged data loss and the independent validation population.
 
 ## Progressive hints
 
@@ -141,7 +172,7 @@ No. It preserves an expectation under its random masking policy. A finite batch 
 
 **Is weight decay always L2regularization?**
 
-No. Equivalence depends on the optimizer and implementation. For adaptive optimizers, de coupled weight decay is not generally the same as adding a squared penalty to the gradient.
+No. Equivalence depends on the optimizer and implementation. For adaptive optimizers, decoupled weight decay is not generally the same as adding a squared penalty to the gradient.
 
 
 

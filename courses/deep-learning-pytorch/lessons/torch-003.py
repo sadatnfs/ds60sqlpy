@@ -5,7 +5,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 """
 
 # Exercise 1: Calculate a known affine layer
-# UseX[[1, 2, 3], [0, 1, 0]], weight[[1, 0, -1]], bias2.
+# UseX[[1, 2, 3], [0, 1, 0]], weight[[1, 0, -1]], bias 2.
 # Expected: outputs[[0], [2]], shape(2, 1).
 
 # Exercise 2: Inspect registered state
@@ -18,14 +18,14 @@ Copy to .learning before editing. Six independent attempts belong below.
 
 # Exercise 4: Remove the intercept explicitly
 # Create a bias-free layer with the same stored weights.
-# Expected: 3 parameters; outputs-2 and0.
+# Expected: 3 parameters; outputs-2 and 0.
 
 # Exercise 5: Expose an unregistered tensor
 # Compare a Module holding a plain requires_grad tensor with one holding Parameter.
-# Expected: plain module has0 registered parameters; proper module has1.
+# Expected: plain module has 0 registered parameters; proper module has 1.
 
 # Exercise 6: Reject wrong feature width
-# Pass a2-feature row to the3-input layer.
+# Pass a2-feature row to the 3-input layer.
 # Expected: RuntimeError from incompatible matrix dimensions.
 
 if __name__ == "__main__":

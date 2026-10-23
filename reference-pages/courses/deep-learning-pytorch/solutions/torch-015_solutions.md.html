@@ -126,6 +126,15 @@
 <p><strong>Worker count:</strong> The number of separate data-loading processes.</p>
 <h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
 <p>TensorDataset groups tensor components sharing the leading dimension. DataLoader(batch_size=2, shuffle=False, num_workers=0) yields three batches for five records. A seeded torch.Generator supplied to shuffling controls the sampler sequence in this runtime. A custom collator receives a list of items and must return the declared batch structure; it should not perform hidden network or file mutations.</p>
+<h3 id="trace-one-observation-through-sampling-and-collation">Trace one observation through sampling and collation<a class="heading-anchor" href="#trace-one-observation-through-sampling-and-collation" aria-label="Link to this section">#</a></h3>
+<p>A map-style Dataset maps an index to one item. A sampler chooses indices, and a DataLoader retrieves those items and groups them through a collator. The model sees the resulting batch, not an abstract guarantee that every source record appeared exactly once. TensorDataset keeps components aligned by their common leading dimension, which is why one sampled index selects its ID and value together.</p>
+<p>For five records and batch size two without dropping, the traversal has three batch elements with sizes 2, 2, 1. Concatenated IDs are 0..4 exactly once. Dataset length five and loader batch count three describe different stages. With drop_last=True and no shuffle, the final ID 4 is omitted. With shuffling, a different identity may land in the tail; the omission still changes the epoch population even if all produced tensor shapes are uniform.</p>
+<p>A local torch.Generator makes the source of sampler randomness explicit. Constructing two fresh generators with seed 7 starts two equivalent sequences in the pinned runtime. Reusing one consumed generator does not reset it: the next traversal begins from later RNG state. A global manual_seed call also does not describe which later operations consume draws. Reproducibility needs the generator ownership, draw order, dataset state and runtime, not only one integer seed. <a href="https://docs.pytorch.org/docs/2.9/notes/randomness.html">PyTorch 2.9 reproducibility notes</a>.</p>
+<p>Default collation can stack compatible tensor shapes, but variable-length sequences require a declared representation. For[2, 3] and[4], this helper produces Long tokens shaped(2, 2), lengths shaped(2, ), and values[[2, 3], [4, 0]] with lengths[2, 1]. The corresponding validity mask from position&lt;length is[[True, True], [True, False]]. There are three participating tokens, not four.</p>
+<p>Padding fills storage; it does not create an observed token. Lengths remain authoritative even if zero can occur as an actual token ID in another contract. A later embedding padding_idx, attention mask or loss mask must agree on the sentinel and validity policy. A token loss averaged over all four stored positions would give the padded slot denominator weight it did not earn. Mask polarity also belongs to the consuming API, so a valid-position mask may need inversion for an API whose True means blocked.</p>
+<p>The repaired collator accepts nonempty sequences of nonnegative integer token IDs representable in signed int64. It rejects Boolean, floating, negative and out-of-range IDs before assigning into a Long buffer. Without that boundary, a value 2.7 could silently become 2 during assignment. A downstream embedding lookup would then process a different symbol while every tensor shape looked correct. The collator does not know the eventual vocabulary size; that additional range check belongs with the vocabulary/model contract.</p>
+<p>Multiple workers add more state. Worker processes may have replicated dataset instances and their own Python/NumPy random generators. Iterable datasets need deliberate sharding to avoid repeated records. Platform start methods, picklable functions, resource cleanup and bounded prefetch also matter. These are reasons to qualify a multiprocessing design separately, not reasons to assume that more workers always improve throughput. The default examples create no worker processes and make no cross-platform performance claim. <a href="https://docs.pytorch.org/docs/2.9/data.html">PyTorch 2.9 data-loading contracts</a>.</p>
+<p>Finally, identity checks must fit the sampling policy. A no-replacement permutation should preserve the complete ID bag. A weighted sampler with replacement may deliberately repeat IDs, so its acceptance contract concerns draw counts and weights instead. Keep the chosen policy and actual records visible before interpreting a training loss.</p>
 <h3 id="exercise-1-inspect-retained-batches">Exercise 1: Inspect retained batches<a class="heading-anchor" href="#exercise-1-inspect-retained-batches" aria-label="Link to this section">#</a></h3>
 <p>The question is: Load five paired ID/value records with batch size 2 and no shuffle.</p>
 <p>The loader preserves the final singleton by default. The ID conservation check catches missing or duplicated records that value-only statistics may hide.</p>
@@ -134,17 +143,17 @@ loader=torch.utils.data.DataLoader(dataset,batch_size=2,shuffle=False,num_worker
 batches=list(loader)
 assert [len(ids) for ids,values in batches]==[2,2,1]
 assert torch.cat([ids for ids,values in batches]).tolist()==[0,1,2,3,4]</code></pre>
-<p><strong>Expected:</strong> sizes2, 2, 1 and IDs0..4 exactly once.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with sizes2, 2, 1 and IDs0..4 exactly once.</p>
+<p><strong>Expected:</strong> sizes 2, 2, 1 and IDs 0..4 exactly once.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with sizes 2, 2, 1 and IDs 0..4 exactly once.</p>
 <h3 id="exercise-2-make-dropping-explicit">Exercise 2: Make dropping explicit<a class="heading-anchor" href="#exercise-2-make-dropping-explicit" aria-label="Link to this section">#</a></h3>
 <p>The question is: Set drop_last True on the same fixture.</p>
 <p>The policy changes the effective epoch population. It may be useful for fixed shapes, but it must not be described as an identical traversal.</p>
 <pre><code class="language-python">dropped=list(torch.utils.data.DataLoader(dataset,batch_size=2,drop_last=True,num_workers=0))
 assert len(dropped)==2 and torch.cat([ids for ids,values in dropped]).tolist()==[0,1,2,3]</code></pre>
-<p><strong>Expected:</strong> two batches; ID4 omitted.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with two batches; ID4 omitted.</p>
+<p><strong>Expected:</strong> two batches; ID 4 omitted.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with two batches; ID 4 omitted.</p>
 <h3 id="exercise-3-reproduce-shuffle-with-a-local-generator">Exercise 3: Reproduce shuffle with a local generator<a class="heading-anchor" href="#exercise-3-reproduce-shuffle-with-a-local-generator" aria-label="Link to this section">#</a></h3>
-<p>The question is: Construct two loaders with fresh generators both seeded7.</p>
+<p>The question is: Construct two loaders with fresh generators both seeded 7.</p>
 <p>A new generator recreates the starting state. Reusing one already-consumed generator would produce a later random sequence rather than a replay.</p>
 <pre><code class="language-python">def order(seed):
     generator=torch.Generator().manual_seed(seed)
@@ -153,9 +162,9 @@ assert len(dropped)==2 and torch.cat([ids for ids,values in dropped]).tolist()==
 assert order(7)==order(7) and sorted(order(7))==list(range(5))</code></pre>
 <p><strong>Expected:</strong> same permutation; all five IDs retained.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with same permutation; all five IDs retained.</p>
-<h3 id="exercise-4-col-late-variable-length-sequences">Exercise 4: Col late variable-length sequences<a class="heading-anchor" href="#exercise-4-col-late-variable-length-sequences" aria-label="Link to this section">#</a></h3>
+<h3 id="exercise-4-collate-variable-length-sequences">Exercise 4: Collate variable-length sequences<a class="heading-anchor" href="#exercise-4-collate-variable-length-sequences" aria-label="Link to this section">#</a></h3>
 <p>The question is: Pad sequences[2, 3] and[4] with zero while keeping lengths.</p>
-<p>Padding equalize s storage without inventing a valid token. Length metadata is needed for recurrent packing or loss masking later.</p>
+<p>Padding equalizes storage without inventing a valid token. Length metadata is needed for recurrent packing or loss masking later.</p>
 <pre><code class="language-python">padded,lengths=collate([[2,3],[4]])
 assert padded.tolist()==[[2,3],[4,0]] and lengths.tolist()==[2,1]</code></pre>
 <p><strong>Expected:</strong> batch[[2, 3], [4, 0]] and lengths 2, 1.</p>
@@ -168,14 +177,18 @@ for ids,targets in torch.utils.data.DataLoader(paired,batch_size=2,shuffle=True,
     assert torch.equal(targets,2*ids)</code></pre>
 <p><strong>Expected:</strong> every target equals twice its ID.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with every target equals twice its ID.</p>
-<h3 id="exercise-6-reject-an-empty-sequence-in-this-collator">Exercise 6: Reject an empty sequence in this collator<a class="heading-anchor" href="#exercise-6-reject-an-empty-sequence-in-this-collator" aria-label="Link to this section">#</a></h3>
-<p>The question is: Pass[[], [1]] to a collator whose contract requires positive lengths.</p>
+<h3 id="exercise-6-reject-invalid-sequence-records">Exercise 6: Reject invalid sequence records<a class="heading-anchor" href="#exercise-6-reject-invalid-sequence-records" aria-label="Link to this section">#</a></h3>
+<p>The question is: Pass an empty sequence and floating, Boolean, negative or overflowing token IDs to the collator.</p>
 <p>Some applications can represent empty sequences, but this lesson&#x27;s recurrent contract cannot. Rejecting the case early keeps an undefined loss denominator from appearing later.</p>
 <pre><code class="language-python">try: collate([[],[1]])
 except ValueError: pass
-else: raise AssertionError(&#x27;empty sequence accepted&#x27;)</code></pre>
-<p><strong>Expected:</strong> ValueError before padding.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with ValueError before padding.</p>
+else: raise AssertionError(&#x27;empty sequence accepted&#x27;)
+for invalid in [[[2.7]],[[True]],[[-1]],[[2**63]]]:
+    try: collate(invalid)
+    except ValueError: pass
+    else: raise AssertionError(&#x27;invalid token ID accepted&#x27;)</code></pre>
+<p><strong>Expected:</strong> ValueError before padding; token IDs must be nonnegative int64 integers.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with ValueError before padding; token IDs must be nonnegative int64 integers.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
 <p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
   </main>

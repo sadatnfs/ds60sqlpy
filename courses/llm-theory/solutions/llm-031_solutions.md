@@ -14,7 +14,7 @@ Instruction tuning changes which text patterns a model learns from, and the loss
 
 ## Reading the implementation
 
-Use a sequence with two prompt tokens followed by three answer tokens. Shift to four targets, then mark only target positions belonging to the answer. Replace excluded labels with-100 before cross entropy. The mask applies to targets, not input padding alone. Verify gradients at ignored logit positions and count the three active answer targets explicitly.
+Use a sequence with two prompt tokens followed by three answer tokens. Shift to four targets, then mark only target positions belonging to the answer. Replace excluded labels with -100 before cross entropy. The mask applies to targets, not input padding alone. Verify gradients at ignored logit positions and count the three active answer targets explicitly.
 
 ## Exercise 1: Align the target mask
 
@@ -33,7 +33,7 @@ assert targets.tolist()==[[2,5,6,3]] and int(answer.sum())==3
 
 ## Exercise 2: Compute answer-only loss
 
-The question is: Use zero vocabulary8 logits and replace prompt targets with-100.
+The question is: Use zero vocabulary8 logits and replace prompt targets with -100.
 
 Uniform logits make each target loss identical. The mean stayslog8, but the active count differs from full-sequence training and affects summed objectives.
 

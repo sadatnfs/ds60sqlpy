@@ -64,16 +64,14 @@ Complexity claims should identify the state space. Coin change and knapsack tabl
 ### Example 1
 
 ```python
-import math
-from bisect import bisect_right
-
-coins=[1,3,4];amount=6
-best=[0]+[math.inf]*amount
-for total in range(1,amount+1):
-    best[total]=min((1+best[total-coin] for coin in coins if coin<=total),default=math.inf)
-assert best[6]==2
-assert 1+1+1>best[6]
-print("Minimum coins for6:",best[6])
+coins = [1, 3, 4]
+amount = 6
+best = [0] + [math.inf] * amount
+for total in range(1, amount + 1):
+    best[total] = min((1 + best[total - coin] for coin in coins if coin <= total), default=math.inf)
+assert best[6] == 2
+assert best[6] < 1 + 1 + 1
+print("Minimum coins for6:", best[6])
 ```
 
 Each state asks about one amount, and choosing the final coin leaves a smaller amount whose optimal count is already known. The comparison with the three-coin greedy result demonstrates why looking only at the largest available denomination is insufficient.
@@ -81,18 +79,17 @@ Each state asks about one amount, and choosing the final coin leaves a smaller a
 ### Example 2
 
 ```python
-import math
-from bisect import bisect_right
-
-capacity=4;weight=2;value=3
-correct=[0]*(capacity+1)
-for available in range(capacity,weight-1,-1):
-    correct[available]=max(correct[available],value+correct[available-weight])
-wrong=[0]*(capacity+1)
-for available in range(weight,capacity+1):
-    wrong[available]=max(wrong[available],value+wrong[available-weight])
-assert correct[4]==3 and wrong[4]==6
-print("One item used once:",correct[4],"ascending-loop reuse:",wrong[4])
+capacity = 4
+weight = 2
+value = 3
+correct = [0] * (capacity + 1)
+for available in range(capacity, weight - 1, -1):
+    correct[available] = max(correct[available], value + correct[available - weight])
+wrong = [0] * (capacity + 1)
+for available in range(weight, capacity + 1):
+    wrong[available] = max(wrong[available], value + wrong[available - weight])
+assert correct[4] == 3 and wrong[4] == 6
+print("One item used once:", correct[4], "ascending-loop reuse:", wrong[4])
 ```
 
 Descending updates read the previous-item state for lower capacities. Ascending updates read a value already improved by the same item and use it twice. Both loops terminate and produce plausible numbers, so an explicit single-item capacity test is necessary.

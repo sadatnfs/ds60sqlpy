@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Spark 028 Solution · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course artifact</p>
+      <h1>Spark 028 Solution</h1>
+      <p class="source-path">Generated from <code>courses/scala-spark/solutions/spark-028_solution.py</code></p>
+    </header>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>from pyspark.sql import SparkSession, functions as F</span>
+<span>from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType</span>
+<span> </span>
+<span> </span>
+<span>def observe(frame):</span>
+<span>    summary = frame.agg(F.count(F.lit(1)),F.countDistinct(&quot;fact_id&quot;),F.count(&quot;amount&quot;),F.sum(&quot;amount&quot;),F.sum(F.col(&quot;amount&quot;)*F.col(&quot;factor&quot;)))</span>
+<span>    values = dict(zip([&quot;rows&quot;,&quot;unique_facts&quot;,&quot;known_amounts&quot;,&quot;amount_total&quot;,&quot;weighted_total&quot;],tuple(summary.collect()[0]),strict=True))</span>
+<span>    exchanges = []</span>
+<span>    pending = [summary._jdf.queryExecution().executedPlan()]</span>
+<span>    while pending:</span>
+<span>        node = pending.pop()</span>
+<span>        if &quot;Exchange&quot; in node.nodeName():</span>
+<span>            metrics = {}; iterator = node.metrics().iterator()</span>
+<span>            while iterator.hasNext():</span>
+<span>                entry = iterator.next(); metrics[str(entry._1())] = int(entry._2().value())</span>
+<span>            exchanges.append((node.nodeName(),metrics))</span>
+<span>        children = node.children().iterator()</span>
+<span>        while children.hasNext():</span>
+<span>            pending.append(children.next())</span>
+<span>    return values,exchanges</span>
+<span>def same_bag(left, right):</span>
+<span>    return left.exceptAll(right).count() == 0 and right.exceptAll(left).count() == 0</span>
+<span> </span>
+<span>def classify_facts(raw):</span>
+<span>    return raw.withColumn(&quot;reason&quot;,F.when(F.col(&quot;fact_id&quot;).isNull(),&quot;missing_identity&quot;).when(F.col(&quot;amount&quot;)&lt;0,&quot;negative_amount&quot;).otherwise(&quot;accepted&quot;))</span>
+<span> </span>
+<span>def review_dimension(raw):</span>
+<span>    reviewed = raw.filter(F.col(&quot;approved&quot;)).select(&quot;key&quot;,&quot;factor&quot;)</span>
+<span>    rows = reviewed.limit(101).count()</span>
+<span>    if rows &gt; 100 or reviewed.agg(F.countDistinct(&quot;key&quot;)).first()[0] != rows:</span>
+<span>        raise ValueError(&quot;Approved keys must be known,unique and bounded&quot;)</span>
+<span>    return reviewed</span>
+<span> </span>
+<span>def baseline_product(facts, dimension):</span>
+<span>    return facts.join(dimension,on=&quot;key&quot;,how=&quot;inner&quot;).select(&quot;source_id&quot;,&quot;fact_id&quot;,&quot;key&quot;,&quot;amount&quot;,&quot;factor&quot;)</span>
+<span> </span>
+<span>def broadcast_product(facts, dimension):</span>
+<span>    return facts.join(F.broadcast(dimension),on=&quot;key&quot;,how=&quot;inner&quot;).select(&quot;source_id&quot;,&quot;fact_id&quot;,&quot;key&quot;,&quot;amount&quot;,&quot;factor&quot;)</span>
+<span> </span>
+<span>def configuration_receipt(spark):</span>
+<span>    return {&quot;version&quot;:spark.version,&quot;master&quot;:spark.sparkContext.master,&quot;aqe&quot;:spark.conf.get(&quot;spark.sql.adaptive.enabled&quot;),&quot;automatic_broadcast&quot;:spark.conf.get(&quot;spark.sql.autoBroadcastJoinThreshold&quot;)}</span>
+<span> </span>
+<span>def choose_product(facts, dimension, use_broadcast):</span>
+<span>    if not isinstance(use_broadcast,bool):</span>
+<span>        raise ValueError(&quot;Explicit Boolean strategy switch required&quot;)</span>
+<span>    return broadcast_product(facts,dimension) if use_broadcast else baseline_product(facts,dimension)</span>
+<span> </span>
+<span>def main():</span>
+<span> </span>
+<span>    spark = (SparkSession.builder.appName(&quot;ds60-spark-028&quot;).master(&quot;local[2]&quot;)</span>
+<span>        .config(&quot;spark.ui.enabled&quot;, &quot;false&quot;)</span>
+<span>        .config(&quot;spark.driver.host&quot;, &quot;127.0.0.1&quot;)</span>
+<span>        .config(&quot;spark.driver.bindAddress&quot;, &quot;127.0.0.1&quot;)</span>
+<span>        .config(&quot;spark.sql.shuffle.partitions&quot;, &quot;2&quot;)</span>
+<span>        .config(&quot;spark.sql.adaptive.enabled&quot;, &quot;false&quot;)</span>
+<span>        .config(&quot;spark.sql.ansi.enabled&quot;, &quot;true&quot;)</span>
+<span>        .config(&quot;spark.sql.session.timeZone&quot;, &quot;UTC&quot;).getOrCreate())</span>
+<span>    try:</span>
+<span>        assert spark.sparkContext.master == &quot;local[2]&quot;</span>
+<span>        spark.sparkContext.setLogLevel(&quot;ERROR&quot;)</span>
+<span>        spark.conf.set(&quot;spark.sql.autoBroadcastJoinThreshold&quot;,&quot;-1&quot;)</span>
+<span>        fact_schema = StructType([StructField(&quot;source_id&quot;,LongType(),False),StructField(&quot;fact_id&quot;,LongType(),True),StructField(&quot;key&quot;,LongType(),False),StructField(&quot;amount&quot;,LongType(),True)])</span>
+<span>        generated = [(i,i,0 if i&lt;=1600 else (i-1601)%4+1,None if i%10==0 else i%7+1) for i in range(1,2001)]</span>
+<span>        raw_facts = spark.createDataFrame(generated+[(2001,None,0,10),(2002,2001,99,-3)],schema=fact_schema)</span>
+<span>        dim_schema = StructType([StructField(&quot;key&quot;,LongType(),False),StructField(&quot;factor&quot;,LongType(),False),StructField(&quot;approved&quot;,BooleanType(),False)])</span>
+<span>        raw_dimension = spark.createDataFrame([(0,1,False),(0,2,True)]+[(k,k+2,True) for k in range(1,6)],schema=dim_schema)</span>
+<span>        expected_metrics = {&quot;rows&quot;:2000,&quot;unique_facts&quot;:2000,&quot;known_amounts&quot;:1800,&quot;amount_total&quot;:7196,&quot;weighted_total&quot;:17913}</span>
+<span>        # Exercise 1: Classify facts and reconcile the whole source population</span>
+<span>        classified = classify_facts(raw_facts)</span>
+<span>        accepted = classified.filter(F.col(&quot;reason&quot;)==&quot;accepted&quot;).drop(&quot;reason&quot;)</span>
+<span>        rejected = classified.filter(F.col(&quot;reason&quot;)!=&quot;accepted&quot;)</span>
+<span>        assert [tuple(r) for r in rejected.select(&quot;source_id&quot;,&quot;reason&quot;).orderBy(&quot;source_id&quot;).collect()] == [(2001,&quot;missing_identity&quot;),(2002,&quot;negative_amount&quot;)]</span>
+<span>        assert accepted.count() == 2000 and rejected.count() == 2 and classified.count() == 2002</span>
+<span>        assert tuple(accepted.agg(F.countDistinct(&quot;fact_id&quot;),F.count(&quot;amount&quot;)).first()) == (2000,1800)</span>
+<span>        # Exercise 2: Select an approved unique dimension before tuning</span>
+<span>        reviewed = review_dimension(raw_dimension)</span>
+<span>        assert [tuple(r) for r in reviewed.orderBy(&quot;key&quot;).collect()] == [(k,k+2) for k in range(6)]</span>
+<span>        try:</span>
+<span>            review_dimension(raw_dimension.unionByName(raw_dimension.filter((F.col(&quot;key&quot;)==0)&amp;F.col(&quot;approved&quot;))))</span>
+<span>        except ValueError:</span>
+<span>            pass</span>
+<span>        else:</span>
+<span>            raise AssertionError(&quot;Conflicting approved dimension accepted&quot;)</span>
+<span>        # Exercise 3: Produce the correct baseline and independent key summary</span>
+<span>        baseline = baseline_product(accepted,reviewed)</span>
+<span>        baseline_values,baseline_exchanges = observe(baseline)</span>
+<span>        assert baseline_values == expected_metrics</span>
+<span>        key_summary = [tuple(r) for r in baseline.groupBy(&quot;key&quot;).agg(F.count(F.lit(1)),F.count(&quot;amount&quot;),F.sum(&quot;amount&quot;),F.sum(F.col(&quot;amount&quot;)*F.col(&quot;factor&quot;))).orderBy(&quot;key&quot;).collect()]</span>
+<span>        assert key_summary == [(0,1600,1440,5755,11510),(1,100,100,401,1203),(2,100,80,321,1284),(3,100,100,398,1990),(4,100,80,321,1926)]</span>
+<span>        # Exercise 4: Compare a bounded broadcast strategy with the same business contract</span>
+<span>        candidate = broadcast_product(accepted,reviewed)</span>
+<span>        candidate_values,candidate_exchanges = observe(candidate)</span>
+<span>        assert candidate_values == expected_metrics and same_bag(candidate,baseline)</span>
+<span>        assert &quot;BroadcastHashJoin&quot; in candidate._jdf.queryExecution().executedPlan().toString()</span>
+<span>        # Exercise 5: Assemble an honest bounded comparison receipt</span>
+<span>        configuration = configuration_receipt(spark)</span>
+<span>        assert configuration == {&quot;version&quot;:&quot;4.0.1&quot;,&quot;master&quot;:&quot;local[2]&quot;,&quot;aqe&quot;:&quot;false&quot;,&quot;automatic_broadcast&quot;:&quot;-1&quot;}</span>
+<span>        frequencies = [tuple(r) for r in accepted.groupBy(&quot;key&quot;).count().orderBy(&quot;key&quot;).collect()]</span>
+<span>        assert frequencies == [(0,1600),(1,100),(2,100),(3,100),(4,100)]</span>
+<span>        assert baseline_exchanges and candidate_exchanges</span>
+<span>        print(&quot;configuration=&quot;,configuration,&quot;key_frequencies=&quot;,frequencies,&quot;baseline_metrics=&quot;,baseline_exchanges,&quot;candidate_metrics=&quot;,candidate_exchanges)</span>
+<span>        print(&quot;baseline_plan=&quot;,baseline._jdf.queryExecution().executedPlan().toString(),&quot;candidate_plan=&quot;,candidate._jdf.queryExecution().executedPlan().toString())</span>
+<span>        # Exercise 6: Roll back execution policy without rolling back data quality</span>
+<span>        rolled_back = choose_product(accepted,reviewed,False)</span>
+<span>        assert observe(rolled_back)[0] == expected_metrics and same_bag(rolled_back,candidate)</span>
+<span>        assert &quot;BroadcastHashJoin&quot; not in rolled_back._jdf.queryExecution().executedPlan().toString()</span>
+<span>        assert same_bag(choose_product(accepted,reviewed,True),baseline)</span>
+<span>        print(&quot;spark-028: six PySpark reference contracts passed; Spark=&quot; + spark.version)</span>
+<span>    finally:</span>
+<span>        try:</span>
+<span>            pass</span>
+<span>        finally:</span>
+<span>            spark.stop()</span>
+<span> </span>
+<span>if __name__ == &quot;__main__&quot;:</span>
+<span>    main()</span>
+<span> </span>
+<span># Exercise 1: Classify facts and reconcile the whole source population. Inputs/task: Add reason using missing fact identity, negative known amount, then accepted precedence. Retain all source records;acceptedNULL amounts remain unknown. Expected: Accepted 2000, rejected 2 with source 2001 missing_identity and 2002 negative_amount. Accepted unique fact IDs 2000 and known amounts 1800. Verify: Assert every rejection identity/reason, source reconciliation and accepted uniqueness/completeness counts.</span>
+<span># Exercise 2: Select an approved unique dimension before tuning. Inputs/task: Keep approved dimension rows, require at most 100 rows and known unique keys, then return key, factor. Reject a candidate with a second approved key 0 row. Expected: Reviewed keys 0..5, factors 2..7, six rows. The conflicting approved candidate fails before joining. Verify: Assert all six key/factor rows and the explicit duplicate-approved rejection.</span>
+<span># Exercise 3: Produce the correct baseline and independent key summary. Inputs/task: Build the ordinary equality join over accepted facts and reviewed dimension, projecting source_id, fact_id, key, amount, factor. Summarize per key with rows, known amounts, total amount and weighted total. Expected: Key 0:(1600,1440,5755,11510);1:(100,100,401,1203);2:(100,80,321,1284);3:(100,100,398,1990);4:(100,80,321,1926). Verify: Assert all five summary tuples and aggregate metrics 2000,2000,1800,7196,17913.</span>
+<span># Exercise 4: Compare a bounded broadcast strategy with the same business contract. Inputs/task: Broadcast the reviewed dimension for the same equality join and projection. Preserve all output occurrences using exceptAll in both directions against baseline. Expected: Identical metrics and empty directional bag differences. The candidate plan containsBroadcastHashJoin. Verify: Assert the full metric map, both distributed bag differences and the observed strategy marker.</span>
+<span># Exercise 5: Assemble an honest bounded comparison receipt. Inputs/task: Return version, master, AQE and automatic broadcast threshold as named fields. Attach key frequencies, the baseline/candidate plans and each observed summary-query exchange metric map. Expected: Spark 4.0.1, local[2], AQEfalse, threshold-1;key 0 frequency 1600 and others 100. Both runs expose actual nonempty exchange observations. No peak-memory or throughput value is invented. Verify: Assert controlled settings and frequency ledger, then print plans and separately labeled actual metric maps.</span>
+<span># Exercise 6: Roll back execution policy without rolling back data quality. Inputs/task: Choose baseline or broadcast using an explicit Boolean switch over the same accepted facts and reviewed dimension. Switch back to baseline and revalidate the complete product. Expected: Both switch positions satisfy the same metric map and bag contract. The disabled position has noBroadcastHashJoin under the controlled configuration. Verify: Assert golden metrics and bag equality after rollback, and inspect the restored baseline plan.</span>
+<span> </span></code></pre></article>
+  </main>
+</body>
+</html>

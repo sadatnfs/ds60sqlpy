@@ -11,7 +11,7 @@ import sys
 import threading
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import pytest
 
@@ -181,7 +181,7 @@ def test_job_completion_count_cannot_replace_pod_identity(
     cluster = SUPPORT["FakeCluster"](lease)
 
     def runner(argv: list[str], **kwargs: Any) -> CommandResult:
-        result = cluster(argv, **kwargs)
+        result = cast(CommandResult, cluster(argv, **kwargs))
         args = arguments(argv)
         if args[:2] == ["get", "pods"] and "batch.kubernetes.io/job-name=" in args[3]:
             payload = json.loads(result.stdout)
@@ -213,7 +213,7 @@ def test_finite_task_output_is_checked_independently(
     cluster = SUPPORT["FakeCluster"](lease)
 
     def runner(argv: list[str], **kwargs: Any) -> CommandResult:
-        result = cluster(argv, **kwargs)
+        result = cast(CommandResult, cluster(argv, **kwargs))
         if arguments(argv)[0] == "logs":
             return CommandResult(
                 0, json.dumps({"accepted": 3, "rejected": 2, "total": 34, "fixture_contract": 2})
@@ -237,9 +237,14 @@ def test_uncertain_new_kind_create_uses_nonce_recovery_and_fresh_cleanup(
 
     def runner(argv: list[str], **kwargs: Any) -> CommandResult:
         nonlocal interrupted
-        result = cluster(argv, **kwargs)
+        result = cast(CommandResult, cluster(argv, **kwargs))
         payload = json.loads(kwargs["input_data"]) if kwargs["input_data"] else None
-        if not interrupted and arguments(argv)[0] == "create" and payload["kind"] == kind:
+        if (
+            not interrupted
+            and arguments(argv)[0] == "create"
+            and payload is not None
+            and payload["kind"] == kind
+        ):
             interrupted = True
             raise InterruptedOperation(status)
         return result
@@ -259,7 +264,7 @@ def test_uncertain_configmap_with_foreign_nonce_is_preserved(
 
     def runner(argv: list[str], **kwargs: Any) -> CommandResult:
         nonlocal interrupted
-        result = cluster(argv, **kwargs)
+        result = cast(CommandResult, cluster(argv, **kwargs))
         args = arguments(argv)
         if not interrupted and args[0] == "create":
             payload = json.loads(kwargs["input_data"])
@@ -429,3 +434,61 @@ def test_actual_finite_fixture_cli_has_exact_exit_and_output(outcome: str, code:
         assert output == {"accepted": 3, "rejected": 2, "total": 35, "fixture_contract": 2}
     else:
         assert output["status"] == "injected-failure"
+
+
+@pytest.mark.parametrize(
+    "name,kinds",
+    [
+        ("hello-configured.yaml", ["ConfigMap", "Deployment", "Service"]),
+        ("hello-startup.yaml", ["Deployment", "Service"]),
+        ("hello-task.yaml", ["Job"]),
+        ("hello-task-failure.yaml", ["Job"]),
+    ],
+)
+def test_curated_contract_two_files_pass_the_actual_parser(name: str, kinds: list[str]) -> None:
+    documents = parse_manifests((ROOT / "courses/kubernetes/fixtures" / name).read_text())
+    assert [document["kind"] for document in documents] == kinds
+
+
+def test_actual_http_client_checks_both_configmap_paths(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from http.server import ThreadingHTTPServer
+
+    fixture = fixture_module()
+    message = tmp_path / "message"
+    message.write_text("reviewer")
+    monkeypatch.setattr(fixture, "CONFIG_FILE", message)
+    monkeypatch.setenv("DS60_MESSAGE", "reviewer")
+    server = ThreadingHTTPServer(("127.0.0.1", 0), fixture.FixtureHandler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        url = f"http://127.0.0.1:{server.server_port}/version"
+        assert (
+            fixture.main(
+                [
+                    "client",
+                    "--url",
+                    url,
+                    "--expect",
+                    "ds60-fixture-v1",
+                    "--expect-message",
+                    "reviewer",
+                    "--expect-file-message",
+                    "reviewer",
+                ]
+            )
+            == 0
+        )
+        assert (
+            fixture.main(
+                ["client", "--url", url, "--expect", "ds60-fixture-v1", "--expect-message", "hello"]
+            )
+            == 2
+        )
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)

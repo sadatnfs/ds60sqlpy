@@ -67,6 +67,125 @@
       "verification_id": null
     },
     {
+      "id": "spark-006",
+      "status": "authored",
+      "language": "scala",
+      "runtime_profile": "scala-jvm",
+      "guide_path": "courses/scala-spark/guides/spark-006.md",
+      "source_path": "courses/scala-spark/lessons/spark-006.scala",
+      "solution_paths": [
+        "courses/scala-spark/solutions/spark-006_solution.scala",
+        "courses/scala-spark/solutions/spark-006_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "spark-007",
+      "status": "authored",
+      "language": "scala",
+      "runtime_profile": "scala-jvm",
+      "guide_path": "courses/scala-spark/guides/spark-007.md",
+      "source_path": "courses/scala-spark/lessons/spark-007.scala",
+      "solution_paths": [
+        "courses/scala-spark/solutions/spark-007_solution.scala",
+        "courses/scala-spark/solutions/spark-007_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "spark-008",
+      "status": "authored",
+      "language": "scala",
+      "runtime_profile": "scala-jvm",
+      "guide_path": "courses/scala-spark/guides/spark-008.md",
+      "source_path": "courses/scala-spark/lessons/spark-008.scala",
+      "solution_paths": [
+        "courses/scala-spark/solutions/spark-008_solution.scala",
+        "courses/scala-spark/solutions/spark-008_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "spark-009",
+      "status": "authored",
+      "language": "scala",
+      "runtime_profile": "scala-jvm",
+      "guide_path": "courses/scala-spark/guides/spark-009.md",
+      "source_path": "courses/scala-spark/lessons/spark-009.scala",
+      "solution_paths": [
+        "courses/scala-spark/solutions/spark-009_solution.scala",
+        "courses/scala-spark/solutions/spark-009_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "spark-010",
+      "status": "authored",
+      "language": "scala",
+      "runtime_profile": "scala-jvm",
+      "guide_path": "courses/scala-spark/guides/spark-010.md",
+      "source_path": "courses/scala-spark/lessons/spark-010.scala",
+      "solution_paths": [
+        "courses/scala-spark/solutions/spark-010_solution.scala",
+        "courses/scala-spark/solutions/spark-010_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "spark-011",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "spark-local-python",
+      "guide_path": "courses/scala-spark/guides/spark-011.md",
+      "source_path": "courses/scala-spark/lessons/spark-011.py",
+      "solution_paths": [
+        "courses/scala-spark/solutions/spark-011_solution.py",
+        "courses/scala-spark/solutions/spark-011_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "scala",
+          "title": "Scala",
+          "language": "scala",
+          "runtime_profile": "spark-local-scala",
+          "source_path": "courses/scala-spark/lessons/spark-011.scala",
+          "solution_paths": [
+            "courses/scala-spark/solutions/spark-011_solution.scala",
+            "courses/scala-spark/solutions/spark-011_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "spark-012",
+      "status": "authored",
+      "language": "scala",
+      "runtime_profile": "spark-local-scala",
+      "guide_path": "courses/scala-spark/guides/spark-012.md",
+      "source_path": "courses/scala-spark/lessons/spark-012.scala",
+      "solution_paths": [
+        "courses/scala-spark/solutions/spark-012_solution.scala",
+        "courses/scala-spark/solutions/spark-012_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "pyspark",
+          "title": "PySpark",
+          "language": "python",
+          "runtime_profile": "spark-local-python",
+          "source_path": "courses/scala-spark/lessons/spark-012.py",
+          "solution_paths": [
+            "courses/scala-spark/solutions/spark-012_solution.py",
+            "courses/scala-spark/solutions/spark-012_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
       "id": "spark-013",
       "status": "authored",
       "language": "scala",
@@ -90,6 +209,759 @@
             "courses/scala-spark/solutions/spark-013_solutions.md"
           ],
           "verification_id": "spark-rows-v1"
+        }
+      ]
+    },
+    {
+      "id": "spark-014",
+      "status": "authored",
+      "language": "scala",
+      "runtime_profile": "spark-local-scala",
+      "guide_path": "courses/scala-spark/guides/spark-014.md",
+      "source_path": "courses/scala-spark/lessons/spark-014.scala",
+      "solution_paths": [
+        "courses/scala-spark/solutions/spark-014_solution.scala",
+        "courses/scala-spark/solutions/spark-014_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "pyspark",
+          "title": "PySpark",
+          "language": "python",
+          "runtime_profile": "spark-local-python",
+          "source_path": "courses/scala-spark/lessons/spark-014.py",
+          "solution_paths": [
+            "courses/scala-spark/solutions/spark-014_solution.py",
+            "courses/scala-spark/solutions/spark-014_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "spark-015",
+      "status": "authored",
+      "language": "scala",
+      "runtime_profile": "spark-local-scala",
+      "guide_path": "courses/scala-spark/guides/spark-015.md",
+      "source_path": "courses/scala-spark/lessons/spark-015.scala",
+      "solution_paths": [
+        "courses/scala-spark/solutions/spark-015_solution.scala",
+        "courses/scala-spark/solutions/spark-015_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "pyspark",
+          "title": "PySpark",
+          "language": "python",
+          "runtime_profile": "spark-local-python",
+          "source_path": "courses/scala-spark/lessons/spark-015.py",
+          "solution_paths": [
+            "courses/scala-spark/solutions/spark-015_solution.py",
+            "courses/scala-spark/solutions/spark-015_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "spark-016",
+      "status": "authored",
+      "language": "scala",
+      "runtime_profile": "spark-local-scala",
+      "guide_path": "courses/scala-spark/guides/spark-016.md",
+      "source_path": "courses/scala-spark/lessons/spark-016.scala",
+      "solution_paths": [
+        "courses/scala-spark/solutions/spark-016_solution.scala",
+        "courses/scala-spark/solutions/spark-016_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "pyspark",
+          "title": "PySpark",
+          "language": "python",
+          "runtime_profile": "spark-local-python",
+          "source_path": "courses/scala-spark/lessons/spark-016.py",
+          "solution_paths": [
+            "courses/scala-spark/solutions/spark-016_solution.py",
+            "courses/scala-spark/solutions/spark-016_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "spark-017",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "spark-local-python",
+      "guide_path": "courses/scala-spark/guides/spark-017.md",
+      "source_path": "courses/scala-spark/lessons/spark-017.py",
+      "solution_paths": [
+        "courses/scala-spark/solutions/spark-017_solution.py",
+        "courses/scala-spark/solutions/spark-017_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "scala",
+          "title": "Scala",
+          "language": "scala",
+          "runtime_profile": "spark-local-scala",
+          "source_path": "courses/scala-spark/lessons/spark-017.scala",
+          "solution_paths": [
+            "courses/scala-spark/solutions/spark-017_solution.scala",
+            "courses/scala-spark/solutions/spark-017_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "spark-018",
+      "status": "authored",
+      "language": "scala",
+      "runtime_profile": "spark-local-scala",
+      "guide_path": "courses/scala-spark/guides/spark-018.md",
+      "source_path": "courses/scala-spark/lessons/spark-018.scala",
+      "solution_paths": [
+        "courses/scala-spark/solutions/spark-018_solution.scala",
+        "courses/scala-spark/solutions/spark-018_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "pyspark",
+          "title": "PySpark",
+          "language": "python",
+          "runtime_profile": "spark-local-python",
+          "source_path": "courses/scala-spark/lessons/spark-018.py",
+          "solution_paths": [
+            "courses/scala-spark/solutions/spark-018_solution.py",
+            "courses/scala-spark/solutions/spark-018_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "spark-019",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "spark-local-python",
+      "guide_path": "courses/scala-spark/guides/spark-019.md",
+      "source_path": "courses/scala-spark/lessons/spark-019.py",
+      "solution_paths": [
+        "courses/scala-spark/solutions/spark-019_solution.py",
+        "courses/scala-spark/solutions/spark-019_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "scala",
+          "title": "Scala",
+          "language": "scala",
+          "runtime_profile": "spark-local-scala",
+          "source_path": "courses/scala-spark/lessons/spark-019.scala",
+          "solution_paths": [
+            "courses/scala-spark/solutions/spark-019_solution.scala",
+            "courses/scala-spark/solutions/spark-019_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "spark-020",
+      "status": "authored",
+      "language": "scala",
+      "runtime_profile": "spark-local-scala",
+      "guide_path": "courses/scala-spark/guides/spark-020.md",
+      "source_path": "courses/scala-spark/lessons/spark-020.scala",
+      "solution_paths": [
+        "courses/scala-spark/solutions/spark-020_solution.scala",
+        "courses/scala-spark/solutions/spark-020_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "pyspark",
+          "title": "PySpark",
+          "language": "python",
+          "runtime_profile": "spark-local-python",
+          "source_path": "courses/scala-spark/lessons/spark-020.py",
+          "solution_paths": [
+            "courses/scala-spark/solutions/spark-020_solution.py",
+            "courses/scala-spark/solutions/spark-020_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "spark-021",
+      "status": "authored",
+      "language": "scala",
+      "runtime_profile": "spark-local-scala",
+      "guide_path": "courses/scala-spark/guides/spark-021.md",
+      "source_path": "courses/scala-spark/lessons/spark-021.scala",
+      "solution_paths": [
+        "courses/scala-spark/solutions/spark-021_solution.scala",
+        "courses/scala-spark/solutions/spark-021_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "pyspark",
+          "title": "PySpark",
+          "language": "python",
+          "runtime_profile": "spark-local-python",
+          "source_path": "courses/scala-spark/lessons/spark-021.py",
+          "solution_paths": [
+            "courses/scala-spark/solutions/spark-021_solution.py",
+            "courses/scala-spark/solutions/spark-021_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "spark-022",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "spark-local-python",
+      "guide_path": "courses/scala-spark/guides/spark-022.md",
+      "source_path": "courses/scala-spark/lessons/spark-022.py",
+      "solution_paths": [
+        "courses/scala-spark/solutions/spark-022_solution.py",
+        "courses/scala-spark/solutions/spark-022_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "scala",
+          "title": "Scala",
+          "language": "scala",
+          "runtime_profile": "spark-local-scala",
+          "source_path": "courses/scala-spark/lessons/spark-022.scala",
+          "solution_paths": [
+            "courses/scala-spark/solutions/spark-022_solution.scala",
+            "courses/scala-spark/solutions/spark-022_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "spark-023",
+      "status": "authored",
+      "language": "scala",
+      "runtime_profile": "spark-local-scala",
+      "guide_path": "courses/scala-spark/guides/spark-023.md",
+      "source_path": "courses/scala-spark/lessons/spark-023.scala",
+      "solution_paths": [
+        "courses/scala-spark/solutions/spark-023_solution.scala",
+        "courses/scala-spark/solutions/spark-023_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "pyspark",
+          "title": "PySpark",
+          "language": "python",
+          "runtime_profile": "spark-local-python",
+          "source_path": "courses/scala-spark/lessons/spark-023.py",
+          "solution_paths": [
+            "courses/scala-spark/solutions/spark-023_solution.py",
+            "courses/scala-spark/solutions/spark-023_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "spark-024",
+      "status": "authored",
+      "language": "scala",
+      "runtime_profile": "spark-local-scala",
+      "guide_path": "courses/scala-spark/guides/spark-024.md",
+      "source_path": "courses/scala-spark/lessons/spark-024.scala",
+      "solution_paths": [
+        "courses/scala-spark/solutions/spark-024_solution.scala",
+        "courses/scala-spark/solutions/spark-024_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "pyspark",
+          "title": "PySpark",
+          "language": "python",
+          "runtime_profile": "spark-local-python",
+          "source_path": "courses/scala-spark/lessons/spark-024.py",
+          "solution_paths": [
+            "courses/scala-spark/solutions/spark-024_solution.py",
+            "courses/scala-spark/solutions/spark-024_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "spark-025",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "spark-local-python",
+      "guide_path": "courses/scala-spark/guides/spark-025.md",
+      "source_path": "courses/scala-spark/lessons/spark-025.py",
+      "solution_paths": [
+        "courses/scala-spark/solutions/spark-025_solution.py",
+        "courses/scala-spark/solutions/spark-025_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "scala",
+          "title": "Scala",
+          "language": "scala",
+          "runtime_profile": "spark-local-scala",
+          "source_path": "courses/scala-spark/lessons/spark-025.scala",
+          "solution_paths": [
+            "courses/scala-spark/solutions/spark-025_solution.scala",
+            "courses/scala-spark/solutions/spark-025_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "spark-026",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "spark-local-python",
+      "guide_path": "courses/scala-spark/guides/spark-026.md",
+      "source_path": "courses/scala-spark/lessons/spark-026.py",
+      "solution_paths": [
+        "courses/scala-spark/solutions/spark-026_solution.py",
+        "courses/scala-spark/solutions/spark-026_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "scala",
+          "title": "Scala",
+          "language": "scala",
+          "runtime_profile": "spark-local-scala",
+          "source_path": "courses/scala-spark/lessons/spark-026.scala",
+          "solution_paths": [
+            "courses/scala-spark/solutions/spark-026_solution.scala",
+            "courses/scala-spark/solutions/spark-026_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "spark-027",
+      "status": "authored",
+      "language": "scala",
+      "runtime_profile": "spark-local-scala",
+      "guide_path": "courses/scala-spark/guides/spark-027.md",
+      "source_path": "courses/scala-spark/lessons/spark-027.scala",
+      "solution_paths": [
+        "courses/scala-spark/solutions/spark-027_solution.scala",
+        "courses/scala-spark/solutions/spark-027_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "pyspark",
+          "title": "PySpark",
+          "language": "python",
+          "runtime_profile": "spark-local-python",
+          "source_path": "courses/scala-spark/lessons/spark-027.py",
+          "solution_paths": [
+            "courses/scala-spark/solutions/spark-027_solution.py",
+            "courses/scala-spark/solutions/spark-027_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "spark-028",
+      "status": "authored",
+      "language": "scala",
+      "runtime_profile": "spark-local-scala",
+      "guide_path": "courses/scala-spark/guides/spark-028.md",
+      "source_path": "courses/scala-spark/lessons/spark-028.scala",
+      "solution_paths": [
+        "courses/scala-spark/solutions/spark-028_solution.scala",
+        "courses/scala-spark/solutions/spark-028_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "pyspark",
+          "title": "PySpark",
+          "language": "python",
+          "runtime_profile": "spark-local-python",
+          "source_path": "courses/scala-spark/lessons/spark-028.py",
+          "solution_paths": [
+            "courses/scala-spark/solutions/spark-028_solution.py",
+            "courses/scala-spark/solutions/spark-028_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "spark-029",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "spark-local-python",
+      "guide_path": "courses/scala-spark/guides/spark-029.md",
+      "source_path": "courses/scala-spark/lessons/spark-029.py",
+      "solution_paths": [
+        "courses/scala-spark/solutions/spark-029_solution.py",
+        "courses/scala-spark/solutions/spark-029_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "scala",
+          "title": "Scala",
+          "language": "scala",
+          "runtime_profile": "spark-local-scala",
+          "source_path": "courses/scala-spark/lessons/spark-029.scala",
+          "solution_paths": [
+            "courses/scala-spark/solutions/spark-029_solution.scala",
+            "courses/scala-spark/solutions/spark-029_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "spark-030",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/scala-spark/guides/spark-030.md",
+      "source_path": "courses/scala-spark/lessons/spark-030.md",
+      "solution_paths": [
+        "courses/scala-spark/solutions/spark-030_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "spark-031",
+      "status": "authored",
+      "language": "scala",
+      "runtime_profile": "spark-local-scala",
+      "guide_path": "courses/scala-spark/guides/spark-031.md",
+      "source_path": "courses/scala-spark/lessons/spark-031.scala",
+      "solution_paths": [
+        "courses/scala-spark/solutions/spark-031_solution.scala",
+        "courses/scala-spark/solutions/spark-031_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "pyspark",
+          "title": "PySpark",
+          "language": "python",
+          "runtime_profile": "spark-local-python",
+          "source_path": "courses/scala-spark/lessons/spark-031.py",
+          "solution_paths": [
+            "courses/scala-spark/solutions/spark-031_solution.py",
+            "courses/scala-spark/solutions/spark-031_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "spark-032",
+      "status": "authored",
+      "language": "scala",
+      "runtime_profile": "spark-local-scala",
+      "guide_path": "courses/scala-spark/guides/spark-032.md",
+      "source_path": "courses/scala-spark/lessons/spark-032.scala",
+      "solution_paths": [
+        "courses/scala-spark/solutions/spark-032_solution.scala",
+        "courses/scala-spark/solutions/spark-032_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "pyspark",
+          "title": "PySpark",
+          "language": "python",
+          "runtime_profile": "spark-local-python",
+          "source_path": "courses/scala-spark/lessons/spark-032.py",
+          "solution_paths": [
+            "courses/scala-spark/solutions/spark-032_solution.py",
+            "courses/scala-spark/solutions/spark-032_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "spark-033",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "spark-local-python",
+      "guide_path": "courses/scala-spark/guides/spark-033.md",
+      "source_path": "courses/scala-spark/lessons/spark-033.py",
+      "solution_paths": [
+        "courses/scala-spark/solutions/spark-033_solution.py",
+        "courses/scala-spark/solutions/spark-033_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "scala",
+          "title": "Scala",
+          "language": "scala",
+          "runtime_profile": "spark-local-scala",
+          "source_path": "courses/scala-spark/lessons/spark-033.scala",
+          "solution_paths": [
+            "courses/scala-spark/solutions/spark-033_solution.scala",
+            "courses/scala-spark/solutions/spark-033_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "spark-034",
+      "status": "authored",
+      "language": "scala",
+      "runtime_profile": "spark-local-scala",
+      "guide_path": "courses/scala-spark/guides/spark-034.md",
+      "source_path": "courses/scala-spark/lessons/spark-034.scala",
+      "solution_paths": [
+        "courses/scala-spark/solutions/spark-034_solution.scala",
+        "courses/scala-spark/solutions/spark-034_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "pyspark",
+          "title": "PySpark",
+          "language": "python",
+          "runtime_profile": "spark-local-python",
+          "source_path": "courses/scala-spark/lessons/spark-034.py",
+          "solution_paths": [
+            "courses/scala-spark/solutions/spark-034_solution.py",
+            "courses/scala-spark/solutions/spark-034_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "spark-035",
+      "status": "authored",
+      "language": "scala",
+      "runtime_profile": "spark-local-scala",
+      "guide_path": "courses/scala-spark/guides/spark-035.md",
+      "source_path": "courses/scala-spark/lessons/spark-035.scala",
+      "solution_paths": [
+        "courses/scala-spark/solutions/spark-035_solution.scala",
+        "courses/scala-spark/solutions/spark-035_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "pyspark",
+          "title": "PySpark",
+          "language": "python",
+          "runtime_profile": "spark-local-python",
+          "source_path": "courses/scala-spark/lessons/spark-035.py",
+          "solution_paths": [
+            "courses/scala-spark/solutions/spark-035_solution.py",
+            "courses/scala-spark/solutions/spark-035_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "spark-036",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "spark-local-python",
+      "guide_path": "courses/scala-spark/guides/spark-036.md",
+      "source_path": "courses/scala-spark/lessons/spark-036.py",
+      "solution_paths": [
+        "courses/scala-spark/solutions/spark-036_solution.py",
+        "courses/scala-spark/solutions/spark-036_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "scala",
+          "title": "Scala",
+          "language": "scala",
+          "runtime_profile": "spark-local-scala",
+          "source_path": "courses/scala-spark/lessons/spark-036.scala",
+          "solution_paths": [
+            "courses/scala-spark/solutions/spark-036_solution.scala",
+            "courses/scala-spark/solutions/spark-036_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "spark-037",
+      "status": "authored",
+      "language": "scala",
+      "runtime_profile": "spark-local-scala",
+      "guide_path": "courses/scala-spark/guides/spark-037.md",
+      "source_path": "courses/scala-spark/lessons/spark-037.scala",
+      "solution_paths": [
+        "courses/scala-spark/solutions/spark-037_solution.scala",
+        "courses/scala-spark/solutions/spark-037_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "pyspark",
+          "title": "PySpark",
+          "language": "python",
+          "runtime_profile": "spark-local-python",
+          "source_path": "courses/scala-spark/lessons/spark-037.py",
+          "solution_paths": [
+            "courses/scala-spark/solutions/spark-037_solution.py",
+            "courses/scala-spark/solutions/spark-037_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "spark-038",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "spark-local-python",
+      "guide_path": "courses/scala-spark/guides/spark-038.md",
+      "source_path": "courses/scala-spark/lessons/spark-038.py",
+      "solution_paths": [
+        "courses/scala-spark/solutions/spark-038_solution.py",
+        "courses/scala-spark/solutions/spark-038_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "scala",
+          "title": "Scala",
+          "language": "scala",
+          "runtime_profile": "spark-local-scala",
+          "source_path": "courses/scala-spark/lessons/spark-038.scala",
+          "solution_paths": [
+            "courses/scala-spark/solutions/spark-038_solution.scala",
+            "courses/scala-spark/solutions/spark-038_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "spark-039",
+      "status": "authored",
+      "language": "scala",
+      "runtime_profile": "spark-local-scala",
+      "guide_path": "courses/scala-spark/guides/spark-039.md",
+      "source_path": "courses/scala-spark/lessons/spark-039.scala",
+      "solution_paths": [
+        "courses/scala-spark/solutions/spark-039_solution.scala",
+        "courses/scala-spark/solutions/spark-039_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "pyspark",
+          "title": "PySpark",
+          "language": "python",
+          "runtime_profile": "spark-local-python",
+          "source_path": "courses/scala-spark/lessons/spark-039.py",
+          "solution_paths": [
+            "courses/scala-spark/solutions/spark-039_solution.py",
+            "courses/scala-spark/solutions/spark-039_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "spark-040",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/scala-spark/guides/spark-040.md",
+      "source_path": "courses/scala-spark/lessons/spark-040.md",
+      "solution_paths": [
+        "courses/scala-spark/solutions/spark-040_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "spark-041",
+      "status": "authored",
+      "language": "scala",
+      "runtime_profile": "spark-local-scala",
+      "guide_path": "courses/scala-spark/guides/spark-041.md",
+      "source_path": "courses/scala-spark/lessons/spark-041.scala",
+      "solution_paths": [
+        "courses/scala-spark/solutions/spark-041_solution.scala",
+        "courses/scala-spark/solutions/spark-041_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "pyspark",
+          "title": "PySpark",
+          "language": "python",
+          "runtime_profile": "spark-local-python",
+          "source_path": "courses/scala-spark/lessons/spark-041.py",
+          "solution_paths": [
+            "courses/scala-spark/solutions/spark-041_solution.py",
+            "courses/scala-spark/solutions/spark-041_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "spark-042",
+      "status": "authored",
+      "language": "scala",
+      "runtime_profile": "spark-local-scala",
+      "guide_path": "courses/scala-spark/guides/spark-042.md",
+      "source_path": "courses/scala-spark/lessons/spark-042.scala",
+      "solution_paths": [
+        "courses/scala-spark/solutions/spark-042_solution.scala",
+        "courses/scala-spark/solutions/spark-042_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "pyspark",
+          "title": "PySpark",
+          "language": "python",
+          "runtime_profile": "spark-local-python",
+          "source_path": "courses/scala-spark/lessons/spark-042.py",
+          "solution_paths": [
+            "courses/scala-spark/solutions/spark-042_solution.py",
+            "courses/scala-spark/solutions/spark-042_solutions.md"
+          ],
+          "verification_id": null
         }
       ]
     }

@@ -12,7 +12,6 @@ def polish(value):
     value=re.sub(r';(?=\S)', '; ', value)
     value=re.sub(r'\b(with|of|by|rank|alpha|beta|size|overlap|budget|reserve|lengths|visits|purchases|version|seed|steps|count|value|rate)(?=\d)', r'\1 ', value)
     value=re.sub(r'(?<=\d)(?=records|steps|tokens|bytes|updates|entries|documents|times|characters)', ' ', value)
-    value=re.sub(r'(?<=\d)(?=[A-Za-z])(?![eE][-+0-9])', ' ', value)
     return value
 
 def write_all(only=None):
@@ -36,7 +35,8 @@ def write_all(only=None):
    terms='\n\n'.join(f'**{k}:** {v}' for k,v in s['terms'])
    exercise_text='\n\n'.join(f"{n}. **{e['title']}.** {e['prompt']}\n   **Expected:** {e['expected']}\n   **Verify:** Save the {('reasoning table' if reading else 'assertion results')} for exercise {n}, including {e['expected']}" for n,e in enumerate(s['exercises'],1))
    examples='\n\n'.join(f"### Example {chr(65+n)}: {e['title']}\n\n{e['why']}\n\n```{'text' if reading else 'python'}\n{(s['imports']+chr(10)+s['helper']+chr(10)) if not reading and n==0 else ''}{e['code']}\n```\n\n**Expected:** {e['expected']}" for n,e in enumerate(s['exercises'][:3]))
-   runtime = ('Use the reading worksheet. Write a reasoned response for each case; no execution or model download is required.' if reading else f"Use a prepared `{p['runtime']}` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/{id}/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: `& $CoursePython {learner}`. For macOS/Linux use `.venv/bin/python {learner}` from the repository root.")
+   runtime = ('Use the reading worksheet. Write a reasoned response for each case; no execution or model download is required.' if reading else f"Use a prepared `{p['runtime']}` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/{id}/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: `& $CoursePython {learner}`. For macOS/Linux, use the interpreter explicitly selected for a separately prepared native PyTorch environment, and invoke that interpreter on `{learner}` from the repository root. The repository's general `.venv` is not assumed to contain PyTorch; the prepared classroom profile is the default execution route.")
+   study_guidance = 'Read the three worked cases in order and write the assumptions, intermediate reasoning and conclusion for each one. These are text cases, not programs to execute. Compare your written interpretation with the stated expected observations, then answer the six exercises in your saved worksheet. A correct argument must state its evidence boundary; source presence does not establish a model run.' if reading else 'Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the explicit tolerance in each assertion. Several analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone is not a universal numerical-error bound. Finite differences, reductions and conditioning can require different justified tolerances. Integer counts, identities and boolean decisions should be exact.'
    code_anatomy=s['anatomy']
    prompt=f'''Use the checked-in $guide-ds60sqlpy-learning skill for {id}, {p['title']}.
 Read {guide} and {learner}. Direct prerequisites: {prereq}.
@@ -47,9 +47,8 @@ Use only the declared local fixtures. Distinguish arithmetic checks, code execut
 and evidence about generalization. Done when I can derive the worked values, pass all six exercise checks, explain a failed counterexample, and solve one fresh transfer case without solutions.'''
    paired=p['paired_lesson_id']
    interview_text='\n\n'.join('**'+question+'**\n\n'+answer for question,answer in s['interview'])
+   diagnosis = s.get('diagnosis', 'When a result disagrees, locate the first intermediate value that violates this explanation. Inspect shapes and identities before aggregates, and inspect counts before averages. Preserve the original fixture and introduce only one controlled change at a time. If an arithmetic identity passes but a data-boundary condition fails, the experiment is still invalid. If a runtime is unavailable, record the unexecuted code as unverified rather than replacing its output with the expected text. The separate explanation discusses why the tempting alternative in each case changes the result.')
    document=f'''# {id}: {p['title']}
-
-Status: authored PyTorch course content. The manifest inventories complete teaching files; runtime readiness remains a separate, measured property.
 
 ## Level and prerequisites
 
@@ -81,11 +80,13 @@ Compare [{paired}](../../deep-learning-tensorflow/guides/{paired}.md) after deri
 
 {runtime}
 
-Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.
+{study_guidance}
 
 ## Syntax anatomy and reasoning sequence
 
 {code_anatomy}
+
+{s.get('deep_dive', '')}
 
 ## Worked example / walkthrough
 
@@ -101,7 +102,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Common pitfalls and diagnosis
 
-When a result disagrees, locate the first intermediate value that violates this explanation. Inspect shapes and identities before aggregates, and inspect counts before averages. Preserve the original fixture and introduce only one controlled change at a time. If an arithmetic identity passes but a data-boundary condition fails, the experiment is still invalid. If a runtime is unavailable, record the unexecuted code as unverified rather than replacing its output with the expected text. The separate explanation discusses why the tempting alternative in each case changes the result.
+{diagnosis}
 
 ## Progressive hints
 
@@ -144,6 +145,8 @@ Compare these answers only after an attempt or an explicit solution reveal. They
 ## Reading the implementation
 
 {s['anatomy']}
+
+{s.get('deep_dive', '')}
 
 '''
    blocks=[]

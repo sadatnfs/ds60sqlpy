@@ -131,6 +131,36 @@
       "baseline": 0,
       "target": 6,
       "basis": "new-lesson"
+    },
+    "sql-deep-01": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "sql-deep-02": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "sql-deep-03": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "sql-deep-04": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "sql-deep-05": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "sql-deep-06": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
     }
   }
 }

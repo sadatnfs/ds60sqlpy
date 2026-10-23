@@ -1,7 +1,5 @@
 # java-027: Builds and dependency reproducibility
 
-Authored course content. Java21 runtime qualification and execution receipts are recorded separately in the implementation checkpoint. A saved source file is not proof that the code was compiled or that the learner understands it.
-
 ## Level and prerequisites
 
 Advanced, approximately 120 minutes. Direct prerequisites: `java-026`
@@ -37,11 +35,15 @@ javac --release 21 Main.java
 java -ea Main
 ```
 
-The public class name and source filename must agree. Each worked example below is a complete file. Example B includes the setup it needs from Example A, so it can be compiled by itself. The six exercise reference blocks form one complete program in the separate solution. Keep your original prediction, source and diagnostic text together. The default examples use only prepared JDK libraries and tiny local fixtures. Any lesson-specific library or additional file is named explicitly; do not download packages from inside a learner program. Resource examples close their owned files, executors or loopback servers.
+The public class name and source filename must agree. Each worked example below is a complete file. Example B includes the setup it needs from Example A, so it can be compiled by itself. The six exercise reference blocks form one complete program in the separate solution. Keep your original prediction, source and diagnostic text together. Most examples use prepared JDK libraries and tiny local fixtures; any additional dependency is specified in the lesson notes below. Any lesson-specific library or additional file is named explicitly; do not download packages from inside a learner program. Resource examples close their owned files, executors or loopback servers.
+
+## Manual build fixture
+
+The [JAR fixture](../fixtures/java-027/README.md) provides the matching source and explicit javac/jar commands for a fresh learner-owned output directory. The reference's fixed-timestamp byte comparison applies only to its prepared JDK environment.
 
 ## Syntax anatomy and execution trace
 
-The JavaCompiler API invokes the prepared compiler with--release21. The JDKjar tool can be accessed throughjava.util.spi.ToolProvider andgiven a fixed--date plusmain-class. Package only the intended classes directory. SHA256 compares artifactbytes;use a fresh childJVM toprove theJAR entrypoint works. A changed source ordependency identity should change the recorded build manifest.
+The JavaCompiler API invokes the prepared compiler with--release21. The JDKjar tool can be accessed throughjava.util.spi.ToolProvider andgiven a fixed--date plusmain-class. Package only the intended classes directory. SHA256 compares artifactbytes;use a fresh childJVM toprove theJAR entrypoint works. A changed source ordependency identity should change the recorded build manifest. The child process inherits the prepared environment unchanged. JVM startup notices such as JAVA_TOOL_OPTIONS belong to stderr, while the application result belongs to stdout. Capture both streams separately in owned files so diagnostics cannot corrupt an exact output comparison; include stderr when a child fails. Do not remove inherited CPU or resource settings to make a test pass.
 
 ## Worked example / walkthrough
 
@@ -58,8 +60,17 @@ public class Main {
         BuildFixture() throws Exception {root=java.nio.file.Files.createTempDirectory("ds60-build-");source=root.resolve("Hello.java");classes=root.resolve("classes");java.nio.file.Files.createDirectories(classes);java.nio.file.Files.writeString(source,"public class Hello { public static void main(String[] args){System.out.println(\"build-ok\");} }");}
         int compile(){var compiler=javax.tools.ToolProvider.getSystemJavaCompiler();if(compiler==null)throw new IllegalStateException("JDK required");return compiler.run(null,null,null,"--release","21","-d",classes.toString(),source.toString());}
         java.nio.file.Path pack(String name) throws Exception {var target=root.resolve(name);var jar=java.util.spi.ToolProvider.findFirst("jar").orElseThrow();var output=new java.io.StringWriter();int result=jar.run(new java.io.PrintWriter(output),new java.io.PrintWriter(output),"--create","--file",target.toString(),"--main-class","Hello","--date=2020-01-01T00:00:02Z","-C",classes.toString(),".");if(result!=0)throw new AssertionError(output.toString());return target;}
-        String run(java.nio.file.Path jar) throws Exception {String executable=java.nio.file.Path.of(System.getProperty("java.home"),"bin","java").toString();var process=new ProcessBuilder(executable,"-ea","-jar",jar.toString()).redirectErrorStream(true).start();if(!process.waitFor(5,java.util.concurrent.TimeUnit.SECONDS)){process.destroyForcibly();throw new AssertionError("JAR timeout");}String output=new String(process.getInputStream().readAllBytes(),java.nio.charset.StandardCharsets.UTF_8);if(process.exitValue()!=0)throw new AssertionError(output);return output;}
-        public void close() throws Exception {try(var paths=java.nio.file.Files.walk(root)){for(var path:paths.sorted(Comparator.reverseOrder()).toList())java.nio.file.Files.deleteIfExists(path);}}
+        String childStderr="";
+        String run(java.nio.file.Path jar) throws Exception {
+            String executable=java.nio.file.Path.of(System.getProperty("java.home"),"bin","java").toString();
+            var stdout=root.resolve("child.stdout");var stderr=root.resolve("child.stderr");
+            var process=new ProcessBuilder(executable,"-ea","-jar",jar.toString()).redirectOutput(stdout.toFile()).redirectError(stderr.toFile()).start();
+            if(!process.waitFor(5,java.util.concurrent.TimeUnit.SECONDS)){process.destroyForcibly();throw new AssertionError("JAR timeout");}
+            String text=java.nio.file.Files.readString(stdout);childStderr=java.nio.file.Files.readString(stderr);
+            if(process.exitValue()!=0)throw new AssertionError("child exit "+process.exitValue()+": "+childStderr);
+            return text;
+        }
+        public void close() throws java.io.IOException {try(var paths=java.nio.file.Files.walk(root)){for(var path:paths.sorted(Comparator.reverseOrder()).toList())java.nio.file.Files.deleteIfExists(path);}}
     }
     public static void main(String[] args) throws Exception {
         try(BuildFixture fixture=new BuildFixture()) {assert fixture.compile()==0;assert java.nio.file.Files.isRegularFile(fixture.classes.resolve("Hello.class"));}
@@ -83,8 +94,17 @@ public class Main {
         BuildFixture() throws Exception {root=java.nio.file.Files.createTempDirectory("ds60-build-");source=root.resolve("Hello.java");classes=root.resolve("classes");java.nio.file.Files.createDirectories(classes);java.nio.file.Files.writeString(source,"public class Hello { public static void main(String[] args){System.out.println(\"build-ok\");} }");}
         int compile(){var compiler=javax.tools.ToolProvider.getSystemJavaCompiler();if(compiler==null)throw new IllegalStateException("JDK required");return compiler.run(null,null,null,"--release","21","-d",classes.toString(),source.toString());}
         java.nio.file.Path pack(String name) throws Exception {var target=root.resolve(name);var jar=java.util.spi.ToolProvider.findFirst("jar").orElseThrow();var output=new java.io.StringWriter();int result=jar.run(new java.io.PrintWriter(output),new java.io.PrintWriter(output),"--create","--file",target.toString(),"--main-class","Hello","--date=2020-01-01T00:00:02Z","-C",classes.toString(),".");if(result!=0)throw new AssertionError(output.toString());return target;}
-        String run(java.nio.file.Path jar) throws Exception {String executable=java.nio.file.Path.of(System.getProperty("java.home"),"bin","java").toString();var process=new ProcessBuilder(executable,"-ea","-jar",jar.toString()).redirectErrorStream(true).start();if(!process.waitFor(5,java.util.concurrent.TimeUnit.SECONDS)){process.destroyForcibly();throw new AssertionError("JAR timeout");}String output=new String(process.getInputStream().readAllBytes(),java.nio.charset.StandardCharsets.UTF_8);if(process.exitValue()!=0)throw new AssertionError(output);return output;}
-        public void close() throws Exception {try(var paths=java.nio.file.Files.walk(root)){for(var path:paths.sorted(Comparator.reverseOrder()).toList())java.nio.file.Files.deleteIfExists(path);}}
+        String childStderr="";
+        String run(java.nio.file.Path jar) throws Exception {
+            String executable=java.nio.file.Path.of(System.getProperty("java.home"),"bin","java").toString();
+            var stdout=root.resolve("child.stdout");var stderr=root.resolve("child.stderr");
+            var process=new ProcessBuilder(executable,"-ea","-jar",jar.toString()).redirectOutput(stdout.toFile()).redirectError(stderr.toFile()).start();
+            if(!process.waitFor(5,java.util.concurrent.TimeUnit.SECONDS)){process.destroyForcibly();throw new AssertionError("JAR timeout");}
+            String text=java.nio.file.Files.readString(stdout);childStderr=java.nio.file.Files.readString(stderr);
+            if(process.exitValue()!=0)throw new AssertionError("child exit "+process.exitValue()+": "+childStderr);
+            return text;
+        }
+        public void close() throws java.io.IOException {try(var paths=java.nio.file.Files.walk(root)){for(var path:paths.sorted(Comparator.reverseOrder()).toList())java.nio.file.Files.deleteIfExists(path);}}
     }
     public static void main(String[] args) throws Exception {
         try(BuildFixture fixture=new BuildFixture()) {assert fixture.compile()==0;assert java.nio.file.Files.isRegularFile(fixture.classes.resolve("Hello.class"));}

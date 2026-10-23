@@ -1,14 +1,12 @@
 # torch-026: Custom modules, residual paths, buffers and autograd checks
 
-Status: authored PyTorch course content. The manifest inventories complete teaching files; runtime readiness remains a separate, measured property.
-
 ## Level and prerequisites
 
 Advanced; approximately 120 minutes. Direct prerequisites: `torch-025`. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
 
 ## Learning objectives
 
-Custom modules should make state ownership and differentiation explicit. The central investigation is concrete: Create a width2 residual with zero kernel and scale buffer1. The finish condition is output equals input; one parameter and one buffer. gradient24. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Custom modules should make state ownership and differentiation explicit. The central investigation is concrete: Create a width 2 residual with zero kernel and scale buffer 1. The finish condition is output equals input; one parameter and one buffer. gradient 24. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -18,13 +16,15 @@ A custom differentiable function should be checked against independent derivativ
 
 ## Design decisions and when to use this method
 
+Use a custom module to express a reusable computation with a stable state inventory. Create persistent learned state once and validate the feature contract on later calls. Choose a residual connection when its identity path is part of the intended architecture, not simply because addition makes a shape mismatch disappear.
 
+Prefer ordinary differentiable PyTorch operations when they express the computation correctly. Write autograd.Function only when a concrete operation requires a custom rule, and then specify its input domain, upstream-gradient behavior and supported derivative orders. Numerical checks complement analytic and composition tests; they do not certify every branch automatically.
 
 ## Paired TensorFlow comparison
 
 Compare [tf-026](../../deep-learning-tensorflow/guides/tf-026.md) after deriving the shared numerical contract.
 
-Keras custom layers often create weights in build and define call; PyTorch modules usually register state in __init__ and define forward. TensorFlow custom-gradient mechanisms and PyTorch autograd.Function both require a correct local derivative multiplied by the incoming gradient.
+Keras custom layers often create weights in build and define call; PyTorch modules usually registerstate in __init__ and define forward. TensorFlow custom-gradient mechanisms and PyTorch autograd.Function both require a correct local derivative multiplied by the incoming gradient.
 
 ## Vocabulary and concepts
 
@@ -38,13 +38,37 @@ Keras custom layers often create weights in build and define call; PyTorch modul
 
 ## How to run this lesson
 
-Use a prepared `llm-torch-cpu` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/torch-026/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: `& $CoursePython courses/deep-learning-pytorch/lessons/torch-026.py`. For macOS/Linux use `.venv/bin/python courses/deep-learning-pytorch/lessons/torch-026.py` from the repository root.
+Use a prepared `llm-torch-cpu` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/torch-026/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: `& $CoursePython courses/deep-learning-pytorch/lessons/torch-026.py`. For macOS/Linux, use the interpreter explicitly selected for a separately prepared native PyTorch environment, and invoke that interpreter on `courses/deep-learning-pytorch/lessons/torch-026.py` from the repository root. The repository's general `.venv` is not assumed to contain PyTorch; the prepared classroom profile is the default execution route.
 
-Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.
+Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the explicit tolerance in each assertion. Several analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone is not a universal numerical-error bound. Finite differences, reductions and conditioning can require different justified tolerances. Integer counts, identities and boolean decisions should be exact.
 
 ## Syntax anatomy and reasoning sequence
 
-Assign nn.Parameter in __init__, register a scale buffer, and implement forward without allocating new trainable state. Use named_parameters and named_buffers to inspect ownership. A torch.autograd.Function defines static forward and backward methods; save_for_backward stores inputs needed later. grad check perturbs double-precision inputs and should avoid kinks. The cube derivative is3*x² times the incoming gradient.
+Assign nn.Parameter in __init__, register a scale buffer, and implement forward without allocating new trainable state. Use named_parameters and named_buffers to inspect ownership. A torch.autograd.Function defines static forward and backward methods; save_for_backward stores inputs needed later. grad check perturbs double-precision inputs and should avoid kinks. The cube derivative is 3*x² times the incoming gradient.
+
+## Derive residual gradients and stable module identity
+
+For X shaped(B, D), a square kernel K shaped(D, D) and scalar scale s, the module computes Y=X+sXK. Both terms have shape(B, D). A different branch width requires an explicit projection or a different architecture. Broadcasting an unrelated tensor into the residual sum may be legal arithmetic but would not satisfy this feature contract.
+
+At K=0 and s=1, the forward map is exactly Y=X. That does not make the branch untrainable. For upstream G=dL/dY, the matrix derivatives are dL/dX=G+sGK^T and dL/dK=sX^T G. With the fixture X=[[1, 2], [3, 4]] and L equal to the sum of output entries, G is all ones, so dL/dK=[[4, 4], [6, 6]] even at K=0. The input derivative is G because the zero branch adds no additional input sensitivity. The skip path preserves a direct derivative route while the branch can begin learning.
+
+Example C changes K to identity and s to 0.5. Its forward result is 1.5X. Under the same hypothetical summed loss, dL/dX=1.5G and dL/dK=[[2, 2], [3, 3]]. The paired TensorFlow residual has no scale buffer and therefore gives 2 X when its kernel is identity. That difference is an intentional mathematical configuration difference, not a framework disagreement. Match the scale before comparing corresponding derivatives.
+
+The module owns one Parameter object with four scalar entries and one scalar buffer. Counting objects and counting scalars answer different questions. Parameters participate in named_parameters and are candidates for optimizer membership. The registered scale buffer participates in module state and device/dtype movement but is not automatically passed to an optimizer. Its current construction does not request gradients. An ordinary tensor attribute would not automatically receive all of those registration behaviors.
+
+state_dict is not the complete program. It contains the registered kernel and persistent buffer, but reconstruction still needs the module class and width argument. Python configuration such as width is not made into serialized tensor state merely because it is an attribute. A release must preserve that construction contract alongside the tensors. Also, a state_dict mapping is not by itself an independent snapshot of every underlying tensor; clone the values when comparing against later in-place mutations.
+
+Stable object identity matters as much as a stable parameter count. Replacing a four-element Parameter with a fresh four-element Parameter inside forward keeps the scalar count unchanged while leaving an existing optimizer holding the old object. Gradients can then appear on the new parameter without an update from that optimizer. The unchanged exercise checks both identity and count to expose this failure. Keras build/add_weight and PyTorch __init__/Parameter use different construction idioms, but both need a persistent tracked object across calls.
+
+## Treat a custom backward as a local vector-Jacobian product
+
+For f(x)=x^3, the local derivative is 3 x^2. backward receives the derivative from later computation, so it must return grad_output×3x^2. At x=2, the derivative of 2 f(x) is 2×12=24. Returning only 3 x^2 would pass a unit-upstream test but fail this composition. For a vector of independently cubed elements, the returned gradient has the same shape and multiplies each incoming component by its own local derivative.
+
+save_for_backward preserves the tensor values required by the rule and lets autograd enforce relevant lifetime/version checks. Do not mutate saved input storage between forward and backward or detach a value that must support a higher-order derivative. A function with several inputs returns a corresponding derivative entry for each differentiable input, and None where that input has no requested derivative under the declared contract. [Extending PyTorch 2.9 autograd](https://docs.pytorch.org/docs/2.9/notes/extending.html).
+
+gradcheck perturbs real-valued inputs and compares numerical sensitivities with the backward rule. The supplied float64 points 0.2 and-0.7 avoid a nondifferentiable branch, and the analytic derivatives are 0.12 and 1.47. Finite precision, probe size and conditioning still matter. A forward implementation that changes branches at the probe point may not have the derivative the numerical test assumes. Overlapping storage can also invalidate an interpretation that perturbations affect one independent coordinate.
+
+A first-derivative check does not establish double backward, forward-mode support, arbitrary broadcasting or performance. Add the relevant contract tests when those features are actually required. The fixture's cube is small enough to inspect symbolically, and the upstream-factor test catches a distinct error from the basic numerical comparison. None of these checks requires a compiled extension or an external package.
 
 ## Worked example / walkthrough
 
@@ -96,15 +120,15 @@ with torch.no_grad(): module.kernel.copy_(torch.eye(2,dtype=torch.float64)); mod
 torch.testing.assert_close(module(x),1.5*x,atol=1e-12,rtol=0)
 ```
 
-**Expected:** output1.5*x.
+**Expected:** output 1.5*x.
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: output equals input; one parameter and one buffer. gradient24. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: output equals input; one parameter and one buffer. gradient 24. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
-1. **Build an identity residual.** Create a width2 residual with zero kernel and scale buffer1.
+1. **Build an identity residual.** Create a width 2 residual with zero kernel and scale buffer 1.
    **Expected:** output equals input; one parameter and one buffer.
    **Verify:** Save the assertion results for exercise 1, including output equals input; one parameter and one buffer.
 
@@ -113,10 +137,10 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Verify:** Save the assertion results for exercise 2, including same kernel object and parameter count 4.
 
 3. **Check a known residual transform.** Assign an identity kernel and scale.5.
-   **Expected:** output1.5*x.
-   **Verify:** Save the assertion results for exercise 3, including output1.5*x.
+   **Expected:** output 1.5*x.
+   **Verify:** Save the assertion results for exercise 3, including output 1.5*x.
 
-4. **Reject incompatible feature width.** Pass a width3 row to the width2 module.
+4. **Reject incompatible feature width.** Pass a width 3 row to the width 2 module.
    **Expected:** ValueError naming feature width.
    **Verify:** Save the assertion results for exercise 4, including ValueError naming feature width.
 
@@ -124,13 +148,15 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** grad check True.
    **Verify:** Save the assertion results for exercise 5, including grad check True.
 
-6. **Inspect the incoming-gradient factor.** Differentiate the sum of 2*Cube(x) atx2.
-   **Expected:** gradient24.
-   **Verify:** Save the assertion results for exercise 6, including gradient24.
+6. **Inspect the incoming-gradient factor.** Differentiate the sum of 2*Cube(x) atx 2.
+   **Expected:** gradient 24.
+   **Verify:** Save the assertion results for exercise 6, including gradient 24.
 
 ## Common pitfalls and diagnosis
 
-When a result disagrees, locate the first intermediate value that violates this explanation. Inspect shapes and identities before aggregates, and inspect counts before averages. Preserve the original fixture and introduce only one controlled change at a time. If an arithmetic identity passes but a data-boundary condition fails, the experiment is still invalid. If a runtime is unavailable, record the unexecuted code as unverified rather than replacing its output with the expected text. The separate explanation discusses why the tempting alternative in each case changes the result.
+If an identity residual receives no kernel gradient, inspect the branch input and graph before concluding that a zero forward branch cannot learn. If the parameter count stays fixed but training stops, compare object identities in the module and optimizer. If loading tensors produces a different function, check constructor width and buffer values as well as weights.
+
+If a custom backward passes only when the outer coefficient is one, multiply the output by a different upstream factor and inspect the vector-Jacobian product. If gradcheck fails near a kink or at float32 precision, choose a justified smooth float64 probe before loosening tolerances. If higher derivatives are required, test them explicitly rather than inferring them from a first-order pass. Preserve saved-tensor ownership instead of bypassing autograd checks with untracked mutation.
 
 ## Progressive hints
 

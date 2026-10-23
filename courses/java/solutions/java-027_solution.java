@@ -6,8 +6,17 @@ public class Main {
         BuildFixture() throws Exception {root=java.nio.file.Files.createTempDirectory("ds60-build-");source=root.resolve("Hello.java");classes=root.resolve("classes");java.nio.file.Files.createDirectories(classes);java.nio.file.Files.writeString(source,"public class Hello { public static void main(String[] args){System.out.println(\"build-ok\");} }");}
         int compile(){var compiler=javax.tools.ToolProvider.getSystemJavaCompiler();if(compiler==null)throw new IllegalStateException("JDK required");return compiler.run(null,null,null,"--release","21","-d",classes.toString(),source.toString());}
         java.nio.file.Path pack(String name) throws Exception {var target=root.resolve(name);var jar=java.util.spi.ToolProvider.findFirst("jar").orElseThrow();var output=new java.io.StringWriter();int result=jar.run(new java.io.PrintWriter(output),new java.io.PrintWriter(output),"--create","--file",target.toString(),"--main-class","Hello","--date=2020-01-01T00:00:02Z","-C",classes.toString(),".");if(result!=0)throw new AssertionError(output.toString());return target;}
-        String run(java.nio.file.Path jar) throws Exception {String executable=java.nio.file.Path.of(System.getProperty("java.home"),"bin","java").toString();var process=new ProcessBuilder(executable,"-ea","-jar",jar.toString()).redirectErrorStream(true).start();if(!process.waitFor(5,java.util.concurrent.TimeUnit.SECONDS)){process.destroyForcibly();throw new AssertionError("JAR timeout");}String output=new String(process.getInputStream().readAllBytes(),java.nio.charset.StandardCharsets.UTF_8);if(process.exitValue()!=0)throw new AssertionError(output);return output;}
-        public void close() throws Exception {try(var paths=java.nio.file.Files.walk(root)){for(var path:paths.sorted(Comparator.reverseOrder()).toList())java.nio.file.Files.deleteIfExists(path);}}
+        String childStderr="";
+        String run(java.nio.file.Path jar) throws Exception {
+            String executable=java.nio.file.Path.of(System.getProperty("java.home"),"bin","java").toString();
+            var stdout=root.resolve("child.stdout");var stderr=root.resolve("child.stderr");
+            var process=new ProcessBuilder(executable,"-ea","-jar",jar.toString()).redirectOutput(stdout.toFile()).redirectError(stderr.toFile()).start();
+            if(!process.waitFor(5,java.util.concurrent.TimeUnit.SECONDS)){process.destroyForcibly();throw new AssertionError("JAR timeout");}
+            String text=java.nio.file.Files.readString(stdout);childStderr=java.nio.file.Files.readString(stderr);
+            if(process.exitValue()!=0)throw new AssertionError("child exit "+process.exitValue()+": "+childStderr);
+            return text;
+        }
+        public void close() throws java.io.IOException {try(var paths=java.nio.file.Files.walk(root)){for(var path:paths.sorted(Comparator.reverseOrder()).toList())java.nio.file.Files.deleteIfExists(path);}}
     }
     public static void main(String[] args) throws Exception {
         // Exercise 1: Compile a literal application

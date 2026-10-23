@@ -123,7 +123,7 @@
 <p><strong>KV bytes:</strong> Raw storage of keys and values under declared shapes and dtype.</p>
 <p><strong>Peak memory:</strong> Maximum observed runtime memory, including more than raw tensor sizes.</p>
 <h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
-<p>For batchB,headsH,timeT,head widthD and bytesS, scores contain B<em>H</em>T<em>T elements. Full multi-head K/V storage contains2</em>layers<em>B</em>H<em>T</em>D<em>S bytes. Express width=H</em>D explicitly. Convert bytes to KiB by dividing1024, not1000, when using that unit. Change one dimension at a time to expose scaling.</p>
+<p>For batch B, heads H, sequence length T, head width d and s bytes per element, scores contain B<em>H</em>T<em>T elements. Full multi-head K/V storage contains 2</em>L<em>B</em>H<em>T</em>d<em>s bytes across L layers. Model width is D=H</em>d; using D in place of d would count the heads twice. Convert bytes to KiB by dividing by 1024, not 1000. Change one dimension at a time to expose scaling.</p>
 <h3 id="exercise-1-count-attention-scores">Exercise 1: Count attention scores<a class="heading-anchor" href="#exercise-1-count-attention-scores" aria-label="Link to this section">#</a></h3>
 <p>The question is: Use batch1,heads2 and contexts16,32.</p>
 <p>Both the query and key axes double, producing four times as many scores. The number of heads remains fixed.</p>

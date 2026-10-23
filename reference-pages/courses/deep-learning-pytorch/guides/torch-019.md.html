@@ -116,15 +116,16 @@
       <p class="source-path">Generated from <code>courses/deep-learning-pytorch/guides/torch-019.md</code></p>
     </header>
     <article class="document"><h2 id="torch-019-convolutions-channel-layouts-and-shared-computation">torch-019: Convolutions, channel layouts and shared computation<a class="heading-anchor" href="#torch-019-convolutions-channel-layouts-and-shared-computation" aria-label="Link to this section">#</a></h2>
-<p>Status: authored PyTorch course content. The manifest inventories complete teaching files; runtime readiness remains a separate, measured property.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Intermediate; approximately 120 minutes. Direct prerequisites: <code>torch-018</code>. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
-<p>Convolution applies a shared local kernel across spatial positions. The central investigation is concrete: Apply kernel1, 0; 0, -1 to image1..9 in3x3NCHW layout. The finish condition is output shape1, 1, 2, 2; all values-4. 8trainable scalars. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
+<p>Convolution applies a shared local kernel across spatial positions. The central investigation is concrete: Apply kernel 1, 0; 0, -1 to image 1..9 in 3 x3NCHW layout. The finish condition is output shape 1, 1, 2, 2; all values-4. 8trainable scalars. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
 <h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
-<p>Convolution applies a shared local kernel across spatial positions. PyTorch C on v2d expects NCHW layout:batch, channels, height, width. Its weight shape is output_channels, input_channels, kernel_height, kernel_width, which differs from the common TensorFlow NHWC image and HWIO kernel conventions. A legal reshape is not always a correct layout conversion; use permute to exchange the meaning of axes.</p>
-<p>The operation is cross-correlation:the kernel slide s without spatial rotation. VALID-style padding0 includes only fully contained patches. Stride controls the gap between patch starts. The3x3ramp image and asymmetric2x2kernel produce an exact output of-4at all four positions, making orientation and layout mistakes visible before introducing learned filters.</p>
+<p>Convolution applies a shared local kernel across spatial positions. PyTorch Conv2d expects NCHW layout: batch, channels, height, width. Its weight shape is output_channels, input_channels, kernel_height, kernel_width, which differs from the common TensorFlow NHWC image and HWIO kernel conventions. A legal reshape is not always a correct layout conversion; use permute to exchange the meaning of axes.</p>
+<p>The operation is cross-correlation: the kernel slides without spatial rotation. VALID-style padding 0 includes only fully contained patches. Stride controls the gap between patch starts. The 3 x3ramp image and asymmetric 2 x2kernel produce an exact output of-4at all four positions, making orientation and layout mistakes visible before introducing learned filters.</p>
 <h3 id="design-decisions-and-when-to-use-this-method">Design decisions and when to use this method<a class="heading-anchor" href="#design-decisions-and-when-to-use-this-method" aria-label="Link to this section">#</a></h3>
+<p>Choose convolution when local structure and reuse of the same learned rule across positions are useful assumptions for the task. Decide the channel convention, boundary padding, stride and receptive-field growth before choosing a filter count. Weight sharing reduces parameters; it does not prove that a particular learned filter is useful or that the whole network is translation-invariant.</p>
+<p>For a framework comparison, match the mathematical kernel and input axes before comparing values. Keep the literal ramp fixture as an arithmetic oracle, then use a nonuniform changed pixel to test locality. The CPU example establishes those small computations. It does not measure accelerator throughput or train an image classifier.</p>
 <h3 id="paired-tensorflow-comparison">Paired TensorFlow comparison<a class="heading-anchor" href="#paired-tensorflow-comparison" aria-label="Link to this section">#</a></h3>
 <p>Compare <a href="../../deep-learning-tensorflow/guides/tf-019.md.html">tf-019</a> after deriving the shared numerical contract.</p>
 <p>TensorFlow&#x27;s common C on v2D layout is NHWC with kernels HWIO; PyTorch uses NCHW and OIHW. Translate images with axis permutation and kernels with the corresponding permutation. Both use cross-correlation semantics despite the convolution name.</p>
@@ -132,12 +133,47 @@
 <p><strong>NCHW:</strong> Batch, channel, height, width axis order for PyTorch images.</p>
 <p><strong>Shared kernel:</strong> One weight pattern reused at many spatial locations.</p>
 <p><strong>Receptive field:</strong> Input positions capable of influencing an output.</p>
-<p><strong>Cross-correlation:</strong> Sliding a kernel without r o t at in git.</p>
+<p><strong>Cross-correlation:</strong> Sliding a kernel without rotating it.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Use a prepared <code>llm-torch-cpu</code> environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored <code>.learning/expansion/torch-019/</code> before editing, or use the application&#x27;s saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: <code>&amp; $CoursePython courses/deep-learning-pytorch/lessons/torch-019.py</code>. For macOS/Linux use <code>.venv/bin/python courses/deep-learning-pytorch/lessons/torch-019.py</code> from the repository root.</p>
-<p>Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.</p>
+<p>Use a prepared <code>llm-torch-cpu</code> environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored <code>.learning/expansion/torch-019/</code> before editing, or use the application&#x27;s saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: <code>&amp; $CoursePython courses/deep-learning-pytorch/lessons/torch-019.py</code>. For macOS/Linux, use the interpreter explicitly selected for a separately prepared native PyTorch environment, and invoke that interpreter on <code>courses/deep-learning-pytorch/lessons/torch-019.py</code> from the repository root. The repository&#x27;s general <code>.venv</code> is not assumed to contain PyTorch; the prepared classroom profile is the default execution route.</p>
+<p>Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the explicit tolerance in each assertion. Several analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone is not a universal numerical-error bound. Finite differences, reductions and conditioning can require different justified tolerances. Integer counts, identities and boolean decisions should be exact.</p>
 <h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
-<p>Build image with shape(1, 1, 3, 3) and kernel(1, 1, 2, 2), then use F.conv2d with stride1, padding0. nn.Conv2d register s weight and optional bias. Count parameters as out_channels<em>in_channels</em>kernel_area plus bias entries. torch.flip(kernel, (-2, -1)) rotates both spatial axes for the convolution-versus-correlation counterexample.</p>
+<p>Build image with shape(1, 1, 3, 3) and kernel(1, 1, 2, 2), then use F.conv 2 d with stride 1, padding 0. nn.Conv2d registers weight and optional bias. Count parameters as out_channels<em>in_channels</em>kernel_area plus bias entries. torch.flip(kernel, (-2, -1)) rotates both spatial axes for the convolution-versus-correlation counterexample.</p>
+<h3 id="derive-the-spatial-map-and-its-backward-accumulation">Derive the spatial map and its backward accumulation<a class="heading-anchor" href="#derive-the-spatial-map-and-its-backward-accumulation" aria-label="Link to this section">#</a></h3>
+<p>Write a PyTorch image as X with shape(N, C_in, H, W) and a grouped Conv2d kernel as K with shape(C_out, C_in/g, k_H, k_W), where g is groups. For the ordinary g=1 case, each output channel sums over every input channel and one spatial patch. With stride s, symmetric numeric padding p and dilation d on one axis, the effective kernel width is k_eff=d(k-1)+1 and the output width is floor((W+2p-k_eff)/s)+1. Apply the same calculation independently to height. This is a count of valid kernel-start positions, not a statement that the image has been resized. <a href="https://docs.pytorch.org/docs/2.9/generated/torch.nn.Conv2d.html">PyTorch 2.9 Conv2d</a>.</p>
+<p>For W=H=3, k=2, d=1, p=0, s=1, there are two starts on each axis. The tensor shape is therefore(1, 1, 2, 2). At the top-left start, the dot product is 1×1+2×0+4×0+5×(-1)=-4. At the top-right start it is 2-6=-4. Equal outputs follow from this ramp and this kernel, not from a rule that every convolution outputs a constant. Stride 2 keeps only the start at zero and produces(1, 1, 1, 1).</p>
+<p>Parameter count and evaluated output count are different. With two output channels, one input channel, a2×2 kernel and no bias, there are 2×1×2×2=8 learned scalars regardless of spatial image size. Enabling bias adds one scalar per output channel, not one per output pixel. The same coefficient participates in multiple local dot products, so its gradient must accumulate contributions from all positions where it was used.</p>
+<p>A separate analytic backward trace makes that sharing explicit. Suppose L is the sum of the four output values, so every upstream output derivative is one. Each kernel derivative is the sum of the corresponding input positions across the four patches:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Kernel entry</th>
+<th>Input values contributing</th>
+<th>dL/dK</th>
+</tr></thead><tbody>
+<tr>
+<td>top-left</td>
+<td>1, 2, 4, 5</td>
+<td>12</td>
+</tr>
+<tr>
+<td>top-right</td>
+<td>2, 3, 5, 6</td>
+<td>16</td>
+</tr>
+<tr>
+<td>bottom-left</td>
+<td>4, 5, 7, 8</td>
+<td>24</td>
+</tr>
+<tr>
+<td>bottom-right</td>
+<td>5, 6, 8, 9</td>
+<td>28</td>
+</tr>
+</tbody></table></div>
+<p>The input gradient, using the original kernel, is[[1, 1, 0], [1, 0, -1], [0, -1, -1]]. The center pixel participates in four patches, but its +1 and -1 contributions cancel while the other two coefficients are zero. A zero derivative at that pixel is therefore not a disconnected graph. Adding a trainable bias would give bias gradient four for this summed loss. These derivatives are an analytic extension of the fixture; the unchanged worked blocks test forward values and do not enable input/kernel autograd themselves.</p>
+<p>Receptive fields grow through compositions. Start with jump j=1 and field size r=1. A layer updates r to r+(k_eff-1)j and j to js. Two stride-one 2×2 layers have a 3×3 receptive field, not 4×4. If the first 2×2 layer has stride 2, the second stride-one 2×2 layer sees a 4×4 input field because its adjacent inputs are already two original pixels apart. Padding affects which positions refer to actual data at the boundary.</p>
+<p>Layout conversion must preserve these meanings. NCHW to NHWC uses permutation(0, 2, 3, 1); the inverse is(0, 3, 1, 2). A TensorFlow HWIO kernel becomes PyTorch OIHW with permutation(3, 2, 0, 1) for this ordinary convolution. A reshape with the same element count can produce legal dimensions while pairing the wrong channels or pixels. PyTorch channels_last memory format is yet another concept: it can change strides while the public tensor shape still uses NCHW semantics.</p>
+<p>Both frameworks perform cross-correlation here. Rotating the asymmetric kernel changes the output to+4. A symmetric kernel could hide an accidental rotation; the asymmetric fixture exposes it. Weight sharing gives an equivariance relationship under suitable shifts and boundary assumptions, not unconditional invariance. Stride, padding and later reductions can break a simple shift correspondence. Likewise, the zero-sum kernel ignores a constant image offset on these VALID patches, but zero padding at edges or a different learned kernel changes that statement.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-compute-the-fixed-spatial-filter">Example A: Compute the fixed spatial filter<a class="heading-anchor" href="#example-a-compute-the-fixed-spatial-filter" aria-label="Link to this section">#</a></h4>
 <p>Each patch subtracts its bottom-right value from its top-left value. The difference is four throughout this ramp fixture.</p>
@@ -149,9 +185,9 @@ from torch.nn import functional as F
 image=torch.arange(1,10,dtype=torch.float64).reshape(1,1,3,3); kernel=torch.tensor([[[[1.,0.],[0.,-1.]]]],dtype=torch.float64)
 out=F.conv2d(image,kernel)
 assert tuple(out.shape)==(1,1,2,2); torch.testing.assert_close(out,torch.full_like(out,-4),atol=0,rtol=0)</code></pre>
-<p><strong>Expected:</strong> output shape1, 1, 2, 2; all values-4.</p>
+<p><strong>Expected:</strong> output shape 1, 1, 2, 2; all values-4.</p>
 <h4 id="example-b-rotate-the-kernel-explicitly">Example B: Rotate the kernel explicitly<a class="heading-anchor" href="#example-b-rotate-the-kernel-explicitly" aria-label="Link to this section">#</a></h4>
-<p>An asymmetric kernel makes the convention observable. Asymmetric kernel could hide an unintended rotation.</p>
+<p>An asymmetric kernel makes the convention observable. A symmetric kernel could hide an unintended rotation.</p>
 <pre><code class="language-python">rotated=torch.flip(kernel,(-2,-1)); changed=F.conv2d(image,rotated)
 torch.testing.assert_close(changed,torch.full_like(changed,4),atol=0,rtol=0)</code></pre>
 <p><strong>Expected:</strong> all outputs+4.</p>
@@ -159,30 +195,31 @@ torch.testing.assert_close(changed,torch.full_like(changed,4),atol=0,rtol=0)</co
 <p>Permutation changes axis meaning without inventing new values. Reshaping the element count alone would not implement a general layout translation.</p>
 <pre><code class="language-python">nhwc=image.permute(0,2,3,1); assert tuple(nhwc.shape)==(1,3,3,1)
 assert torch.equal(nhwc.permute(0,3,1,2),image)</code></pre>
-<p><strong>Expected:</strong> exact round trip; NHWC shape1, 3, 3, 1.</p>
+<p><strong>Expected:</strong> exact round trip; NHWC shape 1, 3, 3, 1.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
-<p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: output shape1, 1, 2, 2; all values-4. 8trainable scalars. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
+<p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: output shape 1, 1, 2, 2; all values-4. 8trainable scalars. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
-<li><strong>Compute the fixed spatial filter.</strong> Apply kernel1, 0; 0, -1 to image1..9 in3x3NCHW layout. <strong>Expected:</strong> output shape1, 1, 2, 2; all values-4. <strong>Verify:</strong> Save the assertion results for exercise 1, including output shape1, 1, 2, 2; all values-4.</li>
+<li><strong>Compute the fixed spatial filter.</strong> Apply kernel 1, 0; 0, -1 to image 1..9 in 3 x3NCHW layout. <strong>Expected:</strong> output shape 1, 1, 2, 2; all values-4. <strong>Verify:</strong> Save the assertion results for exercise 1, including output shape 1, 1, 2, 2; all values-4.</li>
 </ol>
 <ol>
 <li><strong>Rotate the kernel explicitly.</strong> Flip both kernel spatial axes and repeat. <strong>Expected:</strong> all outputs+4. <strong>Verify:</strong> Save the assertion results for exercise 2, including all outputs+4.</li>
 </ol>
 <ol>
-<li><strong>Translate image layout.</strong> Convert NCHW to NHWC with permute and back. <strong>Expected:</strong> exact round trip; NHWC shape1, 3, 3, 1. <strong>Verify:</strong> Save the assertion results for exercise 3, including exact round trip; NHWC shape1, 3, 3, 1.</li>
+<li><strong>Translate image layout.</strong> Convert NCHW to NHWC with permute and back. <strong>Expected:</strong> exact round trip; NHWC shape 1, 3, 3, 1. <strong>Verify:</strong> Save the assertion results for exercise 3, including exact round trip; NHWC shape 1, 3, 3, 1.</li>
 </ol>
 <ol>
-<li><strong>Inspect stride output size.</strong> Repeat with stride2 and padding0. <strong>Expected:</strong> output shape1, 1, 1, 1. <strong>Verify:</strong> Save the assertion results for exercise 4, including output shape1, 1, 1, 1.</li>
+<li><strong>Inspect stride output size.</strong> Repeat with stride 2 and padding 0. <strong>Expected:</strong> output shape 1, 1, 1, 1. <strong>Verify:</strong> Save the assertion results for exercise 4, including output shape 1, 1, 1, 1.</li>
 </ol>
 <ol>
-<li><strong>Trace one pixel influence.</strong> Add10to the top-left pixel and compare output delta. <strong>Expected:</strong> only top-left output increases10. <strong>Verify:</strong> Save the assertion results for exercise 5, including only top-left output increases10.</li>
+<li><strong>Trace one pixel influence.</strong> Add 10 to the top-left pixel and compare output delta. <strong>Expected:</strong> only top-left output increases 10. <strong>Verify:</strong> Save the assertion results for exercise 5, including only top-left output increases 10.</li>
 </ol>
 <ol>
-<li><strong>Count shared parameters.</strong> Build a1-input-channel, 2-output-channel, 2x2bias-free C on v2d. <strong>Expected:</strong> 8trainable scalars. <strong>Verify:</strong> Save the assertion results for exercise 6, including 8trainable scalars.</li>
+<li><strong>Count shared parameters.</strong> Build a1-input-channel, 2-output-channel, 2x2bias-free Conv2d. <strong>Expected:</strong> 8trainable scalars. <strong>Verify:</strong> Save the assertion results for exercise 6, including 8trainable scalars.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>When a result disagrees, locate the first intermediate value that violates this explanation. Inspect shapes and identities before aggregates, and inspect counts before averages. Preserve the original fixture and introduce only one controlled change at a time. If an arithmetic identity passes but a data-boundary condition fails, the experiment is still invalid. If a runtime is unavailable, record the unexecuted code as unverified rather than replacing its output with the expected text. The separate explanation discusses why the tempting alternative in each case changes the result.</p>
+<p>If output dimensions differ, write the effective kernel and start-position count for each axis before changing tensor layout. If the shape agrees but values differ, calculate one patch with channel indices visible and check whether the kernel was rotated. If a TensorFlow comparison fails, verify both image and kernel permutations and the dtype before adjusting tolerances.</p>
+<p>If a gradient differs by the number of positions, inspect whether shared contributions were summed or averaged by the loss. If only a center-pixel gradient is zero, check cancellation before diagnosing disconnection. A single changed corner pixel should influence only the outputs whose receptive fields include it. Keep stride, boundary and layout mistakes distinct: all can produce an accepted tensor operation with the wrong semantic result.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise&#x27;s expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.</p>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>

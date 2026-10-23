@@ -62,14 +62,12 @@ The exercises connect these mechanisms to categorical aggregation, row selection
 ### Example 1
 
 ```python
-import numpy as np
-
-values=np.array([10,20,30,40])
-selected=values[np.array([3,1,1])]
-selected[0]=-1
-assert values.tolist()==[10,20,30,40]
-assert selected.tolist()==[-1,20,20]
-print("Gathered copy:",selected.tolist())
+values = np.array([10, 20, 30, 40])
+selected = values[np.array([3, 1, 1])]
+selected[0] = -1
+assert values.tolist() == [10, 20, 30, 40]
+assert selected.tolist() == [-1, 20, 20]
+print("Gathered copy:", selected.tolist())
 ```
 
 Integer indexing repeats index one and reorders the values without changing their source. Mutating the selected copy affects only that result. Repetition is meaningful here because the output represents requested positions, not a set of unique source rows.
@@ -77,15 +75,15 @@ Integer indexing repeats index one and reorders the values without changing thei
 ### Example 2
 
 ```python
-import numpy as np
-
-indices=np.array([0,0,2])
-updates=np.array([1.,2.,5.])
-buffered=np.zeros(3);buffered[indices]+=updates
-accumulated=np.zeros(3);np.add.at(accumulated,indices,updates)
-assert accumulated.tolist()==[3.,0.,5.]
-assert buffered[0]!=accumulated[0]
-print("Accumulated repeated indices:",accumulated.tolist())
+indices = np.array([0, 0, 2])
+updates = np.array([1.0, 2.0, 5.0])
+buffered = np.zeros(3)
+buffered[indices] += updates
+accumulated = np.zeros(3)
+np.add.at(accumulated, indices, updates)
+assert accumulated.tolist() == [3.0, 0.0, 5.0]
+assert buffered[0] != accumulated[0]
+print("Accumulated repeated indices:", accumulated.tolist())
 ```
 
 Two contributions belong to category zero, so the correct sum is three. add.at preserves both additions. The buffered advanced-index update is deliberately shown as a counterexample; do not use its observed last value as a portable specification for a duplicate-assignment policy.

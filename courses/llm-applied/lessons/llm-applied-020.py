@@ -21,8 +21,9 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Expected: positive score exceeds negative and pairwise loss decreases.
 
 # Exercise 5: Detect a false-negative identity
-# Assign the same document ID to bothpositive andnegative roles and refuse the pair.
-# Expected: identity collision detected beforetraining.
+# Assign the same document ID to positive and negative roles and identify the collision as
+# a prospective admission failure.
+# Expected: identity collision detected; this check is separate from the earlier training loops.
 
 # Exercise 6: Bound the model claim
 # Record that fixed vectors were used and natural-language encoder quality was not

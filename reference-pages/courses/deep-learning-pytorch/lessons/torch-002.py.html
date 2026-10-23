@@ -122,16 +122,16 @@
 <span>&quot;&quot;&quot;</span>
 <span> </span>
 <span># Exercise 1: Inspect shape and stride</span>
-<span># Create a2x3 float64CPU tensor from values0..5.</span>
+<span># Create a2x3 float64 CPU tensor from values 0..5.</span>
 <span># Expected: shape(2, 3), stride(3, 1), CPU, float64.</span>
 <span> </span>
 <span># Exercise 2: Expose shared storage</span>
 <span># Slice the first row, change its first value, and inspect the original tensor.</span>
-<span># Expected: original x[0, 0] becomes99.</span>
+<span># Expected: original x[0, 0] becomes 99.</span>
 <span> </span>
 <span># Exercise 3: Create an independent copy</span>
 <span># Clone the tensor, change the clone and compare the original.</span>
-<span># Expected: clone starts-1; original remains99.</span>
+<span># Expected: clone starts-1; original remains 99.</span>
 <span> </span>
 <span># Exercise 4: Trace a transposed layout</span>
 <span># Transpose x and inspect shape, strides and contiguity.</span>

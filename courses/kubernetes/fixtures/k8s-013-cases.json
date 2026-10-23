@@ -1,0 +1,38 @@
+{
+  "lesson_id": "k8s-013",
+  "provenance": "synthetic teaching cases, not runtime observations",
+  "capability": "stateful owned rollout/recovery; separately qualified image-version rehearsal",
+  "browser_source": false,
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Compare revision A with the supplied B annotation/message example.",
+      "expected": "Pod-template content changes while Deployment name/UID can remain fixed in a stateful lab."
+    },
+    {
+      "exercise": 2,
+      "task": "Analyze the generation5 snapshot with old Ready and new unready Pods.",
+      "expected": "Candidate B incomplete despite aggregate ready traffic."
+    },
+    {
+      "exercise": 3,
+      "task": "Set a bounded wait and explicit candidate acceptance conditions.",
+      "expected": "Generation observed,desired updated/ready candidate counts and expected application marker are required."
+    },
+    {
+      "exercise": 4,
+      "task": "Restore the last verified manifest or repair the candidate,then reobserve.",
+      "expected": "A new generation converges to the selected intent;source and observed marker agree."
+    },
+    {
+      "exercise": 5,
+      "task": "Specify the additional evidence needed to roll between two binaries.",
+      "expected": "Two qualified preloaded image digests,compatible manifests and an application-version response check."
+    },
+    {
+      "exercise": 6,
+      "task": "Write what a client timeline can add to the final rollout snapshot.",
+      "expected": "Observed version/error samples over the transition,with no universal uptime or exact-ratio claim."
+    }
+  ]
+}

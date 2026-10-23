@@ -123,6 +123,7 @@
 <span>from torch.nn import functional as F</span>
 <span> </span>
 <span>def central(function,value,h):</span>
+<span>    if not np.isfinite(value): raise ValueError(&#x27;finite probe point required&#x27;)</span>
 <span>    if not np.isfinite(h) or h&lt;=0: raise ValueError(&#x27;positive finite step required&#x27;)</span>
 <span>    left,right=function(value-h),function(value+h)</span>
 <span>    if not np.isfinite([left,right]).all(): raise ValueError(&#x27;finite probe values required&#x27;)</span>
@@ -158,6 +159,9 @@
 <span>        try: central(function,0.,h)</span>
 <span>        except ValueError: pass</span>
 <span>        else: raise AssertionError(&#x27;invalid derivative probe accepted&#x27;)</span>
+<span>    try: central(lambda value:0.0,float(&#x27;nan&#x27;),.1)</span>
+<span>    except ValueError: pass</span>
+<span>    else: raise AssertionError(&#x27;nonfinite probe point accepted&#x27;)</span>
 <span>    return {&quot;checks&quot;: 6, &quot;status&quot;: &quot;passed&quot;}</span>
 <span> </span>
 <span> </span>

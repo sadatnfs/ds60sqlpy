@@ -1,0 +1,94 @@
+{
+  "lesson_id": "spark-037",
+  "scope": "Tiny paired local contracts;root-owned runtime qualification is separate.",
+  "cases": [
+    {
+      "exercise": 1,
+      "title": "Establish a finite restart baseline",
+      "input_contract": "Run the restart scenario with two supplied records and retain progress plus exact sink values.",
+      "expected": "2 input rows and bag 1:100,2:200.",
+      "verification": "Assert the literal bag, input count 2 and inactive query."
+    },
+    {
+      "exercise": 2,
+      "title": "Prove no-input recovery without a sleep",
+      "input_contract": "Restart the compatible baseline with its existing checkpoint and no new file.",
+      "expected": "Same query ID, new run ID, zero new rows and unchanged sink.",
+      "verification": "Compare identities, input sum and exact bag;allow empty progress entries."
+    },
+    {
+      "exercise": 3,
+      "title": "Test real streaming duplicate suppression",
+      "input_contract": "Use native streaming dropDuplicates on the id key for two identical occurrences of 1:100.",
+      "expected": "2 source rows,1 committed row 1:100.",
+      "verification": "Compare input count 2 and the one-row bag."
+    },
+    {
+      "exercise": 4,
+      "title": "Test the exact event-time boundary",
+      "input_contract": "Apply the explicitly declared admission cutoff event_second>=90 to rows at 80,90 and 110.",
+      "expected": "3 source rows;accepted IDs 2,3 with cents 200,300.",
+      "verification": "Compare exact two-row bag and explain why 90 is retained."
+    },
+    {
+      "exercise": 5,
+      "title": "Keep invalid rows visible in the case ledger",
+      "input_contract": "Reject a NULL identity and a negative amount while retaining valid 3:300.",
+      "expected": "3 input occurrences,2 invalid,1 accepted.",
+      "verification": "Compare raw source count 3, actual progress, sink bag 3:300 and static predicate count 2."
+    },
+    {
+      "exercise": 6,
+      "title": "Prove the oracle rejects a plausible regression",
+      "input_contract": "Compare the correct duplicate-case bag with an unsafe two-copy append result and reject the mismatch. Confirm every owned query is inactive before cleanup.",
+      "expected": "Correct bag passes;duplicated bag raises an assertion-contract error;all owned queries are inactive.",
+      "verification": "Catch the specific mismatch and compare the exact offending rows."
+    }
+  ],
+  "golden": {
+    "source_cases": {
+      "restart": [
+        "{\"id\":1,\"event_second\":100,\"cents\":100}",
+        "{\"id\":2,\"event_second\":110,\"cents\":200}"
+      ],
+      "duplicates": [
+        "{\"id\":1,\"event_second\":100,\"cents\":100}",
+        "{\"id\":1,\"event_second\":100,\"cents\":100}"
+      ],
+      "late": [
+        "{\"id\":1,\"event_second\":80,\"cents\":100}",
+        "{\"id\":2,\"event_second\":90,\"cents\":200}",
+        "{\"id\":3,\"event_second\":110,\"cents\":300}"
+      ],
+      "invalid": [
+        "{\"id\":null,\"event_second\":100,\"cents\":100}",
+        "{\"id\":2,\"event_second\":100,\"cents\":-1}",
+        "{\"id\":3,\"event_second\":100,\"cents\":300}"
+      ]
+    },
+    "expected": {
+      "restart": [
+        "1:100",
+        "2:200"
+      ],
+      "duplicates": [
+        "1:100"
+      ],
+      "late": [
+        "2:200",
+        "3:300"
+      ],
+      "invalid": [
+        "3:300"
+      ]
+    },
+    "cutoff_policy": "event_second >= 90;explicit admission rule,not engine watermark",
+    "invalid_count": 2,
+    "mutation": [
+      "1:100",
+      "1:100"
+    ],
+    "query_deadline_seconds": 45,
+    "progress_scope": "Actual JSON scan progress may reflect predicate pushdown;raw source counts are measured independently"
+  }
+}

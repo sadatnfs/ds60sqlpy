@@ -1,67 +1,84 @@
 # Deep learning with TensorFlow and Keras
 
-Trace arrays, loss and derivatives before relying on a training API.
+This 36-lesson journey connects arrays, derivatives and exact scalar updates to
+Keras models, convolution, sequence masks, attention, custom loops, checkpoint
+recovery, inference export and evidence-based model release. Start with
+[tf-001](guides/tf-001.md) and work through the prerequisite sequence. Each guide
+explains the mechanism, gives concrete examples and six practice contracts,
+and helps diagnose plausible wrong answers.
 
-This is durable **authored beta content** inside the larger
-[reviewed track design](../../docs/expansion/tracks/deep-learning-tensorflow.md).
-The machine-readable [authored inventory](lessons.json) names the files that
-actually exist. It is separate from active catalog publication and execution
-readiness; a lesson ID or a source file does not install its dependencies.
+Use the browser's **Journeys** page with the `python-core` worker for NumPy
+foundations and `tensorflow-cpu` for framework lessons. The
+[Docker classroom guide](../../docs/docker-classroom.md) explains how to build
+and start each profile. The host needs no Python or TensorFlow installation.
+The first preparation uses the network; the ordinary examples then run on tiny
+local CPU fixtures without downloading datasets or models.
 
-## Start with the mechanism
+Save predictions, code and explanations in the classroom. Some worked blocks
+are standalone; the first eight lessons explicitly identify their sequential
+A/B scratch-file contract. Follow the instruction beside the examples and run
+a fresh process. Solutions are available for comparison after your attempt or
+an explicit reveal. No checkbox or successful reference execution certifies
+expertise.
 
-Start with [the orientation guide](guides/tf-001.md), save a prediction and
-work in your own copy. Continue through the authored foundation chain toward
-[the full pilot](guides/tf-008.md),
-and continue through [the final capstone](guides/tf-036.md).
-Ask for one hint before opening a reference. Each companion guide contains
-the definitions, two examples, six exercise contracts and retrieval questions.
-The executable reference checks provide comparison after an attempt; they are
-not a replacement for your explanation or a hidden certification test.
+The [PyTorch journey](../deep-learning-pytorch/README.md) covers the companion
+framework in comparable depth. Pay particular attention to layout, reduction,
+normalization-state and checkpoint differences rather than translating API
+names mechanically. The [Transformer companion](../../docs/learning/inside-a-transformer.md)
+connects the attention lessons to a complete small language-model forward pass.
 
-Read-only orientation uses a Markdown worksheet and written evidence. Python
-foundations use the selected course interpreter with NumPy where declared.
-The pilot uses logical runtime `tensorflow-cpu`. Respect the application's actual
-readiness notice; ordinary source viewing and written work remain useful when
-execution is unavailable. TensorFlow and later PyTorch profiles must pass their
-own architecture, import, bounded-run and offline checks before claiming support.
+## Lesson sequence
 
-## Preserve your work and run deliberately
+| Lesson | Level | Runtime |
+| --- | --- | --- |
+| [tf-001: A bounded deep-learning investigation](guides/tf-001.md) | Beginner | `reading` |
+| [tf-002: Tensors, axes, dtypes and units](guides/tf-002.md) | Beginner | `python-core` |
+| [tf-003: Linear neurons and matrix contracts](guides/tf-003.md) | Beginner | `python-core` |
+| [tf-004: Loss, reduction and what a number measures](guides/tf-004.md) | Beginner | `python-core` |
+| [tf-005: Derivatives as local sensitivity](guides/tf-005.md) | Beginner | `python-core` |
+| [tf-006: The chain rule and activation boundaries](guides/tf-006.md) | Beginner | `python-core` |
+| [tf-007: Eager tensors, variables and a tape](guides/tf-007.md) | Beginner | `tensorflow-cpu` |
+| [tf-008: One gradient step you can audit](guides/tf-008.md) | Beginner | `tensorflow-cpu` |
+| [tf-009: Batches and repeated updates](guides/tf-009.md) | Beginner | `tensorflow-cpu` |
+| [tf-010: A split is part of the experiment](guides/tf-010.md) | Beginner | `python-core` |
+| [tf-011: Keras models and explicit training contracts](guides/tf-011.md) | Beginner | `tensorflow-cpu` |
+| [tf-012: Capstone: an auditable tiny regressor](guides/tf-012.md) | Beginner | `tensorflow-cpu` |
+| [tf-013: Binary logits, probabilities and thresholds](guides/tf-013.md) | Intermediate | `tensorflow-cpu` |
+| [tf-014: Multiclass and multilabel are different tasks](guides/tf-014.md) | Intermediate | `tensorflow-cpu` |
+| [tf-015: A reproducible tf.data pipeline](guides/tf-015.md) | Intermediate | `tensorflow-cpu` |
+| [tf-016: Nonlinearity and initialization](guides/tf-016.md) | Intermediate | `tensorflow-cpu` |
+| [tf-017: Regularization and training/evaluation behavior](guides/tf-017.md) | Intermediate | `tensorflow-cpu` |
+| [tf-018: Normalization state and batch dependence](guides/tf-018.md) | Intermediate | `tensorflow-cpu` |
+| [tf-019: Convolution as a local, shared computation](guides/tf-019.md) | Intermediate | `tensorflow-cpu` |
+| [tf-020: Pooling and augmentation without label leakage](guides/tf-020.md) | Intermediate | `tensorflow-cpu` |
+| [tf-021: Sequences, embeddings and padding](guides/tf-021.md) | Intermediate | `tensorflow-cpu` |
+| [tf-022: Attention with an explicit information boundary](guides/tf-022.md) | Intermediate | `tensorflow-cpu` |
+| [tf-023: Debugging a custom training loop](guides/tf-023.md) | Intermediate | `tensorflow-cpu` |
+| [tf-024: Capstone: a small classifier with honest evaluation](guides/tf-024.md) | Intermediate | `tensorflow-cpu` |
+| [tf-025: Embedding objectives and negative examples](guides/tf-025.md) | Advanced | `tensorflow-cpu` |
+| [tf-026: Custom layers, residuals and trainable state](guides/tf-026.md) | Advanced | `tensorflow-cpu` |
+| [tf-027: Transfer learning without a model download](guides/tf-027.md) | Advanced | `tensorflow-cpu` |
+| [tf-028: Restartable training and checkpoint evidence](guides/tf-028.md) | Advanced | `tensorflow-cpu` |
+| [tf-029: Precision, overflow and stable objectives](guides/tf-029.md) | Advanced | `tensorflow-cpu` |
+| [tf-030: Distributed gradient semantics on one CPU](guides/tf-030.md) | Advanced | `tensorflow-cpu` |
+| [tf-031: Graphs, retracing and measurement](guides/tf-031.md) | Advanced | `tensorflow-cpu` |
+| [tf-032: Saving, export and inference parity](guides/tf-032.md) | Advanced | `tensorflow-cpu` |
+| [tf-033: Inference contracts and bounded batching](guides/tf-033.md) | Advanced | `tensorflow-cpu` |
+| [tf-034: Robustness, privacy and model evidence](guides/tf-034.md) | Advanced | `python-core` |
+| [tf-035: Comparing models with uncertainty](guides/tf-035.md) | Advanced | `python-core` |
+| [tf-036: Capstone: release a small, reproducible model](guides/tf-036.md) | Advanced | `tensorflow-cpu` |
 
-Use a saved application pad when the lesson and profile are available there.
-For a native alternative, create your own copy beneath `.learning/expansion/`.
-Never edit `solutions/` to obtain a passing check and never reset another
-learner's progress. Shared fixtures use only authored local arrays/text and need
-no network after a deliberate environment setup. No service key or database is
-required. Setup is documented centrally; no lesson calls pip or downloads a model.
+## Validation and limits
 
-From the repository root, Windows PowerShell uses the selected `$CoursePython`:
+All runnable reference programs have successful local Linux arm64 Docker
+receipts for their current source bytes. The
+[implementation checkpoint](../../docs/implementation/CHECKPOINT.md) records
+runtime, test and platform acceptance separately. Reading lessons use reasoning
+and written evidence. Windows/WSL2 and amd64 configuration support does not by
+itself establish an observed run on those systems.
 
-```powershell
-& $CoursePython path\to\your\practice.py
-```
-
-macOS/Linux uses the selected interpreter path for the requested profile:
-
-```bash
-"$DS60_COURSE_PYTHON" path/to/your/practice.py
-```
-
-These variables represent paths printed by setup, not automatic installers.
-Choose the NumPy course interpreter for foundation files and the separately
-qualified TensorFlow interpreter for TensorFlow files. If the variable is unset
-or an import fails, retain the error and inspect runtime readiness first.
-
-## Evidence and review
-
-A successful program exit verifies only its actual assertions. Record shapes,
-units, denominators and smallest failures beside results. Separate training,
-selection and untouched evaluation data. A tiny classroom holdout cannot prove
-production quality, safety, fairness or privacy. Published expected numbers are
-learning aids; use new fixtures and a closed-reference explanation for transfer.
-
-The [implementation checkpoint](../../docs/implementation/ml-content-status.md)
-records authored IDs, validation and remaining work. All reviewed lesson IDs now have authored teaching artifacts. Heavy-runtime
-execution is a separate gate; consult the checkpoint for exactly which references
-have been executed. Runtime adapters and catalog registration belong to reviewed
-application code, never arbitrary commands in this metadata.
+All 36 guides received a substantive mechanism review; see the
+[TensorFlow review ledger](../../docs/implementation/tensorflow-depth-review.md).
+The small fixtures demonstrate arithmetic, API behavior and process boundaries.
+They do not establish generalization, accelerator speed or distributed-training
+performance. A failed capstone gate is a useful result to explain and repair.

@@ -18,17 +18,21 @@ from scripts.build_app import stage_course  # noqa: E402
 README = """DS60 Learning Lab: Docker classroom starter
 
 1. Right-click the ZIP and choose Extract All. Open the extracted DS60LearningLab folder.
-2. Start an installed Docker-compatible Linux-container engine. Windows uses WSL 2.
+2. Start a Docker-compatible Linux-container engine with integration enabled for Ubuntu in WSL 2.
 3. Double-click START_DOCKER_CLASSROOM.cmd. Keep its window open for build logs.
-4. The thin launcher builds locally and opens the classroom after readiness succeeds.
+4. The shared ./classroom entrypoint builds and starts all ordinary workers,
+   waits for readiness, and opens the actual URL.
 
-Docker and Compose are the classroom prerequisites. No host Python, PostgreSQL,
+Docker, Compose and the WSL 2 Ubuntu shell are the Windows launcher prerequisites.
+No host Python, PostgreSQL,
 PowerShell tutorial or Git installation is needed for the ordinary module route.
 The first build needs internet. No image is pushed to a registry.
 
-The default button prepares Python/NumPy and the original Python/SQL course.
-Read docs/docker-classroom.md to add TensorFlow, C++ and Scala/Spark with Docker
-commands, save/backup local volumes and resume. Kubernetes has separate explicit
+The default prepares all ten ordinary language/framework workers. Use ./classroom
+--starter in the WSL terminal for a smaller Python/SQL start. Read
+docs/one-command-classroom.md for setup, ports, stopping and recovery, and
+docs/docker-classroom.md for manual Compose and backups.
+Kubernetes has separate explicit
 owned-cluster preparation; it is not silently provisioned by the classroom.
 
 Progress stays in a local Docker learning volume; PostgreSQL has another volume.
@@ -45,6 +49,13 @@ def build_archive(output: Path, *, source_root: Path = ROOT) -> int:
     """Build a clean portable source archive; never copy learner-local state."""
     required = (
         "START_DOCKER_LAB.cmd",
+        "classroom",
+        "classroom.cmd",
+        "scripts/classroom.sh",
+        "START_DOCKER_CLASSROOM.cmd",
+        "START_DOCKER_CLASSROOM.command",
+        "compose.classroom.yaml",
+        "compose.classroom.kubernetes.yaml",
         "scripts/start_docker_windows.ps1",
         "scripts/docker_lab.ps1",
         "Dockerfile",
@@ -77,9 +88,14 @@ def main(argv: list[str] | None = None) -> int:
         "--output", type=Path, default=ROOT / "dist/DS60LearningLab-0.3.0-Windows-Starter.zip"
     )
     args = parser.parse_args(argv)
-    for checker in ("build_course_guide.py", "build_lesson_readers.py"):
+    checks = (
+        ("build_course_guide.py", "--check"),
+        ("build_lesson_readers.py", "--check"),
+        ("check_modules.py",),
+    )
+    for checker, *options in checks:
         result = subprocess.run(
-            [sys.executable, str(ROOT / "scripts" / checker), "--check"], cwd=ROOT, check=False
+            [sys.executable, str(ROOT / "scripts" / checker), *options], cwd=ROOT, check=False
         )
         if result.returncode:
             print("Run make generate before packaging the starter.", file=sys.stderr)

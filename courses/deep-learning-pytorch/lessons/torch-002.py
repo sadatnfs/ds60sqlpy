@@ -5,16 +5,16 @@ Copy to .learning before editing. Six independent attempts belong below.
 """
 
 # Exercise 1: Inspect shape and stride
-# Create a2 x3 float64 CPU tensor from values0..5.
+# Create a2x3 float64 CPU tensor from values 0..5.
 # Expected: shape(2, 3), stride(3, 1), CPU, float64.
 
 # Exercise 2: Expose shared storage
 # Slice the first row, change its first value, and inspect the original tensor.
-# Expected: original x[0, 0] becomes99.
+# Expected: original x[0, 0] becomes 99.
 
 # Exercise 3: Create an independent copy
 # Clone the tensor, change the clone and compare the original.
-# Expected: clone starts-1; original remains99.
+# Expected: clone starts-1; original remains 99.
 
 # Exercise 4: Trace a transposed layout
 # Transpose x and inspect shape, strides and contiguity.

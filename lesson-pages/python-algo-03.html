@@ -363,30 +363,24 @@
 <p>The final exercise uses the same heap mechanism to keep the largest k stream values. A size-k min-heap stores current candidates, with its smallest value at the root. New larger values can replace that root. This bounds candidate memory by k, unlike sorting every input. The lesson compares numeric results, actual routes and cycle failures so an algorithm&#x27;s name is never treated as evidence of correctness.</p>
 <h4 id="guide--worked-examples-and-syntax-anatomy">Worked examples and syntax anatomy<a class="heading-anchor" href="#guide--worked-examples-and-syntax-anatomy" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">import math
-import heapq
-from collections import deque
-
-graph={&quot;a&quot;:[(&quot;b&quot;,10.),(&quot;c&quot;,1.)],&quot;b&quot;:[],&quot;c&quot;:[(&quot;b&quot;,1.)]}
-assert len([&quot;a&quot;,&quot;b&quot;])-1==1
-assert len([&quot;a&quot;,&quot;c&quot;,&quot;b&quot;])-1==2
-assert 1.+1.&lt;10.
+<pre><code class="language-python">graph = {&quot;a&quot;: [(&quot;b&quot;, 10.0), (&quot;c&quot;, 1.0)], &quot;b&quot;: [], &quot;c&quot;: [(&quot;b&quot;, 1.0)]}
+assert len([&quot;a&quot;, &quot;b&quot;]) - 1 == 1
+assert len([&quot;a&quot;, &quot;c&quot;, &quot;b&quot;]) - 1 == 2
+direct_cost = graph[&quot;a&quot;][0][1]
+via_c_cost = graph[&quot;a&quot;][1][1] + graph[&quot;c&quot;][0][1]
+assert via_c_cost == 2.0 &lt; direct_cost == 10.0
 print(&quot;Fewest hops differs from lowest cost:1 edge costs10;2 edges cost2&quot;)</code></pre>
 <p>Breadth-first search would discover b directly in one hop. A cost-aware search must also consider the two-edge route through c, whose total weight is two. The fixture is a counterexample to using hop count as a proxy for weighted travel cost.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">import math
-import heapq
-from collections import deque
-
-heap=[]
-for value in [4.,1.,9.,3.,8.]:
-    if len(heap)&lt;3:
-        heapq.heappush(heap,value)
+<pre><code class="language-python">heap = []
+for value in [4.0, 1.0, 9.0, 3.0, 8.0]:
+    if len(heap) &lt; 3:
+        heapq.heappush(heap, value)
     else:
-        heapq.heappushpop(heap,value)
-assert sorted(heap,reverse=True)==[9.,8.,4.]
-assert heap[0]==4.
-print(&quot;Largest three:&quot;,sorted(heap,reverse=True))</code></pre>
+        heapq.heappushpop(heap, value)
+assert sorted(heap, reverse=True) == [9.0, 8.0, 4.0]
+assert heap[0] == 4.0
+print(&quot;Largest three:&quot;, sorted(heap, reverse=True))</code></pre>
 <p>The heap array is not a fully sorted list. Its root is only guaranteed to be the smallest retained candidate. Sorting the final small heap creates the desired presentation order while avoiding a full sort of all input values.</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <ol>
@@ -469,78 +463,131 @@ Done when all six contracts and their boundary cases have inspected evidence and
 <span>Official implementations remain in solutions/.</span>
 <span>&quot;&quot;&quot;</span>
 <span> </span>
-<span>import math</span>
 <span>import heapq</span>
-<span>from collections import deque</span>
+<span> </span>
 <span> </span>
 <span>def validate_graph(graph: dict[str, list[tuple[str, float]]]) -&gt; None:</span>
-<span>    &quot;&quot;&quot;Require string vertex labels, edges to existing vertices and finite nonnegative numeric weights. Reject Boolean weights, missing neighbor vertices, negative weights and nonfinite weights with ValueError. Empty graphs are valid structures.&quot;&quot;&quot;</span>
+<span>    &quot;&quot;&quot;</span>
+<span>    Require string vertex labels, edges to existing vertices and finite nonnegative numeric</span>
+<span>    weights. Reject Boolean weights, missing neighbor vertices, negative weights and</span>
+<span>    nonfinite weights with ValueError. Empty graphs are valid structures.</span>
+<span>    &quot;&quot;&quot;</span>
 <span>    raise NotImplementedError(&quot;Implement validate_graph&quot;)</span>
 <span> </span>
+<span> </span>
 <span>def bfs_hops(graph: dict[str, list[tuple[str, float]]], start: str) -&gt; dict[str, int]:</span>
-<span>    &quot;&quot;&quot;Return minimum hop counts from start to reachable vertices using a deque frontier. Ignore edge magnitudes for this hop-count question, but validate graph and require start to exist. Do not include unreachable vertices in the result.&quot;&quot;&quot;</span>
+<span>    &quot;&quot;&quot;</span>
+<span>    Return minimum hop counts from start to reachable vertices using a deque frontier.</span>
+<span>    Ignore edge magnitudes for this hop-count question, but validate graph and require start</span>
+<span>    to exist. Do not include unreachable vertices in the result.</span>
+<span>    &quot;&quot;&quot;</span>
 <span>    raise NotImplementedError(&quot;Implement bfs_hops&quot;)</span>
 <span> </span>
-<span>def dijkstra(graph: dict[str, list[tuple[str, float]]], start: str) -&gt; tuple[dict[str, float], dict[str, str | None]]:</span>
-<span>    &quot;&quot;&quot;Return distances and parent links for every graph vertex using a min-heap and nonnegative weights. Unreachable vertices retain infinity and None. Push improved candidates and skip stale popped entries. Reject an absent start or cumulative-cost overflow.&quot;&quot;&quot;</span>
+<span> </span>
+<span>def dijkstra(</span>
+<span>    graph: dict[str, list[tuple[str, float]]], start: str</span>
+<span>) -&gt; tuple[dict[str, float], dict[str, str | None]]:</span>
+<span>    &quot;&quot;&quot;</span>
+<span>    Return distances and parent links for every graph vertex using a min-heap and</span>
+<span>    nonnegative weights. Unreachable vertices retain infinity and None. Push improved</span>
+<span>    candidates and skip stale popped entries. Reject an absent start or cumulative-cost</span>
+<span>    overflow.</span>
+<span>    &quot;&quot;&quot;</span>
 <span>    raise NotImplementedError(&quot;Implement dijkstra&quot;)</span>
 <span> </span>
+<span> </span>
 <span>def reconstruct_path(parent: dict[str, str | None], start: str, goal: str) -&gt; list[str] | None:</span>
-<span>    &quot;&quot;&quot;Reconstruct a start-to-goal path from parent links. Return None for an unreachable goal, return [start] when start equals goal, and reject absent vertices, unknown parent labels or a cycle encountered during reconstruction.&quot;&quot;&quot;</span>
+<span>    &quot;&quot;&quot;</span>
+<span>    Reconstruct a start-to-goal path from parent links. Return None for an unreachable goal,</span>
+<span>    return [start] when start equals goal, and reject absent vertices, unknown parent labels</span>
+<span>    or a cycle encountered during reconstruction.</span>
+<span>    &quot;&quot;&quot;</span>
 <span>    raise NotImplementedError(&quot;Implement reconstruct_path&quot;)</span>
 <span> </span>
+<span> </span>
 <span>def topological_order(graph: dict[str, list[tuple[str, float]]]) -&gt; list[str]:</span>
-<span>    &quot;&quot;&quot;Return a topological order using indegrees and a heap of available string labels, choosing the lexicographically smallest available vertex. Include isolated vertices. Raise ValueError when a directed cycle prevents processing every vertex.&quot;&quot;&quot;</span>
+<span>    &quot;&quot;&quot;</span>
+<span>    Return a topological order using indegrees and a heap of available string labels,</span>
+<span>    choosing the lexicographically smallest available vertex. Include isolated vertices.</span>
+<span>    Raise ValueError when a directed cycle prevents processing every vertex.</span>
+<span>    &quot;&quot;&quot;</span>
 <span>    raise NotImplementedError(&quot;Implement topological_order&quot;)</span>
 <span> </span>
+<span> </span>
 <span>def largest_k(values, k: int) -&gt; list[float]:</span>
-<span>    &quot;&quot;&quot;Consume finite numeric values and retain the k largest values, including duplicates, using at most k heap entries. Return descending values. Require nonnegative non-Boolean integer k and reject nonfinite input; k0 still validates the input stream.&quot;&quot;&quot;</span>
+<span>    &quot;&quot;&quot;</span>
+<span>    Consume finite numeric values and retain the k largest values, including duplicates,</span>
+<span>    using at most k heap entries. Return descending values. Require nonnegative non-Boolean</span>
+<span>    integer k and reject nonfinite input; k0 still validates the input stream.</span>
+<span>    &quot;&quot;&quot;</span>
 <span>    raise NotImplementedError(&quot;Implement largest_k&quot;)</span>
 <span> </span>
-<span>def worked_examples():</span>
-<span>    graph={&quot;a&quot;:[(&quot;b&quot;,10.),(&quot;c&quot;,1.)],&quot;b&quot;:[],&quot;c&quot;:[(&quot;b&quot;,1.)]}</span>
-<span>    assert len([&quot;a&quot;,&quot;b&quot;])-1==1</span>
-<span>    assert len([&quot;a&quot;,&quot;c&quot;,&quot;b&quot;])-1==2</span>
-<span>    assert 1.+1.&lt;10.</span>
+<span> </span>
+<span>def worked_examples() -&gt; None:</span>
+<span>    graph = {&quot;a&quot;: [(&quot;b&quot;, 10.0), (&quot;c&quot;, 1.0)], &quot;b&quot;: [], &quot;c&quot;: [(&quot;b&quot;, 1.0)]}</span>
+<span>    assert len([&quot;a&quot;, &quot;b&quot;]) - 1 == 1</span>
+<span>    assert len([&quot;a&quot;, &quot;c&quot;, &quot;b&quot;]) - 1 == 2</span>
+<span>    direct_cost = graph[&quot;a&quot;][0][1]</span>
+<span>    via_c_cost = graph[&quot;a&quot;][1][1] + graph[&quot;c&quot;][0][1]</span>
+<span>    assert via_c_cost == 2.0 &lt; direct_cost == 10.0</span>
 <span>    print(&quot;Fewest hops differs from lowest cost:1 edge costs10;2 edges cost2&quot;)</span>
 <span> </span>
-<span>    heap=[]</span>
-<span>    for value in [4.,1.,9.,3.,8.]:</span>
-<span>        if len(heap)&lt;3:</span>
-<span>            heapq.heappush(heap,value)</span>
+<span>    heap = []</span>
+<span>    for value in [4.0, 1.0, 9.0, 3.0, 8.0]:</span>
+<span>        if len(heap) &lt; 3:</span>
+<span>            heapq.heappush(heap, value)</span>
 <span>        else:</span>
-<span>            heapq.heappushpop(heap,value)</span>
-<span>    assert sorted(heap,reverse=True)==[9.,8.,4.]</span>
-<span>    assert heap[0]==4.</span>
-<span>    print(&quot;Largest three:&quot;,sorted(heap,reverse=True))</span>
+<span>            heapq.heappushpop(heap, value)</span>
+<span>    assert sorted(heap, reverse=True) == [9.0, 8.0, 4.0]</span>
+<span>    assert heap[0] == 4.0</span>
+<span>    print(&quot;Largest three:&quot;, sorted(heap, reverse=True))</span>
+<span> </span>
 <span> </span>
 <span>if __name__ == &quot;__main__&quot;:</span>
 <span>    worked_examples()</span>
 <span>    print(&quot;Worked examples passed. Complete the six task functions and their boundary checks.&quot;)</span>
 <span> </span>
 <span># Exercise 1: Validate the shortest-path assumptions</span>
-<span># Prompt: Require string vertex labels, edges to existing vertices and finite nonnegative numeric weights. Reject Boolean weights, missing neighbor vertices, negative weights and nonfinite weights with ValueError. Empty graphs are valid structures.</span>
-<span># Expected: a-&gt;b with weight 2 passes when both vertices exist. Weight-1, NaN, True or an edge to absent z fails.</span>
+<span># Prompt: Require string vertex labels, edges to existing vertices and finite nonnegative numeric</span>
+<span># weights. Reject Boolean weights, missing neighbor vertices, negative weights and nonfinite</span>
+<span># weights with ValueError. Empty graphs are valid structures.</span>
+<span># Expected: a-&gt;b with weight 2 passes when both vertices exist. Weight-1, NaN, True or an edge to</span>
+<span># absent z fails.</span>
 <span> </span>
 <span># Exercise 2: Find minimum edge counts</span>
-<span># Prompt: Return minimum hop counts from start to reachable vertices using a deque frontier. Ignore edge magnitudes for this hop-count question, but validate graph and require start to exist. Do not include unreachable vertices in the result.</span>
-<span># Expected: For a-&gt;b(weight 10), a-&gt;c(weight 1), c-&gt;b(weight 1), hops are a 0, b1, c1. An isolated d is absent; an unknown start raises ValueError.</span>
+<span># Prompt: Return minimum hop counts from start to reachable vertices using a deque frontier.</span>
+<span># Ignore edge magnitudes for this hop-count question, but validate graph and require start to</span>
+<span># exist. Do not include unreachable vertices in the result.</span>
+<span># Expected: For a-&gt;b(weight 10), a-&gt;c(weight 1), c-&gt;b(weight 1), hops are a 0, b1, c1. An isolated</span>
+<span># d is absent; an unknown start raises ValueError.</span>
 <span> </span>
 <span># Exercise 3: Use cumulative cost and skip stale entries</span>
-<span># Prompt: Return distances and parent links for every graph vertex using a min-heap and nonnegative weights. Unreachable vertices retain infinity and None. Push improved candidates and skip stale popped entries. Reject an absent start or cumulative-cost overflow.</span>
-<span># Expected: In the a, b, c, d fixture, distances are a 0, c1, b2, d infinity and parent[b]=c. The earlier direct b cost 10 must not overwrite the improved cost 2.</span>
+<span># Prompt: Return distances and parent links for every graph vertex using a min-heap and</span>
+<span># nonnegative weights. Unreachable vertices retain infinity and None. Push improved candidates and</span>
+<span># skip stale popped entries. Reject an absent start or cumulative-cost overflow.</span>
+<span># Expected: In the a, b, c, d fixture, distances are a 0, c1, b2, d infinity and parent[b]=c. The</span>
+<span># earlier direct b cost 10 must not overwrite the improved cost 2.</span>
 <span> </span>
 <span># Exercise 4: Verify a route rather than only its score</span>
-<span># Prompt: Reconstruct a start-to-goal path from parent links. Return None for an unreachable goal, return [start] when start equals goal, and reject absent vertices, unknown parent labels or a cycle encountered during reconstruction.</span>
-<span># Expected: Parents from dijkstra produce[a, c, b] for a to b and None for a to d. A parent cycle x-&gt;y-&gt;x raises ValueError rather than looping.</span>
+<span># Prompt: Reconstruct a start-to-goal path from parent links. Return None for an unreachable goal,</span>
+<span># return [start] when start equals goal, and reject absent vertices, unknown parent labels or a</span>
+<span># cycle encountered during reconstruction.</span>
+<span># Expected: Parents from dijkstra produce[a, c, b] for a to b and None for a to d. A parent cycle</span>
+<span># x-&gt;y-&gt;x raises ValueError rather than looping.</span>
 <span> </span>
 <span># Exercise 5: Order dependencies and expose cycles</span>
-<span># Prompt: Return a topological order using indegrees and a heap of available string labels, choosing the lexicographically smallest available vertex. Include isolated vertices. Raise ValueError when a directed cycle prevents processing every vertex.</span>
-<span># Expected: a-&gt;c, b-&gt;c plus isolated d yields [a, b, c, d]. Every edge source precedes its target. a-&gt;b, b-&gt;a raises ValueError; empty graph returns [].</span>
+<span># Prompt: Return a topological order using indegrees and a heap of available string labels,</span>
+<span># choosing the lexicographically smallest available vertex. Include isolated vertices. Raise</span>
+<span># ValueError when a directed cycle prevents processing every vertex.</span>
+<span># Expected: a-&gt;c, b-&gt;c plus isolated d yields [a, b, c, d]. Every edge source precedes its target.</span>
+<span># a-&gt;b, b-&gt;a raises ValueError; empty graph returns [].</span>
 <span> </span>
 <span># Exercise 6: Transfer priority-queue reasoning to a stream</span>
-<span># Prompt: Consume finite numeric values and retain the k largest values, including duplicates, using at most k heap entries. Return descending values. Require nonnegative non-Boolean integer k and reject nonfinite input; k0 still validates the input stream.</span>
-<span># Expected: [4,1,9,3,8] with k3 gives [9,8,4]; [2,2,1] with k2 gives [2,2]. Empty input or k0 yields []; NaN raises ValueError.</span>
+<span># Prompt: Consume finite numeric values and retain the k largest values, including duplicates,</span>
+<span># using at most k heap entries. Return descending values. Require nonnegative non-Boolean integer</span>
+<span># k and reject nonfinite input; k0 still validates the input stream.</span>
+<span># Expected: [4,1,9,3,8] with k3 gives [9,8,4]; [2,2,1] with k2 gives [2,2]. Empty input or k0</span>
+<span># yields []; NaN raises ValueError.</span>
 <span> </span></code></pre></div>
       </section>
 
@@ -581,18 +628,25 @@ Done when all six contracts and their boundary cases have inspected evidence and
 <p>Require string vertex labels, edges to existing vertices and finite nonnegative numeric weights. Reject Boolean weights, missing neighbor vertices, negative weights and nonfinite weights with ValueError. Empty graphs are valid structures.</p>
 <p><strong>Expected:</strong> a-&gt;b with weight 2 passes when both vertices exist. Weight-1, NaN, True or an edge to absent z fails.</p>
 <pre><code class="language-python">def validate_graph(graph: dict[str, list[tuple[str, float]]]) -&gt; None:
-    if any(not isinstance(vertex,str) for vertex in graph):
+    if any(not isinstance(vertex, str) for vertex in graph):
         raise ValueError(&quot;Vertex labels must be strings&quot;)
     for edges in graph.values():
-        for neighbor,weight in edges:
-            if neighbor not in graph or isinstance(weight,bool) or not isinstance(weight,(int,float)) or not math.isfinite(weight) or weight&lt;0:
+        for neighbor, weight in edges:
+            if (
+                neighbor not in graph
+                or isinstance(weight, bool)
+                or not isinstance(weight, (int, float))
+                or not math.isfinite(weight)
+                or weight &lt; 0
+            ):
                 raise ValueError(&quot;Edges need existing vertices and finite nonnegative weights&quot;)</code></pre>
 <p>Validation establishes the assumptions used by the Dijkstra proof before any route is reported. Including every neighbor as an explicit vertex distinguishes an unreachable or terminal node from a misspelled label. A zero-weight edge is permitted and can be meaningful; a negative edge is rejected because it changes the algorithmic problem. The graph can contain cycles under these nonnegative weights, even though the later topological-order function will reject cycles for its own purpose.</p>
-<pre><code class="language-python">validate_graph({&quot;a&quot;:[(&quot;b&quot;,2.)],&quot;b&quot;:[]});validate_graph({})
-expect_value_error(lambda:validate_graph({&quot;a&quot;:[(&quot;z&quot;,1.)]}))
-expect_value_error(lambda:validate_graph({&quot;a&quot;:[(&quot;a&quot;,-1.)]}))
-expect_value_error(lambda:validate_graph({&quot;a&quot;:[(&quot;a&quot;,math.nan)]}))
-expect_value_error(lambda:validate_graph({&quot;a&quot;:[(&quot;a&quot;,True)]}))</code></pre>
+<pre><code class="language-python">validate_graph({&quot;a&quot;: [(&quot;b&quot;, 2.0)], &quot;b&quot;: []})
+validate_graph({})
+expect_value_error(lambda: validate_graph({&quot;a&quot;: [(&quot;z&quot;, 1.0)]}))
+expect_value_error(lambda: validate_graph({&quot;a&quot;: [(&quot;a&quot;, -1.0)]}))
+expect_value_error(lambda: validate_graph({&quot;a&quot;: [(&quot;a&quot;, math.nan)]}))
+expect_value_error(lambda: validate_graph({&quot;a&quot;: [(&quot;a&quot;, True)]}))</code></pre>
 <h5 id="solution-1--exercise-2-find-minimum-edge-counts">Exercise 2: Find minimum edge counts<a class="heading-anchor" href="#solution-1--exercise-2-find-minimum-edge-counts" aria-label="Link to this section">#</a></h5>
 <p>Return minimum hop counts from start to reachable vertices using a deque frontier. Ignore edge magnitudes for this hop-count question, but validate graph and require start to exist. Do not include unreachable vertices in the result.</p>
 <p><strong>Expected:</strong> For a-&gt;b(weight 10), a-&gt;c(weight 1), c-&gt;b(weight 1), hops are a 0, b1, c1. An isolated d is absent; an unknown start raises ValueError.</p>
@@ -600,117 +654,136 @@ expect_value_error(lambda:validate_graph({&quot;a&quot;:[(&quot;a&quot;,True)]})
     validate_graph(graph)
     if start not in graph:
         raise ValueError(&quot;Start vertex is absent&quot;)
-    distance={start:0};frontier=deque([start])
+    distance = {start: 0}
+    frontier = deque([start])
     while frontier:
-        vertex=frontier.popleft()
-        for neighbor,_ in graph[vertex]:
+        vertex = frontier.popleft()
+        for neighbor, _ in graph[vertex]:
             if neighbor not in distance:
-                distance[neighbor]=distance[vertex]+1
+                distance[neighbor] = distance[vertex] + 1
                 frontier.append(neighbor)
     return distance</code></pre>
 <p>A FIFO queue processes all vertices at hop distance d before vertices at distance d+1. Marking a vertex when it is enqueued prevents duplicate frontier entries and ensures its first discovered hop count is minimal. Edge weights remain irrelevant by contract, so this result should not be relabeled as minimum travel cost. The isolated-node test verifies that reachability is represented honestly.</p>
-<pre><code class="language-python">g={&quot;a&quot;:[(&quot;b&quot;,10.),(&quot;c&quot;,1.)],&quot;b&quot;:[],&quot;c&quot;:[(&quot;b&quot;,1.)],&quot;d&quot;:[]}
-assert bfs_hops(g,&quot;a&quot;)=={&quot;a&quot;:0,&quot;b&quot;:1,&quot;c&quot;:1}
-assert bfs_hops(g,&quot;d&quot;)=={&quot;d&quot;:0}
-expect_value_error(lambda:bfs_hops(g,&quot;z&quot;))</code></pre>
+<pre><code class="language-python">g = {&quot;a&quot;: [(&quot;b&quot;, 10.0), (&quot;c&quot;, 1.0)], &quot;b&quot;: [], &quot;c&quot;: [(&quot;b&quot;, 1.0)], &quot;d&quot;: []}
+assert bfs_hops(g, &quot;a&quot;) == {&quot;a&quot;: 0, &quot;b&quot;: 1, &quot;c&quot;: 1}
+assert bfs_hops(g, &quot;d&quot;) == {&quot;d&quot;: 0}
+expect_value_error(lambda: bfs_hops(g, &quot;z&quot;))</code></pre>
 <h5 id="solution-1--exercise-3-use-cumulative-cost-and-skip-stale-entries">Exercise 3: Use cumulative cost and skip stale entries<a class="heading-anchor" href="#solution-1--exercise-3-use-cumulative-cost-and-skip-stale-entries" aria-label="Link to this section">#</a></h5>
 <p>Return distances and parent links for every graph vertex using a min-heap and nonnegative weights. Unreachable vertices retain infinity and None. Push improved candidates and skip stale popped entries. Reject an absent start or cumulative-cost overflow.</p>
 <p><strong>Expected:</strong> In the a, b, c, d fixture, distances are a 0, c1, b2, d infinity and parent[b]=c. The earlier direct b cost 10 must not overwrite the improved cost 2.</p>
-<pre><code class="language-python">def dijkstra(graph: dict[str, list[tuple[str, float]]], start: str) -&gt; tuple[dict[str, float], dict[str, str | None]]:
+<pre><code class="language-python">def dijkstra(
+    graph: dict[str, list[tuple[str, float]]], start: str
+) -&gt; tuple[dict[str, float], dict[str, str | None]]:
     validate_graph(graph)
     if start not in graph:
         raise ValueError(&quot;Start vertex is absent&quot;)
-    distance={vertex:math.inf for vertex in graph};parent={vertex:None for vertex in graph}
-    distance[start]=0.;frontier=[(0.,start)]
+    distance = dict.fromkeys(graph, math.inf)
+    parent: dict[str, str | None] = dict.fromkeys(graph)
+    distance[start] = 0.0
+    frontier = [(0.0, start)]
     while frontier:
-        cost,vertex=heapq.heappop(frontier)
-        if cost!=distance[vertex]:
+        cost, vertex = heapq.heappop(frontier)
+        if cost != distance[vertex]:
             continue
-        for neighbor,weight in graph[vertex]:
-            candidate=cost+weight
+        for neighbor, weight in graph[vertex]:
+            candidate = cost + weight
             if not math.isfinite(candidate):
                 raise ValueError(&quot;Cumulative path cost exceeds finite floating range&quot;)
-            if candidate&lt;distance[neighbor]:
-                distance[neighbor]=candidate;parent[neighbor]=vertex
-                heapq.heappush(frontier,(candidate,neighbor))
-    return distance,parent</code></pre>
+            if candidate &lt; distance[neighbor]:
+                distance[neighbor] = candidate
+                parent[neighbor] = vertex
+                heapq.heappush(frontier, (candidate, neighbor))
+    return distance, parent</code></pre>
 <p>The heap initially contains a direct route to b costing ten, then receives a cheaper route costing two through c. The old entry remains but is ignored because it no longer matches the distance table. Parent links change only on strict improvement, retaining a deterministic route for this fixture. Nonnegative weights justify processing minimum known costs; removing the validation would invalidate that argument even if some negative-edge examples happened to work.</p>
-<pre><code class="language-python">distance,parent=dijkstra(g,&quot;a&quot;)
-assert distance[&quot;a&quot;]==0 and distance[&quot;c&quot;]==1 and distance[&quot;b&quot;]==2 and math.isinf(distance[&quot;d&quot;])
-assert parent[&quot;b&quot;]==&quot;c&quot; and parent[&quot;d&quot;] is None
-expect_value_error(lambda:dijkstra(g,&quot;z&quot;))
-expect_value_error(lambda:dijkstra({&quot;a&quot;:[(&quot;b&quot;,1e308)],&quot;b&quot;:[(&quot;c&quot;,1e308)],&quot;c&quot;:[]},&quot;a&quot;))</code></pre>
+<pre><code class="language-python">distance, parent = dijkstra(g, &quot;a&quot;)
+assert (
+    distance[&quot;a&quot;] == 0 and distance[&quot;c&quot;] == 1 and distance[&quot;b&quot;] == 2 and math.isinf(distance[&quot;d&quot;])
+)
+assert parent[&quot;b&quot;] == &quot;c&quot; and parent[&quot;d&quot;] is None
+expect_value_error(lambda: dijkstra(g, &quot;z&quot;))
+expect_value_error(lambda: dijkstra({&quot;a&quot;: [(&quot;b&quot;, 1e308)], &quot;b&quot;: [(&quot;c&quot;, 1e308)], &quot;c&quot;: []}, &quot;a&quot;))</code></pre>
 <h5 id="solution-1--exercise-4-verify-a-route-rather-than-only-its-score">Exercise 4: Verify a route rather than only its score<a class="heading-anchor" href="#solution-1--exercise-4-verify-a-route-rather-than-only-its-score" aria-label="Link to this section">#</a></h5>
 <p>Reconstruct a start-to-goal path from parent links. Return None for an unreachable goal, return [start] when start equals goal, and reject absent vertices, unknown parent labels or a cycle encountered during reconstruction.</p>
 <p><strong>Expected:</strong> Parents from dijkstra produce[a, c, b] for a to b and None for a to d. A parent cycle x-&gt;y-&gt;x raises ValueError rather than looping.</p>
 <pre><code class="language-python">def reconstruct_path(parent: dict[str, str | None], start: str, goal: str) -&gt; list[str] | None:
     if start not in parent or goal not in parent:
         raise ValueError(&quot;Start and goal must appear in the parent map&quot;)
-    path=[];seen=set();vertex=goal
-    while vertex!=start:
+    path = []
+    seen = set()
+    vertex = goal
+    while vertex != start:
         if vertex in seen or vertex not in parent:
             raise ValueError(&quot;Parent chain contains a cycle or unknown vertex&quot;)
-        seen.add(vertex);path.append(vertex);vertex=parent[vertex]
-        if vertex is None:
+        seen.add(vertex)
+        path.append(vertex)
+        previous = parent[vertex]
+        if previous is None:
             return None
+        vertex = previous
     path.append(start)
     return list(reversed(path))</code></pre>
 <p>A distance is a numerical claim; the path supplies concrete transitions that can be independently checked and summed. Walking backward follows the predecessor relation, and reversing restores travel order. None terminates an unreachable chain, while a visited set prevents malformed evidence from causing an infinite loop. A zero-edge start-to-itself path is valid and differs from no path, so the return values preserve that distinction.</p>
-<pre><code class="language-python">assert reconstruct_path(parent,&quot;a&quot;,&quot;b&quot;)==[&quot;a&quot;,&quot;c&quot;,&quot;b&quot;]
-assert reconstruct_path(parent,&quot;a&quot;,&quot;d&quot;) is None and reconstruct_path(parent,&quot;a&quot;,&quot;a&quot;)==[&quot;a&quot;]
-expect_value_error(lambda:reconstruct_path({&quot;a&quot;:None,&quot;x&quot;:&quot;y&quot;,&quot;y&quot;:&quot;x&quot;},&quot;a&quot;,&quot;x&quot;))
-expect_value_error(lambda:reconstruct_path({&quot;a&quot;:None,&quot;b&quot;:&quot;missing&quot;},&quot;a&quot;,&quot;b&quot;))</code></pre>
+<pre><code class="language-python">assert reconstruct_path(parent, &quot;a&quot;, &quot;b&quot;) == [&quot;a&quot;, &quot;c&quot;, &quot;b&quot;]
+assert reconstruct_path(parent, &quot;a&quot;, &quot;d&quot;) is None and reconstruct_path(parent, &quot;a&quot;, &quot;a&quot;) == [&quot;a&quot;]
+expect_value_error(lambda: reconstruct_path({&quot;a&quot;: None, &quot;x&quot;: &quot;y&quot;, &quot;y&quot;: &quot;x&quot;}, &quot;a&quot;, &quot;x&quot;))
+expect_value_error(lambda: reconstruct_path({&quot;a&quot;: None, &quot;b&quot;: &quot;missing&quot;}, &quot;a&quot;, &quot;b&quot;))</code></pre>
 <h5 id="solution-1--exercise-5-order-dependencies-and-expose-cycles">Exercise 5: Order dependencies and expose cycles<a class="heading-anchor" href="#solution-1--exercise-5-order-dependencies-and-expose-cycles" aria-label="Link to this section">#</a></h5>
 <p>Return a topological order using indegrees and a heap of available string labels, choosing the lexicographically smallest available vertex. Include isolated vertices. Raise ValueError when a directed cycle prevents processing every vertex.</p>
 <p><strong>Expected:</strong> a-&gt;c, b-&gt;c plus isolated d yields [a, b, c, d]. Every edge source precedes its target. a-&gt;b, b-&gt;a raises ValueError; empty graph returns [].</p>
 <pre><code class="language-python">def topological_order(graph: dict[str, list[tuple[str, float]]]) -&gt; list[str]:
     validate_graph(graph)
-    indegree={vertex:0 for vertex in graph}
+    indegree = dict.fromkeys(graph, 0)
     for edges in graph.values():
-        for neighbor,_ in edges:
-            indegree[neighbor]+=1
-    frontier=[vertex for vertex,degree in indegree.items() if degree==0];heapq.heapify(frontier)
-    result=[]
+        for neighbor, _ in edges:
+            indegree[neighbor] += 1
+    frontier = [vertex for vertex, degree in indegree.items() if degree == 0]
+    heapq.heapify(frontier)
+    result = []
     while frontier:
-        vertex=heapq.heappop(frontier);result.append(vertex)
-        for neighbor,_ in graph[vertex]:
-            indegree[neighbor]-=1
-            if indegree[neighbor]==0:
-                heapq.heappush(frontier,neighbor)
-    if len(result)!=len(graph):
+        vertex = heapq.heappop(frontier)
+        result.append(vertex)
+        for neighbor, _ in graph[vertex]:
+            indegree[neighbor] -= 1
+            if indegree[neighbor] == 0:
+                heapq.heappush(frontier, neighbor)
+    if len(result) != len(graph):
         raise ValueError(&quot;A directed cycle prevents a topological order&quot;)
     return result</code></pre>
 <p>Indegree counts unprocessed prerequisites. Only zero-indegree vertices are eligible, so removing one and updating its outgoing neighbors preserves dependency correctness. The heap adds a deterministic choice among eligible labels; it does not declare that this is the only valid topological order. If a cycle remains, no vertex within that cycle can become eligible, and the final count exposes the failure.</p>
-<pre><code class="language-python">dag={&quot;a&quot;:[(&quot;c&quot;,1.)],&quot;b&quot;:[(&quot;c&quot;,1.)],&quot;c&quot;:[],&quot;d&quot;:[]}
-order=topological_order(dag)
-assert order==[&quot;a&quot;,&quot;b&quot;,&quot;c&quot;,&quot;d&quot;]
-position={vertex:index for index,vertex in enumerate(order)}
-assert all(position[source]&lt;position[target] for source,edges in dag.items() for target,_ in edges)
-expect_value_error(lambda:topological_order({&quot;a&quot;:[(&quot;b&quot;,1.)],&quot;b&quot;:[(&quot;a&quot;,1.)]}))
-assert topological_order({})==[]</code></pre>
+<pre><code class="language-python">dag = {&quot;a&quot;: [(&quot;c&quot;, 1.0)], &quot;b&quot;: [(&quot;c&quot;, 1.0)], &quot;c&quot;: [], &quot;d&quot;: []}
+order = topological_order(dag)
+assert order == [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;d&quot;]
+position = {vertex: index for index, vertex in enumerate(order)}
+assert all(
+    position[source] &lt; position[target] for source, edges in dag.items() for target, _ in edges
+)
+expect_value_error(lambda: topological_order({&quot;a&quot;: [(&quot;b&quot;, 1.0)], &quot;b&quot;: [(&quot;a&quot;, 1.0)]}))
+assert topological_order({}) == []</code></pre>
 <h5 id="solution-1--exercise-6-transfer-priority-queue-reasoning-to-a-stream">Exercise 6: Transfer priority-queue reasoning to a stream<a class="heading-anchor" href="#solution-1--exercise-6-transfer-priority-queue-reasoning-to-a-stream" aria-label="Link to this section">#</a></h5>
 <p>Consume finite numeric values and retain the k largest values, including duplicates, using at most k heap entries. Return descending values. Require nonnegative non-Boolean integer k and reject nonfinite input; k0 still validates the input stream.</p>
 <p><strong>Expected:</strong> [4,1,9,3,8] with k3 gives [9,8,4]; [2,2,1] with k2 gives [2,2]. Empty input or k0 yields []; NaN raises ValueError.</p>
-<pre><code class="language-python">def largest_k(values, k: int) -&gt; list[float]:
-    if isinstance(k,bool) or not isinstance(k,int) or k&lt;0:
+<pre><code class="language-python">def largest_k(values: Iterable[float], k: int) -&gt; list[float]:
+    if isinstance(k, bool) or not isinstance(k, int) or k &lt; 0:
         raise ValueError(&quot;Expected a nonnegative integer k&quot;)
-    heap=[]
+    heap: list[float] = []
     for raw in values:
-        value=float(raw)
+        value = float(raw)
         if not math.isfinite(value):
             raise ValueError(&quot;Expected finite stream values&quot;)
-        if k==0:
+        if k == 0:
             continue
-        if len(heap)&lt;k:
-            heapq.heappush(heap,value)
+        if len(heap) &lt; k:
+            heapq.heappush(heap, value)
         else:
-            heapq.heappushpop(heap,value)
-    return sorted(heap,reverse=True)</code></pre>
+            heapq.heappushpop(heap, value)
+    return sorted(heap, reverse=True)</code></pre>
 <p>Once the heap has k entries, its smallest candidate is the only one a new value can displace. heappushpop keeps the larger candidates without growing retained state beyond k. Duplicates remain because this is a multiset ranking task, not unique-value selection. Sorting only the final heap costs work in k rather than the full stream length. Input validation remains active even when no outputs are requested, avoiding a hidden bypass for malformed data.</p>
-<pre><code class="language-python">assert largest_k(iter([4,1,9,3,8]),3)==[9.,8.,4.]
-assert largest_k([2,2,1],2)==[2.,2.] and largest_k([],3)==[] and largest_k([1,2],0)==[]
-expect_value_error(lambda:largest_k([math.nan],0))
-expect_value_error(lambda:largest_k([1],True))</code></pre>
+<pre><code class="language-python">assert largest_k(iter([4, 1, 9, 3, 8]), 3) == [9.0, 8.0, 4.0]
+assert (
+    largest_k([2, 2, 1], 2) == [2.0, 2.0] and largest_k([], 3) == [] and largest_k([1, 2], 0) == []
+)
+expect_value_error(lambda: largest_k([math.nan], 0))
+expect_value_error(lambda: largest_k([1], True))</code></pre>
 <h4 id="solution-1--verification-and-interpretation">Verification and interpretation<a class="heading-anchor" href="#solution-1--verification-and-interpretation" aria-label="Link to this section">#</a></h4>
 <p>Run <code>python python/professional/solutions/py_algo_03_solution.py</code> from the repository root with the prepared interpreter. The code checks normal inputs and explicit edge cases before printing its success line. Assertions are the evidence; the printed sentence alone is not. The helper <code>expect_value_error</code> requires an actual <code>ValueError</code> and fails if a function silently accepts an invalid input. Inspect each function&#x27;s mutation and ordering behavior as part of its contract.</p></div>
       </section>
@@ -747,141 +820,184 @@ expect_value_error(lambda:largest_k([1],True))</code></pre>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Reference implementation and exact boundary checks for python-algo-03.&quot;&quot;&quot;</span>
 <span> </span>
-<span>import math</span>
 <span>import heapq</span>
+<span>import math</span>
 <span>from collections import deque</span>
+<span>from collections.abc import Callable, Iterable</span>
+<span> </span>
 <span> </span>
 <span>def validate_graph(graph: dict[str, list[tuple[str, float]]]) -&gt; None:</span>
-<span>    if any(not isinstance(vertex,str) for vertex in graph):</span>
+<span>    if any(not isinstance(vertex, str) for vertex in graph):</span>
 <span>        raise ValueError(&quot;Vertex labels must be strings&quot;)</span>
 <span>    for edges in graph.values():</span>
-<span>        for neighbor,weight in edges:</span>
-<span>            if neighbor not in graph or isinstance(weight,bool) or not isinstance(weight,(int,float)) or not math.isfinite(weight) or weight&lt;0:</span>
+<span>        for neighbor, weight in edges:</span>
+<span>            if (</span>
+<span>                neighbor not in graph</span>
+<span>                or isinstance(weight, bool)</span>
+<span>                or not isinstance(weight, (int, float))</span>
+<span>                or not math.isfinite(weight)</span>
+<span>                or weight &lt; 0</span>
+<span>            ):</span>
 <span>                raise ValueError(&quot;Edges need existing vertices and finite nonnegative weights&quot;)</span>
+<span> </span>
 <span> </span>
 <span>def bfs_hops(graph: dict[str, list[tuple[str, float]]], start: str) -&gt; dict[str, int]:</span>
 <span>    validate_graph(graph)</span>
 <span>    if start not in graph:</span>
 <span>        raise ValueError(&quot;Start vertex is absent&quot;)</span>
-<span>    distance={start:0};frontier=deque([start])</span>
+<span>    distance = {start: 0}</span>
+<span>    frontier = deque([start])</span>
 <span>    while frontier:</span>
-<span>        vertex=frontier.popleft()</span>
-<span>        for neighbor,_ in graph[vertex]:</span>
+<span>        vertex = frontier.popleft()</span>
+<span>        for neighbor, _ in graph[vertex]:</span>
 <span>            if neighbor not in distance:</span>
-<span>                distance[neighbor]=distance[vertex]+1</span>
+<span>                distance[neighbor] = distance[vertex] + 1</span>
 <span>                frontier.append(neighbor)</span>
 <span>    return distance</span>
 <span> </span>
-<span>def dijkstra(graph: dict[str, list[tuple[str, float]]], start: str) -&gt; tuple[dict[str, float], dict[str, str | None]]:</span>
+<span> </span>
+<span>def dijkstra(</span>
+<span>    graph: dict[str, list[tuple[str, float]]], start: str</span>
+<span>) -&gt; tuple[dict[str, float], dict[str, str | None]]:</span>
 <span>    validate_graph(graph)</span>
 <span>    if start not in graph:</span>
 <span>        raise ValueError(&quot;Start vertex is absent&quot;)</span>
-<span>    distance={vertex:math.inf for vertex in graph};parent={vertex:None for vertex in graph}</span>
-<span>    distance[start]=0.;frontier=[(0.,start)]</span>
+<span>    distance = dict.fromkeys(graph, math.inf)</span>
+<span>    parent: dict[str, str | None] = dict.fromkeys(graph)</span>
+<span>    distance[start] = 0.0</span>
+<span>    frontier = [(0.0, start)]</span>
 <span>    while frontier:</span>
-<span>        cost,vertex=heapq.heappop(frontier)</span>
-<span>        if cost!=distance[vertex]:</span>
+<span>        cost, vertex = heapq.heappop(frontier)</span>
+<span>        if cost != distance[vertex]:</span>
 <span>            continue</span>
-<span>        for neighbor,weight in graph[vertex]:</span>
-<span>            candidate=cost+weight</span>
+<span>        for neighbor, weight in graph[vertex]:</span>
+<span>            candidate = cost + weight</span>
 <span>            if not math.isfinite(candidate):</span>
 <span>                raise ValueError(&quot;Cumulative path cost exceeds finite floating range&quot;)</span>
-<span>            if candidate&lt;distance[neighbor]:</span>
-<span>                distance[neighbor]=candidate;parent[neighbor]=vertex</span>
-<span>                heapq.heappush(frontier,(candidate,neighbor))</span>
-<span>    return distance,parent</span>
+<span>            if candidate &lt; distance[neighbor]:</span>
+<span>                distance[neighbor] = candidate</span>
+<span>                parent[neighbor] = vertex</span>
+<span>                heapq.heappush(frontier, (candidate, neighbor))</span>
+<span>    return distance, parent</span>
+<span> </span>
 <span> </span>
 <span>def reconstruct_path(parent: dict[str, str | None], start: str, goal: str) -&gt; list[str] | None:</span>
 <span>    if start not in parent or goal not in parent:</span>
 <span>        raise ValueError(&quot;Start and goal must appear in the parent map&quot;)</span>
-<span>    path=[];seen=set();vertex=goal</span>
-<span>    while vertex!=start:</span>
+<span>    path = []</span>
+<span>    seen = set()</span>
+<span>    vertex = goal</span>
+<span>    while vertex != start:</span>
 <span>        if vertex in seen or vertex not in parent:</span>
 <span>            raise ValueError(&quot;Parent chain contains a cycle or unknown vertex&quot;)</span>
-<span>        seen.add(vertex);path.append(vertex);vertex=parent[vertex]</span>
-<span>        if vertex is None:</span>
+<span>        seen.add(vertex)</span>
+<span>        path.append(vertex)</span>
+<span>        previous = parent[vertex]</span>
+<span>        if previous is None:</span>
 <span>            return None</span>
+<span>        vertex = previous</span>
 <span>    path.append(start)</span>
 <span>    return list(reversed(path))</span>
 <span> </span>
+<span> </span>
 <span>def topological_order(graph: dict[str, list[tuple[str, float]]]) -&gt; list[str]:</span>
 <span>    validate_graph(graph)</span>
-<span>    indegree={vertex:0 for vertex in graph}</span>
+<span>    indegree = dict.fromkeys(graph, 0)</span>
 <span>    for edges in graph.values():</span>
-<span>        for neighbor,_ in edges:</span>
-<span>            indegree[neighbor]+=1</span>
-<span>    frontier=[vertex for vertex,degree in indegree.items() if degree==0];heapq.heapify(frontier)</span>
-<span>    result=[]</span>
+<span>        for neighbor, _ in edges:</span>
+<span>            indegree[neighbor] += 1</span>
+<span>    frontier = [vertex for vertex, degree in indegree.items() if degree == 0]</span>
+<span>    heapq.heapify(frontier)</span>
+<span>    result = []</span>
 <span>    while frontier:</span>
-<span>        vertex=heapq.heappop(frontier);result.append(vertex)</span>
-<span>        for neighbor,_ in graph[vertex]:</span>
-<span>            indegree[neighbor]-=1</span>
-<span>            if indegree[neighbor]==0:</span>
-<span>                heapq.heappush(frontier,neighbor)</span>
-<span>    if len(result)!=len(graph):</span>
+<span>        vertex = heapq.heappop(frontier)</span>
+<span>        result.append(vertex)</span>
+<span>        for neighbor, _ in graph[vertex]:</span>
+<span>            indegree[neighbor] -= 1</span>
+<span>            if indegree[neighbor] == 0:</span>
+<span>                heapq.heappush(frontier, neighbor)</span>
+<span>    if len(result) != len(graph):</span>
 <span>        raise ValueError(&quot;A directed cycle prevents a topological order&quot;)</span>
 <span>    return result</span>
 <span> </span>
-<span>def largest_k(values, k: int) -&gt; list[float]:</span>
-<span>    if isinstance(k,bool) or not isinstance(k,int) or k&lt;0:</span>
+<span> </span>
+<span>def largest_k(values: Iterable[float], k: int) -&gt; list[float]:</span>
+<span>    if isinstance(k, bool) or not isinstance(k, int) or k &lt; 0:</span>
 <span>        raise ValueError(&quot;Expected a nonnegative integer k&quot;)</span>
-<span>    heap=[]</span>
+<span>    heap: list[float] = []</span>
 <span>    for raw in values:</span>
-<span>        value=float(raw)</span>
+<span>        value = float(raw)</span>
 <span>        if not math.isfinite(value):</span>
 <span>            raise ValueError(&quot;Expected finite stream values&quot;)</span>
-<span>        if k==0:</span>
+<span>        if k == 0:</span>
 <span>            continue</span>
-<span>        if len(heap)&lt;k:</span>
-<span>            heapq.heappush(heap,value)</span>
+<span>        if len(heap) &lt; k:</span>
+<span>            heapq.heappush(heap, value)</span>
 <span>        else:</span>
-<span>            heapq.heappushpop(heap,value)</span>
-<span>    return sorted(heap,reverse=True)</span>
+<span>            heapq.heappushpop(heap, value)</span>
+<span>    return sorted(heap, reverse=True)</span>
 <span> </span>
-<span>def expect_value_error(call):</span>
+<span> </span>
+<span>def expect_value_error(call: Callable[[], object]) -&gt; None:</span>
 <span>    try:</span>
 <span>        call()</span>
 <span>    except ValueError:</span>
 <span>        return</span>
 <span>    raise AssertionError(&quot;Expected ValueError&quot;)</span>
 <span> </span>
-<span>def main():</span>
+<span> </span>
+<span>def main() -&gt; None:</span>
 <span>    # Exercise 1: Validate the shortest-path assumptions</span>
-<span>    validate_graph({&quot;a&quot;:[(&quot;b&quot;,2.)],&quot;b&quot;:[]});validate_graph({})</span>
-<span>    expect_value_error(lambda:validate_graph({&quot;a&quot;:[(&quot;z&quot;,1.)]}))</span>
-<span>    expect_value_error(lambda:validate_graph({&quot;a&quot;:[(&quot;a&quot;,-1.)]}))</span>
-<span>    expect_value_error(lambda:validate_graph({&quot;a&quot;:[(&quot;a&quot;,math.nan)]}))</span>
-<span>    expect_value_error(lambda:validate_graph({&quot;a&quot;:[(&quot;a&quot;,True)]}))</span>
+<span>    validate_graph({&quot;a&quot;: [(&quot;b&quot;, 2.0)], &quot;b&quot;: []})</span>
+<span>    validate_graph({})</span>
+<span>    expect_value_error(lambda: validate_graph({&quot;a&quot;: [(&quot;z&quot;, 1.0)]}))</span>
+<span>    expect_value_error(lambda: validate_graph({&quot;a&quot;: [(&quot;a&quot;, -1.0)]}))</span>
+<span>    expect_value_error(lambda: validate_graph({&quot;a&quot;: [(&quot;a&quot;, math.nan)]}))</span>
+<span>    expect_value_error(lambda: validate_graph({&quot;a&quot;: [(&quot;a&quot;, True)]}))</span>
 <span>    # Exercise 2: Find minimum edge counts</span>
-<span>    g={&quot;a&quot;:[(&quot;b&quot;,10.),(&quot;c&quot;,1.)],&quot;b&quot;:[],&quot;c&quot;:[(&quot;b&quot;,1.)],&quot;d&quot;:[]}</span>
-<span>    assert bfs_hops(g,&quot;a&quot;)=={&quot;a&quot;:0,&quot;b&quot;:1,&quot;c&quot;:1}</span>
-<span>    assert bfs_hops(g,&quot;d&quot;)=={&quot;d&quot;:0}</span>
-<span>    expect_value_error(lambda:bfs_hops(g,&quot;z&quot;))</span>
+<span>    g = {&quot;a&quot;: [(&quot;b&quot;, 10.0), (&quot;c&quot;, 1.0)], &quot;b&quot;: [], &quot;c&quot;: [(&quot;b&quot;, 1.0)], &quot;d&quot;: []}</span>
+<span>    assert bfs_hops(g, &quot;a&quot;) == {&quot;a&quot;: 0, &quot;b&quot;: 1, &quot;c&quot;: 1}</span>
+<span>    assert bfs_hops(g, &quot;d&quot;) == {&quot;d&quot;: 0}</span>
+<span>    expect_value_error(lambda: bfs_hops(g, &quot;z&quot;))</span>
 <span>    # Exercise 3: Use cumulative cost and skip stale entries</span>
-<span>    distance,parent=dijkstra(g,&quot;a&quot;)</span>
-<span>    assert distance[&quot;a&quot;]==0 and distance[&quot;c&quot;]==1 and distance[&quot;b&quot;]==2 and math.isinf(distance[&quot;d&quot;])</span>
-<span>    assert parent[&quot;b&quot;]==&quot;c&quot; and parent[&quot;d&quot;] is None</span>
-<span>    expect_value_error(lambda:dijkstra(g,&quot;z&quot;))</span>
-<span>    expect_value_error(lambda:dijkstra({&quot;a&quot;:[(&quot;b&quot;,1e308)],&quot;b&quot;:[(&quot;c&quot;,1e308)],&quot;c&quot;:[]},&quot;a&quot;))</span>
+<span>    distance, parent = dijkstra(g, &quot;a&quot;)</span>
+<span>    assert (</span>
+<span>        distance[&quot;a&quot;] == 0</span>
+<span>        and distance[&quot;c&quot;] == 1</span>
+<span>        and distance[&quot;b&quot;] == 2</span>
+<span>        and math.isinf(distance[&quot;d&quot;])</span>
+<span>    )</span>
+<span>    assert parent[&quot;b&quot;] == &quot;c&quot; and parent[&quot;d&quot;] is None</span>
+<span>    expect_value_error(lambda: dijkstra(g, &quot;z&quot;))</span>
+<span>    expect_value_error(lambda: dijkstra({&quot;a&quot;: [(&quot;b&quot;, 1e308)], &quot;b&quot;: [(&quot;c&quot;, 1e308)], &quot;c&quot;: []}, &quot;a&quot;))</span>
 <span>    # Exercise 4: Verify a route rather than only its score</span>
-<span>    assert reconstruct_path(parent,&quot;a&quot;,&quot;b&quot;)==[&quot;a&quot;,&quot;c&quot;,&quot;b&quot;]</span>
-<span>    assert reconstruct_path(parent,&quot;a&quot;,&quot;d&quot;) is None and reconstruct_path(parent,&quot;a&quot;,&quot;a&quot;)==[&quot;a&quot;]</span>
-<span>    expect_value_error(lambda:reconstruct_path({&quot;a&quot;:None,&quot;x&quot;:&quot;y&quot;,&quot;y&quot;:&quot;x&quot;},&quot;a&quot;,&quot;x&quot;))</span>
-<span>    expect_value_error(lambda:reconstruct_path({&quot;a&quot;:None,&quot;b&quot;:&quot;missing&quot;},&quot;a&quot;,&quot;b&quot;))</span>
+<span>    assert reconstruct_path(parent, &quot;a&quot;, &quot;b&quot;) == [&quot;a&quot;, &quot;c&quot;, &quot;b&quot;]</span>
+<span>    assert reconstruct_path(parent, &quot;a&quot;, &quot;d&quot;) is None and reconstruct_path(parent, &quot;a&quot;, &quot;a&quot;) == [</span>
+<span>        &quot;a&quot;</span>
+<span>    ]</span>
+<span>    expect_value_error(lambda: reconstruct_path({&quot;a&quot;: None, &quot;x&quot;: &quot;y&quot;, &quot;y&quot;: &quot;x&quot;}, &quot;a&quot;, &quot;x&quot;))</span>
+<span>    expect_value_error(lambda: reconstruct_path({&quot;a&quot;: None, &quot;b&quot;: &quot;missing&quot;}, &quot;a&quot;, &quot;b&quot;))</span>
 <span>    # Exercise 5: Order dependencies and expose cycles</span>
-<span>    dag={&quot;a&quot;:[(&quot;c&quot;,1.)],&quot;b&quot;:[(&quot;c&quot;,1.)],&quot;c&quot;:[],&quot;d&quot;:[]}</span>
-<span>    order=topological_order(dag)</span>
-<span>    assert order==[&quot;a&quot;,&quot;b&quot;,&quot;c&quot;,&quot;d&quot;]</span>
-<span>    position={vertex:index for index,vertex in enumerate(order)}</span>
-<span>    assert all(position[source]&lt;position[target] for source,edges in dag.items() for target,_ in edges)</span>
-<span>    expect_value_error(lambda:topological_order({&quot;a&quot;:[(&quot;b&quot;,1.)],&quot;b&quot;:[(&quot;a&quot;,1.)]}))</span>
-<span>    assert topological_order({})==[]</span>
+<span>    dag = {&quot;a&quot;: [(&quot;c&quot;, 1.0)], &quot;b&quot;: [(&quot;c&quot;, 1.0)], &quot;c&quot;: [], &quot;d&quot;: []}</span>
+<span>    order = topological_order(dag)</span>
+<span>    assert order == [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;d&quot;]</span>
+<span>    position = {vertex: index for index, vertex in enumerate(order)}</span>
+<span>    assert all(</span>
+<span>        position[source] &lt; position[target] for source, edges in dag.items() for target, _ in edges</span>
+<span>    )</span>
+<span>    expect_value_error(lambda: topological_order({&quot;a&quot;: [(&quot;b&quot;, 1.0)], &quot;b&quot;: [(&quot;a&quot;, 1.0)]}))</span>
+<span>    assert topological_order({}) == []</span>
 <span>    # Exercise 6: Transfer priority-queue reasoning to a stream</span>
-<span>    assert largest_k(iter([4,1,9,3,8]),3)==[9.,8.,4.]</span>
-<span>    assert largest_k([2,2,1],2)==[2.,2.] and largest_k([],3)==[] and largest_k([1,2],0)==[]</span>
-<span>    expect_value_error(lambda:largest_k([math.nan],0))</span>
-<span>    expect_value_error(lambda:largest_k([1],True))</span>
+<span>    assert largest_k(iter([4, 1, 9, 3, 8]), 3) == [9.0, 8.0, 4.0]</span>
+<span>    assert (</span>
+<span>        largest_k([2, 2, 1], 2) == [2.0, 2.0]</span>
+<span>        and largest_k([], 3) == []</span>
+<span>        and largest_k([1, 2], 0) == []</span>
+<span>    )</span>
+<span>    expect_value_error(lambda: largest_k([math.nan], 0))</span>
+<span>    expect_value_error(lambda: largest_k([1], True))</span>
 <span>    print(&quot;python-algo-03: all six normal and boundary contracts passed&quot;)</span>
+<span> </span>
 <span> </span>
 <span>if __name__ == &quot;__main__&quot;:</span>
 <span>    main()</span>

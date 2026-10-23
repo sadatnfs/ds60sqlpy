@@ -41,3 +41,7 @@ This establishes source, structural and local executable-example correctness for
 ## Maintenance
 
 Preserve source-outline.md and stable topic IDs. Revise original chapter Markdown and example programs together, then run the focused suite and root-owned reader/catalog checks. Do not infer broad estimator validity from a tiny demonstration. Keep assumptions, uncertainty limits and claims of actual runtime acceptance explicit.
+
+## Current-source Docker receipt readback
+
+The standardized receipt work/statistics-all-acceptance.jsonl contains 40 successful Core Docker runs. A direct SHA-256 comparison on 23 October 2026 matches every receipt to the current corresponding chapter example. The combined focused suite, including all 82 book checks, also passes. This is executable-demonstration acceptance, not a claim of learner mastery or exhaustive empirical validation of every discussed method.

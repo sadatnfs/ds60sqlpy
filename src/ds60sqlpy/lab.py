@@ -52,6 +52,14 @@ class LabServer(PortalServer):
             raise ValueError(
                 "Container binding requires the explicit DS60_CONTAINER=1 image setting."
             )
+        public_port: int | None = None
+        public_text = os.environ.get("DS60_PUBLIC_PORT", "") if container else ""
+        if public_text:
+            if not public_text.isascii() or not public_text.isdecimal():
+                raise ValueError("DS60_PUBLIC_PORT must be an integer between 1 and 65535.")
+            public_port = int(public_text)
+            if not 1 <= public_port <= 65535:
+                raise ValueError("DS60_PUBLIC_PORT must be an integer between 1 and 65535.")
         super().__init__(
             catalog,
             port=port,
@@ -59,6 +67,10 @@ class LabServer(PortalServer):
             allow_launches=False,
             bind_host="0.0.0.0" if container else "127.0.0.1",
         )
+        # A mapped Docker host port changes the one exact accepted Host/Origin,
+        # never the listening interface or an allowlist of arbitrary hosts.
+        if public_port is not None:
+            self.expected_host = f"127.0.0.1:{public_port}"
         self.RequestHandlerClass = LabRequestHandler
         self.coaching = CoachingService(catalog, self.progress)
         self.pads = PadRunner(catalog, python=python)

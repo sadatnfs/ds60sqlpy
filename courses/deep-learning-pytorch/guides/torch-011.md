@@ -1,14 +1,12 @@
 # torch-011: nn.Module, registered parameters and explicit training loops
 
-Status: authored PyTorch course content. The manifest inventories complete teaching files; runtime readiness remains a separate, measured property.
-
 ## Level and prerequisites
 
 Beginner; approximately 120 minutes. Direct prerequisites: `torch-010`. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
 
 ## Learning objectives
 
-Annn. The central investigation is concrete: Build Scalar Model with weight0 and buffer offset0. The finish condition is one parameter weight; one buffer offset; both in state_dict. same weight object and one parameter. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Annn. The central investigation is concrete: Build Scalar Model with weight 0 and buffer offset 0. The finish condition is one parameter weight; one buffer offset; both in state_dict. same weight object and one parameter. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -18,7 +16,9 @@ Calling model(x) routes through Module machinery and forward; it does not calcul
 
 ## Design decisions and when to use this method
 
+Put persistent learned state and child layers in the module construction path, then use forward to compute from that state. Register fixed tensor state as a buffer when it should follow module conversions and persistence. Keep ordinary metadata as ordinary attributes only when its lifecycle does not require those tensor-state mechanisms.
 
+Finish deliberate model construction and device/dtype placement before creating an optimizer. If a later algorithm replaces or adds parameters, update optimizer membership and any retained optimizer state explicitly. A module's current parameter iterator is not a live subscription that automatically rewrites an already constructed optimizer.
 
 ## Paired TensorFlow comparison
 
@@ -28,7 +28,7 @@ Keras layers often create weights in build when input shape becomes known; PyTor
 
 ## Vocabulary and concepts
 
-**Module:** An object org an i z in g computation and tracked model state.
+**Module:** An object organizing computation and tracked model state.
 
 **Buffer:** Tracked non parameter tensor state.
 
@@ -36,13 +36,37 @@ Keras layers often create weights in build when input shape becomes known; PyTor
 
 ## How to run this lesson
 
-Use a prepared `llm-torch-cpu` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/torch-011/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: `& $CoursePython courses/deep-learning-pytorch/lessons/torch-011.py`. For macOS/Linux use `.venv/bin/python courses/deep-learning-pytorch/lessons/torch-011.py` from the repository root.
+Use a prepared `llm-torch-cpu` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/torch-011/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: `& $CoursePython courses/deep-learning-pytorch/lessons/torch-011.py`. For macOS/Linux, use the interpreter explicitly selected for a separately prepared native PyTorch environment, and invoke that interpreter on `courses/deep-learning-pytorch/lessons/torch-011.py` from the repository root. The repository's general `.venv` is not assumed to contain PyTorch; the prepared classroom profile is the default execution route.
 
-Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.
+Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the explicit tolerance in each assertion. Several analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone is not a universal numerical-error bound. Finite differences, reductions and conditioning can require different justified tolerances. Integer counts, identities and boolean decisions should be exact.
 
 ## Syntax anatomy and reasoning sequence
 
 Define parameters in__init__ after super().__init__, using nn.Parameter or registered child layers. register_buffer names a nontrainable tensor. forward uses those attributes without creating a new parameter on every call. named_parameters and named_buffers expose different state sets. state_dict includes both. An SGD optimizer captures references to the parameter objects supplied at construction.
+
+## Trace module-owned state and optimizer-owned references
+
+The scalar model owns a Parameter named weight and a buffer named offset. Both are scalar float64 tensors, but only weight is selected by model.parameters(). Its forward expression is weight*x+offset. The offset influences predictions while remaining fixed under the demonstrated SGD step because it is not in that optimizer's parameter list.
+
+| Item | Registered category | In parameters() | In default state_dict() | Changed by this SGD step |
+| --- | --- | --- | --- | --- |
+| weight | Parameter | Yes | Yes | Yes |
+| offset | Persistent buffer | No | Yes | No |
+| An arbitrary plain tensor attribute | Ordinary attribute | No | No | Only if separately managed |
+
+These are registration defaults, not a law that buffers can never participate in autograd or that every registered Parameter must be trainable. requires_grad and optimizer membership remain separate choices. A buffer registered with persistent=False still follows module conversion but is omitted from state_dict. The supplied offset uses the default persistent behavior. [PyTorch 2.9 Module state APIs](https://docs.pytorch.org/docs/2.9/generated/torch.nn.Module.html).
+
+A call to model(x) routes through Module machinery and its forward method. At weight=offset=0, the three inputs 1, 2, 3 produce three zeros. No loss, backward call or optimizer step is implied by that invocation. The explicit loop then clears gradients, computes the paired mean squared objective, backpropagates and applies SGD. The one-step weight 28/15 is the same scalar oracle as the earlier chapter, while offset remains zero.
+
+Converting the module to float32 moves both registered tensors through the module conversion mechanism. A plain auxiliary tensor could remain at its old dtype or device and later cause an operation mismatch. This example checks CPU dtype movement; it does not qualify a GPU placement path. In a larger model, also inspect optimizer state after a late conversion because momentum or other optimizer tensors have their own lifecycle.
+
+Object identity makes the stale-optimizer failure concrete. At construction, the optimizer stores a reference to the original weight object. Replacing fresh.weight with a new Parameter changes what forward reads, but the old optimizer list still refers to the former object. A new backward can populate the replacement's grad while step examines the old object's gradient instead. Rebuilding or deliberately editing parameter groups is therefore part of the model-change operation, not an optional cleanup detail.
+
+Creating Parameters inside forward causes a related failure. Repeated calls can create new objects after the optimizer captured its membership, so the current computation and the objects being updated diverge. A stable model should preserve its intended parameter identities across batch sizes unless it implements a deliberate, tested dynamic-state policy. The final exercise compares calls of length one and four for that reason.
+
+State serialization also has a boundary. state_dict supplies a mapping of registered parameter and persistent-buffer state, but it is not automatically an immutable historical snapshot of independent storage. If a diagnostic must survive later in-place model mutation, clone the relevant values or serialize them at a defined point. Later checkpoint lessons distinguish a saved model state from optimizer, RNG and data-order state needed for a training restart.
+
+For the paired Keras model, compare the represented function before comparing the training interface. A no-bias Dense kernel and the zero-offset scalar PyTorch model can represent the same map, but their storage layouts and construction APIs differ. Explicitly match dtype, denominator and update budget; a high-level training call can report a pre-update loss just as a retained PyTorch loss tensor can.
 
 ## Worked example / walkthrough
 
@@ -87,7 +111,7 @@ loss=((model(x)-y)**2).mean(); loss.backward(); optimizer.step()
 np.testing.assert_allclose(model.weight.item(),28/15,atol=1e-12,rtol=0); assert model.offset.item()==0
 ```
 
-**Expected:** weight28/15; buffer still0.
+**Expected:** weight 28/15; buffer still 0.
 
 ## Prediction before your attempt
 
@@ -95,17 +119,17 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Exercises
 
-1. **Inspect module state.** Build Scalar Model with weight0 and buffer offset0.
+1. **Inspect module state.** Build Scalar Model with weight 0 and buffer offset 0.
    **Expected:** one parameter weight; one buffer offset; both in state_dict.
    **Verify:** Save the assertion results for exercise 1, including one parameter weight; one buffer offset; both in state_dict.
 
-2. **Check a forward call.** Runx1, 2, 3 through the zero-weight module.
+2. **Check a forward call.** Runx 1, 2, 3 through the zero-weight module.
    **Expected:** three zero outputs; weight unchanged.
    **Verify:** Save the assertion results for exercise 2, including three zero outputs; weight unchanged.
 
 3. **Run one explicit loop step.** Use SGD.1 and mean squared error, clearing gradients before backward.
-   **Expected:** weight28/15; buffer still0.
-   **Verify:** Save the assertion results for exercise 3, including weight28/15; buffer still0.
+   **Expected:** weight 28/15; buffer still 0.
+   **Verify:** Save the assertion results for exercise 3, including weight 28/15; buffer still 0.
 
 4. **Move dtype through registered state.** Convert the module to float32 and inspect parameter and buffer dtypes.
    **Expected:** both float32.
@@ -115,13 +139,15 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** optimizer still holds old Parameter, not replacement.
    **Verify:** Save the assertion results for exercise 5, including optimizer still holds old Parameter, not replacement.
 
-6. **Keep parameter count stable across calls.** Call a fresh module on batches of length1 and4 and compare parameter identities.
+6. **Keep parameter count stable across calls.** Call a fresh module on batches of length 1 and 4 and compare parameter identities.
    **Expected:** same weight object and one parameter.
    **Verify:** Save the assertion results for exercise 6, including same weight object and one parameter.
 
 ## Common pitfalls and diagnosis
 
-When a result disagrees, locate the first intermediate value that violates this explanation. Inspect shapes and identities before aggregates, and inspect counts before averages. Preserve the original fixture and introduce only one controlled change at a time. If an arithmetic identity passes but a data-boundary condition fails, the experiment is still invalid. If a runtime is unavailable, record the unexecuted code as unverified rather than replacing its output with the expected text. The separate explanation discusses why the tempting alternative in each case changes the result.
+If a tensor is missing from state_dict or model.parameters(), inspect how it was assigned and registered. If a fixed statistic stays on another dtype or device, check whether it is an unregistered attribute rather than a buffer. If a new parameter has a gradient but never moves, compare object identities against every optimizer parameter group.
+
+If parameter count changes after a forward call, look for construction inside forward or an untracked container of child modules. If a state snapshot changes later, inspect shared storage instead of assuming a dictionary copy made tensor copies. If a framework comparison disagrees after one update, reconstruct the scalar 28/15 oracle and verify whether an extra trainable bias or different reduction was introduced.
 
 ## Progressive hints
 

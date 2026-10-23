@@ -1,14 +1,12 @@
 # llm-applied-006: Lexical retrieval and BM25 from first principles
 
-Status: authored applied LLM content. The manifest inventories complete teaching files; runtime readiness remains a separate, measured property.
-
 ## Level and prerequisites
 
 Beginner; approximately 180 minutes. Direct prerequisites: `llm-applied-005`. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
 
 ## Learning objectives
 
-Lexical retrieval ranks documents using observed terms. The central investigation is concrete: Rank documents a=account randomization, b=visit counts and c=account outcomes for the query randomization. The finish condition is a ranks first with a positive score; the other scores are0. empty result for no documents; finite zero score for an empty document. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Lexical retrieval provides a transparent first ranking of the corpus. This chapter explains how term evidence becomes a score, why an inverted index is useful, and how exact terminology, tokenization and negation affect a data-science assistant's retrieval decisions.
 
 ## Purpose and mental model
 
@@ -16,11 +14,53 @@ Lexical retrieval ranks documents using observed terms. A simple overlap score t
 
 This implementation uses lowercase ASCII word tokens and a fixed local corpus. It is a real lexical retrieval calculation, not an embedding model or a language generator. Its limits are visible: synonyms that share no tokens are missed, tokenization policy can change matches, and a high score does not establish that the document answers the question. Stable document-ID tie-breaking makes results reproducible. Access filtering must happen before scoring in a later lesson, because ranking unauthorized documents and removing them afterward can leak metadata and distort result counts.
 
+## Start with the words an analyst can name
+
+An analyst asks the Methods Desk where the handbook discusses account randomization. The phrase contains an unusually useful term: randomization is more specific than account in this small corpus. A lexical retriever can use that distinction without training a language model. It looks for observed terms and ranks documents according to a declared weighting rule.
+
+This transparency makes lexical retrieval a valuable baseline for technical domains. Analysts often know a metric name, an experiment identifier, a column name or an error message. Those strings can be more diagnostic than a broad semantic similarity. A learned retriever may add value for paraphrases, but it should be compared against the exact-match behavior that the task already supports.
+
+The first step is tokenization. The fixture lowercases text and extracts ASCII letter/digit runs. That policy makes “Account” and “account” match, but it does not equate randomization with randomized or purchase with buy. It also chooses how punctuation-separated identifiers are split. A retrieval miss caused by that transformation should be diagnosed before changing the ranking formula.
+
+## From documents to an inverted index
+
+The reference implementation scans small dictionaries so the arithmetic remains visible. A larger lexical index commonly organizes postings by term: each term points to the documents containing it, together with information such as frequency. Document lengths and corpus-level counts provide the remaining statistics. A query then looks up its terms instead of rereading every source string from scratch.
+
+This organization separates two jobs. Index construction records what terms occur under a particular tokenizer and source snapshot. Query scoring uses those recorded facts to rank candidates. If the source changes but the index does not, the scorer can be perfectly implemented and still rank stale content. If the tokenizer changes, the postings and their statistics must be rebuilt consistently.
+
+Term frequency tells how often a term appears within a document. Document frequency tells in how many indexed documents it appears. The first can distinguish a passing mention from a repeated topic; the second estimates how discriminating the term is in the corpus. Counting occurrences when document presence was intended confuses these roles. Repeated text in one source is not equivalent to the term appearing across many sources.
+
+BM25 combines rarity with diminishing returns from repetition and a document-length adjustment. The detailed calculation below derives each factor on the literal corpus. The important modeling idea is that a long document should not win merely because it has more opportunities to contain a term, and a document should not obtain unlimited advantage by repeating that term. The chosen parameters control those tradeoffs; they do not turn the score into a calibrated probability of correctness.
+
+## A high lexical score can preserve an unresolved contradiction
+
+Consider three equal-length documents: “exclude test accounts,” “include test accounts,” and “record eligible visits.” For the query “test accounts,” the first two have the same matching term frequencies and the same lengths. Each query term appears in two of three documents, so each contributes log(1.6) under the fixture's IDF convention. Both documents score 2*log(1.6), about 0.940007.
+
+The tie is correct for the stated lexical evidence. The two documents make opposite claims, but the query terms alone do not distinguish their policy meaning. A deterministic ID tie-break makes the output reproducible; it does not resolve which source is applicable. Version, authority and scope must be considered before an answer adopts either statement.
+
+Adding more query words can help without solving entailment generally. A passage saying “Do not exclude test accounts” still contains exclude,test andaccounts. A bag of terms does not represent the full effect of negation or the scope of an exception. Lexical retrieval is choosing candidates for inspection, not proving that their propositions answer the question correctly.
+
+Technical quantities create another mismatch. “100 milliseconds” and “0.1 seconds” may describe the same duration while sharing little lexical form. A domain-aware normalization step could make the equivalence available, but it must preserve units and context. Blind text substitution can create false matches. The same caution applies to abbreviations, SQL identifiers and method names whose common-language meanings differ from their technical use.
+
+## Diagnose the baseline before adding a learned model
+
+For each missed question, inspect the emitted query tokens, the relevant source tokens and the scoring statistics. A zero score can mean no shared vocabulary, a tokenizer mismatch or evidence that is genuinely absent. Returning the first zero-score document by ID does not make the question answerable. A low score can also reflect a long chunk whose relevant sentence was diluted by unrelated material.
+
+For a false positive, inspect why its terms matched. Was the query broad? Did a repeated header inflate document frequency? Did the source discuss a rejected method rather than recommend it? Did an old policy contain the same terminology as the current rule? These explanations point toward different changes: query formulation, chunking, metadata filtering or a richer relevance model.
+
+Corpus changes affect the score distribution. Rechunking one long handbook into many passages changes document count, average length and term frequencies across indexed units. A threshold chosen before that change may not retain its earlier meaning. The score belongs to a particular corpus and analysis policy, so the evaluation trace should identify both.
+
+A learned embedding branch is justified when failures show useful semantic relationships that lexical terms miss. A reranker is justified when candidates contain the needed evidence but ordering remains poor. The baseline is not a disposable stepping stone. It remains a comparison tool and can continue to supply strong candidates for exact identifiers and rare terminology in a hybrid system.
+
 ## Design decisions and when to use this method
 
 BM25 is a strong baseline when exact terminology, identifiers, code symbols or rare domain phrases matter. It requires no embedding service, can be rebuilt from local text and makes many ranking effects explainable. Domain tokenization is still an engineering choice: splitting SQL identifiers, preserving units or handling accented text can materially change retrieval.
 
 Do not assume a more complex model automatically outperforms lexical retrieval. Compare both on the same relevance-labelled questions, including exact identifiers and synonym cases. Inspect failures before adding query expansion or a reranker. A score threshold calibrated on one corpus may not transfer to a new corpus because document frequencies and lengths change. Keep corpus version, tokenizer policy and ranking parameters in the evaluation trace.
+
+Use the literal BM25 implementation as an auditable ranking baseline. Before comparing a dense retriever, inspect exact terminology, rare identifiers, tokenization and zero-score questions. These often reveal whether a failure is missing vocabulary or missing evidence rather than insufficient model capacity.
+
+The helper exercises the declared defaults and a small positive-k1 example. It does not validate arbitrary caller-supplied k1 or b values. A configurable service should validate its parameter domain separately; the lesson does not claim that every possible input combination is admitted safely.
 
 ## Vocabulary and concepts
 
@@ -34,13 +74,37 @@ Do not assume a more complex model automatically outperforms lexical retrieval. 
 
 ## How to run this lesson
 
-Use a prepared `python-core` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/llm-applied-006/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: `& $CoursePython courses/llm-applied/lessons/llm-applied-006.py`. For macOS/Linux use `.venv/bin/python courses/llm-applied/lessons/llm-applied-006.py` from the repository root.
+Use a prepared `python-core` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/llm-applied-006/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. Use the Docker classroom as the default route and select the declared `python-core` profile. For a separately prepared native environment, invoke its explicitly selected interpreter on `courses/llm-applied/lessons/llm-applied-006.py` from the repository root. The general repository `.venv` is not assumed to include the heavy model dependencies.
 
-Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Distinguish a retrieval or extraction baseline from an actual trained language model; each example names what it implements. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.
+Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Distinguish a retrieval or extraction baseline from an actual trained language model; each example names what it implements. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the tolerance stated in each assertion. Many analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone does not determine a universal error bound. Integer counts, identities and boolean decisions should be exact.
 
 ## Syntax anatomy and reasoning sequence
 
-For querytermq, BM25 usesidf=log(1+(N-df+.5)/(df+.5)). Each document contribution multipliesidf bytf*(k1+1)/(tf+k1*(1-b+b*length/avg_length)). The defaults here arek1=1.2, b=.75, declared as fixture choices. Count query terms once to avoid an accidental repeated-query weighting policy. Empty corpora and empty documents need explicit handling so average length never becomes an unexplained zero denominator.
+For query term q, BM25 uses idf=log(1+(N-df+.5)/(df+.5)). Each document contribution multiplies idf by tf*(k1+1)/(tf+k1*(1-b+b*length/avg_length)). The defaults here are k1=1.2, b=.75, declared as fixture choices. Count query terms once to avoid an accidental repeated-query weighting policy. Empty corpora and empty documents need explicit handling so average length never becomes an unexplained zero denominator.
+
+## Calculate the score and isolate each modeling choice
+
+The three documents each have two tokens, so average document length is two. The query randomization appears once in document a and nowhere else. With N=3, df=1, the implemented IDF is log(1+2.5/1.5)=log(8/3), about 0.980829. The matching document's normalized length ratio is one. With tf=1 and k1=1.2, its frequency factor is 2.2/(1+1.2)=1, so the final score is exactly that IDF. The other documents receive zero because the query term is absent.
+
+For account, df=2 and IDF is log(1+1.5/2.5)=log(1.6), about 0.470004. The rarer query term therefore receives more weight in this fixed corpus. Document frequency counts presence per document: repeating account ten times inside one document still contributes one to df. Token frequency and document frequency are different denominators.
+
+Write K=k1*(1-b+b*L/avgL). The frequency factor is f(tf)=(k1+1)*tf/(tf+K). Holding document length and corpus statistics fixed, its derivative for positive K is(k1+1)*K/(tf+K)^2, positive and decreasing. The second derivative is negative, so additional repetitions have diminishing gain. As tf becomes large under that fixed-length mathematical comparison, the factor approaches k1+1. If actual repetitions also lengthen the document, K changes too; do not silently hold one effect fixed while interpreting a real edit.
+
+With b=0, K=k1. For tf1, 2, 10 at k1=1.2, the factors are 1, 1.375 and about 1.964286. Ten repetitions do not create ten times the score. At b=1, the normalization depends fully on L/avgL; at b=0, document length does not enter K. For the same tf=1, k1=1.2 and b=0.75, a document twice the average length has K=2.1 and factor 2.2/3.1, about 0.709677. One half the average length has K=0.75 and factor 2.2/1.75, about 1.257143.
+
+This positive-IDF convention and the roles of k1 and b are documented in Lucene's versioned BM25 API. The fixture is its own transparent calculation and does not execute Lucene or claim identical index-analysis behavior. [Lucene 10.3.1 BM25Similarity](https://lucene.apache.org/core/10_3_1/core/org/apache/lucene/search/similarities/BM25Similarity.html).
+
+The corpus definition changes the scores. Splitting one source into many chunks changes N, lengths and possibly df. Repeating the same heading in every chunk can make a previously rare term common. A score threshold learned before rechunking therefore may not retain the same meaning afterward. Authorization filtering also defines which corpus is eligible for ranking; the later access chapter makes that boundary explicit.
+
+The local tokenizer lowercases and retains ASCII letter/digit runs. It will split punctuation-delimited identifiers, discard non-ASCII letters under this pattern and treat exact spellings according to that policy. A query token absent from every document gives no positive contribution, while a repeated query term is counted once because the code uses a set. Those are concrete design choices, not intrinsic properties of every BM25 system.
+
+### Interview reasoning with explanatory answers
+
+**Is a BM25 score a relevance probability?** No. It is an ordering score under specified corpus statistics and parameters. A threshold needs task calibration, and changing the corpus can change its interpretation.
+
+**Why can chunking change rankings even when the source text is unchanged?** The retrieval documents and their lengths/frequencies have changed. The scoring unit is the indexed chunk, not automatically the original source family.
+
+**Why does a synonym query miss buy when searching purchase?** The implementation has no learned or curated equivalence between those tokens. Adding expansion or a dense branch is a separate intervention that needs both positive and false-match tests.
 
 ## Worked example / walkthrough
 
@@ -69,7 +133,7 @@ docs={'a':'account randomization','b':'visit counts','c':'account outcomes'}; sc
 assert scores[0][0]=='a' and scores[0][1]>0 and all(score==0 for _,score in scores[1:])
 ```
 
-**Expected:** a ranks first with a positive score; the other scores are0.
+**Expected:** a ranks first with a positive score; the other scores are 0.
 
 ### Example B: Inspect term rarity
 
@@ -92,29 +156,29 @@ a,b,c=[contribution(n) for n in [1,2,10]]
 assert a<b<c and c<10*a
 ```
 
-**Expected:** scores increase, but10 occurrences yield less than10 times the single-occurrence score.
+**Expected:** scores increase, but 10 occurrences yield less than 10 times the single-occurrence score.
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: a ranks first with a positive score; the other scores are0. empty result for no documents; finite zero score for an empty document. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: a ranks first with a positive score; the other scores are 0. empty result for no documents; finite zero score for an empty document. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
 1. **Rank a discriminating term.** Rank documents a=account randomization, b=visit counts and c=account outcomes for the query randomization.
-   **Expected:** a ranks first with a positive score; the other scores are0.
-   **Verify:** Save the assertion results for exercise 1, including a ranks first with a positive score; the other scores are0.
+   **Expected:** a ranks first with a positive score; the other scores are 0.
+   **Verify:** Save the assertion results for exercise 1, including a ranks first with a positive score; the other scores are 0.
 
-2. **Inspect term rarity.** Compare IDF for a term present in1 of 3 documents with a term present in2 of 3.
+2. **Inspect term rarity.** Compare IDF for a term present in 1 of 3 documents with a term present in 2 of 3.
    **Expected:** the rarer term has larger IDF.
    **Verify:** Save the assertion results for exercise 2, including the rarer term has larger IDF.
 
-3. **Verify saturation.** Disable length normalization with b=0 and compare term frequencies1, 2, 10 under the same IDF.
-   **Expected:** scores increase, but10 occurrences yield less than10 times the single-occurrence score.
-   **Verify:** Save the assertion results for exercise 3, including scores increase, but10 occurrences yield less than10 times the single-occurrence score.
+3. **Verify saturation.** Disable length normalization with b=0 and compare term frequencies 1, 2, 10 under the same IDF.
+   **Expected:** scores increase, but 10 occurrences yield less than 10 times the single-occurrence score.
+   **Verify:** Save the assertion results for exercise 3, including scores increase, but 10 occurrences yield less than 10 times the single-occurrence score.
 
 4. **Expose a synonym miss.** Query purchase against a document containing only buy.
-   **Expected:** score0 despite the semantic relationship.
-   **Verify:** Save the assertion results for exercise 4, including score0 despite the semantic relationship.
+   **Expected:** score 0 despite the semantic relationship.
+   **Verify:** Save the assertion results for exercise 4, including score 0 despite the semantic relationship.
 
 5. **Make ties deterministic.** Query an absent word with document IDs z, a, b.
    **Expected:** order a, b, z with zero scores.
@@ -126,7 +190,9 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Common pitfalls and diagnosis
 
-When a result disagrees, locate the first intermediate value that violates this explanation. Inspect shapes and identities before aggregates, and inspect counts before averages. Preserve the original fixture and introduce only one controlled change at a time. If an arithmetic identity passes but a data-boundary condition fails, the experiment is still invalid. If a runtime is unavailable, record the unexecuted code as unverified rather than replacing its output with the expected text. The separate explanation discusses why the tempting alternative in each case changes the result.
+If an exact identifier is missed, inspect emitted tokens before changing ranking parameters. If every score is zero, verify whether the query shares any indexed terms and apply an answerability policy instead of treating the first ID tie-break as evidence. If a score changes after a corpus rebuild, compare document counts, chunk lengths, repeated headings and df.
+
+If repetition overwhelms ranking, separate term-frequency saturation from the document-length effect and inspect the actual k1/b configuration. If a dense retriever appears better, ensure both candidates see the same authorized corpus and context budget. Preserve the literal score calculation as an oracle for ranking arithmetic while evaluating task relevance independently.
 
 ## Progressive hints
 
@@ -134,7 +200,7 @@ First draw the state described in the vocabulary section. Next use the smallest 
 
 ## Self-check and retrieval
 
-Close both worked examples. Explain Term frequency, Document frequency, IDF using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Revisit the worked examples, then close them. Explain Term frequency, Document frequency, IDF using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
 
 ## Next step
 

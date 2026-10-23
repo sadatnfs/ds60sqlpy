@@ -50,3 +50,6 @@ id_rsa
 *.p12
 *.pfx
 *.pem
+
+# Local launcher ports, URL and transient per-project lock.
+.classroom/

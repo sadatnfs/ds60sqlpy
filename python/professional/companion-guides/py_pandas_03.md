@@ -62,15 +62,12 @@ The lesson uses tiny frames with explicit event_id, customer_id, UTC timestamps 
 ### Example 1
 
 ```python
-import numpy as np
-import pandas as pd
-
-frame=pd.DataFrame({"customer_id":["a","a","b"],"amount":[1.,3.,8.]})
-total=frame.groupby("customer_id",sort=False)["amount"].transform("sum")
-share=frame.amount/total
-assert share.tolist()==[.25,.75,1.]
-assert len(total)==len(frame)
-print("Aligned group shares:",share.tolist())
+frame = pd.DataFrame({"customer_id": ["a", "a", "b"], "amount": [1.0, 3.0, 8.0]})
+total = frame.groupby("customer_id", sort=False)["amount"].transform("sum")
+share = frame.amount / total
+assert share.tolist() == [0.25, 0.75, 1.0]
+assert len(total) == len(frame)
+print("Aligned group shares:", share.tolist())
 ```
 
 transform returns three totals aligned with the three input rows, whereas ordinary sum returns only two customer totals. The arithmetic therefore retains event grain. The shares sum to one within each positive-total customer, giving a useful invariant beyond checking one displayed number.
@@ -78,15 +75,17 @@ transform returns three totals aligned with the three input rows, whereas ordina
 ### Example 2
 
 ```python
-import numpy as np
-import pandas as pd
-
-events=pd.DataFrame({"customer_id":["a","a","a"],"at":pd.to_datetime(["2026-01-01T10:00Z","2026-01-01T10:30Z","2026-01-01T11:01Z"])})
-gap=events.groupby("customer_id")["at"].diff()
-start=gap.isna()|gap.gt(pd.Timedelta("30min"))
-session=start.groupby(events.customer_id).cumsum()
-assert session.tolist()==[1,1,2]
-print("Session sequence:",session.tolist())
+events = pd.DataFrame(
+    {
+        "customer_id": ["a", "a", "a"],
+        "at": pd.to_datetime(["2026-01-01T10:00Z", "2026-01-01T10:30Z", "2026-01-01T11:01Z"]),
+    }
+)
+gap = events.groupby("customer_id")["at"].diff()
+start = gap.isna() | gap.gt(pd.Timedelta("30min"))
+session = start.groupby(events.customer_id).cumsum()
+assert session.tolist() == [1, 1, 2]
+print("Session sequence:", session.tolist())
 ```
 
 The exact 30-minute gap remains in session one, while 31 minutes starts session two. The first missing difference means no prior event and is explicitly marked as a start. This is different from treating a missing timestamp as a valid start, which the exercise validation rejects.

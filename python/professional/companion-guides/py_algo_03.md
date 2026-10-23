@@ -62,14 +62,12 @@ The final exercise uses the same heap mechanism to keep the largest k stream val
 ### Example 1
 
 ```python
-import math
-import heapq
-from collections import deque
-
-graph={"a":[("b",10.),("c",1.)],"b":[],"c":[("b",1.)]}
-assert len(["a","b"])-1==1
-assert len(["a","c","b"])-1==2
-assert 1.+1.<10.
+graph = {"a": [("b", 10.0), ("c", 1.0)], "b": [], "c": [("b", 1.0)]}
+assert len(["a", "b"]) - 1 == 1
+assert len(["a", "c", "b"]) - 1 == 2
+direct_cost = graph["a"][0][1]
+via_c_cost = graph["a"][1][1] + graph["c"][0][1]
+assert via_c_cost == 2.0 < direct_cost == 10.0
 print("Fewest hops differs from lowest cost:1 edge costs10;2 edges cost2")
 ```
 
@@ -78,19 +76,15 @@ Breadth-first search would discover b directly in one hop. A cost-aware search m
 ### Example 2
 
 ```python
-import math
-import heapq
-from collections import deque
-
-heap=[]
-for value in [4.,1.,9.,3.,8.]:
-    if len(heap)<3:
-        heapq.heappush(heap,value)
+heap = []
+for value in [4.0, 1.0, 9.0, 3.0, 8.0]:
+    if len(heap) < 3:
+        heapq.heappush(heap, value)
     else:
-        heapq.heappushpop(heap,value)
-assert sorted(heap,reverse=True)==[9.,8.,4.]
-assert heap[0]==4.
-print("Largest three:",sorted(heap,reverse=True))
+        heapq.heappushpop(heap, value)
+assert sorted(heap, reverse=True) == [9.0, 8.0, 4.0]
+assert heap[0] == 4.0
+print("Largest three:", sorted(heap, reverse=True))
 ```
 
 The heap array is not a fully sorted list. Its root is only guaranteed to be the smallest retained candidate. Sorting the final small heap creates the desired presentation order while avoiding a full sort of all input values.

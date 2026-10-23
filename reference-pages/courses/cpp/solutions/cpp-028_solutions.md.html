@@ -121,6 +121,15 @@
 <p>A reusable record library separates stable data contracts from user-interface code. Packaging declares headers and link targets. Compatibility tests protect callers from accidental changes. The capstone combines strict parsing, named errors, ownership and exact integer output with an auditable fixture ledger.</p>
 <h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Keep the library core independent of terminal and filesystem effects so the record grammar can be tested directly. Each successful Record owns integer values, so it can outlive the string_view used during parsing. The four-row corpus distinguishes valid zero values from malformed suffixes and negative amounts. Package acceptance is a separate host boundary: compile a consumer against the public header and link the library target, then preserve the exact commands and statuses.</p>
+<h3 id="designing-and-consuming-a-reusable-parser-library">Designing and consuming a reusable parser library<a class="heading-anchor" href="#designing-and-consuming-a-reusable-parser-library" aria-label="Link to this section">#</a></h3>
+<p>A reusable library separates its public contract from implementation and from the application&#x27;s I/O policy. The record parser accepts one string_view and returns an owning Record or rejection. The caller decides where raw text came from and whether a rejected row aborts a batch. This separation lets the parser be tested without a terminal, file or cluster and keeps its lifetime reasoning small.</p>
+<p>The public Record owns integer id and cents values. It does not retain a view into the input, so a successful result survives after the caller&#x27;s raw string is destroyed. The parser still borrows the input while reading it. A library that returned views into a temporary normalization buffer would violate that lifetime contract even if its ordinary example happened to print correct values.</p>
+<p>The grammar is exactly two comma-separated nonnegative integer fields. The parser checks delimiter count, both conversion results, full consumption and domain ranges. The suffix fixture 7, 125x rejects a plausible permissive parser that accepts a numeric prefix. Valid0, 0 prevents the opposite bug of treating zero as absence. These cases are independent of packaging and should pass before the library is exported.</p>
+<p>The real record-library fixture contains a public header, implementation, independent consumer and CMake target. Building the consumer against that target tests whether the header declares everything it needs and whether the implementation is actually linked. A combined single-file source cannot expose a missing exported include path or omitted library object in the same way.</p>
+<p>Installation/export is another boundary. A local install tree should let a fresh consumer find the documented package/target without relying on the original source directory. The host exercise records configure, build, install and consumer results separately. The browser&#x27;s one-main.cpp run is still useful for parser behavior, but it does not execute that packaging workflow.</p>
+<p>A library release also needs a stability policy. Changing the accepted grammar, error representation or ownership behavior can break callers even when the function name stays the same. Document format/version changes and keep an independent consumer test. A package that compiles but silently accepts malformed suffixes is not a successful release under this contract.</p>
+<h3 id="debugging-the-contract">Debugging the contract<a class="heading-anchor" href="#debugging-the-contract" aria-label="Link to this section">#</a></h3>
+<p>If a consumer compiles only inside the library source tree, inspect public includes and exported target properties. If it links without the intended library, check whether a header accidentally contains a duplicate implementation. If parsing passes normal rows but accepts125x, inspect full consumption. If a returned record changes when raw input is edited, look for borrowed fields where the public contract promised owning values.</p>
 <h3 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-cpp">auto r=parse_record(&quot;7,125&quot;); assert(r-&gt;id==7 &amp;&amp; r-&gt;cents==125);</code></pre>
 <p>Expected: The library produces an owned record with exact fields.</p>
@@ -133,7 +142,7 @@
 <p><strong>Reasoning:</strong> Consumers need semantic rules beyond signatures.</p>
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
 <h3 id="exercise-2-build-independent-fixture">Exercise 2: Build independent fixture<a class="heading-anchor" href="#exercise-2-build-independent-fixture" aria-label="Link to this section">#</a></h3>
-<p>Use [7,125;0,0;7,125x;7,-1] as four records.</p>
+<p>Use [7, 125; 0, 0; 7, 125x; 7, -1] as four records.</p>
 <p><strong>Expected:</strong> Two accepted and two rejected.</p>
 <p><strong>Reasoning:</strong> Expected results are hand-written independently.</p>
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
@@ -144,7 +153,7 @@
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
 <h3 id="exercise-4-inject-a-regression">Exercise 4: Inject a regression<a class="heading-anchor" href="#exercise-4-inject-a-regression" aria-label="Link to this section">#</a></h3>
 <p>Remove the full-consumption check in a scratch implementation.</p>
-<p><strong>Expected:</strong> 7,125x must fail the golden test.</p>
+<p><strong>Expected:</strong> 7, 125x must fail the golden test.</p>
 <p><strong>Reasoning:</strong> A plausible parsing shortcut is the negative control.</p>
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
 <h3 id="exercise-5-check-boundary-ownership">Exercise 5: Check boundary ownership<a class="heading-anchor" href="#exercise-5-check-boundary-ownership" aria-label="Link to this section">#</a></h3>

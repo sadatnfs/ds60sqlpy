@@ -23,6 +23,11 @@ def ignore_private_files(directory: str, names: list[str]) -> set[str]:
     ignored = set()
     patterns = (
         "__pycache__",
+        "node_modules",
+        ".pytest_cache",
+        ".mypy_cache",
+        ".ruff_cache",
+        ".hypothesis",
         "*.pyc",
         "*.egg-info",
         "*.dist-info",
@@ -31,6 +36,7 @@ def ignore_private_files(directory: str, names: list[str]) -> set[str]:
         ".ipynb_checkpoints",
         ".git",
         ".learning",
+        ".classroom",
         ".venv",
         ".env",
         ".env.*",

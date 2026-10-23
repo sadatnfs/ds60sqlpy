@@ -116,7 +116,6 @@
       <p class="source-path">Generated from <code>courses/cpp/guides/cpp-005.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-005-functions-and-parameter-contracts">cpp-005: Functions and parameter contracts<a class="heading-anchor" href="#cpp-005-functions-and-parameter-contracts" aria-label="Link to this section">#</a></h2>
-<p>Authored beta content. Content completion and runtime qualification are separate evidence.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Beginner; 90 minutes. Direct prerequisites: <code>cpp-004</code>.</p>
 <p>Learner artifact: <a href="../lessons/cpp-005.cpp.html">cpp-005.cpp</a>. Keep <a href="../solutions/cpp-005_solutions.md.html">official solutions</a> closed until an attempt. The immutable <a href="../fixtures/cpp-005-cases.json.html">case ledger</a> records exercise inputs and expected observations.</p>
@@ -127,56 +126,97 @@
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p><code>int clamp(int value, int low, int high)</code> declares three copied integers. <code>return</code> ends that call. Checking low&gt;high before applying min/max prevents a nonsensical interval from looking like success.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>
-<p>A caller has three distinct questions: are the bounds valid, is the value below/inside/above them, and may the call alter its input? The supplied function rejects reversed bounds first. Only then does it compute min(value,high), followed by max(low,...). The three ordinary cases cover each position relative to the interval, while equal bounds test a degenerate but valid interval. A return value can differ from the argument without mutating the caller because parameters are copies.</p>
+<p>A caller has three distinct questions: are the bounds valid, is the value below/inside/above them, and may the call alter its input? The supplied function rejects reversed bounds first. Only then does it compute min(value, high), followed by max(low, ...). The three ordinary cases cover each position relative to the interval, while equal bounds test a degenerate but valid interval. A return value can differ from the argument without mutating the caller because parameters are copies.</p>
+<h3 id="function-contracts-and-call-boundaries">Function contracts and call boundaries<a class="heading-anchor" href="#function-contracts-and-call-boundaries" aria-label="Link to this section">#</a></h3>
+<p>A function call creates a local computation with a clear interface. The caller supplies x, low and high; the function returns one integer or rejects an invalid interval. Pass by value gives each parameter its own integer value. If the caller stores x=12, calling clamp_reading(x, 0, 10) can return10 while the caller variable remains12. Returning a value and modifying a caller object are different interface choices.</p>
+<p>The contract has an ordering dependency. First establish low&lt;=high. Only then does the phrase clamp into the interval have a meaningful interpretation. The expression max(low, min(x, high)) implements the valid interval behavior, but it is not an interval validator. With reversed bounds, those library calls still produce an integer, which can hide a nonsensical request. Explicit rejection preserves the distinction between a valid answer and invalid input.</p>
+<p>Trace the three ordinary paths separately. Below the interval, min(x, high) leaves x and max raises it to low. Inside, both operations leave x unchanged. Above, min lowers x to high and max leaves it there. Equal bounds are valid: every input maps to the single permitted point. That fourth case checks that the validation uses &gt; rather than &gt;=.</p>
+<p>The exception type communicates why no result is returned. In the second worked program, the catch block sets a flag, and the program asserts that the flag became true. Merely writing an empty catch block would not prove the exception occurred. Uncaught exceptions terminate the program through a different path from an explicit status return, so the caller must choose where to translate failures into a user-facing diagnostic.</p>
+<p>For a larger API, document units and ranges as part of the contract. Integer cents and integer degrees use the same C++ type but represent different quantities. A pure clamp function is easy to test because it depends only on its arguments. A hidden global limit or filesystem read would add state that each test and caller must understand. Prefer that extra dependency to be explicit when it is actually needed.</p>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">assert(clamp_reading(12,0,10)==10);</code></pre>
-<p><strong>Expected:</strong> 12 is above the upper bound, so the function returns 10.</p>
+<p><a href="../examples/cpp-005-example-1.cpp.html">Complete program 1</a></p>
+<pre><code class="language-cpp">#include &lt;algorithm&gt;
+#include &lt;cassert&gt;
+#include &lt;iostream&gt;
+#include &lt;stdexcept&gt;
+
+int clamp_reading(int x,int low,int high)  {
+     if(low&gt;high) throw std::invalid_argument(&quot;reversed bounds&quot;);
+     return std::max(low,std::min(x,high));
+}
+int main() {
+    assert(clamp_reading(12,0,10)==10);
+    std::cout &lt;&lt; &quot;cpp-005 example 1 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-005 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">try { clamp_reading(5,10,0); } catch(const std::invalid_argument&amp;) { /* rejected */ }</code></pre>
-<p><strong>Expected:</strong> The reversed interval raises invalid_argument before computing a result.</p>
+<p><a href="../examples/cpp-005-example-2.cpp.html">Complete program 2</a></p>
+<pre><code class="language-cpp">#include &lt;algorithm&gt;
+#include &lt;cassert&gt;
+#include &lt;iostream&gt;
+#include &lt;stdexcept&gt;
+
+int clamp_reading(int x,int low,int high)  {
+     if(low&gt;high) throw std::invalid_argument(&quot;reversed bounds&quot;);
+     return std::max(low,std::min(x,high));
+}
+int main() {
+    bool rejected=false;
+    try { (void)clamp_reading(5,10,0); }
+    catch (const std::invalid_argument&amp;) { rejected=true; }
+    assert(rejected);
+    std::cout &lt;&lt; &quot;cpp-005 example 2 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-005 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-predict-the-contract">Exercise 1: Predict the contract<a class="heading-anchor" href="#exercise-1-predict-the-contract" aria-label="Link to this section">#</a></h4>
-<p>Evaluate -3,5,12 for bounds [0,10].</p>
-<p><strong>Expected result/shape:</strong> Results [0,5,10].</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Results [0,5,10].</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Below, inside and above are separate paths.</p>
+<p>Evaluate -3, 5, 12 for bounds [0, 10].</p>
+<p><strong>Expected result/shape:</strong> Results [0, 5, 10].</p>
+<p><strong>Verify:</strong> Results [0, 5, 10].</p>
+<p><strong>Progressive hints:</strong> Below, inside and above are separate paths.</p>
 <h4 id="exercise-2-check-parameter-isolation">Exercise 2: Check parameter isolation<a class="heading-anchor" href="#exercise-2-check-parameter-isolation" aria-label="Link to this section">#</a></h4>
 <p>Call with variable x=12 and inspect x afterward.</p>
 <p><strong>Expected result/shape:</strong> Result 10; caller x still 12.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Result 10; caller x still 12.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Pass by value creates the parameter copy.</p>
+<p><strong>Verify:</strong> Result 10; caller x still 12.</p>
+<p><strong>Progressive hints:</strong> Pass by value creates the parameter copy.</p>
 <h4 id="exercise-3-build-a-predicate">Exercise 3: Build a predicate<a class="heading-anchor" href="#exercise-3-build-a-predicate" aria-label="Link to this section">#</a></h4>
-<p>Write inside(x,low,high) with inclusive bounds.</p>
-<p><strong>Expected result/shape:</strong> inside(0,0,10) true; inside(11,0,10) false.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: inside(0,0,10) true; inside(11,0,10) false.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Return a Boolean comparison conjunction.</p>
+<p>Write inside(x, low, high) with inclusive bounds.</p>
+<p><strong>Expected result/shape:</strong> inside(0, 0, 10) true; inside(11, 0, 10) false.</p>
+<p><strong>Verify:</strong> inside(0, 0, 10) true; inside(11, 0, 10) false.</p>
+<p><strong>Progressive hints:</strong> Return a Boolean comparison conjunction.</p>
 <h4 id="exercise-4-repair-an-invalid-contract">Exercise 4: Repair an invalid contract<a class="heading-anchor" href="#exercise-4-repair-an-invalid-contract" aria-label="Link to this section">#</a></h4>
 <p>Remove the reversed-bounds check and explain the lost guarantee.</p>
-<p><strong>Expected result/shape:</strong> clamp(5,10,0) must be rejected after repair.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: clamp(5,10,0) must be rejected after repair.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: min/max alone do not validate the meaning of the bounds.</p>
+<p><strong>Expected result/shape:</strong> clamp(5, 10, 0) must be rejected after repair.</p>
+<p><strong>Verify:</strong> clamp(5, 10, 0) must be rejected after repair.</p>
+<p><strong>Progressive hints:</strong> min/max alone do not validate the meaning of the bounds.</p>
 <h4 id="exercise-5-check-a-one-point-interval">Exercise 5: Check a one-point interval<a class="heading-anchor" href="#exercise-5-check-a-one-point-interval" aria-label="Link to this section">#</a></h4>
-<p>Evaluate x=2,3,4 with bounds [3,3].</p>
+<p>Evaluate x=2, 3, 4 with bounds [3, 3].</p>
 <p><strong>Expected result/shape:</strong> All return 3.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: All return 3.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Equal bounds form a valid single-value interval.</p>
+<p><strong>Verify:</strong> All return 3.</p>
+<p><strong>Progressive hints:</strong> Equal bounds form a valid single-value interval.</p>
 <h4 id="exercise-6-transfer-to-money">Exercise 6: Transfer to money<a class="heading-anchor" href="#exercise-6-transfer-to-money" aria-label="Link to this section">#</a></h4>
-<p>Clamp a cents amount of 1250 to [0,1000].</p>
+<p>Clamp a cents amount of 1250 to [0, 1000].</p>
 <p><strong>Expected result/shape:</strong> 1000 integer cents, without floating conversion.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: 1000 integer cents, without floating conversion.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: The contract applies to a different integer domain.</p>
+<p><strong>Verify:</strong> 1000 integer cents, without floating conversion.</p>
+<p><strong>Progressive hints:</strong> The contract applies to a different integer domain.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: 12 is above the upper bound, so the function returns 10. Then explain the changed condition in example 2 without opening the answer.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
-<p><code>int clamp(int value, int low, int high)</code> declares three copied integers. <code>return</code> ends that call. Checking low&gt;high before applying min/max prevents a nonsensical interval from looking like success.</p>
-<p>If the result disagrees, preserve the original input and inspect the first differing value or condition. min/max alone do not validate the meaning of the bounds.</p>
+<p>A function-name typo or incompatible argument type is usually a compile problem. A declared but undefined function can compile at the call site and fail during linking. A reversed interval here is a runtime contract failure. Preserve the phase and diagnostic instead of treating all three as a generic failed function. If a caller value unexpectedly changes, inspect whether the real signature uses a nonconst reference or pointer rather than the copied parameters shown here.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
 <p>Close the source. Reconstruct the reasoning for Exercise 6: Transfer to money. Explain which assumptions would fail on a larger input or another runtime.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue with <a href="cpp-006.md.html">cpp-006</a> after saving the six observations.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines">C++ Core Guidelines</a></p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach cpp-005.
 Read courses/cpp/guides/cpp-005.md and courses/cpp/lessons/cpp-005.cpp.

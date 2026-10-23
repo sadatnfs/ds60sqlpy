@@ -116,10 +116,164 @@
       <p class="source-path">Generated from <code>courses/java/README.md</code></p>
     </header>
     <article class="document"><h2 id="java-from-the-first-compile-to-reliable-applications">Java: from the first compile to reliable applications<a class="heading-anchor" href="#java-from-the-first-compile-to-reliable-applications" aria-label="Link to this section">#</a></h2>
-<p>This journey is being authored. The complete route is in <a href="track.json.html">track.json</a>. Only entries in <a href="lessons.json.html">lessons.json</a> have completed lesson artifacts; a planned title is not a completed tutorial. The classroom shows this distinction.</p>
-<p>Use the Docker classroom from the repository root. Choose the relevant profile, then open the <strong>Journeys</strong> page. The runtime panel explains the exact filename and compile/run path, and lets you download your current source. Progress and drafts remain in the local classroom-learning volume across container replacements.</p>
-<p>Java uses the prepared Java21 compiler and JVM. You do not need a host JDK.</p>
-<p>See <a href="../../docs/docker-classroom.md.html">Docker classroom instructions</a> for builds, profile selection, logs, stopping and backups. A successful program is evidence about that run; use the guide to interpret it and explore boundary cases.</p></article>
+<p>All36 lessons in the <a href="track.json.html">reviewed route</a> now have complete authored bundles in the <a href="lessons.json.html">manifest</a>. The course starts with source,types,control flow andobjects,then develops collections,generics,functional code,testing,algorithms,concurrency,files,HTTP,JDBC,serialization,service discovery,profiling andrelease engineering. Every guide has two complete worked examples,six inspectable exercises,mechanism explanations,diagnosis,hints andseparate executable/explanatory solutions.</p>
+<p>Use the Docker classroom&#x27;s prepared Java21 profile. The pad is compiled as <code>Main.java</code> with <code>--release 21</code> andrun with assertions enabled. Helper classes can share that file. You do not need a host JDK. Source viewing,compilation,reference execution andlearner mastery are separate evidence;the <a href="../../docs/implementation/java-content-status.md.html">checkpoint</a> records actual prepared-container results.</p>
+<h3 id="runtime-andresource-boundaries">Runtime andresource boundaries<a class="heading-anchor" href="#runtime-andresource-boundaries" aria-label="Link to this section">#</a></h3>
+<p>Default examples use small local fixtures andprepared JDK libraries. JDBC29 additionally uses the pinned H2 driver already included in the Java image at <code>/opt/course-libs/h2-2.5.252.jar</code>. It opens only owned in-memory H2 databases andperforms real SQL/transaction checks. No lesson installs a package orcontacts a shared database.</p>
+<p>HTTP lessons start short-lived loopback servers on ephemeral ports andclose them after checks. Concurrency lessons use bounded waits andcooperative cleanup. Module,JAR,JFR andrelease examples write only owned temporary files. The <a href="fixtures/java-026/README.md.html">manual module fixture</a>, <a href="fixtures/java-027/README.md.html">manual JAR fixture</a> and <a href="fixtures/java-036/README.md.html">optional jlink workflow</a> explain multi-file orlarger packaging work outside the single-file pad. A customruntime image is platform-specific andis not claimed built by the default reference.</p>
+<p>Keep attempts in saved classroom pads oryour own ignored <code>.learning/</code> copy. Do not edit official solutions to obtain a passing run. Predict outputs andfailure types,attempt the exercises,then compare with the reference andsolve a fresh boundary case.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Lesson</th>
+<th>Topic</th>
+</tr></thead><tbody>
+<tr>
+<td><a href="guides/java-001.md.html">java-001</a></td>
+<td>From source file to running JVM</td>
+</tr>
+<tr>
+<td><a href="guides/java-002.md.html">java-002</a></td>
+<td>Values, numeric types and conversion</td>
+</tr>
+<tr>
+<td><a href="guides/java-003.md.html">java-003</a></td>
+<td>Decisions, loops and invariants</td>
+</tr>
+<tr>
+<td><a href="guides/java-004.md.html">java-004</a></td>
+<td>Methods and explicit contracts</td>
+</tr>
+<tr>
+<td><a href="guides/java-005.md.html">java-005</a></td>
+<td>Arrays, strings and Unicode</td>
+</tr>
+<tr>
+<td><a href="guides/java-006.md.html">java-006</a></td>
+<td>Lists, sets and maps</td>
+</tr>
+<tr>
+<td><a href="guides/java-007.md.html">java-007</a></td>
+<td>Classes and encapsulation</td>
+</tr>
+<tr>
+<td><a href="guides/java-008.md.html">java-008</a></td>
+<td>Constructors, records and invariants</td>
+</tr>
+<tr>
+<td><a href="guides/java-009.md.html">java-009</a></td>
+<td>Exceptions and resource lifetime</td>
+</tr>
+<tr>
+<td><a href="guides/java-010.md.html">java-010</a></td>
+<td>Interfaces and polymorphism</td>
+</tr>
+<tr>
+<td><a href="guides/java-011.md.html">java-011</a></td>
+<td>Equality, hashing and ordering</td>
+</tr>
+<tr>
+<td><a href="guides/java-012.md.html">java-012</a></td>
+<td>Generics and variance</td>
+</tr>
+<tr>
+<td><a href="guides/java-013.md.html">java-013</a></td>
+<td>Lambdas and functional interfaces</td>
+</tr>
+<tr>
+<td><a href="guides/java-014.md.html">java-014</a></td>
+<td>Streams and collectors</td>
+</tr>
+<tr>
+<td><a href="guides/java-015.md.html">java-015</a></td>
+<td>Dates, time zones and formatting</td>
+</tr>
+<tr>
+<td><a href="guides/java-016.md.html">java-016</a></td>
+<td>Files, paths and character encoding</td>
+</tr>
+<tr>
+<td><a href="guides/java-017.md.html">java-017</a></td>
+<td>Optional values and validation boundaries</td>
+</tr>
+<tr>
+<td><a href="guides/java-018.md.html">java-018</a></td>
+<td>Tests that detect broken behavior</td>
+</tr>
+<tr>
+<td><a href="guides/java-019.md.html">java-019</a></td>
+<td>Data structures and complexity</td>
+</tr>
+<tr>
+<td><a href="guides/java-020.md.html">java-020</a></td>
+<td>Search, sorting and dynamic programming</td>
+</tr>
+<tr>
+<td><a href="guides/java-021.md.html">java-021</a></td>
+<td>Threads and the memory model</td>
+</tr>
+<tr>
+<td><a href="guides/java-022.md.html">java-022</a></td>
+<td>Executors, futures and cancellation</td>
+</tr>
+<tr>
+<td><a href="guides/java-023.md.html">java-023</a></td>
+<td>Locks, atomics and concurrent collections</td>
+</tr>
+<tr>
+<td><a href="guides/java-024.md.html">java-024</a></td>
+<td>Virtual threads and blocking work</td>
+</tr>
+<tr>
+<td><a href="guides/java-025.md.html">java-025</a></td>
+<td>JVM memory, GC and allocation</td>
+</tr>
+<tr>
+<td><a href="guides/java-026.md.html">java-026</a></td>
+<td>Packages, classpaths and modules</td>
+</tr>
+<tr>
+<td><a href="guides/java-027.md.html">java-027</a></td>
+<td>Builds and dependency reproducibility</td>
+</tr>
+<tr>
+<td><a href="guides/java-028.md.html">java-028</a></td>
+<td>HTTP services and clients</td>
+</tr>
+<tr>
+<td><a href="guides/java-029.md.html">java-029</a></td>
+<td>JDBC and transactions</td>
+</tr>
+<tr>
+<td><a href="guides/java-030.md.html">java-030</a></td>
+<td>Serialization and schema evolution</td>
+</tr>
+<tr>
+<td><a href="guides/java-031.md.html">java-031</a></td>
+<td>Reflection, annotations and service loading</td>
+</tr>
+<tr>
+<td><a href="guides/java-032.md.html">java-032</a></td>
+<td>Profiling and benchmark reasoning</td>
+</tr>
+<tr>
+<td><a href="guides/java-033.md.html">java-033</a></td>
+<td>Secure application boundaries</td>
+</tr>
+<tr>
+<td><a href="guides/java-034.md.html">java-034</a></td>
+<td>Application design and dependency boundaries</td>
+</tr>
+<tr>
+<td><a href="guides/java-035.md.html">java-035</a></td>
+<td>Build a tested local data service</td>
+</tr>
+<tr>
+<td><a href="guides/java-036.md.html">java-036</a></td>
+<td>Package, diagnose and maintain a release</td>
+</tr>
+</tbody></table></div>
+<h3 id="evidence-andnext-work">Evidence andnext work<a class="heading-anchor" href="#evidence-andnext-work" aria-label="Link to this section">#</a></h3>
+<p>The references include actual compiler diagnostics,controlled lost updates,executor cancellation andqueue rejection,virtual-thread admission limits,module resolution,fresh-JVM JAR launch,prepared JDBC transactions,JFR readback andnegative integrity gates. Their bounded fixtures do not establish production service reliability,cross-platform installer acceptance oruniversal performance claims.</p>
+<p>Use the <a href="../../docs/docker-classroom.md.html">Docker classroom guide</a> for image preparation,visible logs,persistent learner state andstopping the environment. The course&#x27;s full quality review also checks explanation depth,assumptions andfailure analysis beyond minimum word orartifact counts.</p></article>
   </main>
 </body>
 </html>

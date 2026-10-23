@@ -139,6 +139,11 @@
 <span>    layer=nn.Linear(2,2,bias=False)</span>
 <span>    with torch.no_grad(): layer.weight.copy_(w.T)</span>
 <span>    torch.testing.assert_close(F.relu(layer(x)),h,atol=0,rtol=0)</span>
+<span>    asymmetric=torch.tensor([[1.,2.],[3.,4.]])</span>
+<span>    probe=nn.Linear(2,2,bias=False)</span>
+<span>    with torch.no_grad(): probe.weight.copy_(asymmetric.T)</span>
+<span>    torch.testing.assert_close(probe(x),x@asymmetric,atol=0,rtol=0)</span>
+<span>    assert not torch.equal(x@asymmetric,x@asymmetric.T)</span>
 <span> </span>
 <span>    # Exercise 4: Inspect activation gradients</span>
 <span>    z=torch.tensor([-2.,2.],requires_grad=True); F.relu(z).sum().backward()</span>

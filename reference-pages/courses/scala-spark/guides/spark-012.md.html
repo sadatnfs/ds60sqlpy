@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>spark-012: SparkSession, explicit schemas, and bounded actions · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>spark-012: SparkSession, explicit schemas, and bounded actions</h1>
+      <p class="source-path">Generated from <code>courses/scala-spark/guides/spark-012.md</code></p>
+    </header>
+    <article class="document"><h2 id="spark-012-sparksession-explicit-schemas-and-bounded-actions">spark-012: SparkSession, explicit schemas, and bounded actions<a class="heading-anchor" href="#spark-012-sparksession-explicit-schemas-and-bounded-actions" aria-label="Link to this section">#</a></h2>
+<p>Authored paired Scala/PySpark teaching content. The default fixtures are tiny,local and deterministic. Runtime acceptance,logical correctness and learner understanding remain separate evidence.</p>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Beginner; approximately 120 minutes. Direct design prerequisites: <code>spark-001</code>. The prepared baseline is Spark 4.0.1,Scala binary2.13,JDK 17 and Python 3.12. Read the <a href="../execution-baseline.md.html">execution baseline</a>; a proposed future tuple is not a runtime receipt.</p>
+<h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
+<p>Open <code>spark-012</code> in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed <code>spark-local-scala</code> or <code>spark-local-python</code> profile,save your pad and run the complete source. Scala stages as <code>Main.scala</code> with <code>object Main</code>; Python stages as <code>main.py</code> with a main guard. Each program creates its own local[2] session,disables the UI,binds the driver to loopback and stops the session in finally. No external dataset,package download,JDBC connection or cloud service is requested.</p>
+<p>The <a href="../lessons/spark-012.scala.html">Scala learner</a> and <a href="../lessons/spark-012.py.html">PySpark learner</a> run two complete demonstrations and retain six explicit task stubs. Use the <a href="../solutions/spark-012_solutions.md.html">explained solutions</a> only after an attempt or an explicit worked comparison; the <a href="../solutions/spark-012_solution.scala.html">Scala reference</a> and <a href="../solutions/spark-012_solution.py.html">PySpark reference</a> contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Create an owned local session and a typed schema, then distinguish transformations from actions in either API.</li>
+<li>State the input and output grain,schema,NULL policy and ordering before executing a transformation.</li>
+<li>Compare each language implementation with independent literal expectations,not only with the other implementation.</li>
+</ul>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>SparkSession:</strong> The application entry point for DataFrame and SQL work, with configuration and a lifecycle that the creating program must own.</li>
+</ul>
+<ul>
+<li><strong>Explicit schema:</strong> A declared list of field names, data types and nullability, preventing small-sample inference from silently choosing the data contract.</li>
+</ul>
+<ul>
+<li><strong>Bounded action:</strong> An action whose driver-side result is constrained by a stated admission limit; it does not necessarily bound all distributed source work.</li>
+</ul>
+<ul>
+<li><strong>Canonical result:</strong> A deterministic representation with declared field order, types, NULL handling and row ordering used for comparison.</li>
+</ul>
+<p>Readiness for this lesson has two routes: complete the Scala foundation through spark-010, or complete the Python bridge spark-011 after the existing Python testing prerequisite. The plan&#x27;s structural prerequisite lists spark-001 because the framework currently expresses AND prerequisites rather than this OR gate. The learner should demonstrate one route&#x27;s language skills before treating both APIs as familiar.</p>
+<p>SparkSession creates access to the engine and owns session-local views and configuration. The complete source runs in a fresh prepared worker process, requests local[2], disables the UI, binds driver communication to loopback and sets UTC. It reads back the actual master and version rather than assuming the builder text was accepted. The finally block stops the session even when an assertion fails. This is an owned local demonstration, not a request to reuse or stop an unrelated notebook session.</p>
+<p>The schema names event_id, team and amount_cents. event_id is Long and nonnullable; team is nullable String; amount_cents is nullable Long. SQL&#x27;s simpleString representation for Long is bigint. A field&#x27;s nullable flag describes its contract, not whether the current four-row sample happens to contain NULL. Exact integer cents are preserved rather than inferred as floating point because one amount is missing.</p>
+<p>A transformation such as filter returns another DataFrame plan. count or collect requests execution. The lesson demonstrates that separation through small source functions and explicit action sites; it does not infer a measured zero-job history from a wall-clock delay or a printed plan. Planning and metadata operations can also perform work in other contexts, especially when schemas are inferred from files.</p>
+<p>Driver result size must be controlled deliberately. The bounded ID reader selects only event_id, orders it, requests at most limit+1 rows and rejects an oversized result. The extra row distinguishes exactly-at-limit from too-many. This bounds the collected payload, but an orderBy or source scan may still examine far more data in a real job. The fixture remains four rows so both driver and engine work are small.</p>
+<p>Canonical comparison includes field meaning and row identity. NULL is represented as Option in Scala and None in Python; observed zero remains a value. Repartitioning changes physical placement but must not change the canonical row bag. A final complete order is used only for comparison and display, not as an assumption about raw collect order.</p>
+<p>The final settings report distinguishes an actual Spark version from a target declaration. The prepared worker is 4.0.1 with the specified local policies. A matching version string alone is not proof of correct results, cleanup or cluster compatibility. The reference combines settings readback with schema, identity, missingness and bounded-result assertions, then leaves process-level cleanup qualification to the worker receipt.</p>
+<h3 id="supplied-local-fixture">Supplied local fixture<a class="heading-anchor" href="#supplied-local-fixture" aria-label="Link to this section">#</a></h3>
+<p>The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.</p>
+<pre><code class="language-scala">import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types._
+
+val schema = StructType(Seq(
+  StructField(&quot;event_id&quot;,LongType,false),
+  StructField(&quot;team&quot;,StringType,true),
+  StructField(&quot;amount_cents&quot;,LongType,true)))
+val rows = Seq(Row(1L,&quot;A&quot;,0L),Row(2L,&quot;B&quot;,null),Row(3L,&quot;A&quot;,25L),Row(4L,&quot;B&quot;,40L))
+val raw = spark.createDataFrame(spark.sparkContext.parallelize(rows,2),schema)</code></pre>
+<pre><code class="language-python">from pyspark.sql import SparkSession, functions as F
+from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+
+schema = StructType([
+    StructField(&quot;event_id&quot;, LongType(), False),
+    StructField(&quot;team&quot;, StringType(), True),
+    StructField(&quot;amount_cents&quot;, LongType(), True),
+])
+raw = spark.createDataFrame([(1, &quot;A&quot;, 0), (2, &quot;B&quot;, None), (3, &quot;A&quot;, 25), (4, &quot;B&quot;, 40)], schema=schema)</code></pre>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-scala">val names = raw.schema.fields.map(_.name).toSeq
+assert(names == Seq(&quot;event_id&quot;,&quot;team&quot;,&quot;amount_cents&quot;))
+assert(raw.schema(&quot;event_id&quot;).dataType == LongType)
+assert(!raw.schema(&quot;event_id&quot;).nullable &amp;&amp; raw.schema(&quot;amount_cents&quot;).nullable)
+println(raw.schema.simpleString)</code></pre>
+<pre><code class="language-python">assert raw.columns == [&quot;event_id&quot;, &quot;team&quot;, &quot;amount_cents&quot;]
+assert isinstance(raw.schema[&quot;event_id&quot;].dataType, LongType)
+assert raw.schema[&quot;event_id&quot;].nullable is False
+assert raw.schema[&quot;amount_cents&quot;].nullable is True
+print(raw.schema.simpleString())</code></pre>
+<p>The schema is checked independently from the row values. Nullable amount permits the second record&#x27;s unknown value without converting the entire field to a floating or string type. Field names and order are part of the interface used by later transformations.</p>
+<h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-scala">val planned = raw.filter(col(&quot;team&quot;) === lit(&quot;A&quot;))
+val observedCount = planned.count()
+assert(observedCount == 2L)
+assert(planned.select(&quot;event_id&quot;).orderBy(&quot;event_id&quot;).collect().map(_.getLong(0)).toSeq == Seq(1L,3L))
+println(s&quot;team A rows=$observedCount&quot;)</code></pre>
+<pre><code class="language-python">planned = raw.filter(F.col(&quot;team&quot;) == F.lit(&quot;A&quot;))
+observed_count = planned.count()
+assert observed_count == 2
+assert [row.event_id for row in planned.select(&quot;event_id&quot;).orderBy(&quot;event_id&quot;).collect()] == [1, 3]
+print(&quot;team A rows=&quot;, observed_count)</code></pre>
+<p>The filter expression defines the selected relation; count and the bounded fixture collection are action sites. Exact IDs confirm the predicate&#x27;s meaning beyond the count. The source DataFrame still represents all four rows because a transformation does not mutate it in place.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<h4 id="exercise-1-inspect-the-complete-schema-contract">Exercise 1: Inspect the complete schema contract<a class="heading-anchor" href="#exercise-1-inspect-the-complete-schema-contract" aria-label="Link to this section">#</a></h4>
+<p>Return ordered field triples(name, simpleString, nullable) for a DataFrame. Check the fixture rather than inferring correctness from a printed schema alone.</p>
+<p><strong>Expected result/shape:</strong> The triples are(event_id, bigint, false),(team, string, true),(amount_cents, bigint, true).</p>
+<p><strong>Verify:</strong> Compare the complete triples with literals in both languages, including all nullability flags.</p>
+<p><strong>Progressive hint:</strong> Iterate schema.fields and read each field&#x27;s name, dataType.simpleString and nullable property.</p>
+<h4 id="exercise-2-keep-a-transformation-separate-from-its-action">Exercise 2: Keep a transformation separate from its action<a class="heading-anchor" href="#exercise-2-keep-a-transformation-separate-from-its-action" aria-label="Link to this section">#</a></h4>
+<p>Return a DataFrame plan selecting team A without collecting or counting inside the function. At the call site, request a count and verify IDs 1 and 3. Preserve raw.</p>
+<p><strong>Expected result/shape:</strong> The returned frame contains two rows when evaluated; raw still has four. The function body contains only a filter transformation.</p>
+<p><strong>Verify:</strong> Assert returned count 2, ordered IDs[1,3] and raw count 4 at explicit action sites.</p>
+<p><strong>Progressive hint:</strong> Return frame.filter with a Column predicate; put count/collect in the reference checks.</p>
+<h4 id="exercise-3-bound-the-driver-result-and-detect-overflow-of-the-budget">Exercise 3: Bound the driver result and detect overflow of the budget<a class="heading-anchor" href="#exercise-3-bound-the-driver-result-and-detect-overflow-of-the-budget" aria-label="Link to this section">#</a></h4>
+<p>Return ordered event IDs while collecting at most limit+1 rows, with 0&lt;=limit&lt;=20. Reject a result larger than limit and invalid limits. Empty data with limit 0 is valid. Do not collect the full frame before checking length.</p>
+<p><strong>Expected result/shape:</strong> The four-row fixture passes limit 4 and rejects limit 3. An empty filter with limit 0 returns empty; limit 21 is rejected before collection.</p>
+<p><strong>Verify:</strong> Assert exact IDs, catch the oversize and invalid-budget errors, and inspect the bounded limit before the action.</p>
+<p><strong>Progressive hint:</strong> Use the extra row as an overflow witness, then require the returned size not to exceed the declared limit.</p>
+<h4 id="exercise-4-retain-observed-zero-while-isolating-unknown-amounts">Exercise 4: Retain observed zero while isolating unknown amounts<a class="heading-anchor" href="#exercise-4-retain-observed-zero-while-isolating-unknown-amounts" aria-label="Link to this section">#</a></h4>
+<p>Return rows with nonnull amount_cents, keeping all columns and identities. Do not replace NULL with zero or filter out observed zero.</p>
+<p><strong>Expected result/shape:</strong> IDs 1,3,4 remain with amounts 0,25,40, total 65. Raw still has one NULL amount at ID 2.</p>
+<p><strong>Verify:</strong> Assert exact IDs and sum 65, and independently count the unchanged raw NULL row.</p>
+<p><strong>Progressive hint:</strong> Use isNotNull only; zero is a legitimate observed value.</p>
+<h4 id="exercise-5-canonicalize-content-across-physical-repartitioning">Exercise 5: Canonicalize content across physical repartitioning<a class="heading-anchor" href="#exercise-5-canonicalize-content-across-physical-repartitioning" aria-label="Link to this section">#</a></h4>
+<p>Return ordered triples(event_id, optional team, optional amount) for this bounded fixture. Compare raw, repartition(1) and repartition(3) against the same literal content, not raw collect order.</p>
+<p><strong>Expected result/shape:</strong> Every version yields (1, A,0),(2, B, NULL),(3, A,25),(4, B,40). Physical placement does not change identity, NULL state or value.</p>
+<p><strong>Verify:</strong> Assert all three canonical outputs and keep the final event_id ordering explicit.</p>
+<p><strong>Progressive hint:</strong> Order by the unique event ID before bounded collection and use explicit nullable Row extraction in Scala.</p>
+<h4 id="exercise-6-read-back-the-actual-local-session-contract">Exercise 6: Read back the actual local session contract<a class="heading-anchor" href="#exercise-6-read-back-the-actual-local-session-contract" aria-label="Link to this section">#</a></h4>
+<p>Return master, timezone, shuffle-partition, ANSI, AQE, UI, driver-binding and Spark-version settings from the active session. Compare them with this prepared profile and rely on finally for owned stop. Do not substitute a hardcoded target string for version readback.</p>
+<p><strong>Expected result/shape:</strong> Master local[2], UTC, two shuffle partitions, ANSI true, AQE false, UI false, both driver addresses 127.0.0.1, and Spark version 4.0.1.</p>
+<p><strong>Verify:</strong> Assert the complete settings map; record actual version output and distinguish it from worker cleanup evidence.</p>
+<p><strong>Progressive hint:</strong> Read SparkSession.conf and SparkContext.getConf alongside spark.version.</p>
+<h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
+<p>If a schema assertion fails, compare names, types and nullability separately rather than changing all fields to strings. If a bounded result overflows, do not collect first and truncate afterward. If repartitioned results compare unequal only in order, canonicalize by a real unique identity before diagnosing data loss. If NULL extraction throws in Scala, check isNullAt before getLong/getString. If settings differ from the builder, inspect the actual session and prepared profile. Never stop an unrelated session or treat a version string as proof that all cleanup and correctness contracts passed.</p>
+<h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
+<p>Explain the contract of <code>schemaFields</code> / <code>schema_fields</code> without reading its solution. Trace the specified boundary case,then explain the final exercise&#x27;s evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>Use the <a href="../README.md.html">course route</a> to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. Keep runtime/profile receipts separate from any cluster-performance or production-recovery claim.</p>
+<h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://spark.apache.org/docs/4.0.1/sql-getting-started.html">Spark 4.0.1 SparkSession and explicit schemas</a>.</li>
+</ul>
+<ul>
+<li><a href="https://spark.apache.org/docs/4.0.1/configuration.html">Spark 4.0.1 configuration</a>.</li>
+</ul>
+<h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through spark-012: SparkSession, explicit schemas, and bounded actions.
+Read courses/scala-spark/guides/spark-012.md and courses/scala-spark/lessons/spark-012.scala;the paired sources are courses/scala-spark/lessons/spark-012.scala and courses/scala-spark/lessons/spark-012.py.
+Direct prerequisites: spark-001. Explain the schema,row grain and new Scala/Python/Spark syntax,ask me to predict a concrete result,then inspect my attempt. Give one hint at a time,review exact result and boundary evidence,and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
+Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies,start a remote service,reset existing checkpoints or alter unrelated learner work.
+Done when all six contracts have inspected evidence and I can explain the stated assumptions and a meaningful failure case.</code></pre></article>
+  </main>
+</body>
+</html>

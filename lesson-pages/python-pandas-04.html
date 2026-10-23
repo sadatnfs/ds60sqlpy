@@ -363,30 +363,24 @@
 <p>Typed CSV chunks provide a concrete input boundary. Parse IDs and integer amounts with nullable integer dtypes and customer labels as strings. Validate exact columns, key presence and parse failures per chunk. The examples use in-memory text, so no file or network download is needed. The same reduction principles apply to a prepared local file reader, provided its schema and error policy are preserved.</p>
 <h4 id="guide--worked-examples-and-syntax-anatomy">Worked examples and syntax anatomy<a class="heading-anchor" href="#guide--worked-examples-and-syntax-anatomy" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">import math
-from collections import deque
-from io import StringIO
-import numpy as np
-import pandas as pd
-
-chunks=[pd.Series([1.,3.]),pd.Series([100.])]
-means=[chunk.mean() for chunk in chunks]
-correct=sum(chunk.sum() for chunk in chunks)/sum(chunk.count() for chunk in chunks)
-assert np.mean(means)==51 and np.isclose(correct,104/3)
-print(&quot;Wrong mean of means:&quot;,np.mean(means),&quot;global mean:&quot;,correct)</code></pre>
+<pre><code class="language-python">chunks = [pd.Series([1.0, 3.0]), pd.Series([100.0])]
+means = [chunk.mean() for chunk in chunks]
+correct = sum(chunk.sum() for chunk in chunks) / sum(chunk.count() for chunk in chunks)
+assert np.mean(means) == 51 and np.isclose(correct, 104 / 3)
+print(&quot;Wrong mean of means:&quot;, np.mean(means), &quot;global mean:&quot;, correct)</code></pre>
 <p>The second chunk contains only one observation, so giving it the same influence as the two-row chunk changes the population weighting. Sum/count states retain enough information for the global mean regardless of how the input is partitioned.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">import math
-from collections import deque
-from io import StringIO
-import numpy as np
-import pandas as pd
-
-text=&quot;event_id,customer_id,amount_cents\n1,a,10\n2,b,\n3,a,20\n&quot;
-chunks=list(pd.read_csv(StringIO(text),chunksize=2,dtype={&quot;event_id&quot;:&quot;Int64&quot;,&quot;customer_id&quot;:&quot;string&quot;,&quot;amount_cents&quot;:&quot;Int64&quot;}))
-assert [len(chunk) for chunk in chunks]==[2,1]
-assert chunks[0].amount_cents.isna().sum()==1
-print(&quot;Typed chunk lengths:&quot;,[len(chunk) for chunk in chunks])</code></pre>
+<pre><code class="language-python">text = &quot;event_id,customer_id,amount_cents\n1,a,10\n2,b,\n3,a,20\n&quot;
+chunks = list(
+    pd.read_csv(
+        StringIO(text),
+        chunksize=2,
+        dtype={&quot;event_id&quot;: &quot;Int64&quot;, &quot;customer_id&quot;: &quot;string&quot;, &quot;amount_cents&quot;: &quot;Int64&quot;},
+    )
+)
+assert [len(chunk) for chunk in chunks] == [2, 1]
+assert chunks[0].amount_cents.isna().sum() == 1
+print(&quot;Typed chunk lengths:&quot;, [len(chunk) for chunk in chunks])</code></pre>
 <p>The empty amount is preserved as a missing nullable integer rather than coerced to zero. The final chunk is shorter, which is normal and is exactly why averaging per-chunk means is unsafe. Materializing chunks here is only for inspecting the tiny demonstration, not a scalable reading pattern.</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <ol>
@@ -398,7 +392,7 @@ print(&quot;Typed chunk lengths:&quot;,[len(chunk) for chunk in chunks])</code><
 </ol>
 <p><strong>Expected:</strong> States(4,2),(100,1) yield 104/3. Adding(0,0) has no effect. Empty states return None; (5,0), negative count or Boolean count is rejected.</p>
 <ol>
-<li><strong>Reduce typed amounts across batches.</strong> Consume an iterable of chunks with customer_id and nullable/integer amount_cents. Reject missing customers, noninteger amount dtype or totals outside signed int64 range. Return customer_id, row_count, known_count, total_cents sorted by customer, preserving missing totals when a customer has no known amounts.</li>
+<li><strong>Reduce typed amounts across batches.</strong> Consume an iterable of chunks with nonmissing string customer_id and nullable/integer amount_cents. Reject missing or nonstring customers, noninteger amount dtype or totals outside signed int64 range. Return customer_id, row_count, known_count, total_cents sorted by customer, preserving missing totals when a customer has no known amounts.</li>
 </ol>
 <p><strong>Expected:</strong> Across chunks a:10, b:NA then a:20, b:NA, return a counts 2,2, total 30 and b counts 2,0, totalNA. Input chunk boundaries do not change the result.</p>
 <ol>
@@ -469,76 +463,135 @@ Done when all six contracts and their boundary cases have inspected evidence and
 <span>Official implementations remain in solutions/.</span>
 <span>&quot;&quot;&quot;</span>
 <span> </span>
-<span>import math</span>
-<span>from collections import deque</span>
 <span>from io import StringIO</span>
+<span> </span>
 <span>import numpy as np</span>
-<span>import pandas as pd</span>
+<span>import pandas as pd  # type: ignore[import-untyped]</span>
+<span> </span>
 <span> </span>
 <span>def mean_state(values: pd.Series) -&gt; tuple[float, int]:</span>
-<span>    &quot;&quot;&quot;For a numeric Series containing finite values or missing entries, return accurate known-value sum and known-value count. Reject nonnumeric dtype or infinity with ValueError. An empty or all-missing numeric Series returns (0.0,0).&quot;&quot;&quot;</span>
+<span>    &quot;&quot;&quot;</span>
+<span>    For a numeric Series containing finite values or missing entries, return accurate</span>
+<span>    known-value sum and known-value count. Reject nonnumeric dtype or infinity with</span>
+<span>    ValueError. An empty or all-missing numeric Series returns (0.0,0).</span>
+<span>    &quot;&quot;&quot;</span>
 <span>    raise NotImplementedError(&quot;Implement mean_state&quot;)</span>
 <span> </span>
+<span> </span>
 <span>def merge_means(states: list[tuple[float, int]]) -&gt; float | None:</span>
-<span>    &quot;&quot;&quot;Combine sum/count states into one mean, returning None if total count is zero. Require finite sums and nonnegative integer counts; a zero-count state must have zero sum. Reject invalid states with ValueError.&quot;&quot;&quot;</span>
+<span>    &quot;&quot;&quot;</span>
+<span>    Combine sum/count states into one mean, returning None if total count is zero. Require</span>
+<span>    finite sums and nonnegative integer counts; a zero-count state must have zero sum.</span>
+<span>    Reject invalid states with ValueError.</span>
+<span>    &quot;&quot;&quot;</span>
 <span>    raise NotImplementedError(&quot;Implement merge_means&quot;)</span>
 <span> </span>
+<span> </span>
 <span>def customer_totals(chunks) -&gt; pd.DataFrame:</span>
-<span>    &quot;&quot;&quot;Consume an iterable of chunks with customer_id and nullable/integer amount_cents. Reject missing customers, noninteger amount dtype or totals outside signed int64 range. Return customer_id, row_count, known_count, total_cents sorted by customer, preserving missing totals when a customer has no known amounts.&quot;&quot;&quot;</span>
+<span>    &quot;&quot;&quot;</span>
+<span>    Consume chunks with nonmissing string customer_id and nullable/integer amount_cents.</span>
+<span>    Reject missing or nonstring customers, noninteger amount dtype, and totals outside</span>
+<span>    signed int64 range. Return customer_id, row_count, known_count, total_cents sorted</span>
+<span>    by customer, preserving missing totals when a customer has no known amounts.</span>
+<span>    &quot;&quot;&quot;</span>
 <span>    raise NotImplementedError(&quot;Implement customer_totals&quot;)</span>
 <span> </span>
+<span> </span>
 <span>def unique_records(chunks) -&gt; pd.DataFrame:</span>
-<span>    &quot;&quot;&quot;Consume chunks with nonmissing integer event_id and amount_cents that is integer or missing. Keep the first occurrence of identical event records in encounter order. Reject any repeated ID with a different amount, including missing versus zero, with ValueError.&quot;&quot;&quot;</span>
+<span>    &quot;&quot;&quot;</span>
+<span>    Consume chunks with nonmissing integer event_id and amount_cents that is integer or</span>
+<span>    missing. Keep the first occurrence of identical event records in encounter order. Reject</span>
+<span>    any repeated ID with a different amount, including missing versus zero, with ValueError.</span>
+<span>    &quot;&quot;&quot;</span>
 <span>    raise NotImplementedError(&quot;Implement unique_records&quot;)</span>
 <span> </span>
+<span> </span>
 <span>def rolling_means(chunks, window: int):</span>
-<span>    &quot;&quot;&quot;Yield full-window row-count rolling means across an iterable of finite numeric one-dimensional chunks. Require a positive non-Boolean integer window. Do not reset history at a chunk boundary, and yield nothing before a full window exists.&quot;&quot;&quot;</span>
+<span>    &quot;&quot;&quot;</span>
+<span>    Yield full-window row-count rolling means across an iterable of finite numeric</span>
+<span>    one-dimensional chunks. Require a positive non-Boolean integer window. Do not reset</span>
+<span>    history at a chunk boundary, and yield nothing before a full window exists.</span>
+<span>    &quot;&quot;&quot;</span>
 <span>    raise NotImplementedError(&quot;Implement rolling_means&quot;)</span>
 <span> </span>
+<span> </span>
 <span>def csv_chunks(text: str, chunksize: int):</span>
-<span>    &quot;&quot;&quot;Yield chunks from in-memory CSV text with exactly event_id, customer_id, amount_cents columns in that order. Parse IDs/amounts as Int64 and customers as string. Require positive integer chunksize, nonmissing IDs/customers and valid numeric text. Preserve missing amounts.&quot;&quot;&quot;</span>
+<span>    &quot;&quot;&quot;</span>
+<span>    Yield chunks from in-memory CSV text with exactly event_id, customer_id, amount_cents</span>
+<span>    columns in that order. Parse IDs/amounts as Int64 and customers as string. Require</span>
+<span>    positive integer chunksize, nonmissing IDs/customers and valid numeric text. Preserve</span>
+<span>    missing amounts.</span>
+<span>    &quot;&quot;&quot;</span>
 <span>    raise NotImplementedError(&quot;Implement csv_chunks&quot;)</span>
 <span> </span>
-<span>def worked_examples():</span>
-<span>    chunks=[pd.Series([1.,3.]),pd.Series([100.])]</span>
-<span>    means=[chunk.mean() for chunk in chunks]</span>
-<span>    correct=sum(chunk.sum() for chunk in chunks)/sum(chunk.count() for chunk in chunks)</span>
-<span>    assert np.mean(means)==51 and np.isclose(correct,104/3)</span>
-<span>    print(&quot;Wrong mean of means:&quot;,np.mean(means),&quot;global mean:&quot;,correct)</span>
 <span> </span>
-<span>    text=&quot;event_id,customer_id,amount_cents\n1,a,10\n2,b,\n3,a,20\n&quot;</span>
-<span>    chunks=list(pd.read_csv(StringIO(text),chunksize=2,dtype={&quot;event_id&quot;:&quot;Int64&quot;,&quot;customer_id&quot;:&quot;string&quot;,&quot;amount_cents&quot;:&quot;Int64&quot;}))</span>
-<span>    assert [len(chunk) for chunk in chunks]==[2,1]</span>
-<span>    assert chunks[0].amount_cents.isna().sum()==1</span>
-<span>    print(&quot;Typed chunk lengths:&quot;,[len(chunk) for chunk in chunks])</span>
+<span>def worked_examples() -&gt; None:</span>
+<span>    chunks = [pd.Series([1.0, 3.0]), pd.Series([100.0])]</span>
+<span>    means = [chunk.mean() for chunk in chunks]</span>
+<span>    correct = sum(chunk.sum() for chunk in chunks) / sum(chunk.count() for chunk in chunks)</span>
+<span>    assert np.mean(means) == 51 and np.isclose(correct, 104 / 3)</span>
+<span>    print(&quot;Wrong mean of means:&quot;, np.mean(means), &quot;global mean:&quot;, correct)</span>
+<span> </span>
+<span>    text = &quot;event_id,customer_id,amount_cents\n1,a,10\n2,b,\n3,a,20\n&quot;</span>
+<span>    chunks = list(</span>
+<span>        pd.read_csv(</span>
+<span>            StringIO(text),</span>
+<span>            chunksize=2,</span>
+<span>            dtype={&quot;event_id&quot;: &quot;Int64&quot;, &quot;customer_id&quot;: &quot;string&quot;, &quot;amount_cents&quot;: &quot;Int64&quot;},</span>
+<span>        )</span>
+<span>    )</span>
+<span>    assert [len(chunk) for chunk in chunks] == [2, 1]</span>
+<span>    assert chunks[0].amount_cents.isna().sum() == 1</span>
+<span>    print(&quot;Typed chunk lengths:&quot;, [len(chunk) for chunk in chunks])</span>
+<span> </span>
 <span> </span>
 <span>if __name__ == &quot;__main__&quot;:</span>
 <span>    worked_examples()</span>
 <span>    print(&quot;Worked examples passed. Complete the six task functions and their boundary checks.&quot;)</span>
 <span> </span>
 <span># Exercise 1: Retain the correct mean denominator</span>
-<span># Prompt: For a numeric Series containing finite values or missing entries, return accurate known-value sum and known-value count. Reject nonnumeric dtype or infinity with ValueError. An empty or all-missing numeric Series returns (0.0,0).</span>
-<span># Expected: [1, NA,3] returns (4.0,2), not count 3. Empty Float64 and [NA] Float64 return (0.0,0); infinity fails.</span>
+<span># Prompt: For a numeric Series containing finite values or missing entries, return accurate</span>
+<span># known-value sum and known-value count. Reject nonnumeric dtype or infinity with ValueError. An</span>
+<span># empty or all-missing numeric Series returns (0.0,0).</span>
+<span># Expected: [1, NA,3] returns (4.0,2), not count 3. Empty Float64 and [NA] Float64 return (0.0,0);</span>
+<span># infinity fails.</span>
 <span> </span>
 <span># Exercise 2: Combine uneven chunks correctly</span>
-<span># Prompt: Combine sum/count states into one mean, returning None if total count is zero. Require finite sums and nonnegative integer counts; a zero-count state must have zero sum. Reject invalid states with ValueError.</span>
-<span># Expected: States(4,2),(100,1) yield 104/3. Adding(0,0) has no effect. Empty states return None; (5,0), negative count or Boolean count is rejected.</span>
+<span># Prompt: Combine sum/count states into one mean, returning None if total count is zero. Require</span>
+<span># finite sums and nonnegative integer counts; a zero-count state must have zero sum. Reject</span>
+<span># invalid states with ValueError.</span>
+<span># Expected: States(4,2),(100,1) yield 104/3. Adding(0,0) has no effect. Empty states return None;</span>
+<span># (5,0), negative count or Boolean count is rejected.</span>
 <span> </span>
 <span># Exercise 3: Reduce typed amounts across batches</span>
-<span># Prompt: Consume an iterable of chunks with customer_id and nullable/integer amount_cents. Reject missing customers, noninteger amount dtype or totals outside signed int64 range. Return customer_id, row_count, known_count, total_cents sorted by customer, preserving missing totals when a customer has no known amounts.</span>
-<span># Expected: Across chunks a:10, b:NA then a:20, b:NA, return a counts 2,2, total 30 and b counts 2,0, totalNA. Input chunk boundaries do not change the result.</span>
+<span># Prompt: Consume an iterable of chunks with nonmissing string customer_id and nullable/integer</span>
+<span># amount_cents. Reject</span>
+<span># missing customers, noninteger amount dtype or totals outside signed int64 range. Return</span>
+<span># customer_id, row_count, known_count, total_cents sorted by customer, preserving missing totals</span>
+<span># when a customer has no known amounts.</span>
+<span># Expected: Across chunks a:10, b:NA then a:20, b:NA, return a counts 2,2, total 30 and b counts</span>
+<span># 2,0, totalNA. Input chunk boundaries do not change the result.</span>
 <span> </span>
 <span># Exercise 4: Detect conflicts across chunk boundaries</span>
-<span># Prompt: Consume chunks with nonmissing integer event_id and amount_cents that is integer or missing. Keep the first occurrence of identical event records in encounter order. Reject any repeated ID with a different amount, including missing versus zero, with ValueError.</span>
-<span># Expected: Chunks[(1,10),(2, NA)] then[(1,10),(3,20)] return IDs 1,2,3. Repeating ID 2 with amount 0 raises ValueError; missing is not normalized to zero.</span>
+<span># Prompt: Consume chunks with nonmissing integer event_id and amount_cents that is integer or</span>
+<span># missing. Keep the first occurrence of identical event records in encounter order. Reject any</span>
+<span># repeated ID with a different amount, including missing versus zero, with ValueError.</span>
+<span># Expected: Chunks[(1,10),(2, NA)] then[(1,10),(3,20)] return IDs 1,2,3. Repeating ID 2 with</span>
+<span># amount 0 raises ValueError; missing is not normalized to zero.</span>
 <span> </span>
 <span># Exercise 5: Carry rolling history across batches</span>
-<span># Prompt: Yield full-window row-count rolling means across an iterable of finite numeric one-dimensional chunks. Require a positive non-Boolean integer window. Do not reset history at a chunk boundary, and yield nothing before a full window exists.</span>
-<span># Expected: Chunks[1,2] then[3,4] with window 3 yield [2,3], the same as one chunk[1,2,3,4]. Empty input yields no values; window 0 and NaN input fail on iteration.</span>
+<span># Prompt: Yield full-window row-count rolling means across an iterable of finite numeric</span>
+<span># one-dimensional chunks. Require a positive non-Boolean integer window. Do not reset history at a</span>
+<span># chunk boundary, and yield nothing before a full window exists.</span>
+<span># Expected: Chunks[1,2] then[3,4] with window 3 yield [2,3], the same as one chunk[1,2,3,4]. Empty</span>
+<span># input yields no values; window 0 and NaN input fail on iteration.</span>
 <span> </span>
 <span># Exercise 6: Make parsing a typed batch boundary</span>
-<span># Prompt: Yield chunks from in-memory CSV text with exactly event_id, customer_id, amount_cents columns in that order. Parse IDs/amounts as Int64 and customers as string. Require positive integer chunksize, nonmissing IDs/customers and valid numeric text. Preserve missing amounts.</span>
-<span># Expected: Three CSV rows with chunksize 2 yield lengths 2,1 and nullable Int64 amounts. An empty amount stays missing; amount bad or missing event_id raises ValueError during iteration.</span>
+<span># Prompt: Yield chunks from in-memory CSV text with exactly event_id, customer_id, amount_cents</span>
+<span># columns in that order. Parse IDs/amounts as Int64 and customers as string. Require positive</span>
+<span># integer chunksize, nonmissing IDs/customers and valid numeric text. Preserve missing amounts.</span>
+<span># Expected: Three CSV rows with chunksize 2 yield lengths 2,1 and nullable Int64 amounts. An empty</span>
+<span># amount stays missing; amount bad or missing event_id raises ValueError during iteration.</span>
 <span> </span></code></pre></div>
       </section>
 
@@ -581,118 +634,178 @@ Done when all six contracts and their boundary cases have inspected evidence and
 <pre><code class="language-python">def mean_state(values: pd.Series) -&gt; tuple[float, int]:
     if not pd.api.types.is_numeric_dtype(values.dtype):
         raise ValueError(&quot;Expected numeric measurements&quot;)
-    known=values.dropna().to_numpy(dtype=float)
+    known = values.dropna().to_numpy(dtype=float)
     if not np.isfinite(known).all():
         raise ValueError(&quot;Known measurements must be finite&quot;)
-    return math.fsum(float(value) for value in known),len(known)</code></pre>
+    return math.fsum(float(value) for value in known), len(known)</code></pre>
 <p>The state records the number of observed values, not the number of rows in the batch. That distinction survives aggregation and prevents missing records from diluting a mean. math.fsum reduces avoidable cancellation error in the known-value sum. An empty state is an identity for later combination; it does not assert that the population mean is zero.</p>
-<pre><code class="language-python">assert mean_state(pd.Series([1,pd.NA,3],dtype=&quot;Float64&quot;))==(4.,2)
-assert mean_state(pd.Series([],dtype=&quot;Float64&quot;))==(0.,0)
-assert mean_state(pd.Series([pd.NA],dtype=&quot;Float64&quot;))==(0.,0)
-expect_value_error(lambda:mean_state(pd.Series([np.inf])))</code></pre>
+<pre><code class="language-python">assert mean_state(pd.Series([1, pd.NA, 3], dtype=&quot;Float64&quot;)) == (4.0, 2)
+assert mean_state(pd.Series([], dtype=&quot;Float64&quot;)) == (0.0, 0)
+assert mean_state(pd.Series([pd.NA], dtype=&quot;Float64&quot;)) == (0.0, 0)
+expect_value_error(lambda: mean_state(pd.Series([np.inf])))</code></pre>
 <h5 id="solution-1--exercise-2-combine-uneven-chunks-correctly">Exercise 2: Combine uneven chunks correctly<a class="heading-anchor" href="#solution-1--exercise-2-combine-uneven-chunks-correctly" aria-label="Link to this section">#</a></h5>
 <p>Combine sum/count states into one mean, returning None if total count is zero. Require finite sums and nonnegative integer counts; a zero-count state must have zero sum. Reject invalid states with ValueError.</p>
 <p><strong>Expected:</strong> States(4,2),(100,1) yield 104/3. Adding(0,0) has no effect. Empty states return None; (5,0), negative count or Boolean count is rejected.</p>
 <pre><code class="language-python">def merge_means(states: list[tuple[float, int]]) -&gt; float | None:
-    for total,count in states:
-        if not math.isfinite(total) or isinstance(count,bool) or not isinstance(count,(int,np.integer)) or count&lt;0 or (count==0 and total!=0):
+    for total, count in states:
+        if (
+            not math.isfinite(total)
+            or isinstance(count, bool)
+            or not isinstance(count, (int, np.integer))
+            or count &lt; 0
+            or (count == 0 and total != 0)
+        ):
             raise ValueError(&quot;Expected valid sum/count states&quot;)
-    count=sum(count for _,count in states)
-    return math.fsum(total for total,_ in states)/count if count else None</code></pre>
+    count = sum(count for _, count in states)
+    return math.fsum(total for total, _ in states) / count if count else None</code></pre>
 <p>Summing numerators and denominators respects observation weighting across arbitrary partitions. A mean-of-means would require extra weights and is equivalent only when known counts match or are explicitly used. Returning None for no observed values preserves the distinction between an undefined mean and a measured zero. Invalid state checks catch upstream bookkeeping errors before they become plausible aggregate numbers.</p>
-<pre><code class="language-python">assert math.isclose(merge_means([(4.,2),(100.,1)]),104/3)
-assert math.isclose(merge_means([(0.,0),(4.,2),(100.,1)]),104/3)
+<pre><code class="language-python">mean = merge_means([(4.0, 2), (100.0, 1)])
+assert mean is not None and math.isclose(mean, 104 / 3)
+with_empty = merge_means([(0.0, 0), (4.0, 2), (100.0, 1)])
+assert with_empty is not None and math.isclose(with_empty, 104 / 3)
 assert merge_means([]) is None
-expect_value_error(lambda:merge_means([(5.,0)]))
-expect_value_error(lambda:merge_means([(1.,True)]))</code></pre>
+expect_value_error(lambda: merge_means([(5.0, 0)]))
+expect_value_error(lambda: merge_means([(1.0, True)]))</code></pre>
 <h5 id="solution-1--exercise-3-reduce-typed-amounts-across-batches">Exercise 3: Reduce typed amounts across batches<a class="heading-anchor" href="#solution-1--exercise-3-reduce-typed-amounts-across-batches" aria-label="Link to this section">#</a></h5>
-<p>Consume an iterable of chunks with customer_id and nullable/integer amount_cents. Reject missing customers, noninteger amount dtype or totals outside signed int64 range. Return customer_id, row_count, known_count, total_cents sorted by customer, preserving missing totals when a customer has no known amounts.</p>
+<p>Consume an iterable of chunks with nonmissing string customer_id and nullable/integer amount_cents. Reject missing or nonstring customers, noninteger amount dtype or totals outside signed int64 range. Return customer_id, row_count, known_count, total_cents sorted by customer, preserving missing totals when a customer has no known amounts.</p>
 <p><strong>Expected:</strong> Across chunks a:10, b:NA then a:20, b:NA, return a counts 2,2, total 30 and b counts 2,0, totalNA. Input chunk boundaries do not change the result.</p>
-<pre><code class="language-python">def customer_totals(chunks) -&gt; pd.DataFrame:
-    state={}
+<pre><code class="language-python">def customer_totals(chunks: Iterable[pd.DataFrame]) -&gt; pd.DataFrame:
+    state: dict[str, tuple[int, int, int]] = {}
     for chunk in chunks:
-        if not {&quot;customer_id&quot;,&quot;amount_cents&quot;}.issubset(chunk.columns) or chunk[&quot;customer_id&quot;].isna().any() or not pd.api.types.is_integer_dtype(chunk[&quot;amount_cents&quot;].dtype):
-            raise ValueError(&quot;Expected customer identities and integer-cent measurements&quot;)
-        for customer,amount in chunk[[&quot;customer_id&quot;,&quot;amount_cents&quot;]].itertuples(index=False,name=None):
-            rows,known,total=state.get(customer,(0,0,0))
+        if (
+            not {&quot;customer_id&quot;, &quot;amount_cents&quot;}.issubset(chunk.columns)
+            or chunk[&quot;customer_id&quot;].isna().any()
+            or not chunk[&quot;customer_id&quot;].map(lambda value: isinstance(value, str)).all()
+            or not pd.api.types.is_integer_dtype(chunk[&quot;amount_cents&quot;].dtype)
+        ):
+            raise ValueError(&quot;Expected known string customer IDs and integer-cent measurements&quot;)
+        for customer, amount in chunk[[&quot;customer_id&quot;, &quot;amount_cents&quot;]].itertuples(
+            index=False, name=None
+        ):
+            rows, known, total = state.get(customer, (0, 0, 0))
             if not pd.isna(amount):
-                known+=1;total+=int(amount)
-            state[customer]=(rows+1,known,total)
-    rows=[]
-    for customer,(count,known,total) in sorted(state.items()):
-        if not -(2**63)&lt;=total&lt;2**63:
+                known += 1
+                total += int(amount)
+            state[customer] = (rows + 1, known, total)
+    output_rows = []
+    for customer, (count, known, total) in sorted(state.items()):
+        if not -(2**63) &lt;= total &lt; 2**63:
             raise ValueError(&quot;Customer total exceeds the declared Int64 representation&quot;)
-        rows.append((customer,count,known,total if known else pd.NA))
-    result=pd.DataFrame(rows,columns=[&quot;customer_id&quot;,&quot;row_count&quot;,&quot;known_count&quot;,&quot;total_cents&quot;])
-    result[&quot;total_cents&quot;]=pd.array(result[&quot;total_cents&quot;],dtype=&quot;Int64&quot;)
+        output_rows.append((customer, count, known, total if known else pd.NA))
+    result = pd.DataFrame(
+        output_rows, columns=[&quot;customer_id&quot;, &quot;row_count&quot;, &quot;known_count&quot;, &quot;total_cents&quot;]
+    )
+    result[&quot;total_cents&quot;] = pd.array(result[&quot;total_cents&quot;], dtype=&quot;Int64&quot;)
     return result</code></pre>
 <p>The dictionary retains one small state per customer, so memory scales with distinct customers rather than all event rows. Python integer totals avoid intermediate fixed-width wraparound, and the final range check makes the output Int64 boundary explicit. Row count and known count preserve missingness evidence. Repartitioning the same records into one chunk must yield the identical typed result, directly testing that a storage boundary did not change the metric.</p>
-<pre><code class="language-python">a=pd.DataFrame({&quot;customer_id&quot;:[&quot;a&quot;,&quot;b&quot;],&quot;amount_cents&quot;:pd.Series([10,pd.NA],dtype=&quot;Int64&quot;)});b=pd.DataFrame({&quot;customer_id&quot;:[&quot;a&quot;,&quot;b&quot;],&quot;amount_cents&quot;:pd.Series([20,pd.NA],dtype=&quot;Int64&quot;)})
-r=customer_totals(iter([a,b]))
-assert r.customer_id.tolist()==[&quot;a&quot;,&quot;b&quot;] and r.row_count.tolist()==[2,2] and r.known_count.tolist()==[2,0]
-assert r.loc[0,&quot;total_cents&quot;]==30 and pd.isna(r.loc[1,&quot;total_cents&quot;])
-pd.testing.assert_frame_equal(r,customer_totals([pd.concat([a,b])]))</code></pre>
+<pre><code class="language-python">a = pd.DataFrame({&quot;customer_id&quot;: [&quot;a&quot;, &quot;b&quot;], &quot;amount_cents&quot;: pd.Series([10, pd.NA], dtype=&quot;Int64&quot;)})
+b = pd.DataFrame({&quot;customer_id&quot;: [&quot;a&quot;, &quot;b&quot;], &quot;amount_cents&quot;: pd.Series([20, pd.NA], dtype=&quot;Int64&quot;)})
+r = customer_totals(iter([a, b]))
+assert (
+    r.customer_id.tolist() == [&quot;a&quot;, &quot;b&quot;]
+    and r.row_count.tolist() == [2, 2]
+    and r.known_count.tolist() == [2, 0]
+)
+assert r.loc[0, &quot;total_cents&quot;] == 30 and pd.isna(r.loc[1, &quot;total_cents&quot;])
+pd.testing.assert_frame_equal(r, customer_totals([pd.concat([a, b])]))
+mixed_ids = pd.DataFrame(
+    {&quot;customer_id&quot;: [&quot;a&quot;, 1], &quot;amount_cents&quot;: pd.Series([1, 2], dtype=&quot;Int64&quot;)}
+)
+expect_value_error(lambda: customer_totals([mixed_ids]))</code></pre>
 <h5 id="solution-1--exercise-4-detect-conflicts-across-chunk-boundaries">Exercise 4: Detect conflicts across chunk boundaries<a class="heading-anchor" href="#solution-1--exercise-4-detect-conflicts-across-chunk-boundaries" aria-label="Link to this section">#</a></h5>
 <p>Consume chunks with nonmissing integer event_id and amount_cents that is integer or missing. Keep the first occurrence of identical event records in encounter order. Reject any repeated ID with a different amount, including missing versus zero, with ValueError.</p>
 <p><strong>Expected:</strong> Chunks[(1,10),(2, NA)] then[(1,10),(3,20)] return IDs 1,2,3. Repeating ID 2 with amount 0 raises ValueError; missing is not normalized to zero.</p>
-<pre><code class="language-python">def unique_records(chunks) -&gt; pd.DataFrame:
-    seen={};rows=[]
+<pre><code class="language-python">def unique_records(chunks: Iterable[pd.DataFrame]) -&gt; pd.DataFrame:
+    seen: dict[int, int | None] = {}
+    rows = []
     for chunk in chunks:
-        if not {&quot;event_id&quot;,&quot;amount_cents&quot;}.issubset(chunk.columns) or chunk[&quot;event_id&quot;].isna().any() or not pd.api.types.is_integer_dtype(chunk[&quot;event_id&quot;].dtype) or not pd.api.types.is_integer_dtype(chunk[&quot;amount_cents&quot;].dtype):
+        if (
+            not {&quot;event_id&quot;, &quot;amount_cents&quot;}.issubset(chunk.columns)
+            or chunk[&quot;event_id&quot;].isna().any()
+            or not pd.api.types.is_integer_dtype(chunk[&quot;event_id&quot;].dtype)
+            or not pd.api.types.is_integer_dtype(chunk[&quot;amount_cents&quot;].dtype)
+        ):
             raise ValueError(&quot;Expected integer event IDs and integer-cent amounts&quot;)
-        for event,amount in chunk[[&quot;event_id&quot;,&quot;amount_cents&quot;]].itertuples(index=False,name=None):
-            event=int(event);value=None if pd.isna(amount) else int(amount)
+        for event, amount in chunk[[&quot;event_id&quot;, &quot;amount_cents&quot;]].itertuples(index=False, name=None):
+            event = int(event)
+            value = None if pd.isna(amount) else int(amount)
             if event in seen:
-                if seen[event]!=value:
+                if seen[event] != value:
                     raise ValueError(&quot;One event identity has conflicting amounts&quot;)
             else:
-                seen[event]=value;rows.append((event,value))
-    result=pd.DataFrame(rows,columns=[&quot;event_id&quot;,&quot;amount_cents&quot;])
-    result[&quot;amount_cents&quot;]=pd.array(result[&quot;amount_cents&quot;],dtype=&quot;Int64&quot;)
+                seen[event] = value
+                rows.append((event, value))
+    result = pd.DataFrame(rows, columns=[&quot;event_id&quot;, &quot;amount_cents&quot;])
+    result[&quot;amount_cents&quot;] = pd.array(result[&quot;amount_cents&quot;], dtype=&quot;Int64&quot;)
     return result</code></pre>
 <p>Identity state persists across batches, so a duplicate arriving later is still recognized. None is an internal sentinel for missing amount, distinct from the integer zero. Conflicting payloads fail rather than letting encounter order decide truth. This implementation retains all unique identities and result rows, so it is not constant-memory; a larger pipeline may need an external key store or partitioning while preserving the same conflict policy.</p>
-<pre><code class="language-python">a=pd.DataFrame({&quot;event_id&quot;:pd.Series([1,2],dtype=&quot;Int64&quot;),&quot;amount_cents&quot;:pd.Series([10,pd.NA],dtype=&quot;Int64&quot;)});b=pd.DataFrame({&quot;event_id&quot;:pd.Series([1,3],dtype=&quot;Int64&quot;),&quot;amount_cents&quot;:pd.Series([10,20],dtype=&quot;Int64&quot;)})
-r=unique_records([a,b])
-assert r.event_id.tolist()==[1,2,3] and pd.isna(r.loc[1,&quot;amount_cents&quot;])
-conflict=pd.DataFrame({&quot;event_id&quot;:pd.Series([2],dtype=&quot;Int64&quot;),&quot;amount_cents&quot;:pd.Series([0],dtype=&quot;Int64&quot;)})
-expect_value_error(lambda:unique_records([a,conflict]))</code></pre>
+<pre><code class="language-python">a = pd.DataFrame(
+    {
+        &quot;event_id&quot;: pd.Series([1, 2], dtype=&quot;Int64&quot;),
+        &quot;amount_cents&quot;: pd.Series([10, pd.NA], dtype=&quot;Int64&quot;),
+    }
+)
+b = pd.DataFrame(
+    {
+        &quot;event_id&quot;: pd.Series([1, 3], dtype=&quot;Int64&quot;),
+        &quot;amount_cents&quot;: pd.Series([10, 20], dtype=&quot;Int64&quot;),
+    }
+)
+r = unique_records([a, b])
+assert r.event_id.tolist() == [1, 2, 3] and pd.isna(r.loc[1, &quot;amount_cents&quot;])
+conflict = pd.DataFrame(
+    {&quot;event_id&quot;: pd.Series([2], dtype=&quot;Int64&quot;), &quot;amount_cents&quot;: pd.Series([0], dtype=&quot;Int64&quot;)}
+)
+expect_value_error(lambda: unique_records([a, conflict]))</code></pre>
 <h5 id="solution-1--exercise-5-carry-rolling-history-across-batches">Exercise 5: Carry rolling history across batches<a class="heading-anchor" href="#solution-1--exercise-5-carry-rolling-history-across-batches" aria-label="Link to this section">#</a></h5>
 <p>Yield full-window row-count rolling means across an iterable of finite numeric one-dimensional chunks. Require a positive non-Boolean integer window. Do not reset history at a chunk boundary, and yield nothing before a full window exists.</p>
 <p><strong>Expected:</strong> Chunks[1,2] then[3,4] with window 3 yield [2,3], the same as one chunk[1,2,3,4]. Empty input yields no values; window 0 and NaN input fail on iteration.</p>
-<pre><code class="language-python">def rolling_means(chunks, window: int):
-    if isinstance(window,bool) or not isinstance(window,(int,np.integer)) or window&lt;=0:
+<pre><code class="language-python">def rolling_means(chunks: Iterable[Iterable[float]], window: int) -&gt; Iterator[float]:
+    if isinstance(window, bool) or not isinstance(window, (int, np.integer)) or window &lt;= 0:
         raise ValueError(&quot;Expected a positive integer window&quot;)
-    history=deque(maxlen=window)
+    history: deque[float] = deque(maxlen=window)
     for chunk in chunks:
-        values=np.asarray(chunk,dtype=float)
-        if values.ndim!=1 or not np.isfinite(values).all():
+        values = np.asarray(chunk, dtype=float)
+        if values.ndim != 1 or not np.isfinite(values).all():
             raise ValueError(&quot;Expected finite one-dimensional chunks&quot;)
         for value in values:
             history.append(float(value))
-            if len(history)==window:
-                yield math.fsum(history)/window</code></pre>
+            if len(history) == window:
+                yield math.fsum(history) / window</code></pre>
 <p>A deque with maxlen retains only the most recent window observations and evicts older ones as new values arrive. The generator yields outputs incrementally, so a consumer need not collect every result. Validation occurs when the generator is iterated, which is why error tests call list. This is a row-count window over one sequence; entity-specific or elapsed-time windows require additional keys and timestamp-aware state.</p>
-<pre><code class="language-python">assert list(rolling_means([[1,2],[3,4]],3))==[2.,3.]
-assert list(rolling_means([[1,2,3,4]],3))==[2.,3.]
-assert list(rolling_means([],3))==[]
-expect_value_error(lambda:list(rolling_means([[1]],0)))
-expect_value_error(lambda:list(rolling_means([[np.nan]],1)))</code></pre>
+<pre><code class="language-python">assert list(rolling_means([[1, 2], [3, 4]], 3)) == [2.0, 3.0]
+assert list(rolling_means([[1, 2, 3, 4]], 3)) == [2.0, 3.0]
+assert list(rolling_means([], 3)) == []
+expect_value_error(lambda: list(rolling_means([[1]], 0)))
+expect_value_error(lambda: list(rolling_means([[np.nan]], 1)))</code></pre>
 <h5 id="solution-1--exercise-6-make-parsing-a-typed-batch-boundary">Exercise 6: Make parsing a typed batch boundary<a class="heading-anchor" href="#solution-1--exercise-6-make-parsing-a-typed-batch-boundary" aria-label="Link to this section">#</a></h5>
 <p>Yield chunks from in-memory CSV text with exactly event_id, customer_id, amount_cents columns in that order. Parse IDs/amounts as Int64 and customers as string. Require positive integer chunksize, nonmissing IDs/customers and valid numeric text. Preserve missing amounts.</p>
 <p><strong>Expected:</strong> Three CSV rows with chunksize 2 yield lengths 2,1 and nullable Int64 amounts. An empty amount stays missing; amount bad or missing event_id raises ValueError during iteration.</p>
-<pre><code class="language-python">def csv_chunks(text: str, chunksize: int):
-    if isinstance(chunksize,bool) or not isinstance(chunksize,int) or chunksize&lt;=0:
+<pre><code class="language-python">def csv_chunks(text: str, chunksize: int) -&gt; Iterator[pd.DataFrame]:
+    if isinstance(chunksize, bool) or not isinstance(chunksize, int) or chunksize &lt;= 0:
         raise ValueError(&quot;Expected a positive integer chunk size&quot;)
-    for chunk in pd.read_csv(StringIO(text),chunksize=chunksize,dtype={&quot;event_id&quot;:&quot;Int64&quot;,&quot;customer_id&quot;:&quot;string&quot;,&quot;amount_cents&quot;:&quot;Int64&quot;}):
-        if chunk.columns.tolist()!=[&quot;event_id&quot;,&quot;customer_id&quot;,&quot;amount_cents&quot;] or chunk[&quot;event_id&quot;].isna().any() or chunk[&quot;customer_id&quot;].isna().any():
+    for chunk in pd.read_csv(
+        StringIO(text),
+        chunksize=chunksize,
+        dtype={&quot;event_id&quot;: &quot;Int64&quot;, &quot;customer_id&quot;: &quot;string&quot;, &quot;amount_cents&quot;: &quot;Int64&quot;},
+    ):
+        if (
+            chunk.columns.tolist() != [&quot;event_id&quot;, &quot;customer_id&quot;, &quot;amount_cents&quot;]
+            or chunk[&quot;event_id&quot;].isna().any()
+            or chunk[&quot;customer_id&quot;].isna().any()
+        ):
             raise ValueError(&quot;CSV schema and record identities must be valid&quot;)
         yield chunk</code></pre>
 <p>Explicit nullable dtypes prevent each chunk from inferring a different schema based on its local values. Column order and identity checks make the parsing boundary inspectable, while missing measurements remain permitted. A malformed later chunk raises during iteration and must prevent a downstream pipeline from publishing a partial result as complete. The reader yields local batches and performs no file writes, network access or automatic repair of invalid records.</p>
-<pre><code class="language-python">text=&quot;event_id,customer_id,amount_cents\n1,a,10\n2,b,\n3,a,20\n&quot;
-chunks=list(csv_chunks(text,2))
-assert [len(c) for c in chunks]==[2,1] and str(chunks[0].amount_cents.dtype)==&quot;Int64&quot; and pd.isna(chunks[0].loc[1,&quot;amount_cents&quot;])
-expect_value_error(lambda:list(csv_chunks(&quot;event_id,customer_id,amount_cents\n1,a,bad\n&quot;,2)))
-expect_value_error(lambda:list(csv_chunks(&quot;event_id,customer_id,amount_cents\n,a,10\n&quot;,2)))</code></pre>
+<pre><code class="language-python">text = &quot;event_id,customer_id,amount_cents\n1,a,10\n2,b,\n3,a,20\n&quot;
+chunks = list(csv_chunks(text, 2))
+assert (
+    [len(c) for c in chunks] == [2, 1]
+    and str(chunks[0].amount_cents.dtype) == &quot;Int64&quot;
+    and pd.isna(chunks[0].loc[1, &quot;amount_cents&quot;])
+)
+expect_value_error(lambda: list(csv_chunks(&quot;event_id,customer_id,amount_cents\n1,a,bad\n&quot;, 2)))
+expect_value_error(lambda: list(csv_chunks(&quot;event_id,customer_id,amount_cents\n,a,10\n&quot;, 2)))</code></pre>
 <h4 id="solution-1--verification-and-interpretation">Verification and interpretation<a class="heading-anchor" href="#solution-1--verification-and-interpretation" aria-label="Link to this section">#</a></h4>
 <p>Run <code>python python/professional/solutions/py_pandas_04_solution.py</code> from the repository root with the prepared interpreter. The code checks normal inputs and explicit edge cases before printing its success line. Assertions are the evidence; the printed sentence alone is not. The helper <code>expect_value_error</code> requires an actual <code>ValueError</code> and fails if a function silently accepts an invalid input. Inspect each function&#x27;s mutation and ordering behavior as part of its contract.</p></div>
       </section>
@@ -731,125 +844,200 @@ expect_value_error(lambda:list(csv_chunks(&quot;event_id,customer_id,amount_cent
 <span> </span>
 <span>import math</span>
 <span>from collections import deque</span>
+<span>from collections.abc import Callable, Iterable, Iterator</span>
 <span>from io import StringIO</span>
+<span> </span>
 <span>import numpy as np</span>
-<span>import pandas as pd</span>
+<span>import pandas as pd  # type: ignore[import-untyped]</span>
+<span> </span>
 <span> </span>
 <span>def mean_state(values: pd.Series) -&gt; tuple[float, int]:</span>
 <span>    if not pd.api.types.is_numeric_dtype(values.dtype):</span>
 <span>        raise ValueError(&quot;Expected numeric measurements&quot;)</span>
-<span>    known=values.dropna().to_numpy(dtype=float)</span>
+<span>    known = values.dropna().to_numpy(dtype=float)</span>
 <span>    if not np.isfinite(known).all():</span>
 <span>        raise ValueError(&quot;Known measurements must be finite&quot;)</span>
-<span>    return math.fsum(float(value) for value in known),len(known)</span>
+<span>    return math.fsum(float(value) for value in known), len(known)</span>
+<span> </span>
 <span> </span>
 <span>def merge_means(states: list[tuple[float, int]]) -&gt; float | None:</span>
-<span>    for total,count in states:</span>
-<span>        if not math.isfinite(total) or isinstance(count,bool) or not isinstance(count,(int,np.integer)) or count&lt;0 or (count==0 and total!=0):</span>
+<span>    for total, count in states:</span>
+<span>        if (</span>
+<span>            not math.isfinite(total)</span>
+<span>            or isinstance(count, bool)</span>
+<span>            or not isinstance(count, (int, np.integer))</span>
+<span>            or count &lt; 0</span>
+<span>            or (count == 0 and total != 0)</span>
+<span>        ):</span>
 <span>            raise ValueError(&quot;Expected valid sum/count states&quot;)</span>
-<span>    count=sum(count for _,count in states)</span>
-<span>    return math.fsum(total for total,_ in states)/count if count else None</span>
+<span>    count = sum(count for _, count in states)</span>
+<span>    return math.fsum(total for total, _ in states) / count if count else None</span>
 <span> </span>
-<span>def customer_totals(chunks) -&gt; pd.DataFrame:</span>
-<span>    state={}</span>
+<span> </span>
+<span>def customer_totals(chunks: Iterable[pd.DataFrame]) -&gt; pd.DataFrame:</span>
+<span>    state: dict[str, tuple[int, int, int]] = {}</span>
 <span>    for chunk in chunks:</span>
-<span>        if not {&quot;customer_id&quot;,&quot;amount_cents&quot;}.issubset(chunk.columns) or chunk[&quot;customer_id&quot;].isna().any() or not pd.api.types.is_integer_dtype(chunk[&quot;amount_cents&quot;].dtype):</span>
-<span>            raise ValueError(&quot;Expected customer identities and integer-cent measurements&quot;)</span>
-<span>        for customer,amount in chunk[[&quot;customer_id&quot;,&quot;amount_cents&quot;]].itertuples(index=False,name=None):</span>
-<span>            rows,known,total=state.get(customer,(0,0,0))</span>
+<span>        if (</span>
+<span>            not {&quot;customer_id&quot;, &quot;amount_cents&quot;}.issubset(chunk.columns)</span>
+<span>            or chunk[&quot;customer_id&quot;].isna().any()</span>
+<span>            or not chunk[&quot;customer_id&quot;].map(lambda value: isinstance(value, str)).all()</span>
+<span>            or not pd.api.types.is_integer_dtype(chunk[&quot;amount_cents&quot;].dtype)</span>
+<span>        ):</span>
+<span>            raise ValueError(&quot;Expected known string customer IDs and integer-cent measurements&quot;)</span>
+<span>        for customer, amount in chunk[[&quot;customer_id&quot;, &quot;amount_cents&quot;]].itertuples(</span>
+<span>            index=False, name=None</span>
+<span>        ):</span>
+<span>            rows, known, total = state.get(customer, (0, 0, 0))</span>
 <span>            if not pd.isna(amount):</span>
-<span>                known+=1;total+=int(amount)</span>
-<span>            state[customer]=(rows+1,known,total)</span>
-<span>    rows=[]</span>
-<span>    for customer,(count,known,total) in sorted(state.items()):</span>
-<span>        if not -(2**63)&lt;=total&lt;2**63:</span>
+<span>                known += 1</span>
+<span>                total += int(amount)</span>
+<span>            state[customer] = (rows + 1, known, total)</span>
+<span>    output_rows = []</span>
+<span>    for customer, (count, known, total) in sorted(state.items()):</span>
+<span>        if not -(2**63) &lt;= total &lt; 2**63:</span>
 <span>            raise ValueError(&quot;Customer total exceeds the declared Int64 representation&quot;)</span>
-<span>        rows.append((customer,count,known,total if known else pd.NA))</span>
-<span>    result=pd.DataFrame(rows,columns=[&quot;customer_id&quot;,&quot;row_count&quot;,&quot;known_count&quot;,&quot;total_cents&quot;])</span>
-<span>    result[&quot;total_cents&quot;]=pd.array(result[&quot;total_cents&quot;],dtype=&quot;Int64&quot;)</span>
+<span>        output_rows.append((customer, count, known, total if known else pd.NA))</span>
+<span>    result = pd.DataFrame(</span>
+<span>        output_rows, columns=[&quot;customer_id&quot;, &quot;row_count&quot;, &quot;known_count&quot;, &quot;total_cents&quot;]</span>
+<span>    )</span>
+<span>    result[&quot;total_cents&quot;] = pd.array(result[&quot;total_cents&quot;], dtype=&quot;Int64&quot;)</span>
 <span>    return result</span>
 <span> </span>
-<span>def unique_records(chunks) -&gt; pd.DataFrame:</span>
-<span>    seen={};rows=[]</span>
+<span> </span>
+<span>def unique_records(chunks: Iterable[pd.DataFrame]) -&gt; pd.DataFrame:</span>
+<span>    seen: dict[int, int | None] = {}</span>
+<span>    rows = []</span>
 <span>    for chunk in chunks:</span>
-<span>        if not {&quot;event_id&quot;,&quot;amount_cents&quot;}.issubset(chunk.columns) or chunk[&quot;event_id&quot;].isna().any() or not pd.api.types.is_integer_dtype(chunk[&quot;event_id&quot;].dtype) or not pd.api.types.is_integer_dtype(chunk[&quot;amount_cents&quot;].dtype):</span>
+<span>        if (</span>
+<span>            not {&quot;event_id&quot;, &quot;amount_cents&quot;}.issubset(chunk.columns)</span>
+<span>            or chunk[&quot;event_id&quot;].isna().any()</span>
+<span>            or not pd.api.types.is_integer_dtype(chunk[&quot;event_id&quot;].dtype)</span>
+<span>            or not pd.api.types.is_integer_dtype(chunk[&quot;amount_cents&quot;].dtype)</span>
+<span>        ):</span>
 <span>            raise ValueError(&quot;Expected integer event IDs and integer-cent amounts&quot;)</span>
-<span>        for event,amount in chunk[[&quot;event_id&quot;,&quot;amount_cents&quot;]].itertuples(index=False,name=None):</span>
-<span>            event=int(event);value=None if pd.isna(amount) else int(amount)</span>
+<span>        for event, amount in chunk[[&quot;event_id&quot;, &quot;amount_cents&quot;]].itertuples(index=False, name=None):</span>
+<span>            event = int(event)</span>
+<span>            value = None if pd.isna(amount) else int(amount)</span>
 <span>            if event in seen:</span>
-<span>                if seen[event]!=value:</span>
+<span>                if seen[event] != value:</span>
 <span>                    raise ValueError(&quot;One event identity has conflicting amounts&quot;)</span>
 <span>            else:</span>
-<span>                seen[event]=value;rows.append((event,value))</span>
-<span>    result=pd.DataFrame(rows,columns=[&quot;event_id&quot;,&quot;amount_cents&quot;])</span>
-<span>    result[&quot;amount_cents&quot;]=pd.array(result[&quot;amount_cents&quot;],dtype=&quot;Int64&quot;)</span>
+<span>                seen[event] = value</span>
+<span>                rows.append((event, value))</span>
+<span>    result = pd.DataFrame(rows, columns=[&quot;event_id&quot;, &quot;amount_cents&quot;])</span>
+<span>    result[&quot;amount_cents&quot;] = pd.array(result[&quot;amount_cents&quot;], dtype=&quot;Int64&quot;)</span>
 <span>    return result</span>
 <span> </span>
-<span>def rolling_means(chunks, window: int):</span>
-<span>    if isinstance(window,bool) or not isinstance(window,(int,np.integer)) or window&lt;=0:</span>
+<span> </span>
+<span>def rolling_means(chunks: Iterable[Iterable[float]], window: int) -&gt; Iterator[float]:</span>
+<span>    if isinstance(window, bool) or not isinstance(window, (int, np.integer)) or window &lt;= 0:</span>
 <span>        raise ValueError(&quot;Expected a positive integer window&quot;)</span>
-<span>    history=deque(maxlen=window)</span>
+<span>    history: deque[float] = deque(maxlen=window)</span>
 <span>    for chunk in chunks:</span>
-<span>        values=np.asarray(chunk,dtype=float)</span>
-<span>        if values.ndim!=1 or not np.isfinite(values).all():</span>
+<span>        values = np.asarray(chunk, dtype=float)</span>
+<span>        if values.ndim != 1 or not np.isfinite(values).all():</span>
 <span>            raise ValueError(&quot;Expected finite one-dimensional chunks&quot;)</span>
 <span>        for value in values:</span>
 <span>            history.append(float(value))</span>
-<span>            if len(history)==window:</span>
-<span>                yield math.fsum(history)/window</span>
+<span>            if len(history) == window:</span>
+<span>                yield math.fsum(history) / window</span>
 <span> </span>
-<span>def csv_chunks(text: str, chunksize: int):</span>
-<span>    if isinstance(chunksize,bool) or not isinstance(chunksize,int) or chunksize&lt;=0:</span>
+<span> </span>
+<span>def csv_chunks(text: str, chunksize: int) -&gt; Iterator[pd.DataFrame]:</span>
+<span>    if isinstance(chunksize, bool) or not isinstance(chunksize, int) or chunksize &lt;= 0:</span>
 <span>        raise ValueError(&quot;Expected a positive integer chunk size&quot;)</span>
-<span>    for chunk in pd.read_csv(StringIO(text),chunksize=chunksize,dtype={&quot;event_id&quot;:&quot;Int64&quot;,&quot;customer_id&quot;:&quot;string&quot;,&quot;amount_cents&quot;:&quot;Int64&quot;}):</span>
-<span>        if chunk.columns.tolist()!=[&quot;event_id&quot;,&quot;customer_id&quot;,&quot;amount_cents&quot;] or chunk[&quot;event_id&quot;].isna().any() or chunk[&quot;customer_id&quot;].isna().any():</span>
+<span>    for chunk in pd.read_csv(</span>
+<span>        StringIO(text),</span>
+<span>        chunksize=chunksize,</span>
+<span>        dtype={&quot;event_id&quot;: &quot;Int64&quot;, &quot;customer_id&quot;: &quot;string&quot;, &quot;amount_cents&quot;: &quot;Int64&quot;},</span>
+<span>    ):</span>
+<span>        if (</span>
+<span>            chunk.columns.tolist() != [&quot;event_id&quot;, &quot;customer_id&quot;, &quot;amount_cents&quot;]</span>
+<span>            or chunk[&quot;event_id&quot;].isna().any()</span>
+<span>            or chunk[&quot;customer_id&quot;].isna().any()</span>
+<span>        ):</span>
 <span>            raise ValueError(&quot;CSV schema and record identities must be valid&quot;)</span>
 <span>        yield chunk</span>
 <span> </span>
-<span>def expect_value_error(call):</span>
+<span> </span>
+<span>def expect_value_error(call: Callable[[], object]) -&gt; None:</span>
 <span>    try:</span>
 <span>        call()</span>
 <span>    except ValueError:</span>
 <span>        return</span>
 <span>    raise AssertionError(&quot;Expected ValueError&quot;)</span>
 <span> </span>
-<span>def main():</span>
+<span> </span>
+<span>def main() -&gt; None:</span>
 <span>    # Exercise 1: Retain the correct mean denominator</span>
-<span>    assert mean_state(pd.Series([1,pd.NA,3],dtype=&quot;Float64&quot;))==(4.,2)</span>
-<span>    assert mean_state(pd.Series([],dtype=&quot;Float64&quot;))==(0.,0)</span>
-<span>    assert mean_state(pd.Series([pd.NA],dtype=&quot;Float64&quot;))==(0.,0)</span>
-<span>    expect_value_error(lambda:mean_state(pd.Series([np.inf])))</span>
+<span>    assert mean_state(pd.Series([1, pd.NA, 3], dtype=&quot;Float64&quot;)) == (4.0, 2)</span>
+<span>    assert mean_state(pd.Series([], dtype=&quot;Float64&quot;)) == (0.0, 0)</span>
+<span>    assert mean_state(pd.Series([pd.NA], dtype=&quot;Float64&quot;)) == (0.0, 0)</span>
+<span>    expect_value_error(lambda: mean_state(pd.Series([np.inf])))</span>
 <span>    # Exercise 2: Combine uneven chunks correctly</span>
-<span>    assert math.isclose(merge_means([(4.,2),(100.,1)]),104/3)</span>
-<span>    assert math.isclose(merge_means([(0.,0),(4.,2),(100.,1)]),104/3)</span>
+<span>    mean = merge_means([(4.0, 2), (100.0, 1)])</span>
+<span>    assert mean is not None and math.isclose(mean, 104 / 3)</span>
+<span>    with_empty = merge_means([(0.0, 0), (4.0, 2), (100.0, 1)])</span>
+<span>    assert with_empty is not None and math.isclose(with_empty, 104 / 3)</span>
 <span>    assert merge_means([]) is None</span>
-<span>    expect_value_error(lambda:merge_means([(5.,0)]))</span>
-<span>    expect_value_error(lambda:merge_means([(1.,True)]))</span>
+<span>    expect_value_error(lambda: merge_means([(5.0, 0)]))</span>
+<span>    expect_value_error(lambda: merge_means([(1.0, True)]))</span>
 <span>    # Exercise 3: Reduce typed amounts across batches</span>
-<span>    a=pd.DataFrame({&quot;customer_id&quot;:[&quot;a&quot;,&quot;b&quot;],&quot;amount_cents&quot;:pd.Series([10,pd.NA],dtype=&quot;Int64&quot;)});b=pd.DataFrame({&quot;customer_id&quot;:[&quot;a&quot;,&quot;b&quot;],&quot;amount_cents&quot;:pd.Series([20,pd.NA],dtype=&quot;Int64&quot;)})</span>
-<span>    r=customer_totals(iter([a,b]))</span>
-<span>    assert r.customer_id.tolist()==[&quot;a&quot;,&quot;b&quot;] and r.row_count.tolist()==[2,2] and r.known_count.tolist()==[2,0]</span>
-<span>    assert r.loc[0,&quot;total_cents&quot;]==30 and pd.isna(r.loc[1,&quot;total_cents&quot;])</span>
-<span>    pd.testing.assert_frame_equal(r,customer_totals([pd.concat([a,b])]))</span>
+<span>    a = pd.DataFrame(</span>
+<span>        {&quot;customer_id&quot;: [&quot;a&quot;, &quot;b&quot;], &quot;amount_cents&quot;: pd.Series([10, pd.NA], dtype=&quot;Int64&quot;)}</span>
+<span>    )</span>
+<span>    b = pd.DataFrame(</span>
+<span>        {&quot;customer_id&quot;: [&quot;a&quot;, &quot;b&quot;], &quot;amount_cents&quot;: pd.Series([20, pd.NA], dtype=&quot;Int64&quot;)}</span>
+<span>    )</span>
+<span>    r = customer_totals(iter([a, b]))</span>
+<span>    assert (</span>
+<span>        r.customer_id.tolist() == [&quot;a&quot;, &quot;b&quot;]</span>
+<span>        and r.row_count.tolist() == [2, 2]</span>
+<span>        and r.known_count.tolist() == [2, 0]</span>
+<span>    )</span>
+<span>    assert r.loc[0, &quot;total_cents&quot;] == 30 and pd.isna(r.loc[1, &quot;total_cents&quot;])</span>
+<span>    pd.testing.assert_frame_equal(r, customer_totals([pd.concat([a, b])]))</span>
+<span>    mixed_ids = pd.DataFrame(</span>
+<span>        {&quot;customer_id&quot;: [&quot;a&quot;, 1], &quot;amount_cents&quot;: pd.Series([1, 2], dtype=&quot;Int64&quot;)}</span>
+<span>    )</span>
+<span>    expect_value_error(lambda: customer_totals([mixed_ids]))</span>
 <span>    # Exercise 4: Detect conflicts across chunk boundaries</span>
-<span>    a=pd.DataFrame({&quot;event_id&quot;:pd.Series([1,2],dtype=&quot;Int64&quot;),&quot;amount_cents&quot;:pd.Series([10,pd.NA],dtype=&quot;Int64&quot;)});b=pd.DataFrame({&quot;event_id&quot;:pd.Series([1,3],dtype=&quot;Int64&quot;),&quot;amount_cents&quot;:pd.Series([10,20],dtype=&quot;Int64&quot;)})</span>
-<span>    r=unique_records([a,b])</span>
-<span>    assert r.event_id.tolist()==[1,2,3] and pd.isna(r.loc[1,&quot;amount_cents&quot;])</span>
-<span>    conflict=pd.DataFrame({&quot;event_id&quot;:pd.Series([2],dtype=&quot;Int64&quot;),&quot;amount_cents&quot;:pd.Series([0],dtype=&quot;Int64&quot;)})</span>
-<span>    expect_value_error(lambda:unique_records([a,conflict]))</span>
+<span>    a = pd.DataFrame(</span>
+<span>        {</span>
+<span>            &quot;event_id&quot;: pd.Series([1, 2], dtype=&quot;Int64&quot;),</span>
+<span>            &quot;amount_cents&quot;: pd.Series([10, pd.NA], dtype=&quot;Int64&quot;),</span>
+<span>        }</span>
+<span>    )</span>
+<span>    b = pd.DataFrame(</span>
+<span>        {</span>
+<span>            &quot;event_id&quot;: pd.Series([1, 3], dtype=&quot;Int64&quot;),</span>
+<span>            &quot;amount_cents&quot;: pd.Series([10, 20], dtype=&quot;Int64&quot;),</span>
+<span>        }</span>
+<span>    )</span>
+<span>    r = unique_records([a, b])</span>
+<span>    assert r.event_id.tolist() == [1, 2, 3] and pd.isna(r.loc[1, &quot;amount_cents&quot;])</span>
+<span>    conflict = pd.DataFrame(</span>
+<span>        {&quot;event_id&quot;: pd.Series([2], dtype=&quot;Int64&quot;), &quot;amount_cents&quot;: pd.Series([0], dtype=&quot;Int64&quot;)}</span>
+<span>    )</span>
+<span>    expect_value_error(lambda: unique_records([a, conflict]))</span>
 <span>    # Exercise 5: Carry rolling history across batches</span>
-<span>    assert list(rolling_means([[1,2],[3,4]],3))==[2.,3.]</span>
-<span>    assert list(rolling_means([[1,2,3,4]],3))==[2.,3.]</span>
-<span>    assert list(rolling_means([],3))==[]</span>
-<span>    expect_value_error(lambda:list(rolling_means([[1]],0)))</span>
-<span>    expect_value_error(lambda:list(rolling_means([[np.nan]],1)))</span>
+<span>    assert list(rolling_means([[1, 2], [3, 4]], 3)) == [2.0, 3.0]</span>
+<span>    assert list(rolling_means([[1, 2, 3, 4]], 3)) == [2.0, 3.0]</span>
+<span>    assert list(rolling_means([], 3)) == []</span>
+<span>    expect_value_error(lambda: list(rolling_means([[1]], 0)))</span>
+<span>    expect_value_error(lambda: list(rolling_means([[np.nan]], 1)))</span>
 <span>    # Exercise 6: Make parsing a typed batch boundary</span>
-<span>    text=&quot;event_id,customer_id,amount_cents\n1,a,10\n2,b,\n3,a,20\n&quot;</span>
-<span>    chunks=list(csv_chunks(text,2))</span>
-<span>    assert [len(c) for c in chunks]==[2,1] and str(chunks[0].amount_cents.dtype)==&quot;Int64&quot; and pd.isna(chunks[0].loc[1,&quot;amount_cents&quot;])</span>
-<span>    expect_value_error(lambda:list(csv_chunks(&quot;event_id,customer_id,amount_cents\n1,a,bad\n&quot;,2)))</span>
-<span>    expect_value_error(lambda:list(csv_chunks(&quot;event_id,customer_id,amount_cents\n,a,10\n&quot;,2)))</span>
+<span>    text = &quot;event_id,customer_id,amount_cents\n1,a,10\n2,b,\n3,a,20\n&quot;</span>
+<span>    chunks = list(csv_chunks(text, 2))</span>
+<span>    assert (</span>
+<span>        [len(c) for c in chunks] == [2, 1]</span>
+<span>        and str(chunks[0].amount_cents.dtype) == &quot;Int64&quot;</span>
+<span>        and pd.isna(chunks[0].loc[1, &quot;amount_cents&quot;])</span>
+<span>    )</span>
+<span>    expect_value_error(lambda: list(csv_chunks(&quot;event_id,customer_id,amount_cents\n1,a,bad\n&quot;, 2)))</span>
+<span>    expect_value_error(lambda: list(csv_chunks(&quot;event_id,customer_id,amount_cents\n,a,10\n&quot;, 2)))</span>
 <span>    print(&quot;python-pandas-04: all six normal and boundary contracts passed&quot;)</span>
+<span> </span>
 <span> </span>
 <span>if __name__ == &quot;__main__&quot;:</span>
 <span>    main()</span>

@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello
+  labels:
+    app: hello
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hello
+  template:
+    metadata:
+      labels:
+        app: hello
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: hello
+        image: ds60sqlpy-k8s-fixture:0.2.0
+        imagePullPolicy: Never
+        command:
+        - python
+        - /fixture.py
+        - server
+        ports:
+        - name: http
+          containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: http
+          periodSeconds: 2
+          failureThreshold: 2
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            cpu: 100m
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+
+# Exercise 1: Map each control. Explain UID,capabilities,privilege escalation,seccomp and root filesystem fields. Expected: Each field is connected to its specific mechanism rather than one generic secure label.
+# Exercise 2: Run the allowed baseline. Use the fixed nonroot source in a qualified operation. Expected: Accepted source,observed workload readiness and owned cleanup are recorded.
+# Exercise 3: Reject a privileged mutation. Change allowPrivilegeEscalation or add privileged:true in a scratch source. Expected: Parser refusal before cluster mutation.
+# Exercise 4: Reject host access. Review hostPath,hostNetwork and hostPID variants. Expected: All are outside the admitted browser contract.
+# Exercise 5: Observe a host policy separately. With a policy-qualified host fixture,compare allowed and denied API requests. Expected: Policy version,namespace UID and actual admission reason accompany the result.
+# Exercise 6: Write a bounded threat statement. Describe what the fixed controls address and one remaining boundary requiring another control. Expected: For example,RBAC controls API access while network policy or application auth addresses different paths.

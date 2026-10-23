@@ -118,58 +118,233 @@
     <article class="document"><h2 id="llm-016-explanatory-solutions">llm-016: explanatory solutions<a class="heading-anchor" href="#llm-016-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <p>Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>A small causal decoder makes the transformer data path visible. Token IDs index a learned table, position IDs add order, and a tokenwise normalization feeds query/key/value projections. Two heads attend only to current and earlier positions. Their outputs are rejoined, projected and added through a residual connection. A second tokenwise normalization and feed-forward block produce another residual. The output projection creates one vocabulary score per token position. No pretrained model or downloaded corpus is needed. A parameter count and a context limit bound this teaching model; they do not make it a general-purpose language system.</p>
-<p><strong>Decoder block:</strong> Causal attention and tokenwise transformations with residual connections.</p>
-<p><strong>Logits:</strong> Unnormalized vocabulary scores for each prediction position.</p>
-<p><strong>Context limit:</strong> Maximum number of token positions represented by the model.</p>
+<p>A causal Transformer decoder turns a batch of token IDs into a next-token score vector at every input position. Its learned parameters are shared across token positions, apart from the explicit position table. The model does not store a separate neural network for every sentence length. Embedding lookup converts discrete identities into vectors; attention combines visible token representations; a feed-forward network transforms each resulting contextual vector; the final projection scores vocabulary choices.</p>
+<p>This chapter exposes one pre-normalization decoder block rather than loading a pretrained package. The vocabulary has 16 IDs, the model width is 32, there are two attention heads, the feed-forward hidden width is 64 and the maximum learned position is bounded by a 32-row table. The exact model contains 10,464 trainable scalar parameters. It is small enough to trace every tensor axis and parameter group. Random initialization gives finite structured computations, not language understanding or useful generated text.</p>
+<p>Attention and the feed-forward network have different jobs. Attention mixes information across permitted token positions. Each head computes its own query/key similarity distribution and weighted value mixture. The feed-forward block then applies the same nonlinear feature transformation independently at each position. Its input can already contain context from attention, but the feed-forward operation itself does not average or reduce the time axis.</p>
+<p>Residual addition preserves a direct path from the input representation while adding the branch computation. In a pre-normalization block, the attention branch reads LayerNorm(x), then its projected output is added to x; the second branch reads a new LayerNorm of that sum. Residuals help provide an identity contribution to the derivative, but they do not guarantee that all gradients remain healthy. A branch Jacobian can still amplify, cancel or poorly condition directions. The later normalization chapter examines these derivatives more carefully.</p>
+<p>The acceptance test is an information-flow contract: independently recomputing a prefix must reproduce the corresponding early logits of the full sequence. A future-token perturbation must also leave earlier logits unchanged. These are stronger observations than a plausible tensor shape or a decreasing training loss. They still do not establish that the objective uses correctly shifted targets or that evaluation data is uncontaminated; those are separate chapters.</p>
+<p><strong>Decoder block:</strong> Causal token mixing and tokenwise transformations connected by residual additions.</p>
+<p><strong>Logits:</strong> Unnormalized vocabulary scores at every input position.</p>
+<p><strong>Head width:</strong> The feature dimension assigned to each attention head, here 16.</p>
+<p><strong>Pre-normalization:</strong> Applying feature normalization before the residual branch computation.</p>
+<p><strong>Context limit:</strong> The declared position range represented by this model, here 32.</p>
+<p><strong>Detached cache:</strong> Stored K/V tensors disconnected from the prior autograd graph for inference use.</p>
 <h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
-<p>The TinyDecoder helper uses width32,heads2,context32,vocabulary16. Its tensor path is(batch,time,width) to(batch,heads,time,head_width), then back. The boolean allowed matrix uses key_position&lt;=query_position, so the diagonal is allowed for shifted targets. LayerNorm reduces features only. forward returns logits plus detached K/V state for later inference lessons; training in this lesson always passes cache=None.</p>
+<h4 id="exact-parameter-ledger">Exact parameter ledger<a class="heading-anchor" href="#exact-parameter-ledger" aria-label="Link to this section">#</a></h4>
+<div class="table-wrap"><table><thead><tr>
+<th>Component</th>
+<th>Trainable shape or count</th>
+<th>Scalars</th>
+</tr></thead><tbody>
+<tr>
+<td>Token embedding</td>
+<td>16 by 32</td>
+<td>512</td>
+</tr>
+<tr>
+<td>Absolute position embedding</td>
+<td>32 by 32</td>
+<td>1,024</td>
+</tr>
+<tr>
+<td>Two LayerNorm modules</td>
+<td>two sets of gain32 plus bias32</td>
+<td>128</td>
+</tr>
+<tr>
+<td>Combined Q/K/V projection</td>
+<td>96 by 32, no bias</td>
+<td>3,072</td>
+</tr>
+<tr>
+<td>Attention output projection</td>
+<td>32 by 32, no bias</td>
+<td>1,024</td>
+</tr>
+<tr>
+<td>Feed-forward first affine map</td>
+<td>64 by 32 plus bias64</td>
+<td>2,112</td>
+</tr>
+<tr>
+<td>Feed-forward second affine map</td>
+<td>32 by 64 plus bias32</td>
+<td>2,080</td>
+</tr>
+<tr>
+<td>Vocabulary output projection</td>
+<td>16 by 32, no bias</td>
+<td>512</td>
+</tr>
+<tr>
+<td>Total</td>
+<td>sum of these parameter groups</td>
+<td>10,464</td>
+</tr>
+</tbody></table></div>
+<p>PyTorch Linear stores [out_features,in_features] and applies the transposed weight to a row-oriented input. That is why the QKV weight is [96,32], while a mathematical row-vector projection may be written as multiplication by a [32,96] matrix. Biases are omitted in the attention and vocabulary projections but present in both feed-forward Linear modules. Forgetting these 96 bias entries changes the parameter ledger.</p>
+<h4 id="trace-batch-1-time-4-through-the-forward-pass">Trace batch 1, time 4 through the forward pass<a class="heading-anchor" href="#trace-batch-1-time-4-through-the-forward-pass" aria-label="Link to this section">#</a></h4>
+<div class="table-wrap"><table><thead><tr>
+<th>Stage</th>
+<th>Shape</th>
+<th>Meaning of the last axes</th>
+</tr></thead><tbody>
+<tr>
+<td>Input IDs</td>
+<td>[1,4], int64</td>
+<td>four discrete token identities</td>
+</tr>
+<tr>
+<td>Token plus position vectors</td>
+<td>[1,4,32], float32</td>
+<td>32 features for each position</td>
+</tr>
+<tr>
+<td>First LayerNorm</td>
+<td>[1,4,32]</td>
+<td>feature statistics within each token</td>
+</tr>
+<tr>
+<td>Combined QKV projection</td>
+<td>[1,4,96]</td>
+<td>three width-32 projected vectors</td>
+</tr>
+<tr>
+<td>Each split Q, K or V</td>
+<td>[1,2,4,16]</td>
+<td>head, token, head feature</td>
+</tr>
+<tr>
+<td>Scores and weights</td>
+<td>[1,2,4,4]</td>
+<td>query position, key position</td>
+</tr>
+<tr>
+<td>Weighted values</td>
+<td>[1,2,4,16]</td>
+<td>one mixture per head and query</td>
+</tr>
+<tr>
+<td>Rejoined heads and output projection</td>
+<td>[1,4,32]</td>
+<td>model-width contextual branch</td>
+</tr>
+<tr>
+<td>First residual</td>
+<td>[1,4,32]</td>
+<td>input plus contextual branch</td>
+</tr>
+<tr>
+<td>Feed-forward hidden activation</td>
+<td>[1,4,64]</td>
+<td>expanded tokenwise feature space</td>
+</tr>
+<tr>
+<td>Second residual</td>
+<td>[1,4,32]</td>
+<td>transformed contextual representation</td>
+</tr>
+<tr>
+<td>Vocabulary logits</td>
+<td>[1,4,16]</td>
+<td>one score per vocabulary ID</td>
+</tr>
+</tbody></table></div>
+<p>Each head has width 32/2=16, so its dot products are divided by sqrt(16)=4. The Boolean triangle [4,4] broadcasts across batch and heads. Softmax reduces the final key axis, not the query axis or the vocabulary axis. The diagonal is allowed because the representation at input position t predicts the following token when training uses correctly shifted targets. The current input is therefore legal information under that objective.</p>
+<p>After attention, transpose restores [batch,time,head,head_width]. contiguous makes the requested layout explicit before reshape combines the last two axes into model width. A reshape with the correct number of elements can still scramble token/head membership if the transpose order is wrong. The exact shape ledger and prefix checks are complementary; neither substitutes for the other.</p>
 <h3 id="exercise-1-build-a-bounded-decoder">Exercise 1: Build a bounded decoder<a class="heading-anchor" href="#exercise-1-build-a-bounded-decoder" aria-label="Link to this section">#</a></h3>
-<p>The question is: Set seed7, construct the decoder and count trainable scalar parameters.</p>
+<p>The question is: Set seed 7, build the default decoder, count every trainable scalar and compare with the component ledger.</p>
 <p>The exact count follows the embedding, projection and feed-forward shapes. A small parameter count bounds the fixture but says little about capability on unseen tasks.</p>
-<pre><code class="language-python">torch.manual_seed(7); model=TinyDecoder(); model.eval(); count=sum(p.numel() for p in model.parameters())
-assert 0&lt;count&lt;50000</code></pre>
-<p><strong>Expected:</strong> parameter count below50000.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with parameter count below50000.</p>
+<pre><code class="language-python">torch.manual_seed(7)
+model = TinyDecoder().eval()
+count = sum(parameter.numel() for parameter in model.parameters())
+assert count == 10464
+assert count &lt; 50000</code></pre>
+<p><strong>Expected:</strong> Exactly 10,464 trainable scalars, below the 50,000 teaching bound.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with Exactly 10,464 trainable scalars, below the 50,000 teaching bound.</p>
 <h3 id="exercise-2-trace-output-axes">Exercise 2: Trace output axes<a class="heading-anchor" href="#exercise-2-trace-output-axes" aria-label="Link to this section">#</a></h3>
-<p>The question is: Run input IDs[[2,5,7,3]] and inspect logits.</p>
+<p>The question is: Run the integer IDs [[2,5,7,3]] and trace the output shape and dtype.</p>
 <p>Every input position produces a distribution over the same sixteen-token vocabulary. The time axis is not a class axis and must not be reduced accidentally.</p>
-<pre><code class="language-python">ids=torch.tensor([[2,5,7,3]],dtype=torch.long); logits,_=model(ids)
-assert tuple(logits.shape)==(1,4,16) and torch.isfinite(logits).all()</code></pre>
-<p><strong>Expected:</strong> shape(1,4,16), all finite.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with shape(1,4,16), all finite.</p>
+<pre><code class="language-python">torch.manual_seed(7)
+model = TinyDecoder().eval()
+ids = torch.tensor([[2, 5, 7, 3]], dtype=torch.long)
+with torch.no_grad():
+    logits, _ = model(ids)
+assert tuple(logits.shape) == (1, 4, 16)
+assert logits.dtype == torch.float32
+assert torch.isfinite(logits).all()</code></pre>
+<p><strong>Expected:</strong> Finite float32 logits with shape [1,4,16].</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with Finite float32 logits with shape [1,4,16].</p>
 <h3 id="exercise-3-recompute-prefixes">Exercise 3: Recompute prefixes<a class="heading-anchor" href="#exercise-3-recompute-prefixes" aria-label="Link to this section">#</a></h3>
-<p>The question is: Run prefix lengths1..4 independently in evaluation mode.</p>
+<p>The question is: Recompute prefixes of lengths 1 through 4 independently with the same initialized weights.</p>
 <p>The check covers the whole block, including normalization and positions, rather than only the attention mask. Dropout is absent in this teaching decoder.</p>
-<pre><code class="language-python">with torch.no_grad():
-    full,_=model(ids)
-    for cut in range(1,5):
-        prefix,_=model(ids[:,:cut]); torch.testing.assert_close(prefix,full[:,:cut],atol=1e-6,rtol=0)</code></pre>
-<p><strong>Expected:</strong> prefix logits match full early logits within1e-6.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with prefix logits match full early logits within1e-6.</p>
+<pre><code class="language-python">torch.manual_seed(7)
+model = TinyDecoder().eval()
+ids = torch.tensor([[2, 5, 7, 3]], dtype=torch.long)
+with torch.no_grad():
+    full, _ = model(ids)
+    for length in range(1, 5):
+        prefix, _ = model(ids[:, :length])
+        torch.testing.assert_close(prefix, full[:, :length], atol=1e-6, rtol=0)</code></pre>
+<p><strong>Expected:</strong> Every prefix matches the corresponding full-sequence early logits within 1e-6.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with Every prefix matches the corresponding full-sequence early logits within 1e-6.</p>
 <h3 id="exercise-4-perturb-only-future-tokens">Exercise 4: Perturb only future tokens<a class="heading-anchor" href="#exercise-4-perturb-only-future-tokens" aria-label="Link to this section">#</a></h3>
-<p>The question is: Replace positions2,3 with8,9 and compare the first two outputs.</p>
+<p>The question is: Replace only positions 2 and 3 with IDs 8 and 9 and compare the first two logits.</p>
 <p>A future-only perturbation is a direct causal test. It can expose a leaking normalization or incorrect mask even when the model has never been trained.</p>
-<pre><code class="language-python">future=ids.clone(); future[:,2:]=torch.tensor([[8,9]])
-a,_=model(ids); b,_=model(future); torch.testing.assert_close(a[:,:2],b[:,:2],atol=1e-6,rtol=0)</code></pre>
-<p><strong>Expected:</strong> first two logits unchanged within1e-6.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with first two logits unchanged within1e-6.</p>
+<pre><code class="language-python">torch.manual_seed(7)
+model = TinyDecoder().eval()
+ids = torch.tensor([[2, 5, 7, 3]], dtype=torch.long)
+changed = ids.clone()
+changed[:, 2:] = torch.tensor([[8, 9]])
+with torch.no_grad():
+    original, _ = model(ids)
+    perturbed, _ = model(changed)
+torch.testing.assert_close(perturbed[:, :2], original[:, :2], atol=1e-6, rtol=0)
+assert not torch.equal(ids, changed)</code></pre>
+<p><strong>Expected:</strong> The first two score vectors remain unchanged within 1e-6.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with The first two score vectors remain unchanged within 1e-6.</p>
 <h3 id="exercise-5-inspect-head-shapes">Exercise 5: Inspect head shapes<a class="heading-anchor" href="#exercise-5-inspect-head-shapes" aria-label="Link to this section">#</a></h3>
-<p>The question is: Read the returned K/V state after four tokens.</p>
+<p>The question is: Run without disabling autograd and inspect the returned K/V cache shapes, detachment and data-byte count.</p>
 <p>Width32 is split into two sixteen-dimensional heads. The cached time dimension grows with processed tokens, while the feature width remains fixed.</p>
-<pre><code class="language-python">_,cache=model(ids)
-assert tuple(cache[&#x27;k&#x27;].shape)==tuple(cache[&#x27;v&#x27;].shape)==(1,2,4,16)</code></pre>
-<p><strong>Expected:</strong> each cache tensor shape(1,2,4,16).</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with each cache tensor shape(1,2,4,16).</p>
+<pre><code class="language-python">torch.manual_seed(7)
+model = TinyDecoder().eval()
+ids = torch.tensor([[2, 5, 7, 3]], dtype=torch.long)
+logits, cache = model(ids)
+assert logits.requires_grad
+for tensor in cache.values():
+    assert tuple(tensor.shape) == (1, 2, 4, 16)
+    assert tensor.dtype == torch.float32
+    assert not tensor.requires_grad
+assert sum(tensor.numel() * tensor.element_size() for tensor in cache.values()) == 1024</code></pre>
+<p><strong>Expected:</strong> Logits remain connected; each cache is detached float32 [1,2,4,16]; combined cache data occupies 1,024 bytes.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with Logits remain connected; each cache is detached float32 [1,2,4,16]; combined cache data occupies 1,024 bytes.</p>
 <h3 id="exercise-6-reject-invalid-token-ids">Exercise 6: Reject invalid token IDs<a class="heading-anchor" href="#exercise-6-reject-invalid-token-ids" aria-label="Link to this section">#</a></h3>
-<p>The question is: Pass vocabulary ID16 and a33-token context.</p>
+<p>The question is: Reject out-of-range IDs, wrong dtype, empty/excessive context and invalid head/width configurations.</p>
 <p>A fixed vocabulary and position table impose real bounds. Rejecting invalid requests makes the failure understandable before embedding indexing or an excessive context reaches deeper operations.</p>
-<pre><code class="language-python">for bad in [torch.tensor([[16]]),torch.zeros((1,33),dtype=torch.long)]:
-    try: model(bad)
-    except ValueError: pass
-    else: raise AssertionError(&#x27;model bound ignored&#x27;)</code></pre>
-<p><strong>Expected:</strong> both raise ValueError.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with both raise ValueError.</p>
+<pre><code class="language-python">model = TinyDecoder().eval()
+invalid_inputs = [
+    torch.tensor([[16]], dtype=torch.long),
+    torch.tensor([[-1]], dtype=torch.long),
+    torch.zeros((1, 33), dtype=torch.long),
+    torch.zeros((1, 0), dtype=torch.long),
+    torch.tensor([[2.0]], dtype=torch.float32),
+]
+for invalid in invalid_inputs:
+    try:
+        model(invalid)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(&#x27;invalid token/context contract was accepted&#x27;)
+for options in [dict(width=5, heads=2), dict(heads=0), dict(context=0)]:
+    try:
+        TinyDecoder(**options)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(&#x27;invalid model dimensions were accepted&#x27;)</code></pre>
+<p><strong>Expected:</strong> Every invalid contract raises ValueError before a misleading reshape or embedding computation.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with Every invalid contract raises ValueError before a misleading reshape or embedding computation.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
 <p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
   </main>

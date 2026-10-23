@@ -10,13 +10,31 @@ Move semantics lets a value transfer expensive internal resources. An rvalue ref
 
 std::move changes which overloads may be selected; it does not move bytes by itself. The type's move constructor performs the transfer. Standard library members let Batch use compiler-generated special members, so ownership behavior composes without custom cleanup code. After the transfer the receiver has the old value; the source remains an object that can be assigned a new value. Testing one implementation's empty moved-from vector would overstate the portable contract.
 
+<!-- depth:start -->
+## Copy, move and the state left behind
+
+Copying a value preserves the source and creates another value with the type's copy semantics. Moving allows a destination to take resources from a source that will no longer be used in the same way. std::move itself is a cast that makes a move-capable overload eligible; it does not perform resource transfer on its own. The selected constructor or assignment operator determines what actually happens.
+
+Batch contains vector and string members, so generated operations compose those members' semantics. Copying a Batch copies its vector elements and label. Mutating the copied vector does not change the original. Moving a Batch can transfer member resources efficiently, but the source remains a valid object whose exact values should not be assumed unless its type contract specifies them. In particular, do not assert that every moved-from vector or string must be empty.
+
+The second program checks the destination values and then assigns a fresh Batch to the moved-from source. This tests a useful guaranteed operation: reusing a valid object through assignment. Reading an unspecified old label and treating it as a meaningful business value would be a different, unjustified assumption. Valid means permitted operations remain possible under their preconditions, not that all previous content survives.
+
+The rule of zero favors types composed of well-behaved owning members so that manually written copy/move/destruction logic is unnecessary. Once a class owns a raw resource directly, those special operations must be designed together to avoid shallow copies, double release or lost ownership. A custom destructor can also affect implicit move generation, so adding one is not always a harmless logging change.
+
+Performance claims need observation. Moving a tiny value can be no cheaper than copying, and library exception guarantees may influence whether a container copies or moves elements during reallocation. Correctness should follow the type contract first. A benchmark can then measure the actual workload and implementation rather than assuming every occurrence of std::move made the program faster.
+
+## Debugging the contract
+
+If changing a copy changes the original, inspect whether the member is truly owning or merely a pointer/view. If a moved-from value is used for business logic, replace the assumption with a documented post-move operation or explicit reassignment. If a class becomes unexpectedly non-movable after adding a destructor, review the generated special-member rules. Do not add std::move indiscriminately to return statements or const objects without understanding overload selection.
+<!-- depth:end -->
+
 ## Worked example 1
 
 ```cpp
 Batch a{{1,2},"A"}; Batch b=a; b.values[0]=9;
 ```
 
-Expected: a remains [1,2]; b becomes [9,2].
+Expected: a remains [1, 2]; b becomes [9, 2].
 
 ## Worked example 2
 
@@ -38,9 +56,9 @@ Copy a Batch and mutate the copy.
 
 ## Exercise 2: Inspect the receiver
 
-Move Batch([1,2,3]) into a new owner.
+Move Batch([1, 2, 3]) into a new owner.
 
-**Expected:** Receiver values exactly [1,2,3].
+**Expected:** Receiver values exactly [1, 2, 3].
 
 **Reasoning:** The target has a specified transferred value.
 

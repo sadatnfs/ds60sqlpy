@@ -119,14 +119,51 @@
 <p>Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Regularization and training mode affect different parts of the experiment. An explicit L1orL2penalty adds a term to the objective. Dropout randomly zeroes activations during training and rescales retained values; in evaluation it returns the unmodified input. model.train and model.eval recursively set module behavior, but neither changes whether autograd records operations. Optimizer weight decay and an explicit penalty can have different semantics, especially for adaptive optimizers, so their names do not establish equivalence.</p>
-<p>The fixture uses weights1, -2 and unit activations. It separates data loss from penalty, checks stochastic outputs by allowed values rather than a fixed random mask, and confirms deterministic evaluation. None of these checks proves that regularization improves held-out quality; that requires a controlled validation comparison.</p>
+<p>The fixture uses weights 1, -2 and unit activations. It separates data loss from penalty, checks stochastic outputs by allowed values rather than a fixed random mask, and confirms deterministic evaluation. None of these checks proves that regularization improves held-out quality; that requires a controlled validation comparison.</p>
 <p><strong>Regularization penalty:</strong> A parameter-dependent term added to the training objective.</p>
 <p><strong>Dropout mode:</strong> Whether stochastic activation masking is applied.</p>
 <p><strong>Weight decay:</strong> An optimizer-specific parameter update policy requiring its own contract.</p>
 <h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
 <p>nn.Dropout(p=.5) scales retained training activations by 1/(1-p). Call train or eval to select behavior. Compute sum(abs(w)) and sum(w²) for declared penalty conventions, then multiply by an explicit coefficient. A half-scaled squared penalty would have a different derivative. Keep metrics and penalty components separate in logs.</p>
+<h3 id="derive-the-objective-random-transformation-and-gradient">Derive the objective, random transformation and gradient<a class="heading-anchor" href="#derive-the-objective-random-transformation-and-gradient" aria-label="Link to this section">#</a></h3>
+<p>The fixture has w=[1, -2]. The absolute-value sum is three, the squared-value sum is five, and the Euclidean norm is sqrt(5). These are different quantities. This chapter&#x27;s squared L2 penalty is lambda times the sum of squared weights, without a one-half factor. At lambda=0.1 it contributes 0.5 to the objective and gradient[0.2, -0.4]. Doubling both weights doubles the L1 sum to six but quadruples the squared sum to twenty. That scale dependence matters when preprocessing changes the meaning of a unit weight.</p>
+<p>Suppose one coordinate has data gradient g=0.3, parameter w=1 and learning rate eta=0.1. Ordinary SGD on data loss plus 0.1<em>w² uses total gradient 0.3+0.2=0.5 and gives w&#x27;=0.95. The update can also be written (1-2</em>eta<em>lambda)w-eta</em>g. An SGD weight-decay coefficient 0.2 corresponds to this particular explicit penalty convention. A coefficient 0.1 would correspond to a half-scaled objective and would instead give 0.96 for this example. A shared name or numeric coefficient does not fix the objective&#x27;s convention.</p>
+<p>For an adaptive optimizer, adding 2<em>lambda</em>w to g also changes the moment estimates and coordinatewise scaling. Decoupled AdamW applies its decay separately from those moment calculations. Consequently the SGD algebra above does not establish an Adam/AdamW equivalence. Compare the optimizer formula, update count, learning-rate schedule and decayed parameter groups. <a href="https://docs.pytorch.org/docs/2.9/generated/torch.optim.AdamW.html">PyTorch 2.9 AdamW</a>.</p>
+<p>Loss reduction adds another scale choice. Replacing a mean over B observations with a sum multiplies the data gradient by B but leaves a separately added fixed penalty unchanged. That reduces the relative penalty strength unless its coefficient is adjusted. Repeating the full penalty at each microbatch also changes its total contribution if the intent was one large-batch objective. Specify whether the penalty is applied once per optimizer step and how accumulated data gradients are normalized.</p>
+<p>For Dropout probability p&lt;1, let m be a Bernoulli keep indicator with probability q=1-p. Inverted Dropout computes y=m<em>x/q during training. Thus E[y]=x and Var(y)=x²</em>p/q. This statement conditions on the input value; it does not assert that a finite collection of outputs has exactly the same mean. At p=0.5 and x=1, each output is zero or two, each with probability one-half. The derivative with respect to x is the same multiplier m/q, so the sampled backward path is either zero or two. During evaluation the transformation is identity. <a href="https://docs.pytorch.org/docs/2.9/generated/torch.nn.Dropout.html">PyTorch 2.9 Dropout</a>.</p>
+<p>The fixture contains 32 unit activations. Under independent elementwise masking, the count K of retained values has mean 16 and variance 8. The observed tensor mean is 2 K/32, so its expectation is one and its variance is 1/32. Its standard deviation is about 0.177. A particular call can retain 15 or 18 values without violating the contract. Even all-zero and all-two tensors are possible, though rare. That is why the executable assertion checks shape and allowed values rather than requiring exactly 16 survivors or a particular cross-platform random mask.</p>
+<p>Expected activation preservation also does not imply preservation after nonlinear downstream operations. If a scalar activation is always one without Dropout, its square is one. With p=0.5, its squared dropped value is zero or four and has expectation two. Therefore a model&#x27;s expected squared loss need not equal its loss at the expected activation. Dropout changes the stochastic training objective, not just the way an unchanged loss is sampled.</p>
+<p>The state table helps prevent accidental coupling of unrelated controls:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Configuration</th>
+<th>Dropout mask</th>
+<th>Autograd recording for eligible inputs</th>
+</tr></thead><tbody>
+<tr>
+<td>train mode, ordinary grad mode</td>
+<td>Sampled</td>
+<td>Enabled</td>
+</tr>
+<tr>
+<td>eval mode, ordinary grad mode</td>
+<td>Identity</td>
+<td>Enabled</td>
+</tr>
+<tr>
+<td>train mode inside no_grad</td>
+<td>Sampled</td>
+<td>Disabled</td>
+</tr>
+<tr>
+<td>eval mode inside no_grad</td>
+<td>Identity</td>
+<td>Disabled</td>
+</tr>
+</tbody></table></div>
+<p>Exercise six deliberately uses the second row: an evaluation-mode Dropout still carries derivatives, and summing its identity output gives an all-ones input gradient. An inference service commonly uses the fourth row, but gradient-based explanation or adversarial sensitivity analysis may intentionally use the second. Monte Carlo Dropout requires its own deliberate mode policy; simply switching an entire model to train can also change unrelated BatchNorm state.</p>
+<p>For an interview, explain why a training loss can rise after regularization while validation loss improves: the optimized objective includes a penalty or stochastic computation, so it is not the same measured quantity as deterministic predictive loss. Then ask whether the validation comparison was selected repeatedly and whether independent evidence remains. Conversely, lower weight norm by itself does not establish better calibrated probabilities, useful rankings or smaller out-of-population error.</p>
 <h3 id="exercise-1-calculate-two-penalties">Exercise 1: Calculate two penalties<a class="heading-anchor" href="#exercise-1-calculate-two-penalties" aria-label="Link to this section">#</a></h3>
-<p>The question is: Use weights1, -2 and compute L1and squared L2sums.</p>
+<p>The question is: Use weights 1, -2 and compute L1and squared L2sums.</p>
 <p>The squared L2penalty is not the square root norm. Naming the convention avoids a factor or square-root mismatch when comparing implementations.</p>
 <pre><code class="language-python">w=torch.tensor([1.,-2.]); assert w.abs().sum().item()==3 and w.square().sum().item()==5</code></pre>
 <p><strong>Expected:</strong> L1=3; squared L2=5.</p>
@@ -143,18 +180,18 @@ assert torch.equal(drop(x),x) and torch.equal(drop(x),x)</code></pre>
 <p>The test does not require a particular mask or count of zeros. Such a pattern would overfit the random implementation rather than the Dropout contract.</p>
 <pre><code class="language-python">drop.train(); sampled=drop(x)
 assert tuple(sampled.shape)==(4,8) and set(sampled.unique().tolist())&lt;={0.,2.}</code></pre>
-<p><strong>Expected:</strong> shape(4, 8); only0or2.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with shape(4, 8); only0or2.</p>
+<p><strong>Expected:</strong> shape(4, 8); only 0 or2.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with shape(4, 8); only 0 or2.</p>
 <h3 id="exercise-4-separate-data-and-penalty-terms">Exercise 4: Separate data and penalty terms<a class="heading-anchor" href="#exercise-4-separate-data-and-penalty-terms" aria-label="Link to this section">#</a></h3>
-<p>The question is: Combine data loss2 with coefficient.1 times squared L2.</p>
+<p>The question is: Combine data loss 2 with coefficient.1 times squared L2.</p>
 <p>A total objective may change while the predictive error stays fixed. Logging components helps distinguish those mechanisms.</p>
 <pre><code class="language-python">data_loss=torch.tensor(2.); penalty=.1*w.square().sum()
 assert penalty.item()==.5 and (data_loss+penalty).item()==2.5</code></pre>
-<p><strong>Expected:</strong> penalty.5; total2.5.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with penalty.5; total2.5.</p>
+<p><strong>Expected:</strong> penalty.5; total 2.5.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with penalty.5; total 2.5.</p>
 <h3 id="exercise-5-differentiate-the-explicit-penalty">Exercise 5: Differentiate the explicit penalty<a class="heading-anchor" href="#exercise-5-differentiate-the-explicit-penalty" aria-label="Link to this section">#</a></h3>
 <p>The question is: Differentiate .1<em>sum(v</em>v) at v=[1, -2].</p>
-<p>The derivative contains2<em>coefficient</em>v under this definition. Copying a coefficient from a half-scaled objective would change the update.</p>
+<p>The derivative contains 2<em>coefficient</em>v under this definition. Copying a coefficient from a half-scaled objective would change the update.</p>
 <pre><code class="language-python">v=torch.tensor([1.,-2.],requires_grad=True); (.1*v.square().sum()).backward()
 torch.testing.assert_close(v.grad,torch.tensor([.2,-.4]),atol=1e-6,rtol=0)</code></pre>
 <p><strong>Expected:</strong> gradient [.2, -.4].</p>

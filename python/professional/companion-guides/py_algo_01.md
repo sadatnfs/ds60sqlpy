@@ -62,12 +62,10 @@ The exercises move from explicit comparison counting to hash counting, duplicate
 ### Example 1
 
 ```python
-from collections import Counter
-
-for n in [4,8]:
-    comparisons=sum(1 for i in range(n) for j in range(i+1,n))
-    assert comparisons==n*(n-1)//2
-    print("Distinct pairs:",n,comparisons)
+for n in [4, 8]:
+    comparisons = sum(1 for i in range(n) for j in range(i + 1, n))
+    assert comparisons == n * (n - 1) // 2
+    print("Distinct pairs:", n, comparisons)
 ```
 
 The inner range starts after i, so each unordered pair is counted once and self-pairs are excluded. Four items produce six comparisons; eight produce 28. The count demonstrates quadratic growth without depending on processor speed or timing noise.
@@ -75,13 +73,16 @@ The inner range starts after i, so each unordered pair is counted once and self-
 ### Example 2
 
 ```python
-from collections import Counter
-
-left=Counter(["a","a","b"]);right=Counter(["a","b","b"])
-difference={key:left[key]-right[key] for key in sorted(left.keys()|right.keys()) if left[key]!=right[key]}
-assert difference=={"a":1,"b":-1}
-assert set(left)==set(right)
-print("Bag difference:",difference)
+left = Counter(["a", "a", "b"])
+right = Counter(["a", "b", "b"])
+difference = {
+    key: left[key] - right[key]
+    for key in sorted(left.keys() | right.keys())
+    if left[key] != right[key]
+}
+assert difference == {"a": 1, "b": -1}
+assert set(left) == set(right)
+print("Bag difference:", difference)
 ```
 
 Equal membership sets conceal changed multiplicity. Counter stores counts, and the signed difference preserves which side has an extra occurrence. Ordinary Counter subtraction drops nonpositive results, so explicitly subtracting per key is necessary for a two-direction diagnostic.

@@ -62,13 +62,11 @@ The exercises use records(score, label) to keep identity visible when scores tie
 ### Example 1
 
 ```python
-from bisect import bisect_left, bisect_right
-
-records=[(2,"z"),(1,"b"),(2,"a")]
-ordered=sorted(records,key=lambda record:record[0])
-assert ordered==[(1,"b"),(2,"z"),(2,"a")]
-assert sorted(records)!=ordered
-print("Stable score order:",ordered)
+records = [(2, "z"), (1, "b"), (2, "a")]
+ordered = sorted(records, key=lambda record: record[0])
+assert ordered == [(1, "b"), (2, "z"), (2, "a")]
+assert sorted(records) != ordered
+print("Stable score order:", ordered)
 ```
 
 Sorting by the whole tuple uses label as a second key and puts a before z. Sorting only by score preserves z before a because that was their input order. The tuple labels make a stability requirement observable even when tied score values are identical.
@@ -76,13 +74,12 @@ Sorting by the whole tuple uses label as a second key and puts a before z. Sorti
 ### Example 2
 
 ```python
-from bisect import bisect_left, bisect_right
-
-values=[1,2,2,2,5]
-start=bisect_left(values,2);stop=bisect_right(values,2)
-assert (start,stop)==(1,4) and stop-start==3
-assert bisect_left(values,9)==len(values)
-print("Equal-value half-open range:",start,stop)
+values = [1, 2, 2, 2, 5]
+start = bisect_left(values, 2)
+stop = bisect_right(values, 2)
+assert (start, stop) == (1, 4) and stop - start == 3
+assert bisect_left(values, 9) == len(values)
+print("Equal-value half-open range:", start, stop)
 ```
 
 The equal run occupies positions 1,2,3, represented by the half-open interval[1,4). An insertion point at the end is valid even though it cannot be indexed as an existing element. This distinction prevents common off-by-one and IndexError failures.

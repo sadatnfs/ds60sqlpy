@@ -136,7 +136,7 @@
 <span>      ],</span>
 <span>      &quot;outcome&quot;: &quot;A deep-learning investigation asks a model to predict a defined target from available inputs, then tests what evidence supports using that prediction.&quot;,</span>
 <span>      &quot;lab&quot;: &quot;Use three training points(1, 2), (2, 4), (3, 6) and four untouched points(4, 8)..(7, 14); name one row as the prediction unit.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;3 training rows, 4 holdout rows, one prediction per row. report says arithmetic/software checked; population reliability u n established.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;3 training rows, 4 holdout rows, one prediction per row. report says arithmetic/software checked; population reliability unestablished.&quot;,</span>
 <span>      &quot;paired_lesson_id&quot;: &quot;tf-001&quot;</span>
 <span>    },</span>
 <span>    {</span>
@@ -154,8 +154,8 @@
 <span>        &quot;Device&quot;,</span>
 <span>        &quot;Broadcasting&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;A PyTorch tensor has values plus metadata:shape, dtype, device, strides and gradient-tracking state.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Create a2x3 float64CPU tensor from values0..5.&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;A PyTorch tensor has values plus metadata: shape, dtype, device, strides and gradient-tracking state.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Create a2x3 float64 CPU tensor from values 0..5.&quot;,</span>
 <span>      &quot;verification&quot;: &quot;shape(2, 3), stride(3, 1), CPU, float64. RuntimeError for incompatible trailing dimensions.&quot;,</span>
 <span>      &quot;paired_lesson_id&quot;: &quot;tf-002&quot;</span>
 <span>    },</span>
@@ -174,7 +174,7 @@
 <span>        &quot;Weight layout&quot;</span>
 <span>      ],</span>
 <span>      &quot;outcome&quot;: &quot;A linear layer computes an affine transformation from input features to output features.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;UseX[[1, 2, 3], [0, 1, 0]], weight[[1, 0, -1]], bias2.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;UseX[[1, 2, 3], [0, 1, 0]], weight[[1, 0, -1]], bias 2.&quot;,</span>
 <span>      &quot;verification&quot;: &quot;outputs[[0], [2]], shape(2, 1). RuntimeError from incompatible matrix dimensions.&quot;,</span>
 <span>      &quot;paired_lesson_id&quot;: &quot;tf-003&quot;</span>
 <span>    },</span>
@@ -194,7 +194,7 @@
 <span>      ],</span>
 <span>      &quot;outcome&quot;: &quot;A loss is a numerical objective with a declared unit and denominator.&quot;,</span>
 <span>      &quot;lab&quot;: &quot;Use residuals[1, -1, 2] against zero targets.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;squared entries1, 1, 4; sum6; mean2. MAE4/3; MSE2.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;squared entries 1, 1, 4; sum 6; mean 2. MAE 4/3; MSE 2.&quot;,</span>
 <span>      &quot;paired_lesson_id&quot;: &quot;tf-004&quot;</span>
 <span>    },</span>
 <span>    {</span>
@@ -211,9 +211,9 @@
 <span>        &quot;Finite difference&quot;,</span>
 <span>        &quot;Learning rate&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;A derivative measures local sensitivity:how much a function changes for a small input change.&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;A derivative measures local sensitivity: how much a function changes for a small input change.&quot;,</span>
 <span>      &quot;lab&quot;: &quot;Differentiate (w-2)**2 at w=0 using autograd.grad.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;derivative -4; loss4. all raise ValueError.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;derivative -4; loss 4. all raise ValueError.&quot;,</span>
 <span>      &quot;paired_lesson_id&quot;: &quot;tf-005&quot;</span>
 <span>    },</span>
 <span>    {</span>
@@ -232,7 +232,7 @@
 <span>      ],</span>
 <span>      &quot;outcome&quot;: &quot;Autograd follows the chain of tensor operations from a scalar objective back to its inputs.&quot;,</span>
 <span>      &quot;lab&quot;: &quot;Use w=1, z=2*w, a=z*z and loss=(a-1)**2.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;z2, a4, loss9, gradient48. at new w=1.5, gradient -1 for (w-2)**2.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;z2, a4, loss 9, gradient 48. at new w=1.5, gradient -1 for (w-2)**2.&quot;,</span>
 <span>      &quot;paired_lesson_id&quot;: &quot;tf-006&quot;</span>
 <span>    },</span>
 <span>    {</span>
@@ -251,8 +251,8 @@
 <span>        &quot;Gradient mode&quot;</span>
 <span>      ],</span>
 <span>      &quot;outcome&quot;: &quot;PyTorch distinguishes graph tracking from gradient storage.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Create leaf w0 and intermediate2w, retain the intermediate gradient and backpropagate its sum.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;w leaf True; intermediate False; gradients2 and1. output still requires_grad True.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Create leaf w0 and intermediate 2 w, retain the intermediate gradient and backpropagate its sum.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;w leaf True; intermediate False; gradients 2 and 1. output still requires_grad True.&quot;,</span>
 <span>      &quot;paired_lesson_id&quot;: &quot;tf-007&quot;</span>
 <span>    },</span>
 <span>    {</span>
@@ -270,8 +270,8 @@
 <span>        &quot;Independent oracle&quot;</span>
 <span>      ],</span>
 <span>      &quot;outcome&quot;: &quot;One optimizer step is the smallest complete training experiment.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use float64x1, 2, 3, y2x and scalar w0.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;mean squared loss56/3. w.grad None; updated weight unchanged.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Use float64 x1, 2, 3, y2x and scalar w0.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;mean squared loss 56/3. w.grad None; updated weight unchanged.&quot;,</span>
 <span>      &quot;paired_lesson_id&quot;: &quot;tf-008&quot;</span>
 <span>    },</span>
 <span>    {</span>
@@ -289,8 +289,8 @@
 <span>        &quot;Gradient reset&quot;</span>
 <span>      ],</span>
 <span>      &quot;outcome&quot;: &quot;An epoch is a traversal of selected records; a batch is the set reduced before an update; an optimizer step changes parameters once.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Partition IDs1..6 into batches of 2.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;three batches[[1, 2], [3, 4], [5, 6]]. epoch mean4, not5.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Partition IDs 1..6 into batches of 2.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;three batches[[1, 2], [3, 4], [5, 6]]. epoch mean 4, not 5.&quot;,</span>
 <span>      &quot;paired_lesson_id&quot;: &quot;tf-009&quot;</span>
 <span>    },</span>
 <span>    {</span>
@@ -309,8 +309,8 @@
 <span>        &quot;Training-only fit&quot;</span>
 <span>      ],</span>
 <span>      &quot;outcome&quot;: &quot;A Dataset is an interface for retrieving observations, not a guarantee that the experiment is leakage-free.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Create eight records with groups A, A, B, B, C, C, D, D and values1, 3, 5, 7, 20, 22, 30, 32.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;length8; item0has ID0, group A, value 1. 16, 18, 26, 28.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Create eight records with groups A, A, B, B, C, C, D, D and values 1, 3, 5, 7, 20, 22, 30, 32.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;length 8; item 0 has ID 0, group A, value 1. 16, 18, 26, 28.&quot;,</span>
 <span>      &quot;paired_lesson_id&quot;: &quot;tf-010&quot;</span>
 <span>    },</span>
 <span>    {</span>
@@ -328,7 +328,7 @@
 <span>        &quot;Optimizer membership&quot;</span>
 <span>      ],</span>
 <span>      &quot;outcome&quot;: &quot;Annn.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Build Scalar Model with weight0 and buffer offset0.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Build Scalar Model with weight 0 and buffer offset 0.&quot;,</span>
 <span>      &quot;verification&quot;: &quot;one parameter weight; one buffer offset; both in state_dict. same weight object and one parameter.&quot;,</span>
 <span>      &quot;paired_lesson_id&quot;: &quot;tf-011&quot;</span>
 <span>    },</span>
@@ -347,8 +347,8 @@
 <span>        &quot;Frozen assessment&quot;</span>
 <span>      ],</span>
 <span>      &quot;outcome&quot;: &quot;An auditable regressor combines data identity, a baseline, an explicit training loop and separate assessment.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use rows zero, e1, e2, e3, [1, 1, 1], [2, 1, 1] and target2a-b+c.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;targets0, 2, -1, 1, 2, 4. disjoint IDs; holdout count 2; explicit limited scope.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Use rows zero, e1, e2, e3, [1, 1, 1], [2, 1, 1] and target 2 a-b+c.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;targets 0, 2, -1, 1, 2, 4. disjoint IDs; holdout count 2; explicit limited scope.&quot;,</span>
 <span>      &quot;paired_lesson_id&quot;: &quot;tf-012&quot;</span>
 <span>    },</span>
 <span>    {</span>
@@ -367,7 +367,7 @@
 <span>      ],</span>
 <span>      &quot;outcome&quot;: &quot;A binary logit is an unrestricted score.&quot;,</span>
 <span>      &quot;lab&quot;: &quot;Apply sigmoid to-2, 0, 2.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;middle probability.5 and strictly increasing values. 0 errors at.5 and1 at.8.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;middle probability.5 and strictly increasing values. 0 errors at.5 and 1 at.8.&quot;,</span>
 <span>      &quot;paired_lesson_id&quot;: &quot;tf-013&quot;</span>
 <span>    },</span>
 <span>    {</span>
@@ -381,12 +381,12 @@
 <span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
 <span>        &quot;Multiclass target&quot;,</span>
-<span>        &quot;Multi label target&quot;,</span>
+<span>        &quot;Multilabel target&quot;,</span>
 <span>        &quot;Class axis&quot;</span>
 <span>      ],</span>
 <span>      &quot;outcome&quot;: &quot;Multiclass classification chooses exactly one outcome among mutually exclusive classes.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use one row of three zero logits and target class1.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;cross entropy log3. IndexError or RuntimeError identifying an invalid target.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Use one row of three zero logits and target class 1.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;cross entropy log 3. IndexError or RuntimeError identifying an invalid target.&quot;,</span>
 <span>      &quot;paired_lesson_id&quot;: &quot;tf-014&quot;</span>
 <span>    },</span>
 <span>    {</span>
@@ -406,7 +406,7 @@
 <span>      ],</span>
 <span>      &quot;outcome&quot;: &quot;Dataset defines how to retrieve an observation, while DataLoader defines batching, sampling and collation.&quot;,</span>
 <span>      &quot;lab&quot;: &quot;Load five paired ID/value records with batch size 2 and no shuffle.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;sizes2, 2, 1 and IDs0..4 exactly once. ValueError before padding.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;sizes 2, 2, 1 and IDs 0..4 exactly once. ValueError before padding; token IDs must be nonnegative int64 integers.&quot;,</span>
 <span>      &quot;paired_lesson_id&quot;: &quot;tf-015&quot;</span>
 <span>    },</span>
 <span>    {</span>
@@ -425,8 +425,8 @@
 <span>        &quot;Symmetry&quot;</span>
 <span>      ],</span>
 <span>      &quot;outcome&quot;: &quot;Nonlinearity changes which functions a network can represent.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use inputs00, 01, 10, 11 and two rectified differences.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;outputs0, 1, 1, 0. both.6; the function is absolute difference.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Use inputs 00, 01, 10, 11 and two rectified differences.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;outputs 0, 1, 1, 0. both.6; the function is absolute difference.&quot;,</span>
 <span>      &quot;paired_lesson_id&quot;: &quot;tf-016&quot;</span>
 <span>    },</span>
 <span>    {</span>
@@ -444,7 +444,7 @@
 <span>        &quot;Weight decay&quot;</span>
 <span>      ],</span>
 <span>      &quot;outcome&quot;: &quot;Regularization and training mode affect different parts of the experiment.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use weights1, -2 and compute L1and squared L2sums.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Use weights 1, -2 and compute L1and squared L2sums.&quot;,</span>
 <span>      &quot;verification&quot;: &quot;L1=3; squared L2=5. output still requires grad; backward gives ones.&quot;,</span>
 <span>      &quot;paired_lesson_id&quot;: &quot;tf-017&quot;</span>
 <span>    },</span>
@@ -464,8 +464,8 @@
 <span>        &quot;LayerNorm axis&quot;</span>
 <span>      ],</span>
 <span>      &quot;outcome&quot;: &quot;Normalization can introduce both state and cross-observation dependencies.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Apply BatchNorm momentum.5 to rows1, 3 and3, 5.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;running mean1, 2; batch counter1. finite zeros with default affine initialization.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Apply BatchNorm momentum.5 to rows 1, 3 and 3, 5.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;running mean 1, 2; batch counter 1. finite zeros with default affine initialization.&quot;,</span>
 <span>      &quot;paired_lesson_id&quot;: &quot;tf-018&quot;</span>
 <span>    },</span>
 <span>    {</span>
@@ -484,8 +484,8 @@
 <span>        &quot;Cross-correlation&quot;</span>
 <span>      ],</span>
 <span>      &quot;outcome&quot;: &quot;Convolution applies a shared local kernel across spatial positions.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Apply kernel1, 0; 0, -1 to image1..9 in3x3NCHW layout.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;output shape1, 1, 2, 2; all values-4. 8trainable scalars.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Apply kernel 1, 0; 0, -1 to image 1..9 in 3 x3NCHW layout.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;output shape 1, 1, 2, 2; all values-4. 8trainable scalars.&quot;,</span>
 <span>      &quot;paired_lesson_id&quot;: &quot;tf-019&quot;</span>
 <span>    },</span>
 <span>    {</span>
@@ -503,8 +503,8 @@
 <span>        &quot;Label invariance&quot;</span>
 <span>      ],</span>
 <span>      &quot;outcome&quot;: &quot;Pooling reduces local spatial information.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Pool patch1, 3; 2, 4 with a2x2window.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;max4; average2.5. left-&gt;right-&gt;left.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Pool patch 1, 3; 2, 4 with a2x2window.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;max 4; average 2.5. left-&gt;right-&gt;left.&quot;,</span>
 <span>      &quot;paired_lesson_id&quot;: &quot;tf-020&quot;</span>
 <span>    },</span>
 <span>    {</span>
@@ -518,13 +518,13 @@
 <span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
 <span>        &quot;Padding index&quot;,</span>
-<span>        &quot;P ac k e d sequence&quot;,</span>
+<span>        &quot;Packed sequence&quot;,</span>
 <span>        &quot;Final valid state&quot;,</span>
 <span>        &quot;Valid-target denominator&quot;</span>
 <span>      ],</span>
 <span>      &quot;outcome&quot;: &quot;A padded sequence contains real positions and artificial storage positions.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use IDs2, 3, 0 and a fixed4x2table with zero padding row.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;embedding shape1, 3, 2; mask True, True, False. RuntimeError for invalid length.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Use IDs 2, 3, 0 and a fixed 4 x2table with zero padding row.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;embedding shape 1, 3, 2; mask True, True, False. RuntimeError for invalid length.&quot;,</span>
 <span>      &quot;paired_lesson_id&quot;: &quot;tf-021&quot;</span>
 <span>    },</span>
 <span>    {</span>
@@ -543,8 +543,8 @@
 <span>        &quot;Dropout argument&quot;</span>
 <span>      ],</span>
 <span>      &quot;outcome&quot;: &quot;Attention forms weighted combinations of value vectors using query-key comparisons.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use zero3x2queries/keys and values2, 0; 0, 2; 6, 6.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;outputs2, 0; 1, 1; 8/3, 8/3. repeated evaluation matches.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Use zero 3-by-2 queries/keys and values 2, 0; 0, 2; 6, 6.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;outputs 2, 0; 1, 1; 8/3, 8/3. repeated evaluation matches.&quot;,</span>
 <span>      &quot;paired_lesson_id&quot;: &quot;tf-022&quot;</span>
 <span>    },</span>
 <span>    {</span>
@@ -563,7 +563,7 @@
 <span>      ],</span>
 <span>      &quot;outcome&quot;: &quot;A custom training loop can fail by disconnecting the graph, forgetting an update, reusing old gradients or applying an incorrect reduction.&quot;,</span>
 <span>      &quot;lab&quot;: &quot;Detach (w-2)**2 before backward and inspect tracking.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;detached loss requires_grad False; backward raises RuntimeError. nonnegative and below56/675.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;detached loss requires_grad False; backward raises RuntimeError. nonnegative and below 56/675.&quot;,</span>
 <span>      &quot;paired_lesson_id&quot;: &quot;tf-023&quot;</span>
 <span>    },</span>
 <span>    {</span>
@@ -582,8 +582,8 @@
 <span>        &quot;Subgroup evidence&quot;</span>
 <span>      ],</span>
 <span>      &quot;outcome&quot;: &quot;A classifier capstone must connect the task definition to training and evaluation evidence.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use training x-2, -1, 1, 2 with labels0, 0, 1, 1 and test x-3, 3.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;4training records, 2test records. negative0/1errors; positive1/1.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Use training x-2, -1, 1, 2 with labels 0, 0, 1, 1 and test x-3, 3.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;4training records, 2test records. negative 0/1errors; positive 1/1.&quot;,</span>
 <span>      &quot;paired_lesson_id&quot;: &quot;tf-024&quot;</span>
 <span>    },</span>
 <span>    {</span>
@@ -596,15 +596,13 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;embedding objective&quot;,</span>
-<span>        &quot;contrastive loss&quot;,</span>
-<span>        &quot;negative sampling&quot;,</span>
-<span>        &quot;cosine similarity&quot;,</span>
-<span>        &quot;Contrastive embeddings and negative sampling&quot;</span>
+<span>        &quot;Contrastive objective&quot;,</span>
+<span>        &quot;Cosine similarity&quot;,</span>
+<span>        &quot;False negative&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and implement contrastive embeddings and negative sampling with inspectable state and a controlled counterexample.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use bounded authored tensors or data to derive a result, run the PyTorch operation and compare the equivalent TensorFlow mechanism.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect value/gradient/state or failure evidence and explain what the tiny CPU example does not establish.&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Embedding objectives teach a representation to preserve selected relationships.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Use anchor[1, 0], positive[1, 1], negative[0, 1].&quot;,</span>
+<span>      &quot;verification&quot;: &quot;dots 1, 0; cosines 1/sqrt 2, 0. positive probability increases; argmax remains 0.&quot;,</span>
 <span>      &quot;paired_lesson_id&quot;: &quot;tf-025&quot;</span>
 <span>    },</span>
 <span>    {</span>
@@ -617,16 +615,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Layer&quot;,</span>
-<span>        &quot;build&quot;,</span>
-<span>        &quot;call&quot;,</span>
-<span>        &quot;residual&quot;,</span>
-<span>        &quot;tracked state&quot;,</span>
-<span>        &quot;Custom modules, residual paths, buffers and autograd checks&quot;</span>
+<span>        &quot;Custom module&quot;,</span>
+<span>        &quot;Buffer&quot;,</span>
+<span>        &quot;Grad check&quot;,</span>
+<span>        &quot;Incoming gradient&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and implement custom modules, residual paths, buffers and autograd checks with inspectable state and a controlled counterexample.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use bounded authored tensors or data to derive a result, run the PyTorch operation and compare the equivalent TensorFlow mechanism.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect value/gradient/state or failure evidence and explain what the tiny CPU example does not establish.&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Custom modules should make state ownership and differentiation explicit.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Create a width 2 residual with zero kernel and scale buffer 1.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;output equals input; one parameter and one buffer. gradient 24.&quot;,</span>
 <span>      &quot;paired_lesson_id&quot;: &quot;tf-026&quot;</span>
 <span>    },</span>
 <span>    {</span>
@@ -639,15 +635,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;transfer learning&quot;,</span>
-<span>        &quot;freezing&quot;,</span>
-<span>        &quot;fine-tuning&quot;,</span>
-<span>        &quot;optimizer state&quot;,</span>
-<span>        &quot;Transfer learning, frozen layers and optimizer membership&quot;</span>
+<span>        &quot;Frozen base&quot;,</span>
+<span>        &quot;Optimizer membership&quot;,</span>
+<span>        &quot;Mode-dependent buffer&quot;,</span>
+<span>        &quot;Unfreeze phase&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and implement transfer learning, frozen layers and optimizer membership with inspectable state and a controlled counterexample.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use bounded authored tensors or data to derive a result, run the PyTorch operation and compare the equivalent TensorFlow mechanism.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect value/gradient/state or failure evidence and explain what the tiny CPU example does not establish.&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Transfer learning reuses a representation while adapting a task-specific head.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Create a bias-free 2-to-2identity Linear base and disable its parameter gradients.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;base output equals input; all base parameters frozen. base weight now changes.&quot;,</span>
 <span>      &quot;paired_lesson_id&quot;: &quot;tf-027&quot;</span>
 <span>    },</span>
 <span>    {</span>
@@ -660,15 +655,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;checkpoint&quot;,</span>
-<span>        &quot;optimizer slots&quot;,</span>
-<span>        &quot;random state&quot;,</span>
-<span>        &quot;next-step equivalence&quot;,</span>
-<span>        &quot;Restartable training, optimizer state and RNG evidence&quot;</span>
+<span>        &quot;Training checkpoint&quot;,</span>
+<span>        &quot;RNG state&quot;,</span>
+<span>        &quot;Data position&quot;,</span>
+<span>        &quot;Next-step parity&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and implement restartable training, optimizer state and rng evidence with inspectable state and a controlled counterexample.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use bounded authored tensors or data to derive a result, run the PyTorch operation and compare the equivalent TensorFlow mechanism.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect value/gradient/state or failure evidence and explain what the tiny CPU example does not establish.&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Restartable training requires the state that determines the next update, not merely weights that reproduce the current prediction.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Take two Adam updates of a zero-weight linear model onx 1, 2 and y 2 x.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;optimizer step 2 and positive weight. directory absent; no distributed-loader claim.&quot;,</span>
 <span>      &quot;paired_lesson_id&quot;: &quot;tf-028&quot;</span>
 <span>    },</span>
 <span>    {</span>
@@ -681,15 +675,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;precision&quot;,</span>
-<span>        &quot;overflow&quot;,</span>
-<span>        &quot;log-sum-exp&quot;,</span>
-<span>        &quot;loss scaling&quot;,</span>
-<span>        &quot;Stable objectives, precision and mixed-precision boundaries&quot;</span>
+<span>        &quot;Overflow&quot;,</span>
+<span>        &quot;Log-sum-exp&quot;,</span>
+<span>        &quot;Mixed precision&quot;,</span>
+<span>        &quot;Gradient scaling&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and implement stable objectives, precision and mixed-precision boundaries with inspectable state and a controlled counterexample.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use bounded authored tensors or data to derive a result, run the PyTorch operation and compare the equivalent TensorFlow mechanism.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect value/gradient/state or failure evidence and explain what the tiny CPU example does not establish.&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Numerical stability concerns how an equivalent mathematical expression behaves in a finite representation.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Exponentiate float32 logits1000, 999 directly.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;both exponentials infinite. ValueError before loss evaluation.&quot;,</span>
 <span>      &quot;paired_lesson_id&quot;: &quot;tf-029&quot;</span>
 <span>    },</span>
 <span>    {</span>
@@ -702,15 +695,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;replica&quot;,</span>
-<span>        &quot;gradient aggregation&quot;,</span>
-<span>        &quot;unequal shards&quot;,</span>
-<span>        &quot;accumulation&quot;,</span>
-<span>        &quot;Distributed gradients and accumulation semantics on CPU&quot;</span>
+<span>        &quot;Global objective&quot;,</span>
+<span>        &quot;Microbatch accumulation&quot;,</span>
+<span>        &quot;Sha rd weighting&quot;,</span>
+<span>        &quot;Distributed acceptance&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and implement distributed gradients and accumulation semantics on cpu with inspectable state and a controlled counterexample.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use bounded authored tensors or data to derive a result, run the PyTorch operation and compare the equivalent TensorFlow mechanism.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect value/gradient/state or failure evidence and explain what the tiny CPU example does not establish.&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Distributed and accumulated gradients should represent a declared global objective.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Combine means 2, 6 with counts 1, 3.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;global mean 5; unweighted shard mean 4. empty shard contributes 0; global mean 5.&quot;,</span>
 <span>      &quot;paired_lesson_id&quot;: &quot;tf-030&quot;</span>
 <span>    },</span>
 <span>    {</span>
@@ -723,16 +715,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;tf.function&quot;,</span>
-<span>        &quot;signature&quot;,</span>
-<span>        &quot;retracing&quot;,</span>
-<span>        &quot;warmup&quot;,</span>
-<span>        &quot;measurement&quot;,</span>
-<span>        &quot;Profiling, torch.compile and honest performance measurement&quot;</span>
+<span>        &quot;Graph capture&quot;,</span>
+<span>        &quot;Backend&quot;,</span>
+<span>        &quot;Warmup&quot;,</span>
+<span>        &quot;Profiler overhead&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and implement profiling, torch.compile and honest performance measurement with inspectable state and a controlled counterexample.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use bounded authored tensors or data to derive a result, run the PyTorch operation and compare the equivalent TensorFlow mechanism.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect value/gradient/state or failure evidence and explain what the tiny CPU example does not establish.&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Compilation and profiling answer different questions.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Evaluatef(x)=x*x+1 at float32[1, 2].&quot;,</span>
+<span>      &quot;verification&quot;: &quot;output[2, 5]. receipt does not claim universal speedup.&quot;,</span>
 <span>      &quot;paired_lesson_id&quot;: &quot;tf-031&quot;</span>
 <span>    },</span>
 <span>    {</span>
@@ -745,16 +735,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Keras 3&quot;,</span>
-<span>        &quot;.keras&quot;,</span>
-<span>        &quot;SavedModel&quot;,</span>
-<span>        &quot;signature&quot;,</span>
-<span>        &quot;parity&quot;,</span>
-<span>        &quot;state_dict, torch.export and inference parity&quot;</span>
+<span>        &quot;state_dict&quot;,</span>
+<span>        &quot;Exported program&quot;,</span>
+<span>        &quot;Dynamic dimension&quot;,</span>
+<span>        &quot;Inference parity&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and implement state_dict, torch.export and inference parity with inspectable state and a controlled counterexample.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use bounded authored tensors or data to derive a result, run the PyTorch operation and compare the equivalent TensorFlow mechanism.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect value/gradient/state or failure evidence and explain what the tiny CPU example does not establish.&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;A state dictionary stores named parameters and buffers, not the complete Python architecture.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Set a 2-to-1 bias-free Linear weight to[2, -1] and predict rows 1, 2 and 3, 4.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;outputs 0, 2. three-row parity passes; temporary directory absent.&quot;,</span>
 <span>      &quot;paired_lesson_id&quot;: &quot;tf-032&quot;</span>
 <span>    },</span>
 <span>    {</span>
@@ -767,15 +755,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;inference contract&quot;,</span>
-<span>        &quot;batch limit&quot;,</span>
-<span>        &quot;schema&quot;,</span>
-<span>        &quot;input validation&quot;,</span>
-<span>        &quot;Inference mode, model contracts and bounded batching&quot;</span>
+<span>        &quot;Inference mode&quot;,</span>
+<span>        &quot;Input contract&quot;,</span>
+<span>        &quot;Batch independence&quot;,</span>
+<span>        &quot;Owned output&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and implement inference mode, model contracts and bounded batching with inspectable state and a controlled counterexample.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use bounded authored tensors or data to derive a result, run the PyTorch operation and compare the equivalent TensorFlow mechanism.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect value/gradient/state or failure evidence and explain what the tiny CPU example does not establish.&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Inference is a bounded function with an input and output contract.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Use float32 CPU rows 1, 2 and 3, 4.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;outputs 0, 2 with shape(2, ). input unchanged.&quot;,</span>
 <span>      &quot;paired_lesson_id&quot;: &quot;tf-033&quot;</span>
 <span>    },</span>
 <span>    {</span>
@@ -788,16 +775,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;robustness&quot;,</span>
-<span>        &quot;privacy&quot;,</span>
-<span>        &quot;provenance&quot;,</span>
-<span>        &quot;model card&quot;,</span>
-<span>        &quot;claim boundary&quot;,</span>
-<span>        &quot;Robustness, privacy and evidence beyond a score&quot;</span>
+<span>        &quot;Subgroup denominator&quot;,</span>
+<span>        &quot;Robustness condition&quot;,</span>
+<span>        &quot;Finite safety evidence&quot;,</span>
+<span>        &quot;Model card&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and implement robustness, privacy and evidence beyond a score with inspectable state and a controlled counterexample.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use bounded authored tensors or data to derive a result, run the PyTorch operation and compare the equivalent TensorFlow mechanism.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect value/gradient/state or failure evidence and explain what the tiny CPU example does not establish.&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;A reliability report should preserve the conditions and denominators behind a score.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Use groups A, A, B with truth 1, 1, 0 and prediction 1, 0, 0.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;A1/2errors; B0/1. card explicitly has no privacy guarantee.&quot;,</span>
 <span>      &quot;paired_lesson_id&quot;: &quot;tf-034&quot;</span>
 <span>    },</span>
 <span>    {</span>
@@ -810,15 +795,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;paired comparison&quot;,</span>
-<span>        &quot;bootstrap&quot;,</span>
-<span>        &quot;selection bias&quot;,</span>
-<span>        &quot;evaluation unit&quot;,</span>
-<span>        &quot;Paired model comparisons and uncertainty&quot;</span>
+<span>        &quot;Paired difference&quot;,</span>
+<span>        &quot;Resampling unit&quot;,</span>
+<span>        &quot;Selection bias&quot;,</span>
+<span>        &quot;Local generator&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and implement paired model comparisons and uncertainty with inspectable state and a controlled counterexample.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use bounded authored tensors or data to derive a result, run the PyTorch operation and compare the equivalent TensorFlow mechanism.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect value/gradient/state or failure evidence and explain what the tiny CPU example does not establish.&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Model comparisons should preserve the pairing between predictions on the same held-out identities.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Use truth a0, b1, c2 with A0, 2, 2 and B 1, 2, 3 in different dictionary order.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;paired squared-loss differences-1, 0, -1. test selection violates the declared boundary.&quot;,</span>
 <span>      &quot;paired_lesson_id&quot;: &quot;tf-035&quot;</span>
 <span>    },</span>
 <span>    {</span>
@@ -831,16 +815,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;capstone&quot;,</span>
-<span>        &quot;reproducibility&quot;,</span>
-<span>        &quot;release gate&quot;,</span>
-<span>        &quot;rollback&quot;,</span>
-<span>        &quot;limitations&quot;,</span>
-<span>        &quot;Capstone: release a small reproducible PyTorch model&quot;</span>
+<span>        &quot;Release bundle&quot;,</span>
+<span>        &quot;Integrity gate&quot;,</span>
+<span>        &quot;Fresh-process inference&quot;,</span>
+<span>        &quot;Rollback identity&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and implement capstone: release a small reproducible pytorch model with inspectable state and a controlled counterexample.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Use bounded authored tensors or data to derive a result, run the PyTorch operation and compare the equivalent TensorFlow mechanism.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect value/gradient/state or failure evidence and explain what the tiny CPU example does not establish.&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;A reproducible model release is a bundle of state, schema, data identity, execution evidence and limitations.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Use train x1, 2, 3 and holdout 4, 5 with target 2 x and disjoint IDs.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;3training and 2 holdout records. local checks True; production no-go; directory absent.&quot;,</span>
 <span>      &quot;paired_lesson_id&quot;: &quot;tf-036&quot;</span>
 <span>    }</span>
 <span>  ],</span>

@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>llm-045: Pre/post normalization, RMSNorm and gated feed-forward networks · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>llm-045: Pre/post normalization, RMSNorm and gated feed-forward networks</h1>
+      <p class="source-path">Generated from <code>courses/llm-theory/guides/llm-045.md</code></p>
+    </header>
+    <article class="document"><h2 id="llm-045-pre-post-normalization-rmsnorm-and-gated-feed-forward-networks">llm-045: Pre/post normalization, RMSNorm and gated feed-forward networks<a class="heading-anchor" href="#llm-045-pre-post-normalization-rmsnorm-and-gated-feed-forward-networks" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Advanced; approximately 210 minutes. Direct prerequisites: <code>llm-044</code>. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Normalization placement changes the residual network&#x27;s gradient path. The central investigation is concrete: Normalize vector [3, 4] with unit gain and epsilon 1e-8. The finish condition is RMSNorm mean nonzero; LayerNorm mean approximately 0. LayerNorm shift invariant; RMSNorm changes; both zero cases finite. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
+<h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
+<h4 id="normalize-feature-geometry-without-losing-track-of-the-residual-path">Normalize feature geometry without losing track of the residual path<a class="heading-anchor" href="#normalize-feature-geometry-without-losing-track-of-the-residual-path" aria-label="Link to this section">#</a></h4>
+<p>Position mechanisms change how vectors express location. Normalization changes how their scale and common offsets affect subsequent computation. In a transformer, these choices influence both the forward representation and the gradients that travel through many layers. The names LayerNorm and RMSNorm are not interchangeable labels for &quot;make values small&quot;; their formulas preserve and remove different directions.</p>
+<p>Let x be one token&#x27;s d-dimensional feature vector. A tokenwise LayerNorm computes mean mu=(1/d)sum_i x_i, centered values c=x-mu*1, variance v=(1/d)sum_i c_i², and normalized values c/sqrt(v+epsilon), followed by any learned gain and bias. RMSNorm uses x/sqrt[(1/d)sum_i x_i²+epsilon], typically with learned gain, without subtracting the mean. The reduction axis is the feature axis of one token under this construction.</p>
+<h5 id="calculate-the-two-transformations-on-a-new-vector">Calculate the two transformations on a new vector<a class="heading-anchor" href="#calculate-the-two-transformations-on-a-new-vector" aria-label="Link to this section">#</a></h5>
+<p>For x=[1,2,3], LayerNorm has mean 2, centered values[-1,0,1] and variance 2/3. Ignoring only the tiny epsilon for this hand calculation, the normalized result is approximately[-1.224745,0,1.224745]. RMSNorm has mean square 14/3 and root mean square about 2.160247, giving approximately[.462910,.925820,1.388730]. The latter has nonzero mean because centering was never part of its definition.</p>
+<p>Adding 5 to every feature leaves LayerNorm&#x27;s centered vector unchanged. RMSNorm generally changes because both the raw numerator and root mean square change. Multiplying by a positive constant produces another useful comparison: with epsilon zero and nonzero input, both normalizers remove that positive scale under their respective formulas. With positive epsilon, exact scale invariance no longer holds at every magnitude. Small epsilon is a numerical design parameter, not permission to ignore its effect near zero.</p>
+<p>Learned gain and bias can alter the final mean and scale. A unit-gain, zero-bias normalized vector may have zero feature mean under LayerNorm, while an arbitrary learned gain can change that property. State which stage of the formula is being discussed instead of generalizing a property of the standardized intermediate to every final output.</p>
+<h5 id="derive-the-jacobian-by-separating-numerator-and-denominator">Derive the Jacobian by separating numerator and denominator<a class="heading-anchor" href="#derive-the-jacobian-by-separating-numerator-and-denominator" aria-label="Link to this section">#</a></h5>
+<p>For RMSNorm, write r=sqrt(x^T x/d+epsilon). The derivative of x_i/r with respect to x_j contains a direct numerator term delta_ij/r and a denominator term-x_i<em>x_j/(d</em>r³). This yields J=I/r-xx^T/(d*r³). A learned elementwise gain multiplies the corresponding output rows of this Jacobian.</p>
+<p>The geometry becomes clear by testing directions. If u is perpendicular to x, then Ju=u/r. Along x itself, Jx=epsilon*x/r³. When epsilon is zero, a radial scale change has no first-order effect. Near the zero vector, r is approximately sqrt(epsilon), so the Jacobian can have magnitude about 1/sqrt(epsilon). Epsilon makes division defined but does not guarantee small sensitivities.</p>
+<p>LayerNorm adds a centering projection. Let P=I-(1/d)11^T, so c=Px and r=sqrt(c^T c/d+epsilon). Its unit-gain Jacobian is P/r-cc^T/(d<em>r³). Because P</em>1=0 and c^T*1=0, the all-ones shift direction is annihilated. This explains the reference&#x27;s post-normalization Jacobian test directly from the formula, rather than treating the result as an opaque autograd observation.</p>
+<h5 id="place-normalization-relative-to-the-skip-connection">Place normalization relative to the skip connection<a class="heading-anchor" href="#place-normalization-relative-to-the-skip-connection" aria-label="Link to this section">#</a></h5>
+<p>A residual block adds a transformed branch to a direct path. In pre-norm form, y=x+F(N(x)); in post-norm form, y=N(x+F(x)). Applying the chain rule gives I+J_F J_N for pre-norm and J_N(I+J_F) for post-norm. The location of J_N changes which routes a gradient can follow.</p>
+<p>Set F to zero as a controlled case. Pre-norm returns x exactly and has identity Jacobian. Post-norm returns N(x) and still has the normalizer&#x27;s Jacobian. This isolates placement from the complexity of a learned attention or feed-forward branch. It is a powerful local test because the expected difference can be derived without a long training run.</p>
+<p>A direct identity path can help explain optimization behavior, but it is not a complete theorem about training success. Depth, initialization, residual scaling, final normalization, optimizer and data all interact. Moving normalization across an addition changes the function and should be treated as an architectural change, not a harmless code refactor with guaranteed checkpoint equivalence.</p>
+<h5 id="a-gated-feed-forward-block-has-two-interacting-projections">A gated feed-forward block has two interacting projections<a class="heading-anchor" href="#a-gated-feed-forward-block-has-two-interacting-projections" aria-label="Link to this section">#</a></h5>
+<p>A plain feed-forward block can be written phi(XW_1)W_2. A SwiGLU-style block instead forms G=XW_g and U=XW_u, multiplies SiLU(G) elementwise by U, then projects through W_d. SiLU(g)=g*sigmoid(g). The word &quot;gate&quot; describes a multiplicative role; SiLU is not constrained to[0,1] and is not a probability.</p>
+<p>For example, g=-1 gives SiLU(g)≈-.268941. With u=2, the scalar product is about-.537883, so the gate can change sign rather than merely attenuate a positive value. At g=0, SiLU is zero but its derivative is 1/2. This is why the reference&#x27;s output can be zero while the gate receives a nonzero gradient.</p>
+<p>Let H=SiLU(G) elementwise_mul U and let R=dL/dY. The gradient reaching H is R W_d^T. Multiplying this by SiLU(G) gives the up-branch derivative; multiplying by U and SiLU&#x27;(G) gives the gate-branch derivative. A zero up-branch gradient at a zero gate is therefore a local consequence of the product, not necessarily a disconnected parameter. Inspect both activations and both gradient paths before diagnosing an optimizer failure.</p>
+<h5 id="compare-architectures-at-a-stated-resource-budget">Compare architectures at a stated resource budget<a class="heading-anchor" href="#compare-architectures-at-a-stated-resource-budget" aria-label="Link to this section">#</a></h5>
+<p>For input/output width d and hidden width h, a bias-free plain two-matrix FFN has 2dh weights. The gated version has 3dh because it uses gate, up and down matrices. Retaining the same hidden width increases that part of the parameter count by 50 percent. A quality comparison that ignores this change cannot attribute the difference solely to the activation mechanism.</p>
+<p>To match this weight count, choose gated hidden width two-thirds of the plain hidden width when the dimensions and implementation permit it. The fixture&#x27;s d=4, plain h=6 and gated h=4 each give 48 weight entries. This matches one resource measure. It does not automatically equalize activation memory, operation scheduling, kernel efficiency or task quality.</p>
+<p>Biases, rounded hardware-friendly widths and additional projections can change the exact count. Write the matrix dimensions and bias policy before using a shorthand ratio. The small model makes this accounting easy; the same habit prevents confusion when comparing larger checkpoints with different feed-forward conventions.</p>
+<h5 id="diagnose-numerical-differences-before-drawing-training-conclusions">Diagnose numerical differences before drawing training conclusions<a class="heading-anchor" href="#diagnose-numerical-differences-before-drawing-training-conclusions" aria-label="Link to this section">#</a></h5>
+<p>When two implementations disagree, compare the reduction axis, mean subtraction, variance formula, epsilon placement, gain/bias values and dtype. A common-shift case distinguishes centering behavior; a zero vector probes epsilon handling; a nonconstant vector exposes an incorrect variance reduction. Testing only an all-ones vector can hide important differences or collapse the centered variance to zero.</p>
+<p>During causal modeling, normalizing independently over features preserves the token information boundary. Accidentally normalizing over token positions can introduce dependence on future positions. A normalization bug can therefore look like an attention-mask bug at the final output. Follow the dependency graph and compare intermediate states to identify the first divergence.</p>
+<h3 id="design-decisions-and-when-to-use-this-method">Design decisions and when to use this method<a class="heading-anchor" href="#design-decisions-and-when-to-use-this-method" aria-label="Link to this section">#</a></h3>
+<p>Use normalization and gating choices as part of a complete architecture and training policy. Pre-norm often offers a direct residual gradient path, but final normalization, initialization, depth and optimizer settings still matter. RMSNorm preserves a different set of invariances than LayerNorm. A swap requires a model-specific evaluation or retraining plan rather than an assumption of numerical equivalence.</p>
+<p>For SwiGLU, record the gate activation, projection layouts, bias policy, hidden width and parameter budget. Inspect both gate and up branch gradients when a unit appears inactive. A zero gradient at a particular input can follow directly from the product structure and need not indicate a broken autograd graph. Compare actual held-out task quality and resource use after mechanical checks pass.</p>
+<h3 id="derivation-and-shape-trace">Derivation and shape trace<a class="heading-anchor" href="#derivation-and-shape-trace" aria-label="Link to this section">#</a></h3>
+<p>For a feature vector x in R^d with unit gain, let r=sqrt(mean(x²)+epsilon) and y_i=x_i/r. Differentiating both numerator and denominator gives</p>
+<p>\[ \frac{\partial y_i}{\partial x_j}=\frac{\delta_{ij}}{r}-\frac{x_i x_j}{d r^3}. \]</p>
+<p>A learned gain g_i multiplies row i of this Jacobian. RMSNorm does not subtract the feature mean, so adding a constant generally changes its output. LayerNorm first subtracts that mean and therefore removes the all-ones shift direction.</p>
+<p>For a residual branch F and normalizer N, pre-norm is y=x+F(N(x)), with Jacobian I+J_F J_N. Post-norm is y=N(x+F(x)), with Jacobian J_N(I+J_F). Setting F=0 isolates the placement: the first Jacobian is I, while the second remains J_N. This local identity-path argument is not a complete theorem about every training configuration.</p>
+<p>A bias-free plain feed-forward block phi(xW1)W2 has 2dh weights. SwiGLU, [SiLU(xWg) elementwise_mul(xWu)]Wd, has 3dh weights. Equal weight budgets therefore use gated hidden width two-thirds of the plain hidden width when dimensions permit. SiLU(g)=g<em>sigmoid(g), with derivative sigmoid(g)+g</em>sigmoid(g)*(1-sigmoid(g)). At g=0 this derivative is 1/2, which explains the scalar gate-gradient example.</p>
+<h3 id="normalization-changes-which-directions-a-layer-can-preserve">Normalization changes which directions a layer can preserve<a class="heading-anchor" href="#normalization-changes-which-directions-a-layer-can-preserve" aria-label="Link to this section">#</a></h3>
+<p>For x in R^d, define r=sqrt[(1/d)sum_j x_j²+epsilon]. RMSNorm with unit gain returns y=x/r. For x=[3,4], the mean square is 12.5 and r is approximately 3.53553, so y is approximately[.848528,1.131371]. The feature mean is not zero. LayerNorm first subtracts the mean 3.5, producing[-.5,.5], and divides by sqrt(.25+epsilon), giving values close to[-1,1]. Confusing the two normalizers would predict the wrong output even before training begins.</p>
+<p>The normalizer uses a feature-axis average for each token independently in the ordinary transformer construction. It does not estimate statistics across the sequence or batch. Mixing token positions into the normalizing reduction can introduce dependencies across positions, including future positions in a causal model. A module named &quot;normalization&quot; is not enough to establish the intended axis. Record normalized dimensions, gain/bias shapes and epsilon placement when reproducing a checkpoint.</p>
+<p>The RMSNorm Jacobian is J=I/r-xx^T/(d r³). A direction u perpendicular to x satisfies x^T u=0 and therefore Ju=u/r. Along the radial direction x, Jx=epsilon*x/r³. With epsilon exactly zero and nonzero x, changing only the positive scale of x has no first-order effect: normalization removes that radial magnitude. With positive epsilon, the radial sensitivity is small but generally not zero. This is why exact scale invariance must be qualified when an epsilon is present.</p>
+<p>At x=0, r=sqrt(epsilon) and J=I/sqrt(epsilon). Epsilon prevents division by zero, but a very small epsilon can still produce large local sensitivity near zero. It is not a universal gradient bound. A learned gain multiplies output coordinates and corresponding Jacobian rows, further changing sensitivities. A learned bias, if present, changes outputs while leaving this derivative with respect to x unaffected. The fixture uses an explicit unit-gain contract to keep the formulas inspectable.</p>
+<p>LayerNorm removes a common feature shift because subtracting the mean cancels x+c*1 for any scalar c. Its Jacobian annihilates the all-ones direction under the stated feature reduction. RMSNorm generally does not: adding the same constant changes both the numerator and root mean square without centering it away. A test that shifts every feature by 5 distinguishes them even when both return finite normalized vectors. Do not infer zero mean from a name containing &quot;Norm.&quot;</p>
+<p>Residual placement changes the route followed by gradients. Pre-norm y=x+F(N(x)) has Jacobian I+J_F J_N. Post-norm y=N(x+F(x)) has J_N(I+J_F). In the zero-branch control F=0, pre-norm leaves both the forward value and derivative equal to the identity, while post-norm still applies N. The direct identity path is a useful local explanation for optimization differences, but a stack also includes initialization, residual scaling, final normalization, optimizer state and depth. The two-line Jacobian comparison is not a theorem that every pre-norm model trains better.</p>
+<p>For a gated feed-forward layer, let G=XW_g, U=XW_u, A=SiLU(G), H=A elementwise_mul U and Y=HW_d. If the upstream matrix is R=dL/dY, then dL/dH=R W_d^T. The up-branch derivative is(dL/dH) elementwise_mul A; the gate derivative is(dL/dH) elementwise_mul U elementwise_mul SiLU&#x27;(G). Multiplying by X^T accumulates gradients for W_u and W_g. These shapes explain why both projections matter and why a zero local gradient need not indicate a disconnected graph.</p>
+<p>The scalar example sets g=0 and u=2. SiLU(0)=0 but SiLU&#x27;(0)=1/2, so the output is 0, the derivative with respect to g is 1, and the derivative with respect to u is 0. Changing u to 0 would make both branch derivatives zero at this point. This is a property of the multiplicative gate, not evidence that autograd failed. A large negative gate can also make sigmoid-based activation and derivatives small; inspect actual intermediate values before assuming the optimizer ignored a parameter.</p>
+<p>A bias-free plain FFN has matrices d-by-h and h-by-d, totaling2dh weights. A bias-free gated FFN has three such projections totaling3dh. Holding h fixed adds50 percent more FFN weights. Equal weight count requires h_gated=(2/3)h_plain when integer/layout constraints permit: d=4,h_plain=6 and h_gated=4 both yield 48 entries. This equalizes one resource count, not necessarily activation memory, kernel efficiency or task quality.</p>
+<p><strong>Interview reasoning:</strong> &quot;Can RMSNorm replace LayerNorm without retraining?&quot; The formulas have different invariances and can produce different states under the same weights. Whether a particular conversion works is an empirical model-specific question. First reproduce the existing architecture&#x27;s axes, epsilon, gains, biases and placement; then evaluate a deliberate change. The <a href="https://arxiv.org/abs/1910.07467">RMSNorm paper</a> motivates the alternative, while this chapter&#x27;s autograd checks test precise local derivatives.</p>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<p><strong>Pre-norm:</strong> Normalization inside the transformed residual branch.</p>
+<p><strong>Post-norm:</strong> Normalization applied after combining residual and branch.</p>
+<p><strong>RMSNorm:</strong> Normalization by root-mean-square magnitude without mean subtraction.</p>
+<p><strong>SwiGLU:</strong> A gated feed-forward transformation using aSiLU-activated gate.</p>
+<p><strong>Jacobian:</strong> The matrix of output sensitivities to input coordinates.</p>
+<h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
+<p>Use a prepared <code>llm-torch-cpu</code> environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored <code>.learning/expansion/llm-045/</code> before editing, or use the application&#x27;s saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: <code>&amp; $CoursePython courses/llm-theory/lessons/llm-045.py</code>. For macOS/Linux use <code>.venv/bin/python courses/llm-theory/lessons/llm-045.py</code> from the repository root.</p>
+<p>Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Distinguish an exact algebraic mechanism from empirical model quality or hardware performance. The reference uses tiny CPU fixtures only. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.</p>
+<h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
+<p>All examples use float64 and small feature widths. RMSNorm computes x/sqrt(mean(x²)+eps) times gain. LayerNorm computes(x-mean(x))/sqrt(mean((x-mean(x))²)+eps). A pre/post comparison uses a zero linear branch so the residual distinction is isolated. SwiGLU uses F.silu for the gate projection and an elementwise product with the up projection. Check the three matrix shapes before counting parameters or requesting gradients.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="example-a-compare-rmsnorm-and-layernorm">Example A: Compare RMSNorm and LayerNorm<a class="heading-anchor" href="#example-a-compare-rmsnorm-and-layernorm" aria-label="Link to this section">#</a></h4>
+<p>The two methods normalize different statistics. Equal output shape does not imply that one is a drop-in numerical replacement for the other.</p>
+<pre><code class="language-python">import numpy as np
+import torch
+from torch import nn
+from torch.nn import functional as F
+def rms_norm(x,eps=1e-8): return x/torch.sqrt(x.square().mean(-1,keepdim=True)+eps)
+def layer_norm(x,eps=1e-8):
+    centered=x-x.mean(-1,keepdim=True)
+    return centered/torch.sqrt(centered.square().mean(-1,keepdim=True)+eps)
+x=torch.tensor([3.,4.],dtype=torch.float64)
+rms=rms_norm(x); centered=layer_norm(x)
+assert abs(rms.mean().item())&gt;.5
+np.testing.assert_allclose(centered.mean().item(),0,atol=1e-12,rtol=0)
+np.testing.assert_allclose(rms.detach().numpy(),np.array([3.,4.])/np.sqrt(12.5+1e-8),atol=1e-12,rtol=0)</code></pre>
+<p><strong>Expected:</strong> RMSNorm mean nonzero; LayerNorm mean approximately 0.</p>
+<h4 id="example-b-trace-pre-post-residual-jacobians">Example B: Trace pre/post residual Jacobians<a class="heading-anchor" href="#example-b-trace-pre-post-residual-jacobians" aria-label="Link to this section">#</a></h4>
+<p>The zero-branch control isolates placement. LayerNorm removes a common feature shift, so its derivative along the all-ones direction iszero rather than identity.</p>
+<pre><code class="language-python">value=torch.tensor([1.,2.,4.],dtype=torch.float64,requires_grad=True)
+pre=torch.autograd.functional.jacobian(lambda z:z+0*layer_norm(z),value)
+post=torch.autograd.functional.jacobian(lambda z:layer_norm(z+0*z),value)
+torch.testing.assert_close(pre,torch.eye(3,dtype=torch.float64),atol=1e-12,rtol=0)
+torch.testing.assert_close(post@torch.ones(3,dtype=torch.float64),torch.zeros(3,dtype=torch.float64),atol=1e-10,rtol=0)</code></pre>
+<p><strong>Expected:</strong> pre-norm Jacobian is identity; post-norm Jacobian annihilates a constant feature shift.</p>
+<h4 id="example-c-calculate-a-swiglu-gate-derivative">Example C: Calculate a SwiGLU gate derivative<a class="heading-anchor" href="#example-c-calculate-a-swiglu-gate-derivative" aria-label="Link to this section">#</a></h4>
+<p>At zero, SiLU has derivative one-half. Multiplication by up2 givesgate gradient 1, while the up branch sees the zero gate value. A connected zero gradient is not a missing path.</p>
+<pre><code class="language-python">gate=torch.tensor(0.,dtype=torch.float64,requires_grad=True); up=torch.tensor(2.,dtype=torch.float64,requires_grad=True)
+output=F.silu(gate)*up; output.backward()
+assert output.item()==0 and gate.grad.item()==1 and up.grad.item()==0</code></pre>
+<p><strong>Expected:</strong> output 0; gradient with respect to g is 1; with respect to u is 0.</p>
+<h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
+<p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: RMSNorm mean nonzero; LayerNorm mean approximately 0. LayerNorm shift invariant; RMSNorm changes; both zero cases finite. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Compare RMSNorm and LayerNorm.</strong> Normalize vector [3, 4] with unit gain and epsilon 1e-8. <strong>Expected:</strong> RMSNorm mean nonzero; LayerNorm mean approximately 0. <strong>Verify:</strong> Save the assertion results for exercise 1, including RMSNorm mean nonzero; LayerNorm mean approximately 0.</li>
+</ol>
+<ol>
+<li><strong>Trace pre/post residual Jacobians.</strong> Set the transformed branch to zero and compare pre-norm x with post-norm LayerNorm(x). <strong>Expected:</strong> pre-norm Jacobian is identity; post-norm Jacobian annihilates a constant feature shift. <strong>Verify:</strong> Save the assertion results for exercise 2, including pre-norm Jacobian is identity; post-norm Jacobian annihilates a constant feature shift.</li>
+</ol>
+<ol>
+<li><strong>Calculate a SwiGLU gate derivative.</strong> Use scalar g=0, u=2 and output SiLU(g)*u. <strong>Expected:</strong> output 0; gradient with respect to g is 1; with respect to u is 0. <strong>Verify:</strong> Save the assertion results for exercise 3, including output 0; gradient with respect to g is 1; with respect to u is 0.</li>
+</ol>
+<ol>
+<li><strong>Check the RMSNorm Jacobian formula.</strong> Compare autograd with J=I/r-xxT/(d*r³) at x=[1, 2, 3]. <strong>Expected:</strong> matrices agree within 1e-10. <strong>Verify:</strong> Save the assertion results for exercise 4, including matrices agree within 1e-10.</li>
+</ol>
+<ol>
+<li><strong>Match feed-forward parameter budgets.</strong> Compare plain FFN model width d=4, hidden 6 with SwiGLU hidden width 4, excluding biases; execute a gated block with input and output width 4. <strong>Expected:</strong> both 48 weight entries; output shape(2, 4). <strong>Verify:</strong> Save the assertion results for exercise 5, including both 48 weight entries; output shape(2, 4).</li>
+</ol>
+<ol>
+<li><strong>Test invariance and zero-vector boundaries.</strong> Shift x=[1, 2, 3] by 5, compare the two normalizers, and normalize zero. <strong>Expected:</strong> LayerNorm shift invariant; RMSNorm changes; both zero cases finite. <strong>Verify:</strong> Save the assertion results for exercise 6, including LayerNorm shift invariant; RMSNorm changes; both zero cases finite.</li>
+</ol>
+<h3 id="controlled-case-study">Controlled case study<a class="heading-anchor" href="#controlled-case-study" aria-label="Link to this section">#</a></h3>
+<p>A refactor replaces a plain feed-forward block with SwiGLU while retaining the hidden width. The feed-forward parameter count rises by 50 percent, so a quality difference cannot be attributed only to gating. Another refactor moves normalization across the residual addition while keeping the optimizer unchanged. The zero-branch Jacobian and equal-budget calculation separate these changes before a larger training comparison.</p>
+<h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
+<p>For a normalization mismatch, inspect the feature axis, centering, variance convention, epsilon inside or outside the square root, and affine gain/bias before widening tolerances. Use both a nonconstant vector and a zero vector. A zero-branch residual control distinguishes placement independently of a complicated learned branch.</p>
+<p>For a gated FFN, inspect gate and up activations and their separate gradients. A connected zero gradient at one point is different from a missing gradient tensor or a parameter absent from the optimizer. This CPU lesson validates explicit float64 formulas and autograd behavior; it does not demonstrate a large-model training run or establish a universally best normalization architecture.</p>
+<h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
+<p>First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise&#x27;s expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.</p>
+<h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
+<p>Close both worked examples. Explain Pre-norm, Post-norm, RMSNorm using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>The next chapter separates another pair of often-confused ideas: changing the attention architecture by sharing KV heads, and changing the execution algorithm used to compute attention. Both can reduce resource costs, but they preserve different invariants and require different evidence.</p>
+<h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
+<p>API and mechanism reference: <a href="https://arxiv.org/abs/1910.07467">Root Mean Square Layer Normalization</a>, reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. Current execution receipts are recorded in <code>docs/implementation/llm-expert-status.md</code>; authored content does not imply that a heavy runtime was executed.</p>
+<h3 id="additional-primary-references">Additional primary references<a class="heading-anchor" href="#additional-primary-references" aria-label="Link to this section">#</a></h3>
+<p><a href="https://arxiv.org/abs/2002.05202">GLU variants and SwiGLU</a>, <a href="https://arxiv.org/abs/2002.04745">Pre/post normalization analysis</a>.</p>
+<h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for llm-045, Pre/post normalization, RMSNorm and gated feed-forward networks.
+Read courses/llm-theory/guides/llm-045.md and courses/llm-theory/lessons/llm-045.py. Direct prerequisites: `llm-044`.
+Explain the mental model, ask me to predict the worked example, review my attempt,
+give one hint, request output evidence, and ask a fresh retrieval question.
+Keep courses/llm-theory/solutions/ closed until I request comparison or show an attempt.
+Use only the declared local fixtures. Distinguish arithmetic checks, code execution,
+and evidence about generalization. Done when I can derive the worked values, pass all six exercise checks, explain a failed counterexample, and solve one fresh transfer case without solutions.</code></pre></article>
+  </main>
+</body>
+</html>

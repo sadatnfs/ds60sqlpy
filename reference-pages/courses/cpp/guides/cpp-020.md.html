@@ -116,7 +116,6 @@
       <p class="source-path">Generated from <code>courses/cpp/guides/cpp-020.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-020-templates-and-concepts">cpp-020: Templates and concepts<a class="heading-anchor" href="#cpp-020-templates-and-concepts" aria-label="Link to this section">#</a></h2>
-<p>Authored beta content. Content completion and runtime qualification are separate evidence.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Intermediate; 120 minutes. Direct prerequisites: <code>cpp-005</code>, <code>cpp-018</code>.</p>
 <p>Learner artifact: <a href="../lessons/cpp-020.cpp.html">cpp-020.cpp</a>. Keep <a href="../solutions/cpp-020_solutions.md.html">official solutions</a> closed until an attempt. The immutable <a href="../fixtures/cpp-020-cases.json.html">case ledger</a> records exercise inputs and expected observations.</p>
@@ -128,55 +127,91 @@
 <p><code>template&lt;std::integral T&gt;</code> admits integral types and excludes std::string and floating types. The requires mechanism checks validity during compilation. Adding signed values can still overflow, so a concept is separate from a runtime range contract.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Template deduction happens before any generated function runs. Equal int arguments select one specialization; int and long long arguments can produce conflicting deductions because this signature asks for one T. A concept rejects categories that lack the intended operations, often near the call site. It cannot make every admitted value safe. The overflow check in later lessons is still needed even though integral&lt;int&gt; is true.</p>
+<h3 id="templates-and-constraints-as-interface-documentation">Templates and constraints as interface documentation<a class="heading-anchor" href="#templates-and-constraints-as-interface-documentation" aria-label="Link to this section">#</a></h3>
+<p>A function template describes a family of functions parameterized by types or values. The compiler instantiates the needed specialization from a call. Generic syntax alone does not explain what operations are valid for a type, so constraints can make the intended domain visible before a deeply nested implementation error appears.</p>
+<p>The integral constraint says that the type belongs to the language/library concept for integral types. The complete program instantiates identity_sum for integers and checks2+3=5. The second program uses static_assert to establish that double is not integral. That assertion is checked during compilation and produces no runtime branch. The actual negative exercise attempts a constrained call with double and retains the compiler diagnostic.</p>
+<p>A syntactic constraint is not the whole semantic contract. Integral addition can still overflow for signed types, and mixing signed and unsigned arguments can affect deduction or conversions. A template constrained to integral types must still state supported value ranges and any overflow policy. Concepts should not be advertised as automatic arithmetic safety or proof of all algorithm assumptions.</p>
+<p>Template argument deduction also requires compatible inputs. A function taking two values of the same template parameter may reject an int and long combination even when a programmer considers both numbers. An explicit conversion can resolve the call, but it should be deliberate because narrowing or sign changes can lose meaning. Inspect the inferred types when a call does not match expectations.</p>
+<p>Good constraints describe the weakest capabilities the implementation actually needs. Requiring a random-access container for a one-pass accumulation unnecessarily excludes useful inputs. Conversely, accepting any type while relying on an undocumented operation shifts the error into the implementation. The aim is a readable contract and useful diagnostics, followed by ordinary value-boundary tests.</p>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">assert(identity_sum(2,3)==5);</code></pre>
-<p><strong>Expected:</strong> Deduction selects int and the result is 5.</p>
+<p><a href="../examples/cpp-020-example-1.cpp.html">Complete program 1</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;concepts&gt;
+#include &lt;iostream&gt;
+
+#include &lt;concepts&gt;
+template&lt;std::integral T&gt; T identity_sum(T a,T b)  {
+     return a+b;
+}
+int main() {
+    assert(identity_sum(2,3)==5);
+    std::cout &lt;&lt; &quot;cpp-020 example 1 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-020 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">static_assert(!std::integral&lt;double&gt;);</code></pre>
-<p><strong>Expected:</strong> double does not satisfy this integral-only interface.</p>
+<p><a href="../examples/cpp-020-example-2.cpp.html">Complete program 2</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;concepts&gt;
+#include &lt;iostream&gt;
+
+#include &lt;concepts&gt;
+template&lt;std::integral T&gt; T identity_sum(T a,T b)  {
+     return a+b;
+}
+int main() {
+    static_assert(!std::integral&lt;double&gt;);
+    std::cout &lt;&lt; &quot;cpp-020 example 2 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-020 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-read-deduction">Exercise 1: Read deduction<a class="heading-anchor" href="#exercise-1-read-deduction" aria-label="Link to this section">#</a></h4>
 <p>Call identity_sum with int values and long long values.</p>
 <p><strong>Expected result/shape:</strong> Result types int and long long respectively.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Result types int and long long respectively.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: The argument types choose template instantiations.</p>
+<p><strong>Verify:</strong> Result types int and long long respectively.</p>
+<p><strong>Progressive hints:</strong> The argument types choose template instantiations.</p>
 <h4 id="exercise-2-reject-a-category">Exercise 2: Reject a category<a class="heading-anchor" href="#exercise-2-reject-a-category" aria-label="Link to this section">#</a></h4>
 <p>Try identity_sum with two strings in a scratch file.</p>
 <p><strong>Expected result/shape:</strong> Constraint-related compile failure.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Constraint-related compile failure.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Strings do not satisfy integral.</p>
+<p><strong>Verify:</strong> Constraint-related compile failure.</p>
+<p><strong>Progressive hints:</strong> Strings do not satisfy integral.</p>
 <h4 id="exercise-3-add-a-concept">Exercise 3: Add a concept<a class="heading-anchor" href="#exercise-3-add-a-concept" aria-label="Link to this section">#</a></h4>
 <p>Constrain a function to signed_integral.</p>
 <p><strong>Expected result/shape:</strong> int accepted; unsigned rejected.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: int accepted; unsigned rejected.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: A narrower category documents intent.</p>
+<p><strong>Verify:</strong> int accepted; unsigned rejected.</p>
+<p><strong>Progressive hints:</strong> A narrower category documents intent.</p>
 <h4 id="exercise-4-repair-mixed-deduction">Exercise 4: Repair mixed deduction<a class="heading-anchor" href="#exercise-4-repair-mixed-deduction" aria-label="Link to this section">#</a></h4>
-<p>Call identity_sum(2,3LL), then choose a deliberate common type.</p>
+<p>Call identity_sum(2, 3LL), then choose a deliberate common type.</p>
 <p><strong>Expected result/shape:</strong> Mixed call fails deduction; explicit long long arguments succeed.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Mixed call fails deduction; explicit long long arguments succeed.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Conflicting deductions need a policy, not an accidental conversion.</p>
+<p><strong>Verify:</strong> Mixed call fails deduction; explicit long long arguments succeed.</p>
+<p><strong>Progressive hints:</strong> Conflicting deductions need a policy, not an accidental conversion.</p>
 <h4 id="exercise-5-inspect-numeric-boundary">Exercise 5: Inspect numeric boundary<a class="heading-anchor" href="#exercise-5-inspect-numeric-boundary" aria-label="Link to this section">#</a></h4>
 <p>Explain why INT_MAX+1 is still unsafe for integral T=int.</p>
 <p><strong>Expected result/shape:</strong> Concept accepts int but cannot make overflow valid.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Concept accepts int but cannot make overflow valid.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Type eligibility is distinct from value validity.</p>
+<p><strong>Verify:</strong> Concept accepts int but cannot make overflow valid.</p>
+<p><strong>Progressive hints:</strong> Type eligibility is distinct from value validity.</p>
 <h4 id="exercise-6-transfer-a-generic-test">Exercise 6: Transfer a generic test<a class="heading-anchor" href="#exercise-6-transfer-a-generic-test" aria-label="Link to this section">#</a></h4>
 <p>Run zero-identity tests for int and long long.</p>
-<p><strong>Expected result/shape:</strong> sum(x,0)==x for bounded x=7 in both types.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: sum(x,0)==x for bounded x=7 in both types.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: A reusable law should be checked across admitted types.</p>
+<p><strong>Expected result/shape:</strong> sum(x, 0)==x for bounded x=7 in both types.</p>
+<p><strong>Verify:</strong> sum(x, 0)==x for bounded x=7 in both types.</p>
+<p><strong>Progressive hints:</strong> A reusable law should be checked across admitted types.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: Deduction selects int and the result is 5. Then explain the changed condition in example 2 without opening the answer.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
-<p><code>template&lt;std::integral T&gt;</code> admits integral types and excludes std::string and floating types. The requires mechanism checks validity during compilation. Adding signed values can still overflow, so a concept is separate from a runtime range contract.</p>
-<p>If the result disagrees, preserve the original input and inspect the first differing value or condition. Conflicting deductions need a policy, not an accidental conversion.</p>
+<p>If template errors are long, find the first failed constraint or mismatched deduced type rather than the final cascade. If a valid type produces a wrong numeric result, inspect values and conversions: type constraints do not prevent overflow. If an interface rejects an input range unnecessarily, compare the declared capability with the operations actually used. Do not weaken every constraint to make one call compile without reviewing the algorithm assumptions.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
 <p>Close the source. Reconstruct the reasoning for Exercise 6: Transfer a generic test. Explain which assumptions would fail on a larger input or another runtime.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue with <a href="cpp-021.md.html">cpp-021</a> after saving the six observations.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines">C++ Core Guidelines</a></p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach cpp-020.
 Read courses/cpp/guides/cpp-020.md and courses/cpp/lessons/cpp-020.cpp.

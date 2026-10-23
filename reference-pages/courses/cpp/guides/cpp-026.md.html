@@ -116,7 +116,6 @@
       <p class="source-path">Generated from <code>courses/cpp/guides/cpp-026.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-026-debugging-and-measurement-tools">cpp-026: Debugging and measurement tools<a class="heading-anchor" href="#cpp-026-debugging-and-measurement-tools" aria-label="Link to this section">#</a></h2>
-<p>Authored beta content. Content completion and runtime qualification are separate evidence.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Intermediate; 120 minutes. Direct prerequisites: <code>cpp-013</code>, <code>cpp-025</code>.</p>
 <p>Learner artifact: <a href="../lessons/cpp-026.cpp.html">cpp-026.cpp</a>. Keep <a href="../solutions/cpp-026_solutions.md.html">official solutions</a> closed until an attempt. The immutable <a href="../fixtures/cpp-026-cases.json.html">case ledger</a> records exercise inputs and expected observations.</p>
@@ -128,55 +127,95 @@
 <p>Build with -g for source-level symbols. A breakpoint stops at a selected line; stepping enters or advances statements. Timing tiny expressions is dominated by overhead, so use a bounded repeated workload and report units plus compiler/build mode rather than a universal speed claim.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Start with a wrong value you can reproduce, then predict which variable or call should explain it. A debugger stack connects the current function to its caller, while local inspection checks the immediate hypothesis. Timing answers a different question. The reference prints elapsed nanoseconds but asserts only the exact checksum and count, since timing depends on compiler, optimizer and machine activity. A faster incorrect program fails before any performance conclusion.</p>
+<h3 id="debugging-a-wrong-value-before-timing-it">Debugging a wrong value before timing it<a class="heading-anchor" href="#debugging-a-wrong-value-before-timing-it" aria-label="Link to this section">#</a></h3>
+<p>Debugging begins with a reproducible mismatch between expected and observed behavior. A debugger lets you stop at a relevant point, inspect variables and follow the call stack. It is most useful when guided by a hypothesis, such as the accumulator being reset or a caller passing the wrong range. Stepping through every line without a question can produce activity without narrowing the cause.</p>
+<p>The total function provides a small deterministic target. For [2, 4, 6], the expected sum is 12. A breakpoint before the return can inspect the input size and accumulated value. The call stack distinguishes a defect inside total from a caller supplying a different vector. Preserve the smallest failing fixture and the first point where actual state diverges from the predicted trace.</p>
+<p>Timing asks a separate question. Repeating the computation1000 times yields a checksum of 12000, which prevents the benchmark from being judged only by an elapsed number. A benchmark must still consider optimization, allocation, setup work, warm caches and whether the work resembles the real workload. The compiler may simplify work whose result is predictable, so an apparently tiny duration can reflect optimization rather than useful throughput.</p>
+<p>Use a monotonic clock such as steady_clock for elapsed time. Wall-clock adjustments should not create negative benchmark durations. A single measurement is noisy because scheduling and other activity vary. Compare repeated samples and keep the correctness gate fixed. Never assert one exact nanosecond value as a portable expected result.</p>
+<p>Debug builds improve some forms of observability, but their performance may differ substantially from optimized builds. A debug-time result should not be advertised as production speed. Record compiler, flags, architecture, input size and included setup costs. If an optimization changes the answer or skips a required validation step, the faster timing is not a valid improvement.</p>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">assert(total({2,4,6})==12);</code></pre>
-<p><strong>Expected:</strong> Known input gives 12 before any measurement.</p>
+<p><a href="../examples/cpp-026-example-1.cpp.html">Complete program 1</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;iostream&gt;
+#include &lt;numeric&gt;
+#include &lt;vector&gt;
+
+int total(const std::vector&lt;int&gt;&amp; xs) {
+    return std::accumulate(xs.begin(),xs.end(),0);
+}
+int main() {
+    assert(total({2,4,6})==12);
+    std::cout &lt;&lt; &quot;cpp-026 example 1 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-026 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">for(int i=0;i&lt;1000;++i) checksum+=total({2,4,6});</code></pre>
-<p><strong>Expected:</strong> The checksum is 12000; elapsed nanoseconds vary by run.</p>
+<p><a href="../examples/cpp-026-example-2.cpp.html">Complete program 2</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;iostream&gt;
+#include &lt;numeric&gt;
+#include &lt;vector&gt;
+
+int total(const std::vector&lt;int&gt;&amp; xs) {
+    return std::accumulate(xs.begin(),xs.end(),0);
+}
+int main() {
+    long long checksum=0;
+    for(int i=0;i&lt;1000;++i) checksum+=total({2,4,6});
+    assert(checksum==12000);
+    std::cout &lt;&lt; &quot;checksum=&quot; &lt;&lt; checksum &lt;&lt; &quot;\n&quot;;
+    std::cout &lt;&lt; &quot;cpp-026 example 2 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">checksum=12000
+cpp-026 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-reproduce-first">Exercise 1: Reproduce first<a class="heading-anchor" href="#exercise-1-reproduce-first" aria-label="Link to this section">#</a></h4>
-<p>Write the expected sum of [2,4,6].</p>
+<p>Write the expected sum of [2, 4, 6].</p>
 <p><strong>Expected result/shape:</strong> 12 from three values.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: 12 from three values.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: A debugger needs a precise discrepancy.</p>
+<p><strong>Verify:</strong> 12 from three values.</p>
+<p><strong>Progressive hints:</strong> A debugger needs a precise discrepancy.</p>
 <h4 id="exercise-2-inspect-a-stack">Exercise 2: Inspect a stack<a class="heading-anchor" href="#exercise-2-inspect-a-stack" aria-label="Link to this section">#</a></h4>
 <p>Use an already available debugger on a -g host build and break in total.</p>
 <p><strong>Expected result/shape:</strong> Call stack includes main and total; xs has three values.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Call stack includes main and total; xs has three values.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: The browser does not provide an interactive debugger.</p>
+<p><strong>Verify:</strong> Call stack includes main and total; xs has three values.</p>
+<p><strong>Progressive hints:</strong> The browser does not provide an interactive debugger.</p>
 <h4 id="exercise-3-measure-a-bounded-workload">Exercise 3: Measure a bounded workload<a class="heading-anchor" href="#exercise-3-measure-a-bounded-workload" aria-label="Link to this section">#</a></h4>
 <p>Run 1000 totals and record steady_clock duration.</p>
 <p><strong>Expected result/shape:</strong> Checksum 12000 and nonnegative measured duration with units.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Checksum 12000 and nonnegative measured duration with units.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Output correctness prevents meaningless timing claims.</p>
+<p><strong>Verify:</strong> Checksum 12000 and nonnegative measured duration with units.</p>
+<p><strong>Progressive hints:</strong> Output correctness prevents meaningless timing claims.</p>
 <h4 id="exercise-4-reject-a-false-benchmark">Exercise 4: Reject a false benchmark<a class="heading-anchor" href="#exercise-4-reject-a-false-benchmark" aria-label="Link to this section">#</a></h4>
 <p>Explain why one observed faster run proves little.</p>
 <p><strong>Expected result/shape:</strong> Build mode, workload, repetitions and variability listed.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Build mode, workload, repetitions and variability listed.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Scheduler noise and optimizer behavior affect tiny measurements.</p>
+<p><strong>Verify:</strong> Build mode, workload, repetitions and variability listed.</p>
+<p><strong>Progressive hints:</strong> Scheduler noise and optimizer behavior affect tiny measurements.</p>
 <h4 id="exercise-5-test-an-empty-case">Exercise 5: Test an empty case<a class="heading-anchor" href="#exercise-5-test-an-empty-case" aria-label="Link to this section">#</a></h4>
 <p>Inspect total({}) with debugger or assertions.</p>
 <p><strong>Expected result/shape:</strong> 0 and no element access.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: 0 and no element access.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: The accumulation identity handles emptiness.</p>
+<p><strong>Verify:</strong> 0 and no element access.</p>
+<p><strong>Progressive hints:</strong> The accumulation identity handles emptiness.</p>
 <h4 id="exercise-6-transfer-a-hypothesis">Exercise 6: Transfer a hypothesis<a class="heading-anchor" href="#exercise-6-transfer-a-hypothesis" aria-label="Link to this section">#</a></h4>
 <p>Replace a linear scan with a map lookup and state a measurable hypothesis.</p>
 <p><strong>Expected result/shape:</strong> Same exact results, operation counts and bounded measurements compared.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Same exact results, operation counts and bounded measurements compared.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Choose the evidence before declaring a winner.</p>
+<p><strong>Verify:</strong> Same exact results, operation counts and bounded measurements compared.</p>
+<p><strong>Progressive hints:</strong> Choose the evidence before declaring a winner.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: Known input gives 12 before any measurement. Then explain the changed condition in example 2 without opening the answer.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
-<p>Build with -g for source-level symbols. A breakpoint stops at a selected line; stepping enters or advances statements. Timing tiny expressions is dominated by overhead, so use a bounded repeated workload and report units plus compiler/build mode rather than a universal speed claim.</p>
-<p>If the result disagrees, preserve the original input and inspect the first differing value or condition. Scheduler noise and optimizer behavior affect tiny measurements.</p>
+<p>When the wrong output appears only in optimized builds, investigate undefined behavior, uninitialized state and configuration differences before blaming the optimizer. When timing varies wildly, inspect fixture size, setup costs and competing work. When a benchmark is nearly zero, check whether the compiler eliminated or precomputed it. Retain a deterministic checksum and a real workload justification before drawing performance conclusions.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
 <p>Close the source. Reconstruct the reasoning for Exercise 6: Transfer a hypothesis. Explain which assumptions would fail on a larger input or another runtime.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue with <a href="cpp-027.md.html">cpp-027</a> after saving the six observations.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines">C++ Core Guidelines</a></p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach cpp-026.
 Read courses/cpp/guides/cpp-026.md and courses/cpp/lessons/cpp-026.cpp.

@@ -117,14 +117,15 @@
     </header>
     <article class="document"><h2 id="repository-guidance-for-agents">Repository guidance for agents<a class="heading-anchor" href="#repository-guidance-for-agents" aria-label="Link to this section">#</a></h2>
 <h3 id="mission">Mission<a class="heading-anchor" href="#mission" aria-label="Link to this section">#</a></h3>
-<p>Maintain a beginner-friendly, offline-after-bootstrap Python/data-science, PostgreSQL, and application-engineering curriculum that runs on Windows, macOS, and Linux. Accuracy and reproducibility matter more than preserving the historical “60-day” shape.</p>
+<p>Maintain a beginner-friendly, offline-after-setup curriculum spanning data science, statistics, machine learning, languages and systems. The primary application is the Docker browser classroom on Windows, macOS and Linux. Accuracy and reproducibility matter more than preserving the historical “60-day” shape.</p>
 <h3 id="start-here">Start here<a class="heading-anchor" href="#start-here" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Run <code>git status --short --branch</code>; preserve unrelated work.</li>
 <li>Read <a href="README.md.html">README.md</a> and <code>curriculum/catalog.json</code>.</li>
 <li>Read the closest nested <code>AGENTS.md</code> for files under <code>python/</code>, <code>sql/</code>, or <code>bridge/</code>.</li>
 <li>Run commands from the repository root.</li>
-<li>Use <code>python scripts/course.py doctor</code> before diagnosing environment failures.</li>
+<li>Diagnose the selected route: Docker engine/Compose and the app profile readiness for the classroom; <code>python scripts/course.py doctor</code> only for an explicitly prepared native Python environment. Host Python is not a classroom prerequisite.</li>
+<li>Use parallel agents for independent work with clear file ownership. Keep image builds sequential and use grouped four-worker tests. Preserve human Git actions and unrelated workloads. Do not use em dashes in authored prose.</li>
 </ol>
 <h3 id="sources-of-truth">Sources of truth<a class="heading-anchor" href="#sources-of-truth" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -142,7 +143,9 @@
 <li><code>scripts/build_course_guide.py</code>: source for generated <code>START_HERE.html</code>; never hand-edit the HTML</li>
 <li><code>src/ds60sqlpy/lesson_reader.py</code> and <code>scripts/build_lesson_readers.py</code>: sources for generated <code>lesson-pages/&lt;lesson-id&gt;.html</code> and linked <code>reference-pages/&lt;source&gt;.html</code>; never hand-edit those readers</li>
 <li><code>src/ds60sqlpy/sql_notebook.py</code> and <code>scripts/build_sql_lesson_notebook.py</code>: catalog-restricted generator and runner for learner-local SQL notebooks under <code>.learning/sql/</code>; never check generated workspaces into Git</li>
-<li><code>START_DOCKER_LAB.cmd</code> and <code>scripts/start_docker_windows.ps1</code>: Windows beginner container entry point, including consented prerequisite setup. Re-detect after a manual reboot; preserve existing engines and learner work.</li>
+<li><code>classroom</code> and <code>scripts/classroom.sh</code>: shared build/start/health/browser entrypoint for macOS, Linux and Windows through WSL 2. It defaults to all ordinary profiles and automatic loopback host ports. Preserve explicit overrides and named data.</li>
+<li><code>START_DOCKER_CLASSROOM.cmd</code>, <code>START_DOCKER_CLASSROOM.command</code> and <code>compose.classroom.yaml</code>: primary Docker-only classroom and named-volume persistence. See <code>docs/docker-classroom.md</code>; compiler/framework profiles run inside images, and the thin launchers discover the actual published port.</li>
+<li><code>START_DOCKER_LAB.cmd</code> and <code>scripts/start_docker_windows.ps1</code>: optional older Windows installation wizard, including consented prerequisite setup. Re-detect after a manual reboot; preserve existing engines and learner work.</li>
 <li><code>START_DS60.cmd</code> and <code>scripts/start_ds60.ps1</code>: optional Windows native entry point; keep it path-safe, PowerShell 5.1-compatible, and aligned with <code>scripts/bootstrap_windows.ps1</code></li>
 <li><code>src/ds60sqlpy/portal.py</code>: optional loopback launcher and shared <code>.learning/progress.json</code> boundary</li>
 <li><code>docs/curriculum-gap-backlog.md</code>: implemented gap record and maintenance rules</li>
@@ -269,7 +272,7 @@ python -m pytest tests/test_course_guide.py tests/test_lesson_depth_audit.py tes
 <li><a href="CONTRIBUTING.md.html">CONTRIBUTING.md</a> contains the human contribution workflow.</li>
 </ul>
 <h3 id="expansion-implementation-checkpoint">Expansion implementation checkpoint<a class="heading-anchor" href="#expansion-implementation-checkpoint" aria-label="Link to this section">#</a></h3>
-<p>Read <a href="docs/implementation/CHECKPOINT.md.html">the implementation checkpoint</a> before continuing the five new modules. Read <a href="docs/implementation/ADDING_A_MODULE.md.html">the module authoring contract</a> when extending a subject or adding a language. Authored beta files live in <code>courses/</code> and are loaded by <code>modules.py</code>; they do not silently replace the published catalog. <code>module_jobs.py</code> owns persisted jobs, <code>module_service.py</code> authenticated app actions, and the optional <code>module_worker.py</code> / <code>worker_operations.py</code> pair owns bounded private-worker execution. Every claimed runtime needs an actual Docker receipt. Preserve private runtime session files outside <code>.learning</code>, and never print their credentials. Keep image builds sequential under the measured disk budget. Do not start unrelated containers or change the engine configuration.</p>
+<p>Read <a href="docs/implementation/CHECKPOINT.md.html">the implementation checkpoint</a> before continuing the expanded module and tutorial-book library. Read <a href="docs/implementation/ADDING_A_MODULE.md.html">the module authoring contract</a> when extending a subject or adding a language. Authored lesson files live in <code>courses/</code> and are loaded by <code>modules.py</code>; they do not silently replace the published catalog. <code>module_jobs.py</code> owns persisted jobs, <code>module_service.py</code> authenticated app actions, and the optional <code>module_worker.py</code> / <code>worker_operations.py</code> pair owns bounded private-worker execution. Every claimed runtime needs an actual Docker receipt. Preserve private runtime session files outside <code>.learning</code>, and never print their credentials. Keep image builds sequential under the measured disk budget. Do not start unrelated containers or change the engine configuration.</p>
 <h3 id="guided-application-and-codex-adapter">Guided application and Codex adapter<a class="heading-anchor" href="#guided-application-and-codex-adapter" aria-label="Link to this section">#</a></h3>
 <ul>
 <li>Read <a href="docs/expansion/README.md.html">the expansion design hub</a> before adding Kubernetes, TensorFlow, LLM, C++, or Scala/Spark content. Subject plans, pilot lessons, typed job boundaries, profile qualification, and publication gates live there.</li>

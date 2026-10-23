@@ -118,53 +118,117 @@
     <article class="document"><h2 id="llm-010-explanatory-solutions">llm-010: explanatory solutions<a class="heading-anchor" href="#llm-010-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <p>Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>Attention without positions or a causal boundary is equivariant to a joint permutation of tokens: changing input order simply changes output order. A decoder needs information about order, supplied by positional representations and by the causal mask. Those mechanisms have different roles. Position embeddings attach vectors to locations, while a causal mask restricts accessible locations. Normalization can accidentally defeat causality if it computes statistics across the whole sequence. Tokenwise LayerNorm reduces feature values within each position, so future tokens cannot alter an earlier token through that reduction. The fixture separates these effects instead of attributing every order dependency to position embeddings.</p>
-<p><strong>Equivariance:</strong> A transformation of inputs produces the corresponding transformation of outputs.</p>
-<p><strong>Position embedding:</strong> A vector associated with a token location.</p>
-<p><strong>Tokenwise normalization:</strong> Statistics calculated across features of one position.</p>
+<p>Content, position and visibility answer different questions in a Transformer. Content vectors describe the token representation available to a layer. Positional information distinguishes where a token occurs or how far apart two tokens are. A causal mask specifies which key positions a query may read. Normalization controls feature scale. None of these mechanisms automatically supplies all the others, and a correct mask cannot repair future information that has already entered a token representation through an earlier operation.</p>
+<p>Begin with content-only attention and no mask. Every query compares itself with the same collection of keys. If we reorder query, key and value rows together, the comparisons are relabelled but their numerical relationships are unchanged. The output rows follow the same reorder. This property is permutation equivariance. It does not mean every output is identical, and it does not mean the function ignores token identity. It means the function has no separate knowledge of an absolute row number beyond the information supplied in its inputs.</p>
+<p>Now hold a lower-triangular causal mask fixed while moving token content between rows. The first row can read only its current first key, the second can read the first two, and later rows have progressively larger accessible prefixes. Reordering content changes which token participates in each prefix. The mask therefore introduces an ordered visibility structure. It still does not directly encode a distance such as three positions ago, and identical content can remain indistinguishable in a single normalized weighted average. Explicit positional representations supply additional order or distance information.</p>
+<p>Finally, every path feeding an earlier output must respect the intended visibility boundary. LayerNorm in a sequence model normally reduces the feature axis of each token separately. If an implementation instead centers a feature using all token rows, a future value changes the statistic subtracted from an earlier token. That earlier token is already contaminated before attention begins. This chapter derives these distinctions and tests them with literal float64 arrays. The simplified LayerNorm uses gain one and bias zero; learned gain and bias, pre/post-norm placement and RMSNorm receive deeper treatment in llm-045.</p>
+<p><strong>Permutation equivariance:</strong> Reordering inputs produces the corresponding reorder of outputs, rather than necessarily leaving outputs unchanged.</p>
+<p><strong>Positional representation:</strong> Information attached to positions or position relationships, distinct from token content.</p>
+<p><strong>Causal visibility:</strong> A rule forbidding a query from reading future key positions.</p>
+<p><strong>Reduction axis:</strong> The array dimension over which a statistic combines values.</p>
+<p><strong>Prefix invariance:</strong> Earlier outputs are unchanged when future tokens are appended or changed under the stated causal computation.</p>
+<p><strong>Epsilon:</strong> A positive denominator stabilizer that also slightly changes normalized variance.</p>
 <h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
-<p>A joint permutation must be applied to Q,K,V together. Compare the permuted output with the same permutation of the original result. Tokenwise normalization uses axis=-1 with keepdims=True; sequence-wide normalization uses axis=0 and couples token rows. Add a fixed position table to content vectors before attention to break pure content permutation equivariance.</p>
+<p>Use the shape convention Q:[Tq,Dk], K:[Tk,Dk], V:[Tk,Dv]. Scores have shape [Tq,Tk], one comparison for each query/key pair. Row-wise softmax reduces the key axis, so every query receives a distribution over allowed keys. Multiplying weights [Tq,Tk] by V [Tk,Dv] gives output [Tq,Dv]. The key and value row counts must match because each attention weight selects a corresponding value row. Query count need not equal key count in cross-attention, although this lesson&#x27;s main self-attention fixture uses both equal to three.</p>
+<p>The score rule is S = Q K^T / sqrt(Dk). Stable softmax subtracts each row maximum before exponentiation. Subtracting a common row constant preserves the normalized probabilities, while reducing the risk of overflow. A Boolean allowed matrix has the score shape. Forbidden scores become negative infinity, giving zero exponential mass. Each query needs at least one allowed key: an all-forbidden row has no normalized distribution and is rejected instead of silently producing NaN.</p>
+<p>For feature normalization of X:[B,T,D], the mean and variance have shape [B,T,1]. They reduce only D, leaving batch and token dimensions distinct. keepdims=True retains the singleton axis so subtraction broadcasts over the intended features. The variance here divides by D, not D-1, because the operation normalizes the features of this token rather than estimating a population variance from independent sampled cases. The output has the same shape as X. Its mean is zero up to floating-point error; its variance is sigma_squared/(sigma_squared+epsilon), not exactly one when epsilon is positive.</p>
+<h4 id="deriving-the-permutation-identity">Deriving the permutation identity<a class="heading-anchor" href="#deriving-the-permutation-identity" aria-label="Link to this section">#</a></h4>
+<p>Let P be a permutation matrix reordering token rows. Replacing Q,K,V by P Q,P K,P V gives scores P S P^T. This reorders both the query rows and the key columns. A row-wise softmax commutes with those reorders: softmax(P S P^T) = P softmax(S) P^T. The output is therefore P softmax(S) P^T P V = P softmax(S) V, because P^T P is the identity. Reordering only Q, or forgetting to reorder V with K, is a different experiment and does not test this identity.</p>
+<p>If a mask M is present, the corresponding relabelling identity requires reordering the mask too, as P M P^T. Keeping a causal triangle fixed is intentionally different: it keeps the visibility graph attached to row positions while moving content. Similarly, adding a fixed position table E gives input P X + E after a content reorder, while a pure reorder of the original positioned input would be P(X+E) = P X + P E. Unless E happens to remain unchanged under P, those expressions differ.</p>
 <h3 id="exercise-1-permute-content-only-attention">Exercise 1: Permute content-only attention<a class="heading-anchor" href="#exercise-1-permute-content-only-attention" aria-label="Link to this section">#</a></h3>
-<p>The question is: Use Q=K[[1,0],[0,1],[1,1]],V[[1,2],[3,4],[5,6]]; jointly permute rows2,0,1.</p>
-<p>The scores and value mixtures move with the token identities. This comparison uses unmasked attention; a causal mask itself introduces an order boundary.</p>
-<pre><code class="language-python">q=np.array([[1.,0.],[0.,1.],[1.,1.]]); v=np.array([[1.,2.],[3.,4.],[5.,6.]]); order=[2,0,1]
-out=attention(q,q,v); changed=attention(q[order],q[order],v[order])
-np.testing.assert_allclose(changed,out[order],atol=1e-12,rtol=0)</code></pre>
-<p><strong>Expected:</strong> permuted output equals original output rows2,0,1.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with permuted output equals original output rows2,0,1.</p>
+<p>The question is: Use Q=K=[[1,0],[0,1],[1,1]] and V=[[1,2],[3,4],[5,6]]. Reorder all three by [2,0,1] and compare outputs.</p>
+<p>The first query has scores [1/sqrt(2),0,1/sqrt(2)], so keys one and three receive equal weight. Their values are symmetric around [3,4], and the middle value is [3,4] itself, making the first weighted result exactly [3,4] in real arithmetic. The row permutation preserves these relationships. This is an unmasked calculation; a fixed causal triangle would change the experiment.</p>
+<pre><code class="language-python">query = np.array([[1., 0.], [0., 1.], [1., 1.]])
+value = np.array([[1., 2.], [3., 4.], [5., 6.]])
+order = np.array([2, 0, 1])
+scores, weights, original = attention_parts(query, query, value)
+changed = attention(query[order], query[order], value[order])
+np.testing.assert_allclose(changed, original[order], atol=1e-12, rtol=0)
+scale = np.exp(1 / np.sqrt(2))
+expected_first_weights = np.array([scale, 1, scale]) / (2 * scale + 1)
+np.testing.assert_allclose(weights[0], expected_first_weights, atol=1e-12, rtol=0)
+np.testing.assert_allclose(original[0], [3, 4], atol=1e-12, rtol=0)
+assert scores.shape == weights.shape == (3, 3)
+assert original.shape == (3, 2)</code></pre>
+<p><strong>Expected:</strong> attention weights move with key identities; output follows the same row reorder; the first original output is [3,4].</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with attention weights move with key identities; output follows the same row reorder; the first original output is [3,4].</p>
 <h3 id="exercise-2-normalize-each-token">Exercise 2: Normalize each token<a class="heading-anchor" href="#exercise-2-normalize-each-token" aria-label="Link to this section">#</a></h3>
-<p>The question is: Normalize rows[1,3] and[10,20] independently, then alter only the second row.</p>
-<p>The first row uses only its own feature mean and variance. A future token has no opportunity to influence those quantities.</p>
-<pre><code class="language-python">x=np.array([[1.,3.],[10.,20.]]); changed=x.copy(); changed[1]=[1000,2000]
-np.testing.assert_allclose(layer_norm(x)[0],layer_norm(changed)[0],atol=1e-12,rtol=0)</code></pre>
-<p><strong>Expected:</strong> first normalized row unchanged.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with first normalized row unchanged.</p>
+<p>The question is: Normalize [[1,3],[10,20]] across each row, then replace only the second row with [1000,2000].</p>
+<p>For [1,3], the mean is 2, centered features are [-1,1], and the mean squared centered value is 1. The second token uses a different mean and variance, but neither statistic appears in the first token calculation. Altering the future row cannot change the first normalized row. Positive epsilon makes the magnitude slightly below one.</p>
+<pre><code class="language-python">values = np.array([[1., 3.], [10., 20.]])
+changed = values.copy()
+changed[1] = [1000., 2000.]
+normalized = layer_norm(values)
+expected_first = np.array([-1., 1.]) / np.sqrt(1 + 1e-5)
+np.testing.assert_allclose(normalized[0], expected_first, atol=1e-12, rtol=0)
+np.testing.assert_allclose(layer_norm(changed)[0], normalized[0], atol=1e-12, rtol=0)
+assert normalized.shape == values.shape</code></pre>
+<p><strong>Expected:</strong> the first normalized row remains [-1,1]/sqrt(1+1e-5), approximately [-0.999995,0.999995].</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with the first normalized row remains [-1,1]/sqrt(1+1e-5), approximately [-0.999995,0.999995].</p>
 <h3 id="exercise-3-expose-sequence-wide-leakage">Exercise 3: Expose sequence-wide leakage<a class="heading-anchor" href="#exercise-3-expose-sequence-wide-leakage" aria-label="Link to this section">#</a></h3>
-<p>The question is: Center each feature across both token rows, then repeat after changing the future row.</p>
-<p>Reducing across time mixes future values into the statistics used by an earlier position. A correct attention mask cannot repair information already leaked by another component.</p>
-<pre><code class="language-python">assert not np.allclose((x-x.mean(0))[0],(changed-changed.mean(0))[0])</code></pre>
-<p><strong>Expected:</strong> first centered row changes.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with first centered row changes.</p>
+<p>The question is: Center each feature across the two token rows, then change the future row from [10,20] to [1000,2000].</p>
+<p>The original feature means are [5.5,11.5]. Replacing the future row changes them to [500.5,1001.5], so subtracting those means changes the earlier row. There is no attention operation in this counterexample: the leakage is already present in preprocessing. This is why a mask test must be complemented by a full computation-path prefix test.</p>
+<pre><code class="language-python">values = np.array([[1., 3.], [10., 20.]])
+changed = values.copy()
+changed[1] = [1000., 2000.]
+original_first = (values - values.mean(axis=0, keepdims=True))[0]
+changed_first = (changed - changed.mean(axis=0, keepdims=True))[0]
+np.testing.assert_array_equal(original_first, [-4.5, -8.5])
+np.testing.assert_array_equal(changed_first, [-499.5, -998.5])
+assert not np.allclose(original_first, changed_first)</code></pre>
+<p><strong>Expected:</strong> the first centered row changes from [-4.5,-8.5] to [-499.5,-998.5].</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with the first centered row changes from [-4.5,-8.5] to [-499.5,-998.5].</p>
 <h3 id="exercise-4-attach-fixed-positions">Exercise 4: Attach fixed positions<a class="heading-anchor" href="#exercise-4-attach-fixed-positions" aria-label="Link to this section">#</a></h3>
-<p>The question is: Add position vectors[[0,0],[1,0],[0,2]]; permute content but keep positions fixed.</p>
-<p>Moving content to a new location changes its positional representation. Permuting both content and position vectors together would instead move the whole annotated token and test a different condition.</p>
-<pre><code class="language-python">pos=np.array([[0.,0.],[1.,0.],[0.,2.]])
-a=attention(q+pos,q+pos,v); b=attention(q[order]+pos,q[order]+pos,v[order])
-assert not np.allclose(b,a[order])</code></pre>
-<p><strong>Expected:</strong> outputs no longer follow a pure token permutation.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with outputs no longer follow a pure token permutation.</p>
-<h3 id="exercise-5-check-feature-centering">Exercise 5: Check feature centering<a class="heading-anchor" href="#exercise-5-check-feature-centering" aria-label="Link to this section">#</a></h3>
-<p>The question is: Inspect tokenwise normalized row means for the original fixture.</p>
-<p>The per-row mean is the relevant invariant. A global mean of zero could also be produced by a leaking sequence-wide operation, so it is too weak by itself.</p>
-<pre><code class="language-python">np.testing.assert_allclose(layer_norm(x).mean(-1),[0,0],atol=1e-12,rtol=0)</code></pre>
-<p><strong>Expected:</strong> each row mean approximately0.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with each row mean approximately0.</p>
-<h3 id="exercise-6-handle-constant-tokens">Exercise 6: Handle constant tokens<a class="heading-anchor" href="#exercise-6-handle-constant-tokens" aria-label="Link to this section">#</a></h3>
-<p>The question is: Normalize[5,5] with epsilon1e-5.</p>
-<p>Epsilon handles a zero variance without introducing future-token information. The constant row becomes zero before any learned scale or offset is applied.</p>
-<pre><code class="language-python">np.testing.assert_array_equal(layer_norm(np.array([[5.,5.]])),[[0,0]])</code></pre>
-<p><strong>Expected:</strong> finite vector[0,0].</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with finite vector[0,0].</p>
+<p>The question is: Add E=[[0,0],[1,0],[0,2]] to query/key content, then reorder content while keeping E attached to the original row positions.</p>
+<p>The position vector is part of the input to the score computation. Moving content to a new location while preserving the location table is different from relabelling all rows of an already positioned representation. The fixture adds positions only to query/key construction to isolate score effects; a full Transformer commonly adds token and position representations before all projections, including values.</p>
+<pre><code class="language-python">query = np.array([[1., 0.], [0., 1.], [1., 1.]])
+value = np.array([[1., 2.], [3., 4.], [5., 6.]])
+positions = np.array([[0., 0.], [1., 0.], [0., 2.]])
+order = np.array([2, 0, 1])
+original = attention(query + positions, query + positions, value)
+fixed_positions = attention(query[order] + positions, query[order] + positions, value[order])
+assert not np.allclose(fixed_positions, original[order])
+relabelled = attention((query + positions)[order], (query + positions)[order], value[order])
+np.testing.assert_allclose(relabelled, original[order], atol=1e-12, rtol=0)</code></pre>
+<p><strong>Expected:</strong> fixed-position outputs do not follow a pure content permutation; jointly reordering E restores the relabelling identity.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with fixed-position outputs do not follow a pure content permutation; jointly reordering E restores the relabelling identity.</p>
+<h3 id="exercise-5-check-feature-centering-and-causal-prefixes">Exercise 5: Check feature centering and causal prefixes<a class="heading-anchor" href="#exercise-5-check-feature-centering-and-causal-prefixes" aria-label="Link to this section">#</a></h3>
+<p>The question is: Check tokenwise means, then compare causal attention over normalized full input with recomputed prefixes.</p>
+<p>Feature normalization does not mix token rows, and the triangle prevents attention from reading future keys, so the combined operation preserves every prefix. The fixed-mask permutation comparison changes which content occupies each causal prefix. This separates the visibility graph from the content-only equivariance theorem.</p>
+<pre><code class="language-python">values = np.array([[1., 2., 5.], [10., 20., 15.], [7., 0., -2.]])
+normalized = layer_norm(values)
+np.testing.assert_allclose(normalized.mean(axis=-1), 0, atol=1e-12, rtol=0)
+allowed = np.tri(len(values), dtype=bool)
+full = attention(normalized, normalized, normalized, allowed)
+for length in [1, 2, 3]:
+    prefix = layer_norm(values[:length])
+    result = attention(prefix, prefix, prefix, np.tri(length, dtype=bool))
+    np.testing.assert_allclose(result, full[:length], atol=1e-12, rtol=0)
+order = np.array([2, 0, 1])
+permuted = normalized[order]
+fixed_mask = attention(permuted, permuted, permuted, allowed)
+assert not np.allclose(fixed_mask, full[order])</code></pre>
+<p><strong>Expected:</strong> row means are approximately zero and every causal prefix matches; fixed-mask content permutation need not match.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with row means are approximately zero and every causal prefix matches; fixed-mask content permutation need not match.</p>
+<h3 id="exercise-6-handle-constant-tokens-and-invalid-normalization">Exercise 6: Handle constant tokens and invalid normalization<a class="heading-anchor" href="#exercise-6-handle-constant-tokens-and-invalid-normalization" aria-label="Link to this section">#</a></h3>
+<p>The question is: Normalize [5,5], then reject an empty feature axis, zero epsilon and an all-forbidden attention row.</p>
+<p>A constant token has zero centered values and zero variance. Positive epsilon produces a finite zero output. This stabilizer does not justify accepting an empty feature dimension, nonfinite data or a query with no allowed key. Rejecting these cases makes the cause observable instead of producing NaN and diagnosing it several layers later.</p>
+<pre><code class="language-python">constant = layer_norm(np.array([[5., 5.]]))
+np.testing.assert_array_equal(constant, [[0., 0.]])
+assert np.isfinite(constant).all()
+for operation in [
+    lambda: layer_norm(np.empty((2, 0))),
+    lambda: layer_norm(np.array([[5., 5.]]), epsilon=0),
+    lambda: attention(np.ones((1, 2)), np.ones((1, 2)), np.ones((1, 2)), np.zeros((1, 1), dtype=bool)),
+]:
+    try:
+        operation()
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(&#x27;invalid contract was accepted&#x27;)</code></pre>
+<p><strong>Expected:</strong> constant token becomes finite [0,0]; each invalid contract raises ValueError.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with constant token becomes finite [0,0]; each invalid contract raises ValueError.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
 <p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
   </main>

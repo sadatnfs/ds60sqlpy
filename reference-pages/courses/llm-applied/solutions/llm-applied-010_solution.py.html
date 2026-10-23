@@ -121,7 +121,7 @@
 <span> </span>
 <span>def rewrite(query,synonyms): return &#x27; &#x27;.join(synonyms.get(token,token) for token in query.lower().split())</span>
 <span>def walk(start,graph,max_hops):</span>
-<span>    if max_hops&lt;0: raise ValueError(&#x27;nonnegative hop budget required&#x27;)</span>
+<span>    if type(max_hops) is not int or max_hops&lt;0: raise ValueError(&#x27;nonnegative integer hop budget required&#x27;)</span>
 <span>    if start not in graph: return []</span>
 <span>    queue=deque([(start,0)]); seen={start}; result=[]</span>
 <span>    while queue:</span>
@@ -147,6 +147,10 @@
 <span> </span>
 <span>    # Exercise 4: Stop at the declared depth</span>
 <span>    assert walk(&#x27;metric&#x27;,graph,1)==[&#x27;metric&#x27;,&#x27;exclusions&#x27;]</span>
+<span>    for bad_budget in [1.5,True,float(&#x27;nan&#x27;),-1]:</span>
+<span>        try: walk(&#x27;metric&#x27;,graph,bad_budget)</span>
+<span>        except ValueError: pass</span>
+<span>        else: raise AssertionError(&#x27;invalid hop budget accepted&#x27;)</span>
 <span> </span>
 <span>    # Exercise 5: Break a retrieval cycle</span>
 <span>    cyclic={**graph,&#x27;test_accounts&#x27;:[&#x27;metric&#x27;]}; result=walk(&#x27;metric&#x27;,cyclic,10)</span>

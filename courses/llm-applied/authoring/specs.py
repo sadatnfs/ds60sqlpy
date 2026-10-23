@@ -25,7 +25,7 @@ ex('Route an exact calculation','Describe a request to sum validated purchase am
 assert choose(task)==('deterministic_tool','exact computation')''','The assistant may explain the result, but the arithmetic should be performed by a bounded deterministic function. A fluent estimate is not an acceptable substitute for an exact total.'),
 ex('Require evidence before fine-tuning','Describe a stable schema-formatting gap with zero governed examples, then with120 reviewed examples.','first measure_baseline; then adaptation_candidate.', '''task={'exact_computation':False,'fresh_evidence':False,'citation_required':False,'stable_behavior_gap':True,'governed_examples':0}
 assert choose(task)[0]=='measure_baseline'
-task['governed_examples']=120; assert choose(task)[0]=='adaptation_candidate' ''','The threshold120 is a teaching admission rule, not a universal sample-size recommendation. A real decision needs learning curves, label quality and held-out task evidence.'),
+task['governed_examples']=120; assert choose(task)[0]=='adaptation_candidate' ''','The example count120 exceeds the helper\'s teaching admission threshold100; neither number is a universal sample-size recommendation. A real decision needs learning curves, label quality and held-out task evidence.'),
 ex('Keep mechanisms composable','A task needs current policy citations and a stable response schema; state which stage retrieves evidence and which might be adapted.','retrieval remains required; format adaptation is separate.', '''task={'exact_computation':False,'fresh_evidence':True,'citation_required':True,'stable_behavior_gap':True,'governed_examples':120}
 assert choose(task)[0]=='retrieval'
 architecture={'knowledge':'versioned retrieval','format':'prompt baseline, then measured adapter if needed'}
@@ -45,7 +45,7 @@ add('llm-applied-002',
 '''Structured extraction turns text into typed records, but valid JSON is only the first boundary. A record can have all required keys and still contain a fabricated measurement, an impossible count or a unit mismatch. The task should distinguish unsupported fields from explicit missing values. This lesson extracts a small study record with visits,purchases andassignment_unit. The reference uses deterministic parsing of a tightly specified authored format so every accepted value can be traced to source text. It is an extraction baseline, not a language model. A future LLM proposal must pass the same validation before downstream analysis.
 
 For data science, preserving units and uncertainty is essential. Purchases cannot exceed visits under the stated one-purchase-per-visit fixture. A missing outcome is not zero. A study randomized by account cannot be analyzed as though every repeated visit were independently assigned. The schema therefore carries semantic assumptions alongside numeric fields. Once accepted, deterministic code calculates conversion rate; generated prose must cite that computed value rather than invent a second calculation.''',
-'''Parse JSON into a dictionary, require exactly the allowed keys, and reject booleans where an integer count is required because Python bool is a subclass ofint. Validate0<=purchases<=visits and require a positive denominator before computing a rate. UseNone only where the schema explicitly permits missingness. The extract helper recognizes the authored grammar and returns source spans so a field can be traced to the exact characters that supplied it.''',
+'''Validate an already decoded dictionary, require exactly the allowed keys, and reject booleans where an integer count is required because Python bool is a subclass ofint. Validate0<=purchases<=visits and require a positive denominator before computing a rate. UseNone only where the schema explicitly permits missingness. The extract helper recognizes the authored grammar and returns source spans so a field can be traced to the exact characters that supplied it.''',
 [('Schema validity','Structural and type conformance of a proposed record.'),('Semantic validity','Consistency with domain rules such as units and count bounds.'),('Provenance span','The source character interval supporting an extracted field.'),('Abstention','Returning an explicit unknown result when evidence is absent.')],[
 ex('Validate a correct proposal','Validate visits10, purchases3 and assignment_unit account.','conversion rate0.3.', '''record=validate({'visits':10,'purchases':3,'assignment_unit':'account'})
 assert rate(record)==.3''','The denominator and unit are known before division. This calculation is deterministic and does not depend on the wording of an explanation.'),
@@ -234,7 +234,7 @@ ex('Reject zero and nonfinite vectors','Normalize[0,0] and[1,NaN] through the ch
     try: unit(bad)
     except ValueError: pass
     else: raise AssertionError('invalid vector accepted')''','A zero vector has no direction and NaN is not a valid coordinate. Returning a plausible similarity would hide an encoding or data-quality failure.'),
-ex('Reject incompatible spaces','Compare query metadata modelA with an index encoded by modelB, even when both have width3.','space identity mismatch blocks retrieval.', '''query_meta={'model':'A','width':3,'normalization':'unit'}; index_meta={'model':'B','width':3,'normalization':'unit'}
+ex('Reject incompatible spaces','Compare query metadata modelA with an index encoded by modelB, even when both have width3.','metadata identity mismatch is detected; the caller must enforce the retrieval gate.', '''query_meta={'model':'A','width':3,'normalization':'unit'}; index_meta={'model':'B','width':3,'normalization':'unit'}
 assert query_meta!=index_meta''','Vector dimensions are only a shape contract. Two models can use unrelated coordinate systems with the same width, so their dot products are not meaningful cross-model similarities.'),
 ex('Measure a domain failure','Give an irrelevant document a high-scoring vector and record that geometric rank does not establish relevance.','top-ranked IDwrong is outside the authored relevant set.', '''misleading={'wrong':np.array([1.,0.,0.]),'relevant':np.array([.5,.5,0.])}; relevant={'relevant'}
 top=cosine_rank(query,misleading)[0][0]
@@ -325,13 +325,17 @@ ex('Retain a rewrite trace','Record the original, rewritten query and policy ver
 assert set(trace)=={'original','rewritten','policy'}''','A retrieval failure can originate in the rewrite rather than the ranking model. Keeping both strings makes that stage diagnosable.'),
 ex('Follow two evidence hops','Use graphmetric->exclusions->test_accounts with a two-hop bound.','visitedmetric,exclusions,test_accounts.', '''graph={'metric':['exclusions'],'exclusions':['test_accounts'],'test_accounts':[]}
 assert walk('metric',graph,2)==['metric','exclusions','test_accounts']''','The depth counts edges from the starting evidence item. The final document is included because it is exactly two links away.'),
-ex('Stop at the declared depth','Run the same graph with a one-hop bound.','test_accounts is absent.', '''assert walk('metric',graph,1)==['metric','exclusions']''','The budget is a real behavior constraint. Returning the deeper document would mean the implementation ignored the configured stopping rule.'),
+ex('Stop at the declared depth','Run the same graph with a one-hop bound, then reject fractional, Boolean, NaN and negative budgets.','test_accounts is absent; invalid budgets raise ValueError before traversal.', '''assert walk('metric',graph,1)==['metric','exclusions']
+for bad_budget in [1.5,True,float('nan'),-1]:
+    try: walk('metric',graph,bad_budget)
+    except ValueError: pass
+    else: raise AssertionError('invalid hop budget accepted')''','The budget is a real behavior constraint. Returning the deeper document would mean the implementation ignored the configured stopping rule.'),
 ex('Break a retrieval cycle','Addtest_accounts->metric and traverse with a larger bound.','each document appears once.', '''cyclic={**graph,'test_accounts':['metric']}; result=walk('metric',cyclic,10)
 assert result==['metric','exclusions','test_accounts'] and len(result)==len(set(result))''','A visited set prevents repeated evidence from masquerading as additional support and keeps cycles from consuming unlimited work.'),
 ex('Preserve authorization across hops','Remove a restricted target from the admitted graph and ensure links to it are not followed.','restricted document never appears.', '''admitted={'metric':['restricted'],'public':[]}
 assert walk('metric',admitted,3)==['metric']''','A link is not permission to access its target. The traversal follows only nodes present in the already admitted graph.')],RAG,imports='from collections import deque',helper='''def rewrite(query,synonyms): return ' '.join(synonyms.get(token,token) for token in query.lower().split())
 def walk(start,graph,max_hops):
-    if max_hops<0: raise ValueError('nonnegative hop budget required')
+    if type(max_hops) is not int or max_hops<0: raise ValueError('nonnegative integer hop budget required')
     if start not in graph: return []
     queue=deque([(start,0)]); seen={start}; result=[]
     while queue:
@@ -347,7 +351,7 @@ add('llm-applied-011',
 '''Grounded answering requires a connection between each substantive claim and supporting evidence. A citation that points to a real document is not enough if the document does not establish the claim. Preserve document version and character offsets so the cited span can be inspected. Distinguish source quotation, paraphrase and computed result. A deterministic calculation should cite its input records and method, while a quoted policy should cite the exact policy version.
 
 This chapter implements an extractive subject-assistant baseline. It selects an authored supported span and returns it with metadata, or abstains when no supported answer exists. It is deliberately not called a generative LLM. The baseline makes the evidence contract testable before adding a model that may paraphrase or invent claims. Exact substring checks establish span integrity, not general semantic entailment; the fixture includes hand-authored claim-to-span labels for that separate support judgment. Conflicting versions and missing evidence should remain visible rather than be resolved by fluent guesswork.''',
-'''An answer record containsstatus,claims andcitations. Each citation includesdocument_id,version,start,end. Validate that the stored source slice equals the cited quote and that the claim ID is supported by the authored evidence map. For missing evidence, returnstatusunknown with an empty claim list and a reason. Do not use a low retrieval score alone as a universal answerability threshold without calibration.''',
+'''An answer record containsstatus,claims andcitations. Each citation includesdocument_id,version,start,end. The examples check source-slice equality and inspect an authored support map separately. The helper constructs the span record; a complete caller must enforce semantic claim support before accepting it. For missing evidence, returnstatusunknown with an empty claim list and a reason. Do not use a low retrieval score alone as a universal answerability threshold without calibration.''',
 [('Grounded claim','A statement linked to evidence that supports its content.'),('Citation integrity','Agreement between a citation span and the referenced source bytes.'),('Entailment','The evidence actually establishes the meaning of a claim.'),('Abstention policy','A rule for returning unknown instead of unsupported content.')],[
 ex('Return a supported extractive answer','Answer the conversion-definition question from the metric document and its first sentence.','statusanswered;one claim;citation slices the exact sentence.', '''text='Conversion rate equals purchases divided by eligible visits. Exclude test accounts.'
 document={'id':'metric-v1','version':1,'text':text}; end=text.index('.')+1
@@ -473,10 +477,13 @@ assert not torch.equal(before,model.token.weight.detach())''','Checking an embed
 ex('Inspect the mask derivative','Differentiate cross entropy with respect to fresh zero logits under the samelabels.','ignored prompt positions have zero gradient;answer positions do not.', '''probe=torch.zeros((2,3,16),requires_grad=True); F.cross_entropy(probe.reshape(-1,16),labels.reshape(-1),ignore_index=-100).backward()
 assert torch.count_nonzero(probe.grad[:,0]).item()==0 and torch.count_nonzero(probe.grad[:,1:]).item()>0''','The loss mask affects optimization, not merely the displayed average. This independent probe isolates target participation from the model architecture.'),
 ex('Evaluate the frozen held-out prompt','After the declared20 updates,evaluate the held-out sequence without another optimizer step.','finite held-out loss and unchanged weights during evaluation;no promised improvement.', '''model.eval(); saved=model.output.weight.detach().clone()
-with torch.no_grad(): final_held=objective(model,held[:,:-1],held_labels).item()
+with torch.no_grad():
+    final_held=objective(model,held[:,:-1],held_labels).item()
+    final_train=objective(model,inputs,labels).item()
 assert np.isfinite(final_held) and torch.equal(saved,model.output.weight.detach())''','A held-out score may improve or worsen. The lesson reports the observation rather than requiring a favorable result that could encourage test-driven tuning.'),
-ex('Write an honest adaptation receipt','Record update count,active training targets,train/heldout losses and the literal-token limitation.','receipt says20 updates,4 active training targets and no natural-language competence claim.', '''receipt={'updates':20,'active_training_targets':4,'initial_train':initial_train,'final_train':curve[-1],'initial_held':initial_held,'final_held':final_held,'scope':'literal token task, not a pretrained subject assistant'}
-assert receipt['updates']==20 and receipt['active_training_targets']==4 and 'not a pretrained' in receipt['scope']''','A real adaptation report should also include data/model hashes, environment and retained baseline tasks. The tiny receipt illustrates those evidence categories without overstating its task.')],('PyTorch training mechanics','https://docs.pytorch.org/tutorials/beginner/basics/optimization_tutorial.html'),imports=TORCH_IMPORT,helper=DECODER+'''
+ex('Write an honest adaptation receipt','Record update count,active training targets,train/heldout losses and the literal-token limitation.','receipt says20 updates,4 active training targets and no natural-language competence claim.', '''receipt={'updates':20,'active_training_targets':4,'initial_train':initial_train,'final_train':final_train,'initial_held':initial_held,'final_held':final_held,'scope':'literal token task, not a pretrained subject assistant'}
+assert receipt['updates']==20 and receipt['active_training_targets']==4 and 'not a pretrained' in receipt['scope']
+with torch.no_grad(): np.testing.assert_allclose(receipt['final_train'],objective(model,inputs,labels).item(),atol=1e-12,rtol=0)''','A real adaptation report should also include data/model hashes, environment and retained baseline tasks. The tiny receipt illustrates those evidence categories without overstating its task.')],('PyTorch training mechanics','https://docs.pytorch.org/tutorials/beginner/basics/optimization_tutorial.html'),imports=TORCH_IMPORT,helper=DECODER+'''
 def objective(model,inputs,labels):
     logits,_=model(inputs)
     return F.cross_entropy(logits.reshape(-1,model.vocab),labels.reshape(-1),ignore_index=-100)
@@ -617,7 +624,7 @@ ex('Train a pairwise reranker','Use positive feature[1,0],negative[0,1] and a ze
 for _ in range(20):
     optimizer.zero_grad(set_to_none=True); objective=F.softplus(-(positive@weight-negative@weight)); objective.backward(); optimizer.step()
 assert positive@weight>negative@weight and F.softplus(-(positive@weight-negative@weight)).item()<first''','The reranker objective compares candidates for one query. Its training data must distinguish relevance from superficial length or lexical artifacts.'),
-ex('Detect a false-negative identity','Assign the same document ID to bothpositive andnegative roles and refuse the pair.','identity collision detected beforetraining.', '''pair={'positive':'doc-a','negative':'doc-a'}
+ex('Detect a false-negative identity','Assign the same document ID to positive and negative roles and identify the collision as a prospective admission failure.','identity collision detected; this check is separate from the earlier training loops.', '''pair={'positive':'doc-a','negative':'doc-a'}
 assert pair['positive']==pair['negative']''','A duplicated relevant passage can be a false negative even when filenames differ. Exact and family-level checks help prevent contradictory supervision.'),
 ex('Bound the model claim','Record that fixed vectors were used and natural-language encoder quality was not measured.','actual gradient updatesTrue;pretrained_semantic_encoderFalse.', '''receipt={'query_projection_updates':30,'reranker_updates':20,'literal_feature_fixture':True,'pretrained_semantic_encoder':False,'natural_language_quality_measured':False}
 assert receipt['query_projection_updates']==30 and not receipt['natural_language_quality_measured']''','A realistic next experiment should use pinned encoder weights,domain labels and held-out families while retaining these arithmetic and ranking checks.')],('Sentence-BERT','https://arxiv.org/abs/1908.10084'),imports=TORCH_IMPORT,decisions='''Fine-tune retrieval models when error analysis shows that the representation or pair scorer systematically misses domain relevance despite sound chunking and metadata. Choose negatives carefully: random negatives may be too easy,while hard negatives may contain relevant alternatives. Label quality and domain coverage often matter more than increasing the number of updates.
@@ -626,7 +633,7 @@ Do not train a retriever on the final relevance benchmark and then present its s
 add('llm-applied-021',
 '''A realistic pretrained-model adaptation recipe introduces dependencies that the tiny offline exercises deliberately avoid: model weights,tokenizer files,chat templates,library versions,artifact licenses and larger resource needs. These are part of the experiment,not setup trivia. A model name pointing to a moving branch is not a reproducible identity. Pin an exact repository revision and record hashes of the downloaded files. Keep the acquisition step separate from local training so an offline run cannot silently fetch missing assets.
 
-The optional recipe targetsHuggingFaceTB/SmolLM2-135M-Instruct at revision12fd25f77366fa6b3b4b768ec3050bf629380bac,whose model card was checked asApache-2.0 during authoring. This is a small pretrained model for a bounded demonstration,not a recommended production assistant. The recipe pins direct package versions,uses a literal local prompt-completion dataset,checks chat-template prefix alignment and answer-only masks,and runs at most10CPU updates. It is authored but intentionally unexecuted unless the learner separately prepares dependencies and assets. No default lesson downloads a model or calls a paid service.''',
+The optional recipe targetsHuggingFaceTB/SmolLM2-135M-Instruct at revision12fd25f77366fa6b3b4b768ec3050bf629380bac,whose model card was checked asApache-2.0 during authoring. This is a small pretrained model for a bounded demonstration,not a recommended production assistant. The recipe pins direct package versions,uses a literal local prompt-completion dataset,checks chat-template prefix alignment and answer-only masks,and runs at most10CPU updates. The optional recipe has separate bounded Linux arm64 execution evidence for ten full-SFT and LoRA updates, while its generation probe produced an incorrect formula despite evidence. Learners must still explicitly prepare their own dependencies and assets; mechanics success does not establish subject expertise. No default lesson downloads a model or calls a paid service.''',
 '''The prepared scripts live underfixtures/pretrained. prepare_assets.py requires an explicit network acknowledgement and downloads only the pinned model snapshot into a new learner-owned directory. It records SHA256 hashes. train_local.py useslocal_files_only=True andtrust_remote_code=False,checks the manifest and refuses a nonempty output directory. TRL SFTTrainer receives conversational prompt/completion records withcompletion_only_loss=True. Before training,the script inspects tokenized examples and a collated batch to ensure prompt labels are ignored and answer labels remain active. The model itself performs the causal label shift;do not shift labels twice.''',
 [('Pinned revision','An immutable model-repository commit identifying exact source artifacts.'),('Offline asset manifest','Local filenames,hashes,license note and revision used by a run.'),('Chat-template alignment','Agreement between rendered prompt prefix and full conversation tokens.'),('Completion-only loss','Supervision restricted to completion targets under the trainer contract.')],[
 ex('Inspect the pinned artifact contract','Read the supplied model manifest and identify model ID,revision and license note before any download.','exact40-character revision and Apache-2.0 card note are present.', '''Model: HuggingFaceTB/SmolLM2-135M-Instruct
@@ -652,10 +659,11 @@ ex('Compare full and adapter configuration','Inspectmodefull versusmodelora,rank
 LoRA: frozen base plus rank4 adapters on q_proj and v_proj.
 Both: max_steps10,max_length128,batch1,seed7,CPU,report_to=[];
 Evaluate the same held-out families and retain both receipts.''','The recipe supports a controlled mechanism comparison,not an assertion that a ten-step run produces a useful assistant. Actual memory and time must be measured on the prepared environment.'),
-ex('Refuse a false execution claim','Write the status when scripts are authored and syntax-checked but weights were not acquired or training was not run.','pretrained executionunverified;no generated success receipt.', '''Status: recipe authored and statically checked.
-Model/data downloads performed by this authoring pass: none.
-Pretrained training executed: no.
-Required next evidence: local asset verification,mask inspection,actual run receipt,held-out evaluation.''','An optional recipe remains valuable without pretending it has executed. The status must distinguish code review,asset preparation,training and task-quality acceptance.')],('TRL SFTTrainer0.24.0','https://huggingface.co/docs/trl/v0.24.0/en/sft_trainer'),imports='',decisions='''Use the optional recipe only after the default tiny-model lessons make the data,mask and optimization mechanics understandable. Prepare a separate environment so experimentation does not silently replace the classroom runtime. The direct pins are a starting reproducibility contract;for a shared release,resolve a complete platform-specific lock with hashes and retain the downloaded wheels. Record Python,OS,architecture,Torch and accelerator information with the run.
+ex('Distinguish an unexecuted learner scenario','For a hypothetical new learner who has only reviewed scripts, write the status without overwriting the separately qualified maintainer recipe.','pretrained executionunverified;no generated success receipt.', '''Scenario: a new learner has only reviewed the recipe.
+Assets acquired for this learner run: no.
+Training executed for this learner run: no.
+Separate maintainer recipe: qualified mechanics with an observed generation-quality failure.
+Required next evidence: local asset verification,mask inspection,actual run receipt,held-out evaluation.''','An optional recipe remains valuable without pretending it has executed. The status must distinguish code review,asset preparation,training and task-quality acceptance.')],('TRL SFTTrainer0.24.0','https://huggingface.co/docs/trl/v0.24.0/en/sft_trainer'),imports='',decisions='''Use the optional recipe only after the default tiny-model lessons make the data,mask and optimization mechanics understandable. Prepare a separate environment so experimentation does not silently replace the classroom runtime. The supplied recipe includes complete platform-specific dependency locks with hashes; changing those locks requires new environment preparation and qualification. Record Python,OS,architecture,Torch and accelerator information with the run.
 
 Do not assume a chat template supports assistant-only masking merely because the tokenizer has a template. The supplied recipe uses prompt/completion boundaries and verifies them. Do not enabletrust_remote_code or load arbitrary pickled checkpoints to make an unfamiliar model work. Do not treat a model card license note as a blanket approval for every dataset or deployment. The optional inference script loads only local base and adapter artifacts and still requires the same grounded-output and access controls as the default assistant baseline.''')
 add('llm-applied-022',
@@ -672,11 +680,15 @@ ex('Reject an arbitrary operation','Submitoperationrun_sql or an extraquery fiel
     try: dispatch(proposal,rows)
     except ValueError: pass
     else: raise AssertionError('unbounded operation accepted')''','The dispatcher never interprets arbitrary text as code or SQL. A production SQL adapter would need a separate reviewed query template and target boundary.'),
-ex('Reject invalid numeric values','Replace onevalue withTrue,NaN orNone under the strict numeric policy.','each invalid row is rejected.', '''for bad in [True,float('nan'),None]:
+ex('Reject invalid numeric values','Replace one value with True, NaN or None, then check large finite values and cancellation under the same numeric policy.','invalid rows are rejected; equal1e308 values have finite mean1e308 and opposite values have mean0.', '''for bad in [True,float('nan'),None]:
     changed=[dict(r) for r in rows]; changed[0]['value']=bad
     try: dispatch(request,changed)
     except (TypeError,ValueError): pass
-    else: raise AssertionError('invalid numeric value accepted')''','Silently dropping or coercing these values would change the denominator or meaning. A different missingness policy must be explicitly designed and reported.'),
+    else: raise AssertionError('invalid numeric value accepted')
+huge=[{'id':'h1','group':'A','value':1e308},{'id':'h2','group':'A','value':1e308}]
+assert dispatch(request,huge)==[{'group':'A','count':2,'mean':1e308}]
+huge[1]['value']=-1e308
+assert dispatch(request,huge)[0]['mean']==0.0''','Silently dropping or coercing these values would change the denominator or meaning. A different missingness policy must be explicitly designed and reported.'),
 ex('Enforce identity and work limits','Duplicatea1,then supply21 unique rows.','duplicate identity and row-limit violations rejected.', '''too_many=[{'id':str(i),'group':'A','value':1.} for i in range(21)]
 for bad_rows in [rows+[dict(rows[0])],too_many]:
     try: dispatch(request,bad_rows)
@@ -697,7 +709,13 @@ assert report['group_means'] and not report['causal_effect_established']''','An 
         if type(value) not in (int,float): raise TypeError('numeric value required')
         if not math.isfinite(value): raise ValueError('finite value required')
         groups[row['group']].append(value)
-    return [{'group':key,'count':len(values),'mean':sum(values)/len(values)} for key,values in sorted(groups.items())]
+    result=[]
+    for key,values in sorted(groups.items()):
+        scale=max(abs(value) for value in values)
+        mean=0.0 if scale==0 else scale*(math.fsum(value/scale for value in values)/len(values))
+        if not math.isfinite(mean): raise ValueError('finite group mean required')
+        result.append({'group':key,'count':len(values),'mean':mean})
+    return result
 ''',decisions='''Use typed tools when a subject assistant needs exact arithmetic,validated database reads,plots or data transformations. Keep the operation catalog small and explicit. Validate inputs before execution and outputs before explanation. For expensive tools,add real time,cancellation and resource bounds in the execution layer rather than relying only on a prompt asking the model to be concise.
 
 Do not exposeeval,arbitrary filesystem paths or unrestricted SQL as a convenience shortcut. A model proposal can be malformed or influenced by retrieved text. A real database tool should use parameter binding,least-privilege access and an explicit target. Preserve the analysis code and input identity so a user can reproduce a result without trusting the generated prose. Statistical interpretation still depends on sampling,measurement and design assumptions beyond the tool's arithmetic correctness.''')
@@ -785,4 +803,14 @@ def conversion(purchases,visits):
 
 Do not call a deterministic fixture a trained LLM,and do not call a tiny trained decoder a production domain expert. The optional local inference recipe makes the transition to a real pretrained model explicit without changing the evidence contract. A production decision also needs authenticated access integration,real freshness and revocation handling,bounded serving behavior,privacy-aware traces and operational ownership. A no-go with a precise missing-evidence list is a valid final result.''')
 
-SPECS['llm-applied-021']['appendix'] = "## Complete optional scripts and setup\n\nRead the [pretrained recipe](../fixtures/pretrained/README.md) for pinned dependencies, model identity, explicit acquisition, local hash verification, mask checks, bounded training, local inference, resource estimates and a manual container recipe with persistent mounted artifacts. These optional scripts remain unexecuted unless their own receipt says otherwise."
+SPECS['llm-applied-021']['appendix'] = "## Complete optional scripts and setup\n\nRead the [pretrained recipe](../fixtures/pretrained/README.md) for pinned dependencies, model identity, explicit acquisition, local hash verification, mask checks, bounded training, local inference, resource estimates and a manual container recipe with persistent mounted artifacts. See the recipe execution record for the bounded training/reload results and the observed generation-quality failure. A new learner run needs its own receipt."
+
+from lora_depth import deepen as deepen_lora
+deepen_lora(SPECS['llm-applied-016'])
+
+from depth_reviews_applied import apply_reviews
+from render import GUIDES_ONLY
+apply_reviews(SPECS, write_matrix=not GUIDES_ONLY)
+
+from textbook_applied import apply_textbook
+apply_textbook(SPECS)

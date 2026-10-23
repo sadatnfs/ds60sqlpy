@@ -130,13 +130,12 @@
 <span>      &quot;runtime&quot;: &quot;javascript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
 <span>        &quot;ECMAScript&quot;,</span>
-<span>        &quot;host&quot;,</span>
-<span>        &quot;ES module&quot;,</span>
-<span>        &quot;console&quot;</span>
+<span>        &quot;Host&quot;,</span>
+<span>        &quot;ES module&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply javascript, node and the browser with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through ECMAScript examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;JavaScript is a language; Node and browsers are hosts that provide different APIs around it.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Check that the prepared runtime is Node 24 and that process exists.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;major version 24; process.release.name is node. observed value 7 after await.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-002&quot;,</span>
@@ -148,16 +147,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;javascript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;number&quot;,</span>
-<span>        &quot;string&quot;,</span>
-<span>        &quot;boolean&quot;,</span>
-<span>        &quot;null&quot;,</span>
-<span>        &quot;undefined&quot;,</span>
-<span>        &quot;strict equality&quot;</span>
+<span>        &quot;Coercion&quot;,</span>
+<span>        &quot;Strict equality&quot;,</span>
+<span>        &quot;Safe integer&quot;,</span>
+<span>        &quot;BigInt&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply values, coercion and precise comparisons with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through number examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;JavaScript values have runtime types, and operators can perform implicit conversion.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Compare 2+3, 2+string 3, and Number(string 3)+2.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;5, string 23, and 5. valid 12 accepted; invalid cases throw.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-003&quot;,</span>
@@ -169,14 +166,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;javascript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;truthiness&quot;,</span>
-<span>        &quot;short circuit&quot;,</span>
-<span>        &quot;loop&quot;,</span>
-<span>        &quot;invariant&quot;</span>
+<span>        &quot;Truthiness&quot;,</span>
+<span>        &quot;Short circuit&quot;,</span>
+<span>        &quot;Loop invariant&quot;,</span>
+<span>        &quot;Nullish fallback&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply control flow and loop boundaries with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through truthiness examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;Control flow decides which expressions execute and how many times.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Inspect Boolean conversions of 0, empty string, empty array and empty object.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;false, false, true, true. extra undefined element exposes the off-by-one.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-004&quot;,</span>
@@ -188,14 +185,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;javascript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;function&quot;,</span>
-<span>        &quot;lexical scope&quot;,</span>
-<span>        &quot;closure&quot;,</span>
-<span>        &quot;default parameter&quot;</span>
+<span>        &quot;Lexical scope&quot;,</span>
+<span>        &quot;Closure&quot;,</span>
+<span>        &quot;Default parameter&quot;,</span>
+<span>        &quot;Receiver&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply functions, scope and closures with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through function examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;Functions define reusable computations, and lexical scope determines which bindings a function can read.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Use add with 2, 3 and with negative 1, 1.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;5 and 0. TypeError for 0 and 1.5; step 2 yields 2, 4.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-005&quot;,</span>
@@ -207,15 +204,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;javascript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;map&quot;,</span>
-<span>        &quot;filter&quot;,</span>
-<span>        &quot;reduce&quot;,</span>
-<span>        &quot;sort&quot;,</span>
-<span>        &quot;mutation&quot;</span>
+<span>        &quot;Transformation&quot;,</span>
+<span>        &quot;Reduction&quot;,</span>
+<span>        &quot;Shallow copy&quot;,</span>
+<span>        &quot;Mutation&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply arrays and immutable transformations with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through map examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;Array operations differ in whether they mutate the container, return a new container or reuse referenced objects.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Double 1, 2, 3, 4 and keep results above 4.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;6, 8; original array unchanged. edited record changes; original record stays 1.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-006&quot;,</span>
@@ -227,14 +223,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;javascript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;own property&quot;,</span>
-<span>        &quot;prototype&quot;,</span>
-<span>        &quot;destructuring&quot;,</span>
-<span>        &quot;spread&quot;</span>
+<span>        &quot;Own property&quot;,</span>
+<span>        &quot;Prototype chain&quot;,</span>
+<span>        &quot;Destructuring&quot;,</span>
+<span>        &quot;Shallow freeze&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply objects, properties and prototypes with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through own property examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;Objects associate property keys with values and can inherit properties through a prototype chain.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Create a child inheriting kind and owning name.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;kind found by in but not hasOwn; name is own. values 1 then 2; getter executed twice.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-007&quot;,</span>
@@ -246,14 +242,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;javascript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Map&quot;,</span>
-<span>        &quot;Set&quot;,</span>
-<span>        &quot;reference identity&quot;,</span>
-<span>        &quot;lookup&quot;</span>
+<span>        &quot;Reference identity&quot;,</span>
+<span>        &quot;SameValueZero&quot;,</span>
+<span>        &quot;Multiplicity&quot;,</span>
+<span>        &quot;Membership&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply maps, sets and collection identity with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through Map examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;Map and Set provide collection contracts different from plain object records.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Create two {id: 1} objects and use them as Map keys.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;size 2 and separate values. b, a, c.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-008&quot;,</span>
@@ -265,14 +261,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;javascript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;code point&quot;,</span>
-<span>        &quot;UTF-16&quot;,</span>
-<span>        &quot;RegExp&quot;,</span>
-<span>        &quot;escaping&quot;</span>
+<span>        &quot;UTF-16 code unit&quot;,</span>
+<span>        &quot;Code point&quot;,</span>
+<span>        &quot;Normalization&quot;,</span>
+<span>        &quot;Pattern escaping&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply strings, unicode and regular expressions with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through code point examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;JavaScript strings are sequences of UTF-16 code units.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Inspect A followed by one emoji.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;length 3; spread count 2. item_1 accepted; oversized input rejected.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-009&quot;,</span>
@@ -284,14 +280,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;javascript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Error&quot;,</span>
-<span>        &quot;throw&quot;,</span>
-<span>        &quot;try catch&quot;,</span>
-<span>        &quot;validation boundary&quot;</span>
+<span>        &quot;Validation boundary&quot;,</span>
+<span>        &quot;Error cause&quot;,</span>
+<span>        &quot;Domain invariant&quot;,</span>
+<span>        &quot;Failure category&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply errors and explicit validation with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through Error examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;Errors should distinguish an invalid request from an expected missing result and an operational failure.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Validate id A, quantity 2, price 125 and calculate integer cents.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;total 250; fresh accepted object. input unchanged.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-010&quot;,</span>
@@ -303,15 +299,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;javascript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;import&quot;,</span>
-<span>        &quot;export&quot;,</span>
-<span>        &quot;ESM&quot;,</span>
-<span>        &quot;CommonJS&quot;,</span>
-<span>        &quot;package&quot;</span>
+<span>        &quot;Live binding&quot;,</span>
+<span>        &quot;Module namespace&quot;,</span>
+<span>        &quot;Resolution&quot;,</span>
+<span>        &quot;Module cache&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply modules and dependency boundaries with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through import examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;A module is both a namespace and a dependency boundary.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Import a mutable counter and its increment function, then inspect the count before and after incrementing.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;count changes from 0 to 1 through the imported namespace. TypeError; exported value remains 3.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-011&quot;,</span>
@@ -323,14 +318,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;javascript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Symbol.iterator&quot;,</span>
-<span>        &quot;generator&quot;,</span>
-<span>        &quot;lazy sequence&quot;,</span>
-<span>        &quot;cleanup&quot;</span>
+<span>        &quot;Iterable&quot;,</span>
+<span>        &quot;Iterator&quot;,</span>
+<span>        &quot;Suspension&quot;,</span>
+<span>        &quot;Iterator closing&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply iterators and generators with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through Symbol.iterator examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;An iterable describes how to obtain an iterator.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Create a generator, inspect its trace, then request one value.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;trace is empty before next; then started, with value 2. empty array for 0; RangeError for -1 and 1.5.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-012&quot;,</span>
@@ -342,14 +337,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;javascript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Promise&quot;,</span>
-<span>        &quot;microtask&quot;,</span>
-<span>        &quot;task&quot;,</span>
-<span>        &quot;unhandled rejection&quot;</span>
+<span>        &quot;Settlement&quot;,</span>
+<span>        &quot;Reaction&quot;,</span>
+<span>        &quot;Microtask&quot;,</span>
+<span>        &quot;Promise composition&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply promises and the event loop with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through Promise examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;A Promise records one eventual settlement: fulfillment with a value or rejection with a reason.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Record executor, synchronous continuation and then reaction.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;executor, sync, reaction. sync,promise,microtask,timer.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-013&quot;,</span>
@@ -361,14 +356,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;javascript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;async&quot;,</span>
-<span>        &quot;await&quot;,</span>
-<span>        &quot;AbortController&quot;,</span>
-<span>        &quot;timeout&quot;</span>
+<span>        &quot;Cooperative cancellation&quot;,</span>
+<span>        &quot;Abort signal&quot;,</span>
+<span>        &quot;Deadline&quot;,</span>
+<span>        &quot;Cleanup ownership&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply async functions and cancellation with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through async examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;Cancellation is a request communicated to cooperating code.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Start a timer with a signal, abort it, and inspect the rejection.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;AbortError with the original reason as cause. combined signal is aborted with deadline reason.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-014&quot;,</span>
@@ -380,14 +375,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;javascript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;binary search&quot;,</span>
-<span>        &quot;hash index&quot;,</span>
-<span>        &quot;heap&quot;,</span>
-<span>        &quot;complexity&quot;</span>
+<span>        &quot;Complexity&quot;,</span>
+<span>        &quot;Search invariant&quot;,</span>
+<span>        &quot;Index&quot;,</span>
+<span>        &quot;Heap invariant&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply collections, search and algorithmic complexity with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through binary search examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;An algorithm is a rule for transforming an input into a result; complexity describes how its required work grows with input size.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Find the first insertion position for 4 in 1,4,4,8 and inspect the visited intervals.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;index 1; intervals shrink to the first duplicate. all invariants hold; invalid value throws.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-015&quot;,</span>
@@ -399,15 +394,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;javascript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;node:test&quot;,</span>
-<span>        &quot;assert&quot;,</span>
-<span>        &quot;fixture&quot;,</span>
-<span>        &quot;table driven&quot;,</span>
-<span>        &quot;negative test&quot;</span>
+<span>        &quot;Test oracle&quot;,</span>
+<span>        &quot;Negative test&quot;,</span>
+<span>        &quot;Regression&quot;,</span>
+<span>        &quot;Async test lifetime&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply testing with node built-ins with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through node:test examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;Tests make a behavioral claim executable.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Start a real node --test process asserting add(2,3)=5.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;child exit status 0; one passing test. two tests pass without shared mutable state.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-016&quot;,</span>
@@ -419,14 +413,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;javascript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;fs promises&quot;,</span>
-<span>        &quot;Path&quot;,</span>
-<span>        &quot;encoding&quot;,</span>
-<span>        &quot;resource cleanup&quot;</span>
+<span>        &quot;Encoding&quot;,</span>
+<span>        &quot;Chunk boundary&quot;,</span>
+<span>        &quot;Exclusive creation&quot;,</span>
+<span>        &quot;Resource lifetime&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply files, paths and streaming text with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through fs promises examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;A filesystem path names a resource in a host filesystem.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Write one line containing an emoji, then compare text length and byte length.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;text round-trips; UTF-8 byte length exceeds code-unit length. no lines.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-017&quot;,</span>
@@ -438,15 +432,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;javascript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;fetch&quot;,</span>
-<span>        &quot;URL&quot;,</span>
-<span>        &quot;status&quot;,</span>
-<span>        &quot;JSON&quot;,</span>
-<span>        &quot;validation&quot;</span>
+<span>        &quot;HTTP status&quot;,</span>
+<span>        &quot;Representation&quot;,</span>
+<span>        &quot;Query encoding&quot;,</span>
+<span>        &quot;Application validation&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply http, urls and json boundaries with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through fetch examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;HTTP transfers representations between a client and a server using a method, target, headers, status and body.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;GET /sum with a=2 and b=3 and inspect status, content type and JSON.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;status 200; application/json; total 5. status 400 rather than a rounded success value.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-018&quot;,</span>
@@ -458,14 +451,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;javascript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;arguments&quot;,</span>
-<span>        &quot;exit code&quot;,</span>
-<span>        &quot;error contract&quot;,</span>
-<span>        &quot;composition&quot;</span>
+<span>        &quot;CLI contract&quot;,</span>
+<span>        &quot;NDJSON&quot;,</span>
+<span>        &quot;Failure atomicity&quot;,</span>
+<span>        &quot;Process boundary&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply a reliable command-line data tool with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through arguments examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;A reliable command-line program has an input contract, an output contract and a failure contract.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Send two rows worth 250 and 300 cents to the CLI.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;exit 0; stdout is exactly one JSON result with 2 rows and 550 cents; stderr empty. exit 2 with input limit diagnostic; stdout empty.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-019&quot;,</span>
@@ -477,14 +470,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;typescript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;annotation&quot;,</span>
-<span>        &quot;inference&quot;,</span>
-<span>        &quot;erasure&quot;,</span>
-<span>        &quot;strict mode&quot;</span>
+<span>        &quot;Static type&quot;,</span>
+<span>        &quot;Inference&quot;,</span>
+<span>        &quot;Erasure&quot;,</span>
+<span>        &quot;Unknown boundary&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply typescript values and compile-time types with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through annotation examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;TypeScript adds a static checker to JavaScript.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Define a function accepting two numbers and returning their sum; inspect its runtime value.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;sum 5 with runtime typeof number. 12 doubles to 24; string 12 and Infinity reject.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-020&quot;,</span>
@@ -496,14 +489,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;typescript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;union&quot;,</span>
-<span>        &quot;type guard&quot;,</span>
-<span>        &quot;never&quot;,</span>
-<span>        &quot;discriminant&quot;</span>
+<span>        &quot;Union&quot;,</span>
+<span>        &quot;Narrowing&quot;,</span>
+<span>        &quot;Discriminant&quot;,</span>
+<span>        &quot;Exhaustiveness&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply unions, narrowing and exhaustiveness with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through union examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;A union type describes a value that may belong to one of several alternatives.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Format both successful value 7 and a failure message.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;value:7 and error:offline. runtime fallback throws rather than fabricating success.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-021&quot;,</span>
@@ -515,14 +508,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;typescript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;interface&quot;,</span>
-<span>        &quot;type alias&quot;,</span>
-<span>        &quot;readonly&quot;,</span>
-<span>        &quot;optional&quot;</span>
+<span>        &quot;Structural compatibility&quot;,</span>
+<span>        &quot;Excess-property checking&quot;,</span>
+<span>        &quot;Readonly view&quot;,</span>
+<span>        &quot;Optional property&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply object types and structural contracts with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through interface examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;TypeScript object types describe the properties an operation requires.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Pass a wider named object with id and count to a function requiring only id.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;label A; original count remains 2. new array 2,4; input remains 1,2.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-022&quot;,</span>
@@ -534,14 +527,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;typescript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;type parameter&quot;,</span>
-<span>        &quot;keyof&quot;,</span>
-<span>        &quot;constraint&quot;,</span>
-<span>        &quot;inference&quot;</span>
+<span>        &quot;Type parameter&quot;,</span>
+<span>        &quot;Constraint&quot;,</span>
+<span>        &quot;Keyof&quot;,</span>
+<span>        &quot;Indexed access type&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply generic functions and constraints with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through type parameter examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;Generics express a relationship between types across a reusable operation.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Pass a number and an object through identity.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;number remains 7; object is the same reference. expected compile error for returning a fabricated length-only object.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-023&quot;,</span>
@@ -553,14 +546,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;typescript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;mapped type&quot;,</span>
-<span>        &quot;conditional type&quot;,</span>
-<span>        &quot;Pick&quot;,</span>
-<span>        &quot;ReturnType&quot;</span>
+<span>        &quot;Mapped type&quot;,</span>
+<span>        &quot;Conditional type&quot;,</span>
+<span>        &quot;Distributivity&quot;,</span>
+<span>        &quot;Type derivation&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply mapped, conditional and utility types with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through mapped type examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;Type operators can derive one static description from another, reducing duplicated declarations that drift apart.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Create a boolean flag type from id and count fields.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;id true and count false; a missing flag is a compile error. valid table remains usable; misspelled literal key is a compiler error.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-024&quot;,</span>
@@ -572,14 +565,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;typescript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;unknown&quot;,</span>
-<span>        &quot;validation&quot;,</span>
-<span>        &quot;assertion&quot;,</span>
-<span>        &quot;trust boundary&quot;</span>
+<span>        &quot;Unknown input&quot;,</span>
+<span>        &quot;Schema validation&quot;,</span>
+<span>        &quot;Domain validation&quot;,</span>
+<span>        &quot;Diagnostic path&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply runtime validation and unknown input with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through unknown examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;An external payload should enter typed code as unknown.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Parse an order with two line items and inspect the typed success.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;success with total quantity 5; independent copied item records. every malformed fixture is rejected; an empty items array remains valid.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-025&quot;,</span>
@@ -591,14 +584,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;typescript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;mts&quot;,</span>
-<span>        &quot;mjs&quot;,</span>
 <span>        &quot;NodeNext&quot;,</span>
-<span>        &quot;type only import&quot;</span>
+<span>        &quot;Type-only import&quot;,</span>
+<span>        &quot;Emitted extension&quot;,</span>
+<span>        &quot;NoEmitOnError&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply typed modules and nodenext resolution with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through mts examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;TypeScript source participates in two related dependency graphs: the compiler resolves source and declarations while checking, and Node resolves emitted JavaScript while running.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Compile a main module importing twice from ./math.mjs and run it.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;both processes succeed; output 8; math.mjs is emitted. value dependency remains; runtime prints ready:A.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-026&quot;,</span>
@@ -610,14 +603,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;typescript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;class&quot;,</span>
-<span>        &quot;private field&quot;,</span>
-<span>        &quot;interface&quot;,</span>
-<span>        &quot;composition&quot;</span>
+<span>        &quot;Encapsulation&quot;,</span>
+<span>        &quot;Private field&quot;,</span>
+<span>        &quot;Composition&quot;,</span>
+<span>        &quot;Interface&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply classes, composition and private state with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through class examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;Classes combine state with operations that preserve invariants.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Start with 100 cents, deposit 50 and withdraw 30.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;balance 120; no enumerable balance field. ordinary property 999; private cents remain 2.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-027&quot;,</span>
@@ -629,14 +622,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;typescript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Result&quot;,</span>
-<span>        &quot;Promise&quot;,</span>
-<span>        &quot;cancellation&quot;,</span>
-<span>        &quot;discriminated errors&quot;</span>
+<span>        &quot;Result channel&quot;,</span>
+<span>        &quot;Rejection channel&quot;,</span>
+<span>        &quot;Error translation&quot;,</span>
+<span>        &quot;Batch outcome policy&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply typed async workflows and errors with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through Result examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;Promise&lt;T&gt; describes a fulfilled value.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Look up a known id and an absent id.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;known value 7; absent error not_found. expected diagnostics for value before await or before narrowing.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-028&quot;,</span>
@@ -648,14 +641,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;typescript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;graph&quot;,</span>
-<span>        &quot;BFS&quot;,</span>
-<span>        &quot;memoization&quot;,</span>
-<span>        &quot;state transition&quot;</span>
+<span>        &quot;Breadth-first search&quot;,</span>
+<span>        &quot;Parent map&quot;,</span>
+<span>        &quot;Dynamic programming&quot;,</span>
+<span>        &quot;Recurrence&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply data structures and dynamic programming with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through graph examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;Types clarify an algorithm&#x27;s interface, but correctness depends on its invariant.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Search a graph with two equal-length routes from A to D.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;A,B,D under the stated neighbor order. RangeError for all invalid configurations; empty denominations cannot make 1.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-029&quot;,</span>
@@ -667,14 +660,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;reading&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;document&quot;,</span>
-<span>        &quot;event delegation&quot;,</span>
-<span>        &quot;focus&quot;,</span>
-<span>        &quot;accessibility&quot;</span>
+<span>        &quot;DOM node&quot;,</span>
+<span>        &quot;Event target&quot;,</span>
+<span>        &quot;Delegation&quot;,</span>
+<span>        &quot;Focus&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply the dom, events and accessible interaction with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through document examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;The Document Object Model is a live tree of nodes exposed by the browser.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Open the complete snippet, activate Add twice by pointer and once by keyboard, then inspect the count.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;count 3; button remains keyboard reachable. null is detected before accessing a property.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-030&quot;,</span>
@@ -686,14 +679,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;reading&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;form&quot;,</span>
-<span>        &quot;validation&quot;,</span>
-<span>        &quot;localStorage&quot;,</span>
-<span>        &quot;state transition&quot;</span>
+<span>        &quot;Form submission&quot;,</span>
+<span>        &quot;Application state&quot;,</span>
+<span>        &quot;Persistence&quot;,</span>
+<span>        &quot;Origin&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply forms, browser storage and application state with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through form examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;A form is a structured input interface, not merely a collection of text boxes.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Save the snippet as HTML and submit name Ada and quantity 2, then try an invalid quantity.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;valid output Ada: 2; invalid input produces no accepted state. owned key absent; unrelated key unchanged.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-031&quot;,</span>
@@ -705,14 +698,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;reading&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;textContent&quot;,</span>
-<span>        &quot;innerHTML&quot;,</span>
-<span>        &quot;CSP&quot;,</span>
-<span>        &quot;same origin&quot;</span>
+<span>        &quot;Injection boundary&quot;,</span>
+<span>        &quot;Safe text insertion&quot;,</span>
+<span>        &quot;URL policy&quot;,</span>
+<span>        &quot;Content Security Policy&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply safe browser rendering and security boundaries with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through textContent examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;Rendering untrusted text is a data-versus-code boundary.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Save the snippet and inspect the resulting DOM and visible title.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;the angle-bracket text is visible; no img element is created. no claim that CSP authenticates callers, CORS authorizes actions, or meta implements frame-ancestors.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-032&quot;,</span>
@@ -724,14 +717,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;javascript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Readable&quot;,</span>
-<span>        &quot;Writable&quot;,</span>
-<span>        &quot;pipeline&quot;,</span>
-<span>        &quot;highWaterMark&quot;</span>
+<span>        &quot;Backpressure&quot;,</span>
+<span>        &quot;High-water mark&quot;,</span>
+<span>        &quot;Pipeline&quot;,</span>
+<span>        &quot;Partial output&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply streams and backpressure with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through Readable examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;A stream transports chunks incrementally between a producer and a consumer.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Uppercase two byte chunks and collect the transformed output.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;ABCD after successful pipeline completion. pipeline rejects with AbortError; generator finally runs.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-033&quot;,</span>
@@ -743,14 +736,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;javascript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Worker&quot;,</span>
-<span>        &quot;message passing&quot;,</span>
-<span>        &quot;transfer&quot;,</span>
-<span>        &quot;termination&quot;</span>
+<span>        &quot;Worker thread&quot;,</span>
+<span>        &quot;Structured clone&quot;,</span>
+<span>        &quot;Transfer&quot;,</span>
+<span>        &quot;Worker lifecycle&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply worker threads and cpu-bound work with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through Worker examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;An async function does not automatically move CPU work off the main JavaScript thread.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Sum integers 1 through 10000 in a worker and inspect its thread id.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;sum 50005000; worker thread id positive. DataCloneError before useful worker execution.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-034&quot;,</span>
@@ -762,14 +755,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;javascript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;retained object&quot;,</span>
-<span>        &quot;heap&quot;,</span>
-<span>        &quot;event loop delay&quot;,</span>
-<span>        &quot;measurement&quot;</span>
+<span>        &quot;Measurement boundary&quot;,</span>
+<span>        &quot;Monotonic clock&quot;,</span>
+<span>        &quot;Retention&quot;,</span>
+<span>        &quot;Event-loop delay&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply memory, performance and profiling with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through retained object examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;Performance measurement begins with a correctness contract and a question.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Sum a fixed numeric range and record elapsed duration.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;correct sum 50005000; finite nonnegative elapsed time. monitor disabled afterward; sample count reported honestly.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-035&quot;,</span>
@@ -781,14 +774,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;javascript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;Intl&quot;,</span>
-<span>        &quot;Date&quot;,</span>
-<span>        &quot;time zone&quot;,</span>
-<span>        &quot;locale&quot;</span>
+<span>        &quot;Instant&quot;,</span>
+<span>        &quot;Calendar date&quot;,</span>
+<span>        &quot;Timezone&quot;,</span>
+<span>        &quot;Locale formatting&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply dates, internationalization and time zones with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through Intl examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;A date-time problem can involve an instant, a calendar date, a local clock reading or a duration.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Parse UTC midnight and the equivalent previous-day offset representation.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;equal timestamps and UTC ISO output. NaN timestamp; toISOString and invalid timezone construction throw RangeError.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-036&quot;,</span>
@@ -800,14 +793,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;javascript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;exports&quot;,</span>
-<span>        &quot;semver&quot;,</span>
-<span>        &quot;lockfile&quot;,</span>
-<span>        &quot;supply chain&quot;</span>
+<span>        &quot;Exports map&quot;,</span>
+<span>        &quot;Dependency lock&quot;,</span>
+<span>        &quot;Engine declaration&quot;,</span>
+<span>        &quot;Content identity&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply package design and reproducible toolchains with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through exports examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;A package is a public interface plus the files and metadata needed to implement it.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Create a package with exports pointing at index.mjs and import its version value.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;actual child prints 1. child exits successfully for twice(0)=0 and twice(-2)=-4.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-037&quot;,</span>
@@ -819,14 +812,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;javascript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;retry budget&quot;,</span>
-<span>        &quot;jitter&quot;,</span>
-<span>        &quot;idempotency&quot;,</span>
-<span>        &quot;queue&quot;</span>
+<span>        &quot;Retry classification&quot;,</span>
+<span>        &quot;Backoff with jitter&quot;,</span>
+<span>        &quot;Idempotency key&quot;,</span>
+<span>        &quot;Bounded concurrency&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply network retries, idempotency and bounded concurrency with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through retry budget examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;A retry is a new attempt after an uncertain or failed operation.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Fail twice transiently, then succeed, using random value 0.5 and a recording wait.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;three attempts; delays 50 and 100; result ready. original reason rejects; attempts remain 0.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-038&quot;,</span>
@@ -838,14 +831,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;typescript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;schema&quot;,</span>
-<span>        &quot;endpoint&quot;,</span>
-<span>        &quot;error envelope&quot;,</span>
-<span>        &quot;contract&quot;</span>
+<span>        &quot;Envelope&quot;,</span>
+<span>        &quot;Contract test&quot;,</span>
+<span>        &quot;Versioned schema&quot;,</span>
+<span>        &quot;Transport/domain agreement&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply typed api design and contract testing with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through schema examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;A typed API contract connects request validation, domain behavior, transport status and response decoding.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Send 2 and 3 through the handler, JSON round-trip its reply, then decode it.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;status 200 and decoded total 5. bad_request response does not echo the supplied value.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-039&quot;,</span>
@@ -857,14 +850,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;typescript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;pure function&quot;,</span>
-<span>        &quot;effect&quot;,</span>
-<span>        &quot;transition&quot;,</span>
-<span>        &quot;invariant&quot;</span>
+<span>        &quot;State machine&quot;,</span>
+<span>        &quot;Event&quot;,</span>
+<span>        &quot;Functional core&quot;,</span>
+<span>        &quot;Replay&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply functional core and state machines with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through pure function examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;A state machine makes allowed transitions explicit.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Start a queued job and complete it with value 7.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;succeeded with attempt 1 and value 7. input unchanged; new object returned; NaN rejects.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-040&quot;,</span>
@@ -876,14 +869,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;javascript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;HTTP&quot;,</span>
-<span>        &quot;validation&quot;,</span>
-<span>        &quot;shutdown&quot;,</span>
-<span>        &quot;integration test&quot;</span>
+<span>        &quot;Transport integration&quot;,</span>
+<span>        &quot;Repository lifetime&quot;,</span>
+<span>        &quot;Conflict&quot;,</span>
+<span>        &quot;Structured event&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply a tested local javascript service with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through HTTP examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;A local service combines transport handling with domain state and resource ownership.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;POST item A with value 2, then GET the list.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;201 created; subsequent 200 list contains exactly A. matching id and status; server no longer listening.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-041&quot;,</span>
@@ -895,15 +888,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;typescript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;parse&quot;,</span>
-<span>        &quot;transform&quot;,</span>
-<span>        &quot;aggregate&quot;,</span>
-<span>        &quot;stream&quot;,</span>
-<span>        &quot;diagnostics&quot;</span>
+<span>        &quot;Framing&quot;,</span>
+<span>        &quot;Quarantine&quot;,</span>
+<span>        &quot;Aggregation state&quot;,</span>
+<span>        &quot;Resource budget&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply a typed analytics pipeline with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through parse examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;An analytics pipeline combines framing, parsing, validation and aggregation.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Decode rows for groups A and B from three-byte chunks and aggregate their values.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;A count 2 sum 5; B count 1 sum 4; zero rejected. zero accepted with one rejected versus zero accepted with zero rejected.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;js-042&quot;,</span>
@@ -915,15 +907,14 @@
 <span>      ],</span>
 <span>      &quot;runtime&quot;: &quot;javascript-node&quot;,</span>
 <span>      &quot;concepts&quot;: [</span>
-<span>        &quot;build&quot;,</span>
-<span>        &quot;source map&quot;,</span>
-<span>        &quot;logging&quot;,</span>
-<span>        &quot;compatibility&quot;,</span>
-<span>        &quot;operability&quot;</span>
+<span>        &quot;Release artifact&quot;,</span>
+<span>        &quot;Smoke test&quot;,</span>
+<span>        &quot;Artifact verification&quot;,</span>
+<span>        &quot;Compatibility gate&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply release, observability and maintenance with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through build examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;A release is a specific artifact with a reproducible behavior contract, not merely a folder that once worked during development.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Create the authored bundle, verify hashes and run its self-test in a child.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;three checks passed; actual Node version reported. matching policy passes; mismatched policy throws.&quot;</span>
 <span>    }</span>
 <span>  ],</span>
 <span>  &quot;sources&quot;: [</span>

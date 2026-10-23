@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Language models: a textbook reading route · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>Language models: a textbook reading route</h1>
+      <p class="source-path">Generated from <code>docs/learning/llm-textbook.md</code></p>
+    </header>
+    <article class="document"><h2 id="language-models-a-textbook-reading-route">Language models: a textbook reading route<a class="heading-anchor" href="#language-models-a-textbook-reading-route" aria-label="Link to this section">#</a></h2>
+<p>This route joins <strong>48 chapters on how language models work</strong> with <strong>24 chapters on building and evaluating subject-matter assistants</strong>. Read it as a connected book, then use the coding pad to inspect the small experiments. The browser opens these two journeys in a wide reading view; <strong>Show code and notes</strong> brings back the experiment panel. Your layout preference is remembered for each journey.</p>
+<p>Start the whole classroom with <code>./classroom</code>. The <a href="../one-command-classroom.md.html">one-command guide</a> covers macOS, Linux and Windows through WSL 2. The lessons below use the prepared Core or PyTorch CPU worker. Default examples use small local fixtures without API keys, model downloads or GPU requirements. The optional pretrained recipe is identified explicitly.</p>
+<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
+<p>A language model assigns probabilities to possible next tokens given a prefix. A useful assistant is a larger system: it chooses context, controls access to information, may retrieve documents or call defined tools, produces a proposal, and checks that proposal against the intended task. Learning both levels matters. A correct attention implementation is not evidence that a generated business answer is supported, and a fluent answer does not establish that a calculation used the correct denominator.</p>
+<p>The mechanism chapters build from concrete sequences and counts into embeddings, attention, Transformer blocks, objectives and optimization. The later chapters connect the same mathematical objects to caching, inference budgets, adaptation, quantization, routing and evaluation. The applied route carries a running <strong>Methods Desk</strong> case: an assistant helping analysts answer questions from versioned subject-matter material and structured data. It makes the transitions between data preparation, retrieval, generation, tools and measurement visible.</p>
+<p>Each chapter starts with an explanation of the problem the mechanism solves. Notation and assumptions appear before they are used in derivations. Numerical traces connect equations to the existing code and show which intermediate value should change. Counterexamples explain where an attractive shortcut fails. Chapter bridges identify the new idea needed next, so the route does not reduce to a list of library calls.</p>
+<h3 id="a-small-notation-map">A small notation map<a class="heading-anchor" href="#a-small-notation-map" aria-label="Link to this section">#</a></h3>
+<div class="table-wrap"><table><thead><tr>
+<th>Symbol or word</th>
+<th>Meaning to establish before using it</th>
+</tr></thead><tbody>
+<tr>
+<td>Token</td>
+<td>A vocabulary item produced by a particular tokenizer; its boundaries need not match words</td>
+</tr>
+<tr>
+<td>Vocabulary size V</td>
+<td>The number of token IDs the output distribution can assign probability to</td>
+</tr>
+<tr>
+<td>Sequence length T</td>
+<td>The number of token positions participating in the particular computation</td>
+</tr>
+<tr>
+<td>Batch size B</td>
+<td>The number of sequences processed together, not their total active-token count</td>
+</tr>
+<tr>
+<td>Feature width D</td>
+<td>The number of representation coordinates at a token position</td>
+</tr>
+<tr>
+<td>Embedding</td>
+<td>A vector looked up or computed for a token; it is not a stored dictionary definition</td>
+</tr>
+<tr>
+<td>Logit</td>
+<td>An unnormalized score, distinct from the probability obtained after normalization</td>
+</tr>
+<tr>
+<td>Q, K and V in attention</td>
+<td>Query, key and value matrices; this V means values, not vocabulary size</td>
+</tr>
+<tr>
+<td>Mask</td>
+<td>A declaration of permitted information or participating loss positions; the exact meaning depends on the API and operation</td>
+</tr>
+<tr>
+<td>Parameter</td>
+<td>Learned persistent state, such as a projection matrix</td>
+</tr>
+<tr>
+<td>Activation</td>
+<td>An intermediate value computed for particular inputs and parameters</td>
+</tr>
+<tr>
+<td>Gradient</td>
+<td>A local derivative of the declared objective with respect to a chosen quantity</td>
+</tr>
+<tr>
+<td>Cache</td>
+<td>Retained computation state whose correctness depends on model, sequence and position identity</td>
+</tr>
+<tr>
+<td>Evaluation unit</td>
+<td>The observation, customer, document family or other unit to which a reported metric applies</td>
+</tr>
+</tbody></table></div>
+<p>For a decoder, one common representation layout is <code>(B, T, D)</code>. Attention heads introduce another axis, so an implementation might reshape to <code>(B, H, T, d)</code> with <code>D = H*d</code>. That equality belongs to a particular architecture. Grouped-query attention, cross-attention and different framework APIs need their own dimension contracts. Keep the axis names beside an equation rather than guessing from a square example that happens to multiply successfully.</p>
+<p>Similarly, distinguish the causal attention mask from the loss mask. The first limits which positions can influence a prediction. The second determines which target positions contribute to an objective. Excluding a prompt token from loss does not necessarily make it invisible as context. Several chapters derive this separation using exact logits and gradients.</p>
+<h3 id="how-to-read-equations-and-experiments-together">How to read equations and experiments together<a class="heading-anchor" href="#how-to-read-equations-and-experiments-together" aria-label="Link to this section">#</a></h3>
+<p>First identify the inputs and their units. Write the operation in words, then name the axes it preserves or reduces. Follow one small numerical case from input to output before relying on a final scalar. Only then run the code and compare the intermediate quantities with your calculation.</p>
+<p>A program&#x27;s boundary is as important as its happy path. Ask what happens for an empty candidate set, an all-masked row, a different feature width, an unseen identity or a nonfinite intermediate. A check that rejects an undefined quantity can be more informative than a program that always prints a number. Preserve a counterexample that distinguishes the intended mechanism from a plausible wrong implementation.</p>
+<p>The chapters label whether worked blocks are complete standalone programs or a sequential A/B/C experiment. A sequential experiment shares explicitly introduced state inside one fresh process. It does not rely on hidden variables in an old notebook. Save your own pad before replacing it with an example. Ordinary practice sections and separately revealed solutions remain available after the exposition.</p>
+<p>Small examples make a mechanism inspectable. They do not replace the evidence needed for a deployment decision. Track four different questions: whether the algebra is right, whether this implementation executes, whether the measurement matches its stated unit, and whether the resulting system is useful on new work. The final question requires data and evaluation beyond a published toy fixture.</p>
+<h3 id="part-i-mechanisms-training-and-inference">Part I: mechanisms, training and inference<a class="heading-anchor" href="#part-i-mechanisms-training-and-inference" aria-label="Link to this section">#</a></h3>
+<p>Begin with chapters 001-009 if token probability, vector shapes or gradients are unfamiliar. Chapters 010-024 assemble the Transformer and examine training, masking, decoding and state. Chapters 025-042 connect resource use, adaptation, evaluation and a complete bounded system. Chapters 043-048 examine architecture families, positional rotations, normalization and gated feed-forward networks, grouped and blockwise attention, sparse experts, and exact speculative decoding. The exact prerequisites remain in each guide.</p>
+<p>For an additional connected architectural walkthrough, read <a href="inside-a-transformer.md.html">Inside a Transformer</a>. Its NumPy program traces a full small decoder forward pass and independently checks an output-head gradient. It explicitly distinguishes the untrained forward mechanism from full-model learning. The primary <a href="https://arxiv.org/abs/1706.03762">Transformer paper</a> is background reading; the checked-in chapters supply the explanation locally.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Chapter</th>
+<th>Topic</th>
+</tr></thead><tbody>
+<tr>
+<td>llm-001</td>
+<td><a href="../../courses/llm-theory/guides/llm-001.md.html">Language-model claims and evaluation units</a></td>
+</tr>
+<tr>
+<td>llm-002</td>
+<td><a href="../../courses/llm-theory/guides/llm-002.md.html">Scores, stable softmax and probability mass</a></td>
+</tr>
+<tr>
+<td>llm-003</td>
+<td><a href="../../courses/llm-theory/guides/llm-003.md.html">Conditional probability and a sequence likelihood</a></td>
+</tr>
+<tr>
+<td>llm-004</td>
+<td><a href="../../courses/llm-theory/guides/llm-004.md.html">A count-based next-token baseline</a></td>
+</tr>
+<tr>
+<td>llm-005</td>
+<td><a href="../../courses/llm-theory/guides/llm-005.md.html">Cross entropy, perplexity and denominator traps</a></td>
+</tr>
+<tr>
+<td>llm-006</td>
+<td><a href="../../courses/llm-theory/guides/llm-006.md.html">Unicode, bytes and tokenizer round trips</a></td>
+</tr>
+<tr>
+<td>llm-007</td>
+<td><a href="../../courses/llm-theory/guides/llm-007.md.html">A tiny train-only subword vocabulary</a></td>
+</tr>
+<tr>
+<td>llm-008</td>
+<td><a href="../../courses/llm-theory/guides/llm-008.md.html">Embedding lookup is a learned table</a></td>
+</tr>
+<tr>
+<td>llm-009</td>
+<td><a href="../../courses/llm-theory/guides/llm-009.md.html">Causal attention and prefix invariance</a></td>
+</tr>
+<tr>
+<td>llm-010</td>
+<td><a href="../../courses/llm-theory/guides/llm-010.md.html">Position, order and tokenwise normalization</a></td>
+</tr>
+<tr>
+<td>llm-011</td>
+<td><a href="../../courses/llm-theory/guides/llm-011.md.html">Multiple heads, residuals and a decoder block</a></td>
+</tr>
+<tr>
+<td>llm-012</td>
+<td><a href="../../courses/llm-theory/guides/llm-012.md.html">Greedy decoding, temperature and sampling</a></td>
+</tr>
+<tr>
+<td>llm-013</td>
+<td><a href="../../courses/llm-theory/guides/llm-013.md.html">A leakage audit before a model score</a></td>
+</tr>
+<tr>
+<td>llm-014</td>
+<td><a href="../../courses/llm-theory/guides/llm-014.md.html">Capstone: a small language-model evidence notebook</a></td>
+</tr>
+<tr>
+<td>llm-015</td>
+<td><a href="../../courses/llm-theory/guides/llm-015.md.html">PyTorch tensors and automatic gradients</a></td>
+</tr>
+<tr>
+<td>llm-016</td>
+<td><a href="../../courses/llm-theory/guides/llm-016.md.html">A tiny causal transformer from explicit parts</a></td>
+</tr>
+<tr>
+<td>llm-017</td>
+<td><a href="../../courses/llm-theory/guides/llm-017.md.html">Shifted batches, padding and token loss</a></td>
+</tr>
+<tr>
+<td>llm-018</td>
+<td><a href="../../courses/llm-theory/guides/llm-018.md.html">A bounded training loop with visible state</a></td>
+</tr>
+<tr>
+<td>llm-019</td>
+<td><a href="../../courses/llm-theory/guides/llm-019.md.html">Overfit one batch to diagnose the loop</a></td>
+</tr>
+<tr>
+<td>llm-020</td>
+<td><a href="../../courses/llm-theory/guides/llm-020.md.html">Initialization and residual scale</a></td>
+</tr>
+<tr>
+<td>llm-021</td>
+<td><a href="../../courses/llm-theory/guides/llm-021.md.html">Document splits and contamination controls</a></td>
+</tr>
+<tr>
+<td>llm-022</td>
+<td><a href="../../courses/llm-theory/guides/llm-022.md.html">Reproducibility, evaluation mode and restart</a></td>
+</tr>
+<tr>
+<td>llm-023</td>
+<td><a href="../../courses/llm-theory/guides/llm-023.md.html">Top-p, termination and decoding failure cases</a></td>
+</tr>
+<tr>
+<td>llm-024</td>
+<td><a href="../../courses/llm-theory/guides/llm-024.md.html">KV caches and incremental equivalence</a></td>
+</tr>
+<tr>
+<td>llm-025</td>
+<td><a href="../../courses/llm-theory/guides/llm-025.md.html">Memory and compute without a GPU</a></td>
+</tr>
+<tr>
+<td>llm-026</td>
+<td><a href="../../courses/llm-theory/guides/llm-026.md.html">What a representation probe establishes</a></td>
+</tr>
+<tr>
+<td>llm-027</td>
+<td><a href="../../courses/llm-theory/guides/llm-027.md.html">Calibration and comparable evaluation</a></td>
+</tr>
+<tr>
+<td>llm-028</td>
+<td><a href="../../courses/llm-theory/guides/llm-028.md.html">Capstone: train and audit a tiny transformer</a></td>
+</tr>
+<tr>
+<td>llm-029</td>
+<td><a href="../../courses/llm-theory/guides/llm-029.md.html">Scaling laws and the limits of a toy experiment</a></td>
+</tr>
+<tr>
+<td>llm-030</td>
+<td><a href="../../courses/llm-theory/guides/llm-030.md.html">Pretraining data provenance and evaluation contamination</a></td>
+</tr>
+<tr>
+<td>llm-031</td>
+<td><a href="../../courses/llm-theory/guides/llm-031.md.html">Instruction tuning and loss masks</a></td>
+</tr>
+<tr>
+<td>llm-032</td>
+<td><a href="../../courses/llm-theory/guides/llm-032.md.html">Low-rank adaptation without a package download</a></td>
+</tr>
+<tr>
+<td>llm-033</td>
+<td><a href="../../courses/llm-theory/guides/llm-033.md.html">Preference objectives and what they do not prove</a></td>
+</tr>
+<tr>
+<td>llm-034</td>
+<td><a href="../../courses/llm-theory/guides/llm-034.md.html">Precision and quantization error budgets</a></td>
+</tr>
+<tr>
+<td>llm-035</td>
+<td><a href="../../courses/llm-theory/guides/llm-035.md.html">Inference scheduling and cache isolation</a></td>
+</tr>
+<tr>
+<td>llm-036</td>
+<td><a href="../../courses/llm-theory/guides/llm-036.md.html">Retrieval: what RAG changes and what it cannot supply</a></td>
+</tr>
+<tr>
+<td>llm-037</td>
+<td><a href="../../courses/llm-theory/guides/llm-037.md.html">Evaluate retrieval and answers separately</a></td>
+</tr>
+<tr>
+<td>llm-038</td>
+<td><a href="../../courses/llm-theory/guides/llm-038.md.html">Tools, structured output and trust boundaries</a></td>
+</tr>
+<tr>
+<td>llm-039</td>
+<td><a href="../../courses/llm-theory/guides/llm-039.md.html">Robustness, fairness and finite safety evidence</a></td>
+</tr>
+<tr>
+<td>llm-040</td>
+<td><a href="../../courses/llm-theory/guides/llm-040.md.html">A statistical evaluation and reliability argument</a></td>
+</tr>
+<tr>
+<td>llm-041</td>
+<td><a href="../../courses/llm-theory/guides/llm-041.md.html">Optional framework comparison without a second prerequisite</a></td>
+</tr>
+<tr>
+<td>llm-042</td>
+<td><a href="../../courses/llm-theory/guides/llm-042.md.html">Capstone: a defensible language-system decision</a></td>
+</tr>
+<tr>
+<td>llm-043</td>
+<td><a href="../../courses/llm-theory/guides/llm-043.md.html">Encoder, decoder and encoder-decoder architectures and objectives</a></td>
+</tr>
+<tr>
+<td>llm-044</td>
+<td><a href="../../courses/llm-theory/guides/llm-044.md.html">RoPE, relative positions, ALiBi and long-context limits</a></td>
+</tr>
+<tr>
+<td>llm-045</td>
+<td><a href="../../courses/llm-theory/guides/llm-045.md.html">Pre/post normalization, RMSNorm and gated feed-forward networks</a></td>
+</tr>
+<tr>
+<td>llm-046</td>
+<td><a href="../../courses/llm-theory/guides/llm-046.md.html">MHA, MQA, GQA and blockwise exact attention</a></td>
+</tr>
+<tr>
+<td>llm-047</td>
+<td><a href="../../courses/llm-theory/guides/llm-047.md.html">Sparse experts, routing capacity and load balancing</a></td>
+</tr>
+<tr>
+<td>llm-048</td>
+<td><a href="../../courses/llm-theory/guides/llm-048.md.html">Exact speculative decoding and cache rollback</a></td>
+</tr>
+</tbody></table></div>
+<h3 id="part-ii-subject-assistants-and-data-science-work">Part II: subject assistants and data-science work<a class="heading-anchor" href="#part-ii-subject-assistants-and-data-science-work" aria-label="Link to this section">#</a></h3>
+<p>The applied route starts by defining the decision, analytical unit and evidence policy. It then follows documents through ingestion, chunking, indexing, retrieval, ranking and answer construction. Evaluation separates missing evidence, unsupported generation, inappropriate abstention and calculation errors. Access control and provenance apply before a convenient answer is assembled, not after it has already exposed information.</p>
+<p>The adaptation chapters explain why changing model weights and supplying current retrieved context solve different parts of the problem. Fine-tuning is not an automatic substitute for a maintained source of facts. RAG does not guarantee that the selected evidence is relevant or that a generated answer follows it. The <a href="https://arxiv.org/abs/2005.11401">original RAG paper</a> and <a href="https://arxiv.org/abs/2106.09685">LoRA paper</a> support the mechanism references; the course derives concrete local examples and their limits.</p>
+<p>For data-science use, keep structured computation separate from prose generation. Define the population and time window, run the authorized calculation, retain its units and denominator, then explain the result with the available evidence. The Methods Desk chapters show why an assistant can quote the correct document and still answer the wrong analytical question.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Chapter</th>
+<th>Topic</th>
+</tr></thead><tbody>
+<tr>
+<td>llm-applied-001</td>
+<td><a href="../../courses/llm-applied/guides/llm-applied-001.md.html">The subject assistant decision: prompts, retrieval or fine-tuning</a></td>
+</tr>
+<tr>
+<td>llm-applied-002</td>
+<td><a href="../../courses/llm-applied/guides/llm-applied-002.md.html">Data-science task contracts and structured extraction</a></td>
+</tr>
+<tr>
+<td>llm-applied-003</td>
+<td><a href="../../courses/llm-applied/guides/llm-applied-003.md.html">Prompt and context engineering with measurable boundaries</a></td>
+</tr>
+<tr>
+<td>llm-applied-004</td>
+<td><a href="../../courses/llm-applied/guides/llm-applied-004.md.html">Corpus provenance, versions and evaluation isolation</a></td>
+</tr>
+<tr>
+<td>llm-applied-005</td>
+<td><a href="../../courses/llm-applied/guides/llm-applied-005.md.html">Chunking, overlap, offsets and context budgets</a></td>
+</tr>
+<tr>
+<td>llm-applied-006</td>
+<td><a href="../../courses/llm-applied/guides/llm-applied-006.md.html">Lexical retrieval and BM25 from first principles</a></td>
+</tr>
+<tr>
+<td>llm-applied-007</td>
+<td><a href="../../courses/llm-applied/guides/llm-applied-007.md.html">Embedding retrieval, similarity and representation limits</a></td>
+</tr>
+<tr>
+<td>llm-applied-008</td>
+<td><a href="../../courses/llm-applied/guides/llm-applied-008.md.html">Hybrid retrieval, reciprocal-rank fusion and reranking</a></td>
+</tr>
+<tr>
+<td>llm-applied-009</td>
+<td><a href="../../courses/llm-applied/guides/llm-applied-009.md.html">Metadata filtering and access-controlled retrieval</a></td>
+</tr>
+<tr>
+<td>llm-applied-010</td>
+<td><a href="../../courses/llm-applied/guides/llm-applied-010.md.html">Query rewriting and bounded multi-hop retrieval</a></td>
+</tr>
+<tr>
+<td>llm-applied-011</td>
+<td><a href="../../courses/llm-applied/guides/llm-applied-011.md.html">Grounded claims, citations and evidence-based abstention</a></td>
+</tr>
+<tr>
+<td>llm-applied-012</td>
+<td><a href="../../courses/llm-applied/guides/llm-applied-012.md.html">Evaluating retrieval and answers with oracle controls</a></td>
+</tr>
+<tr>
+<td>llm-applied-013</td>
+<td><a href="../../courses/llm-applied/guides/llm-applied-013.md.html">Paired reliability studies and family-aware uncertainty</a></td>
+</tr>
+<tr>
+<td>llm-applied-014</td>
+<td><a href="../../courses/llm-applied/guides/llm-applied-014.md.html">Supervised fine-tuning data and answer-target masks</a></td>
+</tr>
+<tr>
+<td>llm-applied-015</td>
+<td><a href="../../courses/llm-applied/guides/llm-applied-015.md.html">Full supervised fine-tuning of a tiny causal decoder</a></td>
+</tr>
+<tr>
+<td>llm-applied-016</td>
+<td><a href="../../courses/llm-applied/guides/llm-applied-016.md.html">Low-rank adaptation: dimensions, gradients and a real update</a></td>
+</tr>
+<tr>
+<td>llm-applied-017</td>
+<td><a href="../../courses/llm-applied/guides/llm-applied-017.md.html">Quantized frozen bases, adapter gradients and QLoRA limits</a></td>
+</tr>
+<tr>
+<td>llm-applied-018</td>
+<td><a href="../../courses/llm-applied/guides/llm-applied-018.md.html">Compare full and adapter fine-tuning on frozen tasks</a></td>
+</tr>
+<tr>
+<td>llm-applied-019</td>
+<td><a href="../../courses/llm-applied/guides/llm-applied-019.md.html">Preference optimization, DPO and the RLHF distinction</a></td>
+</tr>
+<tr>
+<td>llm-applied-020</td>
+<td><a href="../../courses/llm-applied/guides/llm-applied-020.md.html">Fine-tuning embeddings and a small reranker</a></td>
+</tr>
+<tr>
+<td>llm-applied-021</td>
+<td><a href="../../courses/llm-applied/guides/llm-applied-021.md.html">Optional pretrained-model adaptation with pinned offline artifacts</a></td>
+</tr>
+<tr>
+<td>llm-applied-022</td>
+<td><a href="../../courses/llm-applied/guides/llm-applied-022.md.html">Structured tools for extraction, aggregation and data-science work</a></td>
+</tr>
+<tr>
+<td>llm-applied-023</td>
+<td><a href="../../courses/llm-applied/guides/llm-applied-023.md.html">Domain assistant boundaries: freshness, injection, budgets and traces</a></td>
+</tr>
+<tr>
+<td>llm-applied-024</td>
+<td><a href="../../courses/llm-applied/guides/llm-applied-024.md.html">Capstone: a grounded and evaluated data-science subject assistant</a></td>
+</tr>
+</tbody></table></div>
+<h3 id="companion-routes">Companion routes<a class="heading-anchor" href="#companion-routes" aria-label="Link to this section">#</a></h3>
+<p>Use <a href="../../courses/nlp/README.md.html">NLP</a> for a broader treatment of text processing, representation, classification, sequence tasks and language evaluation. <a href="../../courses/deep-learning-pytorch/README.md.html">PyTorch</a> and <a href="../../courses/deep-learning-tensorflow/README.md.html">TensorFlow</a> explain the tensor, training, state and export machinery in comparable depth. The <a href="../../courses/statistics-ml/README.md.html">statistics book</a> develops the sampling, modeling, experimentation and causal reasoning needed to judge a data-science assistant&#x27;s outputs.</p>
+<p>These are connected learning resources, not a certification that reading alone creates expertise. Reconstruct a mechanism, run the experiment, explain a failure case, and then apply it to a new question with its assumptions made explicit.</p></article>
+  </main>
+</body>
+</html>

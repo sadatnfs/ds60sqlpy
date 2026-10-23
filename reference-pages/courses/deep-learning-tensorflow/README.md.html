@@ -116,21 +116,200 @@
       <p class="source-path">Generated from <code>courses/deep-learning-tensorflow/README.md</code></p>
     </header>
     <article class="document"><h2 id="deep-learning-with-tensorflow-and-keras">Deep learning with TensorFlow and Keras<a class="heading-anchor" href="#deep-learning-with-tensorflow-and-keras" aria-label="Link to this section">#</a></h2>
-<p>Trace arrays, loss and derivatives before relying on a training API.</p>
-<p>This is durable <strong>authored beta content</strong> inside the larger <a href="../../docs/expansion/tracks/deep-learning-tensorflow.md.html">reviewed track design</a>. The machine-readable <a href="lessons.json.html">authored inventory</a> names the files that actually exist. It is separate from active catalog publication and execution readiness; a lesson ID or a source file does not install its dependencies.</p>
-<h3 id="start-with-the-mechanism">Start with the mechanism<a class="heading-anchor" href="#start-with-the-mechanism" aria-label="Link to this section">#</a></h3>
-<p>Start with <a href="guides/tf-001.md.html">the orientation guide</a>, save a prediction and work in your own copy. Continue through the authored foundation chain toward <a href="guides/tf-008.md.html">the full pilot</a>, and continue through <a href="guides/tf-036.md.html">the final capstone</a>. Ask for one hint before opening a reference. Each companion guide contains the definitions, two examples, six exercise contracts and retrieval questions. The executable reference checks provide comparison after an attempt; they are not a replacement for your explanation or a hidden certification test.</p>
-<p>Read-only orientation uses a Markdown worksheet and written evidence. Python foundations use the selected course interpreter with NumPy where declared. The pilot uses logical runtime <code>tensorflow-cpu</code>. Respect the application&#x27;s actual readiness notice; ordinary source viewing and written work remain useful when execution is unavailable. TensorFlow and later PyTorch profiles must pass their own architecture, import, bounded-run and offline checks before claiming support.</p>
-<h3 id="preserve-your-work-and-run-deliberately">Preserve your work and run deliberately<a class="heading-anchor" href="#preserve-your-work-and-run-deliberately" aria-label="Link to this section">#</a></h3>
-<p>Use a saved application pad when the lesson and profile are available there. For a native alternative, create your own copy beneath <code>.learning/expansion/</code>. Never edit <code>solutions/</code> to obtain a passing check and never reset another learner&#x27;s progress. Shared fixtures use only authored local arrays/text and need no network after a deliberate environment setup. No service key or database is required. Setup is documented centrally; no lesson calls pip or downloads a model.</p>
-<p>From the repository root, Windows PowerShell uses the selected <code>$CoursePython</code>:</p>
-<pre><code class="language-powershell">&amp; $CoursePython path\to\your\practice.py</code></pre>
-<p>macOS/Linux uses the selected interpreter path for the requested profile:</p>
-<pre><code class="language-bash">&quot;$DS60_COURSE_PYTHON&quot; path/to/your/practice.py</code></pre>
-<p>These variables represent paths printed by setup, not automatic installers. Choose the NumPy course interpreter for foundation files and the separately qualified TensorFlow interpreter for TensorFlow files. If the variable is unset or an import fails, retain the error and inspect runtime readiness first.</p>
-<h3 id="evidence-and-review">Evidence and review<a class="heading-anchor" href="#evidence-and-review" aria-label="Link to this section">#</a></h3>
-<p>A successful program exit verifies only its actual assertions. Record shapes, units, denominators and smallest failures beside results. Separate training, selection and untouched evaluation data. A tiny classroom holdout cannot prove production quality, safety, fairness or privacy. Published expected numbers are learning aids; use new fixtures and a closed-reference explanation for transfer.</p>
-<p>The <a href="../../docs/implementation/ml-content-status.md.html">implementation checkpoint</a> records authored IDs, validation and remaining work. All reviewed lesson IDs now have authored teaching artifacts. Heavy-runtime execution is a separate gate; consult the checkpoint for exactly which references have been executed. Runtime adapters and catalog registration belong to reviewed application code, never arbitrary commands in this metadata.</p></article>
+<p>This 36-lesson journey connects arrays, derivatives and exact scalar updates to Keras models, convolution, sequence masks, attention, custom loops, checkpoint recovery, inference export and evidence-based model release. Start with <a href="guides/tf-001.md.html">tf-001</a> and work through the prerequisite sequence. Each guide explains the mechanism, gives concrete examples and six practice contracts, and helps diagnose plausible wrong answers.</p>
+<p>Use the browser&#x27;s <strong>Journeys</strong> page with the <code>python-core</code> worker for NumPy foundations and <code>tensorflow-cpu</code> for framework lessons. The <a href="../../docs/docker-classroom.md.html">Docker classroom guide</a> explains how to build and start each profile. The host needs no Python or TensorFlow installation. The first preparation uses the network; the ordinary examples then run on tiny local CPU fixtures without downloading datasets or models.</p>
+<p>Save predictions, code and explanations in the classroom. Some worked blocks are standalone; the first eight lessons explicitly identify their sequential A/B scratch-file contract. Follow the instruction beside the examples and run a fresh process. Solutions are available for comparison after your attempt or an explicit reveal. No checkbox or successful reference execution certifies expertise.</p>
+<p>The <a href="../deep-learning-pytorch/README.md.html">PyTorch journey</a> covers the companion framework in comparable depth. Pay particular attention to layout, reduction, normalization-state and checkpoint differences rather than translating API names mechanically. The <a href="../../docs/learning/inside-a-transformer.md.html">Transformer companion</a> connects the attention lessons to a complete small language-model forward pass.</p>
+<h3 id="lesson-sequence">Lesson sequence<a class="heading-anchor" href="#lesson-sequence" aria-label="Link to this section">#</a></h3>
+<div class="table-wrap"><table><thead><tr>
+<th>Lesson</th>
+<th>Level</th>
+<th>Runtime</th>
+</tr></thead><tbody>
+<tr>
+<td><a href="guides/tf-001.md.html">tf-001: A bounded deep-learning investigation</a></td>
+<td>Beginner</td>
+<td><code>reading</code></td>
+</tr>
+<tr>
+<td><a href="guides/tf-002.md.html">tf-002: Tensors, axes, dtypes and units</a></td>
+<td>Beginner</td>
+<td><code>python-core</code></td>
+</tr>
+<tr>
+<td><a href="guides/tf-003.md.html">tf-003: Linear neurons and matrix contracts</a></td>
+<td>Beginner</td>
+<td><code>python-core</code></td>
+</tr>
+<tr>
+<td><a href="guides/tf-004.md.html">tf-004: Loss, reduction and what a number measures</a></td>
+<td>Beginner</td>
+<td><code>python-core</code></td>
+</tr>
+<tr>
+<td><a href="guides/tf-005.md.html">tf-005: Derivatives as local sensitivity</a></td>
+<td>Beginner</td>
+<td><code>python-core</code></td>
+</tr>
+<tr>
+<td><a href="guides/tf-006.md.html">tf-006: The chain rule and activation boundaries</a></td>
+<td>Beginner</td>
+<td><code>python-core</code></td>
+</tr>
+<tr>
+<td><a href="guides/tf-007.md.html">tf-007: Eager tensors, variables and a tape</a></td>
+<td>Beginner</td>
+<td><code>tensorflow-cpu</code></td>
+</tr>
+<tr>
+<td><a href="guides/tf-008.md.html">tf-008: One gradient step you can audit</a></td>
+<td>Beginner</td>
+<td><code>tensorflow-cpu</code></td>
+</tr>
+<tr>
+<td><a href="guides/tf-009.md.html">tf-009: Batches and repeated updates</a></td>
+<td>Beginner</td>
+<td><code>tensorflow-cpu</code></td>
+</tr>
+<tr>
+<td><a href="guides/tf-010.md.html">tf-010: A split is part of the experiment</a></td>
+<td>Beginner</td>
+<td><code>python-core</code></td>
+</tr>
+<tr>
+<td><a href="guides/tf-011.md.html">tf-011: Keras models and explicit training contracts</a></td>
+<td>Beginner</td>
+<td><code>tensorflow-cpu</code></td>
+</tr>
+<tr>
+<td><a href="guides/tf-012.md.html">tf-012: Capstone: an auditable tiny regressor</a></td>
+<td>Beginner</td>
+<td><code>tensorflow-cpu</code></td>
+</tr>
+<tr>
+<td><a href="guides/tf-013.md.html">tf-013: Binary logits, probabilities and thresholds</a></td>
+<td>Intermediate</td>
+<td><code>tensorflow-cpu</code></td>
+</tr>
+<tr>
+<td><a href="guides/tf-014.md.html">tf-014: Multiclass and multilabel are different tasks</a></td>
+<td>Intermediate</td>
+<td><code>tensorflow-cpu</code></td>
+</tr>
+<tr>
+<td><a href="guides/tf-015.md.html">tf-015: A reproducible tf.data pipeline</a></td>
+<td>Intermediate</td>
+<td><code>tensorflow-cpu</code></td>
+</tr>
+<tr>
+<td><a href="guides/tf-016.md.html">tf-016: Nonlinearity and initialization</a></td>
+<td>Intermediate</td>
+<td><code>tensorflow-cpu</code></td>
+</tr>
+<tr>
+<td><a href="guides/tf-017.md.html">tf-017: Regularization and training/evaluation behavior</a></td>
+<td>Intermediate</td>
+<td><code>tensorflow-cpu</code></td>
+</tr>
+<tr>
+<td><a href="guides/tf-018.md.html">tf-018: Normalization state and batch dependence</a></td>
+<td>Intermediate</td>
+<td><code>tensorflow-cpu</code></td>
+</tr>
+<tr>
+<td><a href="guides/tf-019.md.html">tf-019: Convolution as a local, shared computation</a></td>
+<td>Intermediate</td>
+<td><code>tensorflow-cpu</code></td>
+</tr>
+<tr>
+<td><a href="guides/tf-020.md.html">tf-020: Pooling and augmentation without label leakage</a></td>
+<td>Intermediate</td>
+<td><code>tensorflow-cpu</code></td>
+</tr>
+<tr>
+<td><a href="guides/tf-021.md.html">tf-021: Sequences, embeddings and padding</a></td>
+<td>Intermediate</td>
+<td><code>tensorflow-cpu</code></td>
+</tr>
+<tr>
+<td><a href="guides/tf-022.md.html">tf-022: Attention with an explicit information boundary</a></td>
+<td>Intermediate</td>
+<td><code>tensorflow-cpu</code></td>
+</tr>
+<tr>
+<td><a href="guides/tf-023.md.html">tf-023: Debugging a custom training loop</a></td>
+<td>Intermediate</td>
+<td><code>tensorflow-cpu</code></td>
+</tr>
+<tr>
+<td><a href="guides/tf-024.md.html">tf-024: Capstone: a small classifier with honest evaluation</a></td>
+<td>Intermediate</td>
+<td><code>tensorflow-cpu</code></td>
+</tr>
+<tr>
+<td><a href="guides/tf-025.md.html">tf-025: Embedding objectives and negative examples</a></td>
+<td>Advanced</td>
+<td><code>tensorflow-cpu</code></td>
+</tr>
+<tr>
+<td><a href="guides/tf-026.md.html">tf-026: Custom layers, residuals and trainable state</a></td>
+<td>Advanced</td>
+<td><code>tensorflow-cpu</code></td>
+</tr>
+<tr>
+<td><a href="guides/tf-027.md.html">tf-027: Transfer learning without a model download</a></td>
+<td>Advanced</td>
+<td><code>tensorflow-cpu</code></td>
+</tr>
+<tr>
+<td><a href="guides/tf-028.md.html">tf-028: Restartable training and checkpoint evidence</a></td>
+<td>Advanced</td>
+<td><code>tensorflow-cpu</code></td>
+</tr>
+<tr>
+<td><a href="guides/tf-029.md.html">tf-029: Precision, overflow and stable objectives</a></td>
+<td>Advanced</td>
+<td><code>tensorflow-cpu</code></td>
+</tr>
+<tr>
+<td><a href="guides/tf-030.md.html">tf-030: Distributed gradient semantics on one CPU</a></td>
+<td>Advanced</td>
+<td><code>tensorflow-cpu</code></td>
+</tr>
+<tr>
+<td><a href="guides/tf-031.md.html">tf-031: Graphs, retracing and measurement</a></td>
+<td>Advanced</td>
+<td><code>tensorflow-cpu</code></td>
+</tr>
+<tr>
+<td><a href="guides/tf-032.md.html">tf-032: Saving, export and inference parity</a></td>
+<td>Advanced</td>
+<td><code>tensorflow-cpu</code></td>
+</tr>
+<tr>
+<td><a href="guides/tf-033.md.html">tf-033: Inference contracts and bounded batching</a></td>
+<td>Advanced</td>
+<td><code>tensorflow-cpu</code></td>
+</tr>
+<tr>
+<td><a href="guides/tf-034.md.html">tf-034: Robustness, privacy and model evidence</a></td>
+<td>Advanced</td>
+<td><code>python-core</code></td>
+</tr>
+<tr>
+<td><a href="guides/tf-035.md.html">tf-035: Comparing models with uncertainty</a></td>
+<td>Advanced</td>
+<td><code>python-core</code></td>
+</tr>
+<tr>
+<td><a href="guides/tf-036.md.html">tf-036: Capstone: release a small, reproducible model</a></td>
+<td>Advanced</td>
+<td><code>tensorflow-cpu</code></td>
+</tr>
+</tbody></table></div>
+<h3 id="validation-and-limits">Validation and limits<a class="heading-anchor" href="#validation-and-limits" aria-label="Link to this section">#</a></h3>
+<p>All runnable reference programs have successful local Linux arm64 Docker receipts for their current source bytes. The <a href="../../docs/implementation/CHECKPOINT.md.html">implementation checkpoint</a> records runtime, test and platform acceptance separately. Reading lessons use reasoning and written evidence. Windows/WSL2 and amd64 configuration support does not by itself establish an observed run on those systems.</p>
+<p>All 36 guides received a substantive mechanism review; see the <a href="../../docs/implementation/tensorflow-depth-review.md.html">TensorFlow review ledger</a>. The small fixtures demonstrate arithmetic, API behavior and process boundaries. They do not establish generalization, accelerator speed or distributed-training performance. A failed capstone gate is a useful result to explain and repair.</p></article>
   </main>
 </body>
 </html>

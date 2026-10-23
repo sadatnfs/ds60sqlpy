@@ -115,12 +115,20 @@ def test_spark_local_oracle_matches_shared_fixture_without_spark() -> None:
 
 def test_kubernetes_sources_use_the_offline_owned_fixture() -> None:
     yaml = pytest.importorskip("yaml")
-    for path in (ROOT / "courses/kubernetes").rglob("*.yaml"):
+    browser_yaml = [
+        *(ROOT / "courses/kubernetes/lessons").glob("*.yaml"),
+        *(ROOT / "courses/kubernetes/solutions").glob("*_solution.yaml"),
+        *(ROOT / "courses/kubernetes/fixtures").glob("hello*.yaml"),
+    ]
+    for path in browser_yaml:
         for doc in yaml.safe_load_all(path.read_text()):
             if not doc:
                 continue
             assert "namespace" not in doc["metadata"]
-            assert doc["kind"] in {"Deployment", "Service", "Job"}
+            assert doc["kind"] in {"Deployment", "Service", "Job", "ConfigMap"}
+            if doc["kind"] == "ConfigMap":
+                assert doc["metadata"]["name"] == "hello-config"
+                assert doc["data"] in ({"message": "hello"}, {"message": "reviewer"})
             if doc["kind"] in {"Deployment", "Job"}:
                 pod = doc["spec"]["template"]["spec"]
                 assert pod["automountServiceAccountToken"] is False

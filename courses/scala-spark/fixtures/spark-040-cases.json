@@ -1,0 +1,82 @@
+{
+  "lesson_id": "spark-040",
+  "scope": "Sanitized architecture reasoning; no live connection or deployment.",
+  "cases": [
+    {
+      "exercise": 1,
+      "title": "Define grain, population and bounded read scope",
+      "input_contract": "Synthetic export_id demo-2026, unique event_id, at most 5000 rows, approved columns event_id, cents, price, event_time, note.",
+      "expected": "One row per event_id within one immutable export_id;at most 5000 rows and no unbounded collect.",
+      "verification": "Write the row-grain and population contract, plus the count/uniqueness/readback checks that would reject an oversized or duplicate export."
+    },
+    {
+      "exercise": 2,
+      "title": "Map four tricky SQL values without losing meaning",
+      "input_contract": "cents 125;price 12345678.90 as numeric(10,2);event_time2026-10-23T12:00:00-07:00;noteSQLNULL.",
+      "expected": "LongType 125;DecimalType(10,2)12345678.90;the same instant rendered 19:00:00UTC under the baseline;NULL remains missing, not an empty string.",
+      "verification": "State source and target type, unit, precision/timezone policy and one rejected conversion for each."
+    },
+    {
+      "exercise": 3,
+      "title": "Reject the lowerBound/upperBound filter misconception",
+      "input_contract": "IDs[-10,0,5,10,99, NULL]. Illustrative partition predicates:id<5 OR id IS NULL, and id>=5.",
+      "expected": "All 6 supplied rows can be read. Bounds choose partition stride, not a WHERE filter restricting IDs to[0,10).",
+      "verification": "Assign each supplied ID to the two predicates and write an explicit SQL filter for the intended population if one is required."
+    },
+    {
+      "exercise": 4,
+      "title": "Bound connection concurrency and read consistency",
+      "input_contract": "Two JDBC partitions;source rows can change;no live snapshot-coordination adapter is provided.",
+      "expected": "A nominal 2-partition connection bound plus an explicit immutable-export or separately qualified coordinated-snapshot strategy.",
+      "verification": "Name connection/time/fetch controls and show how concurrent source updates would otherwise produce a mixed-time result."
+    },
+    {
+      "exercise": 5,
+      "title": "Remove credentials from source and evidence",
+      "input_contract": "Synthetic passwordDUMMY_LESSON_ONLY, URLjdbc:postgresql://db.invalid:5432/course, numPartitions 2, fetchsize 1000, queryTimeout 30.",
+      "expected": "No password, user, URL or credential-bearing connection string in the saved source/evidence;only approved operational settings are retained.",
+      "verification": "Write the exact sanitized object and identify the approved runtime credential source without inventing a real account."
+    },
+    {
+      "exercise": 6,
+      "title": "Write a future acceptance and failure contract",
+      "input_contract": "Current profile bundles no qualified JDBC driver/remote database;synthetic export and schema mapping only. Optional enrichment IDssql-quality-01 and sql-test-01.",
+      "expected": "A reviewable acceptance matrix with unavailable runtime rows, not a fabricated successful connection.",
+      "verification": "List positive and negative cases, exact version tuple, source identity, output oracle, connection closure and no-write privileges."
+    }
+  ],
+  "golden": {
+    "provenance": "synthetic export and proposal;no connection opened",
+    "export_id": "demo-2026",
+    "maximum_rows": 5000,
+    "unique_key": "event_id",
+    "row": {
+      "event_id": 7,
+      "cents": 125,
+      "price": "12345678.90",
+      "event_time": "2026-10-23T12:00:00-07:00",
+      "note": null
+    },
+    "expected_utc": "2026-10-23T19:00:00Z",
+    "partition_counterexample": {
+      "ids": [
+        -10,
+        0,
+        5,
+        10,
+        99,
+        null
+      ],
+      "lowerBound": 0,
+      "upperBound": 10,
+      "numPartitions": 2,
+      "expected_read_count": 6
+    },
+    "sanitized_options": {
+      "numPartitions": 2,
+      "fetchsize": 1000,
+      "queryTimeout": 30
+    },
+    "snapshot_strategy": "immutable export;live coordinated snapshot adapter unavailable"
+  }
+}

@@ -1,18 +1,22 @@
 # Docker-only classroom
 
-Use the browser classroom on Windows, macOS, or Linux with a local
-Linux-container engine and **Docker Compose v2.24.4 or newer**. Legacy
-`docker-compose` v1 is not supported. The course itself needs
-no host Python, PowerShell script, Bash script, or native PostgreSQL. Download
-and fully extract the course ZIP, then open a terminal in the folder containing
-`compose.classroom.yaml`. The Docker commands below are identical across OSes;
-Windows can use Command Prompt. Run each command separately and stop if it fails.
+The primary workflow is one command from the course folder:
 
-For engine installation, see [the beginner setup guide](docker-beginners.md#2-install-one-local-container-engine).
-Its Windows installation wizard is optional. Once an engine is ready, Windows
-users may double-click `START_DOCKER_CLASSROOM.cmd`; Mac users may double-click
-`START_DOCKER_CLASSROOM.command`. Both prepare the Python/NumPy starter. The
-manual commands below expose the same preparation and are useful on every OS.
+```sh
+./classroom
+```
+
+It builds and starts all ten ordinary workers, waits for actual readiness,
+selects available loopback host ports and opens the browser. Windows uses the
+same launcher through WSL 2. The thin Windows/Mac launchers delegate to it.
+See [the beginner one-command guide](one-command-classroom.md) for engine/WSL
+setup, a smaller starter, persistence, fixed ports and recovery.
+
+The remainder of this page is the **manual Compose reference**. Direct Docker
+commands remain available without the Bash wrapper. Use a local Linux-container
+engine and Docker Compose 2.24.4 or newer. Its fixed default ports may differ
+from the automatic host ports selected by `./classroom`; use the launcher's
+printed URL or `./classroom status` for its actual address.
 
 ## 1. Check the engine and configuration
 
@@ -43,6 +47,37 @@ Build the lab first; its Python worker reuses that base. These foreground
 builds show download and package-install output; they do not publish images.
 Later starts reuse the prepared local images.
 
+### If the image registry cannot be reached
+
+An `x509: certificate signed by unknown authority` error during image metadata
+or layer download is a connection/certificate problem before the lesson code
+runs. Use your organization's approved engine certificate/proxy configuration.
+Keep TLS verification enabled.
+
+The repository also includes an explicit, public
+[build-only mirror configuration](../docker/registry-mirrors.env.txt).
+It selects [Google's Docker Hub mirror](https://cloud.google.com/artifact-registry/docs/pull-cached-dockerhub-images)
+for the compiler/JVM/Node/Spark bases and
+[Astral's pinned Python image](https://docs.astral.sh/uv/guides/integration/docker/)
+on GitHub Container Registry for the Python base. It does not contain credentials, modify the engine, or publish images.
+These alternatives were used for local Linux arm64 qualification on a machine
+whose Docker Hub CDN certificate chain could not be verified.
+
+To build every ordinary profile with that configuration and visible logs, run
+this single line from the extracted course folder on any OS:
+
+```text
+docker compose --env-file docker/registry-mirrors.env.txt --progress plain -f compose.classroom.yaml --profile "*" --parallel 1 build
+```
+
+Use this file for the **build** command only. An explicit `--env-file` replaces
+Compose's automatic `.env` loading, so use the normal start command below to
+retain your local port/storage settings. If you intentionally need both local
+build overrides and these mirrors, put `--env-file .env` before the mirror
+file, provided that `.env` exists. Shell environment values still take
+precedence. A mirror may not cache every upstream image; an unavailable image
+remains a build failure to resolve, not a reason to bypass certificate checks.
+
 ## 3. Start and practice
 
 ```text
@@ -64,12 +99,16 @@ If a runtime is unavailable, prepare that profile before running its lesson:
 
 | Profile | Service to build/start | Used for |
 | --- | --- | --- |
-| `python-core` | `python-core-worker` | NumPy, current LLM foundations, early TensorFlow math |
+| `python-core` | `python-core-worker` | NumPy, pandas, statistics, NLP, LLM foundations |
 | `cpp20` | `cpp-worker` | C++20 compilation |
 | `tensorflow-cpu` | `tensorflow-worker` | Actual TensorFlow tensors and gradient updates |
 | `scala-jvm` | `scala-worker` | Standalone Scala/JVM |
 | `spark-local-scala` | `spark-scala-worker` | Local Spark using Scala |
 | `spark-local-python` | `spark-python-worker` | Local Spark using Python |
+| `llm-torch-cpu` | `llm-worker` | PyTorch and tensor-based LLM lessons |
+| `java21` | `java-worker` | Java21 compilation and the prepared H2 teaching database |
+| `javascript-node` | `javascript-worker` | Node24 JavaScript ES modules |
+| `typescript-node` | `typescript-worker` | Strict TypeScript5.9 compilation and Node24 execution |
 
 For example, add C++ after the starter:
 
@@ -79,9 +118,21 @@ docker compose -f compose.classroom.yaml --profile python-core --profile cpp20 u
 ```
 
 Use the matching profile and service names for another subject. Build selected
-workers sequentially and start only those you need. The current NumPy LLM pilot
-needs no downloaded model or PyTorch image. CPU PyTorch is a separate recipe,
-outside these six qualified classroom profiles.
+workers sequentially and start only those you need. The NumPy LLM foundations
+need no pretrained model. The PyTorch route uses `llm-torch-cpu`, and its small
+teaching models train locally on CPU. Optional pretrained-model experiments
+have a separate explicit download and preparation guide.
+
+To build every ordinary worker locally with visible logs, use:
+
+```text
+docker compose --progress plain -f compose.classroom.yaml --profile "*" --parallel 1 build
+```
+
+This builds all ordinary language/framework images; it does not start them or
+push them to a registry. Building everything uses substantially more disk than
+the starter. Select the profiles you want for `up` so unused frameworks do not
+consume memory. Kubernetes cluster preparation remains a separate operation.
 
 ## 4. Pause, return, and keep your work
 
@@ -169,13 +220,28 @@ docker compose -f compose.classroom.yaml --profile "*" ps -a
 docker compose -f compose.classroom.yaml logs --tail 100 lab classroom-init postgres
 ```
 
-If port 8765 is already occupied, stop the other course instance you own before
-starting this one. A worker health failure needs its service log, for example
+If a port is already occupied, choose unused ports for this classroom. Create
+or edit the plain-text `.env` file beside `compose.classroom.yaml`, preserving
+any settings already present, and add these two lines:
+
+```dotenv
+DS60_LAB_PORT=8766
+DS60_POSTGRES_PORT=55433
+```
+
+Then repeat the same `up` command and open <http://127.0.0.1:8766/journeys>.
+These numbers are examples; choose other unused ports if necessary. The
+PostgreSQL container publishes both the database and classroom ports because
+they share a network namespace. An older course database can therefore hold
+port8765 even when its web app is stopped. Keeping the same Compose project
+and volume names preserves this classroom's work when changing its ports.
+
+A worker health failure needs its service log, for example
 `docker compose -f compose.classroom.yaml logs --tail 100 cpp-worker`.
 
 Kubernetes remains an extra [owned host-preparation workflow](modules-runtime.md#prepare-and-run-the-owned-kubernetes-lab)
 with an expiring scoped lease. It is not created by these commands. No engine
-socket is mounted into the ordinary app or its six workers. The optional
+socket is mounted into the ordinary app or its language workers. The optional
 PowerShell/Bash launchers remain available for the existing host-folder route.
 
 Command semantics checked against Docker's official [Compose profiles](https://docs.docker.com/compose/how-tos/profiles/),
@@ -286,3 +352,62 @@ and does not push to a registry. Kubernetes retains its separate explicit owned
 cluster preparation. You can keep the initial classroom small and add profiles
 when a lesson needs them. The optional Makefile accepts, for example,
 `make classroom-build CLASSROOM_PROFILES="python-core llm-torch-cpu"`.
+
+
+## Optional Kubernetes inside the same classroom
+
+Kubernetes uses a separately prepared, owned disposable kind cluster. It does
+not attach to an existing personal or company cluster. Follow
+[the Kubernetes runtime preparation guide](modules-runtime.md) for the pinned
+host tools, local fixture image and owned-session workflow. That explicit host
+preparation is separate from the Docker-only ordinary classroom and may need
+host Python, kind and kubectl; on Windows, use the documented WSL or host route.
+The browser and worker never receive the Docker engine socket.
+
+Finish tool preparation and all image builds before creating the fresh session.
+Build the private broker directly from the repository root, so this build does
+not require an existing lease path for Compose interpolation:
+
+```console
+docker build --progress=plain -f docker/kubernetes/Dockerfile.worker -t ds60sqlpy-worker-k8s-kind:0.3.0 .
+```
+
+The preparation guide also gives the fixture-image build and any explicitly
+selected base-image override. Once these builds have succeeded, create the new
+owned session immediately before starting the broker. Its scoped credential
+lasts about 15 minutes; downloading or compiling after preparation can consume
+that lease before the first lesson. If it expires, release that exact session
+and prepare a new one. Do not edit its timestamps or reuse released credentials.
+
+After preparation, set `DS60_K8S_SESSION_DIR` to the exact private session path
+printed by the helper. In Bash use `export DS60_K8S_SESSION_DIR="printed-path"`;
+in PowerShell use `$env:DS60_K8S_SESSION_DIR = "printed-path"`;
+in Command Prompt use `set "DS60_K8S_SESSION_DIR=printed-path"`.
+Never copy credential contents into the learning folder or a message.
+
+Start the already built private broker in the same classroom and progress volume:
+
+```console
+docker compose -f compose.classroom.yaml -f compose.classroom.kubernetes.yaml --profile k8s-kind up -d --no-build --pull never --wait lab kubernetes-worker
+```
+
+This overlay preserves the ordinary worker endpoints and adds only the scoped
+Kubernetes endpoint. It reuses the private classroom credential volume and
+mounts the prepared lease/config read-only. It does not provision a cluster,
+use an ambient kubeconfig, publish the worker port or install tools in the browser.
+The current fixture0.2 operations support the curated hello Deployment/Service,
+fixed ConfigMap inputs, finite task Job and fixed probe paths. Other Kubernetes
+lessons explicitly identify their separate reading or owned host-lab workflow.
+
+When finished, stop the broker and then release the exact owned session using
+the preparation guide. Keep the private session path until release succeeds;
+that receipt is how cleanup identifies the resources it owns.
+
+```console
+docker compose -f compose.classroom.yaml -f compose.classroom.kubernetes.yaml --profile k8s-kind stop kubernetes-worker
+python scripts/prepare_kubernetes.py release --session "printed-path" --confirm-release
+```
+
+A normal classroom start without the overlay leaves Kubernetes unprepared.
+Existing source drafts and receipts remain available for reading. Never use
+`down -v` as a cluster cleanup shortcut; classroom volumes contain learning work.

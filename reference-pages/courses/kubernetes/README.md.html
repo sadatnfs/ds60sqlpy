@@ -8,7 +8,7 @@
     http-equiv="Content-Security-Policy"
     content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
   >
-  <title>Kubernetes teaching content · DS60 reference</title>
+  <title>Kubernetes: beginner to advanced · DS60 reference</title>
   <style>
     :root {
       --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
@@ -112,40 +112,232 @@
   <main class="shell">
     <header class="hero">
       <p class="eyebrow">Rendered course document</p>
-      <h1>Kubernetes teaching content</h1>
+      <h1>Kubernetes: beginner to advanced</h1>
       <p class="source-path">Generated from <code>courses/kubernetes/README.md</code></p>
     </header>
-    <article class="document"><h2 id="kubernetes-teaching-content">Kubernetes teaching content<a class="heading-anchor" href="#kubernetes-teaching-content" aria-label="Link to this section">#</a></h2>
-<p>These are durable authored beta lessons, separate from the full <a href="../../docs/expansion/tracks/kubernetes.md.html">design plan</a>. The <a href="lessons.json.html">lessons.json</a> metadata lists actual files. An authored reference is not a published prerequisite or a runtime qualification receipt. Check the app capability notice and profile receipt before execution. Opening the guide never installs a compiler, JVM or cluster.</p>
+    <article class="document"><h2 id="kubernetes-beginner-to-advanced">Kubernetes: beginner to advanced<a class="heading-anchor" href="#kubernetes-beginner-to-advanced" aria-label="Link to this section">#</a></h2>
+<p>All 42 planned lessons have authored guides, learner artifacts, six inspectable exercises and separate explanations. The bounded browser profile executes only its reviewed Deployment/Service/ConfigMap or finite Job contract. Advanced activities are complete offline and host-lab lessons with explicit missing-capability boundaries, not invented browser execution.</p>
+<p>Use <a href="host-labs.md.html">host-labs.md</a> for exact targeting, 15-minute lease timing, observation and cleanup. Use the <a href="../../docker/kubernetes/README.md.html">preparation guide</a> for the actual owned runtime. The <a href="../../docs/implementation/kubernetes-content-status.md.html">status record</a> separates local content tests, real contract-2 runtime receipts and unqualified advanced host capabilities.</p>
+<h3 id="lesson-sequence">Lesson sequence<a class="heading-anchor" href="#lesson-sequence" aria-label="Link to this section">#</a></h3>
 <div class="table-wrap"><table><thead><tr>
 <th>Lesson</th>
-<th>Profile</th>
-<th>Status</th>
+<th>Title</th>
+<th>App mode</th>
 </tr></thead><tbody>
 <tr>
 <td><a href="guides/k8s-001.md.html">k8s-001</a></td>
-<td>reading</td>
-<td>Authored beta; qualification separate</td>
+<td>Terminal, files and an owned lab receipt</td>
+<td>Reading worksheet; scoped host practice</td>
 </tr>
 <tr>
 <td><a href="guides/k8s-002.md.html">k8s-002</a></td>
-<td>reading</td>
-<td>Authored beta; qualification separate</td>
+<td>Processes, containers, images and ports</td>
+<td>Reading worksheet; scoped host practice</td>
 </tr>
 <tr>
 <td><a href="guides/k8s-003.md.html">k8s-003</a></td>
-<td>k8s-kind</td>
-<td>Authored beta; qualification separate</td>
+<td>Kubernetes objects and YAML anatomy</td>
+<td>Bounded YAML Run; host transitions separate</td>
+</tr>
+<tr>
+<td><a href="guides/k8s-004.md.html">k8s-004</a></td>
+<td>Identity, namespaces and explicit targeting</td>
+<td>Reading worksheet; scoped host practice</td>
+</tr>
+<tr>
+<td><a href="guides/k8s-005.md.html">k8s-005</a></td>
+<td>Pods, image locality and logs</td>
+<td>Bounded YAML Run; host transitions separate</td>
+</tr>
+<tr>
+<td><a href="guides/k8s-006.md.html">k8s-006</a></td>
+<td>Deployments and reconciliation</td>
+<td>Bounded YAML Run; host transitions separate</td>
+</tr>
+<tr>
+<td><a href="guides/k8s-007.md.html">k8s-007</a></td>
+<td>Labels, selectors and Services</td>
+<td>Bounded YAML Run; host transitions separate</td>
 </tr>
 <tr>
 <td><a href="guides/k8s-008.md.html">k8s-008</a></td>
-<td>k8s-kind</td>
-<td>Authored beta; qualification separate</td>
+<td>Readiness and eligible Service backends</td>
+<td>Bounded YAML Run; host transitions separate</td>
+</tr>
+<tr>
+<td><a href="guides/k8s-009.md.html">k8s-009</a></td>
+<td>ConfigMaps and configuration boundaries</td>
+<td>Bounded YAML Run; host transitions separate</td>
+</tr>
+<tr>
+<td><a href="guides/k8s-010.md.html">k8s-010</a></td>
+<td>Requests, limits and namespace budgets</td>
+<td>Bounded YAML Run; host transitions separate</td>
+</tr>
+<tr>
+<td><a href="guides/k8s-011.md.html">k8s-011</a></td>
+<td>Jobs and scheduled work</td>
+<td>Bounded YAML Run; host transitions separate</td>
+</tr>
+<tr>
+<td><a href="guides/k8s-012.md.html">k8s-012</a></td>
+<td>Debug from conditions, events and logs</td>
+<td>Reading worksheet; scoped host practice</td>
+</tr>
+<tr>
+<td><a href="guides/k8s-013.md.html">k8s-013</a></td>
+<td>Rollouts, revisions and recovery</td>
+<td>Reading worksheet; scoped host practice</td>
+</tr>
+<tr>
+<td><a href="guides/k8s-014.md.html">k8s-014</a></td>
+<td>Capstone 1: observable stateless service</td>
+<td>Bounded YAML Run; host transitions separate</td>
+</tr>
+<tr>
+<td><a href="guides/k8s-015.md.html">k8s-015</a></td>
+<td>Startup, liveness and readiness are different</td>
+<td>Bounded YAML Run; host transitions separate</td>
+</tr>
+<tr>
+<td><a href="guides/k8s-016.md.html">k8s-016</a></td>
+<td>Init containers and ephemeral shared files</td>
+<td>Reading worksheet; scoped host practice</td>
+</tr>
+<tr>
+<td><a href="guides/k8s-017.md.html">k8s-017</a></td>
+<td>Nonroot workloads and Pod Security</td>
+<td>Bounded YAML Run; host transitions separate</td>
+</tr>
+<tr>
+<td><a href="guides/k8s-018.md.html">k8s-018</a></td>
+<td>ServiceAccounts and RBAC boundaries</td>
+<td>Reading worksheet; scoped host practice</td>
+</tr>
+<tr>
+<td><a href="guides/k8s-019.md.html">k8s-019</a></td>
+<td>Synthetic Secrets and reload semantics</td>
+<td>Reading worksheet; scoped host practice</td>
+</tr>
+<tr>
+<td><a href="guides/k8s-020.md.html">k8s-020</a></td>
+<td>DNS and layered network diagnosis</td>
+<td>Bounded YAML Run; host transitions separate</td>
+</tr>
+<tr>
+<td><a href="guides/k8s-021.md.html">k8s-021</a></td>
+<td>NetworkPolicy with enforcement evidence</td>
+<td>Reading worksheet; scoped host practice</td>
+</tr>
+<tr>
+<td><a href="guides/k8s-022.md.html">k8s-022</a></td>
+<td>Volumes, claims and stateful identity</td>
+<td>Reading worksheet; scoped host practice</td>
+</tr>
+<tr>
+<td><a href="guides/k8s-023.md.html">k8s-023</a></td>
+<td>Gateway, Ingress and the external route</td>
+<td>Reading worksheet; scoped host practice</td>
+</tr>
+<tr>
+<td><a href="guides/k8s-024.md.html">k8s-024</a></td>
+<td>Kustomize and field ownership</td>
+<td>Reading worksheet; scoped host practice</td>
+</tr>
+<tr>
+<td><a href="guides/k8s-025.md.html">k8s-025</a></td>
+<td>Helm values without hidden side effects</td>
+<td>Reading worksheet; scoped host practice</td>
+</tr>
+<tr>
+<td><a href="guides/k8s-026.md.html">k8s-026</a></td>
+<td>Placement and node-local DaemonSets</td>
+<td>Reading worksheet; scoped host practice</td>
+</tr>
+<tr>
+<td><a href="guides/k8s-027.md.html">k8s-027</a></td>
+<td>Observability and service-level evidence</td>
+<td>Reading worksheet; scoped host practice</td>
+</tr>
+<tr>
+<td><a href="guides/k8s-028.md.html">k8s-028</a></td>
+<td>Capstone 2: stateful change with policy</td>
+<td>Reading worksheet; scoped host practice</td>
+</tr>
+<tr>
+<td><a href="guides/k8s-029.md.html">k8s-029</a></td>
+<td>Custom resources and structural schemas</td>
+<td>Reading worksheet; scoped host practice</td>
+</tr>
+<tr>
+<td><a href="guides/k8s-030.md.html">k8s-030</a></td>
+<td>Operators and reconciliation contracts</td>
+<td>Reading worksheet; scoped host practice</td>
+</tr>
+<tr>
+<td><a href="guides/k8s-031.md.html">k8s-031</a></td>
+<td>Admission policy and controlled denial</td>
+<td>Reading worksheet; scoped host practice</td>
+</tr>
+<tr>
+<td><a href="guides/k8s-032.md.html">k8s-032</a></td>
+<td>Disruptions and availability budgets</td>
+<td>Reading worksheet; scoped host practice</td>
+</tr>
+<tr>
+<td><a href="guides/k8s-033.md.html">k8s-033</a></td>
+<td>Autoscaling with a qualified metrics path</td>
+<td>Reading worksheet; scoped host practice</td>
+</tr>
+<tr>
+<td><a href="guides/k8s-034.md.html">k8s-034</a></td>
+<td>Traffic changes and progressive delivery</td>
+<td>Reading worksheet; scoped host practice</td>
+</tr>
+<tr>
+<td><a href="guides/k8s-035.md.html">k8s-035</a></td>
+<td>Watches and optimistic concurrency</td>
+<td>Reading worksheet; scoped host practice</td>
+</tr>
+<tr>
+<td><a href="guides/k8s-036.md.html">k8s-036</a></td>
+<td>Control-plane snapshots and data backups</td>
+<td>Reading worksheet; scoped host practice</td>
+</tr>
+<tr>
+<td><a href="guides/k8s-037.md.html">k8s-037</a></td>
+<td>Version skew and replacement-cluster rehearsal</td>
+<td>Reading worksheet; scoped host practice</td>
+</tr>
+<tr>
+<td><a href="guides/k8s-038.md.html">k8s-038</a></td>
+<td>Image provenance and offline verification</td>
+<td>Reading worksheet; scoped host practice</td>
+</tr>
+<tr>
+<td><a href="guides/k8s-039.md.html">k8s-039</a></td>
+<td>Multitenancy and threat boundaries</td>
+<td>Reading worksheet; scoped host practice</td>
+</tr>
+<tr>
+<td><a href="guides/k8s-040.md.html">k8s-040</a></td>
+<td>Incident response and bounded fault injection</td>
+<td>Reading worksheet; scoped host practice</td>
+</tr>
+<tr>
+<td><a href="guides/k8s-041.md.html">k8s-041</a></td>
+<td>Recovery objectives and reviewable runbooks</td>
+<td>Reading worksheet; scoped host practice</td>
+</tr>
+<tr>
+<td><a href="guides/k8s-042.md.html">k8s-042</a></td>
+<td>Capstone 3: platform release and incident review</td>
+<td>Reading worksheet; scoped host practice</td>
 </tr>
 </tbody></table></div>
-<p>Follow guide, prediction, learner attempt, one hint at a time, inspection, explanation and changed-fixture retrieval. Official solutions stay separate until an attempt or explicit reveal. Source success, typed verification and understanding are different signals. Save learner edits beneath the app&#x27;s host-owned learning workspace; checked-in lessons are starter sources, not disposable learner work.</p>
-<p>Some pilot prerequisites are still planned. Review the named direct prerequisites and request the missing bridge rather than treating an absent ID as completed. The current implementation status is recorded in <a href="../../docs/implementation/systems-content-status.md.html">systems-content-status.md</a>. No default lesson requires an external dataset or paid service.</p>
-<p>Use the <a href="../../docker/kubernetes/README.md.html">owned Kubernetes preparation guide</a> for the pinned tools, local engine, private lease, one-shot operation and explicit release. This optional path does not alter the main course startup or select an ambient cluster.</p></article>
+<h3 id="how-to-work">How to work<a class="heading-anchor" href="#how-to-work" aria-label="Link to this section">#</a></h3>
+<p>Read the guide, predict the stated case, write or edit your learner artifact, inspect one progressive hint at a time, then compare the separate solution after an attempt. A successful process or a manual read marker is not proof of understanding. Preserve actual learner edits in the app-owned workspace; the checked-in source is a starter.</p>
+<p>The <a href="authoring/complete/README.md.html">portable authoring inputs</a> regenerate the 38 added lesson bodies while preserving the four original pilots. Public synthetic signature material is immutable. No lesson downloads tools, starts a cluster or selects an ambient context when opened.</p></article>
   </main>
 </body>
 </html>

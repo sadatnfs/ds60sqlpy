@@ -10,6 +10,24 @@ A mutex serializes access to shared state. A condition variable lets a thread wa
 
 The queue and closed flag describe one state machine. Empty/open means wait, nonempty means consume, and empty/closed means terminate. All three decisions use the same mutex so the predicate corresponds to the protected data. The predicate overload handles spurious wakes by rechecking rather than assuming a notification means an item exists. A capacity limit adds another state condition: the producer can accept work only when there is room.
 
+<!-- depth:start -->
+## Condition variables coordinate a state machine
+
+A condition variable is a waiting mechanism, not the shared condition itself. The real condition is expressed in protected state. This queue has a sequence of pending integers and a closed flag. Empty/open means there is currently no work but more may arrive. Nonempty means the consumer can take an item. Empty/closed means no more work can arrive and the consumer should finish.
+
+The mutex protects both the queue and the closed flag. The consumer holds a unique_lock and calls the predicate overload of wait. Waiting releases the mutex so a producer can change the state, then reacquires it before the predicate is evaluated again. A wakeup alone does not guarantee an item exists: spurious wakeups and other consumers can change the situation. The predicate is the source of truth.
+
+The first program enqueues2 and 3, then closes the queue while holding the mutex. The consumer drains the existing items even though closed is true, because nonempty still means work exists. Only empty and closed together terminate the loop. Exiting immediately on closed would discard accepted work. Waiting only for nonempty would hang after the last item because closure would not satisfy the condition.
+
+The second program starts with an already empty, closed queue. The predicate is immediately true, so no notification is needed to make progress. This demonstrates why notifications should not be treated as stored messages. State persists; a notification may occur before another thread begins waiting. Rechecking the state under the same mutex avoids depending on an exact notification schedule.
+
+A bounded queue adds a capacity predicate for producers. When full, the interface must choose whether to wait, reject or cancel a submission. That policy belongs to the product contract and should be tested separately from consumer wakeup. The small reference has a fixed two-item input; it demonstrates correct draining and closure, not a production executor with backpressure and arbitrary task scheduling.
+
+## Debugging the contract
+
+If the consumer hangs after processing all items, inspect whether closed participates in the wait predicate. If items disappear during shutdown, check whether the loop exits before draining a nonempty closed queue. If state is read outside the mutex, a notification cannot repair the race. Keep every predicate variable under the same synchronization contract and test empty/open, nonempty and empty/closed separately.
+<!-- depth:end -->
+
 ## Worked example 1
 
 ```cpp

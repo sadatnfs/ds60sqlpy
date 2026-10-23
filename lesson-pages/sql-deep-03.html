@@ -1,0 +1,1113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>sql-deep-03 · ROWS, RANGE, GROUPS, Exclusions, and Sessionization · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+        <a class="lab-only" href="../learn?lesson=sql-deep-03" hidden>
+          Open this lesson in the coding lab
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">sql · lesson sql-deep-03</p>
+        <h1>ROWS, RANGE, GROUPS, Exclusions, and Sessionization</h1>
+        <p class="hero-copy">SQL semantics, temporal metrics and correctness</p>
+        <div class="meta">
+          <span class="tag">advanced</span>
+          <span class="tag">150 minutes</span>
+          <span class="tag">core setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="sql-22.html">sql-22</a> <a class="tag" href="sql-analytics-01.html">sql-analytics-01</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Open your guided SQL workspace</h2>
+          <p id="run-guidance">In private launcher mode, choose <strong>Create/open guided SQL notebook</strong>. It opens an editable copy, a safe database-preparation step, and the real <code>psql -X -v ON_ERROR_STOP=1 -f</code> transcript in one JupyterLab notebook. The target must be the disposable <code>advanced_sql_training</code> database, never a shared or valuable one.</p>
+          <div class="static-help">
+            <strong>If the green SQL-notebook button is not visible, this is reading mode.</strong><br><strong>Windows:</strong> return to the repository folder and double-click <code>START_DS60.cmd</code>. Keep its terminal open; the launcher opens a new private browser page. Find this lesson there and choose <strong>Create/open guided SQL notebook</strong>.<br><strong>macOS/Linux:</strong> from the repository root run <code>.venv/bin/python scripts/learning_portal.py</code>, then use the new private browser page. The manual fallback is to open the real <code>.sql</code> file in VS Code and use the guide's fixed <code>psql -f</code> command.
+          </div>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="sql/professional/lessons/sql_deep_03.sql">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+
+          <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
+          <a class="button lab-only" href="../learn?lesson=sql-deep-03" hidden>
+            Practice and keep evidence in the coding lab
+          </a>
+        </div>
+      </section>
+
+
+      <section class="sql-run-guide native-only" aria-labelledby="sql-run-guide-heading">
+        <p class="eyebrow">SQL beginner path</p>
+        <h2 id="sql-run-guide-heading">From this page to a real query result</h2>
+        <p>
+          The browser explains the lesson; PostgreSQL executes it. The private
+          course portal connects the two safely by creating your own ignored
+          workspace at <code>.learning/sql/sql-deep-03/lesson/</code>.
+        </p>
+        <ol class="run-steps">
+          <li>
+            <strong>Start guided mode.</strong>
+            <span>On Windows, double-click <code>START_DS60.cmd</code> and keep its
+            terminal open. On macOS/Linux, run
+            <code>.venv/bin/python scripts/learning_portal.py</code> from the repository root.</span>
+          </li>
+          <li>
+            <strong>Check the database boundary.</strong>
+            <span>The readiness check must identify local PostgreSQL and only the
+            disposable <code>advanced_sql_training</code> database. Never substitute a
+            workplace, shared, or valuable database.</span>
+          </li>
+          <li>
+            <strong>Create the lesson workspace.</strong>
+            <span>Return to this lesson over <code>127.0.0.1</code> and click
+            <strong>Create/open guided SQL notebook</strong>. JupyterLab opens
+            <code>guided.ipynb</code> beside an editable copy of the lesson SQL.</span>
+          </li>
+          <li>
+            <strong>Read, predict, edit, then run.</strong>
+            <span>Run the readiness cells first. Open the linked editable
+            <code>.sql</code> file, complete one exercise, save it, explicitly confirm
+            the course-schema reset, then run the fixed <code>psql -f</code> cell.</span>
+          </li>
+          <li>
+            <strong>Inspect evidence.</strong>
+            <span>Results and errors appear in the notebook transcript. Success means
+            the command exits cleanly, the course verification cell passes, and you
+            can explain the result's columns, row grain, and ordering.</span>
+          </li>
+        </ol>
+        <details>
+          <summary><strong>If something fails, start with the first message</strong></summary>
+          <dl class="error-map">
+            <dt><code>psql was not found</code></dt>
+            <dd>Close Jupyter, rerun the course launcher/bootstrap so PostgreSQL is
+            discovered, then reopen the notebook from that same portal session.</dd>
+            <dt><code>connection refused</code></dt>
+            <dd>Start the local PostgreSQL service and rerun the readiness check.</dd>
+            <dt><code>database "advanced_sql_training" does not exist</code></dt>
+            <dd>Return to setup and create only the disposable course database.</dd>
+            <dt><code>relation "training.…" does not exist</code></dt>
+            <dd>Read the reset warning, set the notebook's confirmation value to
+            <code>True</code>, and rerun the preparation cell before the lesson.</dd>
+            <dt><code>ERROR … at line …</code></dt>
+            <dd>Fix the first reported error in the editable SQL copy, save the file,
+            and run the lesson cell again. Later errors can be consequences of the first.</dd>
+          </dl>
+        </details>
+      </section>
+
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>sql/professional/companion-guides/sql_deep_03.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/companion-guides/sql_deep_03.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+
+        <div class="artifact-content"><h3 id="guide--rows-range-groups-exclusions-and-sessionization">ROWS, RANGE, GROUPS, Exclusions, and Sessionization<a class="heading-anchor" href="#guide--rows-range-groups-exclusions-and-sessionization" aria-label="Link to this section">#</a></h3>
+<p><strong>Stable ID:</strong> <code>sql-deep-03</code>. <strong>Estimated time:</strong> 150 minutes, split across reading and query investigation.</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Use the private reader&#x27;s <strong>Create/open guided SQL notebook</strong> action. It creates the ignored editable copy at <code>.learning/sql/sql-deep-03/lesson/workspace/sql/professional/lessons/sql_deep_03.sql</code>. Read the supplied fixture, write a prediction, edit that copy and run the complete script. The prepared target must be the local disposable <code>advanced_sql_training</code> database. These lessons never require a production connection or a new cloud service.</p>
+<p>The learner file starts a transaction, checks the database name, creates only temporary tables, runs two worked examples and ends with ROLLBACK. Your six query attempts belong before that final rollback. Re-run the complete file after an error so the fixture and transaction state are known. Output appears in the notebook or terminal as named columns and bounded rows; a command tag alone does not verify a SELECT result.</p>
+<p>Windows PowerShell fallback, from the repository root:</p>
+<pre><code class="language-powershell">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f &quot;sql/professional/lessons/sql_deep_03.sql&quot;</code></pre>
+<p>macOS/Linux fallback, from the repository root:</p>
+<pre><code class="language-bash">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_deep_03.sql</code></pre>
+<p>If the prepared database is unavailable, return to classroom setup rather than changing the target. Keep credentials outside lesson files and command text. Read the <a href="sql-deep-03.html#learner">learner SQL</a>; keep <a href="sql-deep-03.html#solution-1">explanatory solutions</a> and <a href="sql-deep-03.html#solution-2">executable solutions</a> closed until an attempt or an explicit worked comparison. PostgreSQL 16+ syntax is used; the canonical runtime is PostgreSQL 17.</p>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Level:</strong> Advanced. The guide defines each new mechanism before relying on it.</li>
+<li><strong>Prerequisites:</strong> <a href="sql-22.html#guide"><code>sql-22</code></a>, <a href="sql-analytics-01.html#guide"><code>sql-analytics-01</code></a>.</li>
+<li><strong>Artifacts:</strong> <a href="sql-deep-03.html#learner">Learner SQL</a>, <a href="sql-deep-03.html#solution-1">explained reference</a>, and <a href="sql-deep-03.html#solution-2">executable reference</a>. Every fixture is local, deterministic and rolled back; no prior lesson state is required.</li>
+</ul>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>State the output grain and identity before writing a query, including the NULL and duplicate policies.</li>
+<li>Explain the new SQL mechanism, produce each exact projected result and expose the listed counterexample.</li>
+<li>Verify rollback-safe behavior from inspected result rows and assertions without relying on a final success message.</li>
+</ul>
+<h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Window partition:</strong> The rows eligible to contribute to a window function before ordering and frame restrictions are applied.</li>
+</ul>
+<ul>
+<li><strong>Peer group:</strong> Rows equal on all expressions in the window ORDER BY; adding a unique ID changes which rows are peers.</li>
+</ul>
+<ul>
+<li><strong>Frame:</strong> The subset of a partition used for the current row, defined by ROWS, RANGE or GROUPS boundaries and optional exclusions.</li>
+</ul>
+<ul>
+<li><strong>Session boundary:</strong> A derived start flag based on a stated inactivity rule, which must be accumulated in a separate window stage.</li>
+</ul>
+<p>A window function can preserve the input row count while calculating over a different set of rows for each event. PARTITION BY defines independent entities, ORDER BY defines sequence or peers, and the frame defines the contributing neighborhood. These clauses have separate responsibilities. A final ORDER BY controls presentation and does not retroactively change a window&#x27;s calculation.</p>
+<p>ROWS counts physical ordered rows. When its result depends on position, add a deterministic tie break to the window ordering. RANGE works with ordering values and peer groups; an offset RANGE frame over timestamps uses an elapsed-time interval and requires an appropriate single ordering expression. GROUPS counts peer groups rather than individual rows or elapsed duration. A two-row frame, two-peer-group frame and thirty-minute frame answer different questions.</p>
+<p>The default ordered aggregate frame commonly extends through the current peer group. Equal timestamps can therefore receive the same running total even when they appear on separate rows. Adding event_id to that ORDER BY removes the timestamp peers and changes the result. Do not add a tie breaker blindly when the intended metric is peer-aware; choose ROWS for row semantics or preserve the peer key for group semantics.</p>
+<p>EXCLUDE CURRENT ROW removes only the current event. EXCLUDE GROUP removes every peer of the current ordering value, including the current row. EXCLUDE TIES removes other peers while retaining the current row. These distinctions matter for prior-time features: removing only one row can leave another event at the same timestamp in the history. SUM over an empty frame is NULL, so converting it to zero requires an explicit complete-log interpretation.</p>
+<p>LAST_VALUE is especially sensitive to frame boundaries. Under a frame ending at the current row or peer group, it reports that frame&#x27;s last value, not necessarily the partition&#x27;s final event. To obtain the final value for the full customer sequence, explicitly extend the frame to UNBOUNDED FOLLOWING and use a deterministic order.</p>
+<p>Sessionization combines multiple window stages. First calculate the prior timestamp with LAG, then mark the first event or a gap exceeding the threshold, then cumulatively sum those flags. A window result cannot be nested directly inside another window expression in the same SELECT level. Named CTE stages expose the changing columns while preserving event grain until the final session aggregation.</p>
+<h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">WITH samples(event_id,tick,amount) AS (VALUES(1,1,4),(2,1,6),(3,2,3))
+SELECT event_id,
+ sum(amount) OVER(ORDER BY tick,event_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS row_total,
+ sum(amount) OVER(ORDER BY tick RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS peer_total
+FROM samples ORDER BY event_id;</code></pre>
+<p>The output remains one row per event_id with row_total and peer_total. Row totals are 4,10,13 while peer totals are 10,10,13. The first frame advances one deterministic event at a time; the second includes the entire current tick peer group. The final ordering prints identities consistently without changing either frame.</p>
+<h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-sql">WITH samples(event_id,amount) AS (VALUES(1,3),(2,9))
+SELECT event_id,last_value(amount) OVER(ORDER BY event_id) AS default_last,
+ last_value(amount) OVER(ORDER BY event_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS partition_last
+FROM samples ORDER BY event_id;</code></pre>
+<p>One output row per event_id has default_last3 then 9, while partition_last is 9 for both. Explicit UNBOUNDED FOLLOWING makes the second frame cover the entire partition. The function name alone does not determine whether last means current prefix or complete sequence.</p>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<ol>
+<li><strong>Compare row and peer running totals.</strong> For customer a only, return event_id, row_total, peer_total. Use ROWS with occurred_at, event_id for row_total and RANGE with occurred_at alone for peer_total. Both frames start at UNBOUNDED PRECEDING and end at CURRENT ROW. Order final rows by event_id.</li>
+</ol>
+<p><strong>Inputs/evidence:</strong> For sql-deep-03 Exercise 1, For customer a only, return event_id, row_total, peer_total. Use ROWS with occurred_at, event_id for row_total and RANGE with occurred_at alone for peer_total. Both frames start at UNBOUNDED PRECEDING and end at CURRENT ROW. Order final rows by event_id.</p>
+<p><strong>Expected result/shape:</strong> For sql-deep-03 Exercise 1, IDs 1..5 have row_total[1,3,6,10,15] and peer_total[3,3,6,10,15]. The two 10:00 events share only the peer-aware total.</p>
+<p><strong>Verify:</strong> For sql-deep-03 Exercise 1, inspect the tied timestamp rows together: ROWS advances by the full ordering while RANGE includes all peers at the same timestamp.</p>
+<ol>
+<li><strong>Compare neighboring rows with neighboring peer groups.</strong> For customer a, return event_id, two_rows, two_groups. The first frame is ROWS BETWEEN 1 PRECEDING AND CURRENT ROW ordered by timestamp, event_id; the second is GROUPS BETWEEN 1 PRECEDING AND CURRENT ROW ordered by timestamp alone. Final order is event_id.</li>
+</ol>
+<p><strong>Inputs/evidence:</strong> For sql-deep-03 Exercise 2, For customer a, return event_id, two_rows, two_groups. The first frame is ROWS BETWEEN 1 PRECEDING AND CURRENT ROW ordered by timestamp, event_id; the second is GROUPS BETWEEN 1 PRECEDING AND CURRENT ROW ordered by timestamp alone. Final order is event_id.</p>
+<p><strong>Expected result/shape:</strong> For sql-deep-03 Exercise 2, two_rows is[1,3,5,7,9] and two_groups is[3,3,6,7,9]. At event 3 the previous peer group contains both events 1 and 2.</p>
+<p><strong>Verify:</strong> For sql-deep-03 Exercise 2, write each frame membership as a set of event IDs for the tied rows and boundary rows; sum amounts from those memberships independently.</p>
+<ol>
+<li><strong>Distinguish the three exclusion policies.</strong> For customer a, return event_id, without_current, without_group, without_other_ties using a RANGE unbounded-preceding-to-current frame ordered by timestamp. Apply EXCLUDE CURRENT ROW, EXCLUDE GROUP and EXCLUDE TIES respectively. Preserve NULL for empty frames and order by event_id.</li>
+</ol>
+<p><strong>Inputs/evidence:</strong> For sql-deep-03 Exercise 3, For customer a, return event_id, without_current, without_group, without_other_ties using a RANGE unbounded-preceding-to-current frame ordered by timestamp. Apply EXCLUDE CURRENT ROW, EXCLUDE GROUP and EXCLUDE TIES respectively. Preserve NULL for empty frames and order by event_id.</p>
+<p><strong>Expected result/shape:</strong> For sql-deep-03 Exercise 3, ID 1 gives 2, NULL,1; ID 2 gives 1, NULL,2; ID 3 gives 3,3,6; ID 4 gives 6,6,10; ID 5 gives 10,10,15.</p>
+<p><strong>Verify:</strong> For sql-deep-03 Exercise 3, compare CURRENT ROW, GROUP and TIES using the same base frame; confirm TIES retains the current row while removing its other peers.</p>
+<ol>
+<li><strong>Make LAST_VALUE refer to the intended horizon.</strong> For customer a, return event_id, prefix_last, partition_last. Order both windows by timestamp, event_id. Use the default ordered frame for prefix_last and explicit ROWS UNBOUNDED PRECEDING TO UNBOUNDED FOLLOWING for partition_last. Final order is event_id.</li>
+</ol>
+<p><strong>Inputs/evidence:</strong> For sql-deep-03 Exercise 4, For customer a, return event_id, prefix_last, partition_last. Order both windows by timestamp, event_id. Use the default ordered frame for prefix_last and explicit ROWS UNBOUNDED PRECEDING TO UNBOUNDED FOLLOWING for partition_last. Final order is event_id.</p>
+<p><strong>Expected result/shape:</strong> For sql-deep-03 Exercise 4, prefix_last is[1,2,3,4,5], while partition_last is 5 for every row. No row is removed or collapsed.</p>
+<p><strong>Verify:</strong> For sql-deep-03 Exercise 4, compare the default frame last value with a frame extending to UNBOUNDED FOLLOWING; check both peer groups and the final row.</p>
+<ol>
+<li><strong>Build a strictly prior elapsed-time feature.</strong> For all customers return event_id, prior_30m over [occurred_at-30minutes, occurred_at), excluding every event at the current timestamp. Use a timestamp RANGE frame plus EXCLUDE GROUP and partition by customer_id. Treat an empty complete-log window as zero. Order by event_id.</li>
+</ol>
+<p><strong>Inputs/evidence:</strong> For sql-deep-03 Exercise 5, For all customers return event_id, prior_30m over [occurred_at-30minutes, occurred_at), excluding every event at the current timestamp. Use a timestamp RANGE frame plus EXCLUDE GROUP and partition by customer_id. Treat an empty complete-log window as zero. Order by event_id.</p>
+<p><strong>Expected result/shape:</strong> For sql-deep-03 Exercise 5, IDs 1..7 yield prior_30m[0,0,3,3,0,0,10]. Event 4 includes the exact 10:10 lower boundary; event 5 excludes 10:40 because it is 31 minutes old.</p>
+<p><strong>Verify:</strong> For sql-deep-03 Exercise 5, enumerate timestamps inside the elapsed-time interval and exclude every event at the current timestamp; confirm a prior physical row with the same timestamp cannot leak.</p>
+<ol>
+<li><strong>Derive sessions in separate window stages.</strong> Define a new session for a customer&#x27;s first event or a gap strictly greater than 30 minutes. Return customer_id, session_id, event_count, first_event_id, last_event_id, one row per customer/session, ordered by customer_id, session_id. Use deterministic timestamp, event_id ordering and separate lag, flag, cumulative stages.</li>
+</ol>
+<p><strong>Inputs/evidence:</strong> For sql-deep-03 Exercise 6, Define a new session for a customer&#x27;s first event or a gap strictly greater than 30 minutes. Return customer_id, session_id, event_count, first_event_id, last_event_id, one row per customer/session, ordered by customer_id, session_id. Use deterministic timestamp, event_id ordering and separate lag, flag, cumulative stages.</p>
+<p><strong>Expected result/shape:</strong> For sql-deep-03 Exercise 6, Rows are(a,1,4,1,4),(a,2,1,5,5),(b,1,2,6,7). Exact 30-minute gaps stay in the same session; the 31-minute a gap starts session 2.</p>
+<p><strong>Verify:</strong> For sql-deep-03 Exercise 6, compute each lag gap, then the break flag, then its cumulative sum in separate stages; check exactly the threshold and the first event of each user.</p>
+<h4 id="guide--common-mistakes-and-diagnosis">Common mistakes and diagnosis<a class="heading-anchor" href="#guide--common-mistakes-and-diagnosis" aria-label="Link to this section">#</a></h4>
+<p>If a running total jumps across tied timestamps, inspect RANGE peers before assuming duplicate ingestion. If adding a tie breaker changes a peer-aware result, recognize that the peer definition changed. If a prior feature includes same-time events, compare EXCLUDE CURRENT ROW with EXCLUDE GROUP. If LAST_VALUE returns the current value, inspect its frame end. If session logic raises a nested-window error, separate the lag and cumulative calculations into CTEs. Always distinguish the inner window order from the final result order.</p>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Explain the row grain after each FROM, JOIN, filter, grouping or window step. Name the identity columns that prove rows were neither lost nor multiplied.</li>
+<li>Reconstruct a boundary result by hand, then compare with the query output. Explain why the tempting wrong query fails even if it returns the same total on an easier fixture.</li>
+</ul>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<p>Transfer the same reasoning to a new small fixture before using it on larger data, then continue with <a href="sql-deep-04.html#guide">the next deepening lesson</a>. Keep the result columns, ordering, NULL policy and observation horizon explicit. The <a href="../reference-pages/sql/professional/README.md.html">professional SQL track</a> provides the wider route.</p>
+<h4 id="guide--primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#guide--primary-sources-and-official-apis" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><a href="https://www.postgresql.org/docs/17/sql-expressions.html#SYNTAX-WINDOW-FUNCTIONS">PostgreSQL17 window-frame syntax and exclusions</a>.</li>
+</ul>
+<ul>
+<li><a href="https://www.postgresql.org/docs/17/functions-window.html">PostgreSQL17 window functions</a>.</li>
+</ul>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through sql-deep-03: ROWS, RANGE, GROUPS, Exclusions, and Sessionization.
+Read sql/professional/companion-guides/sql_deep_03.md and sql/professional/lessons/sql_deep_03.sql. Direct prerequisites: sql-22, sql-analytics-01.
+Explain the row grain and SQL clauses, then ask me to predict a concrete result before my attempt. Give one hint at a time and review my exact result rows, identity, NULL behavior and boundary evidence. Ask retrieval questions in my own words. Do not read solutions/ until I request it or have made an honest attempt.
+Use only the prepared local disposable advanced_sql_training database and the complete rollback-safe script. Preserve my ignored working copy and do not start services or redirect to another database.
+Done when all six projected-result contracts and their counterexamples have inspected evidence and I can explain why the wrong query fails.</code></pre></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/professional/lessons/sql_deep_03.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/lessons/sql_deep_03.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="lesson"
+
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- sql-deep-03: ROWS, RANGE, GROUPS, Exclusions, and Sessionization</span>
+<span>-- Guide: sql/professional/companion-guides/sql_deep_03.md</span>
+<span>-- Use the complete file in the disposable advanced_sql_training database.</span>
+<span> </span>
+<span>BEGIN;</span>
+<span>DO $course_target$</span>
+<span>BEGIN</span>
+<span>  IF current_database() &lt;&gt; &#x27;advanced_sql_training&#x27; THEN</span>
+<span>    RAISE EXCEPTION &#x27;Use only the disposable advanced_sql_training database&#x27;;</span>
+<span>  END IF;</span>
+<span>END</span>
+<span>$course_target$;</span>
+<span>SET LOCAL TIME ZONE &#x27;UTC&#x27;;</span>
+<span>SET LOCAL statement_timeout = &#x27;15s&#x27;;</span>
+<span> </span>
+<span>CREATE TEMP TABLE deep3_events(event_id integer PRIMARY KEY,customer_id text NOT NULL,occurred_at timestamptz NOT NULL,amount integer NOT NULL) ON COMMIT DROP;</span>
+<span>INSERT INTO deep3_events VALUES</span>
+<span> (1,&#x27;a&#x27;,&#x27;2026-01-01T10:00Z&#x27;,1),(2,&#x27;a&#x27;,&#x27;2026-01-01T10:00Z&#x27;,2),</span>
+<span> (3,&#x27;a&#x27;,&#x27;2026-01-01T10:10Z&#x27;,3),(4,&#x27;a&#x27;,&#x27;2026-01-01T10:40Z&#x27;,4),</span>
+<span> (5,&#x27;a&#x27;,&#x27;2026-01-01T11:11Z&#x27;,5),(6,&#x27;b&#x27;,&#x27;2026-01-01T10:05Z&#x27;,10),</span>
+<span> (7,&#x27;b&#x27;,&#x27;2026-01-01T10:35Z&#x27;,20);</span>
+<span> </span>
+<span>-- Worked example 1</span>
+<span>WITH samples(event_id,tick,amount) AS (VALUES(1,1,4),(2,1,6),(3,2,3))</span>
+<span>SELECT event_id,</span>
+<span> sum(amount) OVER(ORDER BY tick,event_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS row_total,</span>
+<span> sum(amount) OVER(ORDER BY tick RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS peer_total</span>
+<span>FROM samples ORDER BY event_id;</span>
+<span> </span>
+<span>-- Worked example 2</span>
+<span>WITH samples(event_id,amount) AS (VALUES(1,3),(2,9))</span>
+<span>SELECT event_id,last_value(amount) OVER(ORDER BY event_id) AS default_last,</span>
+<span> last_value(amount) OVER(ORDER BY event_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS partition_last</span>
+<span>FROM samples ORDER BY event_id;</span>
+<span> </span>
+<span>-- Exercises</span>
+<span>-- Write attempts in your ignored working copy before the final ROLLBACK.</span>
+<span> </span>
+<span>-- 1. Compare row and peer running totals</span>
+<span>-- Inputs/evidence: For sql-deep-03 Exercise 1, For customer a only, return event_id, row_total, peer_total. Use ROWS with occurred_at, event_id for row_total and RANGE with occurred_at alone for peer_total. Both frames start at UNBOUNDED PRECEDING and end at CURRENT ROW. Order final rows by event_id.</span>
+<span>-- Expected result/shape: For sql-deep-03 Exercise 1, IDs 1..5 have row_total[1,3,6,10,15] and peer_total[3,3,6,10,15]. The two 10:00 events share only the peer-aware total.</span>
+<span>-- Verify: For sql-deep-03 Exercise 1, inspect the tied timestamp rows together: ROWS advances by the full ordering while RANGE includes all peers at the same timestamp.</span>
+<span> </span>
+<span>-- 2. Compare neighboring rows with neighboring peer groups</span>
+<span>-- Inputs/evidence: For sql-deep-03 Exercise 2, For customer a, return event_id, two_rows, two_groups. The first frame is ROWS BETWEEN 1 PRECEDING AND CURRENT ROW ordered by timestamp, event_id; the second is GROUPS BETWEEN 1 PRECEDING AND CURRENT ROW ordered by timestamp alone. Final order is event_id.</span>
+<span>-- Expected result/shape: For sql-deep-03 Exercise 2, two_rows is[1,3,5,7,9] and two_groups is[3,3,6,7,9]. At event 3 the previous peer group contains both events 1 and 2.</span>
+<span>-- Verify: For sql-deep-03 Exercise 2, write each frame membership as a set of event IDs for the tied rows and boundary rows; sum amounts from those memberships independently.</span>
+<span> </span>
+<span>-- 3. Distinguish the three exclusion policies</span>
+<span>-- Inputs/evidence: For sql-deep-03 Exercise 3, For customer a, return event_id, without_current, without_group, without_other_ties using a RANGE unbounded-preceding-to-current frame ordered by timestamp. Apply EXCLUDE CURRENT ROW, EXCLUDE GROUP and EXCLUDE TIES respectively. Preserve NULL for empty frames and order by event_id.</span>
+<span>-- Expected result/shape: For sql-deep-03 Exercise 3, ID 1 gives 2, NULL,1; ID 2 gives 1, NULL,2; ID 3 gives 3,3,6; ID 4 gives 6,6,10; ID 5 gives 10,10,15.</span>
+<span>-- Verify: For sql-deep-03 Exercise 3, compare CURRENT ROW, GROUP and TIES using the same base frame; confirm TIES retains the current row while removing its other peers.</span>
+<span> </span>
+<span>-- 4. Make LAST_VALUE refer to the intended horizon</span>
+<span>-- Inputs/evidence: For sql-deep-03 Exercise 4, For customer a, return event_id, prefix_last, partition_last. Order both windows by timestamp, event_id. Use the default ordered frame for prefix_last and explicit ROWS UNBOUNDED PRECEDING TO UNBOUNDED FOLLOWING for partition_last. Final order is event_id.</span>
+<span>-- Expected result/shape: For sql-deep-03 Exercise 4, prefix_last is[1,2,3,4,5], while partition_last is 5 for every row. No row is removed or collapsed.</span>
+<span>-- Verify: For sql-deep-03 Exercise 4, compare the default frame last value with a frame extending to UNBOUNDED FOLLOWING; check both peer groups and the final row.</span>
+<span> </span>
+<span>-- 5. Build a strictly prior elapsed-time feature</span>
+<span>-- Inputs/evidence: For sql-deep-03 Exercise 5, For all customers return event_id, prior_30m over [occurred_at-30minutes, occurred_at), excluding every event at the current timestamp. Use a timestamp RANGE frame plus EXCLUDE GROUP and partition by customer_id. Treat an empty complete-log window as zero. Order by event_id.</span>
+<span>-- Expected result/shape: For sql-deep-03 Exercise 5, IDs 1..7 yield prior_30m[0,0,3,3,0,0,10]. Event 4 includes the exact 10:10 lower boundary; event 5 excludes 10:40 because it is 31 minutes old.</span>
+<span>-- Verify: For sql-deep-03 Exercise 5, enumerate timestamps inside the elapsed-time interval and exclude every event at the current timestamp; confirm a prior physical row with the same timestamp cannot leak.</span>
+<span> </span>
+<span>-- 6. Derive sessions in separate window stages</span>
+<span>-- Inputs/evidence: For sql-deep-03 Exercise 6, Define a new session for a customer&#x27;s first event or a gap strictly greater than 30 minutes. Return customer_id, session_id, event_count, first_event_id, last_event_id, one row per customer/session, ordered by customer_id, session_id. Use deterministic timestamp, event_id ordering and separate lag, flag, cumulative stages.</span>
+<span>-- Expected result/shape: For sql-deep-03 Exercise 6, Rows are(a,1,4,1,4),(a,2,1,5,5),(b,1,2,6,7). Exact 30-minute gaps stay in the same session; the 31-minute a gap starts session 2.</span>
+<span>-- Verify: For sql-deep-03 Exercise 6, compute each lag gap, then the break flag, then its cumulative sum in separate stages; check exactly the threshold and the first event of each user.</span>
+<span> </span>
+<span>ROLLBACK;</span>
+<span> </span></code></pre></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>sql/professional/solutions/sql_deep_03_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/solutions/sql_deep_03_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--sql-deep-03-explained-reference-solutions">sql-deep-03: Explained reference solutions<a class="heading-anchor" href="#solution-1--sql-deep-03-explained-reference-solutions" aria-label="Link to this section">#</a></h3>
+<p>Read <a href="sql-deep-03.html#guide">ROWS, RANGE, GROUPS, Exclusions, and Sessionization</a> and attempt its six queries before comparing. The <a href="sql-deep-03.html#solution-2">complete reference script</a> recreates the same temporary fixture, runs every answer inside its own savepoint, compares exact JSON row sets with fail-fast assertions, then rolls back. No permanent table, role or service is changed.</p>
+<h4 id="solution-1--exercises-and-reasoning">Exercises and reasoning<a class="heading-anchor" href="#solution-1--exercises-and-reasoning" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-1-compare-row-and-peer-running-totals">Exercise 1: Compare row and peer running totals<a class="heading-anchor" href="#solution-1--exercise-1-compare-row-and-peer-running-totals" aria-label="Link to this section">#</a></h4>
+<p>For customer a only, return event_id, row_total, peer_total. Use ROWS with occurred_at, event_id for row_total and RANGE with occurred_at alone for peer_total. Both frames start at UNBOUNDED PRECEDING and end at CURRENT ROW. Order final rows by event_id.</p>
+<p><strong>Inputs/evidence:</strong> For sql-deep-03 Exercise 1, For customer a only, return event_id, row_total, peer_total. Use ROWS with occurred_at, event_id for row_total and RANGE with occurred_at alone for peer_total. Both frames start at UNBOUNDED PRECEDING and end at CURRENT ROW. Order final rows by event_id.</p>
+<p><strong>Expected result/shape:</strong> For sql-deep-03 Exercise 1, IDs 1..5 have row_total[1,3,6,10,15] and peer_total[3,3,6,10,15]. The two 10:00 events share only the peer-aware total.</p>
+<p><strong>Verify:</strong> For sql-deep-03 Exercise 1, inspect the tied timestamp rows together: ROWS advances by the full ordering while RANGE includes all peers at the same timestamp.</p>
+<pre><code class="language-sql">SELECT event_id,
+ sum(amount) OVER(ORDER BY occurred_at,event_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS row_total,
+ sum(amount) OVER(ORDER BY occurred_at RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS peer_total
+FROM deep3_events WHERE customer_id=&#x27;a&#x27; ORDER BY event_id;</code></pre>
+<p>Filtering to customer a occurs before window evaluation, so the frame contains only those five events. The row-based ordering includes event_id to resolve equal timestamps deterministically. The peer-based ordering deliberately omits it so both 10:00 rows are peers. The different first result is the required counterexample: identical source grain and aggregate function do not imply identical frame semantics.</p>
+<h4 id="solution-1--exercise-2-compare-neighboring-rows-with-neighboring-peer-groups">Exercise 2: Compare neighboring rows with neighboring peer groups<a class="heading-anchor" href="#solution-1--exercise-2-compare-neighboring-rows-with-neighboring-peer-groups" aria-label="Link to this section">#</a></h4>
+<p>For customer a, return event_id, two_rows, two_groups. The first frame is ROWS BETWEEN 1 PRECEDING AND CURRENT ROW ordered by timestamp, event_id; the second is GROUPS BETWEEN 1 PRECEDING AND CURRENT ROW ordered by timestamp alone. Final order is event_id.</p>
+<p><strong>Inputs/evidence:</strong> For sql-deep-03 Exercise 2, For customer a, return event_id, two_rows, two_groups. The first frame is ROWS BETWEEN 1 PRECEDING AND CURRENT ROW ordered by timestamp, event_id; the second is GROUPS BETWEEN 1 PRECEDING AND CURRENT ROW ordered by timestamp alone. Final order is event_id.</p>
+<p><strong>Expected result/shape:</strong> For sql-deep-03 Exercise 2, two_rows is[1,3,5,7,9] and two_groups is[3,3,6,7,9]. At event 3 the previous peer group contains both events 1 and 2.</p>
+<p><strong>Verify:</strong> For sql-deep-03 Exercise 2, write each frame membership as a set of event IDs for the tied rows and boundary rows; sum amounts from those memberships independently.</p>
+<pre><code class="language-sql">SELECT event_id,
+ sum(amount) OVER(ORDER BY occurred_at,event_id ROWS BETWEEN 1 PRECEDING AND CURRENT ROW) AS two_rows,
+ sum(amount) OVER(ORDER BY occurred_at GROUPS BETWEEN 1 PRECEDING AND CURRENT ROW) AS two_groups
+FROM deep3_events WHERE customer_id=&#x27;a&#x27; ORDER BY event_id;</code></pre>
+<p>The GROUPS offset counts distinct ordering-value groups, so one preceding group may contribute several rows. A ROWS offset counts individual ordered positions. Neither frame represents a fixed elapsed duration: the gap from 10:10 to 10:40 is irrelevant to their membership. Use an interval RANGE frame when the scientific question refers to time rather than row or peer count.</p>
+<h4 id="solution-1--exercise-3-distinguish-the-three-exclusion-policies">Exercise 3: Distinguish the three exclusion policies<a class="heading-anchor" href="#solution-1--exercise-3-distinguish-the-three-exclusion-policies" aria-label="Link to this section">#</a></h4>
+<p>For customer a, return event_id, without_current, without_group, without_other_ties using a RANGE unbounded-preceding-to-current frame ordered by timestamp. Apply EXCLUDE CURRENT ROW, EXCLUDE GROUP and EXCLUDE TIES respectively. Preserve NULL for empty frames and order by event_id.</p>
+<p><strong>Inputs/evidence:</strong> For sql-deep-03 Exercise 3, For customer a, return event_id, without_current, without_group, without_other_ties using a RANGE unbounded-preceding-to-current frame ordered by timestamp. Apply EXCLUDE CURRENT ROW, EXCLUDE GROUP and EXCLUDE TIES respectively. Preserve NULL for empty frames and order by event_id.</p>
+<p><strong>Expected result/shape:</strong> For sql-deep-03 Exercise 3, ID 1 gives 2, NULL,1; ID 2 gives 1, NULL,2; ID 3 gives 3,3,6; ID 4 gives 6,6,10; ID 5 gives 10,10,15.</p>
+<p><strong>Verify:</strong> For sql-deep-03 Exercise 3, compare CURRENT ROW, GROUP and TIES using the same base frame; confirm TIES retains the current row while removing its other peers.</p>
+<pre><code class="language-sql">SELECT event_id,
+ sum(amount) OVER(ORDER BY occurred_at RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE CURRENT ROW) AS without_current,
+ sum(amount) OVER(ORDER BY occurred_at RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE GROUP) AS without_group,
+ sum(amount) OVER(ORDER BY occurred_at RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE TIES) AS without_other_ties
+FROM deep3_events WHERE customer_id=&#x27;a&#x27; ORDER BY event_id;</code></pre>
+<p>At 10:00, excluding only the current row leaves the other same-time event, excluding the group leaves no rows, and excluding ties retains only the current event. Later unique timestamps have no other peers, so EXCLUDE TIES retains the full prefix. NULL is the actual SUM result over the empty group-excluded frame. These outputs prevent an accidental claim that current-row exclusion means all strictly earlier times.</p>
+<h4 id="solution-1--exercise-4-make-lastvalue-refer-to-the-intended-horizon">Exercise 4: Make LAST_VALUE refer to the intended horizon<a class="heading-anchor" href="#solution-1--exercise-4-make-lastvalue-refer-to-the-intended-horizon" aria-label="Link to this section">#</a></h4>
+<p>For customer a, return event_id, prefix_last, partition_last. Order both windows by timestamp, event_id. Use the default ordered frame for prefix_last and explicit ROWS UNBOUNDED PRECEDING TO UNBOUNDED FOLLOWING for partition_last. Final order is event_id.</p>
+<p><strong>Inputs/evidence:</strong> For sql-deep-03 Exercise 4, For customer a, return event_id, prefix_last, partition_last. Order both windows by timestamp, event_id. Use the default ordered frame for prefix_last and explicit ROWS UNBOUNDED PRECEDING TO UNBOUNDED FOLLOWING for partition_last. Final order is event_id.</p>
+<p><strong>Expected result/shape:</strong> For sql-deep-03 Exercise 4, prefix_last is[1,2,3,4,5], while partition_last is 5 for every row. No row is removed or collapsed.</p>
+<p><strong>Verify:</strong> For sql-deep-03 Exercise 4, compare the default frame last value with a frame extending to UNBOUNDED FOLLOWING; check both peer groups and the final row.</p>
+<pre><code class="language-sql">SELECT event_id,
+ last_value(amount) OVER(ORDER BY occurred_at,event_id) AS prefix_last,
+ last_value(amount) OVER(ORDER BY occurred_at,event_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS partition_last
+FROM deep3_events WHERE customer_id=&#x27;a&#x27; ORDER BY event_id;</code></pre>
+<p>The unique event_id tie break makes each current ordered position distinct, so the default frame ends at that event and LAST_VALUE returns its amount. The explicit following bound changes the frame horizon without changing output grain. This is useful for retrospective sequence summaries but would leak future information if partition_last were used as a feature at an earlier event time.</p>
+<h4 id="solution-1--exercise-5-build-a-strictly-prior-elapsed-time-feature">Exercise 5: Build a strictly prior elapsed-time feature<a class="heading-anchor" href="#solution-1--exercise-5-build-a-strictly-prior-elapsed-time-feature" aria-label="Link to this section">#</a></h4>
+<p>For all customers return event_id, prior_30m over [occurred_at-30minutes, occurred_at), excluding every event at the current timestamp. Use a timestamp RANGE frame plus EXCLUDE GROUP and partition by customer_id. Treat an empty complete-log window as zero. Order by event_id.</p>
+<p><strong>Inputs/evidence:</strong> For sql-deep-03 Exercise 5, For all customers return event_id, prior_30m over [occurred_at-30minutes, occurred_at), excluding every event at the current timestamp. Use a timestamp RANGE frame plus EXCLUDE GROUP and partition by customer_id. Treat an empty complete-log window as zero. Order by event_id.</p>
+<p><strong>Expected result/shape:</strong> For sql-deep-03 Exercise 5, IDs 1..7 yield prior_30m[0,0,3,3,0,0,10]. Event 4 includes the exact 10:10 lower boundary; event 5 excludes 10:40 because it is 31 minutes old.</p>
+<p><strong>Verify:</strong> For sql-deep-03 Exercise 5, enumerate timestamps inside the elapsed-time interval and exclude every event at the current timestamp; confirm a prior physical row with the same timestamp cannot leak.</p>
+<pre><code class="language-sql">SELECT event_id,COALESCE(sum(amount) OVER(
+ PARTITION BY customer_id ORDER BY occurred_at
+ RANGE BETWEEN INTERVAL &#x27;30 minutes&#x27; PRECEDING AND CURRENT ROW EXCLUDE GROUP),0) AS prior_30m
+FROM deep3_events ORDER BY event_id;</code></pre>
+<p>The interval RANGE lower bound uses elapsed timestamp distance rather than a fixed number of events. EXCLUDE GROUP removes every current-timestamp peer, preserving strict prior-time semantics. COALESCE to zero is justified only because this fixture represents a complete nonmissing event log and an empty contributing set has known zero activity. Partitioning prevents customer b from borrowing customer a&#x27;s history.</p>
+<h4 id="solution-1--exercise-6-derive-sessions-in-separate-window-stages">Exercise 6: Derive sessions in separate window stages<a class="heading-anchor" href="#solution-1--exercise-6-derive-sessions-in-separate-window-stages" aria-label="Link to this section">#</a></h4>
+<p>Define a new session for a customer&#x27;s first event or a gap strictly greater than 30 minutes. Return customer_id, session_id, event_count, first_event_id, last_event_id, one row per customer/session, ordered by customer_id, session_id. Use deterministic timestamp, event_id ordering and separate lag, flag, cumulative stages.</p>
+<p><strong>Inputs/evidence:</strong> For sql-deep-03 Exercise 6, Define a new session for a customer&#x27;s first event or a gap strictly greater than 30 minutes. Return customer_id, session_id, event_count, first_event_id, last_event_id, one row per customer/session, ordered by customer_id, session_id. Use deterministic timestamp, event_id ordering and separate lag, flag, cumulative stages.</p>
+<p><strong>Expected result/shape:</strong> For sql-deep-03 Exercise 6, Rows are(a,1,4,1,4),(a,2,1,5,5),(b,1,2,6,7). Exact 30-minute gaps stay in the same session; the 31-minute a gap starts session 2.</p>
+<p><strong>Verify:</strong> For sql-deep-03 Exercise 6, compute each lag gap, then the break flag, then its cumulative sum in separate stages; check exactly the threshold and the first event of each user.</p>
+<pre><code class="language-sql">WITH previous AS (
+ SELECT e.*,lag(occurred_at) OVER(PARTITION BY customer_id ORDER BY occurred_at,event_id) AS prior_at
+ FROM deep3_events AS e
+), flags AS (
+ SELECT previous.*,CASE WHEN prior_at IS NULL OR occurred_at-prior_at&gt;INTERVAL &#x27;30 minutes&#x27; THEN 1 ELSE 0 END AS begins
+ FROM previous
+), sessions AS (
+ SELECT flags.*,sum(begins) OVER(PARTITION BY customer_id ORDER BY occurred_at,event_id ROWS UNBOUNDED PRECEDING) AS session_id
+ FROM flags
+)
+SELECT customer_id,session_id,count(*) AS event_count,
+ (array_agg(event_id ORDER BY occurred_at,event_id))[1] AS first_event_id,
+ (array_agg(event_id ORDER BY occurred_at DESC,event_id DESC))[1] AS last_event_id
+FROM sessions GROUP BY customer_id,session_id ORDER BY customer_id,session_id;</code></pre>
+<p>The first CTE adds prior timestamps without collapsing events. The next creates start flags, and the third cumulatively numbers them within each customer. Only the final GROUP BY changes grain to one session. Ordered array aggregates select entire event identities at sequence endpoints rather than assuming the smallest or largest numeric ID always corresponds to time. The strict greater-than boundary is verified by both exact 30-minute and 31-minute gaps.</p>
+<h4 id="solution-1--verification-and-transaction-boundary">Verification and transaction boundary<a class="heading-anchor" href="#solution-1--verification-and-transaction-boundary" aria-label="Link to this section">#</a></h4>
+<p>Every answer is materialized into a temporary answer table and compared with a literal expected row set, including column names, NULL values and deterministic order. The assertion function rejects both false and unknown Boolean results, so a NULL comparison cannot silently pass. Each exercise rolls back to its own savepoint, ensuring mutations used for one boundary case do not alter the next. The final ROLLBACK removes the full fixture. Read the first error if a contract fails; a later row count or command tag cannot repair an earlier failed assertion.</p></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/professional/solutions/sql_deep_03_solutions.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/solutions/sql_deep_03_solutions.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span>-- sql-deep-03: complete reference queries and exact result assertions</span>
+<span> </span>
+<span>BEGIN;</span>
+<span>DO $course_target$</span>
+<span>BEGIN</span>
+<span>  IF current_database() &lt;&gt; &#x27;advanced_sql_training&#x27; THEN</span>
+<span>    RAISE EXCEPTION &#x27;Use only the disposable advanced_sql_training database&#x27;;</span>
+<span>  END IF;</span>
+<span>END</span>
+<span>$course_target$;</span>
+<span>SET LOCAL TIME ZONE &#x27;UTC&#x27;;</span>
+<span>SET LOCAL statement_timeout = &#x27;15s&#x27;;</span>
+<span> </span>
+<span>CREATE TEMP TABLE deep3_events(event_id integer PRIMARY KEY,customer_id text NOT NULL,occurred_at timestamptz NOT NULL,amount integer NOT NULL) ON COMMIT DROP;</span>
+<span>INSERT INTO deep3_events VALUES</span>
+<span> (1,&#x27;a&#x27;,&#x27;2026-01-01T10:00Z&#x27;,1),(2,&#x27;a&#x27;,&#x27;2026-01-01T10:00Z&#x27;,2),</span>
+<span> (3,&#x27;a&#x27;,&#x27;2026-01-01T10:10Z&#x27;,3),(4,&#x27;a&#x27;,&#x27;2026-01-01T10:40Z&#x27;,4),</span>
+<span> (5,&#x27;a&#x27;,&#x27;2026-01-01T11:11Z&#x27;,5),(6,&#x27;b&#x27;,&#x27;2026-01-01T10:05Z&#x27;,10),</span>
+<span> (7,&#x27;b&#x27;,&#x27;2026-01-01T10:35Z&#x27;,20);</span>
+<span> </span>
+<span>CREATE FUNCTION pg_temp.assert_true(ok boolean, message text)</span>
+<span>RETURNS void LANGUAGE plpgsql AS $assert$</span>
+<span>BEGIN</span>
+<span>  IF ok IS DISTINCT FROM true THEN</span>
+<span>    RAISE EXCEPTION &#x27;Contract failed: %&#x27;, message;</span>
+<span>  END IF;</span>
+<span>END</span>
+<span>$assert$;</span>
+<span> </span>
+<span>-- Exercises</span>
+<span> </span>
+<span>-- 1. Compare row and peer running totals</span>
+<span>SAVEPOINT exercise_1;</span>
+<span>CREATE TEMP TABLE answer_1 ON COMMIT DROP AS</span>
+<span>SELECT event_id,</span>
+<span> sum(amount) OVER(ORDER BY occurred_at,event_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS row_total,</span>
+<span> sum(amount) OVER(ORDER BY occurred_at RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS peer_total</span>
+<span>FROM deep3_events WHERE customer_id=&#x27;a&#x27; ORDER BY event_id;</span>
+<span>SELECT event_id,row_total,peer_total FROM answer_1 ORDER BY event_id;</span>
+<span>SELECT pg_temp.assert_true((SELECT COALESCE(jsonb_agg(to_jsonb(answer_1) ORDER BY event_id),&#x27;[]&#x27;::jsonb) FROM answer_1) = &#x27;[{&quot;event_id&quot;: 1, &quot;row_total&quot;: 1, &quot;peer_total&quot;: 3}, {&quot;event_id&quot;: 2, &quot;row_total&quot;: 3, &quot;peer_total&quot;: 3}, {&quot;event_id&quot;: 3, &quot;row_total&quot;: 6, &quot;peer_total&quot;: 6}, {&quot;event_id&quot;: 4, &quot;row_total&quot;: 10, &quot;peer_total&quot;: 10}, {&quot;event_id&quot;: 5, &quot;row_total&quot;: 15, &quot;peer_total&quot;: 15}]&#x27;::jsonb,&#x27;sql-deep-03 exercise 1&#x27;);</span>
+<span>ROLLBACK TO SAVEPOINT exercise_1;</span>
+<span>RELEASE SAVEPOINT exercise_1;</span>
+<span> </span>
+<span>-- 2. Compare neighboring rows with neighboring peer groups</span>
+<span>SAVEPOINT exercise_2;</span>
+<span>CREATE TEMP TABLE answer_2 ON COMMIT DROP AS</span>
+<span>SELECT event_id,</span>
+<span> sum(amount) OVER(ORDER BY occurred_at,event_id ROWS BETWEEN 1 PRECEDING AND CURRENT ROW) AS two_rows,</span>
+<span> sum(amount) OVER(ORDER BY occurred_at GROUPS BETWEEN 1 PRECEDING AND CURRENT ROW) AS two_groups</span>
+<span>FROM deep3_events WHERE customer_id=&#x27;a&#x27; ORDER BY event_id;</span>
+<span>SELECT event_id,two_rows,two_groups FROM answer_2 ORDER BY event_id;</span>
+<span>SELECT pg_temp.assert_true((SELECT COALESCE(jsonb_agg(to_jsonb(answer_2) ORDER BY event_id),&#x27;[]&#x27;::jsonb) FROM answer_2) = &#x27;[{&quot;event_id&quot;: 1, &quot;two_rows&quot;: 1, &quot;two_groups&quot;: 3}, {&quot;event_id&quot;: 2, &quot;two_rows&quot;: 3, &quot;two_groups&quot;: 3}, {&quot;event_id&quot;: 3, &quot;two_rows&quot;: 5, &quot;two_groups&quot;: 6}, {&quot;event_id&quot;: 4, &quot;two_rows&quot;: 7, &quot;two_groups&quot;: 7}, {&quot;event_id&quot;: 5, &quot;two_rows&quot;: 9, &quot;two_groups&quot;: 9}]&#x27;::jsonb,&#x27;sql-deep-03 exercise 2&#x27;);</span>
+<span>ROLLBACK TO SAVEPOINT exercise_2;</span>
+<span>RELEASE SAVEPOINT exercise_2;</span>
+<span> </span>
+<span>-- 3. Distinguish the three exclusion policies</span>
+<span>SAVEPOINT exercise_3;</span>
+<span>CREATE TEMP TABLE answer_3 ON COMMIT DROP AS</span>
+<span>SELECT event_id,</span>
+<span> sum(amount) OVER(ORDER BY occurred_at RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE CURRENT ROW) AS without_current,</span>
+<span> sum(amount) OVER(ORDER BY occurred_at RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE GROUP) AS without_group,</span>
+<span> sum(amount) OVER(ORDER BY occurred_at RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE TIES) AS without_other_ties</span>
+<span>FROM deep3_events WHERE customer_id=&#x27;a&#x27; ORDER BY event_id;</span>
+<span>SELECT event_id,without_current,without_group,without_other_ties FROM answer_3 ORDER BY event_id;</span>
+<span>SELECT pg_temp.assert_true((SELECT COALESCE(jsonb_agg(to_jsonb(answer_3) ORDER BY event_id),&#x27;[]&#x27;::jsonb) FROM answer_3) = &#x27;[{&quot;event_id&quot;: 1, &quot;without_current&quot;: 2, &quot;without_group&quot;: null, &quot;without_other_ties&quot;: 1}, {&quot;event_id&quot;: 2, &quot;without_current&quot;: 1, &quot;without_group&quot;: null, &quot;without_other_ties&quot;: 2}, {&quot;event_id&quot;: 3, &quot;without_current&quot;: 3, &quot;without_group&quot;: 3, &quot;without_other_ties&quot;: 6}, {&quot;event_id&quot;: 4, &quot;without_current&quot;: 6, &quot;without_group&quot;: 6, &quot;without_other_ties&quot;: 10}, {&quot;event_id&quot;: 5, &quot;without_current&quot;: 10, &quot;without_group&quot;: 10, &quot;without_other_ties&quot;: 15}]&#x27;::jsonb,&#x27;sql-deep-03 exercise 3&#x27;);</span>
+<span>ROLLBACK TO SAVEPOINT exercise_3;</span>
+<span>RELEASE SAVEPOINT exercise_3;</span>
+<span> </span>
+<span>-- 4. Make LAST_VALUE refer to the intended horizon</span>
+<span>SAVEPOINT exercise_4;</span>
+<span>CREATE TEMP TABLE answer_4 ON COMMIT DROP AS</span>
+<span>SELECT event_id,</span>
+<span> last_value(amount) OVER(ORDER BY occurred_at,event_id) AS prefix_last,</span>
+<span> last_value(amount) OVER(ORDER BY occurred_at,event_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS partition_last</span>
+<span>FROM deep3_events WHERE customer_id=&#x27;a&#x27; ORDER BY event_id;</span>
+<span>SELECT event_id,prefix_last,partition_last FROM answer_4 ORDER BY event_id;</span>
+<span>SELECT pg_temp.assert_true((SELECT COALESCE(jsonb_agg(to_jsonb(answer_4) ORDER BY event_id),&#x27;[]&#x27;::jsonb) FROM answer_4) = &#x27;[{&quot;event_id&quot;: 1, &quot;prefix_last&quot;: 1, &quot;partition_last&quot;: 5}, {&quot;event_id&quot;: 2, &quot;prefix_last&quot;: 2, &quot;partition_last&quot;: 5}, {&quot;event_id&quot;: 3, &quot;prefix_last&quot;: 3, &quot;partition_last&quot;: 5}, {&quot;event_id&quot;: 4, &quot;prefix_last&quot;: 4, &quot;partition_last&quot;: 5}, {&quot;event_id&quot;: 5, &quot;prefix_last&quot;: 5, &quot;partition_last&quot;: 5}]&#x27;::jsonb,&#x27;sql-deep-03 exercise 4&#x27;);</span>
+<span>ROLLBACK TO SAVEPOINT exercise_4;</span>
+<span>RELEASE SAVEPOINT exercise_4;</span>
+<span> </span>
+<span>-- 5. Build a strictly prior elapsed-time feature</span>
+<span>SAVEPOINT exercise_5;</span>
+<span>CREATE TEMP TABLE answer_5 ON COMMIT DROP AS</span>
+<span>SELECT event_id,COALESCE(sum(amount) OVER(</span>
+<span> PARTITION BY customer_id ORDER BY occurred_at</span>
+<span> RANGE BETWEEN INTERVAL &#x27;30 minutes&#x27; PRECEDING AND CURRENT ROW EXCLUDE GROUP),0) AS prior_30m</span>
+<span>FROM deep3_events ORDER BY event_id;</span>
+<span>SELECT event_id,prior_30m FROM answer_5 ORDER BY event_id;</span>
+<span>SELECT pg_temp.assert_true((SELECT COALESCE(jsonb_agg(to_jsonb(answer_5) ORDER BY event_id),&#x27;[]&#x27;::jsonb) FROM answer_5) = &#x27;[{&quot;event_id&quot;: 1, &quot;prior_30m&quot;: 0}, {&quot;event_id&quot;: 2, &quot;prior_30m&quot;: 0}, {&quot;event_id&quot;: 3, &quot;prior_30m&quot;: 3}, {&quot;event_id&quot;: 4, &quot;prior_30m&quot;: 3}, {&quot;event_id&quot;: 5, &quot;prior_30m&quot;: 0}, {&quot;event_id&quot;: 6, &quot;prior_30m&quot;: 0}, {&quot;event_id&quot;: 7, &quot;prior_30m&quot;: 10}]&#x27;::jsonb,&#x27;sql-deep-03 exercise 5&#x27;);</span>
+<span>ROLLBACK TO SAVEPOINT exercise_5;</span>
+<span>RELEASE SAVEPOINT exercise_5;</span>
+<span> </span>
+<span>-- 6. Derive sessions in separate window stages</span>
+<span>SAVEPOINT exercise_6;</span>
+<span>CREATE TEMP TABLE answer_6 ON COMMIT DROP AS</span>
+<span>WITH previous AS (</span>
+<span> SELECT e.*,lag(occurred_at) OVER(PARTITION BY customer_id ORDER BY occurred_at,event_id) AS prior_at</span>
+<span> FROM deep3_events AS e</span>
+<span>), flags AS (</span>
+<span> SELECT previous.*,CASE WHEN prior_at IS NULL OR occurred_at-prior_at&gt;INTERVAL &#x27;30 minutes&#x27; THEN 1 ELSE 0 END AS begins</span>
+<span> FROM previous</span>
+<span>), sessions AS (</span>
+<span> SELECT flags.*,sum(begins) OVER(PARTITION BY customer_id ORDER BY occurred_at,event_id ROWS UNBOUNDED PRECEDING) AS session_id</span>
+<span> FROM flags</span>
+<span>)</span>
+<span>SELECT customer_id,session_id,count(*) AS event_count,</span>
+<span> (array_agg(event_id ORDER BY occurred_at,event_id))[1] AS first_event_id,</span>
+<span> (array_agg(event_id ORDER BY occurred_at DESC,event_id DESC))[1] AS last_event_id</span>
+<span>FROM sessions GROUP BY customer_id,session_id ORDER BY customer_id,session_id;</span>
+<span>SELECT customer_id,session_id,event_count,first_event_id,last_event_id FROM answer_6 ORDER BY customer_id,session_id;</span>
+<span>SELECT pg_temp.assert_true((SELECT COALESCE(jsonb_agg(to_jsonb(answer_6) ORDER BY customer_id,session_id),&#x27;[]&#x27;::jsonb) FROM answer_6) = &#x27;[{&quot;customer_id&quot;: &quot;a&quot;, &quot;session_id&quot;: 1, &quot;event_count&quot;: 4, &quot;first_event_id&quot;: 1, &quot;last_event_id&quot;: 4}, {&quot;customer_id&quot;: &quot;a&quot;, &quot;session_id&quot;: 2, &quot;event_count&quot;: 1, &quot;first_event_id&quot;: 5, &quot;last_event_id&quot;: 5}, {&quot;customer_id&quot;: &quot;b&quot;, &quot;session_id&quot;: 1, &quot;event_count&quot;: 2, &quot;first_event_id&quot;: 6, &quot;last_event_id&quot;: 7}]&#x27;::jsonb,&#x27;sql-deep-03 exercise 6&#x27;);</span>
+<span>ROLLBACK TO SAVEPOINT exercise_6;</span>
+<span>RELEASE SAVEPOINT exercise_6;</span>
+<span> </span>
+<span>ROLLBACK;</span>
+<span> </span></code></pre></div>
+      </section>
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to coach me through sql-deep-03: ROWS, RANGE, GROUPS, Exclusions, and Sessionization.
+Read sql/professional/companion-guides/sql_deep_03.md and sql/professional/lessons/sql_deep_03.sql. Direct prerequisites: sql-22, sql-analytics-01.
+Explain the row grain and SQL clauses, then ask me to predict a concrete result before my attempt. Give one hint at a time and review my exact result rows, identity, NULL behavior and boundary evidence. Ask retrieval questions in my own words. Do not read solutions/ until I request it or have made an honest attempt.
+Use only the prepared local disposable advanced_sql_training database and the complete rollback-safe script. Preserve my ignored working copy and do not start services or redirect to another database.
+Done when all six projected-result contracts and their counterexamples have inspected evidence and I can explain why the wrong query fails.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="sql-deep-02.html"><small>Previous lesson</small><strong>sql-deep-02</strong><span>Metric Algebra Across Grains, Snapshots, and Weighted Bridges</span></a>
+        <a class="nav-card next" href="sql-deep-04.html"><small>Next lesson</small><strong>sql-deep-04</strong><span>Recursive Graph Reachability, Paths, Cycles, and Dependency Order</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "sql-deep-03";
+    const LEARNER_PATH = "sql/professional/lessons/sql_deep_03.sql";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const LAB_MODE = false;
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      !LAB_MODE &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+    const labMode = Boolean(
+      SERVER_TOKEN && LAB_MODE &&
+      location.protocol === "http:" && location.hostname === "127.0.0.1"
+    );
+    if (labMode) {
+      document.querySelectorAll(".lab-only").forEach((element) => { element.hidden = false; });
+      document.querySelectorAll(".native-only, .static-help, .static-only").forEach((element) => { element.hidden = true; });
+      document.querySelector("#run-heading").textContent = "Keep your attempt beside the lesson";
+      document.querySelector("#run-guidance").textContent =
+        "Open this lesson in the coding lab to save your reasoning and work. Its capability notice explains which execution tools are available. Completion follows your saved evidence and self-check.";
+    }
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

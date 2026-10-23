@@ -1,14 +1,12 @@
 # torch-024: Capstone: a small classifier with honest evaluation
 
-Status: authored PyTorch course content. The manifest inventories complete teaching files; runtime readiness remains a separate, measured property.
-
 ## Level and prerequisites
 
 Intermediate; approximately 210 minutes. Direct prerequisites: `torch-023`. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
 
 ## Learning objectives
 
-A classifier capstone must connect the task definition to training and evaluation evidence. The central investigation is concrete: Use training x-2, -1, 1, 2 with labels0, 0, 1, 1 and test x-3, 3. The finish condition is 4 training records, 2 test records. negative0/1 errors; positive1/1. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+A classifier capstone must connect the task definition to training and evaluation evidence. The central investigation is concrete: Use training x-2, -1, 1, 2 with labels 0, 0, 1, 1 and test x-3, 3. The finish condition is 4training records, 2test records. negative 0/1errors; positive 1/1. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -18,13 +16,15 @@ Report confusion counts and their denominator, not only accuracy. A mean baselin
 
 ## Design decisions and when to use this method
 
+Use the one-weight logistic model because the declared target is the sign of one scalar coordinate. Additional hidden layers would add parameters without resolving uncertainty in this visible task. Freeze preprocessing, step budget and decision threshold before examining the two test decisions. If those choices are tuned from later results, record that population as selection data rather than claiming it stayed an untouched test.
 
+Treat the capstone as an inspectable training-and-evaluation procedure. The labels and geometric rule are public, and the test points extend beyond the training coordinate range. A successful fixture proves the declared local behavior; it does not establish a blind scientific discovery, calibration or reliability for a real application.
 
 ## Paired TensorFlow comparison
 
 Compare [tf-024](../../deep-learning-tensorflow/guides/tf-024.md) after deriving the shared numerical contract.
 
-The paired TensorFlow classifier uses the same geometry. Match normalization variance conventions:NumPy default std uses N, while PyTorch std defaults to a correction that must be over r id den here. Both need logit loss, threshold policy, train-only fit and complete confusion counts.
+The paired TensorFlow classifier uses the same geometry. Match normalization variance conventions: NumPy default std uses N, while PyTorch std defaults to a correction that must be overridden here. Both need logit loss, threshold policy, train-only fit and complete confusion counts.
 
 ## Vocabulary and concepts
 
@@ -38,13 +38,38 @@ The paired TensorFlow classifier uses the same geometry. Match normalization var
 
 ## How to run this lesson
 
-Use a prepared `llm-torch-cpu` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/torch-024/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: `& $CoursePython courses/deep-learning-pytorch/lessons/torch-024.py`. For macOS/Linux use `.venv/bin/python courses/deep-learning-pytorch/lessons/torch-024.py` from the repository root.
+Use a prepared `llm-torch-cpu` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/torch-024/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: `& $CoursePython courses/deep-learning-pytorch/lessons/torch-024.py`. For macOS/Linux, use the interpreter explicitly selected for a separately prepared native PyTorch environment, and invoke that interpreter on `courses/deep-learning-pytorch/lessons/torch-024.py` from the repository root. The repository's general `.venv` is not assumed to contain PyTorch; the prepared classroom profile is the default execution route.
 
-Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.
+Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the explicit tolerance in each assertion. Several analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone is not a universal numerical-error bound. Finite differences, reductions and conditioning can require different justified tolerances. Integer counts, identities and boolean decisions should be exact.
 
 ## Syntax anatomy and reasoning sequence
 
-UseX shaped(4, 1), floating binary targets and nn.Linear(1, 1, bias=False). Calculate x.std(dim=0, correction=0)to match the declared population normalization fixture. Train with BCEWithLogitsLoss for40 fixed SGD updates. Evaluate with model.eval and no_grad, then classify logits>=0. Count TP, TN, FP, FN with boolean masks and verify their sum.
+UseX shaped(4, 1), floating binary targets and nn.Linear(1, 1, bias=False). Calculate x.std(dim=0, correction=0)to match the declared population normalization fixture. Train with BCEWithLogitsLoss for 40 fixed SGD updates. Evaluate with model.eval and no_grad, then classify logits>=0. Count TP, TN, FP, FN with boolean masks and verify their sum.
+
+## Derive the classifier and audit every assessment row
+
+The training values[-2, -1, 1, 2] have mean zero and squared deviations summing to ten. Population variance divides by four, giving 2.5 and scale sqrt(2.5). PyTorch's correction=0 matches NumPy's default used in the paired TensorFlow guide. Using the default sample correction would divide by three and produce sqrt(10/3). Both scales are mathematically meaningful statistics, but they define different model inputs and update trajectories. Equal final class labels would not prove framework parity.
+
+The stored model weight has shape(1, 1), inputs and targets have shape(4, 1), and logits have shape(4, 1). The bias is deliberately absent. Binary cross-entropy with logits is applied directly to those logits. Applying sigmoid first and then passing its output to the logits loss would change the objective. A target shaped(4, ) is also a different interface from(4, 1), even when it contains the same four numbers; preserve the declared axes rather than relying on broadcasting or reshaping after a failure.
+
+For one normalized feature t and label y, the logit is z=wt and the loss derivative with respect to w is(sigmoid(z)-y)t. At w=0, all probabilities are one-half. Writing s=sqrt(2.5), the four derivative contributions are -1/s, -1/(2s), -1/(2s), -1/s. Their mean is -3/(4s), approximately-0.474342. The first SGD step at 0.1 therefore makes w approximately 0.0474342. This analytic sign and scale explain why the later fixed 40-step run should have a positive finite weight.
+
+The data are separable under this one-feature rule. In an unregularized logistic model, continued loss reduction can push the weight larger without a finite optimum that must be reached. Forty steps are a declared computational budget, not evidence of convergence or a reason to repeat training until a preferred test score appears. If early stopping or hyperparameters are to be selected, they need a separate selection procedure and data boundary.
+
+The decision rule is logit>=0, which corresponds to probability>=0.5. At the zero initial weight, both test logits are exactly zero and this tie convention predicts the positive class for both rows. After a positive weight, the transformed-3 point has a negative logit and the+3 point a positive one. The final confusion table is:
+
+| Test input | Truth | Decision | Count category |
+| --- | --- | --- | --- |
+| -3 | negative | negative | TN=1 |
+| +3 | positive | positive | TP=1 |
+
+FP and FN are zero, and the four counts sum to two. The fixed class-zero baseline instead has TN=1, FN=1. Its one error and the model's zero errors are evaluated on the same two units. This is a useful paired comparison, but one changed decision would move accuracy by 50 percentage points, so the apparent difference is not a stable population estimate.
+
+The subgroup counterexample changes only the positive row's decision. The negative group then has 0 errors out of 1 and the positive group 1 out of 1. Reporting only an aggregate error rate of 1/2 hides which group failed. At the same time, one observation per group is not sufficient for a reliable subgroup performance claim. These sign-based teaching groups are not a demonstrated fairness analysis of a real population.
+
+Distinct train/test IDs are necessary but not sufficient for independence. Real data can contain copied examples, shared source families, temporal leakage or features only available after the decision. The literal fixture has none of those hidden sources by construction, but its rule is already visible to the learner. Preserve this difference between a procedure test and an undisclosed final assessment.
+
+Finally, normalization parameters belong to the fitted artifact. The test coordinates must reuse the training mean and scale. Recomputing statistics on each inference batch changes predictions according to which other rows arrived together. A release should save feature order, units, mean, scale, dtype and threshold with the model state, and compare a known input through the complete preprocessing-and-model path. Model weights alone are not the whole predictor.
 
 ## Worked example / walkthrough
 
@@ -63,18 +88,18 @@ test_x=torch.tensor([[-3.],[3.]]); truth=torch.tensor([False,True]); train_ids={
 assert not train_ids&test_ids and len(test_ids)==2
 ```
 
-**Expected:** 4 training records, 2 test records.
+**Expected:** 4training records, 2test records.
 
 ### Example B: Fit explicit normalization
 
-PyTorch's default sample correction would produce a different scale. Specifying correction0 aligns this fixture with the paired TensorFlow/NumPy calculation.
+PyTorch's default sample correction would produce a different scale. Specifying correction 0 aligns this fixture with the paired TensorFlow/NumPy calculation.
 
 ```python
 mean=x.mean(0); scale=x.std(0,correction=0); tx=(x-mean)/scale; vx=(test_x-mean)/scale
 assert mean.item()==0; np.testing.assert_allclose(scale.item(),np.sqrt(2.5),atol=1e-6,rtol=0)
 ```
 
-**Expected:** mean0; scale sqrt2.5.
+**Expected:** mean 0; scale sqrt 2.5.
 
 ### Example C: Train a fixed classifier
 
@@ -89,41 +114,43 @@ for _ in range(40):
 assert model.weight.item()>0 and torch.isfinite(model.weight).all()
 ```
 
-**Expected:** positive finite weight after40 updates.
+**Expected:** positive finite weight after 40 updates.
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: 4 training records, 2 test records. negative0/1 errors; positive1/1. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: 4training records, 2test records. negative 0/1errors; positive 1/1. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
-1. **Freeze the geometric task.** Use training x-2, -1, 1, 2 with labels0, 0, 1, 1 and test x-3, 3.
-   **Expected:** 4 training records, 2 test records.
-   **Verify:** Save the assertion results for exercise 1, including 4 training records, 2 test records.
+1. **Freeze the geometric task.** Use training x-2, -1, 1, 2 with labels 0, 0, 1, 1 and test x-3, 3.
+   **Expected:** 4training records, 2test records.
+   **Verify:** Save the assertion results for exercise 1, including 4training records, 2test records.
 
 2. **Fit explicit normalization.** Calculate training mean and population standard deviation.
-   **Expected:** mean0; scale sqrt2.5.
-   **Verify:** Save the assertion results for exercise 2, including mean0; scale sqrt2.5.
+   **Expected:** mean 0; scale sqrt 2.5.
+   **Verify:** Save the assertion results for exercise 2, including mean 0; scale sqrt 2.5.
 
-3. **Train a fixed classifier.** Zero-initialize the weight and run40 SGD.1 steps with binary logits loss.
-   **Expected:** positive finite weight after40 updates.
-   **Verify:** Save the assertion results for exercise 3, including positive finite weight after40 updates.
+3. **Train a fixed classifier.** Zero-initialize the weight and run 40 SGD.1 steps with binary logits loss.
+   **Expected:** positive finite weight after 40 updates.
+   **Verify:** Save the assertion results for exercise 3, including positive finite weight after 40 updates.
 
-4. **Account for every test prediction.** Threshold test logits at0 and calculate confusion counts.
-   **Expected:** TP1, TN1, FP0, FN0, total2.
-   **Verify:** Save the assertion results for exercise 4, including TP1, TN1, FP0, FN0, total2.
+4. **Account for every test prediction.** Threshold test logits at 0 and calculate confusion counts.
+   **Expected:** TP 1, TN 1, FP 0, FN 0, total 2.
+   **Verify:** Save the assertion results for exercise 4, including TP 1, TN 1, FP 0, FN 0, total 2.
 
-5. **Compare a constant baseline.** Predict class0 for both test rows and count mistakes.
-   **Expected:** baseline1 error; model0 on this fixture.
-   **Verify:** Save the assertion results for exercise 5, including baseline1 error; model0 on this fixture.
+5. **Compare a constant baseline.** Predict class 0 for both test rows and count mistakes.
+   **Expected:** baseline 1 error; model 0 on this fixture.
+   **Verify:** Save the assertion results for exercise 5, including baseline 1 error; model 0 on this fixture.
 
 6. **Reveal a group-specific failure.** Flip only the positive group decision and report group counts.
-   **Expected:** negative0/1 errors; positive1/1.
-   **Verify:** Save the assertion results for exercise 6, including negative0/1 errors; positive1/1.
+   **Expected:** negative 0/1errors; positive 1/1.
+   **Verify:** Save the assertion results for exercise 6, including negative 0/1errors; positive 1/1.
 
 ## Common pitfalls and diagnosis
 
-When a result disagrees, locate the first intermediate value that violates this explanation. Inspect shapes and identities before aggregates, and inspect counts before averages. Preserve the original fixture and introduce only one controlled change at a time. If an arithmetic identity passes but a data-boundary condition fails, the experiment is still invalid. If a runtime is unavailable, record the unexecuted code as unverified rather than replacing its output with the expected text. The separate explanation discusses why the tempting alternative in each case changes the result.
+If a paired-framework weight differs, check correction=0, initialization, loss reduction, target shape and update count before assuming a backend defect. Compute the first derivative -3/(4sqrt(2.5)) and inspect its sign. If the model predicts both classes incorrectly, verify that thresholding uses logits rather than a second sigmoid interpretation and that truth rows retain their identity order.
+
+If confusion counts do not sum to two, inspect Boolean complements, shape broadcasting and missing rows. If a subgroup report lacks its denominator, it is incomplete. If a result looks exceptionally strong, revisit the public geometric rule, tiny visible holdout and extrapolation range before calling it population evidence. A failed data or evaluation boundary is a no-go result even when the arithmetic accuracy is perfect.
 
 ## Progressive hints
 
@@ -147,7 +174,7 @@ API and mechanism reference: [PyTorch2.9 reference](https://docs.pytorch.org/doc
 
 Different variance corrections, dtypes or fit partitions change the input values. Framework comparisons must include preprocessing state.
 
-**Does100percent on two test rows establish reliability?**
+**Does 100 percent on two test rows establish reliability?**
 
 No. It establishes those observations under this fixture. Representative independent data and uncertainty are separate evidence.
 

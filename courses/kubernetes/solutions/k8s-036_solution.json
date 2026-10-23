@@ -1,0 +1,17 @@
+{
+  "apiVersion": "v1",
+  "kind": "List",
+  "items": [
+    {
+      "apiVersion": "v1",
+      "kind": "ConfigMap",
+      "metadata": {
+        "name": "recovery-record"
+      },
+      "data": {
+        "marker": "synthetic-v1",
+        "purpose": "teaching metadata only; not a data backup"
+      }
+    }
+  ]
+}

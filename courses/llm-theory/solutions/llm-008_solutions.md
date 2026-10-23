@@ -17,7 +17,7 @@ regardless of the optional arithmetic checker.
 
 ## Exercise 1: Trace row selection
 
-ID two selects [2,2], zero selects [1,0], and the repeated two selects [2,2] again. Stack those selections in token order to obtain the expected (3,2) matrix. The vocabulary length four is used to validate the IDs and is contracted away by selection; it is not a result dimension. This fixed lookup demonstrates indexing only. No optimization or semantic-quality claim is supported by the supplied feature values.
+ID two selects [2,2], zero selects [1,0], and the repeated two selects [2,2] again. Stack those selections in token order to obtain the expected (3,2) matrix. The vocabulary length four is used to validate the IDs and is contracted away by selection; it is not a result dimension. This fixed lookup demonstrates index ing only. No optimization or semantic-quality claim is supported by the supplied feature values.
 
 **Expected:** Output [[2,2],[1,0],[2,2]], shape (3,2).
 
@@ -25,7 +25,7 @@ ID two selects [2,2], zero selects [1,0], and the repeated two selects [2,2] aga
 
 ## Exercise 2: Construct a lookup guard
 
-A one-hot matrix for [2,0,2] has shape (3,4), with one indicator per selected vocabulary row. Multiplying by the (4,2) table gives the same (3,2) feature matrix as direct lookup. The equality makes the roles of the vocabulary and feature axes explicit. Direct indexing is the canonical small interface because forming dense one-hot arrays is unnecessary for large vocabularies. The two computations should agree exactly on these integer-valued float64 fixtures.
+A one-hot matrix for [2,0,2] has shape (3,4), with one indicator per selected vocabulary row. Multiplying by the (4,2) table gives the same (3,2) feature matrix as direct lookup. The equality makes the roles of the vocabulary and feature axes explicit. Direct index ing is the canonical small interface because forming dense one-hot arrays is unnecessary for large vocabularies. The two computations should agree exactly on these integer-valued float64 fixtures.
 
 **Expected:** np.eye(4)[ids] @ table matches the lookup exactly.
 
@@ -33,7 +33,7 @@ A one-hot matrix for [2,0,2] has shape (3,4), with one indicator per selected vo
 
 ## Exercise 3: Reject invalid IDs
 
-Reject -1 even though NumPy would select the final row. Reject 4 because the valid row range is zero through three. Reject 1.5 as a noninteger instead of rounding it to another token. A domain guard is deliberately narrower than NumPy's general indexing behavior. Validate before selection and retain the actual named exception. The valid fixture should still work afterward, demonstrating that rejected requests did not mutate the table or tokenizer mapping.
+Reject -1 even though NumPy would select the final row. Reject 4 because the valid row range is zero through three. Reject 1.5 as a noninteger instead of rounding it to another token. A domain guard is deliberately narrower than NumPy's general index ing behavior. Validate before selection and retain the actual named exception. The valid fixture should still work afterward, demonstrating that rejected requests did not mutate the table or tokenizer mapping.
 
 **Expected:** Negative/out-of-range IDs raise ValueError; noninteger IDs raise TypeError.
 
@@ -49,7 +49,7 @@ This lookup contract accepts an empty token list and returns an empty matrix wit
 
 ## Exercise 5: Preserve table ownership
 
-Advanced integer indexing creates independent output storage here. Mutating the first selected row therefore leaves the original table unchanged. It also must not modify the third selected row merely because both originated from vocabulary ID two. Save and compare the table and repeated row explicitly. Another implementation might intentionally share storage, but that would be a different mutation contract and should not be silently substituted for this learner helper.
+Advanced integer index ing creates independent output storage here. Mutating the first selected row therefore leaves the original table unchanged. It also must not modify the third selected row merely because both originated from vocabulary ID two. Save and compare the table and repeated row explicitly. Another implementation might intentionally share storage, but that would be a different mutation contract and should not be silently substituted for this learner helper.
 
 **Expected:** The table remains unchanged and output[2] remains [2,2].
 

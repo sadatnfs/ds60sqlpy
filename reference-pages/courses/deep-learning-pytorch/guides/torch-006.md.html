@@ -116,15 +116,16 @@
       <p class="source-path">Generated from <code>courses/deep-learning-pytorch/guides/torch-006.md</code></p>
     </header>
     <article class="document"><h2 id="torch-006-autograd-graphs-the-chain-rule-and-in-place-hazards">torch-006: Autograd graphs, the chain rule and in-place hazards<a class="heading-anchor" href="#torch-006-autograd-graphs-the-chain-rule-and-in-place-hazards" aria-label="Link to this section">#</a></h2>
-<p>Status: authored PyTorch course content. The manifest inventories complete teaching files; runtime readiness remains a separate, measured property.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Beginner; approximately 120 minutes. Direct prerequisites: <code>torch-005</code>. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
-<p>Autograd follows the chain of tensor operations from a scalar objective back to its inputs. The central investigation is concrete: Use w=1, z=2<em>w, a=z</em>z and loss=(a-1)<strong>2. The finish condition is z2, a4, loss9, gradient48. at new w=1.5, gradient -1 for (w-2)</strong>2. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
+<p>Autograd follows the chain of tensor operations from a scalar objective back to its inputs. The central investigation is concrete: Use w=1, z=2<em>w, a=z</em>z and loss=(a-1)<strong>2. The finish condition is z2, a4, loss 9, gradient 48. at new w=1.5, gradient -1 for (w-2)</strong>2. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
 <h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>Autograd follows the chain of tensor operations from a scalar objective back to its inputs. Forz=2w, a=z², loss=(a-1)², the derivative multiplies the local sensitivities along that chain. PyTorch builds the graph dynamically during the forward pass and saves values needed for backward. An in-place mutation can invalidate those saved values, so the framework uses version checks and restricts some mutations. A failure is a signal to understand ownership and graph lifetime, not a reason to bypass checks with.data.</p>
 <p>Graph state is also temporary. After a normal backward pass, the saved intermediates are released; reusing the same graph for another backward usually requires an explicit retention policy or a fresh forward computation. Most training loops should recompute the forward graph per batch. Nonlinearities such as ReLU introduce points where a derivative convention matters.</p>
 <h3 id="design-decisions-and-when-to-use-this-method">Design decisions and when to use this method<a class="heading-anchor" href="#design-decisions-and-when-to-use-this-method" aria-label="Link to this section">#</a></h3>
+<p>Use an explicit intermediate trace when introducing a new differentiable operation, debugging a custom backward rule or comparing two implementations with matching forward values. A small scalar chain lets every local factor be checked independently before the same reasoning is applied to vectors and matrices.</p>
+<p>Prefer a fresh forward graph for each ordinary training iteration. Retain a graph only when a deliberate algorithm needs repeated derivative queries from the same unchanged forward computation. Treat in-place mutation as a state-ownership decision, not an automatic memory optimization. Use documented update and copying boundaries rather than bypassing autograd safeguards with <code>.data</code>.</p>
 <h3 id="paired-tensorflow-comparison">Paired TensorFlow comparison<a class="heading-anchor" href="#paired-tensorflow-comparison" aria-label="Link to this section">#</a></h3>
 <p>Compare <a href="../../deep-learning-tensorflow/guides/tf-006.md.html">tf-006</a> after deriving the shared numerical contract.</p>
 <p>TensorFlow records a chosen tape scope, while PyTorch dynamically tracks operations involving requires_grad values. Both need the forward dependencies. PyTorch shared storage and in-place operations make saved-tensor versioning an especially visible debugging concern; avoid translating every TensorFlow assignment into an arbitrary PyTorch in-place edit.</p>
@@ -133,13 +134,43 @@
 <p><strong>Saved tensor:</strong> An intermediate value retained because backward needs it.</p>
 <p><strong>In-place hazard:</strong> A mutation that changes data required by a recorded derivative.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Use a prepared <code>llm-torch-cpu</code> environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored <code>.learning/expansion/torch-006/</code> before editing, or use the application&#x27;s saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: <code>&amp; $CoursePython courses/deep-learning-pytorch/lessons/torch-006.py</code>. For macOS/Linux use <code>.venv/bin/python courses/deep-learning-pytorch/lessons/torch-006.py</code> from the repository root.</p>
-<p>Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.</p>
+<p>Use a prepared <code>llm-torch-cpu</code> environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored <code>.learning/expansion/torch-006/</code> before editing, or use the application&#x27;s saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: <code>&amp; $CoursePython courses/deep-learning-pytorch/lessons/torch-006.py</code>. For macOS/Linux, use the interpreter explicitly selected for a separately prepared native PyTorch environment, and invoke that interpreter on <code>courses/deep-learning-pytorch/lessons/torch-006.py</code> from the repository root. The repository&#x27;s general <code>.venv</code> is not assumed to contain PyTorch; the prepared classroom profile is the default execution route.</p>
+<p>Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the explicit tolerance in each assertion. Several analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone is not a universal numerical-error bound. Finite differences, reductions and conditioning can require different justified tolerances. Integer counts, identities and boolean decisions should be exact.</p>
 <h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
 <p>Build every intermediate from a requires_grad leaf. autograd.grad(loss, w) composes the chain rule. A direct in-place add on a leaf requiring gradients raises RuntimeError unless performed under a deliberate no_grad update context. Mutating a saved input under no_grad can still make a later backward fail its version check. Use clone when a separate mutable value is needed and recompute the graph after optimizer updates.</p>
+<h3 id="trace-the-graph-and-its-saved-values">Trace the graph and its saved values<a class="heading-anchor" href="#trace-the-graph-and-its-saved-values" aria-label="Link to this section">#</a></h3>
+<p>The chain is w→z→a→L, with z=2w, a=z² and L=(a-1)². At w=1, the full trace is:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Operation</th>
+<th>Forward value</th>
+<th>Immediate derivative</th>
+</tr></thead><tbody>
+<tr>
+<td>z=2w</td>
+<td>z=2</td>
+<td>dz/dw=2</td>
+</tr>
+<tr>
+<td>a=z²</td>
+<td>a=4</td>
+<td>da/dz=2z=4</td>
+</tr>
+<tr>
+<td>L=(a-1)²</td>
+<td>L=9</td>
+<td>dL/da=2(a-1)=6</td>
+</tr>
+</tbody></table></div>
+<p>Backward composes sensitivities in reverse dependency order: dL/dw=6×4×2=48. Omitting the inner scale gives 24, even though every forward value remains correct. Changing the inner scale to three gives z=3, a=9, L=64 and derivative 16×6×3=288. A learning-rate adjustment that hides the missing factor for scale 2 would not repair the algorithm for scale 3.</p>
+<p>The scalar expression can also be expanded to L=16w⁴-8w²+1. Its derivative 64 w³-16w equals 48 at one, providing a symbolic check independent of the local-factor table. The finite-difference check recomputes the complete expression at 1+h and 1-h. Holding a=4 fixed while perturbing w would instead probe a constant function with slope zero. Equal forward values at one point do not establish equal dependencies.</p>
+<p>For larger tensors, reverse-mode differentiation propagates vector-Jacobian products rather than materializing every possible derivative matrix. A scalar loss supplies the initial sensitivity one; each operation transforms the incoming sensitivity using its saved forward values. This explains why the graph must retain information from the actual forward pass and why asking for derivatives of a nonscalar result requires an explicit upstream-gradient convention.</p>
+<p>Consider <code>objective = value.square()</code> when value is two. Backward needs the original value to produce derivative four. If code then changes that storage to three before calling backward, the old objective still represents the forward value four, but the saved input has changed. Computing derivative six from the new storage would mix two different states. PyTorch&#x27;s saved-tensor version checks reject such an invalid sequence rather than silently returning that mixed-state result. <a href="https://docs.pytorch.org/docs/2.9/notes/autograd.html">PyTorch 2.9 autograd mechanics</a>.</p>
+<p>Using no_grad around the mutation prevents recording that new operation. It does not restore the saved value or make the earlier graph consistent. A safe ordinary update sequence completes the current derivative computation, updates parameter state at a deliberate boundary, then recomputes the next forward graph. Clone can provide separate mutable storage, but a clone is not a substitute for knowing which value each graph depends on.</p>
+<p>After a normal derivative computation, saved intermediates can be released. Keeping a reference to loss does not promise another backward pass can reconstruct those released values. Repeated training usually needs a new forward pass, whereas an algorithm intentionally querying multiple derivatives can request graph retention and accept its memory cost. Do not confuse retaining a graph with accumulating gradients across distinct fresh graphs.</p>
+<p>ReLU adds a separate mathematical boundary. At a negative input the derivative is zero; at a positive input it is one. At zero there is no unique classical derivative, and PyTorch chooses zero for backward. The numerical convention is not a graph-disconnection error. It should be recorded explicitly when designing derivative tests rather than judged against a symmetric probe&#x27;s0.5 as if both were the same object.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-trace-the-chain-rule">Example A: Trace the chain rule<a class="heading-anchor" href="#example-a-trace-the-chain-rule" aria-label="Link to this section">#</a></h4>
-<p>The factors are2(loss inner), 2z and2 from the affine input, with the outer residual included. Multiplying them gives48 at the supplied point.</p>
+<p>The factors are dL/da=2(a-1)=6, da/dz=2z=4 and dz/dw=2. Multiplying 6<em>4</em>2 gives 48 at the supplied point.</p>
 <pre><code class="language-python">import numpy as np
 import torch
 from torch import nn
@@ -148,13 +179,13 @@ from torch.nn import functional as F
 w=torch.tensor(1.,dtype=torch.float64,requires_grad=True); z=2*w; a=z*z; loss=(a-1)**2
 gradient=torch.autograd.grad(loss,w)[0]
 assert (z.item(),a.item(),loss.item(),gradient.item())==(2.,4.,9.,48.)</code></pre>
-<p><strong>Expected:</strong> z2, a4, loss9, gradient48.</p>
+<p><strong>Expected:</strong> z2, a4, loss 9, gradient 48.</p>
 <h4 id="example-b-check-an-independent-slope">Example B: Check an independent slope<a class="heading-anchor" href="#example-b-check-an-independent-slope" aria-label="Link to this section">#</a></h4>
-<p>The finite difference treats the entire function as a black box. It can expose an incorrect manual chain factor without reading the graph internal s.</p>
+<p>The finite difference treats the entire function as a black box. It can expose an incorrect manual chain factor without reading the graph internals.</p>
 <pre><code class="language-python">h=1e-5; f=lambda value:((2*value)**2-1)**2
 numeric=(f(1+h)-f(1-h))/(2*h)
 np.testing.assert_allclose(numeric,48,atol=1e-5,rtol=0)</code></pre>
-<p><strong>Expected:</strong> approximately48 within1e-5.</p>
+<p><strong>Expected:</strong> approximately 48 within 1e-5.</p>
 <h4 id="example-c-observe-a-leaf-mutation-guard">Example C: Observe a leaf mutation guard<a class="heading-anchor" href="#example-c-observe-a-leaf-mutation-guard" aria-label="Link to this section">#</a></h4>
 <p>The guard prevents an ambiguous modification of a value whose derivative history is being tracked. Optimizer updates use a deliberate state-update boundary instead.</p>
 <pre><code class="language-python">leaf=torch.tensor(1.,requires_grad=True)
@@ -163,13 +194,13 @@ except RuntimeError: pass
 else: raise AssertionError(&#x27;unsafe leaf mutation accepted&#x27;)</code></pre>
 <p><strong>Expected:</strong> RuntimeError.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
-<p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: z2, a4, loss9, gradient48. at new w=1.5, gradient -1 for (w-2)**2. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
+<p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: z2, a4, loss 9, gradient 48. at new w=1.5, gradient -1 for (w-2)**2. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
-<li><strong>Trace the chain rule.</strong> Use w=1, z=2<em>w, a=z</em>z and loss=(a-1)<strong>2. </strong>Expected:<strong> z2, a4, loss9, gradient48. </strong>Verify:** Save the assertion results for exercise 1, including z2, a4, loss9, gradient48.</li>
+<li><strong>Trace the chain rule.</strong> Use w=1, z=2<em>w, a=z</em>z and loss=(a-1)<strong>2. </strong>Expected:<strong> z2, a4, loss 9, gradient 48. </strong>Verify:** Save the assertion results for exercise 1, including z2, a4, loss 9, gradient 48.</li>
 </ol>
 <ol>
-<li><strong>Check an independent slope.</strong> Compare the chain derivative with a central difference of the complete scalar expression. <strong>Expected:</strong> approximately48 within1e-5. <strong>Verify:</strong> Save the assertion results for exercise 2, including approximately48 within1e-5.</li>
+<li><strong>Check an independent slope.</strong> Compare the chain derivative with a central difference of the complete scalar expression. <strong>Expected:</strong> approximately 48 within 1e-5. <strong>Verify:</strong> Save the assertion results for exercise 2, including approximately 48 within 1e-5.</li>
 </ol>
 <ol>
 <li><strong>Observe a leaf mutation guard.</strong> Try an in-place add on a leaf requiring gradients outside no_grad. <strong>Expected:</strong> RuntimeError. <strong>Verify:</strong> Save the assertion results for exercise 3, including RuntimeError.</li>
@@ -178,13 +209,14 @@ else: raise AssertionError(&#x27;unsafe leaf mutation accepted&#x27;)</code></pr
 <li><strong>Expose saved-value invalidation.</strong> Build loss=x*x, mutate x under no_grad before backward, and inspect the failure. <strong>Expected:</strong> RuntimeError from a changed saved tensor version. <strong>Verify:</strong> Save the assertion results for exercise 4, including RuntimeError from a changed saved tensor version.</li>
 </ol>
 <ol>
-<li><strong>Inspect a ReLU convention.</strong> Differentiate ReLU at negative, zero and positive inputs. <strong>Expected:</strong> gradients0, 0, 1. <strong>Verify:</strong> Save the assertion results for exercise 5, including gradients0, 0, 1.</li>
+<li><strong>Inspect a ReLU convention.</strong> Differentiate ReLU at negative, zero and positive inputs. <strong>Expected:</strong> gradients 0, 0, 1. <strong>Verify:</strong> Save the assertion results for exercise 5, including gradients 0, 0, 1.</li>
 </ol>
 <ol>
 <li><strong>Recompute after an update.</strong> Update a scalar under no_grad, then build a fresh quadratic objective and request its derivative. <strong>Expected:</strong> at new w=1.5, gradient -1 for (w-2)<strong>2. </strong>Verify:<strong> Save the assertion results for exercise 6, including at new w=1.5, gradient -1 for (w-2)</strong>2.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>When a result disagrees, locate the first intermediate value that violates this explanation. Inspect shapes and identities before aggregates, and inspect counts before averages. Preserve the original fixture and introduce only one controlled change at a time. If an arithmetic identity passes but a data-boundary condition fails, the experiment is still invalid. If a runtime is unavailable, record the unexecuted code as unverified rather than replacing its output with the expected text. The separate explanation discusses why the tempting alternative in each case changes the result.</p>
+<p>For a factor mismatch, inspect the local derivative table before changing a learning rate. For a zero finite difference, ensure the complete function is recomputed at each perturbed input. For a tensor-version error, locate the first in-place write to a value saved by the forward graph, including writes through an alias or a no_grad block.</p>
+<p>A leaf-mutation guard and a later saved-value version error describe different failure points. Do not silence either with <code>.data</code>; that can replace an informative failure with an incorrect derivative. If a second backward reports released intermediates, decide whether the algorithm needs a fresh forward computation or deliberate graph retention. If an activation derivative disagrees only at a kink, compare one-sided slopes and the documented convention before investigating numerical precision.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise&#x27;s expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.</p>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
@@ -196,7 +228,7 @@ else: raise AssertionError(&#x27;unsafe leaf mutation accepted&#x27;)</code></pr
 <h3 id="interview-reasoning-with-worked-answers">Interview reasoning with worked answers<a class="heading-anchor" href="#interview-reasoning-with-worked-answers" aria-label="Link to this section">#</a></h3>
 <p><strong>Does no_grad make any mutation safe?</strong></p>
 <p>No. It stops recording new operations, but a mutation can still invalidate values saved by an earlier graph. Update only at a deliberate boundary and recompute the forward pass.</p>
-<p><strong>Why avoid.data as a work around?</strong></p>
+<p><strong>Why avoid.data as a workaround?</strong></p>
 <p>It can bypass useful autograd safeguards and create silently incorrect derivatives. Understand the graph and use documented no_grad, detach and clone semantics instead.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for torch-006, Autograd graphs, the chain rule and in-place hazards.

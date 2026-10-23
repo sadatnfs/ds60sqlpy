@@ -20,6 +20,32 @@ Separate extraction, computation and explanation. An extraction proposal becomes
 
 The tool request has exactlyoperation, group_by andvalue fields. Allowed values aregroup_mean, group andvalue. Input rows haveid, group, value with unique IDs and at most20 records. Rejectbool even though it is anint subclass. Group values with a dictionary, then emit sorted rows containinggroup, count, mean. Keep the tool result separate from any prose proposal and verify quoted numbers against it.
 
+## Trace a typed tool from proposal to descriptive result
+
+The accepted request is exactly operation=group_mean, group_by=group, value=value. An extra query field or operation=run_sql is rejected rather than interpreted. The dispatcher therefore selects a fixed implementation; it does not execute model-generated source code. The literal rows are already in memory, so this example makes no claim about authenticating a database connection or binding SQL parameters in a live engine.
+
+The input grain is one identified observation per row. The output grain is one row per group, carrying count and mean. For A values1, 3, the sum is four, count two and mean two. B has value ten, count one and mean ten. The descriptive difference B minus A is eight. The output preserves the different sample counts instead of presenting both means as equally supported by data.
+
+Aggregation can change meaning. The overall observation mean is(1+3+10)/3=14/3. Averaging the two group means gives(2+10)/2=6 and weights groups equally rather than observations. Carrying counts makes the distinction reconstructible. The request schema does not authorize a later explanation to substitute either aggregate silently.
+
+Finite input checks alone do not prevent intermediate overflow. With values[1e308, 1e308], ordinary floating summation can become infinity before division by two, although the mathematical mean is1e308. The repaired calculation uses s=max(abs(values)), computes a mean of scaled values v/s, then multiplies by s. Every scaled magnitude is at most one, so the bounded group cannot overflow that summation. A zero scale returns zero directly. The result is also checked for finiteness.
+
+For the two large equal values, scaled values are[1, 1], their mean is one and the output is1e308. For equal opposite values, the scaled terms cancel to zero. This is an arithmetic stability improvement, not a guarantee of exactness for every representable combination; rounding and underflow remain part of floating-point computation. Use an explicitly different numeric representation if the task requires exact monetary units or exact decimal rounding rules.
+
+Missing values and booleans are rejected under this strict policy. Dropping None would change count and potentially bias the result; accepting True as one would conflate logical and measured data. A different missingness policy may be appropriate for another task, but it should have its own output count, denominator and explanation. Duplicate IDs are also a data-quality failure because repeated observations would change weights.
+
+The explanation check in the fixture compares the computed mean two with a proposed value twenty. It demonstrates an independent numeric anchor, but it is not a parser that validates every arbitrary sentence. A real report interface can carry structured claims referring to result cells and render them through reviewed templates, or use a separately evaluated extraction/validation stage for free-form prose.
+
+Finally, group membership is not a treatment-assignment design. The difference eight does not by itself estimate the causal effect of changing an observation from A to B. Sampling, measurement, confounding and assignment assumptions remain outside the grouped-mean arithmetic. The assistant can state which additional evidence is needed, but fluent explanation cannot supply it.
+
+### Interview reasoning with explanatory answers
+
+**Why keep counts beside means?** They identify denominators and allow correct recombination. They also expose a one-record group that a mean alone could conceal.
+
+**Why validate outputs after validated inputs?** Correct primitive types and finite inputs do not exclude numerical overflow or implementation errors. The computed artifact has its own contract.
+
+**Does a narrow tool replace data access policy?** No. It restricts allowed operations. The application must separately determine which rows the principal may use and how results may be disclosed.
+
 ## Exercise 1: Execute a bounded grouped mean
 
 The question is: Use rowsA1, A3, B10 and the admittedgroup_mean request.
@@ -56,7 +82,7 @@ for proposal in [{'operation':'run_sql','group_by':'group','value':'value'},{**r
 
 ## Exercise 3: Reject invalid numeric values
 
-The question is: Replace onevalue withTrue, NaN orNone under the strict numeric policy.
+The question is: Replace one value with True, NaN or None, then check large finite values and cancellation under the same numeric policy.
 
 Silently dropping or coercing these values would change the denominator or meaning. A different missingness policy must be explicitly designed and reported.
 
@@ -66,11 +92,15 @@ for bad in [True,float('nan'),None]:
     try: dispatch(request,changed)
     except (TypeError,ValueError): pass
     else: raise AssertionError('invalid numeric value accepted')
+huge=[{'id':'h1','group':'A','value':1e308},{'id':'h2','group':'A','value':1e308}]
+assert dispatch(request,huge)==[{'group':'A','count':2,'mean':1e308}]
+huge[1]['value']=-1e308
+assert dispatch(request,huge)[0]['mean']==0.0
 ```
 
-**Expected:** each invalid row is rejected.
+**Expected:** invalid rows are rejected; equal1e308 values have finite mean1e308 and opposite values have mean0.
 
-**Verify:** Compare the computed values or written argument with each invalid row is rejected.
+**Verify:** Compare the computed values or written argument with invalid rows are rejected; equal1e308 values have finite mean1e308 and opposite values have mean0.
 
 ## Exercise 4: Enforce identity and work limits
 

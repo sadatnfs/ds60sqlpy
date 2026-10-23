@@ -18,11 +18,33 @@ This lesson saves a fixed two-feature linear model and an exported program, then
 
 ## Reading the implementation
 
-Save model.state_dict with torch.save and load into ann.Linear(2, 1, bias=False). torch.export.export(model, (example, ), strict=True) captures a static program; torch.export.save/load persists it. Call loaded_program.module() to obtain the checked inference module. For variable batch length, declareDim('batch', min=1, max=4) through dynamic_shapes and test within and outside the bound. Keep loaded owners in named variables while using their derived objects.
+Save model.state_dict with torch.save and load into an nn.Linear(2, 1, bias=False). torch.export.export(model, (example, ), strict=True) captures a static program; torch.export.save/load persists it. Call loaded_program.module() to obtain the checked inference module. For variable batch length, declareDim('batch', min=1, max=4) through dynamic_shapes and test within and outside the bound. Keep loaded owners in named variables while using their derived objects.
+
+## Compare tensor state with a constrained program
+
+The fixed Linear layer has two input features, one output and no bias. Its stored weight is[2, -1], so row[1, 2] maps to zero and row[3, 4] maps to two. The output shape is(B, 1). This explicit affine rule is the independent persistence oracle: the restored result should match the known function, not merely another object that happens to share the original weights.
+
+state_dict records named parameters and persistent buffers. Loading it into a new nn.Linear(2, 1, bias=False) checks compatibility with that reconstructed architecture. It does not serialize the Python class definition, feature names, normalization policy or arbitrary nonregistered state. Strict loading can detect missing/unexpected keys and incompatible tensor shapes, but equal shapes do not establish semantic equivalence. Reversing the two feature meanings changes[1, 2]'s prediction from zero to three while preserving every dimension.
+
+torch.export captures a tensor program with assumptions derived from the example and declared dynamic shapes. In the static example, the batch dimension is specialized to two. The ordinary reconstructed Linear can evaluate a three-row batch, because its parameters constrain feature width rather than batch size. The static exported module rejects that same batch under its captured guard. That rejection is expected interface enforcement, not evidence that the affine calculation itself requires exactly two observations. [PyTorch 2.9 export](https://docs.pytorch.org/docs/2.9/export.html).
+
+The dynamic export names a batch dimension with declared range 1..4 while keeping feature width two. A three-row call is compared with the ordinary module in the reference. That establishes one in-range dynamic case. The current executable does not separately test batch sizes one, four or an out-of-range five against the dynamic artifact, so those should not be claimed as observed results merely because the range appears in source. Export constraints are useful, but acceptance still needs the actual intended boundary cases when that interface is relied on.
+
+A dynamic dimension does not mean arbitrary rank, dtype, feature width or arbitrary Python control. Shape constraints describe a family of tensor programs that the export process could justify. If later code needs a new branch or input structure, it may require a new export and qualification. A successful strict export is also not a promise that every target runtime or lowering backend can execute the resulting operators.
+
+The fresh interpreter is an important independence boundary. It creates a new Linear, loads the saved tensors, and separately loads the exported program from the file path. It cannot accidentally satisfy the test by reusing the parent's in-memory model. Keeping loaded artifact owners and their derived modules in named variables makes the lifecycle inspectable. The child has a bounded timeout and exposes stderr on failure, so a failed load or guard is not converted into a success transcript.
+
+The two saved forms have different reconstruction semantics from Keras .keras and SavedModel inference export. The paired TensorFlow example also uses a different one-feature affine fixture. Compare the artifact responsibilities and each independent local oracle rather than expecting identical filenames, load APIs or literal predictions across frameworks.
+
+Prediction parity and training continuation remain separate. Matching[0, 2] says nothing about Adam moments, RNG position, data iteration or scheduler state. Conversely, a training checkpoint may contain state irrelevant to a minimal inference consumer. The previous checkpoint chapter tests the next update; this chapter tests a fixed prediction interface. Preserve that distinction in filenames, metadata and review claims.
+
+Only the locally created trusted artifacts are loaded. weights_only=True constrains the state-dictionary load path but does not authenticate a publisher or prove that an arbitrary file has acceptable resource demands. The exported program has its own versioned loader/runtime contract. An archive suffix or a successful save call is not proof of compatibility with another framework, architecture or deployment format.
+
+The handoff should retain artifact identity, constructor/program version, feature order and units, dtype/device, mode, shape constraints, preprocessing and output interpretation. Test the full predictor with known inputs in the consumer environment. A graph that reproduces one matrix multiplication can still sit behind a mismatched normalizer or class-label mapping, and those application errors will not be repaired by re-exporting the same weights.
 
 ## Exercise 1: Create a known inference model
 
-The question is: Set a 2-to-1 bias-free Linear weight to[2, -1] and predict rows1, 2 and3, 4.
+The question is: Set a 2-to-1 bias-free Linear weight to[2, -1] and predict rows 1, 2 and 3, 4.
 
 Known coefficients make a layout or persistence error visible without depending on training randomness.
 
@@ -33,9 +55,9 @@ model.eval(); x=torch.tensor([[1.,2.],[3.,4.]]); expected=model(x).detach()
 assert expected.tolist()==[[0.],[2.]]
 ```
 
-**Expected:** outputs0, 2.
+**Expected:** outputs 0, 2.
 
-**Verify:** Compare the computed values or written argument with outputs0, 2.
+**Verify:** Compare the computed values or written argument with outputs 0, 2.
 
 ## Exercise 2: Round-trip named state
 
@@ -49,9 +71,9 @@ restored=nn.Linear(2,1,bias=False); restored.load_state_dict(torch.load(state_pa
 torch.testing.assert_close(restored(x),expected,atol=1e-6,rtol=0)
 ```
 
-**Expected:** restored predictions match within1e-6.
+**Expected:** restored predictions match within 1e-6.
 
-**Verify:** Compare the computed values or written argument with restored predictions match within1e-6.
+**Verify:** Compare the computed values or written argument with restored predictions match within 1e-6.
 
 ## Exercise 3: Save an exported program
 
@@ -65,9 +87,9 @@ loaded_program=torch.export.load(export_path); exported_module=loaded_program.mo
 torch.testing.assert_close(exported_module(x),expected,atol=1e-6,rtol=0)
 ```
 
-**Expected:** exported predictions match within1e-6.
+**Expected:** exported predictions match within 1e-6.
 
-**Verify:** Compare the computed values or written argument with exported predictions match within1e-6.
+**Verify:** Compare the computed values or written argument with exported predictions match within 1e-6.
 
 ## Exercise 4: Check both artifacts in a fresh process
 
@@ -91,15 +113,15 @@ if result.returncode: raise RuntimeError('export child failed: '+result.stderr)
 a,b=json.loads(result.stdout.strip().splitlines()[-1]); np.testing.assert_allclose(a,expected.numpy(),atol=1e-6,rtol=0); np.testing.assert_allclose(b,expected.numpy(),atol=1e-6,rtol=0)
 ```
 
-**Expected:** both child predictions0, 2.
+**Expected:** both child predictions 0, 2.
 
-**Verify:** Compare the computed values or written argument with both child predictions0, 2.
+**Verify:** Compare the computed values or written argument with both child predictions 0, 2.
 
 ## Exercise 5: Expose static batch specialization
 
 The question is: Pass three rows to the statically exported module and compare with ordinary Linear.
 
-Mathematical batch flexibility does not automatically make an export contract dynamic. The pinned PyTorch2.9.1 profile raises AssertionError with the exact guard input.size()[0] == 2 for this invalid batch. The handler recognizes that shape guard and re-raises unrelated assertions. Exception types can differ across framework versions, so the diagnostic is tied to the prepared profile.
+Mathematical batch flexibility does not automatically make an export contract dynamic. The pinned PyTorch 2.9.1 profile raises AssertionError with the exact guard input.size()[0] == 2 for this invalid batch. The handler recognizes that shape guard and re-raises unrelated assertions. Exception types can differ across framework versions, so the diagnostic is tied to the prepared profile.
 
 ```python
 three=torch.tensor([[0.,0.],[1.,2.],[3.,4.]])
@@ -110,13 +132,13 @@ except AssertionError as error:
 else: raise AssertionError('static export constraint not enforced')
 ```
 
-**Expected:** ordinary Linear accepts3; static export rejects its batch constraint.
+**Expected:** ordinary Linear accepts 3; static export rejects its batch constraint.
 
-**Verify:** Compare the computed values or written argument with ordinary Linear accepts3; static export rejects its batch constraint.
+**Verify:** Compare the computed values or written argument with ordinary Linear accepts 3; static export rejects its batch constraint.
 
 ## Exercise 6: Declare a bounded dynamic batch and clean up
 
-The question is: Export with batch Dim range1..4, test three rows, and remove owned files.
+The question is: Export with batch Dim range 1..4, test three rows, and remove owned files.
 
 Dynamic dimensions describe allowed variation, not arbitrary inputs. Feature width, dtype and finite-value policy still need their own contracts.
 

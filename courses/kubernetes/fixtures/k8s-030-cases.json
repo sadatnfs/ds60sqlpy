@@ -1,0 +1,38 @@
+{
+  "lesson_id": "k8s-030",
+  "provenance": "synthetic teaching cases, not runtime observations",
+  "capability": "preloaded namespaced controller with reviewed child, status and finalizer contracts",
+  "browser_source": false,
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Classify absent, owned-equal, owned-different and foreign child states.",
+      "expected": "create, no-op, update and refuse respectively."
+    },
+    {
+      "exercise": 2,
+      "task": "Apply the same desired state three times in the synthetic model.",
+      "expected": "One create followed by two no-ops, with one child."
+    },
+    {
+      "exercise": 3,
+      "task": "Move the owned desired count from1 to2 and inspect the next two decisions.",
+      "expected": "update then no-op after observed state matches."
+    },
+    {
+      "exercise": 4,
+      "task": "Replace the parent name with a new UID while the old child remains.",
+      "expected": "The old child is foreign to the new parent under this contract."
+    },
+    {
+      "exercise": 5,
+      "task": "Classify temporary API unavailability versus an invalid desired value and stale generation status.",
+      "expected": "Bounded backoff for transient failure; corrected intent for invalid input; stale readiness does not pass."
+    },
+    {
+      "exercise": 6,
+      "task": "Remove only lesson.cleanup after synthetic external cleanup succeeds.",
+      "expected": "other.cleanup remains; failed cleanup retains lesson.cleanup."
+    }
+  ]
+}

@@ -62,17 +62,11 @@ Typed CSV chunks provide a concrete input boundary. Parse IDs and integer amount
 ### Example 1
 
 ```python
-import math
-from collections import deque
-from io import StringIO
-import numpy as np
-import pandas as pd
-
-chunks=[pd.Series([1.,3.]),pd.Series([100.])]
-means=[chunk.mean() for chunk in chunks]
-correct=sum(chunk.sum() for chunk in chunks)/sum(chunk.count() for chunk in chunks)
-assert np.mean(means)==51 and np.isclose(correct,104/3)
-print("Wrong mean of means:",np.mean(means),"global mean:",correct)
+chunks = [pd.Series([1.0, 3.0]), pd.Series([100.0])]
+means = [chunk.mean() for chunk in chunks]
+correct = sum(chunk.sum() for chunk in chunks) / sum(chunk.count() for chunk in chunks)
+assert np.mean(means) == 51 and np.isclose(correct, 104 / 3)
+print("Wrong mean of means:", np.mean(means), "global mean:", correct)
 ```
 
 The second chunk contains only one observation, so giving it the same influence as the two-row chunk changes the population weighting. Sum/count states retain enough information for the global mean regardless of how the input is partitioned.
@@ -80,17 +74,17 @@ The second chunk contains only one observation, so giving it the same influence 
 ### Example 2
 
 ```python
-import math
-from collections import deque
-from io import StringIO
-import numpy as np
-import pandas as pd
-
-text="event_id,customer_id,amount_cents\n1,a,10\n2,b,\n3,a,20\n"
-chunks=list(pd.read_csv(StringIO(text),chunksize=2,dtype={"event_id":"Int64","customer_id":"string","amount_cents":"Int64"}))
-assert [len(chunk) for chunk in chunks]==[2,1]
-assert chunks[0].amount_cents.isna().sum()==1
-print("Typed chunk lengths:",[len(chunk) for chunk in chunks])
+text = "event_id,customer_id,amount_cents\n1,a,10\n2,b,\n3,a,20\n"
+chunks = list(
+    pd.read_csv(
+        StringIO(text),
+        chunksize=2,
+        dtype={"event_id": "Int64", "customer_id": "string", "amount_cents": "Int64"},
+    )
+)
+assert [len(chunk) for chunk in chunks] == [2, 1]
+assert chunks[0].amount_cents.isna().sum() == 1
+print("Typed chunk lengths:", [len(chunk) for chunk in chunks])
 ```
 
 The empty amount is preserved as a missing nullable integer rather than coerced to zero. The final chunk is shorter, which is normal and is exactly why averaging per-chunk means is unsafe. Materializing chunks here is only for inspecting the tiny demonstration, not a scalable reading pattern.
@@ -105,7 +99,7 @@ The empty amount is preserved as a missing nullable integer rather than coerced 
 
 **Expected:** States(4,2),(100,1) yield 104/3. Adding(0,0) has no effect. Empty states return None; (5,0), negative count or Boolean count is rejected.
 
-3. **Reduce typed amounts across batches.** Consume an iterable of chunks with customer_id and nullable/integer amount_cents. Reject missing customers, noninteger amount dtype or totals outside signed int64 range. Return customer_id, row_count, known_count, total_cents sorted by customer, preserving missing totals when a customer has no known amounts.
+3. **Reduce typed amounts across batches.** Consume an iterable of chunks with nonmissing string customer_id and nullable/integer amount_cents. Reject missing or nonstring customers, noninteger amount dtype or totals outside signed int64 range. Return customer_id, row_count, known_count, total_cents sorted by customer, preserving missing totals when a customer has no known amounts.
 
 **Expected:** Across chunks a:10, b:NA then a:20, b:NA, return a counts 2,2, total 30 and b counts 2,0, totalNA. Input chunk boundaries do not change the result.
 

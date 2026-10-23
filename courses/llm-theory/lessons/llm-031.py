@@ -9,7 +9,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Expected: targets[2,5,6,3];mask[False,True,True,True].
 
 # Exercise 2: Compute answer-only loss
-# Use zero vocabulary8 logits and replace prompt targets with-100.
+# Use zero vocabulary8 logits and replace prompt targets with -100.
 # Expected: 3 active targets;meanlog8.
 
 # Exercise 3: Compare loss sums

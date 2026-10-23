@@ -50,27 +50,33 @@ FROM instants ORDER BY position;
 -- Write attempts in your ignored working copy before the final ROLLBACK.
 
 -- 1. Expose invalid event relationships before aggregation
--- Prompt: Return event_id, user_id, reason for events with an unknown user or occurrence before that user's signup. One diagnostic row represents one invalid event, ordered by event_id. Classify unknown_user before comparing signup time.
--- Expected: Event 7, user 1 is before_signup; event 8, user 99 is unknown_user. Future availability alone is not a malformed relationship and is handled separately.
+-- Inputs/evidence: For sql-deep-06 Exercise 1, Return event_id, user_id, reason for events with an unknown user or occurrence before that user's signup. One diagnostic row represents one invalid event, ordered by event_id. Classify unknown_user before comparing signup time.
+-- Expected result/shape: For sql-deep-06 Exercise 1, Event 7, user 1 is before_signup; event 8, user 99 is unknown_user. Future availability alone is not a malformed relationship and is handled separately.
+-- Verify: For sql-deep-06 Exercise 1, compare event and user identities before counting activity; classify orphan, pre-signup and not-yet-available evidence separately so invalid rows cannot enter the numerator.
 
 -- 2. Define denominator eligibility using both clocks
--- Prompt: As ofJanuary 10 UTC, return user_id, cohort_day, eligible for each user. A day 7 label is eligible only when signup+8days is no later than both the report cutoff and observed_through. Preserve one row per user ordered by user_id.
--- Expected: Users 1,3,5 are eligible; users 2 and 4 are pending. User 2 has elapsed calendar time but an incomplete observation watermark. User 3 ends its window exactly at the cutoff and is eligible.
+-- Inputs/evidence: For sql-deep-06 Exercise 2, As ofJanuary 10 UTC, return user_id, cohort_day, eligible for each user. A day 7 label is eligible only when signup+8days is no later than both the report cutoff and observed_through. Preserve one row per user ordered by user_id.
+-- Expected result/shape: For sql-deep-06 Exercise 2, Users 1,3,5 are eligible; users 2 and 4 are pending. User 2 has elapsed calendar time but an incomplete observation watermark. User 3 ends its window exactly at the cutoff and is eligible.
+-- Verify: For sql-deep-06 Exercise 2, check both event-time maturity and availability-time eligibility at the report cutoff; explain why passing only one clock is insufficient.
 
 -- 3. Create one nullable retention label per user
--- Prompt: Return user_id, eligible, day 7_retained from a user-level label CTE. Use EXISTS for available events in[signup+7days, signup+8days), and leave day 7_retained NULL when ineligible. Require event available_at no later than the historical cutoff. Order by user_id.
--- Expected: Users 1 and 3 are true, user 5 is false, and users 2 and 4 are NULL. User 1's multiple day 7 events still produce one true label; its exact window-end event is excluded.
+-- Inputs/evidence: For sql-deep-06 Exercise 3, Return user_id, eligible, day 7_retained from a user-level label CTE. Use EXISTS for available events in[signup+7days, signup+8days), and leave day 7_retained NULL when ineligible. Require event available_at no later than the historical cutoff. Order by user_id.
+-- Expected result/shape: For sql-deep-06 Exercise 3, Users 1 and 3 are true, user 5 is false, and users 2 and 4 are NULL. User 1's multiple day 7 events still produce one true label; its exact window-end event is excluded.
+-- Verify: For sql-deep-06 Exercise 3, construct the expected label from each eligible user event history: one for observed qualifying retention, zero only for complete mature nonretention, and NULL for pending observation.
 
 -- 4. Report cohort rates with their denominators
--- Prompt: Aggregate user labels to cohort_day, total_users, eligible_users, retained_users, retention_rate, ordered by cohort_day. Count only eligible users in the rate denominator and only true labels in the numerator. Return NULL when no user is eligible, preserving the pending cohort.
--- Expected: January 1 has 3 total,2 eligible,1 retained, rate 0.5; January 2 has 1,1,1, rate 1; January 9 has 1,0,0, rateNULL.
+-- Inputs/evidence: For sql-deep-06 Exercise 4, Aggregate user labels to cohort_day, total_users, eligible_users, retained_users, retention_rate, ordered by cohort_day. Count only eligible users in the rate denominator and only true labels in the numerator. Return NULL when no user is eligible, preserving the pending cohort.
+-- Expected result/shape: For sql-deep-06 Exercise 4, January 1 has 3 total,2 eligible,1 retained, rate 0.5; January 2 has 1,1,1, rate 1; January 9 has 1,0,0, rateNULL.
+-- Verify: For sql-deep-06 Exercise 4, sum eligible user labels and denominators independently, checking that pending labels do not silently enter either the retained count or mature denominator.
 
 -- 5. Detect a historical feature or label leakage candidate
--- Prompt: Return event_id, user_id, event_before_cutoff, available_by_cutoff for events occurring no later thanJanuary 10 but available only afterward. One row represents one late-arriving historical event, ordered by event_id. Do not include events that themselves occur after the cutoff.
--- Expected: Only event 5 for user 2 appears, with event_before_cutoff=true and available_by_cutoff=false. Event 9 is future occurrence and is outside this particular late-arrival diagnostic.
+-- Inputs/evidence: For sql-deep-06 Exercise 5, Return event_id, user_id, event_before_cutoff, available_by_cutoff for events occurring no later thanJanuary 10 but available only afterward. One row represents one late-arriving historical event, ordered by event_id. Do not include events that themselves occur after the cutoff.
+-- Expected result/shape: For sql-deep-06 Exercise 5, Only event 5 for user 2 appears, with event_before_cutoff=true and available_by_cutoff=false. Event 9 is future occurrence and is outside this particular late-arrival diagnostic.
+-- Verify: For sql-deep-06 Exercise 5, compare each record availability timestamp with the historical prediction cutoff even when its event timestamp is earlier; identify late-arriving evidence that would leak future knowledge.
 
 -- 6. Distinguish empty cohorts from pending-only cohorts
--- Prompt: Create a daily cohort spine forJanuary 1 throughJanuary 10 and left-join the cohort label summary. Return cohort_day, cohort_state, eligible_users, retention_rate ordered by cohort_day. Use empty for no signup rows, pending_only for signups but no eligible users, and has_eligible otherwise.
--- Expected: January 1 is has_eligible,2,0.5; January 2 has_eligible,1,1; January 9 pending_only,0, NULL; the other seven dates are empty,0, NULL. Ten date rows must remain.
+-- Inputs/evidence: For sql-deep-06 Exercise 6, Create a daily cohort spine forJanuary 1 throughJanuary 10 and left-join the cohort label summary. Return cohort_day, cohort_state, eligible_users, retention_rate ordered by cohort_day. Use empty for no signup rows, pending_only for signups but no eligible users, and has_eligible otherwise.
+-- Expected result/shape: For sql-deep-06 Exercise 6, January 1 is has_eligible,2,0.5; January 2 has_eligible,1,1; January 9 pending_only,0, NULL; the other seven dates are empty,0, NULL. Ten date rows must remain.
+-- Verify: For sql-deep-06 Exercise 6, left join the cohort spine to user-level evidence and distinguish zero users from users with no mature labels; inspect the count columns before interpreting a NULL rate.
 
 ROLLBACK;

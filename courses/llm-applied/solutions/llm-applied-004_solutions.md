@@ -20,6 +20,35 @@ This lesson uses six authored snippets about data-science methods. One is restri
 
 Canonical JSON with sorted keys makes manifest hashing stable across dictionary insertion order. SHA256 fingerprints UTF-8 text. Compare family sets across partitions and validate one active version perfamily under a simple current-only policy. A missing permission field is an admission failure, not an invitation to infer permission. Do not strip or normalize text before hashing unless that normalization policy is declared and separately recorded.
 
+## Follow a corpus update through its derived artifacts
+
+The fixture changes conversion from purchases divided by eligible visits to purchases divided by eligible accounts. Even if the same numerator is used, those denominators can differ. With three purchases, ten eligible visits and five eligible accounts, the two definitions yield0.3 and0.6. A system using the newer text with older computation code may produce a coherent-looking answer that combines incompatible versions.
+
+A content fingerprint detects a byte change under the chosen encoding. Here SHA256 is applied to UTF-8 text. It does not establish who wrote the text, whether it is accurate, whether its permission statement is legitimate or which date it applies to. Likewise, permission='course-fixture' is an explicit fixture value; the code does not consult a real policy owner. These distinctions are why dataset documentation should retain purpose, collection and intended-use information beside integrity metadata. [Datasheets for Datasets](https://arxiv.org/abs/1803.09010).
+
+The admission helper checks required-key presence, a nonempty permission value and text/hash equality. It allows additional fields and does not fully validate every field's type or consult an identity provider. That is its exact local contract. A source can pass those checks and still be semantically wrong or unauthorized under an external policy. Describe such a result as integrity/metadata admission, not a complete trust determination.
+
+The active-version loop selects the largest version value within each family. Suppose version 1 applies through January and version 2 begins in February. A question about a January experiment needs version 1 even if version 2 is current today. If version 2 was discovered in March but applies retroactively from February, effective time and ingestion time differ again. A reproducible answer needs the applicable policy and the system's evidence snapshot, not just the newest filename.
+
+| Artifact | Parent identity that must remain traceable | Example stale mismatch |
+| --- | --- | --- |
+| Admitted document | Source version and exact content hash | Changed text with old hash |
+| Chunk | Document version and original offsets | Old offsets applied to new text |
+| Vector or lexical index | Chunk identities and encoding/tokenizer policy | Rebuilt corpus with old index |
+| Cached answer | Evidence, prompt, model and effective access policy | Privileged or obsolete answer reused |
+
+A release can prepare a new corpus and derived index together, verify their compatibility, and switch the served identity only after checks pass. The six-document fixture does not implement an atomic deployment protocol. The table states which identities a larger implementation would need to bind. Keeping an old index alive temporarily is not automatically wrong, provided the served version is explicit and its access/freshness policy still permits it.
+
+Evaluation isolation follows semantic lineage as well as bytes. metric-v1 and metric-v2 have different hashes but share a family. A model or prompt selected using one may already have seen the task structure behind the other. Conversely, two unrelated documents can legitimately share a common boilerplate sentence. Define families using the dependence relevant to the intended generalization claim, rather than equating every shared token with leakage or every different hash with independence.
+
+### Interview reasoning with explanatory answers
+
+**Does a hash prove authenticity?** It detects content disagreement with a declared digest. Authenticity additionally needs a trusted association between that digest, the source identity and the publication process. A maliciously replaced text and digest can agree perfectly.
+
+**Why version an index separately from a corpus?** Index construction can lag, fail partially or change tokenization/embedding policy without changing the original documents. The two identities describe different artifacts.
+
+**Why is selecting the newest document insufficient?** The newest version may not apply to the event being analyzed, and conflicting sources may have different authority. Applicability and precedence must be stated before resolving a conflict.
+
 ## Exercise 1: Fingerprint authored sources
 
 The question is: Add source=course-authored, permission=course-fixture and SHA256 to each local document.

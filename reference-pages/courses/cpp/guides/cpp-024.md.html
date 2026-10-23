@@ -116,7 +116,6 @@
       <p class="source-path">Generated from <code>courses/cpp/guides/cpp-024.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-024-property-tests-and-bounded-fuzzing">cpp-024: Property tests and bounded fuzzing<a class="heading-anchor" href="#cpp-024-property-tests-and-bounded-fuzzing" aria-label="Link to this section">#</a></h2>
-<p>Authored beta content. Content completion and runtime qualification are separate evidence.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Intermediate; 120 minutes. Direct prerequisites: <code>cpp-013</code>, <code>cpp-017</code>.</p>
 <p>Learner artifact: <a href="../lessons/cpp-024.cpp.html">cpp-024.cpp</a>. Keep <a href="../solutions/cpp-024_solutions.md.html">official solutions</a> closed until an attempt. The immutable <a href="../fixtures/cpp-024-cases.json.html">case ledger</a> records exercise inputs and expected observations.</p>
@@ -127,56 +126,94 @@
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Enumerate a small deterministic domain before adding randomness. Checking reverse(reverse(xs))==xs tests a law; also compare a known reversal to avoid a function that does nothing passing the law. A fixed seed helps reproducibility but does not make a fuzz run exhaustive.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>
-<p>An implementation that returns its input unchanged satisfies double reversal, so that law alone cannot identify reversal. The literal [1,2,3] to [3,2,1] example supplies an independent semantic anchor. The 25 two-element cases then explore combinations systematically. When a test fails, retain the smallest relevant vector and observed result, not only a random seed. A limited corpus plus explicit budgets is reproducible evidence with a visible coverage boundary.</p>
+<p>An implementation that returns its input unchanged satisfies double reversal, so that law alone cannot identify reversal. The literal [1, 2, 3] to [3, 2, 1] example supplies an independent semantic anchor. The 25 two-element cases then explore combinations systematically. When a test fails, retain the smallest relevant vector and observed result, not only a random seed. A limited corpus plus explicit budgets is reproducible evidence with a visible coverage boundary.</p>
+<h3 id="tests-that-distinguish-plausible-wrong-programs">Tests that distinguish plausible wrong programs<a class="heading-anchor" href="#tests-that-distinguish-plausible-wrong-programs" aria-label="Link to this section">#</a></h3>
+<p>A useful test is chosen to reject a plausible defect. One expected example can show a behavior, but it may also be satisfied by a shortcut that returns a constant. Boundary cases, negative cases and independent properties make the contract harder to fake accidentally. The reverse example starts with a concrete known result, then checks a relationship over changed inputs.</p>
+<p>Reversing twice should recover the original sequence. This is a metamorphic property: it relates outputs of multiple executions without requiring a handwritten expected vector for every possible input. However, the identity function also satisfies reverse(reverse(x))==x. Therefore the property must be paired with an ordinary example whose expected order differs from its input. Properties complement examples; they do not automatically prove the intended algorithm.</p>
+<p>Empty and single-element sequences are important because they expose invalid index calculations. For an unsigned size, computing size-1 on an empty vector wraps before a loop even begins. A standard algorithm can avoid that hand-written boundary hazard, but the input contract still needs tests. Repeated values check multiplicity preservation rather than only order.</p>
+<p>A deterministic corpus is easier to reproduce than an unexplained random failure. If randomized generation is used, record the seed and the minimized failing input, but do not assume the seed alone remains sufficient after generator changes. A small exact counterexample usually teaches more than thousands of passing cases. Test reporting should retain the first meaningful mismatch rather than hide it in a large log.</p>
+<p>Mutation testing asks whether the test suite rejects a deliberately wrong implementation, such as returning the input unchanged or dropping one repeated value. The exercise can perform that change in a scratch copy and compare which test catches it. Do not weaken the expectation to accept the mutated behavior. The purpose is to assess whether the tests cover the contract, not whether every edited program can be made green.</p>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">assert((reversed({1,2,3})==std::vector&lt;int&gt;{3,2,1}));</code></pre>
-<p><strong>Expected:</strong> The independent golden example fixes the intended meaning of reversal.</p>
+<p><a href="../examples/cpp-024-example-1.cpp.html">Complete program 1</a></p>
+<pre><code class="language-cpp">#include &lt;algorithm&gt;
+#include &lt;cassert&gt;
+#include &lt;iostream&gt;
+#include &lt;vector&gt;
+
+std::vector&lt;int&gt; reversed(std::vector&lt;int&gt; xs) {
+    std::reverse(xs.begin(),xs.end());
+    return xs;
+}
+int main() {
+    assert((reversed({1,2,3})==std::vector&lt;int&gt;{3,2,1}));
+    std::cout &lt;&lt; &quot;cpp-024 example 1 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-024 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">assert(reversed(reversed(std::vector&lt;int&gt;{-1,2}))==std::vector&lt;int&gt;({-1,2}));</code></pre>
-<p><strong>Expected:</strong> Applying reversal twice restores the original sequence.</p>
+<p><a href="../examples/cpp-024-example-2.cpp.html">Complete program 2</a></p>
+<pre><code class="language-cpp">#include &lt;algorithm&gt;
+#include &lt;cassert&gt;
+#include &lt;iostream&gt;
+#include &lt;vector&gt;
+
+std::vector&lt;int&gt; reversed(std::vector&lt;int&gt; xs) {
+    std::reverse(xs.begin(),xs.end());
+    return xs;
+}
+int main() {
+    assert(reversed(reversed(std::vector&lt;int&gt;{-1,2}))==std::vector&lt;int&gt;({-1,2}));
+    std::cout &lt;&lt; &quot;cpp-024 example 2 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-024 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-write-a-golden-case">Exercise 1: Write a golden case<a class="heading-anchor" href="#exercise-1-write-a-golden-case" aria-label="Link to this section">#</a></h4>
-<p>Reverse [1,2,3] against a literal expected vector.</p>
-<p><strong>Expected result/shape:</strong> [3,2,1].</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: [3,2,1].</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: The expected result is independent of the implementation.</p>
+<p>Reverse [1, 2, 3] against a literal expected vector.</p>
+<p><strong>Expected result/shape:</strong> [3, 2, 1].</p>
+<p><strong>Verify:</strong> [3, 2, 1].</p>
+<p><strong>Progressive hints:</strong> The expected result is independent of the implementation.</p>
 <h4 id="exercise-2-enumerate-a-property">Exercise 2: Enumerate a property<a class="heading-anchor" href="#exercise-2-enumerate-a-property" aria-label="Link to this section">#</a></h4>
 <p>Test all pairs from integers -2 through 2.</p>
 <p><strong>Expected result/shape:</strong> 25 cases satisfy double reversal.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: 25 cases satisfy double reversal.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: The finite domain gives a known work budget.</p>
+<p><strong>Verify:</strong> 25 cases satisfy double reversal.</p>
+<p><strong>Progressive hints:</strong> The finite domain gives a known work budget.</p>
 <h4 id="exercise-3-add-a-boundary-corpus">Exercise 3: Add a boundary corpus<a class="heading-anchor" href="#exercise-3-add-a-boundary-corpus" aria-label="Link to this section">#</a></h4>
 <p>Include empty, singleton and duplicate vectors.</p>
-<p><strong>Expected result/shape:</strong> [], [7], [2,2] preserved after double reversal.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: [], [7], [2,2] preserved after double reversal.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Edges exercise different shapes.</p>
+<p><strong>Expected result/shape:</strong> [], [7], [2, 2] preserved after double reversal.</p>
+<p><strong>Verify:</strong> [], [7], [2, 2] preserved after double reversal.</p>
+<p><strong>Progressive hints:</strong> Edges exercise different shapes.</p>
 <h4 id="exercise-4-expose-a-weak-property">Exercise 4: Expose a weak property<a class="heading-anchor" href="#exercise-4-expose-a-weak-property" aria-label="Link to this section">#</a></h4>
 <p>Replace reversal with identity in a scratch copy.</p>
 <p><strong>Expected result/shape:</strong> Double-reverse property passes but golden reversal fails.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Double-reverse property passes but golden reversal fails.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: A property can be necessary without being sufficient.</p>
+<p><strong>Verify:</strong> Double-reverse property passes but golden reversal fails.</p>
+<p><strong>Progressive hints:</strong> A property can be necessary without being sufficient.</p>
 <h4 id="exercise-5-save-a-reproduction">Exercise 5: Save a reproduction<a class="heading-anchor" href="#exercise-5-save-a-reproduction" aria-label="Link to this section">#</a></h4>
 <p>Break reversal to drop the first item.</p>
 <p><strong>Expected result/shape:</strong> Small failing vector and exact observed output retained.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Small failing vector and exact observed output retained.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: A minimized failing case is easier to diagnose than a seed alone.</p>
+<p><strong>Verify:</strong> Small failing vector and exact observed output retained.</p>
+<p><strong>Progressive hints:</strong> A minimized failing case is easier to diagnose than a seed alone.</p>
 <h4 id="exercise-6-transfer-to-a-parser">Exercise 6: Transfer to a parser<a class="heading-anchor" href="#exercise-6-transfer-to-a-parser" aria-label="Link to this section">#</a></h4>
 <p>Design encode/decode properties and independent malformed inputs.</p>
 <p><strong>Expected result/shape:</strong> Round-trip valid records; reject suffix junk and wrong versions.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Round-trip valid records; reject suffix junk and wrong versions.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Round-trip tests alone can let matching bugs agree.</p>
+<p><strong>Verify:</strong> Round-trip valid records; reject suffix junk and wrong versions.</p>
+<p><strong>Progressive hints:</strong> Round-trip tests alone can let matching bugs agree.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: The independent golden example fixes the intended meaning of reversal. Then explain the changed condition in example 2 without opening the answer.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
-<p>Enumerate a small deterministic domain before adding randomness. Checking reverse(reverse(xs))==xs tests a law; also compare a known reversal to avoid a function that does nothing passing the law. A fixed seed helps reproducibility but does not make a fuzz run exhaustive.</p>
-<p>If the result disagrees, preserve the original input and inspect the first differing value or condition. A property can be necessary without being sufficient.</p>
+<p>If a property passes for a wrong implementation, construct a concrete case that distinguishes the intended transformation from the shortcut. If only empty input crashes, inspect size arithmetic before indexing. If a randomized failure cannot be reproduced, preserve the exact input in addition to the seed. If all tests compare a function with itself through the same helper, add an independent oracle or manually derived expected value.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
 <p>Close the source. Reconstruct the reasoning for Exercise 6: Transfer to a parser. Explain which assumptions would fail on a larger input or another runtime.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue with <a href="cpp-025.md.html">cpp-025</a> after saving the six observations.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines">C++ Core Guidelines</a></p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach cpp-024.
 Read courses/cpp/guides/cpp-024.md and courses/cpp/lessons/cpp-024.cpp.

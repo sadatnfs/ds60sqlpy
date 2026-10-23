@@ -123,17 +123,17 @@
 <span> </span>
 <span># Exercise 1: Inspect retained batches</span>
 <span># Load five paired ID/value records with batch size 2 and no shuffle.</span>
-<span># Expected: sizes2, 2, 1 and IDs0..4 exactly once.</span>
+<span># Expected: sizes 2, 2, 1 and IDs 0..4 exactly once.</span>
 <span> </span>
 <span># Exercise 2: Make dropping explicit</span>
 <span># Set drop_last True on the same fixture.</span>
-<span># Expected: two batches; ID4 omitted.</span>
+<span># Expected: two batches; ID 4 omitted.</span>
 <span> </span>
 <span># Exercise 3: Reproduce shuffle with a local generator</span>
-<span># Construct two loaders with fresh generators both seeded7.</span>
+<span># Construct two loaders with fresh generators both seeded 7.</span>
 <span># Expected: same permutation; all five IDs retained.</span>
 <span> </span>
-<span># Exercise 4: Col late variable-length sequences</span>
+<span># Exercise 4: Collate variable-length sequences</span>
 <span># Pad sequences[2, 3] and[4] with zero while keeping lengths.</span>
 <span># Expected: batch[[2, 3], [4, 0]] and lengths 2, 1.</span>
 <span> </span>
@@ -141,9 +141,10 @@
 <span># Load values=2*IDs with shuffling and check each batch.</span>
 <span># Expected: every target equals twice its ID.</span>
 <span> </span>
-<span># Exercise 6: Reject an empty sequence in this collator</span>
-<span># Pass[[], [1]] to a collator whose contract requires positive lengths.</span>
-<span># Expected: ValueError before padding.</span>
+<span># Exercise 6: Reject invalid sequence records</span>
+<span># Pass an empty sequence and floating, Boolean, negative or overflowing token IDs to the</span>
+<span># collator.</span>
+<span># Expected: ValueError before padding; token IDs must be nonnegative int64 integers.</span>
 <span> </span>
 <span>if __name__ == &quot;__main__&quot;:</span>
 <span>    print(&quot;Read the guide and implement the six exercises in your saved copy.&quot;)</span>

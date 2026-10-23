@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Spark 031 Solution · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course artifact</p>
+      <h1>Spark 031 Solution</h1>
+      <p class="source-path">Generated from <code>courses/scala-spark/solutions/spark-031_solution.scala</code></p>
+    </header>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-scala"><code><span>import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}</span>
+<span>import org.apache.spark.sql.functions._</span>
+<span>import org.apache.spark.sql.types._</span>
+<span>import org.apache.spark.sql.streaming.{StreamingQuery,Trigger}</span>
+<span>import java.nio.file.{Files,Path,Paths,StandardOpenOption,StandardCopyOption}</span>
+<span>import java.nio.charset.StandardCharsets</span>
+<span>import java.util.UUID</span>
+<span>import scala.jdk.CollectionConverters._</span>
+<span>import com.fasterxml.jackson.databind.ObjectMapper</span>
+<span> </span>
+<span>object Main {</span>
+<span>  val eventSchema = StructType(Seq(StructField(&quot;id&quot;,LongType,true),StructField(&quot;team&quot;,StringType,true),StructField(&quot;amount&quot;,LongType,true)))</span>
+<span>  def deleteOwned(root: Path): Unit = {</span>
+<span>    val paths = Files.walk(root)</span>
+<span>    try paths.iterator().asScala.toSeq.sortBy(_.getNameCount).reverse.foreach(p =&gt; Files.delete(p))</span>
+<span>    finally paths.close()</span>
+<span>  }</span>
+<span> </span>
+<span>  def publishFile(root: Path, name: String, lines: Seq[String]): Unit = {</span>
+<span>    require(name.matches(&quot;batch-[0-9]+\\.json&quot;),&quot;Invalid input filename&quot;)</span>
+<span>    val target = root.resolve(&quot;input&quot;).resolve(name)</span>
+<span>    require(!Files.exists(target),&quot;Input file already exists&quot;)</span>
+<span>    val pending = Files.createTempFile(root.resolve(&quot;staging&quot;),&quot;arrival-&quot;,&quot;.tmp&quot;)</span>
+<span>    try {</span>
+<span>     Files.writeString(pending,lines.mkString(&quot;\n&quot;)+&quot;\n&quot;,StandardCharsets.UTF_8,StandardOpenOption.TRUNCATE_EXISTING)</span>
+<span>     Files.move(pending,target,StandardCopyOption.ATOMIC_MOVE)</span>
+<span>    } finally Files.deleteIfExists(pending)</span>
+<span>  }</span>
+<span> </span>
+<span>  def inputStream(spark: SparkSession, root: Path): DataFrame = {</span>
+<span>    spark.readStream.schema(eventSchema).option(&quot;maxFilesPerTrigger&quot;,1).json(root.resolve(&quot;input&quot;).toString)</span>
+<span>  }</span>
+<span> </span>
+<span>  def teamSummary(frame: DataFrame): DataFrame = {</span>
+<span>    frame.groupBy(&quot;team&quot;).agg(count(lit(1)).as(&quot;row_count&quot;),count(&quot;amount&quot;).as(&quot;known_amounts&quot;),sum(&quot;amount&quot;).as(&quot;total_amount&quot;))</span>
+<span>  }</span>
+<span> </span>
+<span>  def runAvailable(summary: DataFrame, checkpoint: Path, table: String): StreamingQuery = {</span>
+<span>    val query = summary.writeStream.format(&quot;memory&quot;).queryName(table).outputMode(&quot;complete&quot;).option(&quot;checkpointLocation&quot;,checkpoint.toString).trigger(Trigger.AvailableNow()).start()</span>
+<span>    try {</span>
+<span>     require(query.awaitTermination(30000L),&quot;AvailableNow deadline exceeded&quot;)</span>
+<span>     require(!query.isActive &amp;&amp; query.exception.isEmpty,&quot;Query did not terminate cleanly&quot;)</span>
+<span>     query</span>
+<span>    } finally query.stop()</span>
+<span>  }</span>
+<span> </span>
+<span>  def inputProgress(query: StreamingQuery): Seq[(Long,Long)] = {</span>
+<span>    query.recentProgress.toSeq.map(progress =&gt; (progress.batchId,progress.numInputRows))</span>
+<span>  }</span>
+<span> </span>
+<span>  def summaryRows(frame: DataFrame): Seq[(String,Long,Long,Long)] = {</span>
+<span>    frame.orderBy(&quot;team&quot;).collect().toSeq.map(r =&gt; (r.getString(0),r.getLong(1),r.getLong(2),r.getLong(3)))</span>
+<span>  }</span>
+<span> </span>
+<span>  def main(args: Array[String]): Unit = {</span>
+<span>    var ownedRoot: Path = null</span>
+<span>    var ownedTable: String = null</span>
+<span>    val spark = SparkSession.builder().appName(&quot;ds60-spark-031&quot;).master(&quot;local[2]&quot;)</span>
+<span>      .config(&quot;spark.ui.enabled&quot;,&quot;false&quot;)</span>
+<span>      .config(&quot;spark.driver.host&quot;,&quot;127.0.0.1&quot;)</span>
+<span>      .config(&quot;spark.driver.bindAddress&quot;,&quot;127.0.0.1&quot;)</span>
+<span>      .config(&quot;spark.sql.shuffle.partitions&quot;,&quot;2&quot;)</span>
+<span>      .config(&quot;spark.sql.adaptive.enabled&quot;,&quot;false&quot;)</span>
+<span>      .config(&quot;spark.sql.ansi.enabled&quot;,&quot;true&quot;)</span>
+<span>      .config(&quot;spark.sql.session.timeZone&quot;,&quot;UTC&quot;).getOrCreate()</span>
+<span>    try {</span>
+<span>      require(spark.sparkContext.master == &quot;local[2]&quot;, &quot;local-only course session&quot;)</span>
+<span>      spark.sparkContext.setLogLevel(&quot;ERROR&quot;)</span>
+<span>      spark.conf.set(&quot;spark.sql.streaming.stopTimeout&quot;,&quot;10000&quot;)</span>
+<span>      ownedRoot = Files.createTempDirectory(Paths.get(&quot;.&quot;).toAbsolutePath.normalize(),&quot;.ds60-spark-031-&quot;)</span>
+<span>      Files.createDirectory(ownedRoot.resolve(&quot;input&quot;));Files.createDirectory(ownedRoot.resolve(&quot;staging&quot;))</span>
+<span>      ownedTable = &quot;ds60_s031_&quot; + UUID.randomUUID().toString.replace(&quot;-&quot;,&quot;&quot;)</span>
+<span>      val batches = Seq(</span>
+<span>       Seq(&quot;&quot;&quot;{&quot;id&quot;:1,&quot;team&quot;:&quot;A&quot;,&quot;amount&quot;:10}&quot;&quot;&quot;,&quot;&quot;&quot;{&quot;id&quot;:2,&quot;team&quot;:&quot;B&quot;,&quot;amount&quot;:20}&quot;&quot;&quot;,&quot;&quot;&quot;{&quot;id&quot;:3,&quot;team&quot;:&quot;A&quot;,&quot;amount&quot;:0}&quot;&quot;&quot;),</span>
+<span>       Seq(&quot;&quot;&quot;{&quot;id&quot;:4,&quot;team&quot;:&quot;B&quot;,&quot;amount&quot;:null}&quot;&quot;&quot;,&quot;&quot;&quot;{&quot;id&quot;:5,&quot;team&quot;:&quot;C&quot;,&quot;amount&quot;:30}&quot;&quot;&quot;,&quot;&quot;&quot;{&quot;id&quot;:6,&quot;team&quot;:&quot;A&quot;,&quot;amount&quot;:5}&quot;&quot;&quot;),</span>
+<span>       Seq(&quot;&quot;&quot;{&quot;id&quot;:7,&quot;team&quot;:&quot;C&quot;,&quot;amount&quot;:0}&quot;&quot;&quot;,&quot;&quot;&quot;{&quot;id&quot;:8,&quot;team&quot;:&quot;B&quot;,&quot;amount&quot;:15}&quot;&quot;&quot;,&quot;&quot;&quot;{&quot;id&quot;:9,&quot;team&quot;:&quot;A&quot;,&quot;amount&quot;:null}&quot;&quot;&quot;))</span>
+<span>      // Exercise 1: Publish complete input files atomically</span>
+<span>      batches.zipWithIndex.foreach { case (lines,index) =&gt; publishFile(ownedRoot,s&quot;batch-$index.json&quot;,lines) }</span>
+<span>      val inputFiles = Files.list(ownedRoot.resolve(&quot;input&quot;))</span>
+<span>      try assert(inputFiles.count() == 3L) finally inputFiles.close()</span>
+<span>      var duplicateRejected = false</span>
+<span>      try publishFile(ownedRoot,&quot;batch-0.json&quot;,batches.head) catch { case _: IllegalArgumentException =&gt; duplicateRejected = true }</span>
+<span>      assert(duplicateRejected)</span>
+<span>      // Exercise 2: Construct an explicit streaming relation without starting it</span>
+<span>      val stream = inputStream(spark,ownedRoot)</span>
+<span>      assert(stream.isStreaming &amp;&amp; stream.schema.fields.toSeq.map(f =&gt; (f.name,f.dataType.simpleString)) == Seq((&quot;id&quot;,&quot;bigint&quot;),(&quot;team&quot;,&quot;string&quot;),(&quot;amount&quot;,&quot;bigint&quot;)))</span>
+<span>      assert(spark.streams.active.isEmpty)</span>
+<span>      // Exercise 3: Define a cumulative aggregate with separate completeness counts</span>
+<span>      val summary = teamSummary(stream)</span>
+<span>      assert(summary.isStreaming &amp;&amp; summary.columns.toSeq == Seq(&quot;team&quot;,&quot;row_count&quot;,&quot;known_amounts&quot;,&quot;total_amount&quot;))</span>
+<span>      // Exercise 4: Run AvailableNow with a deadline and owned cleanup</span>
+<span>      val query = runAvailable(summary,ownedRoot.resolve(&quot;checkpoint&quot;),ownedTable)</span>
+<span>      assert(!query.isActive &amp;&amp; spark.streams.active.isEmpty)</span>
+<span>      // Exercise 5: Reconcile processed input through progress evidence</span>
+<span>      val progress = inputProgress(query)</span>
+<span>      val positive = progress.filter(_._2 &gt; 0L)</span>
+<span>      assert(progress.map(_._2).sum == 9L &amp;&amp; positive.size == 3 &amp;&amp; positive.forall(_._2 == 3L))</span>
+<span>      assert(progress.map(_._1).distinct.size == progress.size)</span>
+<span>      println(&quot;input_progress=&quot; + progress)</span>
+<span>      // Exercise 6: Compare final streaming output with batch and literal oracles</span>
+<span>      val actual = summaryRows(spark.table(ownedTable))</span>
+<span>      val batch = spark.read.schema(eventSchema).json(ownedRoot.resolve(&quot;input&quot;).toString)</span>
+<span>      val expected = Seq((&quot;A&quot;,4L,3L,15L),(&quot;B&quot;,3L,2L,35L),(&quot;C&quot;,2L,2L,30L))</span>
+<span>      assert(actual == expected &amp;&amp; summaryRows(teamSummary(batch)) == expected)</span>
+<span>      assert(actual.map(_._2).sum == 9L &amp;&amp; actual.map(_._3).sum == 7L &amp;&amp; actual.map(_._4).sum == 80L &amp;&amp; spark.streams.active.isEmpty)</span>
+<span>      println(&quot;spark-031: six Scala reference contracts passed; Spark=&quot; + spark.version + &quot;; Scala=&quot; + scala.util.Properties.versionNumberString)</span>
+<span>    } finally { try { require(!spark.streams.active.exists(q =&gt; q.name == ownedTable),&quot;Owned query still active; preserve scratch&quot;); if(ownedTable != null) spark.catalog.dropTempView(ownedTable); if(ownedRoot != null) deleteOwned(ownedRoot) } finally { spark.stop() } }</span>
+<span>  }</span>
+<span>}</span>
+<span> </span>
+<span>// Exercise 1: Publish complete input files atomically. Inputs/task: Write each declared file in the owned staging directory, then atomically move it into input under a new batch-N.json name. Reject invalid names or an existing destination. Expected: Three input files, each with 3 completeJSON records;no staging temporary file remains. Reusing batch-0.json is rejected. Verify: Assert the file count and explicit existing-name rejection before starting any query.</span>
+<span>// Exercise 2: Construct an explicit streaming relation without starting it. Inputs/task: Read the owned JSON input through readStream with the declared schema and maxFilesPerTrigger 1. Return the streamingDataFrame;do not call an ordinary batch collect on it. Expected: isStreaming istrue, columns areid, team, amount and their types arebigint, string, bigint. No query is started by construction alone. Verify: Assert streaming status and exact type mapping while the active query list remains empty.</span>
+<span>// Exercise 3: Define a cumulative aggregate with separate completeness counts. Inputs/task: Group by team and compute row_count, known_amounts and total_amount. Use the same expression for streaming and batch relations without filling unknown amounts. Expected: The streaming result remains streaming and has one state/result row per team. Its eventual literal result isA(4,3,15), B(3,2,35), C(2,2,30). Verify: Assert output columns and streaming status now;verify the exact final tuples after bounded execution.</span>
+<span>// Exercise 4: Run AvailableNow with a deadline and owned cleanup. Inputs/task: Start the aggregate in a uniquely named memory sink with complete mode, a fresh checkpoint and AvailableNow. Await at most 30 seconds, require termination and always stop the query in finally. Expected: The query terminates and isActive isfalse. The memory table holds the final finite aggregate;the checkpoint belongs only to this run. Verify: Assert bounded await success, no query exception and inactive state. No sleep or external producer is used.</span>
+<span>// Exercise 5: Reconcile processed input through progress evidence. Inputs/task: Return(batch_id, num_input_rows) from retained query progress. Sum input rows and inspect positive-input batches without confusing cumulative sink snapshots with new input. Expected: Three positive-input batches of 3 records and total input 9. Any zero-input progress entry contributes zero to that total. Verify: Assert total 9, three positive batches of 3 and unique recorded batch IDs;print the actual ledger.</span>
+<span>// Exercise 6: Compare final streaming output with batch and literal oracles. Inputs/task: Read the final memory table, compare its ordered summary tuples with a batch read of the same nine source records, and compare both with the literalA/B/C oracle. Expected: ExactlyA(4,3,15), B(3,2,35), C(2,2,30), whose record counts sum 9, known counts 7 and amounts 80. Verify: Assert both path comparisons and the independent literal tuple list;confirm no active query remains before cleanup.</span>
+<span> </span></code></pre></article>
+  </main>
+</body>
+</html>

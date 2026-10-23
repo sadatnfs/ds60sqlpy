@@ -1,0 +1,58 @@
+{
+  "lesson_id": "spark-029",
+  "scope": "Tiny paired local contracts;root-owned runtime qualification is separate.",
+  "cases": [
+    {
+      "exercise": 1,
+      "title": "Validate the product before computing its digest",
+      "input_contract": "Require ordered fieldsid, value with bigint types, exactly 30 known unique IDs 0..29, known values equal to 2*id and total 870. ReturnSHA-256 of sorted SparkJSON lines joined by newline without a trailing newline.",
+      "expected": "A64-character lowercase digest for the valid product. Wrong values, counts, types or identities are rejected before hashing.",
+      "verification": "Assert a64-hex digest and equal digest after repartitioning;reject a31-row source."
+    },
+    {
+      "exercise": 2,
+      "title": "Stage a run and validate the persisted readback",
+      "input_contract": "Restrict run IDs to 1..32 lowercase letters, digits or hyphens. Validate input, write a fresh run-specific Parquet product, validate readback and save its receipt. If that run already exists, require its validated digest to match instead of appending.",
+      "expected": "run-a has one 30-row data product and a receipt with the declared schema/count/path/digest. Reusing it never appends another product.",
+      "verification": "Assert staged receipt existence and digest equality;all paths remain within the fresh owned root."
+    },
+    {
+      "exercise": 3,
+      "title": "Validate a receipt against a fixed owned data path",
+      "input_contract": "Read a run receipt and require its run_id, data_path, row_count, schema and digest to match the declared contract and actual Parquet readback. Construct the read path from validated runId rather than trusting arbitrary receipt text.",
+      "expected": "Validrun-a receipt returns unchanged. A traversal-style run ID is rejected before path access.",
+      "verification": "Assert receipt equality and explicit rejection of../outside."
+    },
+    {
+      "exercise": 4,
+      "title": "Publish only a validated run at one explicit visibility point",
+      "input_contract": "Validate the staged receipt, write it to a fresh temporary manifest beside current.json, and atomically replace current.json. Support an injected failure before replacement and clean any unpublished temporary manifest in finally.",
+      "expected": "Publishingrun-a creates current.json selecting its 30-row product. No data is appended or rewritten during publication.",
+      "verification": "Assert the current manifest equals the validated receipt and points torun-a."
+    },
+    {
+      "exercise": 5,
+      "title": "Keep the previous publication readable after an interrupted replacement",
+      "input_contract": "Read the current manifest, validate its selected run and return that product. Stage run-b, inject failure before its manifest replacement, and confirm the reader still seesrun-a.",
+      "expected": "The injected error occurs, current.json bytes remain identical torun-a, and the published product still has 30 rows with the original digest.",
+      "verification": "Assert the named exception, unchanged manifest and exact published product digest;run-b staging must not enter the reader population."
+    },
+    {
+      "exercise": 6,
+      "title": "Replay the same input without appending another product",
+      "input_contract": "Compose stage, validate/publish and readback for a repeated run ID. Retryrun-a with a different execution partition layout, then attempt an invalid 31-row product and confirm publication stays intact.",
+      "expected": "Manifest bytes and data-file count are unchanged by validrun-a replay;published count remains 30. Invalid input fails before changing current.json.",
+      "verification": "Assert digest, manifest bytes, file-count equality and negative-control rejection."
+    }
+  ],
+  "golden": {
+    "sha256": "b4eaf827f5ce5797e0df60939b503b2ca6f264c0c167c9ca557db2aeb6cc2879",
+    "rows": 30,
+    "value_total": 870,
+    "schema": "id:bigint,value:bigint",
+    "successful_run": "run-a",
+    "failed_before_publication_run": "run-b",
+    "invalid_input_run": "run-c",
+    "publication_scope": "Single-writer process-level atomic manifest replacement on prepared local filesystem;no distributed transaction or power-loss durability claim."
+  }
+}

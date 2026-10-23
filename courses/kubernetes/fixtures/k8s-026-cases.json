@@ -1,0 +1,38 @@
+{
+  "lesson_id": "k8s-026",
+  "provenance": "synthetic teaching cases, not runtime observations",
+  "capability": "exclusive topology/DaemonSet host fixture with sanitized node facts",
+  "browser_source": false,
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Explain replicas2 Deployment versus a DaemonSet over eligible nodes.",
+      "expected": "Fixed replica count versus topology-derived desired placement."
+    },
+    {
+      "exercise": 2,
+      "task": "Apply the zone=a selector to the three supplied node facts.",
+      "expected": "node-a and node-c pass the label condition;node-b does not."
+    },
+    {
+      "exercise": 3,
+      "task": "Add the untolerated dedicated NoSchedule condition.",
+      "expected": "Only node-a remains eligible in the simplified model."
+    },
+    {
+      "exercise": 4,
+      "task": "In the qualified host topology,compare desired/ready counts and Pod nodeName/UIDs.",
+      "expected": "Observed eligible-node and controller evidence agree or a specific condition explains the gap."
+    },
+    {
+      "exercise": 5,
+      "task": "Review a proposal to remove a taint from a shared Node to make the lab pass.",
+      "expected": "No learner Node mutation;request the correct owned capability or report unavailable placement."
+    },
+    {
+      "exercise": 6,
+      "task": "Describe DaemonSet UID-aware cleanup and retained host configuration.",
+      "expected": "Only the owned DaemonSet/controller children are removed;unrelated agents and node settings preserved."
+    }
+  ]
+}

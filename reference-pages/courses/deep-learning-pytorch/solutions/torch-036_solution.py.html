@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Torch 036 Solution · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course artifact</p>
+      <h1>Torch 036 Solution</h1>
+      <p class="source-path">Generated from <code>courses/deep-learning-pytorch/solutions/torch-036_solution.py</code></p>
+    </header>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;torch-036: bounded local reference checks. No network or persistent data writes.&quot;&quot;&quot;</span>
+<span> </span>
+<span>import numpy as np</span>
+<span>import torch</span>
+<span>from torch import nn</span>
+<span>from torch.nn import functional as F</span>
+<span>import tempfile,json,subprocess,sys,textwrap,hashlib</span>
+<span>from pathlib import Path</span>
+<span> </span>
+<span> </span>
+<span> </span>
+<span> </span>
+<span>def verify():</span>
+<span>    # Exercise 1: Freeze the scalar experiment</span>
+<span>    x=torch.tensor([[1.],[2.],[3.]],dtype=torch.float64); y=2*x; held=torch.tensor([[4.],[5.]],dtype=torch.float64)</span>
+<span>    split={&#x27;train&#x27;:[&#x27;a&#x27;,&#x27;b&#x27;,&#x27;c&#x27;],&#x27;test&#x27;:[&#x27;d&#x27;,&#x27;e&#x27;]}; assert not set(split[&#x27;train&#x27;])&amp;set(split[&#x27;test&#x27;]) and len(split[&#x27;test&#x27;])==2</span>
+<span> </span>
+<span>    # Exercise 2: Train within a declared budget</span>
+<span>    model=nn.Linear(1,1,bias=False,dtype=torch.float64)</span>
+<span>    with torch.no_grad(): model.weight.zero_()</span>
+<span>    optimizer=torch.optim.SGD(model.parameters(),lr=.01)</span>
+<span>    for _ in range(30):</span>
+<span>        optimizer.zero_grad(set_to_none=True); (model(x)-y).square().mean().backward(); optimizer.step()</span>
+<span>    model.eval()</span>
+<span>    with torch.no_grad(): expected=model(held); error=(expected-2*held).square().mean().item()</span>
+<span>    assert torch.isfinite(model.weight).all() and error&lt;26</span>
+<span> </span>
+<span>    # Exercise 3: Build the owned release bundle</span>
+<span>    temporary=tempfile.TemporaryDirectory(); folder=Path(temporary.name); weights=folder/&#x27;weights.pt&#x27;; torch.save(model.state_dict(),weights)</span>
+<span>    manifest={&#x27;schema&#x27;:{&#x27;features&#x27;:[&#x27;x&#x27;],&#x27;dtype&#x27;:&#x27;float64&#x27;,&#x27;width&#x27;:1},&#x27;split&#x27;:split,&#x27;weight_sha256&#x27;:hashlib.sha256(weights.read_bytes()).hexdigest(),&#x27;steps&#x27;:30}</span>
+<span>    manifest_path=folder/&#x27;manifest.json&#x27;; manifest_path.write_text(json.dumps(manifest,sort_keys=True))</span>
+<span>    assert len(manifest[&#x27;weight_sha256&#x27;])==64 and manifest[&#x27;schema&#x27;][&#x27;width&#x27;]==1</span>
+<span> </span>
+<span>    # Exercise 4: Verify fresh-process prediction parity</span>
+<span>    child=textwrap.dedent(&quot;&quot;&quot;</span>
+<span>    import hashlib,json,sys,torch</span>
+<span>    from pathlib import Path</span>
+<span>    from torch import nn</span>
+<span>    folder=Path(sys.argv[1]); manifest=json.loads((folder/&#x27;manifest.json&#x27;).read_text()); weights=folder/&#x27;weights.pt&#x27;</span>
+<span>    if hashlib.sha256(weights.read_bytes()).hexdigest()!=manifest[&#x27;weight_sha256&#x27;]: raise ValueError(&#x27;weight hash mismatch&#x27;)</span>
+<span>    if manifest[&#x27;schema&#x27;]!={&#x27;features&#x27;:[&#x27;x&#x27;],&#x27;dtype&#x27;:&#x27;float64&#x27;,&#x27;width&#x27;:1}: raise ValueError(&#x27;schema mismatch&#x27;)</span>
+<span>    model=nn.Linear(1,1,bias=False,dtype=torch.float64); model.load_state_dict(torch.load(weights,map_location=&#x27;cpu&#x27;,weights_only=True)); model.eval()</span>
+<span>    with torch.inference_mode(): predictions=model(torch.tensor([[4.],[5.]],dtype=torch.float64)).tolist()</span>
+<span>    print(json.dumps(predictions))</span>
+<span>    &quot;&quot;&quot;)</span>
+<span>    compile(child,&#x27;torch-release-child&#x27;,&#x27;exec&#x27;)</span>
+<span>    result=subprocess.run([sys.executable,&#x27;-c&#x27;,child,str(folder)],capture_output=True,text=True,timeout=60,check=False)</span>
+<span>    if result.returncode: raise RuntimeError(&#x27;release child failed: &#x27;+result.stderr)</span>
+<span>    np.testing.assert_allclose(json.loads(result.stdout.strip().splitlines()[-1]),expected.numpy(),atol=1e-12,rtol=0)</span>
+<span> </span>
+<span>    # Exercise 5: Make a corrupted artifact fail</span>
+<span>    broken={**manifest,&#x27;weight_sha256&#x27;:&#x27;0&#x27;*64}; manifest_path.write_text(json.dumps(broken,sort_keys=True))</span>
+<span>    rejected=subprocess.run([sys.executable,&#x27;-c&#x27;,child,str(folder)],capture_output=True,text=True,timeout=60,check=False)</span>
+<span>    assert rejected.returncode!=0 and &#x27;weight hash mismatch&#x27; in rejected.stderr</span>
+<span>    manifest_path.write_text(json.dumps(manifest,sort_keys=True))</span>
+<span> </span>
+<span>    # Exercise 6: Record a bounded decision and cleanup</span>
+<span>    receipt={&#x27;local_contracts_pass&#x27;:True,&#x27;test_count&#x27;:2,&#x27;previous_artifact&#x27;:&#x27;v1&#x27;,&#x27;production_go&#x27;:False,&#x27;limits&#x27;:[&#x27;synthetic fixture&#x27;,&#x27;no operational deployment test&#x27;]}</span>
+<span>    temporary.cleanup()</span>
+<span>    assert receipt[&#x27;local_contracts_pass&#x27;] and not receipt[&#x27;production_go&#x27;] and not folder.exists()</span>
+<span>    return {&quot;checks&quot;: 6, &quot;status&quot;: &quot;passed&quot;}</span>
+<span> </span>
+<span> </span>
+<span>if __name__ == &quot;__main__&quot;:</span>
+<span>    print(verify())</span>
+<span> </span></code></pre></article>
+  </main>
+</body>
+</html>

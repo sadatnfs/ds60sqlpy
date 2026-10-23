@@ -121,29 +121,33 @@
 <span>Copy to .learning before editing. Six independent attempts belong below.</span>
 <span>&quot;&quot;&quot;</span>
 <span> </span>
-<span># Exercise 1: Update moving state</span>
-<span># Apply BatchNorm with momentum.5 to rows[1,3],[3,5].</span>
-<span># Expected: moving mean[1,2].</span>
+<span># Exercise 1: Update and inspect moving state</span>
+<span># Apply Keras BatchNorm with momentum 0.5 to [[1,3],[3,5]], then use a separate variance-</span>
+<span># four probe.</span>
+<span># Expected: moving mean [1,2]; main variance stays [1,1]; variance-four probe updates moving variance to [2.5,2.5].</span>
 <span> </span>
 <span># Exercise 2: Freeze evaluation state</span>
-<span># Call BatchNorm in evaluation with a very different batch and compare moving means.</span>
-<span># Expected: state remains[1,2].</span>
+<span># After one training call, evaluate the same batch and compare with the stored-statistic</span>
+<span># formula.</span>
+<span># Expected: moving state stays unchanged; inference output uses mean [1,2] and differs from training output.</span>
 <span> </span>
-<span># Exercise 3: Test row independence</span>
-<span># Apply LayerNorm to one row and to the same row beside[100,200].</span>
-<span># Expected: first row matches within1e-6.</span>
+<span># Exercise 3: Test LayerNorm row independence</span>
+<span># Normalize [1,3] alone and as the first row beside [100,200].</span>
+<span># Expected: the first output is unchanged; LayerNorm has no running-statistic variables.</span>
 <span> </span>
-<span># Exercise 4: Expose batch dependence</span>
-<span># Compare raw batch-centered first rows before and after adding an extreme row.</span>
-<span># Expected: first row changes from[-1,-1] to[-33,-66].</span>
+<span># Exercise 4: Expose actual BatchNorm batch dependence</span>
+<span># Compare the first row of training normalization with and without the added row [98,199].</span>
+<span># Expected: the output changes and matches independent per-channel NumPy mean/variance calculations.</span>
 <span> </span>
-<span># Exercise 5: Repeat the state update</span>
-<span># Apply the original batch a second time in training mode.</span>
-<span># Expected: moving mean[1.5,3].</span>
+<span># Exercise 5: Repeat updates and translate asymmetric momentum</span>
+<span># Repeat the 0.5 update, then run a fresh Keras layer with momentum 0.8 and compare</span>
+<span># old/new-weight arithmetic.</span>
+<span># Expected: 0.5 repeat gives [1.5,3]; Keras0.8 first/second means are [0.4,0.8] and [0.72,1.44]; matching Torch new-batch weight is 0.2.</span>
 <span> </span>
-<span># Exercise 6: Handle a constant feature row</span>
-<span># Normalize a row[5,5] with LayerNorm and default zero offset.</span>
-<span># Expected: finite output[0,0].</span>
+<span># Exercise 6: Handle constant rows and frozen BatchNorm</span>
+<span># Normalize a constant row, then freeze a trained Keras BatchNorm layer and call it with</span>
+<span># training=True.</span>
+<span># Expected: LayerNorm returns finite zeros; frozen Keras BatchNorm preserves moving state and uses its inference statistics.</span>
 <span> </span>
 <span>if __name__ == &quot;__main__&quot;:</span>
 <span>    print(&quot;Read the guide and implement the six exercises in your saved copy.&quot;)</span>

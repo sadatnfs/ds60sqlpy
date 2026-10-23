@@ -122,9 +122,9 @@
 <span>&quot;&quot;&quot;</span>
 <span> </span>
 <span># Exercise 1: Inspect a literal Dataset</span>
-<span># Create eight records with groups A, A, B, B, C, C, D, D and values1, 3, 5, 7, 20, 22,</span>
+<span># Create eight records with groups A, A, B, B, C, C, D, D and values 1, 3, 5, 7, 20, 22,</span>
 <span># 30, 32.</span>
-<span># Expected: length8; item0has ID0, group A, value 1.</span>
+<span># Expected: length 8; item 0 has ID 0, group A, value 1.</span>
 <span> </span>
 <span># Exercise 2: Select whole groups</span>
 <span># Train on accounts A, B and holdout C, D using Subset.</span>
@@ -132,15 +132,15 @@
 <span> </span>
 <span># Exercise 3: Fit only training values</span>
 <span># Calculate the mean from the four training tensors.</span>
-<span># Expected: mean4.</span>
+<span># Expected: mean 4.</span>
 <span> </span>
 <span># Exercise 4: Perturb only assessment values</span>
 <span># Replace the final held-out value with 3200 in a copied dataset and recompute the</span>
 <span># training mean.</span>
-<span># Expected: training mean unchanged4; global mean changes.</span>
+<span># Expected: training mean unchanged 4; global mean changes.</span>
 <span> </span>
 <span># Exercise 5: Expose row-level leakage</span>
-<span># Assign alter nat in g indices to train/test and inspect group intersection.</span>
+<span># Assign alternating indices to train/test and inspect group intersection.</span>
 <span># Expected: allA, B, C, D cross.</span>
 <span> </span>
 <span># Exercise 6: Apply the frozen transform</span>

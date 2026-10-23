@@ -2,7 +2,7 @@ PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 TEST_WORKERS ?= 4
 MODULE_PROFILES ?= python-core,cpp20
 
-.PHONY: help setup generate journey-preview check test test-serial testserial lab mcp app windows-starter docker docker-stop docker-status modules-build modules-start modules-stop modules-check classroom-build classroom-start classroom-stop
+.PHONY: help setup generate journey-preview check test test-serial testserial lab mcp app windows-starter docker docker-stop docker-status modules-build modules-start modules-stop modules-check classroom classroom-build classroom-start classroom-stop
 help:
 	@echo "setup: install learner environment; lab: open coding lab; app: build native executable"
 	@echo "generate: refresh catalog/readers/reports; check: validate; docker: build and start lab"
@@ -84,3 +84,7 @@ classroom-start:
 
 classroom-stop:
 	docker compose -f compose.classroom.yaml $(CLASSROOM_FLAGS) stop
+
+# One command for build, readiness, browser opening and persistent learning data.
+classroom:
+	bash classroom

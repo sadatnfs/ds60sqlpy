@@ -123,26 +123,26 @@
 <span> </span>
 <span># Exercise 1: Derive a scalar slope</span>
 <span># Differentiate (w-2)**2 at w=0 using autograd.grad.</span>
-<span># Expected: derivative -4; loss4.</span>
+<span># Expected: derivative -4; loss 4.</span>
 <span> </span>
 <span># Exercise 2: Check three finite differences</span>
-<span># Useh.1, .01, .001 atw0 and compare each slope with-4.</span>
-<span># Expected: all agree within1e-10.</span>
+<span># Use h=0.1, .01, .001 at w=0 and compare each slope with-4.</span>
+<span># Expected: all agree within 1e-10.</span>
 <span> </span>
 <span># Exercise 3: Separate gradient from update</span>
 <span># Use learning rate.1 and gradient-4 from w0.</span>
-<span># Expected: neww.4, not-4.</span>
+<span># Expected: new w=0.4, not-4.</span>
 <span> </span>
 <span># Exercise 4: Inspect a stationary point</span>
-<span># Differentiate the same objective atw2.</span>
-<span># Expected: gradient0 and loss0.</span>
+<span># Differentiate the same objective atw 2.</span>
+<span># Expected: gradient 0 and loss 0.</span>
 <span> </span>
 <span># Exercise 5: Observe grad-return behavior</span>
 <span># Check that autograd.grad did not accumulate into the leaf.grad field.</span>
 <span># Expected: w.grad is None despite a returned derivative.</span>
 <span> </span>
 <span># Exercise 6: Reject invalid probes</span>
-<span># Pass h0, negative h and a function returning infinity to the finite-difference helper.</span>
+<span># Pass h=0, negative h and a function returning infinity to the finite-difference helper.</span>
 <span># Expected: all raise ValueError.</span>
 <span> </span>
 <span>if __name__ == &quot;__main__&quot;:</span>

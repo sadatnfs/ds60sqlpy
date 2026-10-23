@@ -122,16 +122,16 @@
 <span>&quot;&quot;&quot;</span>
 <span> </span>
 <span># Exercise 1: Inspect module state</span>
-<span># Build Scalar Model with weight0 and buffer offset0.</span>
+<span># Build Scalar Model with weight 0 and buffer offset 0.</span>
 <span># Expected: one parameter weight; one buffer offset; both in state_dict.</span>
 <span> </span>
 <span># Exercise 2: Check a forward call</span>
-<span># Runx1, 2, 3 through the zero-weight module.</span>
+<span># Runx 1, 2, 3 through the zero-weight module.</span>
 <span># Expected: three zero outputs; weight unchanged.</span>
 <span> </span>
 <span># Exercise 3: Run one explicit loop step</span>
 <span># Use SGD.1 and mean squared error, clearing gradients before backward.</span>
-<span># Expected: weight28/15; buffer still0.</span>
+<span># Expected: weight 28/15; buffer still 0.</span>
 <span> </span>
 <span># Exercise 4: Move dtype through registered state</span>
 <span># Convert the module to float32 and inspect parameter and buffer dtypes.</span>
@@ -142,7 +142,7 @@
 <span># Expected: optimizer still holds old Parameter, not replacement.</span>
 <span> </span>
 <span># Exercise 6: Keep parameter count stable across calls</span>
-<span># Call a fresh module on batches of length1 and4 and compare parameter identities.</span>
+<span># Call a fresh module on batches of length 1 and 4 and compare parameter identities.</span>
 <span># Expected: same weight object and one parameter.</span>
 <span> </span>
 <span>if __name__ == &quot;__main__&quot;:</span>

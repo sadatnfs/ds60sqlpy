@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>js-037: Network retries, idempotency and bounded concurrency · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>js-037: Network retries, idempotency and bounded concurrency</h1>
+      <p class="source-path">Generated from <code>courses/javascript-typescript/guides/js-037.md</code></p>
+    </header>
+    <article class="document"><h2 id="js-037-network-retries-idempotency-and-bounded-concurrency">js-037: Network retries, idempotency and bounded concurrency<a class="heading-anchor" href="#js-037-network-retries-idempotency-and-bounded-concurrency" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Advanced, approximately 120 minutes. Direct prerequisites: <code>js-036</code></p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Explain retry classification, backoff with jitter, idempotency key, bounded concurrency with a concrete program. Trace how the values change, identify the assumptions, and make a boundary or invalid case observable. The first investigation is: Fail twice transiently, then succeed, using random value 0.5 and a recording wait. The final task tests honor cancellation before the first attempt.</p>
+<h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
+<p>A retry is a new attempt after an uncertain or failed operation. It can improve resilience to transient failures, but it also multiplies load and may repeat side effects. Retrying every exception hides programming errors and permanent rejections. An operation needs a retry classification, maximum attempts, delay policy, cancellation behavior and a final failure result. A deadline limits waiting; it does not prove that a remote write did not occur.</p>
+<p>Exponential backoff grows the delay between attempts. Full jitter chooses a delay uniformly from zero to a capped exponential bound, spreading clients that would otherwise retry simultaneously. The examples inject the random source and waiting function so expected delays are deterministic. They test a retry policy around a controlled transport fixture, not a real network outage or production recovery claim.</p>
+<p>Idempotency associates repeated attempts with one intended operation. A key alone is insufficient if a caller reuses it with different request data. The fixture stores a canonical request representation and its completed result; matching retries reuse that result, while conflicting reuse rejects. Its Map is only in-memory and single-process. It does not survive crashes or solve distributed coordination; a durable service needs a transactionally enforced key/payload/result policy.</p>
+<p>Bounded concurrency limits simultaneous owned work. Promise.all over a huge input starts all mapped operations immediately unless scheduling is controlled. The provided worker-loop scheduler starts at most the configured limit and preserves result order. On failure it stops scheduling new work, awaits already started work, then rejects. That is cleanup discipline, not cancellation of external side effects already underway.</p>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<p><strong>Retry classification:</strong> The policy selecting failures eligible for another attempt.</p>
+<p><strong>Backoff with jitter:</strong> A growing delay bound with randomized spacing inside it.</p>
+<p><strong>Idempotency key:</strong> An identifier linking retries to one intended operation and payload.</p>
+<p><strong>Bounded concurrency:</strong> A limit on simultaneously active owned operations.</p>
+<h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
+<p>Use the prepared Node 24.22.1 profile. The classroom saves an ES module as main.mjs and executes it with Node. Only built-in Node or ECMAScript APIs are used. For a prepared native environment, node main.mjs is the same command on PowerShell and POSIX. Browser APIs have separate host requirements.</p>
+<p>Save your own learner copy under ignored <code>.learning/expansion/js-037/</code> or use a saved classroom pad. Record predictions before execution. Each worked program includes its helper definitions. The reference puts the six exercises in separate scopes, so a task cannot silently rely on a variable from a previous task. A successful assertion is silent; the final JSON receipt reports how many exercise blocks completed. A failing assertion must produce a failed process, not a generic success message.</p>
+<h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
+<p>retry receives an operation, an injected wait, an injected random function and an AbortSignal. It checks cancellation before each attempt, retries only the explicit transient category and throws the final error on exhaustion. The delay bound is min(cap, base times 2 to the attempt index), and jitter scales it by a sample in [0,1). The bounded map shares a synchronous next-index counter across async workers; each takes an index before awaiting its operation, so no two workers claim the same item.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="example-a-retry-transient-failures-with-deterministic-full-jitter">Example A: Retry transient failures with deterministic full jitter<a class="heading-anchor" href="#example-a-retry-transient-failures-with-deterministic-full-jitter" aria-label="Link to this section">#</a></h4>
+<p>The injected wait records policy without sleeping. The result demonstrates classification and arithmetic, not elapsed network latency or a live outage recovery.</p>
+<pre><code class="language-javascript">import { strict as assert } from &#x27;node:assert&#x27;;
+import { setTimeout as delay } from &#x27;node:timers/promises&#x27;;
+
+async function retry(operation, { attempts = 3, base = 100, cap = 1000, random = Math.random, wait = (milliseconds, signal) =&gt; delay(milliseconds, undefined, { signal }), signal = new AbortController().signal } = {}) {
+  if (!Number.isInteger(attempts) || attempts &lt; 1 || attempts &gt; 5) throw new RangeError(&#x27;attempts from 1 to 5 required&#x27;);
+  if (!Number.isFinite(base) || !Number.isFinite(cap) || base &lt; 0 || cap &lt; 0 || cap &gt; 10000) throw new RangeError(&#x27;finite nonnegative backoff with cap at most 10000 required&#x27;);
+  for (let index = 0; index &lt; attempts; index += 1) {
+    signal.throwIfAborted();
+    try { return await operation(signal); }
+    catch (error) {
+      if (!error || error.transient !== true || index + 1 === attempts) throw error;
+      signal.throwIfAborted();
+      const sample = random();
+      if (!(sample &gt;= 0 &amp;&amp; sample &lt; 1)) throw new RangeError(&#x27;random sample must be in [0,1)&#x27;);
+      await wait(Math.floor(Math.min(cap, base * 2 ** index) * sample), signal);
+    }
+  }
+  throw new Error(&#x27;unreachable retry state&#x27;);
+}
+class IdempotentStore {
+  records = new Map();
+  effects = 0;
+  apply(key, payload) {
+    if (typeof key !== &#x27;string&#x27; || !key || !Number.isSafeInteger(payload.amount) || payload.amount &lt;= 0) throw new TypeError(&#x27;valid key and amount required&#x27;);
+    const canonical = JSON.stringify({ amount: payload.amount });
+    const previous = this.records.get(key);
+    if (previous) {
+      if (previous.canonical !== canonical) throw new Error(&#x27;idempotency key conflict&#x27;);
+      return { ...previous.result };
+    }
+    this.effects += 1;
+    const result = { sequence: this.effects, amount: payload.amount };
+    this.records.set(key, { canonical, result });
+    return { ...result };
+  }
+}
+async function mapBounded(values, limit, operation) {
+  if (!Number.isInteger(limit) || limit &lt; 1 || limit &gt; 8) throw new RangeError(&#x27;limit from 1 to 8 required&#x27;);
+  const results = new Array(values.length);
+  let next = 0;
+  let failed = false;
+  let failure;
+  async function worker() {
+    while (!failed &amp;&amp; next &lt; values.length) {
+      const index = next++;
+      try { results[index] = await operation(values[index], index); }
+      catch (error) { if (!failed) { failed = true; failure = error; } }
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(limit, values.length) }, worker));
+  if (failed) throw failure;
+  return results;
+}
+
+export async function verify() {
+  // Worked example
+  {
+    let attempts = 0;
+    const waits = [];
+    const result = await retry(async () =&gt; { attempts += 1; if (attempts &lt; 3) throw Object.assign(new Error(&#x27;temporary&#x27;), { transient: true }); return &#x27;ready&#x27;; }, { wait: async value =&gt; { waits.push(value); }, random: () =&gt; 0.5 });
+    assert.equal(result, &#x27;ready&#x27;);
+    assert.equal(attempts, 3);
+    assert.deepEqual(waits, [50, 100]);
+  }
+
+  return { checks: 1, status: &quot;passed&quot; };
+}
+
+console.log(JSON.stringify(await verify()));
+</code></pre>
+<p><strong>Expected:</strong> three attempts; delays 50 and 100; result ready.</p>
+<h4 id="example-b-stop-on-permanent-failure-and-on-exhausted-attempts">Example B: Stop on permanent failure and on exhausted attempts<a class="heading-anchor" href="#example-b-stop-on-permanent-failure-and-on-exhausted-attempts" aria-label="Link to this section">#</a></h4>
+<p>A retry policy must retain a bounded final failure. Converting exhaustion into a default success would erase the operation&#x27;s actual outcome.</p>
+<pre><code class="language-javascript">import { strict as assert } from &#x27;node:assert&#x27;;
+import { setTimeout as delay } from &#x27;node:timers/promises&#x27;;
+
+async function retry(operation, { attempts = 3, base = 100, cap = 1000, random = Math.random, wait = (milliseconds, signal) =&gt; delay(milliseconds, undefined, { signal }), signal = new AbortController().signal } = {}) {
+  if (!Number.isInteger(attempts) || attempts &lt; 1 || attempts &gt; 5) throw new RangeError(&#x27;attempts from 1 to 5 required&#x27;);
+  if (!Number.isFinite(base) || !Number.isFinite(cap) || base &lt; 0 || cap &lt; 0 || cap &gt; 10000) throw new RangeError(&#x27;finite nonnegative backoff with cap at most 10000 required&#x27;);
+  for (let index = 0; index &lt; attempts; index += 1) {
+    signal.throwIfAborted();
+    try { return await operation(signal); }
+    catch (error) {
+      if (!error || error.transient !== true || index + 1 === attempts) throw error;
+      signal.throwIfAborted();
+      const sample = random();
+      if (!(sample &gt;= 0 &amp;&amp; sample &lt; 1)) throw new RangeError(&#x27;random sample must be in [0,1)&#x27;);
+      await wait(Math.floor(Math.min(cap, base * 2 ** index) * sample), signal);
+    }
+  }
+  throw new Error(&#x27;unreachable retry state&#x27;);
+}
+class IdempotentStore {
+  records = new Map();
+  effects = 0;
+  apply(key, payload) {
+    if (typeof key !== &#x27;string&#x27; || !key || !Number.isSafeInteger(payload.amount) || payload.amount &lt;= 0) throw new TypeError(&#x27;valid key and amount required&#x27;);
+    const canonical = JSON.stringify({ amount: payload.amount });
+    const previous = this.records.get(key);
+    if (previous) {
+      if (previous.canonical !== canonical) throw new Error(&#x27;idempotency key conflict&#x27;);
+      return { ...previous.result };
+    }
+    this.effects += 1;
+    const result = { sequence: this.effects, amount: payload.amount };
+    this.records.set(key, { canonical, result });
+    return { ...result };
+  }
+}
+async function mapBounded(values, limit, operation) {
+  if (!Number.isInteger(limit) || limit &lt; 1 || limit &gt; 8) throw new RangeError(&#x27;limit from 1 to 8 required&#x27;);
+  const results = new Array(values.length);
+  let next = 0;
+  let failed = false;
+  let failure;
+  async function worker() {
+    while (!failed &amp;&amp; next &lt; values.length) {
+      const index = next++;
+      try { results[index] = await operation(values[index], index); }
+      catch (error) { if (!failed) { failed = true; failure = error; } }
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(limit, values.length) }, worker));
+  if (failed) throw failure;
+  return results;
+}
+
+export async function verify() {
+  // Worked example
+  {
+    let permanent = 0;
+    await assert.rejects(retry(async () =&gt; { permanent += 1; throw new Error(&#x27;permanent&#x27;); }), /permanent/u);
+    assert.equal(permanent, 1);
+    let transient = 0;
+    await assert.rejects(retry(async () =&gt; { transient += 1; throw Object.assign(new Error(&#x27;still unavailable&#x27;), { transient: true }); }, { wait: async () =&gt; {} }), /still unavailable/u);
+    assert.equal(transient, 3);
+  }
+
+  return { checks: 1, status: &quot;passed&quot; };
+}
+
+console.log(JSON.stringify(await verify()));
+</code></pre>
+<p><strong>Expected:</strong> permanent attempted once; transient attempted three times and still rejects.</p>
+<h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
+<p>Trace the entry point and identify the values that exist before each operation. Distinguish a value from a reference to an object, a returned Promise from its eventual result, and a compile-time type from a runtime check. Write down the first observation that would disprove your explanation. A useful prediction includes an expected value or failure category, not merely a claim that the program should work.</p>
+<p>For a loop, write the state before and after one iteration. For a callback, identify the caller and the arguments it supplies. For an asynchronous operation, identify who starts it, who awaits it, and who owns cleanup. These small traces make failures local: you can compare the first incorrect state instead of guessing from a much later symptom.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Retry transient failures with deterministic full jitter.</strong> Fail twice transiently, then succeed, using random value 0.5 and a recording wait. <strong>Expected:</strong> three attempts; delays 50 and 100; result ready. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
+</ol>
+<ol>
+<li><strong>Stop on permanent failure and on exhausted attempts.</strong> Use one permanent failure, then an always-transient operation with a three-attempt budget. <strong>Expected:</strong> permanent attempted once; transient attempted three times and still rejects. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
+</ol>
+<ol>
+<li><strong>Reuse a completed idempotent result.</strong> Submit the same key and payload twice to the local store. <strong>Expected:</strong> one side effect; identical returned receipt. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
+</ol>
+<ol>
+<li><strong>Reject conflicting reuse of an idempotency key.</strong> Reuse one key for amounts 5 and 7. <strong>Expected:</strong> conflict error; effects remains 1. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
+</ol>
+<ol>
+<li><strong>Bound active work while preserving input order.</strong> Map four values with concurrency 2 and observe active-operation counts. <strong>Expected:</strong> results 2,4,6,8; peak active at most 2; active returns to 0. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
+</ol>
+<ol>
+<li><strong>Honor cancellation before the first attempt.</strong> Abort a signal before calling retry and track attempted work. <strong>Expected:</strong> original reason rejects; attempts remain 0. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
+</ol>
+<h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
+<p>Keep the smallest fixture that distinguishes the intended behavior from a tempting alternative. Read the assertion message and inspect the input, return value and state at that point. Do not remove a failing check just to reach the success receipt. Preserve the original failure, repair the responsible assumption, then check the normal path and the negative case again.</p>
+<p>If a host API is absent, confirm the actual host and version before changing the algorithm. A successful parse does not prove that an API exists. Compiler success does not prove that external data satisfies a type. A browser interaction requires browser evidence. For resource-owning examples, inspect cleanup after failure as carefully as the happy path. The separate explanations discuss the specific mistaken inference in each exercise.</p>
+<h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
+<p>Start by comparing the actual value with the literal expected result. Next, isolate the expression that transforms it or the boundary where its type or ownership changes. If the discrepancy involves scheduling, replace unrelated work with a small trace array and await the exact completion you intend to observe. Finally, ask for one hint about the first incorrect assumption before opening the reference. Keep one controlled failure that would catch the same mistake returning.</p>
+<h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
+<p>Close the solution and explain Retry classification, Backoff with jitter, Idempotency key using the fixture. Reconstruct one example from a blank saved copy. Change a boundary input and predict the new result before running it. Explain the assumptions under which the mechanism is useful and a situation in which its cost or host requirements make another design preferable. A copied program is useful rehearsal; a fresh case demonstrates transfer.</p>
+<h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
+<p><a href="https://nodejs.org/download/release/v24.11.0/docs/api/timers.html">Official language or host reference</a>. Fixtures and exercises are original course material. Actual prepared Node, TypeScript and browser execution evidence is tracked in <code>docs/implementation/javascript-content-status.md</code>. Manual-only steps remain unqualified until performed. No default lesson installs dependencies, downloads a model or contacts a shared service.</p>
+<h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning for js-037: Network retries, idempotency and bounded concurrency.
+Read courses/javascript-typescript/guides/js-037.md and courses/javascript-typescript/lessons/js-037.mjs. Direct prerequisites: `js-036`.
+Explain the mechanism, ask me to predict a value or failure, review my own attempt,
+give one hint, request compile/runtime/browser evidence, and ask a fresh retrieval question.
+Keep courses/javascript-typescript/solutions/ closed until I request comparison or show an attempt.
+Done when I can explain the state and host contracts, pass all six exercise checks,
+diagnose a controlled failure, and solve a new boundary case without copying the answer.</code></pre></article>
+  </main>
+</body>
+</html>

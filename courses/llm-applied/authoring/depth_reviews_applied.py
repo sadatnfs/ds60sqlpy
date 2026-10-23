@@ -1,0 +1,846 @@
+"""Substantive applied-LLM review additions; qualified programs remain unchanged."""
+from __future__ import annotations
+
+import json
+from pathlib import Path
+from typing import Any
+
+REVIEWS: dict[str, dict[str, Any]] = {}
+
+
+def review(number: int, findings: list[str], decisions: str, deep_dive: str, diagnosis: str) -> None:
+    assert number != 16, "LoRA depth is independently owned and qualified"
+    identifier = f"llm-applied-{number:03d}"
+    assert identifier not in REVIEWS
+    REVIEWS[identifier] = {
+        "findings": findings,
+        "decisions": decisions.strip(),
+        "deep_dive": deep_dive.strip(),
+        "diagnosis": diagnosis.strip(),
+    }
+
+
+def apply_reviews(specs: dict[str, dict[str, Any]], *, write_matrix: bool = True) -> None:
+    for identifier, details in REVIEWS.items():
+        spec = specs[identifier]
+        spec["decisions"] += "\n\n" + details["decisions"]
+        spec["anatomy"] += "\n\n" + details["deep_dive"]
+        spec["diagnosis"] = details["diagnosis"]
+    if not write_matrix:
+        return
+    root = Path(__file__).resolve().parents[3]
+    plan = json.loads((root / "courses/llm-applied/track.json").read_text())["lessons"]
+    evidence = json.loads((root / "courses/llm-applied/authoring/review_runtime_evidence.json").read_text())["records"]
+    matrix = []
+    for topic in plan:
+        detail = REVIEWS.get(topic["id"])
+        separately_reviewed = topic["id"] == "llm-applied-016"
+        matrix.append({
+            "id": topic["id"],
+            "title": topic["title"],
+            "status": "reviewed_and_deepened" if detail or separately_reviewed else "pending_substantive_review",
+            "findings": detail["findings"] if detail else (["Independent LoRA orientation, exact gradient/update and rank review completed in lora_depth.py."] if separately_reviewed else []),
+            "executable_change": topic["id"] in {"llm-applied-010", "llm-applied-015", "llm-applied-022"},
+            "worked_code_change": topic["id"] in {"llm-applied-010", "llm-applied-022"},
+            "review_owner": "lora_depth.py" if separately_reviewed else "depth_reviews_applied.py",
+            "review_runtime_evidence": [record for record in evidence if record["lesson_id"] == topic["id"]],
+        })
+    (root / "courses/llm-applied/authoring/review_matrix.json").write_text(
+        json.dumps({"review_date": "2026-10-23", "chapters": matrix}, indent=2) + "\n"
+    )
+
+review(1,
+    ["The routing fixture needed a stage-by-stage capability and evidence ledger.", "The prose incorrectly called120 the admission threshold while the helper uses100.", "A model-quality comparison needed conditional failure accounting and controlled alternatives."],
+    """For a metric assistant, separate four requests that may appear in one sentence: identify the applicable definition, extract the required inputs, compute the value and explain its interpretation. Retrieval can supply the definition; a proposal model can extract fields; trusted validation and code can compute the value. The final interpretation still depends on the study design. Choose the component to change from an observed failure at that stage.
+
+The fixture's numeric admission rule is intentionally simple: at least100 governed examples makes a stable behavior gap an adaptation candidate. The120-example case passes that rule. It is not an instruction to train after collecting a magic number of rows. A small set of independently informative examples can differ greatly from many duplicated templates.""",
+    """## Trace a subject-assistant request through its evidence requirements
+
+Consider: “What is our current account conversion rate, and did the new checkout cause it to improve?” This contains several distinct claims. The word current requires the correct effective definition and data period. Account requires a denominator and grouping unit. Conversion rate requires validated counts and arithmetic. Cause requires treatment assignment or defensible identification assumptions. One well-formed generated sentence cannot establish all four.
+
+| Subtask | Required input | Inspectable output | Failure that belongs here |
+| --- | --- | --- | --- |
+| Find the definition | Authorized, effective source version | Source ID and supported formula | Wrong version or missing source |
+| Extract fields | Source text or structured observations | Typed fields with provenance | Unsupported count or wrong unit |
+| Calculate | Accepted inputs and declared formula | Reproducible numeric artifact | Wrong denominator or arithmetic |
+| Interpret | Population and study design | Bounded claim with assumptions | Unsupported causal conclusion |
+
+A trained model can participate in the first two interfaces or explain the last two, but its fluency does not replace their evidence. The routing helper returns one primary route, while the composed architecture may contain several stages. In particular, exact_computation takes precedence in the helper. That priority is a teaching decision about one requested operation; it does not mean a numerical tool can discover an unknown business definition on its own.
+
+A simple probability decomposition explains why adding components is not automatically an improvement. Let R mean sufficient admissible evidence reached the answer stage, A mean the answer is correct and supported given that evidence, and V mean the result meets the required validation contract. The success probability for this complete path is P(R) times P(A given R) times P(V given A and R). These conditional factors do not require an independence assumption. In an illustrative calculation,0.9 times0.8 times0.95 is0.684. Those values are invented for arithmetic explanation, not measured model performance. Improving the last factor alone cannot recover all failures from missing evidence.
+
+Use controlled comparisons to choose an intervention. A prompt baseline can reveal whether the task is already expressible without training. An oracle-context control can show whether answer behavior improves when relevant evidence is supplied directly. A retrieval intervention holds the answering configuration fixed while changing evidence selection. An adaptation comparison holds evaluation families and access conditions fixed while changing learned behavior. If all of those change together, an improved score does not identify the useful component.
+
+Retrieval changes the inference evidence available to a model; adaptation changes the model's parameterized behavior. The original RAG work combined parametric generation with explicit retrieved memory, but this course's first route selector performs neither learned retrieval nor generation. Its role is to make decisions and prerequisites inspectable. [Retrieval-Augmented Generation](https://arxiv.org/abs/2005.11401).
+
+### Interview reasoning with explanatory answers
+
+**Why not fine-tune current policy documents directly into the model?** Updates, source attribution and per-request access remain separate problems. A memorized fact does not expose which version supports it or whether the current principal may see it. Adaptation may still improve a stable response behavior, while retrieved evidence supplies current facts.
+
+**When is a deterministic tool the right answer?** When the task requires an exact operation over validated inputs and a declared formula. The tool's correctness does not establish that the extracted inputs or chosen denominator were appropriate; retain those upstream contracts too.
+
+**What makes an adaptation experiment informative?** A measured behavior gap, governed examples, a frozen comparison policy, independent evaluation families and real outputs from both candidates. A training loss by itself measures fit to training targets, not domain-assistant utility.""",
+    """If an assistant returns the right number under the wrong definition, debug definition/version selection before arithmetic. If a tool computes correctly from invented counts, the error is at extraction or validation. If a response follows the schema but invents a causal explanation, inspect the claim rubric and study-design evidence rather than only format compliance.
+
+If every proposed fix adds another model, compare the existing stages against an oracle control first. If a report cites the120-example demonstration as a sample-size law, return to the helper's actual threshold100 and its explicitly artificial admission role. Record which route was chosen, which prerequisites were satisfied and which quality evidence remains unobserved.""")
+
+review(2,
+    ["Decoded-object validation, source parsing and numerical eligibility were conflated.", "The count ratio needed an explicit unit and aggregation counterexample.", "Unsupported fields and rejected records needed separate evaluation denominators."],
+    """Define the accepted record schema before asking a model to populate it. Keep source parsing, record validation and eligibility for a particular calculation as separate stages. This fixture permits a zero-visit/zero-purchase record structurally, but rate() rejects its zero denominator. That distinction lets a system preserve a real zero-activity observation without inventing a rate.
+
+When extraction is used before statistical analysis, retain rejected records and their reasons. An acceptance filter can change the analyzed population. A high accuracy among accepted records should therefore be accompanied by acceptance coverage and a review of which document families were excluded.""",
+    """## Follow one value from text to an analysis unit
+
+The helper extract recognizes a deliberately narrow source grammar. It uses a full-string regular expression and returns digit spans from the original string. The helper validate accepts an already decoded Python dictionary; it is not a JSON parser. A JSON response from a future language model would first need parsing and then the same independent acceptance checks. These interfaces should not be collapsed into the claim “the model returned valid data.”
+
+For the literal text `Visits: 10; Purchases: 3; Unit: account`, the visit digits occupy the half-open character interval[8,10), the purchase digit[23,24), and the unit[32,39). Slicing the original string at those boundaries recovers10,3 and account. The integer conversion changes representation, while the stored span keeps its provenance. If preprocessing removes spaces before extracting offsets, those new offsets cannot be applied directly to the original string without a mapping.
+
+The record check accepts exactly three keys and requires type(value) to be int for both counts. Python's Boolean subtype relationship makes this stricter than a plain isinstance(value,int) test. A True visit count would otherwise become one in arithmetic even though the source proposed a logical value. Extra fields are also rejected, so a model cannot quietly insert an unsupported p_value alongside otherwise valid counts.
+
+The domain constraint0<=purchases<=visits assumes at most one counted purchase per eligible visit. It is not a universal business rule. If the real outcome counts multiple items purchased in a visit, the ratio may legitimately exceed one and needs a different name and contract. A validator should make that modeling choice explicit instead of treating every ratio as a probability.
+
+For the valid fixture,3/10=0.3 describes purchases per eligible visit. The assignment_unit field says the experimental assignment is by account. It does not transform the arithmetic denominator into accounts, nor does it make10 visits independently randomized. Repeated observations within accounts require account identities and a suitable analysis design for uncertainty. The three extracted fields alone cannot recover that information.
+
+Aggregation adds another distinction. Suppose one account has1 purchase in1 visit and another has1 purchase in9 visits. The pooled visit rate is2/10=0.2. The equally weighted mean of account-specific rates is(1+1/9)/2=5/9, about0.556. Both calculations are valid for their declared estimands; they answer different questions. Calling both “average conversion” hides the weighting rule. The extraction schema should preserve enough units and identities to support the intended calculation.
+
+Missingness and invalidity need explicit statuses. purchases=None is rejected by this strict count schema; purchases=0 is a real observed zero. A broader system could carry a separate unknown record with a source reason. It should not coerce unknown to zero, nor remove every hard-to-parse study and then report the remaining sample as representative.
+
+### Interview reasoning with explanatory answers
+
+**Why is schema validity insufficient?** It establishes structure and primitive types. A fabricated purchase count can still be an integer within the allowed range. Source support and semantic interpretation need separate checks.
+
+**Can the parser prove a statistical result?** It can recover the declared source fields under its grammar. A causal effect, standard error or p-value additionally needs actual analysis inputs and justified design assumptions. Preserve a source's claim as a claim until that separate computation is validated.
+
+**How should an extraction comparison be scored?** Align records and fields to held-out source families, count unsupported values and missing-field behavior, and report acceptance coverage beside accuracy. Otherwise a system can appear accurate by rejecting difficult documents or inventing easy defaults.""",
+    """If a rate is wrong, inspect the exact source spans, parsed values, eligibility rule and denominator in that order. If zero-activity records vanish, distinguish a valid zero-count observation from an undefined zero-denominator rate. If a Boolean slips into counts, inspect exact types before coercion.
+
+If accepted records have excellent accuracy but aggregate findings change, inspect the rejected population and grouping units. If a causal conclusion appears despite having only counts and a unit label, locate the missing assignment and outcome data. If citations move after text cleanup, preserve the original version and an explicit coordinate mapping rather than widening a substring match.""")
+
+review(3,
+    ["The whole-item allocator needed exact scope and a greedy-selection counterexample.", "Prompt serialization was not separated enough from model behavior and authorization.", "Prompt tuning needed a controlled evaluation and truncation ledger."],
+    """Treat prompt assembly as a versioned data transformation with a budget, then evaluate the actual model response separately. Preserve the question, admitted evidence IDs, template identity and selection decisions. A valid prompt artifact establishes what was supplied; it does not establish that the model followed instructions or produced a supported answer.
+
+Reserve the actual tokenizer's full rendered overhead before evidence selection. The helper in this chapter allocates whitespace counts for evidence only after a response reserve. It does not count instruction text, the question or chat-control markers. Use its conservation logic as a teaching component, not as a pretrained context-window guarantee.""",
+    """## Derive a context allocation and identify its missing terms
+
+Let C be a model's allowed context budget, I instruction tokens, Q question tokens, H chat-template and tool-schema overhead, R reserved response capacity and E selected evidence tokens. A complete allocation must satisfy I+Q+H+R+E<=C under the intended tokenizer and serving contract. A whitespace word count is a different unit. The fixture deliberately models only E<=C-R so its arithmetic is inspectable.
+
+With total12 and reserve4, the evidence allowance is eight whitespace units. The first item costs five and is admitted. The second costs four;5+4 would exceed eight, so it is omitted. Used evidence is five and unused allowance is three. Returning only five used units is correct under a whole-item policy. It is not evidence that the policy maximizes evidence utility or uses every possible unit.
+
+The allocator scans all items in their provided order and admits a fitting item. It does not stop at the first oversized item, and it does not solve a knapsack optimization. For a budget of six, item A with cost four and utility four can block later items B and C, each with cost three and utility three. A-first greedy selection returns utility four, while choosing B and C gives utility six. This is an analytic extension of the allocator, not a new measured retrieval result. If item order is the chosen ranking policy, that tradeoff should be declared.
+
+Utility itself can be nonadditive. Two passages may be useful only together when one defines the denominator and the other states an exclusion. Two overlapping passages may be redundant. A practical selector can group required evidence, deduplicate spans, reserve schema context and record omissions. The goal is sufficient supported context under a bounded policy, not simply the largest token total.
+
+Serialization and authority are separate. JSON encoding keeps an embedded quote or newline inside a string value instead of corrupting the artifact structure. A model reading that string can still respond to its semantic content. The test that AUTHORIZED_OPERATIONS remains unchanged proves the local Python constant was not modified; no model is invoked in that example, and no adversarial-model resistance is measured. Enforcement belongs in the application component that decides which operation can actually run.
+
+The intended chat format is also part of the model interface. Role/content objects are converted into token sequences with model-specific control tokens, so a tokenizer and template need compatible identities. The versioned Transformers documentation shows that different chat models can require different formatting despite related base architectures. The offline fixture does not execute that tokenizer; the optional pretrained recipe later validates the actual format. [Transformers4.57.1 chat templates](https://huggingface.co/docs/transformers/v4.57.1/en/chat_templating).
+
+Prompt changes consume evaluation information even without gradient updates. If a failure on final question family B motivates adding a B demonstration, B has entered system selection. Renaming the prompt file does not restore independence. Use a development set for revision, a validation policy for comparison and a separately retained final assessment when a fresh generalization claim is needed.
+
+### Interview reasoning with explanatory answers
+
+**Does a template hash make a result reproducible?** It identifies exact template bytes. Reproduction also needs question, evidence versions, model/tokenizer, decoding settings and relevant runtime state. A hash is one identity in that record.
+
+**Why retain complete evidence items?** It avoids silently cutting a definition or citation in half. It can waste capacity or omit a complementary item, so the policy needs task evaluation rather than a universal claim of optimality.
+
+**Does placing retrieved text in a data field neutralize injection?** It preserves the application's structural distinction, but it does not prove how a model behaves. Keep operation authorization and source-access checks outside generated text, and evaluate model behavior separately.""",
+    """If a prompt exceeds the real context limit, compare tokenizer-measured instruction, question, template, evidence and reserve counts. Do not repair a missing overhead term by claiming whitespace words equal tokens. If a needed passage is omitted, inspect item order and whole-item costs before blaming the answer model.
+
+If an injection test reports success without running a model, state exactly what the local test checked: artifact structure and fixed operation policy. If prompt quality improves only on examples used to edit the instructions, inspect family leakage and repeated selection. If an answer changes after a template edit, preserve both rendered prompts and evidence identities so the cause is traceable.""")
+review(4,
+    ["Integrity metadata needed separation from authenticity, access and applicability.", "Current-only version selection lacked an explicit historical-time counterexample.", "Corpus, chunk, index and answer identities needed a dependency trace."],
+    """Maintain separate identities for raw source bytes, normalized text, chunks and index builds. An update to one representation can leave another stale. Record the transformation policy and parent identities so a reviewer can trace a retrieved span back to its exact admitted source.
+
+Decide whether a question asks for the currently served rule or the rule effective at a historical event time. Maximum integer version is a valid fixture policy, but it cannot answer every historical question. Effective dates, source precedence and the time at which the system learned an update are separate pieces of metadata.""",
+    """## Follow a corpus update through its derived artifacts
+
+The fixture changes conversion from purchases divided by eligible visits to purchases divided by eligible accounts. Even if the same numerator is used, those denominators can differ. With three purchases, ten eligible visits and five eligible accounts, the two definitions yield0.3 and0.6. A system using the newer text with older computation code may produce a coherent-looking answer that combines incompatible versions.
+
+A content fingerprint detects a byte change under the chosen encoding. Here SHA256 is applied to UTF-8 text. It does not establish who wrote the text, whether it is accurate, whether its permission statement is legitimate or which date it applies to. Likewise, permission='course-fixture' is an explicit fixture value; the code does not consult a real policy owner. These distinctions are why dataset documentation should retain purpose, collection and intended-use information beside integrity metadata. [Datasheets for Datasets](https://arxiv.org/abs/1803.09010).
+
+The admission helper checks required-key presence, a nonempty permission value and text/hash equality. It allows additional fields and does not fully validate every field's type or consult an identity provider. That is its exact local contract. A source can pass those checks and still be semantically wrong or unauthorized under an external policy. Describe such a result as integrity/metadata admission, not a complete trust determination.
+
+The active-version loop selects the largest version value within each family. Suppose version1 applies through January and version2 begins in February. A question about a January experiment needs version1 even if version2 is current today. If version2 was discovered in March but applies retroactively from February, effective time and ingestion time differ again. A reproducible answer needs the applicable policy and the system's evidence snapshot, not just the newest filename.
+
+| Artifact | Parent identity that must remain traceable | Example stale mismatch |
+| --- | --- | --- |
+| Admitted document | Source version and exact content hash | Changed text with old hash |
+| Chunk | Document version and original offsets | Old offsets applied to new text |
+| Vector or lexical index | Chunk identities and encoding/tokenizer policy | Rebuilt corpus with old index |
+| Cached answer | Evidence, prompt, model and effective access policy | Privileged or obsolete answer reused |
+
+A release can prepare a new corpus and derived index together, verify their compatibility, and switch the served identity only after checks pass. The six-document fixture does not implement an atomic deployment protocol. The table states which identities a larger implementation would need to bind. Keeping an old index alive temporarily is not automatically wrong, provided the served version is explicit and its access/freshness policy still permits it.
+
+Evaluation isolation follows semantic lineage as well as bytes. metric-v1 and metric-v2 have different hashes but share a family. A model or prompt selected using one may already have seen the task structure behind the other. Conversely, two unrelated documents can legitimately share a common boilerplate sentence. Define families using the dependence relevant to the intended generalization claim, rather than equating every shared token with leakage or every different hash with independence.
+
+### Interview reasoning with explanatory answers
+
+**Does a hash prove authenticity?** It detects content disagreement with a declared digest. Authenticity additionally needs a trusted association between that digest, the source identity and the publication process. A maliciously replaced text and digest can agree perfectly.
+
+**Why version an index separately from a corpus?** Index construction can lag, fail partially or change tokenization/embedding policy without changing the original documents. The two identities describe different artifacts.
+
+**Why is selecting the newest document insufficient?** The newest version may not apply to the event being analyzed, and conflicting sources may have different authority. Applicability and precedence must be stated before resolving a conflict.""",
+    """If an answer cites the correct document ID but wrong wording, compare version, hash, chunk offsets and index-build identity. If rebuilding an index changes ranks without source changes, inspect tokenization, encoder and normalization metadata. If a historical answer uses the current rule, check the time policy before retrieval relevance.
+
+If a corpus passes admission yet violates access rules, inspect which external policy checks were actually executed. If test accuracy rises after adding a revised document, examine family lineage across selection and assessment. Preserve quarantined and excluded records with reasons so a successful manifest is not merely a hidden subset of the intended corpus.""")
+
+review(5,
+    ["Chunk-count and duplication formulas needed derivation and exact boundary arithmetic.", "Character offsets were not distinguished from bytes or model tokens.", "Overlap needed an evidence-dependence and multi-passage sufficiency counterexample."],
+    """Choose the retrieval unit from the question's required evidence. A definition may fit in one paragraph, while a table answer may require a row, header, units and footnote together. Evaluate a splitter on those dependencies instead of optimizing only chunk length or embedding throughput.
+
+Keep a chunk's original-source identity and its representation for retrieval separate. An index may add a heading or normalize whitespace for encoding, but citation offsets still need to refer to the admitted original text. Record the transformation rather than assuming the encoded string can be sliced back out unchanged.""",
+    """## Derive windows, duplication and citation coordinates
+
+Let a nonempty document have n whitespace-token spans, window size s and overlap o, with0<=o<s. The advance is d=s-o. The first chunk covers up to s spans; further chunks begin at d,2d and so on until one reaches the end. For this helper, the number of chunks is one when n<=s and otherwise1+ceil((n-s)/d). Empty input produces zero chunks under the declared policy.
+
+For n=7,s=3,o=1, d=2 and the chunk count is1+ceil(4/2)=3. The span-index groups are[0,1,2],[2,3,4],[4,5,6]. Stored token occurrences total nine while unique source positions total seven. Positions2 and4 are repeated once. The redundancy ratio for this finite fixture is9/7, about1.286; it is not nine independent observations supporting the answer.
+
+For a long uniform document with full windows, stored token occurrences per newly covered position approach s/(s-o). Overlap near the window size can therefore create a large storage and retrieval cost. At s=100,o=90, the advance is ten and the interior duplication factor approaches ten. That arithmetic does not prove an optimal overlap policy; it identifies a cost to measure beside evidence recall.
+
+The loop stops when a chunk reaches the end. Without that break, the range of starts could produce another tail containing only already-covered final tokens. For the seven-token example, continuing after the window beginning at four would add a window beginning at six containing only seven. Preventing that duplicate tail is a policy decision visible in the helper, not an automatic property of overlapping windows.
+
+Citation coordinates have units. Python string offsets count Unicode code points, while a UTF-8 byte stream and a model tokenizer can have different lengths. For example, the character β occupies one Python-string position but two UTF-8 bytes. Combining marks can make a visually single character contain multiple code points. The fixture's offsets belong to the original Python string, and its tests correctly slice that same string. Calling them byte offsets would be inaccurate.
+
+Internal whitespace remains intact because chunk text is sliced from the first selected token's start to the last token's end. In a source containing alpha, two spaces, beta, a newline and gamma, the first two-token chunk retains two spaces between alpha and beta. Joining selected token strings with one space would produce different text and break the source-slice equality. The splitter excludes leading/trailing whitespace outside the selected token endpoints, which should also be understood when comparing full-document reconstruction.
+
+Overlap can improve boundary coverage without making each chunk self-sufficient. If a formula appears in one section and its eligibility rule appears several sections earlier, a one-token overlap does not recover that dependency. A retrieved passage saying “divide by the eligible population” may be insufficient without the definition of eligibility. Evaluate whether the selected context jointly covers all required facts, not only whether one answer phrase appears in any chunk.
+
+### Interview reasoning with explanatory answers
+
+**Why not increase overlap until recall is perfect?** Duplication consumes storage and context, can return several copies of the same evidence and can displace a complementary source. Recall and useful context sufficiency are different measurements.
+
+**What should identify a chunk?** The source/version and boundaries plus the splitter representation policy. An ordinal such as chunk3 can refer to different content after an earlier section changes.
+
+**Can a whitespace chunk count predict model-token use?** Only under an explicitly verified mapping, which this fixture does not supply. The intended tokenizer and rendered chat format must measure the actual model budget.""",
+    """If citation text differs, compare coordinate units, exact source version and normalization history. If a splitter loops or repeats indefinitely, inspect the positive advance s-o before considering content. If the last chunk duplicates an already-covered tail, inspect the termination rule.
+
+If retrieval returns many near-identical passages, deduplicate by source spans or evidence identity before treating them as corroboration. If recall appears high but answers miss exclusions or units, inspect whether the relevant evidence set was defined as an isolated phrase instead of the complete dependency. Tune split policy on validation families, then retain unseen boundary cases for assessment.""")
+
+review(6,
+    ["BM25 needed a full numeric score trace and parameter-limit interpretation.", "Document-frequency and chunk-policy changes needed a corpus-dependence example.", "The tokenizer and default-only parameter contract needed honest boundaries."],
+    """Use the literal BM25 implementation as an auditable ranking baseline. Before comparing a dense retriever, inspect exact terminology, rare identifiers, tokenization and zero-score questions. These often reveal whether a failure is missing vocabulary or missing evidence rather than insufficient model capacity.
+
+The helper exercises the declared defaults and a small positive-k1 example. It does not validate arbitrary caller-supplied k1 or b values. A configurable service should validate its parameter domain separately; the lesson does not claim that every possible input combination is admitted safely.""",
+    """## Calculate the score and isolate each modeling choice
+
+The three documents each have two tokens, so average document length is two. The query randomization appears once in document a and nowhere else. With N=3,df=1, the implemented IDF is log(1+2.5/1.5)=log(8/3), about0.980829. The matching document's normalized length ratio is one. With tf=1 and k1=1.2, its frequency factor is2.2/(1+1.2)=1, so the final score is exactly that IDF. The other documents receive zero because the query term is absent.
+
+For account, df=2 and IDF is log(1+1.5/2.5)=log(1.6), about0.470004. The rarer query term therefore receives more weight in this fixed corpus. Document frequency counts presence per document: repeating account ten times inside one document still contributes one to df. Token frequency and document frequency are different denominators.
+
+Write K=k1*(1-b+b*L/avgL). The frequency factor is f(tf)=(k1+1)*tf/(tf+K). Holding document length and corpus statistics fixed, its derivative for positive K is(k1+1)*K/(tf+K)^2, positive and decreasing. The second derivative is negative, so additional repetitions have diminishing gain. As tf becomes large under that fixed-length mathematical comparison, the factor approaches k1+1. If actual repetitions also lengthen the document, K changes too; do not silently hold one effect fixed while interpreting a real edit.
+
+With b=0, K=k1. For tf1,2,10 at k1=1.2, the factors are1,1.375 and about1.964286. Ten repetitions do not create ten times the score. At b=1, the normalization depends fully on L/avgL; at b=0, document length does not enter K. For the same tf=1, k1=1.2 and b=0.75, a document twice the average length has K=2.1 and factor2.2/3.1, about0.709677. One half the average length has K=0.75 and factor2.2/1.75, about1.257143.
+
+This positive-IDF convention and the roles of k1 and b are documented in Lucene's versioned BM25 API. The fixture is its own transparent calculation and does not execute Lucene or claim identical index-analysis behavior. [Lucene10.3.1 BM25Similarity](https://lucene.apache.org/core/10_3_1/core/org/apache/lucene/search/similarities/BM25Similarity.html).
+
+The corpus definition changes the scores. Splitting one source into many chunks changes N, lengths and possibly df. Repeating the same heading in every chunk can make a previously rare term common. A score threshold learned before rechunking therefore may not retain the same meaning afterward. Authorization filtering also defines which corpus is eligible for ranking; the later access chapter makes that boundary explicit.
+
+The local tokenizer lowercases and retains ASCII letter/digit runs. It will split punctuation-delimited identifiers, discard non-ASCII letters under this pattern and treat exact spellings according to that policy. A query token absent from every document gives no positive contribution, while a repeated query term is counted once because the code uses a set. Those are concrete design choices, not intrinsic properties of every BM25 system.
+
+### Interview reasoning with explanatory answers
+
+**Is a BM25 score a relevance probability?** No. It is an ordering score under specified corpus statistics and parameters. A threshold needs task calibration, and changing the corpus can change its interpretation.
+
+**Why can chunking change rankings even when the source text is unchanged?** The retrieval documents and their lengths/frequencies have changed. The scoring unit is the indexed chunk, not automatically the original source family.
+
+**Why does a synonym query miss buy when searching purchase?** The implementation has no learned or curated equivalence between those tokens. Adding expansion or a dense branch is a separate intervention that needs both positive and false-match tests.""",
+    """If an exact identifier is missed, inspect emitted tokens before changing ranking parameters. If every score is zero, verify whether the query shares any indexed terms and apply an answerability policy instead of treating the first ID tie-break as evidence. If a score changes after a corpus rebuild, compare document counts, chunk lengths, repeated headings and df.
+
+If repetition overwhelms ranking, separate term-frequency saturation from the document-length effect and inspect the actual k1/b configuration. If a dense retriever appears better, ensure both candidates see the same authorized corpus and context budget. Preserve the literal score calculation as an oracle for ranking arithmetic while evaluating task relevance independently.""")
+review(7,
+    ["Cosine retrieval needed an exact geometric calculation and a coordinate-system counterexample.", "The metadata exercise only compares dictionaries; it does not enforce an integrated retrieval gate.", "Encoder quality, normalization range and approximate search needed separate evidence."],
+    """Separate representation quality, similarity arithmetic and search approximation. The literal vectors test arithmetic only. A learned encoder needs relevance labels; an approximate index needs comparison with exact search over the same vectors. Improving one layer does not automatically repair another.
+
+Treat model/tokenizer/pooling/normalization identity as part of the vector interface. The metadata exercise detects a mismatch with an assertion, but cosine_rank itself receives only arrays and cannot enforce encoder identity. A real caller must perform that gate before handing vectors to the numerical function.""",
+    """## Derive the ranking and distinguish geometry from meaning
+
+For nonzero vectors q and d, cosine is(q dot d)/(norm(q)*norm(d)). The query[1,0,0] already has norm one. The purchase vector[1,0.1,0] has norm sqrt(1.01), so its cosine is1/sqrt(1.01), about0.995037. The mixed vector[0.5,0.5,0] has norm sqrt(0.5), giving cosine1/sqrt(2), about0.707107. Geometry[0,1,0] gives zero. These calculations establish purchase, mixed, geometry as the order under the authored coordinates.
+
+Positive scaling preserves direction: replacing d by10d multiplies both numerator and norm by ten, leaving cosine unchanged. A raw dot product multiplies by ten. Negative scaling reverses direction and changes the cosine's sign, so the invariance claim is specifically about positive magnitude scaling. A document with a large norm can dominate dot-product search even when its direction is less aligned; whether that norm carries useful information depends on the encoder's training contract.
+
+For unit-normalized vectors, squared Euclidean distance is norm(q-d)^2=2-2(q dot d). Thus sorting by decreasing cosine and increasing squared distance gives the same exact order when both sides are unit vectors. This identity is conditional on normalization; it does not make every distance metric interchangeable on raw embeddings.
+
+An embedding coordinate system has no universal axis meaning. Apply the same orthogonal rotation R to both q and d, and their dot product is unchanged because R^T R is identity. Rotate only one side, and the cross-space comparison changes. For example, one encoder may represent the relevant concept by[1,0] while another represents it by[0,1]. Both vectors have width two and each can work correctly within its own space, but their cross-model dot product is zero. Equal width is therefore a shape check, not a semantic compatibility proof.
+
+The fixture assigns buy and purchase the same literal vector. Their equivalence is authored knowledge, not a measured generalization by a language model. Sentence-BERT is an example of learning sentence representations suitable for efficient similarity comparison; the local table does not reproduce its training or encode arbitrary text. [Sentence-BERT](https://arxiv.org/abs/1908.10084).
+
+A real dual encoder permits document vectors to be computed in advance and query vectors at request time. Exact scoring over M documents of dimension D requires work proportional to M*D and stored vectors proportional to M*D. Approximate nearest-neighbor methods trade search work against candidate recall. Measure that search recall against the exact vector ranking separately from semantic relevance recall against human-labeled evidence. An approximate index can perfectly imitate a bad semantic ranking, and a good encoder can lose its best document through approximation.
+
+The helper rejects zero vectors, nonfinite coordinates and a norm that is zero or nonfinite after computation. That is a bounded numerical contract, not a promise to normalize every mathematically finite nonzero vector. Extremely large or tiny float64 coordinates can overflow or underflow during a naive norm calculation. A scaled norm can extend the useful range, but changing that implementation would require its own tests. The supplied tiny vectors stay well inside the demonstrated range.
+
+### Interview reasoning with explanatory answers
+
+**Is cosine0.9 a90% relevance probability?** No. It describes an angle under a particular representation. Relevance calibration needs labeled examples and can shift with corpus, encoder or task.
+
+**Why keep exact identifiers in evaluation?** A semantic encoder can place a nearby but wrong identifier close to the query. Lexical and semantic mechanisms may make complementary errors, so average paraphrase quality does not settle the choice.
+
+**How do you localize a missing relevant document?** Compare exact vector ranking, approximate-index candidates and relevance labels. That separates encoder geometry from search loss and downstream context truncation.""",
+    """If scores become NaN or zero unexpectedly, inspect input shape, finite values and computed norms before changing a threshold. If shapes pass but ranks are nonsensical, verify encoder and preprocessing identities; the metadata demonstration does not automatically guard the numerical helper.
+
+If exact search succeeds but approximate search misses, inspect index/search parameters under the same vectors. If both searches rank an irrelevant item first, inspect the representation and relevance labels. If a claimed synonym success comes from a hand-assigned table, label it as fixture geometry rather than learned semantic capability.""")
+
+review(8,
+    ["Fusion needed exact score gaps and a constant-dependent tradeoff.", "Duplicate handling within a list was not distinguished from correlated list evidence.", "Reranker quality needed candidate and context ceilings with controlled budgets."],
+    """Measure complementarity before fusing retrieval systems. Two different model names can return nearly identical errors, while a simple lexical branch may recover important IDs missed by a dense branch. Compare union coverage and final context quality at a fixed work budget before assuming a hybrid is useful.
+
+Use a reranker when good evidence is present among candidates but ordered poorly. Keep candidate generation, reranking and final context selection as separate stages, with their own IDs and costs. A reranker that secretly fetches new candidates changes the experiment and needs a separate admission step.""",
+    """## Calculate the fused ordering and its limits
+
+For constant c and one-based rank r, this fixture contributes1/(c+r) from each list containing the document. Missing documents contribute zero. With lists[a,b,c] and[b,d,a] at constant60, the scores are:
+
+| Document | Contributions | Fused score |
+| --- | --- | --- |
+| b | 1/62+1/61 | about0.032522 |
+| a | 1/61+1/63 | about0.032266 |
+| d | 1/62 | about0.016129 |
+| c | 1/63 | about0.015873 |
+
+The b-minus-a gap is1/62-1/63=1/3906, about0.000256. Their common rank-one contribution cancels. This exact difference is useful for detecting an off-by-one or list-order mistake even when both scores round to0.032 in a display. The reciprocal-rank fusion paper supplies the original method; the table is a calculation from the local fixture. [Reciprocal Rank Fusion](https://cormack.uwaterloo.ca/cormacksigir09-rrf.pdf).
+
+The constant changes how strongly rank gaps matter. With a large constant relative to the list depth, each appearance contributes roughly1/c, so cross-list occurrence count becomes influential and nearby ranks differ little. With a small positive constant, top ranks have much stronger relative weight. Neither setting is universally optimal. The fixture's60 is a declared choice, not a calibrated relevance probability or a domain-independent threshold.
+
+RRF discards raw score gaps. A system giving its first document a tiny lead and another giving an overwhelming lead produce the same rank contribution. This makes fusion insensitive to raw score units, but it also discards potentially useful confidence information. A calibrated score-combination approach is a different design that needs validation of both scales and their transfer across query families.
+
+Within one ranking, duplicate IDs are removed before ranks are assigned. Thus[a,b,b,c] becomes[a,b,c], preserving c's third position instead of penalizing it for a duplicate emission. Across lists, the same ID deliberately receives another contribution. If two lists are exact copies of the same retrieval run, that extra vote is not independent evidence. The method does not estimate correlation between retrievers; duplication at the system level can overweight one behavior.
+
+Let R be the authored relevant set and C the admitted candidate set. Candidate recall is|R intersect C|/|R| when R is nonempty. Any reranker returning only items from C cannot exceed that evidence coverage, even if its ordering is perfect. A final top-k or token-budget selection can reduce coverage further. For R={a,d} and C={a,b,c}, candidate recall is one-half; no rearrangement can supply d. If both facts are necessary for the answer, the context may still be insufficient despite retrieving one relevant item.
+
+The example reranker sorts authored features0,2,1. It is neither a trained cross-encoder nor a measured inference cost. A learned cross-encoder jointly reads the query and each candidate, usually giving richer interactions at a cost tied to candidate count and length. Comparing it with a baseline supplied fewer candidates would mix model quality with resource allocation.
+
+### Interview reasoning with explanatory answers
+
+**Why not add BM25 and cosine directly?** Their raw scales and variation are not inherently comparable. One can dominate solely because of units. Rank fusion avoids that specific assumption but sacrifices score-gap information.
+
+**Does duplicate removal solve correlated evidence?** It prevents repeated IDs within one list from earning extra ranks. It does not make two similar retrieval systems independent or turn overlapping chunks into independent support.
+
+**What should be measured before tuning a reranker?** Candidate recall, authorization admission, candidate count/length and final context budget. Without sufficient candidates, reranker improvements cannot recover the missing evidence.""",
+    """If a candidate receives an unexpectedly large score, inspect duplicate IDs within lists and duplicated retrieval runs across lists separately. If only the top two positions differ, calculate the exact reciprocal contributions rather than relying on rounded scores.
+
+If the reranker fails a question, first verify that the required evidence was in its input. If it was absent, diagnose candidate generation or admission. If it was present but dropped before answering, inspect final context selection. The helper demonstrates finite positive constants and explicit zero rejection; a broader configurable API should also validate nonfinite values and resource bounds before treating it as production input validation.""")
+
+review(9,
+    ["The access fixture needed an explicit trusted-input and enforcement boundary.", "Filtering after top-k required a concrete result and leakage counterexample.", "Cache policy identity, revocation and equivalence classes needed precise scope."],
+    """Define the retrieval function over a caller's admitted evidence set. Authentication and effective authorization must be resolved by trusted application state before that set reaches a scorer or model. The synthetic scope strings in this fixture are inputs to the demonstration, not a real authentication mechanism.
+
+Choose whether different principals may share a cache only after establishing that their effective permissions and personalization behavior are equivalent. Identical scope labels can be insufficient in a real tenant or record-level policy. Cache identity should reflect the actual policy boundary, not a convenient user-facing role name.""",
+    """## Follow access policy through retrieval and reuse
+
+The six-document corpus contains five public records and one restricted record. admit returns shallow copies of records whose scope is in the supplied set. With{'public'}, the restricted item is removed before any downstream ranking. With{'public','restricted'}, all six are present. The function neither authenticates a principal nor validates the legitimacy of the caller's scope set. Those are deliberately external responsibilities in the fixture.
+
+Pre-filtering and filtering after top-k can return different public results. Imagine global scores restricted=100, publicA=90 and publicB=80 with k=2. Global top-two then removal returns only publicA. Ranking the authorized public subset first returns publicA and publicB. Post-filtering can therefore both expose a restricted candidate to an intermediate component and unnecessarily reduce useful coverage. The two procedures are not interchangeable.
+
+A policy must cover more than the final visible answer. Candidate IDs, score traces, reranker inputs, cached text and diagnostic excerpts can reveal information. An application that hides the restricted sentence but exposes its title in a debug panel has a different disclosure boundary from the one claimed. The local trace test checks only IDs from the already admitted set. It does not measure timing side channels or behavior of a remote vector service.
+
+The cache key hashes an ordered structure containing question, sorted scope list, corpus version and retriever version. Sorting makes different set iteration orders yield the same key. Changing effective scope or corpus version changes the input structure and therefore normally changes its digest. The hash identifies a cache partition; it does not authorize the request or encrypt the cached answer.
+
+The omitted fields are informative too. This fixture has no tenant, per-record grant, model/prompt version or personalized answer policy. A real system may need them when they affect either permitted evidence or the answer. Conversely, using a unique principal ID in every key can destroy safe sharing among principals with truly identical effective policy. The correct cache equivalence class follows the full answer/access contract.
+
+Revocation is a time-dependent case. A cached answer that was valid before a permission change may be invalid afterward. A short time-to-live limits stale duration but does not make immediate revocation correct. A policy version or fingerprint can force a miss, while the serving layer rechecks access before releasing stored content. Distributed invalidation and concurrent policy changes are not implemented by this local dictionary/hash demonstration.
+
+Instruction-like evidence remains ordinary text. attack-v1 can be admitted as public adversarial test data while its imperative sentence has no authority to add restricted scope. The test proves that the local code reads trusted metadata and leaves its explicit scope set unchanged. It does not run a language model and cannot establish that a generated response would resist every malicious instruction. Model-facing behavior and application authorization should be evaluated separately.
+
+### Interview reasoning with explanatory answers
+
+**Why can final-answer redaction be insufficient?** A prior stage may already have consumed restricted content, and traces or caches may retain it. Enforcement must match the full data path, not only the final rendered string.
+
+**Does hashing a policy make it trustworthy?** No. A hash identifies the supplied policy state. Trust comes from how that state was authenticated, computed and bound to the request.
+
+**What is the strongest local test in this fixture?** It checks that unauthorized records are absent from the scorer input and public trace, then verifies cache separation under changed scope and corpus identities. Real identity-provider and revocation integration remain separate evidence.""",
+    """If a public request returns fewer useful documents than expected, inspect whether top-k was applied before authorization. If a privileged answer appears for another principal, inspect cache identity and the policy attached to the stored response. If an access change is not reflected, compare policy/corpus versions and invalidation behavior.
+
+If a document asks for broader access, trace whether any application code derives scope from body text or model output. If a local test claims real authentication success, identify the missing external identity-provider step. Keep failure traces informative without copying restricted content into a supposedly public diagnostic surface.""")
+review(10,
+    ["The graph walk's hop definition needed queue-state and complexity traces.", "Fractional and Boolean hop budgets were accepted despite violating the intended integer boundary.", "Query expansion and graph reachability were not distinguished from evidence entailment."],
+    """Retain the original query as a branch when a rewrite is intended to improve vocabulary coverage. The rewritten form can lose exact identifiers, negation or units. Compare both branches on the same admitted corpus and inspect which additional results improve actual evidence sufficiency.
+
+Use a hop limit together with limits on examined candidates, total work and elapsed time. Depth alone does not bound a broad graph tightly. The local helper traverses an already materialized finite graph and now validates an integer depth budget; it does not implement remote deadlines or network cancellation.""",
+    """## Trace the retrieval frontier and the stopping policy
+
+The fixture starts at metric with depth zero. A queue entry records both node and distance in edges from the start. Removing metric from the queue emits it; if the depth is below the limit, its admitted neighbor exclusions is enqueued at depth one. Removing exclusions then enqueues test_accounts at depth two. At a maximum of two, that final node is emitted but its outgoing links are not followed.
+
+| Step | Removed entry | Newly admitted queue entry | Emitted IDs so far |
+| --- | --- | --- | --- |
+| 1 | (metric,0) | (exclusions,1) | metric |
+| 2 | (exclusions,1) | (test_accounts,2) | metric,exclusions |
+| 3 | (test_accounts,2) | none at the depth boundary | metric,exclusions,test_accounts |
+
+The visited set is updated when a node is enqueued, not only when it is removed. That prevents two parent nodes from adding the same child repeatedly while it is already waiting. In an unweighted graph with this breadth-first order, the first discovered path has minimum edge count. A depth bound therefore has a precise interpretation. Weighted relevance or confidence costs would require a different search policy; breadth-first order does not optimize them.
+
+The original validation only rejected a negative max_hops. A fractional value such as1.5 could pass that check, but integer depths never equaled1.5 at the stopping comparison, so the walk could continue across the whole finite graph. The repaired contract requires a nonnegative Python integer and rejects Boolean, fractional and NaN values before traversal. This is a real configuration boundary, not a numerical-tolerance issue.
+
+Even an integer hop limit can admit many nodes. With branching factor b and depth h in a tree without merging, the number reachable through that depth is1+b+...+b^h. For b=10,h=3, that is1111 nodes. A visited set prevents repeated identities, but it does not make all reachable evidence cheap. A remote retrieval service needs explicit candidate/work budgets and failure behavior beyond this bounded local graph.
+
+Reachability is not support. An edge from a metric page to an exclusion page may be a navigation link, a reference or merely a related-topic connection. To conclude that an exclusion applies to the metric, the system must inspect the bridge's meaning and version. A graph path alone cannot license a factual inference. The fixture's edges are authored to demonstrate traversal; they do not implement semantic entailment.
+
+Likewise, the rewrite maps lowercased whitespace tokens through a curated dictionary. It replaces buy with purchase but does not perform contextual disambiguation. A phrase such as “buy back shares” can have a different meaning from a retail purchase question. Punctuation attached to a token also follows this simple split policy. A learned rewriter may handle more cases, but it adds its own unsupported-expansion and intent-preservation risks.
+
+Authorization remains fixed across hops. The helper follows a target only when it is a key in the admitted graph. A link to an excluded node is not permission to fetch it. A larger system must ensure the graph itself was constructed under the correct policy and recheck any external fetch; the walk does not authenticate a principal.
+
+### Interview reasoning with explanatory answers
+
+**Why preserve a visited set if a hop limit exists?** It prevents repeated work and duplicate evidence within the permitted depth. The depth limit and identity deduplication solve different problems.
+
+**Does another hop always improve an answer?** It can add required evidence, irrelevant context or a contradiction. Continue only when a named missing dependency justifies the extra work, then measure sufficiency and support.
+
+**What does a cycle test establish?** That this finite traversal emits each admitted node at most once. It does not establish that remote requests time out correctly or that every followed link supports an inference.""",
+    """If a traversal exceeds its intended depth, inspect the budget's type and the exact edge-count convention. If duplicate nodes appear, check when seen is updated. If the node count is unexpectedly large despite a small depth, inspect branching and add a separate work budget rather than assuming the depth limit is broken.
+
+If a rewrite improves lexical matches but worsens answers, compare the original intent, rewritten terms and bridge evidence. If a restricted target appears, trace whether it entered the admitted graph or was fetched through an unguarded side path. If an answer invents a connection, distinguish graph reachability from semantic support.""")
+
+review(11,
+    ["Citation integrity, claim support and world truth needed separate tests.", "The extractive helper was described too broadly as validating a support map.", "Abstention required a concrete coverage/utility tradeoff and computed-claim lineage."],
+    """Use a claim-level record when an answer combines source statements and calculations. Each substantive claim should identify whether it is a quotation, paraphrase, computation or inference, and retain the evidence appropriate to that type. A citation to one document should not silently cover an entire paragraph of unrelated claims.
+
+Choose an abstention policy against the task's cost and coverage requirements. A system that refuses every answer has no unsupported positive claims but provides no useful answers. Compare supported-answer coverage, unsupported-answer rate and important failure cases together.""",
+    """## Separate the four questions behind a citation
+
+A citation can answer four different questions: does the referenced document exist, does the stored span reproduce the quoted text, does that text support the stated claim, and is the source itself reliable/applicable? Passing an earlier question does not imply a later one. An exact quote from an obsolete policy has perfect span integrity and can still be the wrong answer to a current-policy question.
+
+The helper extractive_answer constructs a record from a supplied document, span and claim ID. It validates a nonempty in-range span or returns unknown when no document is supplied. It does not look up the claim ID in a semantic support map. The separate exercise inspects an authored support map to show why that gate is necessary. A real caller must establish support before treating the constructed record as a validated grounded answer.
+
+For the metric fixture, the first sentence ends at the first period. The returned quote includes that period and the citation stores document_id,version,start,end. Changing the quote to “Conversion rate is always one” while retaining the span fails the slice-equality test. Changing the claim to statistical significance while retaining the correct metric quote passes slice integrity but fails semantic support. These counterexamples localize two different failures.
+
+An answer can also preserve the words while changing the scope. Suppose a source says “Exclude test accounts from this experiment's eligible population.” A generated claim that all company metrics exclude test accounts adds a universal scope not established by that sentence. Citation existence and overlapping vocabulary are weak proxies for entailment. Human rubrics or a separately validated support evaluator must assess the actual proposition.
+
+Computed claims need a different lineage. The result0.3 comes from purchases3 divided by eligible visits10. A useful record preserves those inputs, the formula, relevant definition version and calculation output. The source definition supports the formula; it does not itself supply the measured count values. A generated explanation should consume the computed artifact rather than recomputing an approximate number from memory. Neither the ratio nor the definition establishes a causal treatment effect.
+
+Abstention is a decision under uncertainty about support. In a simple illustrative utility model, a correct supported answer earns benefit B, an incorrect or unsupported answer incurs cost C, and abstention has utility zero. If p were a calibrated probability of meeting the complete answer contract, answering is favored when pB-(1-p)C>0, or p>C/(B+C). This is a derivation under explicit assumptions, not permission to interpret a retrieval score as p. Additional answer costs or asymmetric abstention costs change the threshold.
+
+Coverage and conditional quality must be reported together. If a system answers six of ten questions and five answers satisfy the full contract, coverage is0.6 and accepted-answer accuracy is5/6. Reporting only5/6 hides the four refusals; reporting only five successes hides whether the failures were unsupported answers or appropriate unknowns. The final task population and cost policy determine which tradeoff is useful.
+
+Conflicting sources need a policy too. A newer version may supersede an older one for current questions, but historical questions can require the older rule. Two simultaneously applicable sources may disagree. Preserve the conflict and source-precedence rule rather than using fluent synthesis to erase it. A supported quote from each side can establish that a conflict exists without establishing which side is correct.
+
+### Interview reasoning with explanatory answers
+
+**Does an exact substring prove an answer is grounded?** It proves a quote matches a declared source span. The question's proposition, source applicability and support relation require additional checks.
+
+**Why can a correct answer still fail this task?** It may be guessed from prior knowledge or use unauthorized/stale evidence. An evidence-grounded task includes the support and access contract, not only the final words.
+
+**How can abstention improve a system without hiding failure?** Declare its policy and report coverage, supported accuracy and failure categories. Keep refusals on answerable questions visible beside successful refusals on unanswerable ones.""",
+    """If a citation opens correctly but the claim is wrong, inspect the proposition and scope rather than only the offsets. If a quote no longer matches, compare source version and coordinate system. If a computed number differs from the report, trace the validated input and output artifact instead of asking a model to justify the discrepancy.
+
+If unsupported answers fall only because the system answers fewer questions, inspect coverage and the mix of refused cases. If the helper is described as an entailment validator, locate the absent support-map enforcement and separate record construction from acceptance. Preserve conflicting evidence as an explicit state rather than silently choosing the most convenient passage.""")
+
+review(12,
+    ["Retrieval recall and first-hit rank needed cutoff and multi-evidence interpretations.", "Saved labels were not distinguished sufficiently from observed model execution.", "Oracle context and aggregate scores needed paired controls and clear denominators."],
+    """Design evaluation around stage-specific questions. Candidate recall measures which relevant IDs were available; final-context recall measures what the answerer actually saw; answer correctness and claim support measure the returned artifact. Fix the corpus, authorized scope, question families, budget and scoring rubric before comparing configurations.
+
+Treat an oracle-context experiment as an intervention with its own protocol. Keep the question, model, prompt policy and scoring rule fixed, and record exactly how the context changed. Removing distractors and changing context length as well as adding a missing source can reveal an answer-stage sensitivity, not only a retrieval omission.""",
+    """## Calculate metrics without losing the task's evidence structure
+
+For relevant IDs R={a,c} and retrieved list[b,c,a], both relevant documents appear, giving recall2/2=1. The first relevant item is at rank two, giving reciprocal rank1/2. If the caller truncates to the first two items, recall becomes1/2 while reciprocal rank remains1/2. The helper accepts the supplied list as its evaluation depth; it has no separate k argument. Name that cutoff when reporting Recall@k.
+
+A first-hit metric cannot establish multi-evidence sufficiency. If a question requires both a definition and its exclusion rule, retrieving only one can give reciprocal rank one but an incomplete answer context. Conversely, a relevance set may contain several interchangeable documents, where any one is sufficient. The evaluation label should distinguish all required evidence from alternative supporting sources. The set arithmetic alone cannot infer that logic.
+
+Duplicate retrieved IDs are rejected before metrics. Without that boundary, a naive count could reward repeated evidence. The current recall uses a set intersection, which prevents numerator inflation, but duplicate list entries would still distort ranks and consumed budget. Requiring unique identities makes the evaluation unit explicit.
+
+For an unanswerable question, the relevant set is empty. Recall has a zero denominator, so the helper returns None and separately assigns reciprocal rank zero. Treating undefined recall as one would reward a system merely for facing a question with no evidence. Treating it as zero inside every average would confound retriever quality on answerable cases with the prevalence of unanswerable cases. Report the number of answerable cases and score abstention separately.
+
+Suppose one question has one relevant document and retrieves it, while another has nine relevant documents and retrieves one. Macro-average recall is(1+1/9)/2=5/9. Micro recall over all relevant IDs is2/10=0.2. Neither arithmetic result is inherently wrong: one weights questions equally, the other weights relevant-document opportunities equally. The population and task contract must choose the estimand before seeing which number looks better.
+
+The oracle fixture contains saved labels observed={q1:0,q2:0} and oracle={q1:1,q2:0}. It calculates a paired gain of one for q1 and zero for q2, averaging0.5 over those two fixed IDs. No language model is invoked by those dictionaries, and the values are not empirical measurements of a named model. They demonstrate how an actual paired result would be represented and analyzed.
+
+In a real oracle run, improvement after supplying sufficient evidence suggests that context selection was a useful intervention. A remaining failure may concern answer behavior, prompt construction, source interpretation or an incorrect rubric. If oracle context is much shorter or removes conflicting passages, its improvement does not isolate missing-document recall alone. Preserve those differences and use narrower ablations when causal attribution between engineering components matters.
+
+Support and correctness form separate axes. A correct-looking answer with unsupported citations may have come from memorized knowledge or chance; an accurately quoted but irrelevant source may be supported in a literal sense while failing the question. Define support at the claim level under the question's intended meaning. Schema validity, fluent text and citation count should remain diagnostic signals rather than substitutes for the full rubric.
+
+### Interview reasoning with explanatory answers
+
+**Why inspect oracle context?** It helps test whether the answer stage can succeed when sufficient evidence is supplied. It is a controlled diagnostic, not a guarantee that every remaining error belongs exclusively to generation.
+
+**Which average should a retrieval report use?** The one matching the intended evaluation unit, with its denominator stated. Report enough counts to reconstruct it and avoid silently mixing undefined unanswerable cases with answerable recall.
+
+**Can an LLM judge replace the reference labels?** It can supply another measurement proposal, but its disagreement, bias and repeatability need validation. Deterministic identity/format checks and human-reviewed support cases remain valuable independent anchors.""",
+    """If an aggregate score changes, inspect question identity, cutoff, relevant-set size and missing-case handling before attributing the change to a model. If recall is high but answers fail, check whether all required evidence survived the final context budget and whether the answer used it correctly.
+
+If oracle results improve, compare context length, distractors and source versions as well as missing-document coverage. If a report calls saved labels observed model performance, locate the missing execution artifact. If two systems are compared on different question IDs or families, repair the pairing before calculating a gain or uncertainty interval.""")
+review(13,
+    ["The family bootstrap needed its exact discrete distribution and estimand.", "Paired identity, selective accuracy and severe-error gates needed different denominators.", "The finite saved-label fixture required a clearer population and causal boundary."],
+    """Choose the unit of independence from how cases were created. Related paraphrases, document revisions or questions from one account can share errors. Preserve that grouping before computing uncertainty, and state whether the deployment objective weights rows, families or a declared mix.
+
+Separate a statistical comparison from acceptance gates. A favorable average loss difference can coexist with a prohibited access disclosure or an unacceptable unsupported-answer rate. Declare those constraints and the weighting policy before inspecting candidate results.""",
+    """## Derive the paired and family-level comparison
+
+System A has errors[0,0,1] on q1,q2,q3; system B has[1,1,0] on the same IDs. Subtracting A minus B gives[-1,-1,1], where negative favors A because smaller error is better. Sorting dictionary keys aligns identities. Pairing by insertion order would compare different questions and produce a statistic with no intended case-level meaning.
+
+The row-weighted mean is(-1-1+1)/3=-1/3. If q1 and q2 are related variants of family F and q3 is family G, the family means are[-1,+1], whose equally weighted average is zero. This is not a disagreement between arithmetic implementations. The row estimand gives family F twice the weight, while the family estimand gives F and G equal weight.
+
+The bootstrap draws two family indices with replacement. There are four equally likely ordered samples from the empirical family distribution:
+
+| Resampled families | Mean difference | Probability |
+| --- | --- | --- |
+| F,F | -1 | 1/4 |
+| F,G | 0 | 1/4 |
+| G,F | 0 | 1/4 |
+| G,G | +1 | 1/4 |
+
+The exact bootstrap mean is zero and variance is1/2. Its standard deviation is sqrt(1/2), about0.7071. The2000 seeded draws approximate this very coarse distribution; increasing the draw count only reduces Monte Carlo noise in that approximation. It does not create more than the two observed independent families or establish that those families represent the deployment population.
+
+Pairing preserves the relationship between candidate errors. The variance identity Var(A-B)=Var(A)+Var(B)-2Cov(A,B) explains why independently resampling each candidate can change uncertainty. Family resampling must likewise keep all within-family candidate observations together. If question families have unequal intended population weights, specify the weighted estimator and a resampling design that matches it rather than selecting the narrowest interval after the fact.
+
+Selective answering introduces more denominators. With ten questions, six answers and five correct answers, coverage is6/10=0.6 and accuracy among answers is5/6. Correct answers per all requests is5/10. A system that answers only the easiest one correctly has conditional accuracy one but coverage0.1. It may or may not be useful under the task's costs. Always retain how many refusals were appropriate and how many answerable cases were declined.
+
+The saved errors here are teaching data. Their bootstrap computation is real arithmetic, but the arrays are not receipts from running a named model. A real comparison should preserve question IDs, predictions, rubric decisions, candidate configuration and family labels. Review label disagreements, because uncertainty over sampled questions does not automatically account for systematic rubric error.
+
+### Interview reasoning with explanatory answers
+
+**Why can more paraphrases make an interval look falsely precise?** Treating correlated variants as independent rows can overstate the effective evidence. Resampling at the relevant family level preserves that dependence under the chosen empirical design.
+
+**Does a confidence interval establish why one candidate improved?** No. It describes variability of a statistic under assumptions. Attributing improvement to a changed component needs a controlled comparison or suitable causal design.
+
+**Can a severe failure be averaged away?** Arithmetic can dilute it, but the acceptance contract need not permit that. A zero-access-leak requirement is a separate gate whose observed violation blocks release even if an average metric improves.""",
+    """If a comparison changes when dictionary order changes, repair identity alignment first. If repeating one family changes a supposedly family-weighted result, inspect aggregation and sampling units. If a bootstrap interval becomes narrow only after treating paraphrases as independent, revisit the dependence model.
+
+If answered accuracy improves while users receive fewer useful responses, inspect coverage and refusal categories. If a report treats2000 bootstrap draws as2000 independent cases, correct the sample-size claim. If test cases influenced hyperparameter choices, record that selection and obtain untouched evidence for a new final claim.""")
+
+review(14,
+    ["Answer-only masking needed an indexed next-token table and explicit denominator.", "Truncation preserving any target was not distinguished from preserving complete answers.", "Masking loss terms was not separated from conditioning paths or packing boundaries."],
+    """Review training records as both semantic targets and token-level events. A supported answer can be tokenized or masked incorrectly; a perfectly aligned mask can still train an unsupported answer. Keep annotation admission and numerical participation as independent checks.
+
+Choose whether the objective weights tokens, examples or source families. Longer answers receive more weight under a global token mean. If that is not the desired task weighting, change the declared objective rather than silently averaging per-batch means with different active-token counts.""",
+    """## Enumerate the target positions before training
+
+Let the prompt length be P and the concatenated sequence length be L. A causal next-token example at input index i predicts original sequence position i+1. It belongs to the answer when i+1>=P, or equivalently i>=P-1. The first answer token is therefore supervised from the final prompt position, not from the first answer input position.
+
+For prompt[1,2] and answer[5,6,3], the complete sequence is[1,2,5,6,3]:
+
+| Input index | Input token | Next-token target | Participates in answer loss |
+| --- | --- | --- | --- |
+| 0 | 1 | 2 | No, prompt continuation |
+| 1 | 2 | 5 | Yes, first answer token |
+| 2 | 5 | 6 | Yes |
+| 3 | 6 | 3 | Yes, final answer token |
+
+Inputs are[1,2,5,6] and labels[-100,5,6,3], with three active targets. The mean cross-entropy denominator is three for this record. Dividing the summed active loss by four would dilute the objective with the excluded prompt event. The sentinel-100 is a loss API convention, not a token the model should generate or embed.
+
+Masking a prompt target removes that position's direct loss term. It does not remove the prompt from the forward computation. Later answer positions can attend to prompt representations, so the answer loss can backpropagate through prompt embeddings and attention paths. Confusing those two boundaries can lead to detaching useful context or incorrectly claiming prompt tokens receive no training signal.
+
+Truncation must be inspected after alignment. A maximum concatenated length of two retains[1,2] and no answer target, so the helper rejects it. A limit of four retains[1,2,5,6], giving labels[-100,5,6]. That passes the helper's at-least-one-answer-target rule but loses the final token3. If3 is an end marker, the truncated example no longer teaches the complete stopping behavior. Acceptance of some supervised content is weaker than preservation of the full answer.
+
+The helper treats max_length as a sequence-length bound for this literal-token fixture. The actual model context, chat-template overhead, role tokens and generation markers must be counted under the intended tokenizer. A character boundary in raw text is not necessarily a token boundary. TRL's versioned SFT documentation distinguishes training formats and loss-mask behavior; the optional pretrained recipe checks the concrete template used there. [TRL0.24.0 SFTTrainer](https://huggingface.co/docs/trl/v0.24.0/en/sft_trainer).
+
+Packing introduces another independence boundary. Two examples in separate batch rows have separate attention contexts. Concatenating them into one longer row can let tokens from the second example attend to the first unless the packing/attention policy prevents it. An answer-only loss mask by itself does not define that attention boundary. State whether cross-example context is allowed and test the resulting positions rather than assuming that a label sentinel blocks attention.
+
+### Interview reasoning with explanatory answers
+
+**Why is the first answer target easy to lose?** Its prediction is emitted at the last prompt input position. Masking by whether the input token is inside the answer creates an off-by-one error.
+
+**Does valid training loss imply trustworthy targets?** No. Cross entropy will reward matching any accepted target, including an invented or policy-violating answer. Source support and annotation review must happen before optimization.
+
+**Why report active-token counts?** They define the denominator and reveal empty or destructively truncated examples. They also make comparisons between variable-length batches interpretable.""",
+    """If the first generated answer token is weak, inspect the shifted mask table before changing learning rate. If loss is unexpectedly small, verify that target positions were not excluded or labels leaked into the wrong input positions. If a record passes despite losing its stop marker, inspect whether the admission rule requires a complete answer or merely some active targets.
+
+If prompt embeddings receive gradients, check whether they influence supervised answer positions before calling it a mask failure. If packed examples interfere, inspect attention boundaries separately from label masks. If formatting success grows while factual support worsens, audit target provenance rather than treating the optimizer as an evidence validator.""")
+
+review(15,
+    ["The tiny decoder needed an exact parameter/shape ledger and active-logit derivative.", "The held-out prefix could be solved through a shared token shortcut rather than broad transfer.", "The final training receipt used a pre-update loss while held-out loss used the post-update model."],
+    """Use the tiny decoder to inspect a complete gradient-update path before scaling the training stack. Record the actual model, target mask and state being measured. The review repairs the final training receipt to recompute loss after the twentieth update, matching the state used for final held-out evaluation.
+
+Keep retention tasks and multiple independent answer families when evaluating real adaptation. This fixture has two training sequences and one visible held-out prefix. Its purpose is bounded optimization evidence, not a claim of natural-language or domain competence.""",
+    """## Trace the full-SFT state and objective
+
+The model uses vocabulary16, width32, two attention heads and context capacity32. For a training batch with B=2,T=3, token and position embeddings combine into[2,3,32]. The QKV projection produces[2,3,96], then each component becomes[2,2,3,16] after splitting into two heads. Attention scores have shape[2,2,3,3], with a causal allowed-position relation. The output logits return to[2,3,16].
+
+The trainable parameter ledger is explicit:
+
+| Component | Entries |
+| --- | --- |
+| Token embedding16×32 | 512 |
+| Position embedding32×32 | 1024 |
+| Two LayerNorm scales and biases | 128 |
+| Bias-free QKV32×96 | 3072 |
+| Bias-free attention projection32×32 | 1024 |
+| Feed-forward32→64→32 including biases | 4192 |
+| Bias-free vocabulary projection32×16 | 512 |
+| Total | 10464 |
+
+No weights are tied in this decoder. Parameter count does not equal total training memory: gradients, Adam moment state, activations and temporary attention tensors contribute separately. The CPU example does not measure GPU peak allocation or optimizer sharding.
+
+The two sequences yield four active targets:5,3,6,3. For an independent zero-logit probe, each class initially has probability1/16 and each active event has loss log16. The mean over the four active events is still log16. At an active position, the target-logit gradient is(1/16-1)/4=-15/64, and every other class gradient is1/64. The ignored prompt-prediction positions have zero direct logit gradient. These derivatives explain both the mask and the denominator without relying on the trained decoder's internal state.
+
+Each optimizer iteration computes loss at the current parameters, records it, backpropagates and then updates. Thus a20-entry curve records states before updates1 through20: its final element describes the model after19 updates. It is useful optimization history, but it is not the post-twentieth-update loss. The repaired final evaluation recomputes training and held-out objectives from the same frozen final state. This prevents a reporting label from mixing two parameter versions.
+
+The objective is teacher-forced next-token cross entropy. It conditions each position on the supplied prefix, including previous true answer tokens. Autoregressive generation instead conditions later positions on its own earlier outputs. A lower teacher-forced loss does not guarantee exact generated answers or correct stopping behavior. The lesson deliberately evaluates token loss and parameter changes; it does not silently substitute them for a generation-quality test.
+
+The held-out sequence[7,2,5,3] changes the first prompt token while preserving the second prompt token2 and the answer[5,3]. A model could succeed by learning a shortcut from token2 to5 and then to3, without using the first prompt token meaningfully. That makes the example a small transfer probe, not a demonstration of unseen factual reasoning. Multiple counterexamples that require both prompt components would be needed to assess compositional dependence.
+
+The decoder returns a detached key/value cache, but this training objective discards it and uses full uncached sequences. Reusing that detached cache across training segments would change the gradient boundary. Treat it as an inference facility unless a separate truncated-training objective is explicitly designed and tested.
+
+### Interview reasoning with explanatory answers
+
+**What proves that full-model optimization occurred?** The optimizer receives all trainable parameters, updates actually run, losses are observed and an embedding parameter changes. This establishes a concrete update path, not that every scalar must change on every batch.
+
+**Why recompute final loss?** The last logged training loss precedes the last optimizer step. A final-state comparison needs a fresh forward evaluation after all declared updates.
+
+**Why can held-out token loss improve without domain competence?** The task may share a simple token shortcut, and teacher forcing differs from free generation. The fixture contains literal IDs and one visible transfer case, so broader claims require different evidence.""",
+    """If a curve decreases but parameters do not change, verify that the optimizer owns the model being evaluated and that step executes. If a reported final loss disagrees with a saved model, inspect whether it was measured before or after the final update. If mask gradients appear diluted, count active target positions rather than all stored logits.
+
+If held-out success disappears after changing the second prompt token, investigate the shortcut encoded by the tiny task. If generation fails despite better teacher-forced loss, inspect rollout, decoding and stop-token behavior separately. If a cache is reused during training, document its detached gradient boundary before interpreting the update as full-sequence learning.""")
+review(17,
+    ["The quantization example needed exact reconstructed outputs and an error bound.", "Packed-byte accounting needed separation from Python objects and compute buffers.", "Adapter improvement toward zero was not the same as recovering the original model."],
+    """Compare four states separately when studying quantized adaptation: original weights, reconstructed frozen weights, an untrained adapter on that reconstruction and the trained adapter. A useful task result should identify which transition changed the output and which objective the adapter optimized.
+
+Treat storage format, compute dtype and trainable state as distinct budgets. The tiny packed array is real, but Python objects, scale metadata, dequantized tensors, activations and gradients remain separate allocations. Use the actual backend's measurements before claiming memory savings for a larger training job.""",
+    """## Derive the codes, bytes and forward error
+
+The maximum absolute matrix entry is1.7, so the uniform scale is1.7/7=17/70, about0.242857. Dividing the entries by that scale and rounding gives codes[[0,-4],[7,-1]]. The allowed signed range contains15 values from-7 through7. Offsetting by eight produces unsigned nibbles[8,4,15,7]; one of the16 possible nibble values is unused by this chosen symmetric scheme.
+
+The first packed byte is8+(4 shifted left by4)=8+64=72. The second is15+(7 shifted left by4)=15+112=127. Unpacking the low four bits and then the high four bits restores those integer codes exactly. This is a lossless representation change of the already quantized integers. The information loss happened earlier when the original floating weights were rounded.
+
+Using ideal decimal arithmetic, the reconstructed matrix is[[0,-34/35],[17/10,-17/70]]. Multiplying by x=[1,-2] gives[68/35,153/70], about[1.942857,2.185714]. The original output is[1.9,2.1], so the errors are[3/70,6/70], about[0.042857,0.085714]. Actual float32 operations can differ slightly from these ideal-decimal values, which is why the executable comparison uses explicit tolerances.
+
+Without clipping, nearest-grid rounding has per-weight absolute error at most scale/2. For a fixed output row, the triangle inequality gives an output error bound of(scale/2)*sum(abs(x)). Here that is(17/140)*3=51/140, about0.364286. The observed errors are smaller. This is a worst-case arithmetic bound for the declared uniform quantizer and input, not a bound on classification quality or generated-answer support.
+
+The adapter code uses the stored output-by-input matrix convention: Y=X(W+AB)^T. A has shape[2,1] and B[1,2]. At B=0, the A gradient is zero, while B can receive a gradient through nonzero A. With the initial one-row output above and mean squared loss against zero, the upstream output gradient equals Y because there are two output elements. Since A entries are0.1, the first B gradient is0.1*sum(Y)*X, approximately[0.412857,-0.825714]. The packed codes stay fixed while that differentiable branch changes.
+
+The adapter's target is zero output on one input, not the original full-precision output. A falling loss therefore demonstrates optimization of the stated task; it does not prove recovery of the original weight matrix or correction of quantization on other inputs. A rank-one update fitting one vector leaves many unconstrained directions.
+
+Two packed bytes plus a chosen float32 scale field would occupy six payload bytes in that logical serialized layout. The fixture's scale variable is a Python float and is not itself a four-byte on-disk record; the counter explicitly excludes object overhead. Computation also materializes a16-byte float32 matrix. Calling six bytes the process's peak memory would combine incompatible accounting levels.
+
+The original QLoRA method includes NF4, double quantization and paged-optimizer machinery. This lesson implements uniform codes and ordinary CPU adapter gradients instead. Those names identify different mechanisms; the local result does not inherit the paper's GPU measurements. [QLoRA](https://arxiv.org/abs/2305.14314).
+
+### Interview reasoning with explanatory answers
+
+**Is nibble round-trip equality evidence of lossless model quantization?** No. It proves that integer codes survive packing. Compare reconstructed weights and outputs with the original floating model to measure quantization error.
+
+**Can a frozen quantized base still participate in gradient computation?** Yes. Its reconstructed values act as constants while derivatives flow into adapters and potentially earlier trainable operations. Freezing updates is different from disabling the whole graph.
+
+**Why is the byte ratio insufficient for a memory claim?** The runtime also holds metadata, reconstructed or transient weights, activations, adapter parameters and optimizer/gradient state. The backend determines their actual lifetime and representation.""",
+    """If reconstructed outputs are wrong, inspect scale, signed offset, nibble order and matrix orientation before training an adapter. If packing round trips but model output changes, that may be the expected rounding error rather than a packing failure.
+
+If adapter loss falls, identify whether the target was original-model parity or another task. If a report claims NF4 or GPU savings, locate the actual codebook, backend and memory measurement. If a six-byte payload is presented as total memory, separate the serialization calculation from the live Python and Torch allocations.""")
+
+review(18,
+    ["The full-versus-adapter comparison needed a complete trainable-state and hypothesis-space ledger.", "Equal steps were not separated from equal compute or identical optimization policy.", "Held-out teacher-forced loss and output-head placement needed narrower interpretation."],
+    """Use the shared-base comparison to answer a specific engineering question: can a constrained output-head update address the declared token task under the chosen budget? Do not interpret that as a universal comparison of all LoRA placements or all pretrained adaptation methods.
+
+Keep independent model objects and optimizers, shared initial state, the same supervised events and a fixed evaluation protocol. Report learning rates and parameter ownership alongside step counts. Equal numbers of steps do not make the amount of computation or the optimization problem identical.""",
+    """## Trace the two candidate models from one base
+
+The full candidate starts with10464 trainable parameters from the decoder ledger. The adapter candidate retains those base values frozen and adds A[32,2] and B[2,16] to the output projection, for64+32=96 trainable entries. The trainable ratio is96/10464=1/109, about0.917%. Total stored parameter entries are larger in the unmerged adapter object because the frozen base and the additional factors both remain present.
+
+The output-head function is base_output(H)+(HAB)*(alpha/r), with hidden states H shaped[B,T,32]. In this fixture alpha=r=2, so the scale is one. B starts at zero and therefore preserves initial logits regardless of the random nonzero A. Comparing logits verifies function preservation, while exact parameter comparisons verify that the copied base states agree. The two checks answer different questions.
+
+Only the final vocabulary mapping is adapted. Token embeddings, position embeddings, attention and feed-forward transformations remain fixed in that candidate. The full model can change all of them. This constrains which representation failures the adapter can repair. A low training loss from the output head may be sufficient for the tiny task, while a task requiring different hidden-state distinctions could need another target module or a different method.
+
+The rank-two update has at most rank two, but its numerical rank can be smaller. For one hidden vector, many different factor pairs produce the same output adjustment. A parameter count does not identify a unique learned mechanism. Keep module placement, scale and actual singular-value or behavior checks separate from the configured rank label.
+
+The full optimizer uses learning rate0.01 and the adapter optimizer0.03, each for20 updates. These are fixed fixture settings rather than held-out selections, but they are not the same optimizer policy. A claim that one update method is inherently better cannot be isolated from those settings with this single run. A more informative study might allocate a declared tuning budget to each method using development data, then compare frozen choices on untouched families.
+
+The frozen-state check snapshots every nontrainable adapted parameter and compares it exactly afterward. That can catch explicit accidental assignments even if requires_grad remains False. It does not prove the full absence of mutable nonparameter state in arbitrary architectures; models with BatchNorm or other buffers need those state objects checked too. This decoder uses LayerNorm and no running-batch-statistic buffers.
+
+The held-out record again changes a prefix token while preserving a known second prompt token and answer. Both candidates are evaluated using teacher-forced active-target loss, without requiring a particular winner. A meaningful report should preserve those actual values, question identity and mask. It should not turn one finite loss comparison into evidence of natural-language generation, domain knowledge or source-grounded correctness.
+
+### Interview reasoning with explanatory answers
+
+**Why copy one state_dict instead of merely using one seed?** Model construction consumes random draws. Creating multiple models after one seed can yield different initial weights; copying the same state explicitly establishes the intended starting point.
+
+**Does freezing the base guarantee no gradient is needed through it?** Not universally. If trainable modules precede a frozen block, derivatives may need to pass through that block to reach them. Here the only added trainable module is the output head, so the specific dependency structure is narrower.
+
+**What does the96-parameter result establish?** The trainable size of this output-head adapter. It does not measure peak memory, latency or the quality of adapting attention projections in a different architecture.""",
+    """If initial logits differ, inspect state copying, adapter zero initialization, scale and model mode before training. If frozen values change, inspect explicit assignments and optimizer membership. If a model has buffers, include them in state checks rather than assuming parameter equality covers everything.
+
+If one candidate wins the tiny held-out loss, preserve the fixed learning-rate policies and narrow task scope in the report. If resource claims follow only from96 versus10464 parameters, request actual allocation and timing evidence. If output-head adaptation fails, inspect whether the hidden representation contains the distinction the task requires.""")
+
+review(19,
+    ["The preference loss needed its derivative, curvature and exact first update.", "A free scalar margin was not a complete normalized language-model policy.", "Sequence scoring, reference state and factual support required separate contracts."],
+    """Use preference learning only when the chosen/rejected relation has a stable, reviewed meaning. A pair can encode helpfulness, style, brevity, factual support or a mixture. Record the rubric and disagreements before treating preference optimization as a solution to a domain-quality problem.
+
+Keep the reference policy fixed under the declared experiment, and preserve response identities with their scores. Changing sequence normalization, response truncation or the reference checkpoint changes the objective even when the final scalar formula looks the same.""",
+    """## Derive the DPO-style scalar update
+
+Let d be the policy chosen-minus-rejected log-probability difference and r the same difference under a fixed reference. The adjusted margin is z=beta*(d-r), and the loss is log(1+exp(-z)), implemented through softplus for numerical stability. Its derivative with respect to d is-beta*sigmoid(-z). The second derivative is beta²*sigmoid(z)*sigmoid(-z), nonnegative, so this scalar loss is convex in d for a fixed reference.
+
+At d=r=0 and beta0.5, the loss is log2, about0.693147. The derivative is-0.5*0.5=-0.25, and the curvature is0.25*0.25=0.0625. SGD with learning rate0.2 moves d to0-0.2*(-0.25)=0.05. The new adjusted margin is0.025 and the loss is about0.680725. This is an actual scalar gradient update in the reference.
+
+A positive step increases the chosen-response advantage relative to the reference, but it does not uniquely specify the two response probabilities. Many pairs of chosen/rejected log probabilities can have the same difference. The fixture optimizes a free scalar and does not implement a vocabulary softmax, sequence model, KL measurement or normalized policy distribution. Calling it DPO-style margin mechanics preserves that distinction.
+
+In a language model, a response log probability is normally assembled from token-level conditional log probabilities under a declared response mask. Summing them and averaging by response length are different scoring rules. Prompt tokens, end markers, truncation and chosen/rejected identities must be handled consistently for both policy and reference. Otherwise the margin can reward a formatting or length artifact instead of the intended preference.
+
+Reversing a preference means reversing the corresponding chosen-minus-rejected comparisons. At the symmetric zero-reference fixture, the derivative changes from-0.25 to+0.25. In a nonzero-reference case, swapping only a label string while leaving score orientation unchanged would not define the intended opposite comparison. Preserve both response records and their model scores rather than manipulating an anonymous scalar after the fact.
+
+The full DPO formulation connects offline preference comparisons to a reference-regularized policy objective. That theoretical relationship is broader than this scalar probe, which does not train a complete language model. Likewise, the example does not train a reward model or run online reinforcement learning. [Direct Preference Optimization](https://arxiv.org/abs/2305.18290).
+
+Feedback quality remains decisive. If annotators prefer a confident but unsupported denominator, the optimization signal rewards that preference. A lower preference loss can coexist with worse grounded correctness. Evaluate source support, abstention, domain task utility and retained capabilities separately from agreement with training pair labels.
+
+### Interview reasoning with explanatory answers
+
+**Why include a reference difference?** It anchors the policy's chosen/rejected advantage relative to a fixed comparison distribution. Omitting or changing the reference changes the adjusted margin being optimized.
+
+**Does a lower preference loss establish factuality?** It establishes better agreement with the supplied preference objective on the measured pairs. Factual support depends on the rubric, evidence and independent evaluation.
+
+**Why does beta matter beyond a name in configuration?** It scales the margin, derivative and curvature. At zero margin the gradient magnitude is beta/2; changing it changes the update even before considering a full model's dynamics.""",
+    """If the first update moves toward the rejected response, check orientation and the sign inside softplus. If two implementations disagree by a factor, inspect beta and sequence reduction. If score differences change after tokenization updates, verify the response mask and end-marker handling in both policy and reference.
+
+If preference metrics improve while factual support declines, inspect the labels and rubric before increasing training. If a scalar probe is presented as a complete RLHF run, identify the missing policy, reward/environment and evaluation artifacts. Preserve disagreement cases instead of treating preference as an unquestionable ground truth.""")
+
+review(20,
+    ["The trainable retrieval fixture needed its first gradient and analytic decision boundary.", "The pairwise reranker needed an independent update trace.", "False-negative identity detection was not an integrated data-admission function."],
+    """Adapt the stage that error analysis identifies. A query projection can change retrieval geometry, while a reranker changes ordering inside a candidate set. Preserve a frozen lexical and unadapted-vector baseline, and evaluate whether the improved retrieval actually supplies better evidence to the answer stage.
+
+Treat negative selection as part of the supervised task. A visually similar passage can be an excellent hard negative or another relevant answer. Decide that from relevance labels and source-family relationships before optimizing the contrastive loss.""",
+    """## Derive the first query-projection and reranker updates
+
+Queries and documents are both the2-by-2 identity matrix, while W begins at zero. The score matrix QWD^T is therefore W itself. Each row has uniform class probabilities[0.5,0.5], and the labels are[0,1]. Mean cross entropy across two rows gives gradient[[-0.25,0.25],[0.25,-0.25]]. SGD at0.5 produces W=[[0.125,-0.125],[-0.125,0.125]] after one update.
+
+The positive-minus-negative score margin is0.25 in both training rows. Symmetry preserves the form[[a,-a],[-a,a]] during this particular optimization, with positive a after the first step. For a new query[x,y], the two scores are[a(x-y),-a(x-y)], so the decision boundary is x=y. The held-out[0.9,0.1] lies well on the document0 side; after the first step its scores are[0.1,-0.1]. That is a local feature-space check, not a test of understanding a new sentence.
+
+The cross-entropy derivative can be written Q^T(P-Y)D/B for this fixed-feature linear projection, where P contains row probabilities, Y the one-hot targets and B the number of query rows. Its shape matches W. In a real trainable encoder, gradients would flow through encoder and embedding parameters for fixed tokenized inputs; ordinary discrete token IDs and the tokenizer are not differentiable parts of that graph. Here document features remain fixed and only four projection entries are updated.
+
+The reranker has weight w=[w0,w1], positive feature[1,0] and negative[0,1]. Its score margin is w0-w1 and its loss is softplus(-(w0-w1)). At zero, the gradient is[-0.5,0.5]. A0.2 SGD step produces[0.1,-0.1], giving margin0.2 and a smaller loss. This independent calculation shows what the pairwise objective favors without assuming the training loop's result.
+
+A pairwise loss for one query should compare candidates under that same query's intended relevance. Mixing a positive from one question with a negative from an unrelated question can teach a shortcut unless the dataset design explicitly calls for it. In-batch negatives also assume that another row's positive is not a valid answer for the current query. Multiple correct passages or duplicated source families can violate that assumption.
+
+The false-negative exercise detects that positive and negative IDs are identical. It does not supply a reusable admission function that automatically blocks all future training pairs. Different IDs can still refer to the same content or to two valid answers. Real admission needs identity, content/family and semantic relevance checks, with uncertainty preserved for review rather than forced into a negative label.
+
+The trained models are small but real: parameters change under gradients and rankings are observed. Their input features are literal arrays, so they are not pretrained text encoders. Sentence representation training motivates this distinction between reusable encoders and pair scorers, but the local result does not inherit a natural-language benchmark score. [Sentence-BERT](https://arxiv.org/abs/1908.10084).
+
+### Interview reasoning with explanatory answers
+
+**Why can a hard negative be harmful?** If it is actually relevant, the objective pushes away evidence the system should retrieve. Hardness is a model score property; correctness of the negative label is a task property.
+
+**Why evaluate candidate recall after reranker training?** A better ordering cannot recover evidence absent from the candidate set. Improvements at one stage must be measured under the full retrieval budget.
+
+**What does the perturbed feature result establish?** The learned linear boundary behaves as expected at one nearby point with an authored label. It does not establish transfer to unseen document or language families.""",
+    """If the first projection update has the wrong sign, derive P-Y for the paired labels and check the mean denominator. If the held-out feature changes class unexpectedly, inspect its side of the analytic x=y boundary. If a reranker prefers the negative, verify feature and response identity pairing before changing the loss.
+
+If training improves but retrieval quality falls, inspect false negatives, family leakage and whether the served index uses the new encoder space. If a duplicate-ID assertion is described as a complete admission system, identify the absent enforcement function and broader semantic checks. Keep training ranking, held-out relevance and downstream answer support as distinct results.""")
+review(21,
+    ["The optional recipe needed a current evidence ladder separating execution from quality.", "Trainer-internal label shifting needed comparison with the earlier manual-shift fixture.", "Pinned artifacts, same-environment repeatability and platform scope needed precise interpretation."],
+    """Read the optional recipe as a staged experiment: prepare a locked environment, acquire one pinned artifact deliberately, verify local assets, inspect the real masks, train under a fixed budget, reload and evaluate actual outputs. Each stage earns a different conclusion. A fresh learner run must produce its own artifacts even when a maintainer run has already qualified the mechanism.
+
+Keep the default chapter as a written review. The separate pretrained fixture has already run under the documented Linux arm64 environment, but reading the cases does not acquire assets or perform training. Its source and runtime remain governed by the dedicated recipe rather than the tiny-decoder classroom profile.""",
+    """## Read the qualified recipe as several independent evidence tiers
+
+The pinned revision identifies a particular repository state; the local manifest identifies the acquired files and their hashes. The lock identifies resolved dependency artifacts for a platform. The image identifies the executable environment. None of these identities alone establishes that training happened. A run receipt and saved artifact provide that next tier, followed by separate reload and task-quality observations.
+
+The existing recipe record reports13 acquired files and actual10-update CPU runs for both full SFT and LoRA. Full SFT has134515008 trainable parameters; the rank-four q_proj/v_proj adapter path has230400. The recorded held-out losses changed from6.721148 to0.008058 for full SFT and from6.721148 to6.474194 for LoRA. These are observations from the qualified recipe, not reruns performed by this prose review. [Optional recipe evidence and workflow](../fixtures/pretrained/README.md).
+
+The evaluation dataset contains one held-out entity label, while the four training records share an assignment-unit extraction task and prompt template. Distinct family labels do not automatically produce independent business domains. The dramatic full-SFT loss drop therefore needs that narrow context. It does not establish that full SFT generally beats LoRA or that either model understands unrelated statistical questions.
+
+The generation probe is particularly informative because it tests a different boundary. It supplies the correct conversion definition as evidence, yet the saved adapter produced a fluent incorrect formula: eligible visits divided by eligible visits. That is a task-quality failure despite successful asset loading, masking, optimization, save and reload. The output also did not establish claim-level citation support. Preserve the failure rather than replacing it with a hypothetical correct answer.
+
+Mask alignment differs from the earlier manual tiny-token helper. In the TRL path, active labels equal the corresponding input token IDs and ignored prompt positions contain-100. The causal model shifts labels internally when calculating next-token loss. Manually shifting those labels again would train the wrong target. The processed completion mask and actual collated batch are inspected before training, and records longer than the declared128-token limit are rejected rather than silently losing answers.
+
+Chat-template prefix equality is another concrete gate. The prompt rendered with a generation marker must be an exact token prefix of the full prompt-plus-completion rendering. This checks the specific template's boundary, not a universal property of all templates. A different model or tokenizer may require a different valid construction. Preserve the actual tokenized example and prefix lengths in the receipt.
+
+Two LoRA runs in the same qualified image produced matching adapter hashes and evaluation loss after seeding before adapter construction. Setting a trainer seed later cannot retroactively recreate already sampled adapter matrices. That repeatability result is valuable but is limited to the tested environment and ordering. An amd64 dependency lock is preparation evidence; it is not an executed amd64 or Windows result.
+
+A successful local loader must not silently fall back to a remote model ID when a file is missing. The recipe's explicit connected acquisition phase and later local-only, networking-disabled runs make those behaviors separable. Hash verification detects modified artifacts; it does not make a model's generated claims true or establish approval for every downstream dataset and use.
+
+### Interview reasoning with explanatory answers
+
+**What does the pinned revision prove?** It identifies the selected upstream artifact state. Actual local verification, execution and task quality need their own evidence.
+
+**Why can low held-out token loss coexist with a wrong generated formula?** The evaluation record and teacher-forced objective can be narrow, while generation faces another task and its own rollout. The observed output must be scored under the intended domain contract.
+
+**Why inspect labels instead of trusting a completion-only flag?** Configuration expresses intent. Processed examples and a real collated batch show whether the chosen trainer/template combination produced the intended active targets before optimization.""",
+    """If training cannot find an asset, inspect the local manifest and exact directory rather than permitting an implicit download. If losses are unexpectedly low, inspect target leakage, family/task overlap and mask boundaries. If saved-adapter predictions differ across repeated runs, check seed placement before construction, artifact identity and decoding settings.
+
+If the generated answer is wrong despite supplied evidence, score that failure explicitly. Do not relabel successful optimization as grounded-answer acceptance. If an unexecuted learner scenario is reported, keep it conditional on that learner's state rather than overwriting the maintainer recipe's observed execution record.""")
+
+review(22,
+    ["The grouped-mean tool needed grain, weighting and causal-boundary calculations.", "Finite inputs could overflow the naive sum and return an infinite mean.", "A typed proposal and output lookup were not a complete explanation validator or live database tool."],
+    """Expose a small operation whose input schema, output grain and computational meaning are reviewable. A proposal model can choose that operation and explain its result, while the application validates and executes it. Keep operation admission distinct from permission to access the underlying data.
+
+The numeric implementation now uses scaled summation so two large finite values can have a correct finite mean without an overflowing intermediate sum. That strengthens arithmetic under the same declared finite-number policy. It does not turn floating-point means into exact rational arithmetic or establish causal interpretation.""",
+    """## Trace a typed tool from proposal to descriptive result
+
+The accepted request is exactly operation=group_mean,group_by=group,value=value. An extra query field or operation=run_sql is rejected rather than interpreted. The dispatcher therefore selects a fixed implementation; it does not execute model-generated source code. The literal rows are already in memory, so this example makes no claim about authenticating a database connection or binding SQL parameters in a live engine.
+
+The input grain is one identified observation per row. The output grain is one row per group, carrying count and mean. For A values1,3, the sum is four, count two and mean two. B has value ten, count one and mean ten. The descriptive difference B minus A is eight. The output preserves the different sample counts instead of presenting both means as equally supported by data.
+
+Aggregation can change meaning. The overall observation mean is(1+3+10)/3=14/3. Averaging the two group means gives(2+10)/2=6 and weights groups equally rather than observations. Carrying counts makes the distinction reconstructible. The request schema does not authorize a later explanation to substitute either aggregate silently.
+
+Finite input checks alone do not prevent intermediate overflow. With values[1e308,1e308], ordinary floating summation can become infinity before division by two, although the mathematical mean is1e308. The repaired calculation uses s=max(abs(values)), computes a mean of scaled values v/s, then multiplies by s. Every scaled magnitude is at most one, so the bounded group cannot overflow that summation. A zero scale returns zero directly. The result is also checked for finiteness.
+
+For the two large equal values, scaled values are[1,1], their mean is one and the output is1e308. For equal opposite values, the scaled terms cancel to zero. This is an arithmetic stability improvement, not a guarantee of exactness for every representable combination; rounding and underflow remain part of floating-point computation. Use an explicitly different numeric representation if the task requires exact monetary units or exact decimal rounding rules.
+
+Missing values and booleans are rejected under this strict policy. Dropping None would change count and potentially bias the result; accepting True as one would conflate logical and measured data. A different missingness policy may be appropriate for another task, but it should have its own output count, denominator and explanation. Duplicate IDs are also a data-quality failure because repeated observations would change weights.
+
+The explanation check in the fixture compares the computed mean two with a proposed value twenty. It demonstrates an independent numeric anchor, but it is not a parser that validates every arbitrary sentence. A real report interface can carry structured claims referring to result cells and render them through reviewed templates, or use a separately evaluated extraction/validation stage for free-form prose.
+
+Finally, group membership is not a treatment-assignment design. The difference eight does not by itself estimate the causal effect of changing an observation from A to B. Sampling, measurement, confounding and assignment assumptions remain outside the grouped-mean arithmetic. The assistant can state which additional evidence is needed, but fluent explanation cannot supply it.
+
+### Interview reasoning with explanatory answers
+
+**Why keep counts beside means?** They identify denominators and allow correct recombination. They also expose a one-record group that a mean alone could conceal.
+
+**Why validate outputs after validated inputs?** Correct primitive types and finite inputs do not exclude numerical overflow or implementation errors. The computed artifact has its own contract.
+
+**Does a narrow tool replace data access policy?** No. It restricts allowed operations. The application must separately determine which rows the principal may use and how results may be disclosed.""",
+    """If a mean is nonfinite despite finite rows, inspect intermediate arithmetic and the output guard. If an aggregate changes after joining data, inspect observation IDs and multiplicity before the tool. If a report uses a mean of group means, verify that equal-group weighting was actually intended.
+
+If a model proposes extra columns or arbitrary SQL, reject the unsupported request shape rather than attempting to interpret it. If the explanation invents a number or causal effect, compare it with the structured artifact and design evidence. Record admission, calculation and interpretation failures separately so each can be repaired at the correct boundary.""")
+
+review(23,
+    ["Freshness needed exact inclusive boundaries and a distinction between publication and knowledge time.", "The call counter needed attempt semantics and separation from elapsed-time limits.", "A field allowlist was not sufficient to guarantee safe trace values."],
+    """Specify operational policies as measurable contracts around the model: admissible evidence age, access identity, maximum admitted work, cancellation, failure categories and trace schema. Keep their implementation evidence separate from a successful local model call.
+
+Use an injected UTC clock for deterministic freshness checks. Publication time, effective time, ingestion time and last verification time can answer different questions. A maximum publication age is one policy; it should not silently stand in for all of them.""",
+    """## Trace temporal admission, work consumption and diagnosis
+
+The freshness helper computes age=now-published and accepts0<=age<=maximum_age. Both boundaries are inclusive. At a two-day limit, a source exactly two days old is admitted; a source two days plus one microsecond old is not. A future publication has negative age and fails rather than remaining perpetually fresh. These comparisons implement a chosen policy, not a test that the document is factually correct.
+
+The supplied fixtures use timezone-aware UTC datetimes. Rejection of naive timestamps prevents one obvious ambiguity, but a complete real-time interface also needs normalization and a policy for source clocks. Civil-time transitions and ambiguous local timestamps deserve separate tests if non-UTC input is supported. An aware timestamp alone should not be described as a complete clock-quality guarantee.
+
+Different temporal fields should remain distinguishable. A policy may be published yesterday but effective next month, or discovered today after applying for weeks. A current answer might require both applicability and a recent verification event. A historical answer might intentionally use an old source that was effective at the event time. The simple published-age gate cannot decide those cases without additional metadata.
+
+The Budget object starts with used=0. Three consume calls move it to one,two,three. The fourth checks used>=limit before incrementing and raises, leaving used at three. A zero limit permits no calls. The limit is a nonnegative integer, so a Boolean or fractional configuration is rejected instead of becoming an accidental count policy.
+
+The counter measures admitted attempts when consume is called before an operation. If an admitted tool later fails, the budget has still been consumed. Refunding it automatically could permit an unbounded retry loop; never refunding it may reduce task completion. Choose and document the retry policy rather than letting it emerge from exception placement. A counter also cannot stop one admitted operation from running forever. The execution layer needs a real deadline, cancellation propagation and resource boundaries.
+
+The trace helper retains request_id,corpus_version,policy,result and excludes fields named secret or source_text. That is a useful key-level allowlist, but it does not inspect the contents of the allowed values. If a raw private question is placed inside request_id, the allowlist will retain it. A production trace schema therefore needs typed identifiers, value-length limits, permitted categories and an access/retention policy, not merely approved field names.
+
+Authorization and freshness are independent gates. The final example combines an authorized source with stale=False admission, resulting in unknown. An error response should explain the failure category without revealing restricted source identities or copying content into logs. The exact user-visible reason may need to distinguish absence, staleness and forbidden access internally while preserving the outward disclosure policy.
+
+### Interview reasoning with explanatory answers
+
+**Why inject time instead of reading the wall clock inside the test?** It makes boundary cases repeatable and allows exact checks at the permitted age limit. It does not remove the need to handle real clock quality in deployment.
+
+**Does a three-call budget bound latency?** No. One call can take arbitrarily long unless the execution layer enforces a deadline and cancellation. Count and duration are different resource dimensions.
+
+**Does an allowlisted trace guarantee no sensitive data leaks?** It restricts keys. Allowed values, downstream access, retention and correlation can still disclose information, so their contracts need separate validation.""",
+    """If freshness changes unexpectedly, inspect the exact timestamps, timezone normalization, inclusive boundary and the meaning of published versus effective time. If future timestamps are admitted, check the lower age bound as well as the maximum.
+
+If retries exceed the intended work budget, trace where consume is called and whether failed attempts are refunded. If a request hangs under the call limit, inspect execution deadlines rather than increasing the counter. If a trace leaks content, inspect allowed field values and downstream access instead of only searching for a field literally named secret.""")
+
+review(24,
+    ["The capstone needed an exact integration ledger identifying what was and was not connected.", "Three correct statuses were not distinguished from answer coverage and semantic quality.", "The optional trained model's execution/failure evidence needed separation from this extractive baseline."],
+    """Use the capstone to review an evidence chain, not to collapse every earlier demonstration into an implied integrated product. The local Assistant performs access-filtered document lookup with a fixed question map and first-sentence extraction. It does not run the learned retriever, tiny decoder or optional pretrained adapter.
+
+A generative candidate can later replace the proposal stage only while preserving the access, source, calculation and evaluation contracts. Compare actual saved outputs under a fixed task rubric. Keep a no-go decision when the evidence fails, including the optional recipe's observed incorrect formula.""",
+    """## Audit the complete local path without inventing missing integration
+
+At construction, the Assistant copies only documents whose scope appears in the supplied set. A public instance therefore lacks private-v1 in its internal document dictionary. answer then maps a fixed question key to a document ID, retrieves that admitted document and returns its first sentence with versioned character offsets. An unsupported or excluded target returns unknown with no restricted document identity in the response.
+
+This is an explicit lookup-and-extraction baseline. It does not embed a natural-language question, execute BM25, learn a retrieval policy or generate a new paraphrase. The controlled map makes identity and disclosure behavior transparent. A broader natural-language interface would need its own intent mapping and retrieval evaluation rather than inheriting success from these exact keys.
+
+| Capability | Local capstone evidence | Separate evidence still needed for a larger assistant |
+| --- | --- | --- |
+| Scope filtering | Restricted target absent from public instance | Authenticated dynamic policy integration |
+| Source extraction | Exact first-sentence slice and version | General claim support and conflict handling |
+| Numerical calculation | Validated3/10=0.3 and invalid-count rejection | Real input provenance and analysis design |
+| Task statuses | Three fixed expected statuses match | Independent question families and utility |
+| Model generation | Not invoked by this baseline | Actual candidate outputs and grounding evaluation |
+
+The three status cases include one answered definition and two correct unknowns: missing comet evidence and a restricted threshold under public scope. Status accuracy is3/3, but answer coverage is1/3. That is appropriate for these authored cases; it is not evidence that every future question is answered correctly. A high status score can coexist with low usefulness if the evaluation contains too many easy refusals.
+
+Citation integrity is checked separately by slicing the original document. This catches a corrupted span even if status remains answered. It does not prove that the first sentence contains every caveat needed by a future question. The metric document's second sentence excludes test accounts, while the returned first sentence gives the formula. A question requiring eligibility details would need the additional span; the current fixed key is not a general policy-synthesis test.
+
+The conversion helper accepts integer purchases and visits with0<=purchases<=visits and a positive denominator. Its0.3 output is descriptive arithmetic under the stated counting rule. Source evidence defines eligible visits, but actual eligible counts still need validated observations. Neither this ratio nor the assistant's explanation establishes sampling uncertainty or a causal effect.
+
+The instance captures its permitted documents at construction. It does not dynamically reevaluate revocations, implement the previous chapter's freshness gate or connect to a real identity provider. Those earlier components illustrate contracts that a larger service should integrate and test. Their separate existence in the course does not mean this small class already exercises them end to end.
+
+The optional pretrained recipe supplies another real but separate result: training, reload and generation executed, while the formula in its generated answer was incorrect despite supplied evidence. The capstone's local receipt correctly says pretrained_generation_executed=False for this particular run. It must not be read as a global denial that the separate recipe ran, or as a reason to discard its quality failure. A release report should reference both artifacts and retain their distinct scopes.
+
+### Interview reasoning with explanatory answers
+
+**Why can a successful capstone still conclude no-go?** Its local contracts pass while required operational and domain-quality evidence remains absent or has failed. A bounded success is useful without satisfying every release criterion.
+
+**What would justify replacing the extractive stage with generation?** Measured utility on cases requiring synthesis or explanation, with access, supported claims, citations, deterministic calculations and appropriate abstention preserved. Fluency alone does not establish that improvement.
+
+**How do you know whether all previous components are integrated?** Trace the actual call path and execution artifacts. A list of available modules or completed lessons is not an end-to-end runtime receipt.""",
+    """If a supported key returns unknown, inspect its fixed map, admitted scope and document version. If a public response reveals a restricted ID, inspect both the internal lookup and returned trace. If status accuracy is high but the system is unhelpful, separate coverage and answer quality from correct refusals.
+
+If a report claims trained generation, freshness checks or dynamic revocation ran in this class, trace the actual method calls and receipts. If a generated formula contradicts the computed artifact or source, preserve the failure and reject the answer. Keep the local baseline, tiny-model training and optional pretrained experiment separate until a real integrated run demonstrates their combined behavior.""")

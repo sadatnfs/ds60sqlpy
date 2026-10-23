@@ -5,9 +5,9 @@ Copy to .learning before editing. Six independent attempts belong below.
 """
 
 # Exercise 1: Inspect leaf and nonleaf state
-# Create leaf w0 and intermediate2 w, retain the intermediate gradient and backpropagate
+# Create leaf w0 and intermediate 2 w, retain the intermediate gradient and backpropagate
 # its sum.
-# Expected: w leaf True; intermediate False; gradients2 and1.
+# Expected: w leaf True; intermediate False; gradients 2 and 1.
 
 # Exercise 2: Observe accumulation across fresh graphs
 # Compute (w-2)**2 twice at w=0 without clearing grad.

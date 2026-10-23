@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>js-010: explanatory solutions · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>js-010: explanatory solutions</h1>
+      <p class="source-path">Generated from <code>courses/javascript-typescript/solutions/js-010_solutions.md</code></p>
+    </header>
+    <article class="document"><h2 id="js-010-explanatory-solutions">js-010: explanatory solutions<a class="heading-anchor" href="#js-010-explanatory-solutions" aria-label="Link to this section">#</a></h2>
+<p>Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.</p>
+<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
+<p>A module is both a namespace and a dependency boundary. An ES module declares imports and exports before its body executes. The loader resolves dependencies, links the bindings, then evaluates the graph. An imported binding observes the exporting module&#x27;s current binding; it is not a copied snapshot. Importing the same resolved module URL again normally returns the cached module namespace and does not repeat its initialization.</p>
+<p>Node uses .mjs to select ES module syntax explicitly. Relative imports require the intended filename extension. Bare package names use package resolution rules; node: names identify built-in modules. CommonJS uses a different export object and loading model. Interoperability is useful, but guessing that an arbitrary CommonJS property will become a named ES export is fragile. This lesson imports a CommonJS default export deliberately and keeps ESM bindings explicit.</p>
+<p>The fixtures create tiny source files in a newly allocated temporary directory, import them, and remove only that directory afterward. They do not install a package or edit the repository. Unique directory URLs avoid accidental cache sharing between exercises. A production module should usually avoid expensive side effects at import time: top-level file writes, network requests or background listeners make dependency loading itself operational work.</p>
+<p><strong>Live binding:</strong> An imported name observes updates made to the exporting binding.</p>
+<p><strong>Module namespace:</strong> The read-only view of a module&#x27;s exported bindings.</p>
+<p><strong>Resolution:</strong> Mapping a module specifier to the module that will be loaded.</p>
+<p><strong>Module cache:</strong> Reuse of an already loaded module for its resolved identity.</p>
+<h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
+<p>An export declaration exposes a binding. import() returns a Promise for the module namespace, so asynchronous loading must be awaited. pathToFileURL converts a platform filesystem path to a correctly encoded file URL; concatenating file: with a raw path fails for spaces and reserved characters. A namespace property cannot be reassigned by the importer, although exported functions may update their own module state. finally runs cleanup after success and after an import rejection.</p>
+<h3 id="exercise-1-observe-a-live-binding">Exercise 1: Observe a live binding<a class="heading-anchor" href="#exercise-1-observe-a-live-binding" aria-label="Link to this section">#</a></h3>
+<p>Task: Import a mutable counter and its increment function, then inspect the count before and after incrementing.</p>
+<p>The importer receives a binding view. Copying count into a local number would instead preserve the value read at that moment. The distinction becomes visible only after the exporter changes state.</p>
+<pre><code class="language-javascript">await withModules({ &#x27;counter.mjs&#x27;: &#x27;export let count = 0; export function increment() { count += 1; }&#x27; }, async directory =&gt; {
+  const module = await import(pathToFileURL(join(directory, &#x27;counter.mjs&#x27;)).href);
+  assert.equal(module.count, 0);
+  module.increment();
+  assert.equal(module.count, 1);
+});</code></pre>
+<p><strong>Expected:</strong> count changes from 0 to 1 through the imported namespace.</p>
+<p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
+<h3 id="exercise-2-resolve-a-relative-dependency">Exercise 2: Resolve a relative dependency<a class="heading-anchor" href="#exercise-2-resolve-a-relative-dependency" aria-label="Link to this section">#</a></h3>
+<p>Task: Create a main module importing twice from ./math.mjs, then call its export.</p>
+<p>The relative path is resolved from the importing file, not from the process working directory. Naming the .mjs extension makes the loader contract explicit.</p>
+<pre><code class="language-javascript">await withModules({ &#x27;math.mjs&#x27;: &#x27;export const twice = value =&gt; 2 * value;&#x27;, &#x27;main.mjs&#x27;: &quot;import { twice } from &#x27;./math.mjs&#x27;; export const answer = twice(4);&quot; }, async directory =&gt; {
+  const module = await import(pathToFileURL(join(directory, &#x27;main.mjs&#x27;)).href);
+  assert.equal(module.answer, 8);
+});</code></pre>
+<p><strong>Expected:</strong> answer equals 8.</p>
+<p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
+<h3 id="exercise-3-prove-cached-module-identity">Exercise 3: Prove cached module identity<a class="heading-anchor" href="#exercise-3-prove-cached-module-identity" aria-label="Link to this section">#</a></h3>
+<p>Task: Import one URL twice and compare the namespace and exported object.</p>
+<p>A module is not a factory that automatically resets on each import. For independent instances, export a factory function and call it explicitly.</p>
+<pre><code class="language-javascript">await withModules({ &#x27;state.mjs&#x27;: &#x27;export const state = { visits: 0 };&#x27; }, async directory =&gt; {
+  const url = pathToFileURL(join(directory, &#x27;state.mjs&#x27;)).href;
+  const first = await import(url);
+  const second = await import(url);
+  assert.equal(first, second);
+  assert.equal(first.state, second.state);
+});</code></pre>
+<p><strong>Expected:</strong> both namespace and object identities are shared.</p>
+<p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
+<h3 id="exercise-4-inspect-commonjs-interoperability">Exercise 4: Inspect CommonJS interoperability<a class="heading-anchor" href="#exercise-4-inspect-commonjs-interoperability" aria-label="Link to this section">#</a></h3>
+<p>Task: Import a .cjs file exporting an object through its default binding.</p>
+<p>The default binding is the intentional CommonJS export-object boundary here. This example does not depend on heuristic named-export detection.</p>
+<pre><code class="language-javascript">await withModules({ &#x27;legacy.cjs&#x27;: &quot;module.exports = { label: &#x27;legacy&#x27; };&quot; }, async directory =&gt; {
+  const module = await import(pathToFileURL(join(directory, &#x27;legacy.cjs&#x27;)).href);
+  assert.equal(module.default.label, &#x27;legacy&#x27;);
+});</code></pre>
+<p><strong>Expected:</strong> default.label equals legacy.</p>
+<p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
+<h3 id="exercise-5-reject-a-missing-dependency">Exercise 5: Reject a missing dependency<a class="heading-anchor" href="#exercise-5-reject-a-missing-dependency" aria-label="Link to this section">#</a></h3>
+<p>Task: Import a module with a nonexistent relative dependency and preserve the loader error code.</p>
+<p>Missing dependency resolution is a loader failure before useful module evaluation. Catching every import error and returning an empty object would disguise a broken dependency graph.</p>
+<pre><code class="language-javascript">await withModules({ &#x27;broken.mjs&#x27;: &quot;import &#x27;./missing.mjs&#x27;;&quot; }, async directory =&gt; {
+  await assert.rejects(import(pathToFileURL(join(directory, &#x27;broken.mjs&#x27;)).href), error =&gt; error.code === &#x27;ERR_MODULE_NOT_FOUND&#x27;);
+});</code></pre>
+<p><strong>Expected:</strong> ERR_MODULE_NOT_FOUND.</p>
+<p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
+<h3 id="exercise-6-respect-namespace-ownership">Exercise 6: Respect namespace ownership<a class="heading-anchor" href="#exercise-6-respect-namespace-ownership" aria-label="Link to this section">#</a></h3>
+<p>Task: Attempt to assign an exported binding from the importer.</p>
+<p>Live does not mean writable from every importer. The exporter owns assignment to its binding. Expose a deliberate operation when mutation is part of the public contract.</p>
+<pre><code class="language-javascript">await withModules({ &#x27;fixed.mjs&#x27;: &#x27;export let value = 3;&#x27; }, async directory =&gt; {
+  const module = await import(pathToFileURL(join(directory, &#x27;fixed.mjs&#x27;)).href);
+  assert.throws(() =&gt; { module.value = 9; }, TypeError);
+  assert.equal(module.value, 3);
+});</code></pre>
+<p><strong>Expected:</strong> TypeError; exported value remains 3.</p>
+<p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
+<h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>
+<p>Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.</p></article>
+  </main>
+</body>
+</html>

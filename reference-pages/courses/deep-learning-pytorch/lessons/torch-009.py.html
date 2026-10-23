@@ -122,12 +122,12 @@
 <span>&quot;&quot;&quot;</span>
 <span> </span>
 <span># Exercise 1: Count batches and updates</span>
-<span># Partition IDs1..6 into batches of 2.</span>
+<span># Partition IDs 1..6 into batches of 2.</span>
 <span># Expected: three batches[[1, 2], [3, 4], [5, 6]].</span>
 <span> </span>
 <span># Exercise 2: Retain a short tail</span>
 <span># Partition five IDs with batch size 2.</span>
-<span># Expected: batch sizes2, 2, 1.</span>
+<span># Expected: batch sizes 2, 2, 1.</span>
 <span> </span>
 <span># Exercise 3: Run three independent updates</span>
 <span># Train x1..6, y2x, w0 with batch size 2, rate.01, clearing gradients each batch.</span>
@@ -138,12 +138,12 @@
 <span># Expected: different endpoint.</span>
 <span> </span>
 <span># Exercise 5: Shuffle paired records together</span>
-<span># Use permutation5, 0, 4, 1, 3, 2 for both x andy.</span>
+<span># Use permutation 5, 0, 4, 1, 3, 2 for both x and y.</span>
 <span># Expected: every shuffled target equals twice its input.</span>
 <span> </span>
 <span># Exercise 6: Aggregate unequal batch means</span>
-<span># Combine mean loss2 over2examples and mean loss8 over1example.</span>
-<span># Expected: epoch mean4, not5.</span>
+<span># Combine mean loss 2 over 2 examples and mean loss 8 over 1 example.</span>
+<span># Expected: epoch mean 4, not 5.</span>
 <span> </span>
 <span>if __name__ == &quot;__main__&quot;:</span>
 <span>    print(&quot;Read the guide and implement the six exercises in your saved copy.&quot;)</span>

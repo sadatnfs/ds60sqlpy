@@ -116,7 +116,6 @@
       <p class="source-path">Generated from <code>courses/cpp/guides/cpp-035.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-035-algorithmic-and-representation-choices">cpp-035: Algorithmic and representation choices<a class="heading-anchor" href="#cpp-035-algorithmic-and-representation-choices" aria-label="Link to this section">#</a></h2>
-<p>Authored beta content. Content completion and runtime qualification are separate evidence.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Advanced; 120 minutes. Direct prerequisites: <code>cpp-034</code>.</p>
 <p>Learner artifact: <a href="../lessons/cpp-035.cpp.html">cpp-035.cpp</a>. Keep <a href="../solutions/cpp-035_solutions.md.html">official solutions</a> closed until an attempt. The immutable <a href="../fixtures/cpp-035-cases.json.html">case ledger</a> records exercise inputs and expected observations.</p>
@@ -128,55 +127,92 @@
 <p>A map associates one key with one value, so repeated keys need an explicit aggregation or rejection policy. Building counts with ++counts[x] preserves multiplicity. Compare outputs and operation counts before reporting elapsed-time differences.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Index building has an upfront cost that can be repaid across repeated queries. A map count preserves both occurrences of key 2; a set would answer a different question. The seemingly read-like counts[9] inserts a missing key with zero, whereas find does not change the map. That behavioral difference can contaminate an experiment and the data contract. Report index construction separately from lookup work and keep the queried answers identical.</p>
+<h3 id="algorithmic-work-and-index-side-effects">Algorithmic work and index side effects<a class="heading-anchor" href="#algorithmic-work-and-index-side-effects" aria-label="Link to this section">#</a></h3>
+<p>Complexity describes how work grows with input size under a stated model. A linear scan visits elements to answer a query. An index spends work and memory building a reusable structure so later queries can be cheaper. The right choice depends on the number of queries, update frequency, key distribution and required semantics, not only a big-O label.</p>
+<p>The map fixture counts occurrences of 2, 3, 2, 4. The count for2 is 2, which preserves multiplicity. A set would retain only membership and answer a different question. The index construction traverses every input and updates counts. That upfront work must be included when comparing one query with a direct scan, and can be amortized only when the index is actually reused.</p>
+<p>map::find is an observation that does not insert a missing key. operator[] can insert a value-initialized mapped value when the key is absent. The second complete program demonstrates this difference:find(9) leaves size unchanged, while counts[9] creates a new zero entry. A read-like expression can therefore mutate the data and distort later measurements or reports.</p>
+<p>Ordering is also part of the container contract. std::map maintains an ordering by its comparator, whereas unordered alternatives have different iteration and performance properties. Do not rely on unspecified order when emitting a deterministic report. If output order matters, choose or impose it deliberately rather than inheriting it accidentally from one implementation run.</p>
+<p>A useful performance comparison checks identical answers first, then records index build cost, lookup count and memory tradeoffs. It includes missing keys and repeated keys because they exercise different paths. A faster method that drops duplicate events or inserts new data during lookup does not satisfy the original contract.</p>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">for(int x:std::vector&lt;int&gt;{2,3,2,4}) ++counts[x];</code></pre>
-<p><strong>Expected:</strong> The index holds 2-&gt;2, 3-&gt;1, 4-&gt;1.</p>
+<p><a href="../examples/cpp-035-example-1.cpp.html">Complete program 1</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;iostream&gt;
+#include &lt;map&gt;
+#include &lt;vector&gt;
+
+
+int main() {
+    std::map&lt;int,int&gt; counts;
+    for(int x:std::vector&lt;int&gt;{2,3,2,4}) ++counts[x];
+    assert(counts.at(2)==2 &amp;&amp; counts.size()==3);
+    std::cout &lt;&lt; &quot;cpp-035 example 1 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-035 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">assert(counts.find(9)==counts.end());</code></pre>
-<p><strong>Expected:</strong> A non-mutating lookup reports absence without inserting key 9.</p>
+<p><a href="../examples/cpp-035-example-2.cpp.html">Complete program 2</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;iostream&gt;
+#include &lt;map&gt;
+
+
+int main() {
+    std::map&lt;int,int&gt; counts{{2,2},{3,1},{4,1}};
+    const auto before=counts.size();
+    assert(counts.find(9)==counts.end());
+    assert(counts.size()==before);
+    assert(counts[9]==0 &amp;&amp; counts.size()==before+1);
+    std::cout &lt;&lt; &quot;cpp-035 example 2 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-035 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-count-linear-work">Exercise 1: Count linear work<a class="heading-anchor" href="#exercise-1-count-linear-work" aria-label="Link to this section">#</a></h4>
 <p>Search four rows for key 2 once.</p>
 <p><strong>Expected result/shape:</strong> Four comparisons and count 2.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Four comparisons and count 2.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: A scan inspects every element for a complete count.</p>
+<p><strong>Verify:</strong> Four comparisons and count 2.</p>
+<p><strong>Progressive hints:</strong> A scan inspects every element for a complete count.</p>
 <h4 id="exercise-2-build-an-index">Exercise 2: Build an index<a class="heading-anchor" href="#exercise-2-build-an-index" aria-label="Link to this section">#</a></h4>
-<p>Build frequency map for [2,3,2,4].</p>
-<p><strong>Expected result/shape:</strong> Three keys with counts 2,1,1.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Three keys with counts 2,1,1.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: The representation preserves duplicate multiplicity.</p>
+<p>Build frequency map for [2, 3, 2, 4].</p>
+<p><strong>Expected result/shape:</strong> Three keys with counts 2, 1, 1.</p>
+<p><strong>Verify:</strong> Three keys with counts 2, 1, 1.</p>
+<p><strong>Progressive hints:</strong> The representation preserves duplicate multiplicity.</p>
 <h4 id="exercise-3-compare-repeated-queries">Exercise 3: Compare repeated queries<a class="heading-anchor" href="#exercise-3-compare-repeated-queries" aria-label="Link to this section">#</a></h4>
 <p>Compare 100 full scans with one index build plus 100 lookups.</p>
 <p><strong>Expected result/shape:</strong> Same answers; setup and lookup work reported separately.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Same answers; setup and lookup work reported separately.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Amortization depends on number of queries.</p>
+<p><strong>Verify:</strong> Same answers; setup and lookup work reported separately.</p>
+<p><strong>Progressive hints:</strong> Amortization depends on number of queries.</p>
 <h4 id="exercise-4-repair-mutating-lookup">Exercise 4: Repair mutating lookup<a class="heading-anchor" href="#exercise-4-repair-mutating-lookup" aria-label="Link to this section">#</a></h4>
 <p>Use counts[9] to inspect absence, then repair with find.</p>
 <p><strong>Expected result/shape:</strong> operator[] inserts zero; find leaves key count unchanged.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: operator[] inserts zero; find leaves key count unchanged.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Read syntax can mutate a map.</p>
+<p><strong>Verify:</strong> operator[] inserts zero; find leaves key count unchanged.</p>
+<p><strong>Progressive hints:</strong> Read syntax can mutate a map.</p>
 <h4 id="exercise-5-check-empty-data">Exercise 5: Check empty data<a class="heading-anchor" href="#exercise-5-check-empty-data" aria-label="Link to this section">#</a></h4>
 <p>Build and query an empty frequency index.</p>
 <p><strong>Expected result/shape:</strong> No key 2 and zero matching rows.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: No key 2 and zero matching rows.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Avoid accidental insertion during an absence check.</p>
+<p><strong>Verify:</strong> No key 2 and zero matching rows.</p>
+<p><strong>Progressive hints:</strong> Avoid accidental insertion during an absence check.</p>
 <h4 id="exercise-6-transfer-sorted-storage">Exercise 6: Transfer sorted storage<a class="heading-anchor" href="#exercise-6-transfer-sorted-storage" aria-label="Link to this section">#</a></h4>
 <p>Compare binary search on a sorted vector with map lookup.</p>
 <p><strong>Expected result/shape:</strong> Sorting cost, duplicate range and lookup budget documented.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Sorting cost, duplicate range and lookup budget documented.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: The best choice depends on updates and query frequency.</p>
+<p><strong>Verify:</strong> Sorting cost, duplicate range and lookup budget documented.</p>
+<p><strong>Progressive hints:</strong> The best choice depends on updates and query frequency.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: The index holds 2-&gt;2, 3-&gt;1, 4-&gt;1. Then explain the changed condition in example 2 without opening the answer.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
-<p>A map associates one key with one value, so repeated keys need an explicit aggregation or rejection policy. Building counts with ++counts[x] preserves multiplicity. Compare outputs and operation counts before reporting elapsed-time differences.</p>
-<p>If the result disagrees, preserve the original input and inspect the first differing value or condition. Read syntax can mutate a map.</p>
+<p>If a map grows during a supposedly read-only report, search for operator[] on missing keys. If duplicates disappear, check whether a set replaced a count map. If two approaches give different answers, resolve semantics before timing. If an index helps only after many queries, report the build cost and reuse threshold instead of presenting lookup-only timing as the total task cost.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
 <p>Close the source. Reconstruct the reasoning for Exercise 6: Transfer sorted storage. Explain which assumptions would fail on a larger input or another runtime.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue with <a href="cpp-036.md.html">cpp-036</a> after saving the six observations.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines">C++ Core Guidelines</a></p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach cpp-035.
 Read courses/cpp/guides/cpp-035.md and courses/cpp/lessons/cpp-035.cpp.

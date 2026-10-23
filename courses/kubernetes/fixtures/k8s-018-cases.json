@@ -1,0 +1,38 @@
+{
+  "lesson_id": "k8s-018",
+  "provenance": "synthetic teaching cases, not runtime observations",
+  "capability": "scoped ServiceAccount authorization observation",
+  "browser_source": false,
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Separate identity name/namespace from token contents and Role rules.",
+      "expected": "A nonsecret identity record is distinct from credential bytes and permissions."
+    },
+    {
+      "exercise": 2,
+      "task": "Explain the subject namespace versus the RoleBinding namespace.",
+      "expected": "Subject identifies the ServiceAccount;binding scope determines the namespaced grant."
+    },
+    {
+      "exercise": 3,
+      "task": "Fill the five-action authorization matrix.",
+      "expected": "Only the intended own-namespace Pod reads are allowed;Secrets and privilege changes denied."
+    },
+    {
+      "exercise": 4,
+      "task": "Inspect automountServiceAccountToken:false in the application source.",
+      "expected": "The synthetic workload does not receive an automatic API token mount."
+    },
+    {
+      "exercise": 5,
+      "task": "Explain the sequence when a prepared fifteen-minute lease expires before Run.",
+      "expected": "Guard refuses;exact owned session is released and a fresh session is prepared immediately before use."
+    },
+    {
+      "exercise": 6,
+      "task": "With the named host capability,retain positive/negative self-authorization outcomes without credentials.",
+      "expected": "Identity,target,verb/resource,result and time are recorded;token/kubeconfig contents are excluded."
+    }
+  ]
+}

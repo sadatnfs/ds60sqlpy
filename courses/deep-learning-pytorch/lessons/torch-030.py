@@ -4,16 +4,16 @@ Answer-free learner worksheet. See the companion guide for worked examples.
 Copy to .learning before editing. Six independent attempts belong below.
 """
 
-# Exercise 1: Weight unequal sha rd means
-# Combine means2, 6 with counts1, 3.
-# Expected: global mean5; unweighted sha rd mean4.
+# Exercise 1: Weight unequal shard means
+# Combine means 2, 6 with counts 1, 3.
+# Expected: global mean 5; unweighted shard mean 4.
 
 # Exercise 2: Reconstruct an example mean
-# Split gradients2, 4, 6, 8 into one and three elements and recombine sums/counts.
-# Expected: global mean5.
+# Split gradients 2, 4, 6, 8 into one and three elements and recombine sums/counts.
+# Expected: global mean 5.
 
 # Exercise 3: Accumulate one full-batch gradient
-# Atw0, usex1..4, y2 x, accumulate squared-loss sums forshards1 and3, and divide by 4.
+# At w=0, usex 1..4, y2x, accumulate squared-loss sums forshards 1 and 3, and divide by 4.
 # Expected: gradient-30, matching full-batch mean.
 
 # Exercise 4: Apply one accumulated update
@@ -21,12 +21,12 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Expected: new weight.3.
 
 # Exercise 5: Contrast separate microbatch updates
-# Reset w0 and step after eachs hard mean instead.
+# Reset w0and step after each shard mean instead.
 # Expected: endpoint differs from.3.
 
-# Exercise 6: Represent empty-sha rd contributions
-# Combine an emptys hard and the four real gradients using sums and counts.
-# Expected: empty sha rd contributes0; global mean5.
+# Exercise 6: Represent empty-shard contributions
+# Combine an empty shard and the four real gradients using sums and counts.
+# Expected: empty shard contributes 0; global mean 5.
 
 if __name__ == "__main__":
     print("Read the guide and implement the six exercises in your saved copy.")

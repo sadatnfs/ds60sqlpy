@@ -5,28 +5,32 @@ Copy to .learning before editing. Six independent attempts belong below.
 """
 
 # Exercise 1: Build a bounded decoder
-# Set seed7, construct the decoder and count trainable scalar parameters.
-# Expected: parameter count below50000.
+# Set seed 7, build the default decoder, count every trainable scalar and compare with the
+# component ledger.
+# Expected: Exactly 10,464 trainable scalars, below the 50,000 teaching bound.
 
 # Exercise 2: Trace output axes
-# Run input IDs[[2,5,7,3]] and inspect logits.
-# Expected: shape(1,4,16), all finite.
+# Run the integer IDs [[2,5,7,3]] and trace the output shape and dtype.
+# Expected: Finite float32 logits with shape [1,4,16].
 
 # Exercise 3: Recompute prefixes
-# Run prefix lengths1..4 independently in evaluation mode.
-# Expected: prefix logits match full early logits within1e-6.
+# Recompute prefixes of lengths 1 through 4 independently with the same initialized
+# weights.
+# Expected: Every prefix matches the corresponding full-sequence early logits within 1e-6.
 
 # Exercise 4: Perturb only future tokens
-# Replace positions2,3 with8,9 and compare the first two outputs.
-# Expected: first two logits unchanged within1e-6.
+# Replace only positions 2 and 3 with IDs 8 and 9 and compare the first two logits.
+# Expected: The first two score vectors remain unchanged within 1e-6.
 
 # Exercise 5: Inspect head shapes
-# Read the returned K/V state after four tokens.
-# Expected: each cache tensor shape(1,2,4,16).
+# Run without disabling autograd and inspect the returned K/V cache shapes, detachment and
+# data-byte count.
+# Expected: Logits remain connected; each cache is detached float32 [1,2,4,16]; combined cache data occupies 1,024 bytes.
 
 # Exercise 6: Reject invalid token IDs
-# Pass vocabulary ID16 and a33-token context.
-# Expected: both raise ValueError.
+# Reject out-of-range IDs, wrong dtype, empty/excessive context and invalid head/width
+# configurations.
+# Expected: Every invalid contract raises ValueError before a misleading reshape or embedding computation.
 
 if __name__ == "__main__":
     print("Read the guide and implement the six exercises in your saved copy.")

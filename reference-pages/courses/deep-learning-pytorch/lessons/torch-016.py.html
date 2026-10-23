@@ -122,20 +122,20 @@
 <span>&quot;&quot;&quot;</span>
 <span> </span>
 <span># Exercise 1: Construct XOR by hand</span>
-<span># Use inputs00, 01, 10, 11 and two rectified differences.</span>
-<span># Expected: outputs0, 1, 1, 0.</span>
+<span># Use inputs 00, 01, 10, 11 and two rectified differences.</span>
+<span># Expected: outputs 0, 1, 1, 0.</span>
 <span> </span>
 <span># Exercise 2: Remove the nonlinearity</span>
 <span># Sum the raw difference features without ReLU.</span>
-<span># Expected: all four outputs0.</span>
+<span># Expected: all four outputs 0.</span>
 <span> </span>
 <span># Exercise 3: Map the construction into Linear</span>
-<span># Seta2-to-2bias-free Linear weight to W.T and apply ReLU.</span>
-<span># Expected: module features equal manual features.</span>
+<span># Set a 2-to-2 bias-free Linear weight to W.T, then check a separate asymmetric matrix.</span>
+<span># Expected: module features equal manual features; the asymmetric probe distinguishes the two orientations.</span>
 <span> </span>
 <span># Exercise 4: Inspect activation gradients</span>
-<span># Differentiate ReLU at-2 and2.</span>
-<span># Expected: gradients0 and1.</span>
+<span># Differentiate ReLU at-2 and 2.</span>
+<span># Expected: gradients 0 and 1.</span>
 <span> </span>
 <span># Exercise 5: Expose identical-unit symmetry</span>
 <span># Initialize both stored Linear rows identically and compare their outputs.</span>

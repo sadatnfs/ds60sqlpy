@@ -62,12 +62,10 @@ The exercises make shape validation explicit, preserve inputs, reject undefined 
 ### Example 1
 
 ```python
-import numpy as np
-
-x=np.array([[1.,3.,5.],[2.,4.,9.]])
-centered=x-x.mean(axis=1,keepdims=True)
-assert centered.shape==(2,3) and np.allclose(centered.mean(axis=1),0)
-print("Row centered:",centered.tolist())
+x = np.array([[1.0, 3.0, 5.0], [2.0, 4.0, 9.0]])
+centered = x - x.mean(axis=1, keepdims=True)
+assert centered.shape == (2, 3) and np.allclose(centered.mean(axis=1), 0)
+print("Row centered:", centered.tolist())
 ```
 
 axis=1 combines the three feature positions inside each row. keepdims retains a two-by-one mean so subtraction repeats each row's own mean across its three columns. The zero row means are a mathematical invariant, not merely an expected printout.
@@ -75,15 +73,13 @@ axis=1 combines the three feature positions inside each row. keepdims retains a 
 ### Example 2
 
 ```python
-import numpy as np
-
-a=np.array([[0.,0.],[3.,4.]])
-b=np.array([[0.,4.],[3.,0.],[0.,0.]])
-difference=a[:,None,:]-b[None,:,:]
-distance=np.sqrt(np.sum(difference**2,axis=-1))
-assert distance.shape==(2,3)
-assert np.allclose(distance,[[4,3,0],[3,4,5]])
-print("Pairwise distances:",distance.tolist())
+a = np.array([[0.0, 0.0], [3.0, 4.0]])
+b = np.array([[0.0, 4.0], [3.0, 0.0], [0.0, 0.0]])
+difference = a[:, None, :] - b[None, :, :]
+distance = np.sqrt(np.sum(difference**2, axis=-1))
+assert distance.shape == (2, 3)
+assert np.allclose(distance, [[4, 3, 0], [3, 4, 5]])
+print("Pairwise distances:", distance.tolist())
 ```
 
 The inserted singleton axes form every a-row/b-row pair. The final axis still represents coordinate differences and is the only axis summed. The resulting two-by-three table preserves the identities of both sets of points; accidentally summing axis zero would answer a different question.

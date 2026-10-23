@@ -18,7 +18,7 @@ The example compiles one small application,packages it twice with a fixed archiv
 
 ## Reading the reference
 
-The JavaCompiler API invokes the prepared compiler with--release21. The JDKjar tool can be accessed throughjava.util.spi.ToolProvider andgiven a fixed--date plusmain-class. Package only the intended classes directory. SHA256 compares artifactbytes;use a fresh childJVM toprove theJAR entrypoint works. A changed source ordependency identity should change the recorded build manifest.
+The JavaCompiler API invokes the prepared compiler with--release21. The JDKjar tool can be accessed throughjava.util.spi.ToolProvider andgiven a fixed--date plusmain-class. Package only the intended classes directory. SHA256 compares artifactbytes;use a fresh childJVM toprove theJAR entrypoint works. A changed source ordependency identity should change the recorded build manifest. The child process inherits the prepared environment unchanged. JVM startup notices such as JAVA_TOOL_OPTIONS belong to stderr, while the application result belongs to stdout. Capture both streams separately in owned files so diagnostics cannot corrupt an exact output comparison; include stderr when a child fails. Do not remove inherited CPU or resource settings to make a test pass.
 
 ## Exercise 1: Compile a literal application
 

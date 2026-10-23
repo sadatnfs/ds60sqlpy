@@ -116,15 +116,16 @@
       <p class="source-path">Generated from <code>courses/deep-learning-pytorch/guides/torch-003.md</code></p>
     </header>
     <article class="document"><h2 id="torch-003-linear-modules-parameters-and-matrix-contracts">torch-003: Linear modules, parameters and matrix contracts<a class="heading-anchor" href="#torch-003-linear-modules-parameters-and-matrix-contracts" aria-label="Link to this section">#</a></h2>
-<p>Status: authored PyTorch course content. The manifest inventories complete teaching files; runtime readiness remains a separate, measured property.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Beginner; approximately 120 minutes. Direct prerequisites: <code>torch-002</code>. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
-<p>A linear layer computes an affine transformation from input features to output features. The central investigation is concrete: UseX[[1, 2, 3], [0, 1, 0]], weight[[1, 0, -1]], bias2. The finish condition is outputs[[0], [2]], shape(2, 1). RuntimeError from incompatible matrix dimensions. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
+<p>A linear layer computes an affine transformation from input features to output features. The central investigation is concrete: UseX[[1, 2, 3], [0, 1, 0]], weight[[1, 0, -1]], bias 2. The finish condition is outputs[[0], [2]], shape(2, 1). RuntimeError from incompatible matrix dimensions. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
 <h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>A linear layer computes an affine transformation from input features to output features. For a batch X shaped(B, I), PyTorch nn.Linear(I, O) stores weight shaped(O, I) and computes X@weight.T+bias. This storage orientation differs from the common mathematical W shaped(I, O) and from a Keras Dense kernel. The batch axis is not part of the parameter shape. Bias has one value per output feature and is shared across observations.</p>
-<p>Annn.Parameter assigned to annn.Module is registered as trainable state. A plain tensor attribute is not automatically an optimizer parameter, even if it participates in arithmetic. Registration lets model.parameters(), state_dict and device/dtype conversion find the intended state. Shape inspection and a hand-calculated first row provide an independent check before any training occurs.</p>
+<p>An nn.Parameter assigned to an nn.Module is registered as trainable state. A plain tensor attribute is not automatically an optimizer parameter, even if it participates in arithmetic. Registration lets model.parameters(), state_dict and device/dtype conversion find the intended state. Shape inspection and a hand-calculated first row provide an independent check before any training occurs.</p>
 <h3 id="design-decisions-and-when-to-use-this-method">Design decisions and when to use this method<a class="heading-anchor" href="#design-decisions-and-when-to-use-this-method" aria-label="Link to this section">#</a></h3>
+<p>Use an affine layer as a directly inspectable baseline when an additive combination of declared features is meaningful. Add nonlinear layers only when the task and evidence justify their extra behavior. The same shape can encode different feature orders or units, so an accepted matrix multiplication is not a complete model-schema check.</p>
+<p>Keep parameter registration separate from trainability and optimizer membership. A registered Parameter can be frozen, and an optimizer can still hold an obsolete parameter object after a module is replaced. This early chapter establishes the state inventory; later transfer and checkpoint chapters examine how that inventory changes over time.</p>
 <h3 id="paired-tensorflow-comparison">Paired TensorFlow comparison<a class="heading-anchor" href="#paired-tensorflow-comparison" aria-label="Link to this section">#</a></h3>
 <p>Compare <a href="../../deep-learning-tensorflow/guides/tf-003.md.html">tf-003</a> after deriving the shared numerical contract.</p>
 <p>Keras Dense stores a kernel shaped(input_features, output_features), while PyTorch nn.Linear stores(output_features, input_features). Copying values without transposing changes or breaks the computation. Both expose tracked trainable state, but PyTorch distinguishes Parameter registration from an ordinary tensor attribute.</p>
@@ -133,13 +134,51 @@
 <p><strong>Parameter registration:</strong> Tracking model state for optimization and serialization.</p>
 <p><strong>Weight layout:</strong> The semantic orientation of stored input/output feature axes.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Use a prepared <code>llm-torch-cpu</code> environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored <code>.learning/expansion/torch-003/</code> before editing, or use the application&#x27;s saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: <code>&amp; $CoursePython courses/deep-learning-pytorch/lessons/torch-003.py</code>. For macOS/Linux use <code>.venv/bin/python courses/deep-learning-pytorch/lessons/torch-003.py</code> from the repository root.</p>
-<p>Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.</p>
+<p>Use a prepared <code>llm-torch-cpu</code> environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored <code>.learning/expansion/torch-003/</code> before editing, or use the application&#x27;s saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: <code>&amp; $CoursePython courses/deep-learning-pytorch/lessons/torch-003.py</code>. For macOS/Linux, use the interpreter explicitly selected for a separately prepared native PyTorch environment, and invoke that interpreter on <code>courses/deep-learning-pytorch/lessons/torch-003.py</code> from the repository root. The repository&#x27;s general <code>.venv</code> is not assumed to contain PyTorch; the prepared classroom profile is the default execution route.</p>
+<p>Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the explicit tolerance in each assertion. Several analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone is not a universal numerical-error bound. Finite differences, reductions and conditioning can require different justified tolerances. Integer counts, identities and boolean decisions should be exact.</p>
 <h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
 <p>Construct nn.Linear(3, 1, bias=True, dtype=torch.float64). Assign known values under no_grad so initialization does not become part of an autograd graph. copy_ requires the stored layout(1, 3). Calling the module performs the forward computation; it does not update weights. parameters enumerates both weight and bias when enabled. Count scalar entries with numel, not the number of Parameter objects.</p>
+<h3 id="derive-the-forward-map-and-parameter-contracts">Derive the forward map and parameter contracts<a class="heading-anchor" href="#derive-the-forward-map-and-parameter-contracts" aria-label="Link to this section">#</a></h3>
+<p>Let a batch have B observations, I input features and O outputs. The mathematical row-vector expression uses X shaped(B, I), W shaped(I, O) and b shaped(O), producing Y shaped(B, O). PyTorch stores the corresponding Linear weight as(O, I), so its forward expression is X@weight.T+b. The transpose translates the storage convention; it is not a proposal to exchange the observation and feature axes. <a href="https://docs.pytorch.org/docs/2.9/generated/torch.nn.Linear.html">PyTorch 2.9 Linear</a>.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Object</th>
+<th>This fixture</th>
+<th>General contract</th>
+</tr></thead><tbody>
+<tr>
+<td>Input X</td>
+<td>(2, 3)</td>
+<td>(B, I)</td>
+</tr>
+<tr>
+<td>Stored weight</td>
+<td>(1, 3)</td>
+<td>(O, I)</td>
+</tr>
+<tr>
+<td>Mathematical W</td>
+<td>(3, 1)</td>
+<td>(I, O)</td>
+</tr>
+<tr>
+<td>Bias</td>
+<td>(1, )</td>
+<td>(O, )</td>
+</tr>
+<tr>
+<td>Output</td>
+<td>(2, 1)</td>
+<td>(B, O)</td>
+</tr>
+</tbody></table></div>
+<p>For the first row[1, 2, 3], the products are 1, 0, -3. Adding bias 2 gives zero. The second row[0, 1, 0] contributes zero before the same shared bias, giving two. The bias is not a separate fitted offset for each observation. WithO outputs there areI×O weight scalars and O bias scalars, orO(I+1) total. ChangingB changes the number of evaluated rows, not the parameter count.</p>
+<p>Suppose an upstream loss supplies derivatives g1 and g2 for these two scalar outputs. The stored weight gradient is[g1, 2g1+g2, 3g1], and the bias gradient isg 1+g2. The bias gradient sums over the batch because one bias participates in both outputs. Each input-row gradient is its upstream scalar multiplied by[1, 0, -1]. These shapes can be predicted before using autograd: weight.grad must match(1, 3), bias.grad must match(1, ), and input derivatives match(2, 3).</p>
+<p>A feature-order mistake can remain invisible to every dimension check. If the first input is accidentally exported as[3, 2, 1], its output becomes 3-1+2=4 instead of zero while all shapes remain valid. Likewise, a centimeter-to-meter conversion requires a corresponding weight interpretation if the represented function is to stay the same. The data schema must therefore preserve names, order and units beside the width.</p>
+<p>Autograd and module registration answer different questions. A plain tensor with requires_grad=True can participate in a differentiable computation, but model.parameters() will not discover it merely because it is an attribute. Assigning nn.Parameter registers it. Registration does not require that gradients currently be enabled: freezing can turn requires_grad off while retaining the parameter in the module&#x27;s state. Buffers form another category of registered state introduced later.</p>
+<p>The known-value initialization runs under no_grad so assignment is not recorded as part of the differentiation graph. It does not make the layer permanently nontrainable. Calling the layer computes outputs but does not update parameters; an optimizer update is a separate later operation. These distinctions let the reader locate whether a failure concerns the forward function, the differentiation graph, the state inventory or the update mechanism.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-calculate-a-known-affine-layer">Example A: Calculate a known affine layer<a class="heading-anchor" href="#example-a-calculate-a-known-affine-layer" aria-label="Link to this section">#</a></h4>
-<p>The first output is1-3+2=0, and the second is0+2=2. This calculation checks orientation and bias independently of random initialization.</p>
+<p>The first output is 1-3+2=0, and the second is 0+2=2. This calculation checks orientation and bias independently of random initialization.</p>
 <pre><code class="language-python">import numpy as np
 import torch
 from torch import nn
@@ -165,7 +204,7 @@ torch.testing.assert_close(x@mathematical_w+layer.bias,out,atol=1e-12,rtol=0)</c
 <p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: outputs[[0], [2]], shape(2, 1). RuntimeError from incompatible matrix dimensions. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
-<li><strong>Calculate a known affine layer.</strong> UseX[[1, 2, 3], [0, 1, 0]], weight[[1, 0, -1]], bias2. <strong>Expected:</strong> outputs[[0], [2]], shape(2, 1). <strong>Verify:</strong> Save the assertion results for exercise 1, including outputs[[0], [2]], shape(2, 1).</li>
+<li><strong>Calculate a known affine layer.</strong> UseX[[1, 2, 3], [0, 1, 0]], weight[[1, 0, -1]], bias 2. <strong>Expected:</strong> outputs[[0], [2]], shape(2, 1). <strong>Verify:</strong> Save the assertion results for exercise 1, including outputs[[0], [2]], shape(2, 1).</li>
 </ol>
 <ol>
 <li><strong>Inspect registered state.</strong> Count weight and bias scalar entries and inspect state_dict keys. <strong>Expected:</strong> 4 scalars; keys weight, bias. <strong>Verify:</strong> Save the assertion results for exercise 2, including 4 scalars; keys weight, bias.</li>
@@ -174,16 +213,17 @@ torch.testing.assert_close(x@mathematical_w+layer.bias,out,atol=1e-12,rtol=0)</c
 <li><strong>Compare with a mathematical matrix.</strong> Transpose the stored weight and calculate X@W+b directly. <strong>Expected:</strong> direct result equals module output. <strong>Verify:</strong> Save the assertion results for exercise 3, including direct result equals module output.</li>
 </ol>
 <ol>
-<li><strong>Remove the intercept explicitly.</strong> Create a bias-free layer with the same stored weights. <strong>Expected:</strong> 3 parameters; outputs-2 and0. <strong>Verify:</strong> Save the assertion results for exercise 4, including 3 parameters; outputs-2 and0.</li>
+<li><strong>Remove the intercept explicitly.</strong> Create a bias-free layer with the same stored weights. <strong>Expected:</strong> 3 parameters; outputs-2 and 0. <strong>Verify:</strong> Save the assertion results for exercise 4, including 3 parameters; outputs-2 and 0.</li>
 </ol>
 <ol>
-<li><strong>Expose an unregistered tensor.</strong> Compare a Module holding a plain requires_grad tensor with one holding Parameter. <strong>Expected:</strong> plain module has0 registered parameters; proper module has1. <strong>Verify:</strong> Save the assertion results for exercise 5, including plain module has0 registered parameters; proper module has1.</li>
+<li><strong>Expose an unregistered tensor.</strong> Compare a Module holding a plain requires_grad tensor with one holding Parameter. <strong>Expected:</strong> plain module has 0 registered parameters; proper module has 1. <strong>Verify:</strong> Save the assertion results for exercise 5, including plain module has 0 registered parameters; proper module has 1.</li>
 </ol>
 <ol>
-<li><strong>Reject wrong feature width.</strong> Pass a2-feature row to the3-input layer. <strong>Expected:</strong> RuntimeError from incompatible matrix dimensions. <strong>Verify:</strong> Save the assertion results for exercise 6, including RuntimeError from incompatible matrix dimensions.</li>
+<li><strong>Reject wrong feature width.</strong> Pass a2-feature row to the 3-input layer. <strong>Expected:</strong> RuntimeError from incompatible matrix dimensions. <strong>Verify:</strong> Save the assertion results for exercise 6, including RuntimeError from incompatible matrix dimensions.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>When a result disagrees, locate the first intermediate value that violates this explanation. Inspect shapes and identities before aggregates, and inspect counts before averages. Preserve the original fixture and introduce only one controlled change at a time. If an arithmetic identity passes but a data-boundary condition fails, the experiment is still invalid. If a runtime is unavailable, record the unexecuted code as unverified rather than replacing its output with the expected text. The separate explanation discusses why the tempting alternative in each case changes the result.</p>
+<p>If a matrix product fails, nameB, I and O and check the shared feature dimension before adding a transpose. If output width unexpectedly grows, inspect the bias axis. If dimensions pass but a prediction differs, calculate the first row&#x27;s dot product and then inspect feature order and units.</p>
+<p>If a tensor receives a gradient but does not move, compare its identity with the objects returned by model.parameters() and held by the optimizer. Conversely, a frozen Parameter can remain in state_dict without receiving a gradient. Count scalar entries with numel; counting Parameter objects would report two objects instead of four scalars in this fixture. During framework comparison, transpose the Dense kernel into the Linear storage layout explicitly and compare the first forward result before interpreting any training difference.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise&#x27;s expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.</p>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
@@ -194,7 +234,7 @@ torch.testing.assert_close(x@mathematical_w+layer.bias,out,atol=1e-12,rtol=0)</c
 <p>API and mechanism reference: <a href="https://docs.pytorch.org/docs/2.9/index.html">PyTorch2.9 reference</a>, reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. Current execution receipts are recorded in <code>docs/implementation/pytorch-content-status.md</code>; authored content does not imply that a heavy runtime was executed.</p>
 <h3 id="interview-reasoning-with-worked-answers">Interview reasoning with worked answers<a class="heading-anchor" href="#interview-reasoning-with-worked-answers" aria-label="Link to this section">#</a></h3>
 <p><strong>Why does Linear store a transposed-looking weight?</strong></p>
-<p>Its public contract defines weight as(out, in) and applies the transpose during the batched row-vector computation. The important check is the documented layout, not which notation fee l s more natural.</p>
+<p>Its public contract defines weight as(out, in) and applies the transpose during the batched row-vector computation. The important check is the documented layout, not which notation feels more natural.</p>
 <p><strong>Can a tensor have gradients but be absent from an optimizer?</strong></p>
 <p>Yes. Autograd tracking and module registration are separate. A plain requires_grad tensor can receive gradients while model.parameters omits it.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>

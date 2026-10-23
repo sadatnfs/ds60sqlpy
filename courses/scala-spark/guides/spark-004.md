@@ -142,9 +142,9 @@ Continue to the next lesson only after you can explain the boundary behavior. Th
 
 ## Primary sources and official APIs
 
-- [Scala2 collection transformations](https://docs.scala-lang.org/overviews/scala-book/collections-methods.html).
+- [Scala 2 collection transformations](https://docs.scala-lang.org/overviews/scala-book/collections-methods.html).
 
-- [Scala2.13 immutable collections](https://docs.scala-lang.org/overviews/collections-2.13/introduction.html).
+- [Scala 2.13 immutable collections](https://docs.scala-lang.org/overviews/collections-2.13/introduction.html).
 
 ## Ask Codex about this lesson
 

@@ -122,20 +122,20 @@
 <span>&quot;&quot;&quot;</span>
 <span> </span>
 <span># Exercise 1: Compare local reductions</span>
-<span># Pool patch1, 3; 2, 4 with a2x2window.</span>
-<span># Expected: max4; average2.5.</span>
+<span># Pool patch 1, 3; 2, 4 with a2x2window.</span>
+<span># Expected: max 4; average 2.5.</span>
 <span> </span>
 <span># Exercise 2: Inspect a horizontal flip</span>
 <span># Flip the width axis and read the pixel s.</span>
-<span># Expected: rows3, 1 and4, 2.</span>
+<span># Expected: rows 3, 1 and 4, 2.</span>
 <span> </span>
 <span># Exercise 3: Check the round trip</span>
 <span># Flip the image horizontal l y twice.</span>
 <span># Expected: exact original values.</span>
 <span> </span>
 <span># Exercise 4: Expose discarded information</span>
-<span># Change only the non maximum pixel1to0 and compare pool s.</span>
-<span># Expected: max still4; average2.25.</span>
+<span># Change only the non maximum pixel 1 to0 and compare pool s.</span>
+<span># Expected: max still 4; average 2.25.</span>
 <span> </span>
 <span># Exercise 5: Keep evaluation transforms deterministic</span>
 <span># Define a transform that flips only in training and returns an owned copy in evaluation.</span>

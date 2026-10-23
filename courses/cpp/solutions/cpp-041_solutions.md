@@ -10,6 +10,24 @@ A release packet connects source identity to a tested binary and a documented pl
 
 A release packet should let another reviewer connect source, build configuration, executable and test observations. Keep Debug/Release results separate because NDEBUG and optimization change behavior and observability. The same checksum must hold before comparing performance. An untested platform stays unqualified even when a build file mentions it. Rollback needs an identifiable compatible artifact and a check that shows the restored version still meets its input/output contract.
 
+<!-- depth:start -->
+## A release packet connects source to behavior
+
+A release is an identifiable artifact with an explicit contract and evidence for supported environments. A version string alone does not connect the binary to the source, compiler options or tested fixture. Record source revision or hash, toolchain, architecture, build configuration, dependency identities and the output schema that consumers rely on.
+
+The example report uses schema 1, rows3, total6. Its always-active condition checks the checksum before printing the report. This matters in Release builds where ordinary assert expressions may be removed. A successful build followed by an unchecked output string could otherwise look like acceptance even if the actual computation changed.
+
+Debug and optimized builds answer related but different questions. Debug information helps diagnosis; optimization changes performance and can expose latent undefined behavior. Both should preserve the declared result. Keep timing observations separate from correctness assertions, and record the exact flags used. A configuration name by itself is not enough to reproduce a binary.
+
+A platform matrix should contain actual tested rows and explicit unavailable rows. Mentioning Windows, macOS and Linux in a build file does not qualify all of them. A Linux container binary also has a specific CPU architecture and cannot be assumed to run natively on every host that can display the guide. Runtime environment and packaging are part of the handoff.
+
+Rollback needs a known compatible artifact and a check that the restored version satisfies the expected input/output contract. Reusing an old executable accidentally after a failed build is not a controlled rollback. Keep artifact identity and the decision explicit. If data format changed between versions, rollback may require compatibility handling beyond switching a binary.
+
+## Debugging the contract
+
+If a release test passes only in Debug, inspect assert-only validation and configuration-dependent behavior. If a report claims a schema version but its fields changed, fix versioning and consumer tests. If the wrong artifact runs, record the executable path and hash instead of trusting its filename. If a platform was not exercised, mark it unqualified rather than copying another platform's result into the matrix.
+<!-- depth:end -->
+
 ## Worked example 1
 
 ```cpp
@@ -40,7 +58,7 @@ Record source revision or content hashes plus compiler/architecture.
 
 Run always-active checks in Debug and Release host builds.
 
-**Expected:** Both report rows=3,total=6 and actual executed test count.
+**Expected:** Both report rows=3, total=6 and actual executed test count.
 
 **Reasoning:** NDEBUG must not remove the only checks.
 

@@ -7,7 +7,8 @@ from torch.nn import functional as F
 
 def collate(sequences):
     if not sequences or any(len(sequence)==0 for sequence in sequences): raise ValueError('nonempty sequences required')
-    lengths=torch.tensor([len(sequence) for sequence in sequences]); batch=torch.zeros((len(sequences),int(lengths.max())),dtype=torch.long)
+    if any(isinstance(token,(bool,np.bool_)) or not isinstance(token,(int,np.integer)) or not 0<=int(token)<2**63 for sequence in sequences for token in sequence): raise ValueError('nonnegative int64 token IDs required')
+    lengths=torch.tensor([len(sequence) for sequence in sequences],dtype=torch.long); batch=torch.zeros((len(sequences),int(lengths.max())),dtype=torch.long)
     for row,sequence in enumerate(sequences): batch[row,:len(sequence)]=torch.tensor(sequence)
     return batch,lengths
 
@@ -31,7 +32,7 @@ def verify():
         return torch.cat([ids for ids,values in batches]).tolist()
     assert order(7)==order(7) and sorted(order(7))==list(range(5))
 
-    # Exercise 4: Col late variable-length sequences
+    # Exercise 4: Collate variable-length sequences
     padded,lengths=collate([[2,3],[4]])
     assert padded.tolist()==[[2,3],[4,0]] and lengths.tolist()==[2,1]
 
@@ -40,10 +41,14 @@ def verify():
     for ids,targets in torch.utils.data.DataLoader(paired,batch_size=2,shuffle=True,generator=torch.Generator().manual_seed(9),num_workers=0):
         assert torch.equal(targets,2*ids)
 
-    # Exercise 6: Reject an empty sequence in this collator
+    # Exercise 6: Reject invalid sequence records
     try: collate([[],[1]])
     except ValueError: pass
     else: raise AssertionError('empty sequence accepted')
+    for invalid in [[[2.7]],[[True]],[[-1]],[[2**63]]]:
+        try: collate(invalid)
+        except ValueError: pass
+        else: raise AssertionError('invalid token ID accepted')
     return {"checks": 6, "status": "passed"}
 
 

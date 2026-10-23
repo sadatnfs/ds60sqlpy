@@ -142,9 +142,9 @@ Continue to the next lesson only after you can explain the boundary behavior. Th
 
 ## Primary sources and official APIs
 
-- [Scala2 Option and functional error handling](https://docs.scala-lang.org/overviews/scala-book/functional-error-handling.html).
+- [Scala 2 Option and functional error handling](https://docs.scala-lang.org/overviews/scala-book/functional-error-handling.html).
 
-- [Scala2.13 Option API](https://www.scala-lang.org/api/2.13.16/scala/Option.html).
+- [Scala 2.13 Option API](https://www.scala-lang.org/api/2.13.16/scala/Option.html).
 
 ## Ask Codex about this lesson
 

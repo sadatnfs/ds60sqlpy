@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>k8s-011: Explanatory solutions · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>k8s-011: Explanatory solutions</h1>
+      <p class="source-path">Generated from <code>courses/kubernetes/solutions/k8s-011_solutions.md</code></p>
+    </header>
+    <article class="document"><h2 id="k8s-011-explanatory-solutions">k8s-011: Explanatory solutions<a class="heading-anchor" href="#k8s-011-explanatory-solutions" aria-label="Link to this section">#</a></h2>
+<p>These answers explain the stated synthetic and scoped runtime contracts. Static checks do not prove cluster acceptance.</p>
+<h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
+<p>A Job manages finite work toward a completion condition. A Deployment manages a continuing replica set. A CronJob creates Jobs according to a schedule. These controllers have different success and lifecycle meanings:an intentionally exiting task belongs in a Job, while a server that should remain available belongs in a continuing workload controller.</p>
+<p>The fixed hello-task Job runs a deterministic synthetic calculation and exits. Its success output records three accepted rows, two rejected rows and total35. A separate allowed failure outcome exits2. The worker checks the Job condition, its controlled Pod identity, the task container&#x27;s zero exit and the exact bounded JSON output before calling the success path complete.</p>
+<p>The CronJob example is suspended and remains a host-lab/reading fixture. The browser does not accept arbitrary schedules or leave recurring workloads behind. A scheduled configuration is not evidence that a run occurred, and a completed run is not evidence that future recurrence works.</p>
+<h3 id="exercise-1-identify-finite-work-controls">Exercise 1: Identify finite-work controls<a class="heading-anchor" href="#exercise-1-identify-finite-work-controls" aria-label="Link to this section">#</a></h3>
+<p>A single completion is the desired successful work count, parallelism bounds concurrent Pods, and backoff controls retries after failures. The active deadline bounds duration independently of the outer app operation deadline.</p>
+<p><strong>Expected:</strong> 1, 1, Never, 0 and20 seconds for the reference.</p>
+<h3 id="exercise-2-verify-exact-task-output">Exercise 2: Verify exact task output<a class="heading-anchor" href="#exercise-2-verify-exact-task-output" aria-label="Link to this section">#</a></h3>
+<p>The fixed task is deterministic and has no external side effects. Its receipt connects controller state to the actual task container and a small independent ledger. It does not certify arbitrary learner code or every written exercise.</p>
+<p><strong>Expected:</strong> Owned Complete Job, controlled successful task Pod, exit0 and exact accepted3/rejected2/total35 output.</p>
+<h3 id="exercise-3-observe-intentional-failure">Exercise 3: Observe intentional failure<a class="heading-anchor" href="#exercise-3-observe-intentional-failure" aria-label="Link to this section">#</a></h3>
+<p>The source remains syntactically valid and the workload can start, but the task intentionally reports failure. This distinguishes runtime task failure from manifest rejection or image absence.</p>
+<p><strong>Expected:</strong> Job reaches Failed; operation reports failure and cleans its owned UID.</p>
+<h3 id="exercise-4-explain-retry-semantics">Exercise 4: Explain retry semantics<a class="heading-anchor" href="#exercise-4-explain-retry-semantics" aria-label="Link to this section">#</a></h3>
+<p>The Job controller can create another Pod even when the kubelet will not restart a failed container in the same Pod. Production side effects must tolerate duplicate attempts rather than assuming the controller provides exactly-once execution.</p>
+<p><strong>Expected:</strong> At most the declared retry budget is requested; Never does not forbid a replacement Pod attempt.</p>
+<h3 id="exercise-5-review-the-suspended-cronjob">Exercise 5: Review the suspended CronJob<a class="heading-anchor" href="#exercise-5-review-the-suspended-cronjob" aria-label="Link to this section">#</a></h3>
+<p>Suspension affects future scheduling. It does not erase an already running Job or prove that the schedule previously fired. A live recurring lab needs a separate host capability and multiple observed timestamps/results.</p>
+<p><strong>Expected:</strong> A five-minute UTC schedule is configured but suspended; existing active Jobs require separate handling.</p>
+<h3 id="exercise-6-design-an-idempotent-handoff">Exercise 6: Design an idempotent handoff<a class="heading-anchor" href="#exercise-6-design-an-idempotent-handoff" aria-label="Link to this section">#</a></h3>
+<p>Use an application-level identity and an atomic or otherwise justified publication protocol. A final successful Job count cannot establish that an external sink received exactly one effect. The teaching task avoids that external boundary and labels the limitation.</p>
+<p><strong>Expected:</strong> A stable logical-work key, commit boundary, replay policy and acceptance ledger are named.</p>
+<h3 id="boundary-and-troubleshooting-review">Boundary and troubleshooting review<a class="heading-anchor" href="#boundary-and-troubleshooting-review" aria-label="Link to this section">#</a></h3>
+<p>A failed task exit, a deadline exceeded condition and a missing image are different failures. The fixed failure mode demonstrates application failure with bounded cleanup. A timeout of the outer operation is another boundary, with a separate cleanup reserve.</p>
+<p>Do not hide failed attempts by reading only the most recent success counter, or claim that printing the expected text proves task correctness. The fixed reference uses independent expected counts and ties logs to a verified owned successful Pod. Written reasoning about recurrence and idempotency remains outside automatic grading.</p></article>
+  </main>
+</body>
+</html>

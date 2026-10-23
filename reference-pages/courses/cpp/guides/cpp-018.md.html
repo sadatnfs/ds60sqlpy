@@ -116,7 +116,6 @@
       <p class="source-path">Generated from <code>courses/cpp/guides/cpp-018.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-018-views-iterators-and-invalidation">cpp-018: Views, iterators and invalidation<a class="heading-anchor" href="#cpp-018-views-iterators-and-invalidation" aria-label="Link to this section">#</a></h2>
-<p>Authored beta content. Content completion and runtime qualification are separate evidence.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Intermediate; 105 minutes. Direct prerequisites: <code>cpp-009</code>, <code>cpp-016</code>.</p>
 <p>Learner artifact: <a href="../lessons/cpp-018.cpp.html">cpp-018.cpp</a>. Keep <a href="../solutions/cpp-018_solutions.md.html">official solutions</a> closed until an attempt. The immutable <a href="../fixtures/cpp-018-cases.json.html">case ledger</a> records exercise inputs and expected observations.</p>
@@ -128,55 +127,98 @@
 <p><code>std::span&lt;const int&gt;{vector}</code> borrows the current contiguous storage. Construct the view after mutations that can reallocate. <code>subspan(offset,count)</code> describes a region but requires valid bounds; validate user lengths before building it.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>A span consists conceptually of an address and a count. Copying a span copies that description, not the elements. Vector growth can replace the allocation while leaving the copied descriptions unchanged. This is why even a const span may dangle after mutation through the owner. For subranges, first establish offset&lt;=size, then count&lt;=size-offset; subtracting only after the first check avoids unsigned underflow in the validation itself.</p>
+<h3 id="views-describe-storage-without-owning-it">Views describe storage without owning it<a class="heading-anchor" href="#views-describe-storage-without-owning-it" aria-label="Link to this section">#</a></h3>
+<p>A span describes a contiguous sequence using an address and an extent. A string_view describes characters similarly. Neither owns the underlying storage. Copying a view copies that description, not the elements, so the owner must remain alive and its storage valid for every use. A view is useful for avoiding unnecessary copies only when that lifetime relationship is clear.</p>
+<p>The first program borrows a vector through span&lt;const int&gt; and selects subspan(1, 2). The offset1 skips the first element and count 2 selects4 and 6. The sum is 10. The operation does not allocate a new vector. The caller must satisfy the subspan bounds; a view type does not make every offset/count automatically safe. Validate externally supplied ranges before constructing or slicing views.</p>
+<p>The second program creates a two-character view over alpha. Changing the first character of the owning string in place makes the view observe Al. This illustrates aliasing: the view is not a frozen snapshot. A string reallocation or destruction would instead invalidate the view. The safe example changes an existing character without altering storage capacity and checks the result while the owner remains in scope.</p>
+<p>Const in span&lt;const int&gt; blocks writing elements through that view. It does not prevent another mutable alias from changing the same vector. A function that needs a stable snapshot across later mutation should own a copy or establish a stronger synchronization/lifetime contract. Read-only access and immutable data are different promises.</p>
+<p>Returning a view requires identifying an owner that survives the function. Returning a span into a local vector is dangling immediately after return. Returning an owning vector is often the clearer result when the function creates new data. A view into a caller-owned object can be appropriate, but the caller must know which later edits or destruction invalidate it. Document those operations alongside the return type.</p>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">std::vector&lt;int&gt; xs{2,4,6}; assert(sum_view(std::span&lt;const int&gt;(xs).subspan(1,2))==10);</code></pre>
-<p><strong>Expected:</strong> The view of positions 1 and 2 sums to 10.</p>
+<p><a href="../examples/cpp-018-example-1.cpp.html">Complete program 1</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;iostream&gt;
+#include &lt;numeric&gt;
+#include &lt;span&gt;
+#include &lt;vector&gt;
+
+int sum_view(std::span&lt;const int&gt; xs)  {
+     return std::accumulate(xs.begin(),xs.end(),0);
+}
+int main() {
+    std::vector&lt;int&gt; xs{2,4,6}; assert(sum_view(std::span&lt;const int&gt;(xs).subspan(1,2))==10);
+    std::cout &lt;&lt; &quot;cpp-018 example 1 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-018 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">std::string text=&quot;alpha&quot;; std::string_view prefix(text.data(),2);</code></pre>
-<p><strong>Expected:</strong> The borrowed prefix is al while text remains alive and stable.</p>
+<p><a href="../examples/cpp-018-example-2.cpp.html">Complete program 2</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;iostream&gt;
+#include &lt;numeric&gt;
+#include &lt;span&gt;
+#include &lt;string&gt;
+#include &lt;string_view&gt;
+
+int sum_view(std::span&lt;const int&gt; xs)  {
+     return std::accumulate(xs.begin(),xs.end(),0);
+}
+int main() {
+    std::string text=&quot;alpha&quot;;
+    std::string_view prefix(text.data(),2);
+    assert(prefix==&quot;al&quot;);
+    text[0]=&#x27;A&#x27;;
+    assert(prefix==&quot;Al&quot;);
+    std::cout &lt;&lt; &quot;cpp-018 example 2 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-018 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-identify-ownership">Exercise 1: Identify ownership<a class="heading-anchor" href="#exercise-1-identify-ownership" aria-label="Link to this section">#</a></h4>
 <p>Draw vector storage and its span.</p>
 <p><strong>Expected result/shape:</strong> One owner and one non-owning view.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: One owner and one non-owning view.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: A view stores a location and length.</p>
+<p><strong>Verify:</strong> One owner and one non-owning view.</p>
+<p><strong>Progressive hints:</strong> A view stores a location and length.</p>
 <h4 id="exercise-2-select-a-subrange">Exercise 2: Select a subrange<a class="heading-anchor" href="#exercise-2-select-a-subrange" aria-label="Link to this section">#</a></h4>
-<p>Sum the final two values of [2,4,6].</p>
+<p>Sum the final two values of [2, 4, 6].</p>
 <p><strong>Expected result/shape:</strong> 10 with original vector unchanged.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: 10 with original vector unchanged.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: The borrowed slice starts at offset 1.</p>
+<p><strong>Verify:</strong> 10 with original vector unchanged.</p>
+<p><strong>Progressive hints:</strong> The borrowed slice starts at offset 1.</p>
 <h4 id="exercise-3-write-a-bounds-guard">Exercise 3: Write a bounds guard<a class="heading-anchor" href="#exercise-3-write-a-bounds-guard" aria-label="Link to this section">#</a></h4>
-<p>Validate offset=2,count=2 for size=3 before subspan.</p>
+<p>Validate offset=2, count=2 for size=3 before subspan.</p>
 <p><strong>Expected result/shape:</strong> Reject because only one value remains.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Reject because only one value remains.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Avoid overflow by checking count&lt;=size-offset after offset&lt;=size.</p>
+<p><strong>Verify:</strong> Reject because only one value remains.</p>
+<p><strong>Progressive hints:</strong> Avoid overflow by checking count&lt;=size-offset after offset&lt;=size.</p>
 <h4 id="exercise-4-repair-invalidation">Exercise 4: Repair invalidation<a class="heading-anchor" href="#exercise-4-repair-invalidation" aria-label="Link to this section">#</a></h4>
 <p>Review span created before vector growth that reallocates.</p>
 <p><strong>Expected result/shape:</strong> Recreate span after growth; never dereference stale span.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Recreate span after growth; never dereference stale span.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Reallocation replaces the underlying buffer.</p>
+<p><strong>Verify:</strong> Recreate span after growth; never dereference stale span.</p>
+<p><strong>Progressive hints:</strong> Reallocation replaces the underlying buffer.</p>
 <h4 id="exercise-5-test-empty-view">Exercise 5: Test empty view<a class="heading-anchor" href="#exercise-5-test-empty-view" aria-label="Link to this section">#</a></h4>
 <p>Pass an empty span to sum_view.</p>
 <p><strong>Expected result/shape:</strong> 0 without dereference.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: 0 without dereference.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: An empty range has a valid identity total.</p>
+<p><strong>Verify:</strong> 0 without dereference.</p>
+<p><strong>Progressive hints:</strong> An empty range has a valid identity total.</p>
 <h4 id="exercise-6-transfer-lifetime-reasoning">Exercise 6: Transfer lifetime reasoning<a class="heading-anchor" href="#exercise-6-transfer-lifetime-reasoning" aria-label="Link to this section">#</a></h4>
 <p>Review string_view returned from a local string.</p>
 <p><strong>Expected result/shape:</strong> Reject; return string ownership or borrow caller-owned text.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Reject; return string ownership or borrow caller-owned text.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: A view cannot retain a destroyed local buffer.</p>
+<p><strong>Verify:</strong> Reject; return string ownership or borrow caller-owned text.</p>
+<p><strong>Progressive hints:</strong> A view cannot retain a destroyed local buffer.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: The view of positions 1 and 2 sums to 10. Then explain the changed condition in example 2 without opening the answer.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
-<p><code>std::span&lt;const int&gt;{vector}</code> borrows the current contiguous storage. Construct the view after mutations that can reallocate. <code>subspan(offset,count)</code> describes a region but requires valid bounds; validate user lengths before building it.</p>
-<p>If the result disagrees, preserve the original input and inspect the first differing value or condition. Reallocation replaces the underlying buffer.</p>
+<p>A view that worked once can still be dangling. Inspect owner scope and reallocating operations rather than trusting printed bytes. If a returned view points into a local temporary, change the ownership design. If a span slice is out of range, fix the offset/count contract before access. If a supposedly constant result changes, check whether the program borrowed a mutable owner instead of taking a snapshot.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
 <p>Close the source. Reconstruct the reasoning for Exercise 6: Transfer lifetime reasoning. Explain which assumptions would fail on a larger input or another runtime.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue with <a href="cpp-019.md.html">cpp-019</a> after saving the six observations.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines">C++ Core Guidelines</a></p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach cpp-018.
 Read courses/cpp/guides/cpp-018.md and courses/cpp/lessons/cpp-018.cpp.

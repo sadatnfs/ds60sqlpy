@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>nlp-019: Annotation, agreement and uncertain labels · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>nlp-019: Annotation, agreement and uncertain labels</h1>
+      <p class="source-path">Generated from <code>courses/nlp/guides/nlp-019.md</code></p>
+    </header>
+    <article class="document"><h2 id="nlp-019-annotation-agreement-and-uncertain-labels">nlp-019: Annotation, agreement and uncertain labels<a class="heading-anchor" href="#nlp-019-annotation-agreement-and-uncertain-labels" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Advanced; about 120 minutes plus discussion. Direct prerequisites: <code>nlp-018</code>. Read the preceding guide if its notation or information boundaries are unfamiliar.</p>
+<h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
+<p>Labels are measurements created by people, rules or models under an annotation contract. They are not automatically error-free truth. A sentiment label can depend on whose sentiment is being described, an entity boundary can depend on a corpus convention, and an urgency label can depend on an operational threshold. Improving a model before clarifying the label can optimize the wrong target more efficiently.</p>
+<p>An annotation guide should define the unit, label inventory, inclusion/exclusion rules, ambiguous cases and an abstention or uncertainty policy. It should include counterexamples, not only easy positive examples. Annotators need the same source context that the eventual task requires, and that context must not contain information unavailable at the intended prediction time.</p>
+<p>This lesson calculates agreement, preserves disagreement through soft labels and demonstrates an auditable adjudication record. The examples use invented binary judgments to expose mathematical behavior. Agreement measures consistency among raters under a procedure; they do not establish that the procedure measures the right construct.</p>
+<h3 id="derive-raw-agreement-and-kappa">Derive raw agreement and kappa<a class="heading-anchor" href="#derive-raw-agreement-and-kappa" aria-label="Link to this section">#</a></h3>
+<p>Raw agreement is the fraction of items on which two raters assign the same label. Cohen&#x27;s kappa adjusts it relative to agreement expected from the raters&#x27; marginal label frequencies: kappa=(p_o-p_e)/(1-p_e). For binary labels, p_e=p_A<em>p_B+(1-p_A)</em>(1-p_B), where p_A and p_B are each rater&#x27;s positive-label fractions.</p>
+<p>In the six-item fixture, the raters agree on four items and each uses positive labels half the time. Thus p_o=2/3, p_e=1/2 and kappa=1/3. The program compares this hand calculation with scikit-learn. A negative kappa means observed agreement is below this marginal-frequency baseline, not necessarily that the raters intentionally disagree.</p>
+<p>If both raters assign the same single category to every item, p_e=1 and the formula has a zero denominator. The reference returns None for kappa while preserving raw agreement one. This is an explicit undefined-result policy rather than silently returning a misleading numeric score.</p>
+<h3 id="prevalence-and-disagreement-need-interpretation">Prevalence and disagreement need interpretation<a class="heading-anchor" href="#prevalence-and-disagreement-need-interpretation" aria-label="Link to this section">#</a></h3>
+<p>A highly imbalanced label distribution can yield high raw agreement and low or negative kappa. In the hundred-item example both raters label 99 items positive, but disagree on two items. Raw agreement is .98 while the chance baseline is .9802, giving slightly negative kappa. The example shows why one statistic cannot summarize annotation quality without the confusion pattern and label prevalence.</p>
+<p>Disagreement can arise from unclear instructions, missing context, ambiguous language, expertise differences or a genuinely subjective construct. Investigate examples before deciding to remove annotators or force consensus. High agreement can also occur when everyone follows the same flawed shortcut. External validity and construct definition remain separate questions.</p>
+<p>For span or ordinal tasks, binary kappa may not be appropriate. Specify matching tolerance or ordinal distance and choose a measure aligned with that structure. Multiple raters, missing ratings and clustered documents also require methods and uncertainty estimates suited to the annotation design.</p>
+<h3 id="adjudication-and-soft-labels">Adjudication and soft labels<a class="heading-anchor" href="#adjudication-and-soft-labels" aria-label="Link to this section">#</a></h3>
+<p>Adjudication creates a final label after review, but the original independent judgments should remain immutable. Store item identity, original ratings, final decision, rationale, evidence and rubric version. Replacing the original disagreement with the final label before calculating agreement would manufacture a misleading consistency result.</p>
+<p>A soft label can retain the fraction of raters favoring a class, such as two-thirds for ratings [1,1,0]. It may represent disagreement or uncertainty under the sampled rater population, not necessarily the true probability that the statement is objectively positive. Entropy quantifies dispersion of the binary proportion: zero at unanimous zero/one and larger near one-half.</p>
+<p>Training on soft labels can preserve ambiguity, but it also encodes who the annotators were and how they interpreted the task. If labels are used for a safety-critical or operational decision, define how uncertainty affects abstention or review. Do not infer that majority vote is always the correct resolution.</p>
+<h3 id="build-an-annotation-study-that-can-improve">Build an annotation study that can improve<a class="heading-anchor" href="#build-an-annotation-study-that-can-improve" aria-label="Link to this section">#</a></h3>
+<p>Pilot the guide on representative examples, collect independent labels, inspect disagreement and revise ambiguous rules. Keep a record of which cases informed rubric development, then evaluate the revised process on new items. Split by document family when near-duplicate sentences share context.</p>
+<p>A language model can propose labels or explanations, but model-assisted annotation changes the measurement process. Human reviewers may anchor on the suggestion, making apparent agreement less independent. Compare assisted and unassisted judgments when the distinction matters, and preserve the proposal separately from the accepted label. The same principle applies to using one model to label data for another model&#x27;s evaluation.</p>
+<h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
+<h4 id="worked-example-1-reproduce-a-kappa-calculation">Worked example 1: Reproduce a kappa calculation<a class="heading-anchor" href="#worked-example-1-reproduce-a-kappa-calculation" aria-label="Link to this section">#</a></h4>
+<p>Rater arrays [1,1,0,0,1,0] and [1,0,0,0,1,1] agree on four of six items. Their positive fractions are both one-half, so chance agreement is one-half and kappa one-third. The reference checks both this derivation and library parity.</p>
+<h4 id="worked-example-2-inspect-a-prevalence-counterexample">Worked example 2: Inspect a prevalence counterexample<a class="heading-anchor" href="#worked-example-2-inspect-a-prevalence-counterexample" aria-label="Link to this section">#</a></h4>
+<p>Both hundred-item raters use 99 positive labels, but their one negative labels occur on different items. They agree on 98 percent of items, slightly below the 98.02 percent marginal-frequency baseline. A headline of 98 percent agreement alone would conceal the lack of agreement on the rare negative category.</p>
+<h4 id="worked-example-3-keep-ambiguity-and-a-review-trail">Worked example 3: Keep ambiguity and a review trail<a class="heading-anchor" href="#worked-example-3-keep-ambiguity-and-a-review-trail" aria-label="Link to this section">#</a></h4>
+<p>Three rating rows [1,1,0],[1,1,1],[0,0,0] yield soft labels [2/3,1,0]. Only the first has positive binary entropy. An adjudicated final label for that first item is stored beside the original tuple and rationale, preserving the fact that the initial measurement was disputed.</p>
+<h4 id="executable-worked-traces">Executable worked traces<a class="heading-anchor" href="#executable-worked-traces" aria-label="Link to this section">#</a></h4>
+<p>Run these two small blocks in order. They reproduce the numerical or structural observations above; the full reference additionally checks the exercise changes and failure cases.</p>
+<pre><code class="language-python">import numpy as np
+a=np.array([1,1,0,0,1,0]);b=np.array([1,0,0,0,1,1])
+observed=np.mean(a==b);expected=a.mean()*b.mean()+(1-a.mean())*(1-b.mean())
+kappa=(observed-expected)/(1-expected)
+print(observed,expected,kappa)
+assert np.isclose(kappa,1/3)</code></pre>
+<pre><code class="language-python">ratings=np.array([[1,1,0],[1,1,1],[0,0,0]])
+soft=ratings.mean(axis=1)
+print(soft)
+assert np.allclose(soft,[2/3,1,0])</code></pre>
+<h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
+<p>Open the NLP module with the prepared <code>python-core</code> profile and save <code>courses/nlp/learners/nlp-019.py</code> in your learner pad. The learner file contains fixtures and incomplete work, not the official implementation. No download, model service or external corpus is required. The checked-in <a href="../fixtures/nlp-019-cases.json.html">fixture ledger</a> records the exercise contract. When using a prepared native environment, run <code>python courses/nlp/learners/nlp-019.py</code> from the repository root. A process exit does not automatically grade the exercises. Keep <a href="../solutions/nlp-019_solutions.md.html">solutions</a> closed until an attempt or explicit comparison.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<h4 id="exercise-1-define-the-annotation-unit">Exercise 1: Define the annotation unit<a class="heading-anchor" href="#exercise-1-define-the-annotation-unit" aria-label="Link to this section">#</a></h4>
+<p>Write a binary urgency rubric with a source-context boundary and one ambiguous case.</p>
+<p><strong>Expected:</strong> A concrete unit, two label definitions, abstention/review rule and a counterexample.</p>
+<p><strong>Verify:</strong> A concrete unit, two label definitions, abstention/review rule and a counterexample. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Hints:</strong> Specify what evidence an annotator may use and what the label is intended to measure.</p>
+<h4 id="exercise-2-calculate-agreement-manually">Exercise 2: Calculate agreement manually<a class="heading-anchor" href="#exercise-2-calculate-agreement-manually" aria-label="Link to this section">#</a></h4>
+<p>Compute raw agreement, marginal expected agreement and kappa for the six-item arrays.</p>
+<p><strong>Expected:</strong> 2/3,1/2,1/3 respectively, matching the library.</p>
+<p><strong>Verify:</strong> 2/3,1/2,1/3 respectively, matching the library. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Hints:</strong> Count matching positions and each rater&#x27;s positive fraction separately.</p>
+<h4 id="exercise-3-explain-the-imbalanced-case">Exercise 3: Explain the imbalanced case<a class="heading-anchor" href="#exercise-3-explain-the-imbalanced-case" aria-label="Link to this section">#</a></h4>
+<p>Calculate the hundred-item prevalence counterexample.</p>
+<p><strong>Expected:</strong> Raw agreement.98 but kappa slightly below zero.</p>
+<p><strong>Verify:</strong> Raw agreement.98 but kappa slightly below zero. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Hints:</strong> Both positive fractions are.99, so p_e=.99^2+.01^2.</p>
+<h4 id="exercise-4-retain-soft-labels">Exercise 4: Retain soft labels<a class="heading-anchor" href="#exercise-4-retain-soft-labels" aria-label="Link to this section">#</a></h4>
+<p>Compute proportions and entropy for the three three-rater rows.</p>
+<p><strong>Expected:</strong> Soft labels[2/3,1,0]; positive entropy only for the disputed row.</p>
+<p><strong>Verify:</strong> Soft labels[2/3,1,0]; positive entropy only for the disputed row. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Hints:</strong> Handle probabilities zero and one without log-zero warnings.</p>
+<h4 id="exercise-5-preserve-adjudication-evidence">Exercise 5: Preserve adjudication evidence<a class="heading-anchor" href="#exercise-5-preserve-adjudication-evidence" aria-label="Link to this section">#</a></h4>
+<p>Create a final-label record without changing the independent ratings.</p>
+<p><strong>Expected:</strong> Original(1,1,0),final label1,rationale and item identity retained.</p>
+<p><strong>Verify:</strong> Original(1,1,0),final label1,rationale and item identity retained. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Hints:</strong> Keep proposal, independent ratings and final decision as separate fields.</p>
+<h4 id="exercise-6-handle-undefined-agreement">Exercise 6: Handle undefined agreement<a class="heading-anchor" href="#exercise-6-handle-undefined-agreement" aria-label="Link to this section">#</a></h4>
+<p>Evaluate two identical all-positive arrays and design a follow-up annotation sample.</p>
+<p><strong>Expected:</strong> Raw agreement1,kappa undefined/None; follow-up includes rare and ambiguous categories.</p>
+<p><strong>Verify:</strong> Raw agreement1,kappa undefined/None; follow-up includes rare and ambiguous categories. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Hints:</strong> The denominator is zero when expected agreement is one.</p>
+<h3 id="interview-reasoning">Interview reasoning<a class="heading-anchor" href="#interview-reasoning" aria-label="Link to this section">#</a></h3>
+<p><strong>Interview: Does high interrater agreement prove valid labels?</strong> It proves consistency under the measured procedure. Raters can share an invalid definition or shortcut, so construct validity and external evidence remain necessary.</p>
+<p><strong>Interview: Why preserve original labels after adjudication?</strong> They reveal ambiguity and process weaknesses. Replacing them with consensus destroys the data used to measure independent agreement.</p>
+<p><strong>Interview: What does a soft label mean?</strong> It can summarize rater disagreement under a defined panel. It is not automatically the true probability of a factual class and should be interpreted with the annotation design.</p>
+<h3 id="retrieval-and-continuation">Retrieval and continuation<a class="heading-anchor" href="#retrieval-and-continuation" aria-label="Link to this section">#</a></h3>
+<p>Without the source, explain which mechanism produces the first worked result, which counterexample exposes its limitation, and which claim the tiny fixture cannot establish. Continue to <code>nlp-020</code>.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://scikit-learn.org/stable/modules/generated/sklearn.metrics.cohen_kappa_score.html">scikit-learn Cohen kappa</a></li>
+</ul>
+<ul>
+<li><a href="https://web.stanford.edu/~jurafsky/slp3/">Jurafsky and Martin, annotation and evaluation</a></li>
+</ul>
+<h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning for nlp-019.
+Read courses/nlp/guides/nlp-019.md and courses/nlp/learners/nlp-019.py.
+Direct prerequisites: `nlp-018`.
+Explain the mechanism and notation, ask me to predict, let me attempt, give one hint, inspect evidence, then ask for retrieval.
+Keep courses/nlp/solutions/ closed until I attempt or explicitly request comparison.
+Check numerical, span or task-level outputs and a counterexample; do not equate a toy mechanism with pretrained-model quality.
+Do not download corpora or models or send text to an external service.</code></pre></article>
+  </main>
+</body>
+</html>

@@ -62,15 +62,12 @@ Finally, choose comparison tolerances from units and scale. Absolute tolerance c
 ### Example 1
 
 ```python
-import math
-import numpy as np
-
-scores=np.array([1000.,1001.,999.])
-shifted=scores-scores.max()
-probability=np.exp(shifted)/np.exp(shifted).sum()
-assert np.isfinite(probability).all() and np.isclose(probability.sum(),1)
-assert probability.argmax()==1
-print("Stable probabilities:",probability.tolist())
+scores = np.array([1000.0, 1001.0, 999.0])
+shifted = scores - scores.max()
+probability = np.exp(shifted) / np.exp(shifted).sum()
+assert np.isfinite(probability).all() and np.isclose(probability.sum(), 1)
+assert probability.argmax() == 1
+print("Stable probabilities:", probability.tolist())
 ```
 
 The raw exponentials would overflow at these scores, while subtracting 1001 changes neither their relative ratios nor the resulting probabilities. The maximum-score class remains the most probable. Checking finite values, normalization and ordering gives three independent observations about the transformation.
@@ -78,16 +75,15 @@ The raw exponentials would overflow at these scores, while subtracting 1001 chan
 ### Example 2
 
 ```python
-import math
-import numpy as np
-
-values=[1e16,1.,-1e16]
-ordinary=float(np.sum(values));accurate=math.fsum(values)
-assert accurate==1. and ordinary==0.
-a=np.array([[2.,0.],[0.,4.]])
-b=np.array([6.,8.]);x=np.linalg.solve(a,b)
-assert np.allclose(x,[3.,2.]) and np.allclose(a@x,b)
-print("Summation:",ordinary,accurate,"linear solution:",x.tolist())
+values = [1e16, 1.0, -1e16]
+ordinary = float(np.sum(values))
+accurate = math.fsum(values)
+assert accurate == 1.0 and ordinary == 0.0
+a = np.array([[2.0, 0.0], [0.0, 4.0]])
+b = np.array([6.0, 8.0])
+x = np.linalg.solve(a, b)
+assert np.allclose(x, [3.0, 2.0]) and np.allclose(a @ x, b)
+print("Summation:", ordinary, accurate, "linear solution:", x.tolist())
 ```
 
 The summation counterexample exposes lost low-order information. The diagonal system then makes a solver result independently inspectable: two times three is six and four times two is eight. A library success flag is weaker evidence than both the expected solution and a checked residual on a known fixture.

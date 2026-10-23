@@ -8,7 +8,25 @@ Integer overflow and floating-point rounding are different correctness problems.
 
 ## Detailed reasoning
 
-The integer guard is arranged to avoid evaluating the dangerous sum. Because inputs are nonnegative, max-b is safe and can be compared with a before adding. Floating addition follows a different model: rounding can make different parenthesizations of [1e16,1,-1e16] produce different results. Use exact arithmetic for integer cents and justify approximate tolerances using scale and units. A loose tolerance must not conceal an incorrect algorithm.
+The integer guard is arranged to avoid evaluating the dangerous sum. Because inputs are nonnegative, max-b is safe and can be compared with a before adding. Floating addition follows a different model: rounding can make different parenthesizations of [1e16, 1, -1e16] produce different results. Use exact arithmetic for integer cents and justify approximate tolerances using scale and units. A loose tolerance must not conceal an incorrect algorithm.
+
+<!-- depth:start -->
+## Integer overflow and floating-point error are different
+
+Integer arithmetic and floating-point arithmetic have different contracts. Signed integer overflow is not a defined wraparound policy in C++. A checked-add function must establish that the result is representable before evaluating the dangerous addition. Checking whether the sum became negative after overflow is too late because the invalid operation already occurred.
+
+For nonnegative a and b, the guard a>max-b detects whether a+b would exceed the maximum. max-b is safe under the stated nonnegative supported range. Only after that guard passes should the addition be evaluated. If negative operands are allowed, the guard logic must cover underflow and other sign combinations separately. A formula valid for one restricted domain is not automatically a general checked-add implementation.
+
+Floating-point values represent a finite set of numbers with rounding. Decimal0.1 and 0.2 do not generally have exact finite binary representations, so their sum can differ slightly from the stored approximation of 0.3. The complete example uses a small tolerance for this specific comparison. That does not justify one universal tolerance for every scale or unit.
+
+Addition order can matter because intermediate rounding occurs. Summing [1e16, 1, -1e16] in one order can lose the small contribution, while another grouping can preserve it. Parallel reduction can change grouping, so exact bitwise equality may require a stronger reproducibility design. For integer cents within a checked range, exact comparison remains appropriate; do not introduce approximate tolerances to hide a wrong integer result.
+
+Choose numeric representation from the domain. Money may use checked integer minor units or a deliberate decimal representation. Measurements may need floating-point with error bounds, scale-aware comparison and stable algorithms. More precision can reduce some error but cannot substitute for an explicit contract or eliminate every conditioning problem.
+
+## Debugging the contract
+
+If a checked sum computes a+b before its guard, the protection is ineffective. If a nonnegative-only helper receives negative input, reject it or implement the broader signed contract. If a floating test fails at a different scale, review absolute versus relative tolerance and units. If a parallel total differs slightly, inspect grouping and rounding before assuming a race, while still checking synchronization independently.
+<!-- depth:end -->
 
 ## Worked example 1
 
@@ -68,7 +86,7 @@ Explain why epsilon=0.1 is poor for both tiny and huge measurements.
 
 ## Exercise 5: Check zero boundary
 
-Run safe_add(0,0) and safe_add(-1,2).
+Run safe_add(0, 0) and safe_add(-1, 2).
 
 **Expected:** Present 0 and rejected negative input.
 
@@ -78,7 +96,7 @@ Run safe_add(0,0) and safe_add(-1,2).
 
 ## Exercise 6: Transfer stability
 
-Compare sums [1e16,1,-1e16] under different groupings.
+Compare sums [1e16, 1, -1e16] under different groupings.
 
 **Expected:** Floating sums can differ; exact expected mathematical total is 1.
 

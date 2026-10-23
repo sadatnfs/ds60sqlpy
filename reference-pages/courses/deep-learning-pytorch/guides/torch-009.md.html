@@ -116,15 +116,16 @@
       <p class="source-path">Generated from <code>courses/deep-learning-pytorch/guides/torch-009.md</code></p>
     </header>
     <article class="document"><h2 id="torch-009-batches-zerograd-and-repeated-updates">torch-009: Batches, zero_grad and repeated updates<a class="heading-anchor" href="#torch-009-batches-zerograd-and-repeated-updates" aria-label="Link to this section">#</a></h2>
-<p>Status: authored PyTorch course content. The manifest inventories complete teaching files; runtime readiness remains a separate, measured property.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Beginner; approximately 120 minutes. Direct prerequisites: <code>torch-008</code>. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
-<p>An epoch is a traversal of selected records; a batch is the set reduced before an update; an optimizer step changes parameters once. The central investigation is concrete: Partition IDs1..6 into batches of 2. The finish condition is three batches[[1, 2], [3, 4], [5, 6]]. epoch mean4, not5. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
+<p>An epoch is a traversal of selected records; a batch is the set reduced before an update; an optimizer step changes parameters once. The central investigation is concrete: Partition IDs 1..6 into batches of 2. The finish condition is three batches[[1, 2], [3, 4], [5, 6]]. epoch mean 4, not 5. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
 <h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
-<p>An epoch is a traversal of selected records; a batch is the set reduced before an update; an optimizer step changes parameters once. These counts differ. Six records with batch size 2 produce three updates per epoch, while batch size 1 produces six. Later batches see weights changed by earlier updates, so equal epochs do not imply equal trajectories. PyTorch also accumulates gradients unless they are clear e d, which can accidentally turn a minibatch loop into an unplanned accumulation scheme.</p>
+<p>An epoch is a traversal of selected records; a batch is the set reduced before an update; an optimizer step changes parameters once. These counts differ. Six records with batch size 2 produce three updates per epoch, while batch size 1 produces six. Later batches see weights changed by earlier updates, so equal epochs do not imply equal trajectories. PyTorch also accumulates gradients unless they are cleared, which can accidentally turn a minibatch loop into an unplanned accumulation scheme.</p>
 <p>Record IDs should travel with features and targets. A final short batch is retained unless drop_last is explicitly chosen. Its mean loss uses its own number of examples. To report an epoch mean from unequal batches, accumulate loss sums and counts rather than averaging batch means equally. This lesson makes the loop explicit before introducing DataLoader configuration.</p>
 <h3 id="design-decisions-and-when-to-use-this-method">Design decisions and when to use this method<a class="heading-anchor" href="#design-decisions-and-when-to-use-this-method" aria-label="Link to this section">#</a></h3>
+<p>Choose batch size together with the intended update budget, memory budget and statistical unit. Equal epochs do not imply equal optimizer-step counts, and equal step counts do not imply equal numbers of observed records. Record both when comparing runs. Keep a short final batch unless a documented shape or algorithm requirement justifies dropping it.</p>
+<p>Use zero_grad between independent minibatch updates. If memory constraints require accumulation, define a separate policy that holds parameters fixed while accumulating correctly weighted contributions and steps once at the intended boundary. Do not treat a loop that steps repeatedly on an uncleared gradient as an equivalent large-batch implementation.</p>
 <h3 id="paired-tensorflow-comparison">Paired TensorFlow comparison<a class="heading-anchor" href="#paired-tensorflow-comparison" aria-label="Link to this section">#</a></h3>
 <p>Compare <a href="../../deep-learning-tensorflow/guides/tf-009.md.html">tf-009</a> after deriving the shared numerical contract.</p>
 <p>TensorFlow and PyTorch share batch/epoch/step semantics, but PyTorch leaf.grad accumulation makes the zero_grad policy explicit in a standard loop. In either framework, a short batch changes the correct weighting of per-batch metrics.</p>
@@ -133,10 +134,48 @@
 <p><strong>Batch:</strong> The observations contributing to one gradient reduction.</p>
 <p><strong>Gradient reset:</strong> Clearing stored derivatives before an independent update.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Use a prepared <code>llm-torch-cpu</code> environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored <code>.learning/expansion/torch-009/</code> before editing, or use the application&#x27;s saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: <code>&amp; $CoursePython courses/deep-learning-pytorch/lessons/torch-009.py</code>. For macOS/Linux use <code>.venv/bin/python courses/deep-learning-pytorch/lessons/torch-009.py</code> from the repository root.</p>
-<p>Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.</p>
+<p>Use a prepared <code>llm-torch-cpu</code> environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored <code>.learning/expansion/torch-009/</code> before editing, or use the application&#x27;s saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: <code>&amp; $CoursePython courses/deep-learning-pytorch/lessons/torch-009.py</code>. For macOS/Linux, use the interpreter explicitly selected for a separately prepared native PyTorch environment, and invoke that interpreter on <code>courses/deep-learning-pytorch/lessons/torch-009.py</code> from the repository root. The repository&#x27;s general <code>.venv</code> is not assumed to contain PyTorch; the prepared classroom profile is the default execution route.</p>
+<p>Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the explicit tolerance in each assertion. Several analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone is not a universal numerical-error bound. Finite differences, reductions and conditioning can require different justified tolerances. Integer counts, identities and boolean decisions should be exact.</p>
 <h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
 <p>Slice the leading observation axis into batches. For each independent update, call zero_grad(set_to_none=True), compute the current mean loss, backward and step. Log parameter values after each step and counts separately from epochs. A shared index permutation preserves x/y pairing. Changing only one side creates a different learning task even when marginal distributions remain unchanged.</p>
+<h3 id="trace-every-update-at-the-state-where-its-gradient-was-computed">Trace every update at the state where its gradient was computed<a class="heading-anchor" href="#trace-every-update-at-the-state-where-its-gradient-was-computed" aria-label="Link to this section">#</a></h3>
+<p>Six records with batch size two produce three batches per epoch: IDs[1, 2], [3, 4], [5, 6]. With one optimizer step per batch, one epoch means three updates. At batch size one, the same epoch means six updates. Neither count identifies the resulting parameter trajectory without the data order, loss reduction and learning rate.</p>
+<p>For this scalar fixture, y=2x and each batch mean loss has derivative 2 mean(x²)(w-2). With rate 0.01, the exact correct trajectory is:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Batch inputs</th>
+<th>mean(x²)</th>
+<th>Weight before</th>
+<th>Fresh gradient</th>
+<th>Weight after</th>
+</tr></thead><tbody>
+<tr>
+<td>[1, 2]</td>
+<td>2.5</td>
+<td>0</td>
+<td>-10</td>
+<td>0.1</td>
+</tr>
+<tr>
+<td>[3, 4]</td>
+<td>12.5</td>
+<td>0.1</td>
+<td>-47.5</td>
+<td>0.575</td>
+</tr>
+<tr>
+<td>[5, 6]</td>
+<td>30.5</td>
+<td>0.575</td>
+<td>-86.925</td>
+<td>1.44425</td>
+</tr>
+</tbody></table></div>
+<p>Each gradient uses the latest weight. Clearing the buffer before each backward ensures that the applied gradient is precisely the one shown in its row. The same records in a different order can yield another trajectory because their local curvature and current parameter state differ.</p>
+<p>Without clearing, the first step is still 0.1. The next backward adds -47.5 to the stored -10, giving -57.5, and the second weight becomes 0.675. The final fresh derivative is -80.825, but the accumulated buffer becomes -138.325 and the final weight 2.05825. These are derivatives evaluated at different historical weights. A single constant learning-rate adjustment does not turn this procedure into the intended minibatch algorithm.</p>
+<p>Interestingly, the incorrect endpoint happens to lie closer to the known optimum two on this tiny sequence. That does not make the implementation correct. It violated the declared update rule, and another sequence can behave very differently. An acceptance test must inspect the mechanism and state trace rather than reward whichever accidental final training loss is smaller.</p>
+<p>Intentional accumulation is different. Hold w fixed, compute each microbatch&#x27;s contribution to one declared objective, accumulate the scaled gradients, and call step once. For the full six-record mean at w=0, the gradient is 2 mean(x²)(-2)=-182/3. One rate 0.01 step gives 91/150, about 0.606667. This differs from the three-step minibatch result because it is one update from one fixed state. When microbatch sizes differ, weight each microbatch mean by its participating count divided by the total count.</p>
+<p>Metric reporting needs the same denominator discipline. A mean loss two from two records contributes numerator four; mean loss eight from one record contributes numerator eight. The record-weighted mean is(4+8)/3=4, not the unweighted batch-mean average five. But there is another interpretation boundary: losses measured before successive updates belong to different model states. Their weighted average is an online training statistic, not necessarily the loss of the final model. A final-model metric requires a separate fixed-state evaluation pass.</p>
+<p>Record identities protect the training population. A shared permutation of x and y preserves y=2x after shuffling. Independently permuting either side changes the prediction task while leaving each marginal array plausible. For five records at batch size two, the tail has one record; dropping it changes which observations participated in the epoch. The loop should retain that decision in its budget and denominator report.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-count-batches-and-updates">Example A: Count batches and updates<a class="heading-anchor" href="#example-a-count-batches-and-updates" aria-label="Link to this section">#</a></h4>
 <p>The update count is the number of batches when there is one step per batch. It is neither the number of examples nor the number of epochs.</p>
@@ -152,7 +191,7 @@ assert batches==[[1,2],[3,4],[5,6]]</code></pre>
 <p>Dropping the last singleton would change the effective training set. Record that choice explicitly when fixed batch shapes are required.</p>
 <pre><code class="language-python">short=[list(range(5))[i:i+2] for i in range(0,5,2)]
 assert [len(batch) for batch in short]==[2,2,1]</code></pre>
-<p><strong>Expected:</strong> batch sizes2, 2, 1.</p>
+<p><strong>Expected:</strong> batch sizes 2, 2, 1.</p>
 <h4 id="example-c-run-three-independent-updates">Example C: Run three independent updates<a class="heading-anchor" href="#example-c-run-three-independent-updates" aria-label="Link to this section">#</a></h4>
 <p>Each derivative is evaluated at the latest weight. Clearing the gradient prevents earlier batches from being counted again accidentally.</p>
 <pre><code class="language-python">x=torch.arange(1,7,dtype=torch.float64); y=2*x; w=nn.Parameter(torch.tensor(0.,dtype=torch.float64)); optimizer=torch.optim.SGD([w],lr=.01); history=[]
@@ -161,13 +200,13 @@ for start in range(0,6,2):
 assert len(history)==3 and np.isfinite(history).all() and len(set(history))==3</code></pre>
 <p><strong>Expected:</strong> three finite distinct weights.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
-<p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: three batches[[1, 2], [3, 4], [5, 6]]. epoch mean4, not5. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
+<p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: three batches[[1, 2], [3, 4], [5, 6]]. epoch mean 4, not 5. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
-<li><strong>Count batches and updates.</strong> Partition IDs1..6 into batches of 2. <strong>Expected:</strong> three batches[[1, 2], [3, 4], [5, 6]]. <strong>Verify:</strong> Save the assertion results for exercise 1, including three batches[[1, 2], [3, 4], [5, 6]].</li>
+<li><strong>Count batches and updates.</strong> Partition IDs 1..6 into batches of 2. <strong>Expected:</strong> three batches[[1, 2], [3, 4], [5, 6]]. <strong>Verify:</strong> Save the assertion results for exercise 1, including three batches[[1, 2], [3, 4], [5, 6]].</li>
 </ol>
 <ol>
-<li><strong>Retain a short tail.</strong> Partition five IDs with batch size 2. <strong>Expected:</strong> batch sizes2, 2, 1. <strong>Verify:</strong> Save the assertion results for exercise 2, including batch sizes2, 2, 1.</li>
+<li><strong>Retain a short tail.</strong> Partition five IDs with batch size 2. <strong>Expected:</strong> batch sizes 2, 2, 1. <strong>Verify:</strong> Save the assertion results for exercise 2, including batch sizes 2, 2, 1.</li>
 </ol>
 <ol>
 <li><strong>Run three independent updates.</strong> Train x1..6, y2x, w0 with batch size 2, rate.01, clearing gradients each batch. <strong>Expected:</strong> three finite distinct weights. <strong>Verify:</strong> Save the assertion results for exercise 3, including three finite distinct weights.</li>
@@ -176,13 +215,14 @@ assert len(history)==3 and np.isfinite(history).all() and len(set(history))==3</
 <li><strong>Expose accidental accumulation.</strong> Repeat the loop without zero_grad and compare its final weight with the correct run. <strong>Expected:</strong> different endpoint. <strong>Verify:</strong> Save the assertion results for exercise 4, including different endpoint.</li>
 </ol>
 <ol>
-<li><strong>Shuffle paired records together.</strong> Use permutation5, 0, 4, 1, 3, 2 for both x andy. <strong>Expected:</strong> every shuffled target equals twice its input. <strong>Verify:</strong> Save the assertion results for exercise 5, including every shuffled target equals twice its input.</li>
+<li><strong>Shuffle paired records together.</strong> Use permutation 5, 0, 4, 1, 3, 2 for both x and y. <strong>Expected:</strong> every shuffled target equals twice its input. <strong>Verify:</strong> Save the assertion results for exercise 5, including every shuffled target equals twice its input.</li>
 </ol>
 <ol>
-<li><strong>Aggregate unequal batch means.</strong> Combine mean loss2 over2examples and mean loss8 over1example. <strong>Expected:</strong> epoch mean4, not5. <strong>Verify:</strong> Save the assertion results for exercise 6, including epoch mean4, not5.</li>
+<li><strong>Aggregate unequal batch means.</strong> Combine mean loss 2 over 2 examples and mean loss 8 over 1 example. <strong>Expected:</strong> epoch mean 4, not 5. <strong>Verify:</strong> Save the assertion results for exercise 6, including epoch mean 4, not 5.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>When a result disagrees, locate the first intermediate value that violates this explanation. Inspect shapes and identities before aggregates, and inspect counts before averages. Preserve the original fixture and introduce only one controlled change at a time. If an arithmetic identity passes but a data-boundary condition fails, the experiment is still invalid. If a runtime is unavailable, record the unexecuted code as unverified rather than replacing its output with the expected text. The separate explanation discusses why the tempting alternative in each case changes the result.</p>
+<p>If the number of steps is wrong, inspect the batch slices and tail policy before looking at the optimizer. If a second step is too large, inspect whether the gradient buffer still contains a prior contribution. Compare the exact 0.1, 0.575, 1.44425 trace with the incorrect uncleared trajectory rather than accepting only a finite endpoint.</p>
+<p>If batch-size changes appear to improve a model, compare examples seen, update count and ordering before attributing the result to batch size alone. If an epoch metric depends on how records are partitioned into batches, reconstruct loss sums and counts. If it is reported as a final-model score, check whether all records were evaluated at one fixed final state. Finally, keep record IDs through shuffling so a correct-looking tensor shape cannot hide broken target pairing.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise&#x27;s expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.</p>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>

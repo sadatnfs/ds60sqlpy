@@ -24,13 +24,17 @@ If the prepared database is unavailable, return to classroom setup rather than c
 
 ## Level and prerequisites
 
-Advanced. Direct catalog prerequisites: `sql-24`, `sql-25`. The guide still defines each new mechanism before relying on it. Every fixture is local, deterministic and rolled back; no prior lesson state is required.
+- **Level:** Advanced. The guide defines each new mechanism before relying on it.
+- **Prerequisites:** [`sql-24`](../../postgres-60day/companion-guides/day24_recursive_ctes.md), [`sql-25`](../../postgres-60day/companion-guides/day25_multiple_ctes_hierarchies.md).
+- **Artifacts:** [Learner SQL](../lessons/sql_deep_04.sql), [explained reference](../solutions/sql_deep_04_solutions.md), and [executable reference](../solutions/sql_deep_04_solutions.sql). Every fixture is local, deterministic and rolled back; no prior lesson state is required.
 
 ## Learning objectives
 
-State the output grain and identity before writing a query. Explain the new SQL mechanism, produce each exact projected result, expose the listed counterexample and verify rollback-safe behavior without relying on a final success message.
+- State the output grain and identity before writing a query, including the NULL and duplicate policies.
+- Explain the new SQL mechanism, produce each exact projected result and expose the listed counterexample.
+- Verify rollback-safe behavior from inspected result rows and assertions without relying on a final success message.
 
-## Vocabulary and mental model
+## Vocabulary and concepts
 
 - **Recursive state:** The columns carried from one recursive CTE iteration to the next; they determine both meaning and duplicate elimination.
 
@@ -52,7 +56,7 @@ Enumerating all simple paths can identify the cheapest path on a tiny nonnegativ
 
 Dependency ordering uses different logic. A vertex is eligible only when all of its incoming prerequisites have already been processed. Repeatedly choose an eligible vertex, append it to processed state and stop when none remain. If some vertices remain, they may form a cycle or depend on one. Distinguish that blocked set from proof that every remaining vertex lies in a cycle.
 
-## Worked examples and query anatomy
+## Worked example / walkthrough
 
 ### Example 1
 
@@ -81,39 +85,64 @@ The one-row output has path, revisits_b, extended_path. Membership is true for b
 
 1. **Compute reachability with a finite identity state.** Starting at a, return vertex for every reachable vertex including a. Use recursive UNION over vertex identity only so the b-c-d cycle terminates. One output row represents one vertex, ordered by vertex.
 
-**Expected:** Rows a, b, c, d, e, g appear once each; isolated f is absent. No arbitrary depth cap is required for this finite identity-state traversal.
+**Inputs/evidence:** For sql-deep-04 Exercise 1, Starting at a, return vertex for every reachable vertex including a. Use recursive UNION over vertex identity only so the b-c-d cycle terminates. One output row represents one vertex, ordered by vertex.
+
+**Expected result/shape:** For sql-deep-04 Exercise 1, Rows a, b, c, d, e, g appear once each; isolated f is absent. No arbitrary depth cap is required for this finite identity-state traversal.
+
+**Verify:** For sql-deep-04 Exercise 1, compare the distinct returned vertices with a hand traversal from the start; confirm the cycle does not produce an unbounded growing recursion state.
 
 2. **Enumerate simple routes to a target.** Return path, total_cost, hops for every simple path from a to d. Carry vertex, path, cost in the recursive state, append targets and prevent revisiting any vertex already in the path. One output row represents a complete path; order by path.
 
-**Expected:** Paths[a, b, c, d] cost 3, hops 3 and [a, c, d] cost 5, hops 2 appear. The cheaper route has more hops, and no path repeats a vertex.
+**Inputs/evidence:** For sql-deep-04 Exercise 2, Return path, total_cost, hops for every simple path from a to d. Carry vertex, path, cost in the recursive state, append targets and prevent revisiting any vertex already in the path. One output row represents a complete path; order by path.
+
+**Expected result/shape:** For sql-deep-04 Exercise 2, Paths[a, b, c, d] cost 3, hops 3 and [a, c, d] cost 5, hops 2 appear. The cheaper route has more hops, and no path repeats a vertex.
+
+**Verify:** For sql-deep-04 Exercise 2, inspect every route array for repeated vertices and check each consecutive pair is an edge; sum edge weights independently and retain distinct valid routes.
 
 3. **Emit one cycle-closing step as evidence.** Return cycle_path, repeated_vertex, cycle_cost for traversals from a that first revisit a vertex. Allow a closing edge to be emitted, mark it as a cycle and stop expanding marked states. Order by cycle_path and do not claim that the whole path prefix is itself a cycle.
 
-**Expected:** Paths[a, b, c, d, b] repeat b at cost 4 and [a, c, d, b, c] repeat c at cost 7. Both are emitted once and terminate.
+**Inputs/evidence:** For sql-deep-04 Exercise 3, Return cycle_path, repeated_vertex, cycle_cost for traversals from a that first revisit a vertex. Allow a closing edge to be emitted, mark it as a cycle and stop expanding marked states. Order by cycle_path and do not claim that the whole path prefix is itself a cycle.
+
+**Expected result/shape:** For sql-deep-04 Exercise 3, Paths[a, b, c, d, b] repeat b at cost 4 and [a, c, d, b, c] repeat c at cost 7. Both are emitted once and terminate.
+
+**Verify:** For sql-deep-04 Exercise 3, confirm the final step repeats a vertex already in the route, and that this closing row is emitted once without being expanded further.
 
 4. **Report a truncated search honestly.** Explore simple paths from a for at most two edges. Return vertex, min_hops, search_truncated for vertices reached within that budget, ordered by vertex. Set the global truncation flag true if any depth-two state has an outgoing target not already in its path.
 
-**Expected:** Vertices a, b, c, d, e have minimum hops 0,1,1,2,2 and search_truncated=true. Vertex g is absent because it requires more than two hops, so absence cannot be called unreachable.
+**Inputs/evidence:** For sql-deep-04 Exercise 4, Explore simple paths from a for at most two edges. Return vertex, min_hops, search_truncated for vertices reached within that budget, ordered by vertex. Set the global truncation flag true if any depth-two state has an outgoing target not already in its path.
+
+**Expected result/shape:** For sql-deep-04 Exercise 4, Vertices a, b, c, d, e have minimum hops 0,1,1,2,2 and search_truncated=true. Vertex g is absent because it requires more than two hops, so absence cannot be called unreachable.
+
+**Verify:** For sql-deep-04 Exercise 4, find at least one admissible outgoing edge beyond a boundary-depth route; a nonempty frontier proves the result is truncated rather than complete.
 
 5. **Return cheapest path evidence for every vertex.** Enumerate simple paths on this tiny nonnegative graph and choose the cheapest per vertex, breaking ties by fewer hops then lexicographic path. Left-join to all vertices and return vertex, total_cost, path ordered by vertex, preserving unreachable f with NULL cost/path.
 
-**Expected:** Costs a 0, b1, c2, d3, e6, g4 have paths[a],[a, b],[a, b, c],[a, b, c, d],[a, b, e],[a, b, c, d, g]. Vertex f has NULL cost and path.
+**Inputs/evidence:** For sql-deep-04 Exercise 5, Enumerate simple paths on this tiny nonnegative graph and choose the cheapest per vertex, breaking ties by fewer hops then lexicographic path. Left-join to all vertices and return vertex, total_cost, path ordered by vertex, preserving unreachable f with NULL cost/path.
+
+**Expected result/shape:** For sql-deep-04 Exercise 5, Costs a0, b1, c2, d3, e6, g4 have paths[a],[a, b],[a, b, c],[a, b, c, d],[a, b, e],[a, b, c, d, g]. Vertex f has NULL cost and path.
+
+**Verify:** For sql-deep-04 Exercise 5, compare candidate simple routes for each reachable vertex and independently sum the selected route weights; preserve the unreachable vertex as explicitly unreachable.
 
 6. **Separate processed dependencies from cyclic or blocked vertices.** Repeatedly select the lexicographically smallest unprocessed vertex whose incoming prerequisites are all processed. Return vertex, processed, cyclic_or_blocked for every vertex ordered by vertex. Stop when no eligible vertex remains and label remaining vertices as cyclic or blocked, not all proven cycle members.
 
-**Expected:** Only a and isolated f are processed. Vertices b, c, d, e, g are cyclic_or_blocked=true; e and g depend on the cycle but are not themselves on its directed loop.
+**Inputs/evidence:** For sql-deep-04 Exercise 6, Repeatedly select the lexicographically smallest unprocessed vertex whose incoming prerequisites are all processed. Return vertex, processed, cyclic_or_blocked for every vertex ordered by vertex. Stop when no eligible vertex remains and label remaining vertices as cyclic or blocked, not all proven cycle members.
+
+**Expected result/shape:** For sql-deep-04 Exercise 6, Only a and isolated f are processed. Vertices b, c, d, e, g are cyclic_or_blocked=true; e and g depend on the cycle but are not themselves on its directed loop.
+
+**Verify:** For sql-deep-04 Exercise 6, repeatedly remove zero-indegree vertices by hand and compare the processed-vertex output; distinguish vertices on the cycle from a downstream vertex blocked by it, rather than calling the entire remainder a cycle.
 
 ## Common mistakes and diagnosis
 
 If recursion does not terminate on a cycle, inspect every state column used by UNION duplicate elimination. A growing path makes every row new. If a bounded search omits a vertex, inspect the frontier before declaring it unreachable. If cheapest and fewest-hop paths differ, preserve the edge-weight objective. If a dependency check marks every remaining node as a cycle member, distinguish actual cycle witnesses from downstream blockage. Use actual path arrays and exact costs as evidence, and keep exponential path enumeration confined to the tiny teaching fixture.
 
-## Self-check and retrieval
+## Self-check
 
-Explain the row grain after each FROM, JOIN, filter, grouping or window step in one exercise. Name the identity columns that prove rows were neither lost nor multiplied. Reconstruct a boundary result by hand, then compare with the query output. Explain why the tempting wrong query fails even if it returns the same total on an easier fixture.
+- Explain the row grain after each FROM, JOIN, filter, grouping or window step. Name the identity columns that prove rows were neither lost nor multiplied.
+- Reconstruct a boundary result by hand, then compare with the query output. Explain why the tempting wrong query fails even if it returns the same total on an easier fixture.
 
-## Next steps
+## Next step
 
-Transfer the same reasoning to a new small fixture before using it on larger data. Keep the result columns, ordering, NULL policy and observation horizon explicit. The [professional SQL track](../README.md) contains the prerequisite operational and modeling lessons.
+Transfer the same reasoning to a new small fixture before using it on larger data, then continue with [the next deepening lesson](sql_deep_05.md). Keep the result columns, ordering, NULL policy and observation horizon explicit. The [professional SQL track](../README.md) provides the wider route.
 
 ## Primary sources and official APIs
 

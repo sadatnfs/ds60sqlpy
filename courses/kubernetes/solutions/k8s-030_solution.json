@@ -1,0 +1,17 @@
+{
+  "apiVersion": "v1",
+  "kind": "List",
+  "items": [
+    {
+      "apiVersion": "learning.ds60sqlpy/v1",
+      "kind": "LessonReport",
+      "metadata": {
+        "name": "hello-report"
+      },
+      "spec": {
+        "message": "hello",
+        "replicas": 1
+      }
+    }
+  ]
+}

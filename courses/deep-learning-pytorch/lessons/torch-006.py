@@ -6,12 +6,12 @@ Copy to .learning before editing. Six independent attempts belong below.
 
 # Exercise 1: Trace the chain rule
 # Use w=1, z=2*w, a=z*z and loss=(a-1)**2.
-# Expected: z2, a4, loss9, gradient48.
+# Expected: z2, a4, loss 9, gradient 48.
 
 # Exercise 2: Check an independent slope
 # Compare the chain derivative with a central difference of the complete scalar
 # expression.
-# Expected: approximately48 within1e-5.
+# Expected: approximately 48 within 1e-5.
 
 # Exercise 3: Observe a leaf mutation guard
 # Try an in-place add on a leaf requiring gradients outside no_grad.
@@ -23,7 +23,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 
 # Exercise 5: Inspect a ReLU convention
 # Differentiate ReLU at negative, zero and positive inputs.
-# Expected: gradients0, 0, 1.
+# Expected: gradients 0, 0, 1.
 
 # Exercise 6: Recompute after an update
 # Update a scalar under no_grad, then build a fresh quadratic objective and request its

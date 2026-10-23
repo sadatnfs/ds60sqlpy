@@ -364,30 +364,27 @@
 <p>Complexity claims should identify the state space. Coin change and knapsack tables scale with the numeric amount or capacity, which can be enormous relative to its encoded bit length; this is called pseudopolynomial behavior. A correct recurrence can still be an impractical algorithm for a large state domain.</p>
 <h4 id="guide--worked-examples-and-syntax-anatomy">Worked examples and syntax anatomy<a class="heading-anchor" href="#guide--worked-examples-and-syntax-anatomy" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">import math
-from bisect import bisect_right
-
-coins=[1,3,4];amount=6
-best=[0]+[math.inf]*amount
-for total in range(1,amount+1):
-    best[total]=min((1+best[total-coin] for coin in coins if coin&lt;=total),default=math.inf)
-assert best[6]==2
-assert 1+1+1&gt;best[6]
-print(&quot;Minimum coins for6:&quot;,best[6])</code></pre>
+<pre><code class="language-python">coins = [1, 3, 4]
+amount = 6
+best = [0] + [math.inf] * amount
+for total in range(1, amount + 1):
+    best[total] = min((1 + best[total - coin] for coin in coins if coin &lt;= total), default=math.inf)
+assert best[6] == 2
+assert best[6] &lt; 1 + 1 + 1
+print(&quot;Minimum coins for6:&quot;, best[6])</code></pre>
 <p>Each state asks about one amount, and choosing the final coin leaves a smaller amount whose optimal count is already known. The comparison with the three-coin greedy result demonstrates why looking only at the largest available denomination is insufficient.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">import math
-from bisect import bisect_right
-
-capacity=4;weight=2;value=3
-correct=[0]*(capacity+1)
-for available in range(capacity,weight-1,-1):
-    correct[available]=max(correct[available],value+correct[available-weight])
-wrong=[0]*(capacity+1)
-for available in range(weight,capacity+1):
-    wrong[available]=max(wrong[available],value+wrong[available-weight])
-assert correct[4]==3 and wrong[4]==6
-print(&quot;One item used once:&quot;,correct[4],&quot;ascending-loop reuse:&quot;,wrong[4])</code></pre>
+<pre><code class="language-python">capacity = 4
+weight = 2
+value = 3
+correct = [0] * (capacity + 1)
+for available in range(capacity, weight - 1, -1):
+    correct[available] = max(correct[available], value + correct[available - weight])
+wrong = [0] * (capacity + 1)
+for available in range(weight, capacity + 1):
+    wrong[available] = max(wrong[available], value + wrong[available - weight])
+assert correct[4] == 3 and wrong[4] == 6
+print(&quot;One item used once:&quot;, correct[4], &quot;ascending-loop reuse:&quot;, wrong[4])</code></pre>
 <p>Descending updates read the previous-item state for lower capacities. Ascending updates read a value already improved by the same item and use it twice. Both loops terminate and produce plausible numbers, so an explicit single-item capacity test is necessary.</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <ol>
@@ -471,78 +468,134 @@ Done when all six contracts and their boundary cases have inspected evidence and
 <span>&quot;&quot;&quot;</span>
 <span> </span>
 <span>import math</span>
-<span>from bisect import bisect_right</span>
+<span> </span>
 <span> </span>
 <span>def stair_paths(steps: int) -&gt; int:</span>
-<span>    &quot;&quot;&quot;Count ordered ways to reach steps using moves of one or two. Require a nonnegative non-Boolean integer. Use an iterative recurrence with constant retained state, returning one for zero steps.&quot;&quot;&quot;</span>
+<span>    &quot;&quot;&quot;</span>
+<span>    Count ordered ways to reach steps using moves of one or two. Require a nonnegative</span>
+<span>    non-Boolean integer. Use an iterative recurrence with constant retained state, returning</span>
+<span>    one for zero steps.</span>
+<span>    &quot;&quot;&quot;</span>
 <span>    raise NotImplementedError(&quot;Implement stair_paths&quot;)</span>
 <span> </span>
+<span> </span>
 <span>def minimum_coins(coins: list[int], amount: int) -&gt; int | None:</span>
-<span>    &quot;&quot;&quot;Find the fewest unlimited positive-integer coins needed for a nonnegative integer amount. Reject Boolean/noninteger/zero/negative coins and invalid amounts. Return None if impossible and zero for amount 0, including with no denominations.&quot;&quot;&quot;</span>
+<span>    &quot;&quot;&quot;</span>
+<span>    Find the fewest unlimited positive-integer coins needed for a nonnegative integer</span>
+<span>    amount. Reject Boolean/noninteger/zero/negative coins and invalid amounts. Return None</span>
+<span>    if impossible and zero for amount 0, including with no denominations.</span>
+<span>    &quot;&quot;&quot;</span>
 <span>    raise NotImplementedError(&quot;Implement minimum_coins&quot;)</span>
 <span> </span>
+<span> </span>
 <span>def coin_plan(coins: list[int], amount: int) -&gt; list[int] | None:</span>
-<span>    &quot;&quot;&quot;Return a sorted list of coins achieving the minimum count, or None if impossible. Use the same input rules as minimum_coins. Record improving choices, with ascending denominations considered first and no replacement on equal count.&quot;&quot;&quot;</span>
+<span>    &quot;&quot;&quot;</span>
+<span>    Return a sorted list of coins achieving the minimum count, or None if impossible. Use</span>
+<span>    the same input rules as minimum_coins. Record improving choices, with ascending</span>
+<span>    denominations considered first and no replacement on equal count.</span>
+<span>    &quot;&quot;&quot;</span>
 <span>    raise NotImplementedError(&quot;Implement coin_plan&quot;)</span>
 <span> </span>
+<span> </span>
 <span>def edit_distance(left: str, right: str) -&gt; int:</span>
-<span>    &quot;&quot;&quot;Compute unit-cost insertion, deletion and substitution edit distance for Python strings using only two rows of dynamic-programming state. Empty strings are valid. Treat Unicode code points as units and do not include a one-step transposition operation.&quot;&quot;&quot;</span>
+<span>    &quot;&quot;&quot;</span>
+<span>    Compute unit-cost insertion, deletion and substitution edit distance for Python strings</span>
+<span>    using only two rows of dynamic-programming state. Empty strings are valid. Treat Unicode</span>
+<span>    code points as units and do not include a one-step transposition operation.</span>
+<span>    &quot;&quot;&quot;</span>
 <span>    raise NotImplementedError(&quot;Implement edit_distance&quot;)</span>
 <span> </span>
+<span> </span>
 <span>def knapsack_value(weights: list[int], values: list[int], capacity: int) -&gt; int:</span>
-<span>    &quot;&quot;&quot;Compute maximum total nonnegative integer value for 0/1 items with positive integer weights and a nonnegative integer capacity. Require matching lengths and reject Boolean or invalid numbers. Use a one-dimensional table updated downward so each item is used at most once.&quot;&quot;&quot;</span>
+<span>    &quot;&quot;&quot;</span>
+<span>    Compute maximum total nonnegative integer value for 0/1 items with positive integer</span>
+<span>    weights and a nonnegative integer capacity. Require matching lengths and reject Boolean</span>
+<span>    or invalid numbers. Use a one-dimensional table updated downward so each item is used at</span>
+<span>    most once.</span>
+<span>    &quot;&quot;&quot;</span>
 <span>    raise NotImplementedError(&quot;Implement knapsack_value&quot;)</span>
 <span> </span>
+<span> </span>
 <span>def weighted_schedule(jobs: list[tuple[int, int, int, str]]) -&gt; tuple[int, list[str]]:</span>
-<span>    &quot;&quot;&quot;Choose nonoverlapping half-open jobs(start, end, value, id) maximizing nonnegative integer value. Require integer times with start&lt;end, unique string IDs and nonnegative integer values. Sort by end, start, id, use compatible-prefix binary search, and skip on exact-value ties. Return value plus chosen IDs in time order.&quot;&quot;&quot;</span>
+<span>    &quot;&quot;&quot;</span>
+<span>    Choose nonoverlapping half-open jobs(start, end, value, id) maximizing nonnegative</span>
+<span>    integer value. Require integer times with start&lt;end, unique string IDs and nonnegative</span>
+<span>    integer values. Sort by end, start, id, use compatible-prefix binary search, and skip on</span>
+<span>    exact-value ties. Return value plus chosen IDs in time order.</span>
+<span>    &quot;&quot;&quot;</span>
 <span>    raise NotImplementedError(&quot;Implement weighted_schedule&quot;)</span>
 <span> </span>
-<span>def worked_examples():</span>
-<span>    coins=[1,3,4];amount=6</span>
-<span>    best=[0]+[math.inf]*amount</span>
-<span>    for total in range(1,amount+1):</span>
-<span>        best[total]=min((1+best[total-coin] for coin in coins if coin&lt;=total),default=math.inf)</span>
-<span>    assert best[6]==2</span>
-<span>    assert 1+1+1&gt;best[6]</span>
-<span>    print(&quot;Minimum coins for6:&quot;,best[6])</span>
 <span> </span>
-<span>    capacity=4;weight=2;value=3</span>
-<span>    correct=[0]*(capacity+1)</span>
-<span>    for available in range(capacity,weight-1,-1):</span>
-<span>        correct[available]=max(correct[available],value+correct[available-weight])</span>
-<span>    wrong=[0]*(capacity+1)</span>
-<span>    for available in range(weight,capacity+1):</span>
-<span>        wrong[available]=max(wrong[available],value+wrong[available-weight])</span>
-<span>    assert correct[4]==3 and wrong[4]==6</span>
-<span>    print(&quot;One item used once:&quot;,correct[4],&quot;ascending-loop reuse:&quot;,wrong[4])</span>
+<span>def worked_examples() -&gt; None:</span>
+<span>    coins = [1, 3, 4]</span>
+<span>    amount = 6</span>
+<span>    best = [0] + [math.inf] * amount</span>
+<span>    for total in range(1, amount + 1):</span>
+<span>        best[total] = min(</span>
+<span>            (1 + best[total - coin] for coin in coins if coin &lt;= total), default=math.inf</span>
+<span>        )</span>
+<span>    assert best[6] == 2</span>
+<span>    assert best[6] &lt; 1 + 1 + 1</span>
+<span>    print(&quot;Minimum coins for6:&quot;, best[6])</span>
+<span> </span>
+<span>    capacity = 4</span>
+<span>    weight = 2</span>
+<span>    value = 3</span>
+<span>    correct = [0] * (capacity + 1)</span>
+<span>    for available in range(capacity, weight - 1, -1):</span>
+<span>        correct[available] = max(correct[available], value + correct[available - weight])</span>
+<span>    wrong = [0] * (capacity + 1)</span>
+<span>    for available in range(weight, capacity + 1):</span>
+<span>        wrong[available] = max(wrong[available], value + wrong[available - weight])</span>
+<span>    assert correct[4] == 3 and wrong[4] == 6</span>
+<span>    print(&quot;One item used once:&quot;, correct[4], &quot;ascending-loop reuse:&quot;, wrong[4])</span>
+<span> </span>
 <span> </span>
 <span>if __name__ == &quot;__main__&quot;:</span>
 <span>    worked_examples()</span>
 <span>    print(&quot;Worked examples passed. Complete the six task functions and their boundary checks.&quot;)</span>
 <span> </span>
 <span># Exercise 1: Define the empty-state identity</span>
-<span># Prompt: Count ordered ways to reach steps using moves of one or two. Require a nonnegative non-Boolean integer. Use an iterative recurrence with constant retained state, returning one for zero steps.</span>
+<span># Prompt: Count ordered ways to reach steps using moves of one or two. Require a nonnegative</span>
+<span># non-Boolean integer. Use an iterative recurrence with constant retained state, returning one for</span>
+<span># zero steps.</span>
 <span># Expected: Steps 0,1,2,5 return 1,1,2,8. Negative, True or a noninteger raises ValueError.</span>
 <span> </span>
 <span># Exercise 2: Distinguish impossible from zero cost</span>
-<span># Prompt: Find the fewest unlimited positive-integer coins needed for a nonnegative integer amount. Reject Boolean/noninteger/zero/negative coins and invalid amounts. Return None if impossible and zero for amount 0, including with no denominations.</span>
-<span># Expected: Coins[1,3,4], amount 6 returns 2; [2,4], amount 3 returns None; [], amount 0 returns 0. A zero denomination raises ValueError.</span>
+<span># Prompt: Find the fewest unlimited positive-integer coins needed for a nonnegative integer</span>
+<span># amount. Reject Boolean/noninteger/zero/negative coins and invalid amounts. Return None if</span>
+<span># impossible and zero for amount 0, including with no denominations.</span>
+<span># Expected: Coins[1,3,4], amount 6 returns 2; [2,4], amount 3 returns None; [], amount 0 returns</span>
+<span># Continued: 0. A zero denomination raises ValueError.</span>
 <span> </span>
 <span># Exercise 3: Reconstruct an optimal payment</span>
-<span># Prompt: Return a sorted list of coins achieving the minimum count, or None if impossible. Use the same input rules as minimum_coins. Record improving choices, with ascending denominations considered first and no replacement on equal count.</span>
-<span># Expected: [1,3,4], amount 6 returns [3,3], whose sum is 6 and length equals minimum_coins. Amount 0 returns [] and an unreachable odd amount with only even coins returns None.</span>
+<span># Prompt: Return a sorted list of coins achieving the minimum count, or None if impossible. Use</span>
+<span># the same input rules as minimum_coins. Record improving choices, with ascending denominations</span>
+<span># considered first and no replacement on equal count.</span>
+<span># Expected: [1,3,4], amount 6 returns [3,3], whose sum is 6 and length equals minimum_coins.</span>
+<span># Amount 0 returns [] and an unreachable odd amount with only even coins returns None.</span>
 <span> </span>
 <span># Exercise 4: Design a prefix recurrence</span>
-<span># Prompt: Compute unit-cost insertion, deletion and substitution edit distance for Python strings using only two rows of dynamic-programming state. Empty strings are valid. Treat Unicode code points as units and do not include a one-step transposition operation.</span>
-<span># Expected: kitten to sitting costs 3; empty to abc costs 3; identical strings cost 0; ab to ba costs 2, not 1. Swapping arguments preserves the distance.</span>
+<span># Prompt: Compute unit-cost insertion, deletion and substitution edit distance for Python strings</span>
+<span># using only two rows of dynamic-programming state. Empty strings are valid. Treat Unicode code</span>
+<span># points as units and do not include a one-step transposition operation.</span>
+<span># Expected: kitten to sitting costs 3; empty to abc costs 3; identical strings cost 0; ab to ba</span>
+<span># costs 2, not 1. Swapping arguments preserves the distance.</span>
 <span> </span>
 <span># Exercise 5: Preserve the at-most-once constraint</span>
-<span># Prompt: Compute maximum total nonnegative integer value for 0/1 items with positive integer weights and a nonnegative integer capacity. Require matching lengths and reject Boolean or invalid numbers. Use a one-dimensional table updated downward so each item is used at most once.</span>
-<span># Expected: Weights[2,3,4], values[4,5,7], capacity 5 gives 9. One item weight 2, value 3 with capacity 4 gives 3, not 6. Empty items or zero capacity give 0.</span>
+<span># Prompt: Compute maximum total nonnegative integer value for 0/1 items with positive integer</span>
+<span># weights and a nonnegative integer capacity. Require matching lengths and reject Boolean or</span>
+<span># invalid numbers. Use a one-dimensional table updated downward so each item is used at most once.</span>
+<span># Expected: Weights[2,3,4], values[4,5,7], capacity 5 gives 9. One item weight 2, value 3 with</span>
+<span># capacity 4 gives 3, not 6. Empty items or zero capacity give 0.</span>
 <span> </span>
 <span># Exercise 6: Combine binary search, recurrence and backpointers</span>
-<span># Prompt: Choose nonoverlapping half-open jobs(start, end, value, id) maximizing nonnegative integer value. Require integer times with start&lt;end, unique string IDs and nonnegative integer values. Sort by end, start, id, use compatible-prefix binary search, and skip on exact-value ties. Return value plus chosen IDs in time order.</span>
-<span># Expected: Jobs(0,2,4, a),(2,4,4, b),(1,4,7, c) choose[a, b] with value 8. End==next start is compatible; an overlapping lower-value combination is excluded. Empty input gives (0,[]).</span>
+<span># Prompt: Choose nonoverlapping half-open jobs(start, end, value, id) maximizing nonnegative</span>
+<span># integer value. Require integer times with start&lt;end, unique string IDs and nonnegative integer</span>
+<span># values. Sort by end, start, id, use compatible-prefix binary search, and skip on exact-value</span>
+<span># ties. Return value plus chosen IDs in time order.</span>
+<span># Expected: Jobs(0,2,4, a),(2,4,4, b),(1,4,7, c) choose[a, b] with value 8. End==next start is</span>
+<span># compatible; an overlapping lower-value combination is excluded. Empty input gives (0,[]).</span>
 <span> </span></code></pre></div>
       </section>
 
@@ -583,124 +636,160 @@ Done when all six contracts and their boundary cases have inspected evidence and
 <p>Count ordered ways to reach steps using moves of one or two. Require a nonnegative non-Boolean integer. Use an iterative recurrence with constant retained state, returning one for zero steps.</p>
 <p><strong>Expected:</strong> Steps 0,1,2,5 return 1,1,2,8. Negative, True or a noninteger raises ValueError.</p>
 <pre><code class="language-python">def stair_paths(steps: int) -&gt; int:
-    if isinstance(steps,bool) or not isinstance(steps,int) or steps&lt;0:
+    if isinstance(steps, bool) or not isinstance(steps, int) or steps &lt; 0:
         raise ValueError(&quot;Expected a nonnegative integer step count&quot;)
-    previous,current=1,1
+    previous, current = 1, 1
     for _ in range(steps):
-        previous,current=current,previous+current
+        previous, current = current, previous + current
     return previous</code></pre>
 <p>Every nonempty route ends with a one-step or two-step move, partitioning routes into the two predecessor states. The empty route counts once so a move directly reaching the target is included. Only two consecutive counts are needed, making retained state constant even though Python integers grow with the result magnitude. The recurrence check across many small states tests the mathematical structure independently of a few memorized values.</p>
-<pre><code class="language-python">assert [stair_paths(n) for n in [0,1,2,5]]==[1,1,2,8]
-for n in range(2,20):
-    assert stair_paths(n)==stair_paths(n-1)+stair_paths(n-2)
-expect_value_error(lambda:stair_paths(-1))
-expect_value_error(lambda:stair_paths(True))</code></pre>
+<pre><code class="language-python">assert [stair_paths(n) for n in [0, 1, 2, 5]] == [1, 1, 2, 8]
+for n in range(2, 20):
+    assert stair_paths(n) == stair_paths(n - 1) + stair_paths(n - 2)
+expect_value_error(lambda: stair_paths(-1))
+expect_value_error(lambda: stair_paths(True))</code></pre>
 <h5 id="solution-1--exercise-2-distinguish-impossible-from-zero-cost">Exercise 2: Distinguish impossible from zero cost<a class="heading-anchor" href="#solution-1--exercise-2-distinguish-impossible-from-zero-cost" aria-label="Link to this section">#</a></h5>
 <p>Find the fewest unlimited positive-integer coins needed for a nonnegative integer amount. Reject Boolean/noninteger/zero/negative coins and invalid amounts. Return None if impossible and zero for amount 0, including with no denominations.</p>
 <p><strong>Expected:</strong> Coins[1,3,4], amount 6 returns 2; [2,4], amount 3 returns None; [], amount 0 returns 0. A zero denomination raises ValueError.</p>
 <pre><code class="language-python">def minimum_coins(coins: list[int], amount: int) -&gt; int | None:
-    if isinstance(amount,bool) or not isinstance(amount,int) or amount&lt;0 or any(isinstance(c,bool) or not isinstance(c,int) or c&lt;=0 for c in coins):
+    if (
+        isinstance(amount, bool)
+        or not isinstance(amount, int)
+        or amount &lt; 0
+        or any(isinstance(c, bool) or not isinstance(c, int) or c &lt;= 0 for c in coins)
+    ):
         raise ValueError(&quot;Expected positive integer coins and nonnegative amount&quot;)
-    best=[0]+[math.inf]*amount
-    for total in range(1,amount+1):
-        best[total]=min((1+best[total-coin] for coin in coins if coin&lt;=total),default=math.inf)
+    best = [0] + [math.inf] * amount
+    for total in range(1, amount + 1):
+        best[total] = min(
+            (1 + best[total - coin] for coin in coins if coin &lt;= total), default=math.inf
+        )
     return None if math.isinf(best[amount]) else int(best[amount])</code></pre>
 <p>Infinity represents an amount not yet reachable and remains infinite when an impossible predecessor is extended. Zero is reserved for the valid empty payment. Iterating amounts upward is correct here because coins are unlimited and each predecessor amount is smaller. Duplicate denominations do not change the optimum, though removing them can reduce redundant work. The returned None preserves impossibility rather than pretending an empty coin list pays a positive amount.</p>
-<pre><code class="language-python">assert minimum_coins([1,3,4],6)==2 and minimum_coins([2,4],3) is None
-assert minimum_coins([],0)==0 and minimum_coins([],2) is None
-expect_value_error(lambda:minimum_coins([0,1],2))
-expect_value_error(lambda:minimum_coins([True],2))</code></pre>
+<pre><code class="language-python">assert minimum_coins([1, 3, 4], 6) == 2 and minimum_coins([2, 4], 3) is None
+assert minimum_coins([], 0) == 0 and minimum_coins([], 2) is None
+expect_value_error(lambda: minimum_coins([0, 1], 2))
+expect_value_error(lambda: minimum_coins([True], 2))</code></pre>
 <h5 id="solution-1--exercise-3-reconstruct-an-optimal-payment">Exercise 3: Reconstruct an optimal payment<a class="heading-anchor" href="#solution-1--exercise-3-reconstruct-an-optimal-payment" aria-label="Link to this section">#</a></h5>
 <p>Return a sorted list of coins achieving the minimum count, or None if impossible. Use the same input rules as minimum_coins. Record improving choices, with ascending denominations considered first and no replacement on equal count.</p>
 <p><strong>Expected:</strong> [1,3,4], amount 6 returns [3,3], whose sum is 6 and length equals minimum_coins. Amount 0 returns [] and an unreachable odd amount with only even coins returns None.</p>
 <pre><code class="language-python">def coin_plan(coins: list[int], amount: int) -&gt; list[int] | None:
-    minimum_coins(coins,amount)
-    denominations=sorted(set(coins));best=[0]+[math.inf]*amount;choice=[None]*(amount+1)
-    for total in range(1,amount+1):
+    minimum_coins(coins, amount)
+    denominations = sorted(set(coins))
+    best = [0] + [math.inf] * amount
+    choice: list[int | None] = [None] * (amount + 1)
+    for total in range(1, amount + 1):
         for coin in denominations:
-            if coin&lt;=total and 1+best[total-coin]&lt;best[total]:
-                best[total]=1+best[total-coin];choice[total]=coin
+            if coin &lt;= total and 1 + best[total - coin] &lt; best[total]:
+                best[total] = 1 + best[total - coin]
+                choice[total] = coin
     if math.isinf(best[amount]):
         return None
-    result=[];remaining=amount
+    result = []
+    remaining = amount
     while remaining:
-        coin=choice[remaining]
-        assert coin is not None
-        result.append(coin);remaining-=coin
+        chosen_coin = choice[remaining]
+        assert chosen_coin is not None
+        result.append(chosen_coin)
+        remaining -= chosen_coin
     return sorted(result)</code></pre>
 <p>The score table alone cannot identify which coins produced the optimum, so a choice is stored whenever a strictly better count is found. Following choices decreases the remaining amount until the base state. Sorting the reconstructed multiset is a presentation policy because payment order is irrelevant to this objective. The assertions verify feasibility, optimal count and impossible-state behavior separately rather than trusting only the printed plan.</p>
-<pre><code class="language-python">plan=coin_plan([4,1,3],6)
-assert plan==[3,3] and sum(plan)==6 and len(plan)==minimum_coins([1,3,4],6)
-assert coin_plan([],0)==[] and coin_plan([2,4],3) is None
-expect_value_error(lambda:coin_plan([-1,2],3))</code></pre>
+<pre><code class="language-python">plan = coin_plan([4, 1, 3], 6)
+assert plan == [3, 3] and sum(plan) == 6 and len(plan) == minimum_coins([1, 3, 4], 6)
+assert coin_plan([], 0) == [] and coin_plan([2, 4], 3) is None
+expect_value_error(lambda: coin_plan([-1, 2], 3))</code></pre>
 <h5 id="solution-1--exercise-4-design-a-prefix-recurrence">Exercise 4: Design a prefix recurrence<a class="heading-anchor" href="#solution-1--exercise-4-design-a-prefix-recurrence" aria-label="Link to this section">#</a></h5>
 <p>Compute unit-cost insertion, deletion and substitution edit distance for Python strings using only two rows of dynamic-programming state. Empty strings are valid. Treat Unicode code points as units and do not include a one-step transposition operation.</p>
 <p><strong>Expected:</strong> kitten to sitting costs 3; empty to abc costs 3; identical strings cost 0; ab to ba costs 2, not 1. Swapping arguments preserves the distance.</p>
 <pre><code class="language-python">def edit_distance(left: str, right: str) -&gt; int:
-    if len(right)&gt;len(left):
-        left,right=right,left
-    previous=list(range(len(right)+1))
-    for i,a in enumerate(left,1):
-        current=[i]
-        for j,b in enumerate(right,1):
-            current.append(min(current[j-1]+1,previous[j]+1,previous[j-1]+(a!=b)))
-        previous=current
+    if len(right) &gt; len(left):
+        left, right = right, left
+    previous = list(range(len(right) + 1))
+    for i, a in enumerate(left, 1):
+        current = [i]
+        for j, b in enumerate(right, 1):
+            current.append(min(current[j - 1] + 1, previous[j] + 1, previous[j - 1] + (a != b)))
+        previous = current
     return previous[-1]</code></pre>
 <p>Each state concerns prefixes, and the three candidate transitions correspond to insertion, deletion and substitution or match. The first row and column encode conversion to or from an empty prefix. Only the preceding row is needed for the score, so placing the shorter string on the column axis bounds retained memory by its length. Code-point distance differs from user-perceived grapheme distance; normalization and linguistic tokenization are separate domain decisions.</p>
-<pre><code class="language-python">assert edit_distance(&quot;kitten&quot;,&quot;sitting&quot;)==3 and edit_distance(&quot;&quot;,&quot;abc&quot;)==3
-assert edit_distance(&quot;same&quot;,&quot;same&quot;)==0 and edit_distance(&quot;ab&quot;,&quot;ba&quot;)==2
-assert edit_distance(&quot;abc&quot;,&quot;ax&quot;)==edit_distance(&quot;ax&quot;,&quot;abc&quot;)</code></pre>
+<pre><code class="language-python">assert edit_distance(&quot;kitten&quot;, &quot;sitting&quot;) == 3 and edit_distance(&quot;&quot;, &quot;abc&quot;) == 3
+assert edit_distance(&quot;same&quot;, &quot;same&quot;) == 0 and edit_distance(&quot;ab&quot;, &quot;ba&quot;) == 2
+assert edit_distance(&quot;abc&quot;, &quot;ax&quot;) == edit_distance(&quot;ax&quot;, &quot;abc&quot;)</code></pre>
 <h5 id="solution-1--exercise-5-preserve-the-at-most-once-constraint">Exercise 5: Preserve the at-most-once constraint<a class="heading-anchor" href="#solution-1--exercise-5-preserve-the-at-most-once-constraint" aria-label="Link to this section">#</a></h5>
 <p>Compute maximum total nonnegative integer value for 0/1 items with positive integer weights and a nonnegative integer capacity. Require matching lengths and reject Boolean or invalid numbers. Use a one-dimensional table updated downward so each item is used at most once.</p>
 <p><strong>Expected:</strong> Weights[2,3,4], values[4,5,7], capacity 5 gives 9. One item weight 2, value 3 with capacity 4 gives 3, not 6. Empty items or zero capacity give 0.</p>
 <pre><code class="language-python">def knapsack_value(weights: list[int], values: list[int], capacity: int) -&gt; int:
-    if isinstance(capacity,bool) or not isinstance(capacity,int) or capacity&lt;0 or len(weights)!=len(values) or any(isinstance(w,bool) or not isinstance(w,int) or w&lt;=0 for w in weights) or any(isinstance(v,bool) or not isinstance(v,int) or v&lt;0 for v in values):
+    if (
+        isinstance(capacity, bool)
+        or not isinstance(capacity, int)
+        or capacity &lt; 0
+        or len(weights) != len(values)
+        or any(isinstance(w, bool) or not isinstance(w, int) or w &lt;= 0 for w in weights)
+        or any(isinstance(v, bool) or not isinstance(v, int) or v &lt; 0 for v in values)
+    ):
         raise ValueError(&quot;Expected valid 0/1 items and capacity&quot;)
-    best=[0]*(capacity+1)
-    for weight,value in zip(weights,values):
-        for available in range(capacity,weight-1,-1):
-            best[available]=max(best[available],value+best[available-weight])
+    best = [0] * (capacity + 1)
+    for weight, value in zip(weights, values, strict=True):
+        for available in range(capacity, weight - 1, -1):
+            best[available] = max(best[available], value + best[available - weight])
     return best[capacity]</code></pre>
 <p>The state means best value using the items processed so far within an available capacity. Descending capacity order ensures each transition reads the state before the current item was added. Ascending updates would solve a different unlimited-reuse problem. The algorithm takes O(number_of_items*capacity) time and O(capacity) memory, so a very large numeric capacity can be impractical despite a short input representation.</p>
-<pre><code class="language-python">assert knapsack_value([2,3,4],[4,5,7],5)==9
-assert knapsack_value([2],[3],4)==3 and knapsack_value([],[],4)==0
-assert knapsack_value([2],[3],0)==0
-expect_value_error(lambda:knapsack_value([0],[3],4))
-expect_value_error(lambda:knapsack_value([2],[3,4],4))</code></pre>
+<pre><code class="language-python">assert knapsack_value([2, 3, 4], [4, 5, 7], 5) == 9
+assert knapsack_value([2], [3], 4) == 3 and knapsack_value([], [], 4) == 0
+assert knapsack_value([2], [3], 0) == 0
+expect_value_error(lambda: knapsack_value([0], [3], 4))
+expect_value_error(lambda: knapsack_value([2], [3, 4], 4))</code></pre>
 <h5 id="solution-1--exercise-6-combine-binary-search-recurrence-and-backpointers">Exercise 6: Combine binary search, recurrence and backpointers<a class="heading-anchor" href="#solution-1--exercise-6-combine-binary-search-recurrence-and-backpointers" aria-label="Link to this section">#</a></h5>
 <p>Choose nonoverlapping half-open jobs(start, end, value, id) maximizing nonnegative integer value. Require integer times with start&lt;end, unique string IDs and nonnegative integer values. Sort by end, start, id, use compatible-prefix binary search, and skip on exact-value ties. Return value plus chosen IDs in time order.</p>
 <p><strong>Expected:</strong> Jobs(0,2,4, a),(2,4,4, b),(1,4,7, c) choose[a, b] with value 8. End==next start is compatible; an overlapping lower-value combination is excluded. Empty input gives (0,[]).</p>
 <pre><code class="language-python">def weighted_schedule(jobs: list[tuple[int, int, int, str]]) -&gt; tuple[int, list[str]]:
-    seen=set()
-    for start,end,value,ident in jobs:
-        if any(isinstance(x,bool) or not isinstance(x,int) for x in [start,end,value]) or start&gt;=end or value&lt;0 or not isinstance(ident,str) or ident in seen:
-            raise ValueError(&quot;Expected positive intervals, nonnegative values and unique string IDs&quot;)
+    seen = set()
+    for start, end, value, ident in jobs:
+        if (
+            any(isinstance(x, bool) or not isinstance(x, int) for x in [start, end, value])
+            or start &gt;= end
+            or value &lt; 0
+            or not isinstance(ident, str)
+            or ident in seen
+        ):
+            raise ValueError(
+                &quot;Expected positive intervals, nonnegative values and unique string IDs&quot;
+            )
         seen.add(ident)
-    ordered=sorted(jobs,key=lambda job:(job[1],job[0],job[3]));ends=[job[1] for job in ordered]
-    best=[0]*(len(ordered)+1);take=[False]*(len(ordered)+1);previous=[0]*(len(ordered)+1)
-    for i,(start,end,value,ident) in enumerate(ordered,1):
-        compatible=bisect_right(ends,start,0,i-1)
-        previous[i]=compatible;candidate=value+best[compatible]
-        if candidate&gt;best[i-1]:
-            best[i]=candidate;take[i]=True
+    ordered = sorted(jobs, key=lambda job: (job[1], job[0], job[3]))
+    ends = [job[1] for job in ordered]
+    best = [0] * (len(ordered) + 1)
+    take = [False] * (len(ordered) + 1)
+    previous = [0] * (len(ordered) + 1)
+    for i, (start, _end, value, _ident) in enumerate(ordered, 1):
+        compatible = bisect_right(ends, start, 0, i - 1)
+        previous[i] = compatible
+        candidate = value + best[compatible]
+        if candidate &gt; best[i - 1]:
+            best[i] = candidate
+            take[i] = True
         else:
-            best[i]=best[i-1]
-    chosen=[];i=len(ordered)
+            best[i] = best[i - 1]
+    chosen = []
+    i = len(ordered)
     while i:
         if take[i]:
-            chosen.append(ordered[i-1][3]);i=previous[i]
+            chosen.append(ordered[i - 1][3])
+            i = previous[i]
         else:
-            i-=1
-    return best[-1],list(reversed(chosen))</code></pre>
+            i -= 1
+    return best[-1], list(reversed(chosen))</code></pre>
 <p>Sorting by end time makes all jobs compatible with a candidate form a prefix of earlier jobs. bisect_right includes jobs ending exactly at the candidate start, matching half-open semantics. The recurrence compares taking the candidate plus that optimal prefix against skipping it. Backpointers recover actual IDs, and separate checks prove their intervals do not overlap and their values sum to the reported optimum. The explicit skip-on-tie policy makes equally valuable schedules deterministic.</p>
-<pre><code class="language-python">jobs=[(0,2,4,&quot;a&quot;),(2,4,4,&quot;b&quot;),(1,4,7,&quot;c&quot;)]
-value,chosen=weighted_schedule(jobs)
-assert (value,chosen)==(8,[&quot;a&quot;,&quot;b&quot;])
-selected=[next(job for job in jobs if job[3]==ident) for ident in chosen]
-assert sum(job[2] for job in selected)==value and all(a[1]&lt;=b[0] for a,b in zip(selected,selected[1:]))
-assert weighted_schedule([])==(0,[])
-expect_value_error(lambda:weighted_schedule([(0,0,1,&quot;a&quot;)]))
-expect_value_error(lambda:weighted_schedule([(0,1,1,&quot;a&quot;),(2,3,1,&quot;a&quot;)]))</code></pre>
+<pre><code class="language-python">jobs = [(0, 2, 4, &quot;a&quot;), (2, 4, 4, &quot;b&quot;), (1, 4, 7, &quot;c&quot;)]
+value, chosen = weighted_schedule(jobs)
+assert (value, chosen) == (8, [&quot;a&quot;, &quot;b&quot;])
+selected = [next(job for job in jobs if job[3] == ident) for ident in chosen]
+assert sum(job[2] for job in selected) == value and all(
+    a[1] &lt;= b[0] for a, b in zip(selected, selected[1:], strict=False)
+)
+assert weighted_schedule([]) == (0, [])
+expect_value_error(lambda: weighted_schedule([(0, 0, 1, &quot;a&quot;)]))
+expect_value_error(lambda: weighted_schedule([(0, 1, 1, &quot;a&quot;), (2, 3, 1, &quot;a&quot;)]))</code></pre>
 <h4 id="solution-1--verification-and-interpretation">Verification and interpretation<a class="heading-anchor" href="#solution-1--verification-and-interpretation" aria-label="Link to this section">#</a></h4>
 <p>Run <code>python python/professional/solutions/py_algo_04_solution.py</code> from the repository root with the prepared interpreter. The code checks normal inputs and explicit edge cases before printing its success line. Assertions are the evidence; the printed sentence alone is not. The helper <code>expect_value_error</code> requires an actual <code>ValueError</code> and fails if a function silently accepts an invalid input. Inspect each function&#x27;s mutation and ordering behavior as part of its contract.</p></div>
       </section>
@@ -739,126 +828,172 @@ expect_value_error(lambda:weighted_schedule([(0,1,1,&quot;a&quot;),(2,3,1,&quot;
 <span> </span>
 <span>import math</span>
 <span>from bisect import bisect_right</span>
+<span>from collections.abc import Callable</span>
+<span> </span>
 <span> </span>
 <span>def stair_paths(steps: int) -&gt; int:</span>
-<span>    if isinstance(steps,bool) or not isinstance(steps,int) or steps&lt;0:</span>
+<span>    if isinstance(steps, bool) or not isinstance(steps, int) or steps &lt; 0:</span>
 <span>        raise ValueError(&quot;Expected a nonnegative integer step count&quot;)</span>
-<span>    previous,current=1,1</span>
+<span>    previous, current = 1, 1</span>
 <span>    for _ in range(steps):</span>
-<span>        previous,current=current,previous+current</span>
+<span>        previous, current = current, previous + current</span>
 <span>    return previous</span>
 <span> </span>
+<span> </span>
 <span>def minimum_coins(coins: list[int], amount: int) -&gt; int | None:</span>
-<span>    if isinstance(amount,bool) or not isinstance(amount,int) or amount&lt;0 or any(isinstance(c,bool) or not isinstance(c,int) or c&lt;=0 for c in coins):</span>
+<span>    if (</span>
+<span>        isinstance(amount, bool)</span>
+<span>        or not isinstance(amount, int)</span>
+<span>        or amount &lt; 0</span>
+<span>        or any(isinstance(c, bool) or not isinstance(c, int) or c &lt;= 0 for c in coins)</span>
+<span>    ):</span>
 <span>        raise ValueError(&quot;Expected positive integer coins and nonnegative amount&quot;)</span>
-<span>    best=[0]+[math.inf]*amount</span>
-<span>    for total in range(1,amount+1):</span>
-<span>        best[total]=min((1+best[total-coin] for coin in coins if coin&lt;=total),default=math.inf)</span>
+<span>    best = [0] + [math.inf] * amount</span>
+<span>    for total in range(1, amount + 1):</span>
+<span>        best[total] = min(</span>
+<span>            (1 + best[total - coin] for coin in coins if coin &lt;= total), default=math.inf</span>
+<span>        )</span>
 <span>    return None if math.isinf(best[amount]) else int(best[amount])</span>
 <span> </span>
+<span> </span>
 <span>def coin_plan(coins: list[int], amount: int) -&gt; list[int] | None:</span>
-<span>    minimum_coins(coins,amount)</span>
-<span>    denominations=sorted(set(coins));best=[0]+[math.inf]*amount;choice=[None]*(amount+1)</span>
-<span>    for total in range(1,amount+1):</span>
+<span>    minimum_coins(coins, amount)</span>
+<span>    denominations = sorted(set(coins))</span>
+<span>    best = [0] + [math.inf] * amount</span>
+<span>    choice: list[int | None] = [None] * (amount + 1)</span>
+<span>    for total in range(1, amount + 1):</span>
 <span>        for coin in denominations:</span>
-<span>            if coin&lt;=total and 1+best[total-coin]&lt;best[total]:</span>
-<span>                best[total]=1+best[total-coin];choice[total]=coin</span>
+<span>            if coin &lt;= total and 1 + best[total - coin] &lt; best[total]:</span>
+<span>                best[total] = 1 + best[total - coin]</span>
+<span>                choice[total] = coin</span>
 <span>    if math.isinf(best[amount]):</span>
 <span>        return None</span>
-<span>    result=[];remaining=amount</span>
+<span>    result = []</span>
+<span>    remaining = amount</span>
 <span>    while remaining:</span>
-<span>        coin=choice[remaining]</span>
-<span>        assert coin is not None</span>
-<span>        result.append(coin);remaining-=coin</span>
+<span>        chosen_coin = choice[remaining]</span>
+<span>        assert chosen_coin is not None</span>
+<span>        result.append(chosen_coin)</span>
+<span>        remaining -= chosen_coin</span>
 <span>    return sorted(result)</span>
 <span> </span>
+<span> </span>
 <span>def edit_distance(left: str, right: str) -&gt; int:</span>
-<span>    if len(right)&gt;len(left):</span>
-<span>        left,right=right,left</span>
-<span>    previous=list(range(len(right)+1))</span>
-<span>    for i,a in enumerate(left,1):</span>
-<span>        current=[i]</span>
-<span>        for j,b in enumerate(right,1):</span>
-<span>            current.append(min(current[j-1]+1,previous[j]+1,previous[j-1]+(a!=b)))</span>
-<span>        previous=current</span>
+<span>    if len(right) &gt; len(left):</span>
+<span>        left, right = right, left</span>
+<span>    previous = list(range(len(right) + 1))</span>
+<span>    for i, a in enumerate(left, 1):</span>
+<span>        current = [i]</span>
+<span>        for j, b in enumerate(right, 1):</span>
+<span>            current.append(min(current[j - 1] + 1, previous[j] + 1, previous[j - 1] + (a != b)))</span>
+<span>        previous = current</span>
 <span>    return previous[-1]</span>
 <span> </span>
+<span> </span>
 <span>def knapsack_value(weights: list[int], values: list[int], capacity: int) -&gt; int:</span>
-<span>    if isinstance(capacity,bool) or not isinstance(capacity,int) or capacity&lt;0 or len(weights)!=len(values) or any(isinstance(w,bool) or not isinstance(w,int) or w&lt;=0 for w in weights) or any(isinstance(v,bool) or not isinstance(v,int) or v&lt;0 for v in values):</span>
+<span>    if (</span>
+<span>        isinstance(capacity, bool)</span>
+<span>        or not isinstance(capacity, int)</span>
+<span>        or capacity &lt; 0</span>
+<span>        or len(weights) != len(values)</span>
+<span>        or any(isinstance(w, bool) or not isinstance(w, int) or w &lt;= 0 for w in weights)</span>
+<span>        or any(isinstance(v, bool) or not isinstance(v, int) or v &lt; 0 for v in values)</span>
+<span>    ):</span>
 <span>        raise ValueError(&quot;Expected valid 0/1 items and capacity&quot;)</span>
-<span>    best=[0]*(capacity+1)</span>
-<span>    for weight,value in zip(weights,values):</span>
-<span>        for available in range(capacity,weight-1,-1):</span>
-<span>            best[available]=max(best[available],value+best[available-weight])</span>
+<span>    best = [0] * (capacity + 1)</span>
+<span>    for weight, value in zip(weights, values, strict=True):</span>
+<span>        for available in range(capacity, weight - 1, -1):</span>
+<span>            best[available] = max(best[available], value + best[available - weight])</span>
 <span>    return best[capacity]</span>
 <span> </span>
+<span> </span>
 <span>def weighted_schedule(jobs: list[tuple[int, int, int, str]]) -&gt; tuple[int, list[str]]:</span>
-<span>    seen=set()</span>
-<span>    for start,end,value,ident in jobs:</span>
-<span>        if any(isinstance(x,bool) or not isinstance(x,int) for x in [start,end,value]) or start&gt;=end or value&lt;0 or not isinstance(ident,str) or ident in seen:</span>
-<span>            raise ValueError(&quot;Expected positive intervals, nonnegative values and unique string IDs&quot;)</span>
+<span>    seen = set()</span>
+<span>    for start, end, value, ident in jobs:</span>
+<span>        if (</span>
+<span>            any(isinstance(x, bool) or not isinstance(x, int) for x in [start, end, value])</span>
+<span>            or start &gt;= end</span>
+<span>            or value &lt; 0</span>
+<span>            or not isinstance(ident, str)</span>
+<span>            or ident in seen</span>
+<span>        ):</span>
+<span>            raise ValueError(</span>
+<span>                &quot;Expected positive intervals, nonnegative values and unique string IDs&quot;</span>
+<span>            )</span>
 <span>        seen.add(ident)</span>
-<span>    ordered=sorted(jobs,key=lambda job:(job[1],job[0],job[3]));ends=[job[1] for job in ordered]</span>
-<span>    best=[0]*(len(ordered)+1);take=[False]*(len(ordered)+1);previous=[0]*(len(ordered)+1)</span>
-<span>    for i,(start,end,value,ident) in enumerate(ordered,1):</span>
-<span>        compatible=bisect_right(ends,start,0,i-1)</span>
-<span>        previous[i]=compatible;candidate=value+best[compatible]</span>
-<span>        if candidate&gt;best[i-1]:</span>
-<span>            best[i]=candidate;take[i]=True</span>
+<span>    ordered = sorted(jobs, key=lambda job: (job[1], job[0], job[3]))</span>
+<span>    ends = [job[1] for job in ordered]</span>
+<span>    best = [0] * (len(ordered) + 1)</span>
+<span>    take = [False] * (len(ordered) + 1)</span>
+<span>    previous = [0] * (len(ordered) + 1)</span>
+<span>    for i, (start, _end, value, _ident) in enumerate(ordered, 1):</span>
+<span>        compatible = bisect_right(ends, start, 0, i - 1)</span>
+<span>        previous[i] = compatible</span>
+<span>        candidate = value + best[compatible]</span>
+<span>        if candidate &gt; best[i - 1]:</span>
+<span>            best[i] = candidate</span>
+<span>            take[i] = True</span>
 <span>        else:</span>
-<span>            best[i]=best[i-1]</span>
-<span>    chosen=[];i=len(ordered)</span>
+<span>            best[i] = best[i - 1]</span>
+<span>    chosen = []</span>
+<span>    i = len(ordered)</span>
 <span>    while i:</span>
 <span>        if take[i]:</span>
-<span>            chosen.append(ordered[i-1][3]);i=previous[i]</span>
+<span>            chosen.append(ordered[i - 1][3])</span>
+<span>            i = previous[i]</span>
 <span>        else:</span>
-<span>            i-=1</span>
-<span>    return best[-1],list(reversed(chosen))</span>
+<span>            i -= 1</span>
+<span>    return best[-1], list(reversed(chosen))</span>
 <span> </span>
-<span>def expect_value_error(call):</span>
+<span> </span>
+<span>def expect_value_error(call: Callable[[], object]) -&gt; None:</span>
 <span>    try:</span>
 <span>        call()</span>
 <span>    except ValueError:</span>
 <span>        return</span>
 <span>    raise AssertionError(&quot;Expected ValueError&quot;)</span>
 <span> </span>
-<span>def main():</span>
+<span> </span>
+<span>def main() -&gt; None:</span>
 <span>    # Exercise 1: Define the empty-state identity</span>
-<span>    assert [stair_paths(n) for n in [0,1,2,5]]==[1,1,2,8]</span>
-<span>    for n in range(2,20):</span>
-<span>        assert stair_paths(n)==stair_paths(n-1)+stair_paths(n-2)</span>
-<span>    expect_value_error(lambda:stair_paths(-1))</span>
-<span>    expect_value_error(lambda:stair_paths(True))</span>
+<span>    assert [stair_paths(n) for n in [0, 1, 2, 5]] == [1, 1, 2, 8]</span>
+<span>    for n in range(2, 20):</span>
+<span>        assert stair_paths(n) == stair_paths(n - 1) + stair_paths(n - 2)</span>
+<span>    expect_value_error(lambda: stair_paths(-1))</span>
+<span>    expect_value_error(lambda: stair_paths(True))</span>
 <span>    # Exercise 2: Distinguish impossible from zero cost</span>
-<span>    assert minimum_coins([1,3,4],6)==2 and minimum_coins([2,4],3) is None</span>
-<span>    assert minimum_coins([],0)==0 and minimum_coins([],2) is None</span>
-<span>    expect_value_error(lambda:minimum_coins([0,1],2))</span>
-<span>    expect_value_error(lambda:minimum_coins([True],2))</span>
+<span>    assert minimum_coins([1, 3, 4], 6) == 2 and minimum_coins([2, 4], 3) is None</span>
+<span>    assert minimum_coins([], 0) == 0 and minimum_coins([], 2) is None</span>
+<span>    expect_value_error(lambda: minimum_coins([0, 1], 2))</span>
+<span>    expect_value_error(lambda: minimum_coins([True], 2))</span>
 <span>    # Exercise 3: Reconstruct an optimal payment</span>
-<span>    plan=coin_plan([4,1,3],6)</span>
-<span>    assert plan==[3,3] and sum(plan)==6 and len(plan)==minimum_coins([1,3,4],6)</span>
-<span>    assert coin_plan([],0)==[] and coin_plan([2,4],3) is None</span>
-<span>    expect_value_error(lambda:coin_plan([-1,2],3))</span>
+<span>    plan = coin_plan([4, 1, 3], 6)</span>
+<span>    assert plan == [3, 3] and sum(plan) == 6 and len(plan) == minimum_coins([1, 3, 4], 6)</span>
+<span>    assert coin_plan([], 0) == [] and coin_plan([2, 4], 3) is None</span>
+<span>    expect_value_error(lambda: coin_plan([-1, 2], 3))</span>
 <span>    # Exercise 4: Design a prefix recurrence</span>
-<span>    assert edit_distance(&quot;kitten&quot;,&quot;sitting&quot;)==3 and edit_distance(&quot;&quot;,&quot;abc&quot;)==3</span>
-<span>    assert edit_distance(&quot;same&quot;,&quot;same&quot;)==0 and edit_distance(&quot;ab&quot;,&quot;ba&quot;)==2</span>
-<span>    assert edit_distance(&quot;abc&quot;,&quot;ax&quot;)==edit_distance(&quot;ax&quot;,&quot;abc&quot;)</span>
+<span>    assert edit_distance(&quot;kitten&quot;, &quot;sitting&quot;) == 3 and edit_distance(&quot;&quot;, &quot;abc&quot;) == 3</span>
+<span>    assert edit_distance(&quot;same&quot;, &quot;same&quot;) == 0 and edit_distance(&quot;ab&quot;, &quot;ba&quot;) == 2</span>
+<span>    assert edit_distance(&quot;abc&quot;, &quot;ax&quot;) == edit_distance(&quot;ax&quot;, &quot;abc&quot;)</span>
 <span>    # Exercise 5: Preserve the at-most-once constraint</span>
-<span>    assert knapsack_value([2,3,4],[4,5,7],5)==9</span>
-<span>    assert knapsack_value([2],[3],4)==3 and knapsack_value([],[],4)==0</span>
-<span>    assert knapsack_value([2],[3],0)==0</span>
-<span>    expect_value_error(lambda:knapsack_value([0],[3],4))</span>
-<span>    expect_value_error(lambda:knapsack_value([2],[3,4],4))</span>
+<span>    assert knapsack_value([2, 3, 4], [4, 5, 7], 5) == 9</span>
+<span>    assert knapsack_value([2], [3], 4) == 3 and knapsack_value([], [], 4) == 0</span>
+<span>    assert knapsack_value([2], [3], 0) == 0</span>
+<span>    expect_value_error(lambda: knapsack_value([0], [3], 4))</span>
+<span>    expect_value_error(lambda: knapsack_value([2], [3, 4], 4))</span>
 <span>    # Exercise 6: Combine binary search, recurrence and backpointers</span>
-<span>    jobs=[(0,2,4,&quot;a&quot;),(2,4,4,&quot;b&quot;),(1,4,7,&quot;c&quot;)]</span>
-<span>    value,chosen=weighted_schedule(jobs)</span>
-<span>    assert (value,chosen)==(8,[&quot;a&quot;,&quot;b&quot;])</span>
-<span>    selected=[next(job for job in jobs if job[3]==ident) for ident in chosen]</span>
-<span>    assert sum(job[2] for job in selected)==value and all(a[1]&lt;=b[0] for a,b in zip(selected,selected[1:]))</span>
-<span>    assert weighted_schedule([])==(0,[])</span>
-<span>    expect_value_error(lambda:weighted_schedule([(0,0,1,&quot;a&quot;)]))</span>
-<span>    expect_value_error(lambda:weighted_schedule([(0,1,1,&quot;a&quot;),(2,3,1,&quot;a&quot;)]))</span>
+<span>    jobs = [(0, 2, 4, &quot;a&quot;), (2, 4, 4, &quot;b&quot;), (1, 4, 7, &quot;c&quot;)]</span>
+<span>    value, chosen = weighted_schedule(jobs)</span>
+<span>    assert (value, chosen) == (8, [&quot;a&quot;, &quot;b&quot;])</span>
+<span>    selected = [next(job for job in jobs if job[3] == ident) for ident in chosen]</span>
+<span>    assert sum(job[2] for job in selected) == value and all(</span>
+<span>        a[1] &lt;= b[0] for a, b in zip(selected, selected[1:], strict=False)</span>
+<span>    )</span>
+<span>    assert weighted_schedule([]) == (0, [])</span>
+<span>    expect_value_error(lambda: weighted_schedule([(0, 0, 1, &quot;a&quot;)]))</span>
+<span>    expect_value_error(lambda: weighted_schedule([(0, 1, 1, &quot;a&quot;), (2, 3, 1, &quot;a&quot;)]))</span>
 <span>    print(&quot;python-algo-04: all six normal and boundary contracts passed&quot;)</span>
+<span> </span>
 <span> </span>
 <span>if __name__ == &quot;__main__&quot;:</span>
 <span>    main()</span>

@@ -116,8 +116,202 @@
       <p class="source-path">Generated from <code>courses/deep-learning-pytorch/README.md</code></p>
     </header>
     <article class="document"><h2 id="deep-learning-with-pytorch">Deep Learning with PyTorch<a class="heading-anchor" href="#deep-learning-with-pytorch" aria-label="Link to this section">#</a></h2>
-<p>This36lesson journey is being authored with depth comparable to the complete <a href="../deep-learning-tensorflow/README.md.html">TensorFlow journey</a>. It starts with inspectable tensors and gradients and progresses through data pipelines, training loops, CNNs, sequences, transformers, checkpointing, diagnosis and model releases. The <a href="track.json.html">track plan</a> pairs each topic with its TensorFlow counterpart. The <a href="lessons.json.html">authored manifest</a> lists completed lesson sets; a planned title is not a finished tutorial.</p>
-<p>Use the Docker classroom&#x27;s <code>llm-torch-cpu</code> profile. This is the shared prepared PyTorch CPU worker, also used by the LLM courses; no host Python, GPU, model weights or external dataset download is required for the default examples. See <a href="../../docs/docker-classroom.md.html">classroom setup</a> for visible build logs, startup and persistent progress. The <a href="COMPARISON.md.html">comparison guide</a> explains how to study the two frameworks together without assuming identical defaults.</p></article>
+<p>This complete36-lesson authored route gives PyTorch the same broad subject coverage as the <a href="../deep-learning-tensorflow/README.md.html">36-lesson TensorFlow course</a>. It progresses from tensor storage and gradients through data loading,training,classifiers,convolutions,recurrent sequences,attention,custom autograd,transfer,checkpointing,numerics,profiling,export and a model-release capstone. Each topic is paired with its TensorFlow counterpart so you can compare the mathematical contract and the framework-specific implementation separately.</p>
+<p>The <a href="lessons.json.html">authored manifest</a> lists real guide,learner and separate solution artifacts. The <a href="track.json.html">track plan</a> preserves prerequisites and paired IDs. Every guide has three worked examples,six concrete exercises,progressive hints,answered interview reasoning and a copy-ready Codex prompt. Read the <a href="COMPARISON.md.html">comparison guide</a> for layout,reduction,state and mode differences. Source completion does not imply runtime acceptance;the <a href="../../docs/implementation/pytorch-content-status.md.html">execution checkpoint</a> records actual receipts.</p>
+<h3 id="run-the-same-prepared-cpu-environment">Run the same prepared CPU environment<a class="heading-anchor" href="#run-the-same-prepared-cpu-environment" aria-label="Link to this section">#</a></h3>
+<p>Use the Docker classroom&#x27;s <code>llm-torch-cpu</code> profile. Its historical name does not restrict it to language models:the prepared PyTorch2.9.1 CPU/NumPy2.2.6 worker runs this whole deep-learning route. No host PyTorch,GPU,torchvision,external dataset or pretrained-model download is needed. DataLoader usesnum_workers=0 in the default examples. See <a href="../../docs/docker-classroom.md.html">classroom setup</a> for image preparation,logs and persistent learner pads.</p>
+<p>The first lesson is a reading worksheet;the other35 have executable Python references. Work in your saved pad or an ignored <code>.learning/</code> copy. Keep official solutions closed until you attempt the exercises or explicitly request comparison. A successful reference run verifies its assertions,not your independent understanding or a production model&#x27;s reliability.</p>
+<h3 id="study-both-frameworks-by-contract">Study both frameworks by contract<a class="heading-anchor" href="#study-both-frameworks-by-contract" aria-label="Link to this section">#</a></h3>
+<p>Match data identities,shapes,dtypes,initial state,loss reduction and optimizer policy before comparing numbers. PyTorchLinear andKerasDense store weight axes differently. BatchNorm momentum conventions differ. PyTorchbackward accumulates leaf gradients unless cleared,andtrain/eval is separate from gradient mode. Checkpoint and inference artifacts have different state and lifetime contracts. The paired lessons expose these differences with controlled failures rather than treating similarly named APIs as interchangeable.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>PyTorch lesson</th>
+<th>Topic</th>
+<th>TensorFlow pair</th>
+</tr></thead><tbody>
+<tr>
+<td><a href="guides/torch-001.md.html">torch-001</a></td>
+<td>A bounded PyTorch investigation and framework comparison</td>
+<td><a href="../deep-learning-tensorflow/guides/tf-001.md.html">tf-001</a></td>
+</tr>
+<tr>
+<td><a href="guides/torch-002.md.html">torch-002</a></td>
+<td>Tensors, devices, dtypes, strides and views</td>
+<td><a href="../deep-learning-tensorflow/guides/tf-002.md.html">tf-002</a></td>
+</tr>
+<tr>
+<td><a href="guides/torch-003.md.html">torch-003</a></td>
+<td>Linear modules, parameters and matrix contracts</td>
+<td><a href="../deep-learning-tensorflow/guides/tf-003.md.html">tf-003</a></td>
+</tr>
+<tr>
+<td><a href="guides/torch-004.md.html">torch-004</a></td>
+<td>Loss functions, reductions and gradient scale</td>
+<td><a href="../deep-learning-tensorflow/guides/tf-004.md.html">tf-004</a></td>
+</tr>
+<tr>
+<td><a href="guides/torch-005.md.html">torch-005</a></td>
+<td>Derivatives, requires_grad and finite-difference checks</td>
+<td><a href="../deep-learning-tensorflow/guides/tf-005.md.html">tf-005</a></td>
+</tr>
+<tr>
+<td><a href="guides/torch-006.md.html">torch-006</a></td>
+<td>Autograd graphs, the chain rule and in-place hazards</td>
+<td><a href="../deep-learning-tensorflow/guides/tf-006.md.html">tf-006</a></td>
+</tr>
+<tr>
+<td><a href="guides/torch-007.md.html">torch-007</a></td>
+<td>Leaf tensors, detach, no_grad and gradient accumulation</td>
+<td><a href="../deep-learning-tensorflow/guides/tf-007.md.html">tf-007</a></td>
+</tr>
+<tr>
+<td><a href="guides/torch-008.md.html">torch-008</a></td>
+<td>One optimizer step you can audit</td>
+<td><a href="../deep-learning-tensorflow/guides/tf-008.md.html">tf-008</a></td>
+</tr>
+<tr>
+<td><a href="guides/torch-009.md.html">torch-009</a></td>
+<td>Batches, zero_grad and repeated updates</td>
+<td><a href="../deep-learning-tensorflow/guides/tf-009.md.html">tf-009</a></td>
+</tr>
+<tr>
+<td><a href="guides/torch-010.md.html">torch-010</a></td>
+<td>Datasets, held-out families and leakage controls</td>
+<td><a href="../deep-learning-tensorflow/guides/tf-010.md.html">tf-010</a></td>
+</tr>
+<tr>
+<td><a href="guides/torch-011.md.html">torch-011</a></td>
+<td>nn.Module, registered parameters and explicit training loops</td>
+<td><a href="../deep-learning-tensorflow/guides/tf-011.md.html">tf-011</a></td>
+</tr>
+<tr>
+<td><a href="guides/torch-012.md.html">torch-012</a></td>
+<td>Capstone: an auditable tiny PyTorch regressor</td>
+<td><a href="../deep-learning-tensorflow/guides/tf-012.md.html">tf-012</a></td>
+</tr>
+<tr>
+<td><a href="guides/torch-013.md.html">torch-013</a></td>
+<td>Binary logits, BCEWithLogitsLoss and thresholds</td>
+<td><a href="../deep-learning-tensorflow/guides/tf-013.md.html">tf-013</a></td>
+</tr>
+<tr>
+<td><a href="guides/torch-014.md.html">torch-014</a></td>
+<td>CrossEntropyLoss, multiclass and multilabel contracts</td>
+<td><a href="../deep-learning-tensorflow/guides/tf-014.md.html">tf-014</a></td>
+</tr>
+<tr>
+<td><a href="guides/torch-015.md.html">torch-015</a></td>
+<td>Dataset, DataLoader, collation and reproducible sampling</td>
+<td><a href="../deep-learning-tensorflow/guides/tf-015.md.html">tf-015</a></td>
+</tr>
+<tr>
+<td><a href="guides/torch-016.md.html">torch-016</a></td>
+<td>Initialization, nonlinearities and gradient diagnostics</td>
+<td><a href="../deep-learning-tensorflow/guides/tf-016.md.html">tf-016</a></td>
+</tr>
+<tr>
+<td><a href="guides/torch-017.md.html">torch-017</a></td>
+<td>Dropout, regularization, train and eval modes</td>
+<td><a href="../deep-learning-tensorflow/guides/tf-017.md.html">tf-017</a></td>
+</tr>
+<tr>
+<td><a href="guides/torch-018.md.html">torch-018</a></td>
+<td>BatchNorm, LayerNorm and stateful normalization</td>
+<td><a href="../deep-learning-tensorflow/guides/tf-018.md.html">tf-018</a></td>
+</tr>
+<tr>
+<td><a href="guides/torch-019.md.html">torch-019</a></td>
+<td>Convolutions, channel layouts and shared computation</td>
+<td><a href="../deep-learning-tensorflow/guides/tf-019.md.html">tf-019</a></td>
+</tr>
+<tr>
+<td><a href="guides/torch-020.md.html">torch-020</a></td>
+<td>Pooling, local augmentation and label invariants</td>
+<td><a href="../deep-learning-tensorflow/guides/tf-020.md.html">tf-020</a></td>
+</tr>
+<tr>
+<td><a href="guides/torch-021.md.html">torch-021</a></td>
+<td>Embeddings, padded sequences and recurrent models</td>
+<td><a href="../deep-learning-tensorflow/guides/tf-021.md.html">tf-021</a></td>
+</tr>
+<tr>
+<td><a href="guides/torch-022.md.html">torch-022</a></td>
+<td>Attention, transformer masks and information boundaries</td>
+<td><a href="../deep-learning-tensorflow/guides/tf-022.md.html">tf-022</a></td>
+</tr>
+<tr>
+<td><a href="guides/torch-023.md.html">torch-023</a></td>
+<td>Debugging custom loops, accumulation and clipping</td>
+<td><a href="../deep-learning-tensorflow/guides/tf-023.md.html">tf-023</a></td>
+</tr>
+<tr>
+<td><a href="guides/torch-024.md.html">torch-024</a></td>
+<td>Capstone: a small classifier with honest evaluation</td>
+<td><a href="../deep-learning-tensorflow/guides/tf-024.md.html">tf-024</a></td>
+</tr>
+<tr>
+<td><a href="guides/torch-025.md.html">torch-025</a></td>
+<td>Contrastive embeddings and negative sampling</td>
+<td><a href="../deep-learning-tensorflow/guides/tf-025.md.html">tf-025</a></td>
+</tr>
+<tr>
+<td><a href="guides/torch-026.md.html">torch-026</a></td>
+<td>Custom modules, residual paths, buffers and autograd checks</td>
+<td><a href="../deep-learning-tensorflow/guides/tf-026.md.html">tf-026</a></td>
+</tr>
+<tr>
+<td><a href="guides/torch-027.md.html">torch-027</a></td>
+<td>Transfer learning, frozen layers and optimizer membership</td>
+<td><a href="../deep-learning-tensorflow/guides/tf-027.md.html">tf-027</a></td>
+</tr>
+<tr>
+<td><a href="guides/torch-028.md.html">torch-028</a></td>
+<td>Restartable training, optimizer state and RNG evidence</td>
+<td><a href="../deep-learning-tensorflow/guides/tf-028.md.html">tf-028</a></td>
+</tr>
+<tr>
+<td><a href="guides/torch-029.md.html">torch-029</a></td>
+<td>Stable objectives, precision and mixed-precision boundaries</td>
+<td><a href="../deep-learning-tensorflow/guides/tf-029.md.html">tf-029</a></td>
+</tr>
+<tr>
+<td><a href="guides/torch-030.md.html">torch-030</a></td>
+<td>Distributed gradients and accumulation semantics on CPU</td>
+<td><a href="../deep-learning-tensorflow/guides/tf-030.md.html">tf-030</a></td>
+</tr>
+<tr>
+<td><a href="guides/torch-031.md.html">torch-031</a></td>
+<td>Profiling, torch.compile and honest performance measurement</td>
+<td><a href="../deep-learning-tensorflow/guides/tf-031.md.html">tf-031</a></td>
+</tr>
+<tr>
+<td><a href="guides/torch-032.md.html">torch-032</a></td>
+<td>state_dict, torch.export and inference parity</td>
+<td><a href="../deep-learning-tensorflow/guides/tf-032.md.html">tf-032</a></td>
+</tr>
+<tr>
+<td><a href="guides/torch-033.md.html">torch-033</a></td>
+<td>Inference mode, model contracts and bounded batching</td>
+<td><a href="../deep-learning-tensorflow/guides/tf-033.md.html">tf-033</a></td>
+</tr>
+<tr>
+<td><a href="guides/torch-034.md.html">torch-034</a></td>
+<td>Robustness, privacy and evidence beyond a score</td>
+<td><a href="../deep-learning-tensorflow/guides/tf-034.md.html">tf-034</a></td>
+</tr>
+<tr>
+<td><a href="guides/torch-035.md.html">torch-035</a></td>
+<td>Paired model comparisons and uncertainty</td>
+<td><a href="../deep-learning-tensorflow/guides/tf-035.md.html">tf-035</a></td>
+</tr>
+<tr>
+<td><a href="guides/torch-036.md.html">torch-036</a></td>
+<td>Capstone: release a small reproducible PyTorch model</td>
+<td><a href="../deep-learning-tensorflow/guides/tf-036.md.html">tf-036</a></td>
+</tr>
+</tbody></table></div>
+<h3 id="evidence-and-limits">Evidence and limits<a class="heading-anchor" href="#evidence-and-limits" aria-label="Link to this section">#</a></h3>
+<p>Tiny CPU fixtures establish local arithmetic,gradient,state and artifact contracts. They do not establish GPU throughput,distributed scaling,privacy,fairness or representative population quality. The compilation lesson uses a transparent eager graph backend and makes no native-kernel speedup claim. Persistence lessons use fresh subprocesses,owned temporary directories and explicit failure diagnostics. The release capstone deliberately rejects a corrupted artifact and permits a no-go decision.</p>
+<p>For domain assistants and actual tiny-model adaptation,continue with <a href="../llm-applied/README.md.html">applied LLMs</a>. For inference and study-design reasoning,see the <a href="../statistics-ml/README.md.html">statistics and machine-learning book</a>. Those topics complement the framework mechanics and do not replace them.</p></article>
   </main>
 </body>
 </html>

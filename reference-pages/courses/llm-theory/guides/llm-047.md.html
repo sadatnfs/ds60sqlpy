@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>llm-047: Sparse experts, routing capacity and load balancing · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>llm-047: Sparse experts, routing capacity and load balancing</h1>
+      <p class="source-path">Generated from <code>courses/llm-theory/guides/llm-047.md</code></p>
+    </header>
+    <article class="document"><h2 id="llm-047-sparse-experts-routing-capacity-and-load-balancing">llm-047: Sparse experts, routing capacity and load balancing<a class="heading-anchor" href="#llm-047-sparse-experts-routing-capacity-and-load-balancing" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Advanced; approximately 210 minutes. Direct prerequisites: <code>llm-046</code>. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>A mixture-of-experts layer routes each token to a subset of specialized transformations. The central investigation is concrete: Use experts I, 2I, -I and three token/router rows with selected probabilities 3/4 and 1/4. The finish condition is outputs[1.25, 0], [0, 1.75], [-.25, -.25]. invalid policies raise ValueError; top-2 tie indices 0, 1. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
+<h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
+<h4 id="let-a-router-choose-computation-then-account-for-every-consequence">Let a router choose computation, then account for every consequence<a class="heading-anchor" href="#let-a-router-choose-computation-then-account-for-every-consequence" aria-label="Link to this section">#</a></h4>
+<p>A mixture-of-experts layer gives a token several possible transformations and uses a router to select a subset. The intended benefit is conditional computation: a model can store many expert parameters while evaluating only some of them for each token. That description leaves several important questions open. How are selected outputs weighted? What happens at a tie? How many tokens can one expert accept? Which paths receive gradients? The answers define the actual model.</p>
+<p>The fixture uses literal linear experts rather than trained semantic specialists. With matrices I,2I and-I, the experts preserve, double or negate an input vector. Calling them experts describes their architectural role, not a demonstrated domain skill. Their simple transformations let us see exactly how routing changes the output without attributing learned knowledge to the toy model.</p>
+<h5 id="separate-scores-assignments-and-gates">Separate scores, assignments and gates<a class="heading-anchor" href="#separate-scores-assignments-and-gates" aria-label="Link to this section">#</a></h5>
+<p>For token t, the router produces E scores z_t1,...,z_tE. A top-k rule selects a set S_t of expert indices. A gate rule then assigns weights to the selected outputs. This lesson computes a softmax over all scores and renormalizes the selected mass, which is equivalent to a softmax restricted to the selected scores while the selection remains fixed.</p>
+<p>With selected probabilities 3/4 and 1/4 and expert outputs x and 2x, the mixture is(3/4)x+(1/4)2x=1.25x. If the selected experts instead produce-x and 2x with the same weights, the result is-.25x. The gate weights are nonnegative and sum to one, but the output features can be negative because the expert outputs are vectors, not probabilities.</p>
+<p>Retaining the original selected probabilities without renormalization would define a different scale, especially if substantial mass lies on unselected experts. Using a unit-weight top-1 delta inside a residual branch defines another policy. These are not interchangeable implementation details. State the formula before comparing gradients or quality.</p>
+<h5 id="understand-the-piecewise-smooth-function">Understand the piecewise-smooth function<a class="heading-anchor" href="#understand-the-piecewise-smooth-function" aria-label="Link to this section">#</a></h5>
+<p>Within a fixed selected set, the normalized gate g_i is exp(z_i)/sum_(j in S)exp(z_j). For scalar expert outputs e_i, mixture y=sum_i g_i e_i has derivative dy/dz_j=g_j(e_j-y). The derivative is smooth as long as the selected identities do not change. A common shift of all selected scores cancels, so the derivatives over those scores sum to zero.</p>
+<p>At a top-k boundary, selection can change discontinuously. The reference uses a stable sorting policy so equal scores choose lower indices deterministically. That makes the discrete result reproducible but does not make the boundary differentiable. A finite-difference check near a tie can compare two different selected sets rather than the intended smooth local derivative.</p>
+<p>Top-1 with selected-mass renormalization illustrates an important limit. The single selected gate becomes 1, so its local derivative with respect to the router score is zero while assignment remains unchanged. Main-task loss through that normalized gate alone cannot supply the same router signal as a policy retaining the selected full-softmax probability. An auxiliary objective or another routing/training choice may therefore matter. The word top-1 does not specify the entire learning mechanism.</p>
+<h5 id="capacity-can-be-exhausted-unevenly">Capacity can be exhausted unevenly<a class="heading-anchor" href="#capacity-can-be-exhausted-unevenly" aria-label="Link to this section">#</a></h5>
+<p>Capacity limits the number of assignments an expert accepts in a batch. A common planning form is C=ceil(c<em>k</em>T/E), where T is token count, k assignments per token, E experts and c a capacity factor. This formula describes a nominal per-expert allocation under a balanced-load expectation. It does not ensure that actual routing is balanced or that every token will be admitted.</p>
+<p>For T=4,E=2,k=1,c=1, capacity is 2 per expert. The fixture assigns tokens to experts[0,0,1,0], producing counts[3,1]. Expert 0 overflows by one while expert 1 has an unused slot. Total nominal capacity equals total assignments, yet one token still cannot use its chosen expert. This is a concrete reason that average utilization can hide a bottleneck.</p>
+<p>The reference admits assignments in input order and preserves the overflowing token&#x27;s residual input while dropping its expert delta. The token remains in the sequence and in any later loss denominator. Reordering the batch can change which token overflows even when assigned counts remain[3,1]. Record token identities, accepted assignments and drop flags, not just the histogram.</p>
+<p>Other systems may reroute, use a different priority policy, increase capacity or apply another fallback. Each changes behavior and resource use. Increasing capacity can reduce drops but requires more activation buffers and may change worst-case work. A capacity-factor name alone does not establish which policy was executed.</p>
+<h5 id="read-the-balancing-objective-under-its-stated-approximation">Read the balancing objective under its stated approximation<a class="heading-anchor" href="#read-the-balancing-objective-under-its-stated-approximation" aria-label="Link to this section">#</a></h5>
+<p>For the top-1-style auxiliary calculation, f_i is the fraction of hard token assignments to expert i and P_i is mean router probability for that expert. The term alpha<em>E</em>sum_i f_i P_i encourages a relationship between hard load and probability mass. In a local gradient calculation, f is treated as fixed while gradients flow through the soft probabilities.</p>
+<p>With f=[.75,.25],P=[.7,.3],E=2 and alpha=.01, the value is .01<em>2</em>(.75<em>.7+.25</em>.3)=.012. The balanced fixture f=P=[.5,.5] yields .01. This comparison illustrates the formula on two states; it does not establish a universal lower bound or prove that lowering the auxiliary term always improves task accuracy or eliminates capacity overflow.</p>
+<p>For one token among T, the local derivative with respect to score j is alpha*E/T times p_j[f_j-sum_i f_i p_i]. If a token gives substantial probability to an already heavily assigned expert, the derivative can push that score down under gradient descent. But the hard assignment counts can change at a routing boundary, and the main task objective can prefer a different tradeoff. Monitor both objectives and actual dispatch outcomes.</p>
+<h5 id="count-stored-and-activated-parameters-separately">Count stored and activated parameters separately<a class="heading-anchor" href="#count-stored-and-activated-parameters-separately" aria-label="Link to this section">#</a></h5>
+<p>For E experts each containing bias-free matrices D-by-H and H-by-D, total expert weights are 2EDH. A token selecting k experts activates k of those transformations, corresponding to 2kDH expert weights in this simple count. With E=8,D=64,H=128,k=2, the totals are 131072 stored expert weights and 32768 selected expert weights per token, excluding the router and other model components.</p>
+<p>The selected-weight count is not a complete compute or memory bill. Expert weights must be stored somewhere, routing has overhead, and activation dispatch can require communication between devices. Small batches may underutilize large matrices; skewed assignments can make one expert the critical path. A model with sparse activation is not automatically as cheap to serve as a dense model with the same active-parameter count.</p>
+<p>A distributed expert-parallel system additionally needs to preserve token identity during dispatch and recombination. Outputs must return to the correct original positions with the correct gates. Network failures, stragglers and padded capacity slots introduce operational concerns absent from this local NumPy fixture. The <a href="https://arxiv.org/abs/2101.03961">Switch Transformer study</a> provides a broader learned-system example; this chapter exposes the smaller contracts that such a system must implement.</p>
+<h5 id="diagnose-whether-the-problem-is-routing-capacity-or-the-task">Diagnose whether the problem is routing, capacity or the task<a class="heading-anchor" href="#diagnose-whether-the-problem-is-routing-capacity-or-the-task" aria-label="Link to this section">#</a></h5>
+<p>If output values disagree, inspect selected indices, gate normalization and expert matrices before interpreting task quality. If local gradients disagree, check whether top-k membership changed during the perturbation. If capacity drops occur, preserve which tokens were affected and whether their errors differ from admitted tokens. A balanced load plot cannot prove that the experts learned useful transformations.</p>
+<p>A meaningful model study compares held-out task behavior, resource use and routing statistics under a fixed data and evaluation contract. It may find that more balanced routing improves throughput while changing accuracy, or that a higher capacity reduces drops at an unacceptable memory cost. These are measured tradeoffs, not consequences that follow from the sparse architecture&#x27;s name.</p>
+<h3 id="design-decisions-and-when-to-use-this-method">Design decisions and when to use this method<a class="heading-anchor" href="#design-decisions-and-when-to-use-this-method" aria-label="Link to this section">#</a></h3>
+<p>Use sparse experts when the architecture, training and serving stack can support conditional computation and its routing overhead. Measure token load distributions and tail behavior, not just mean expert utilization. Keep capacity, tie handling, gate normalization and overflow policy in the artifact contract.</p>
+<p>Do not claim that a model with many total parameters has the compute cost of a small dense model without accounting for router work, expert shapes, communication and batching. This CPU reference executes small matrices locally and does not verify distributed dispatch, network bandwidth or hardware throughput. A real expert-parallel acceptance test needs those measurements and failure/straggler behavior separately.</p>
+<h3 id="derivation-and-shape-trace">Derivation and shape trace<a class="heading-anchor" href="#derivation-and-shape-trace" aria-label="Link to this section">#</a></h3>
+<p>For token x_t, let router probabilities p_t=softmax(z_t), and let S_t be its selected top-k expert set. This reference uses g_ti=p_ti/sum_(j in S_t)p_tj for selected experts and zero otherwise. The output is y_t=sum_i g_ti E_i(x_t). Retaining the original selected probabilities instead would define a different gate policy.</p>
+<p>Within a fixed selected set, a scalar mixture has derivative dy/dz_j=g_j<em>(e_j-y). With expert outputs 1 and 2 and gates 3/4 and 1/4, y=5/4 and the first-logit derivative is (3/4)</em>(1-5/4)=-3/16. A change in top-k membership introduces a hard selection boundary, so this local derivative must not be described as differentiating every routing decision.</p>
+<p>A Switch-style auxiliary term is L_aux=alpha<em>N</em>sum_i f_i P_i. Here f_i is the fraction of hard assignments to expert i, and P_i is the mean router probability. The hard fraction vector is not differentiable; the probability vector is. For T tokens and fixed f, the derivative for one logit is alpha<em>N/T </em> p_tj * (f_j-sum_i f_i p_ti). The coefficient .01 is a declared fixture setting.</p>
+<p>For E experts with two bias-free matrices D-by-H and H-by-D, total expert weights are 2EDH. Top-k activates k experts per token, but storage and communication still depend on placement and serving of all E experts.</p>
+<h3 id="routing-has-a-smooth-interior-and-a-discrete-boundary">Routing has a smooth interior and a discrete boundary<a class="heading-anchor" href="#routing-has-a-smooth-interior-and-a-discrete-boundary" aria-label="Link to this section">#</a></h3>
+<p>A mixture-of-experts block first computes router scores z_ti for token t and expert i. A top-k operation selects a set S_t, and a gate rule combines selected expert outputs. Within one fixed selected set, this lesson renormalizes the selected probabilities. Since the full-softmax denominator cancels, selected gate g_i equals exp(z_i)/sum_(j in S) exp(z_j). Scores of unselected experts have no effect on that normalized mixture until they cross the selection boundary. This local statement is essential when interpreting a finite-difference router gradient.</p>
+<p>For selected scalar expert outputs e_1=1,e_2=2 and gates[3/4,1/4], the mixture y is 5/4. Differentiating with the selected set held fixed gives dy/dz_j=g_j(e_j-y). Thus the first derivative is(3/4)(1-5/4)=-3/16 and the second is+3/16. Raising the score of the smaller-output expert lowers this scalar output. The derivatives sum to zero because a common shift of selected scores leaves their softmax unchanged. The fixture&#x27;s finite difference verifies this smooth local behavior, not a derivative through every top-k identity change.</p>
+<p>At a routing tie, a small perturbation can change which expert is selected. The reference makes ties deterministic by stable descending sorting, so a lower index wins an equal score. Deterministic does not mean differentiable. Finite-difference checks should stay away from membership boundaries when testing the smooth formula, then test the boundary behavior separately as a discrete policy. If a gradient estimate changes dramatically with step size near a tie, the first question is whether the selected expert set changed.</p>
+<p>For top1 with renormalization among selected experts, the only selected gate is exactly1. Within a fixed assignment, the main expert-mixture output has zero derivative with respect to the router score through that gate. Training the router then requires another mechanism, such as a different gating convention or an auxiliary signal. Retaining the selected probability from the full softmax would produce a different gradient and output scale. The capacity example deliberately uses a unit-weight top1 expert delta in a residual path, so it must not be presented as every sparse-transformer implementation&#x27;s training rule.</p>
+<p>Capacity adds an admission policy after assignment. The example assigns counts[3,1] to two experts, each with capacity 2. Only two of expert 0&#x27;s three tokens are admitted, leaving accepted counts[2,1] and one overflow. The dropped token is not removed from the sequence or loss denominator; its output keeps the residual input while omitting the expert delta. With input[2,1], that fallback remains[2,1]. Silently dropping its entire output row would change sequence alignment and the evaluation unit.</p>
+<p>The implementation admits tokens in input order. Reordering a batch with the same assigned counts can therefore change which token overflows and which task predictions are affected. Load counts alone cannot reveal that fairness or quality effect. A production policy could select by gate confidence, reserve capacity or use another dispatch scheme, but each choice defines different behavior and needs an explicit acceptance test. Increasing capacity reduces some drops while increasing activation buffers and potentially changing worst-case work.</p>
+<p>For T tokens and N experts, let f_i be the fraction of hard assignments and P_i the mean router probability. The auxiliary term is alpha<em>N</em>sum_i f_i P_i. In a local derivative that treats the hard f as fixed, one token&#x27;s score derivative is alpha*N/T times p_tj[f_j-sum_i f_i p_ti]. This reveals what can receive a gradient: the probability path, not the discrete counts. For f=[.75,.25],p_t=[.7,.3],N=2,T=4,alpha=.01, the derivatives are+.000525 and-.000525. Gradient descent pushes this token&#x27;s probabilities away from the more heavily assigned expert under the fixed-count local approximation.</p>
+<p>Balanced f=P=[.5,.5] gives the stated .01 fixture value, while f=[.75,.25],P=[.7,.3] gives.012. These two calculations do not prove that .01 is a universal lower bound over every feasible collection of routing distributions, nor that reducing the auxiliary term necessarily improves task loss. Monitor assigned counts, accepted counts, dropped tokens, per-family errors and the main objective together. The auxiliary coefficient trades off objectives and must not be interpreted as a stand-alone quality metric.</p>
+<p>Sparse activation also differs from storage. With E experts each containing two bias-free matrices D-by-H and H-by-D, stored expert weights total 2EDH even if only k experts execute per token. Distributed dispatch requires transporting activations to selected experts and combining their outputs. Uneven loads, synchronization, communication and padding can dominate wall-clock cost. The local linear experts do not measure these effects or reproduce the <a href="https://arxiv.org/abs/2101.03961">Switch Transformer</a> training system.</p>
+<p><strong>Interview reasoning:</strong> &quot;Does activating only two experts make an enormous model as cheap as a small dense one?&quot; It reduces one category of active expert computation under the stated shapes. Total weight storage, routing, dispatch, memory traffic and latency remain. State the counted operations first, then measure the actual system rather than converting an active-parameter count directly into a speed claim.</p>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<p><strong>Sparse expert activation:</strong> Evaluating only selected experts for each token.</p>
+<p><strong>Router:</strong> A function producing expert-selection scores for each token.</p>
+<p><strong>Capacity:</strong> A bound on tokens admitted to an expert in one batch.</p>
+<p><strong>Load-balancing loss:</strong> An auxiliary objective encouraging a less concentrated routing distribution.</p>
+<p><strong>Expert parallelism:</strong> Placing different experts on different devices and moving activations between them.</p>
+<h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
+<p>Use a prepared <code>python-core</code> environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored <code>.learning/expansion/llm-047/</code> before editing, or use the application&#x27;s saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: <code>&amp; $CoursePython courses/llm-theory/lessons/llm-047.py</code>. For macOS/Linux use <code>.venv/bin/python courses/llm-theory/lessons/llm-047.py</code> from the repository root.</p>
+<p>Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Distinguish an exact algebraic mechanism from empirical model quality or hardware performance. The reference uses tiny CPU fixtures only. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.</p>
+<h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
+<p>Inputs have shape(tokens, model_width), router logits(tokens, experts), and expert matrices(experts, model_width, output_width). Stable descending argsort declares a lowest-index tie policy. The selected gates are normalized before combining expert outputs. The capacity helper tracks assigned counts, accepted counts and dropped-token flags separately. A Switch-style auxiliary term uses hard assignment fractions f and mean router probabilities P, with the hard fractions held fixed for a local gradient calculation.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="example-a-calculate-a-top2-expert-mixture">Example A: Calculate a top2 expert mixture<a class="heading-anchor" href="#example-a-calculate-a-top2-expert-mixture" aria-label="Link to this section">#</a></h4>
+<p>The third token combines a negative expert with a positive expert, so routing can change the function ratherthan merely selecting a faster implementation of the same computation.</p>
+<pre><code class="language-python">import numpy as np
+def softmax_rows(logits):
+    logits=np.asarray(logits,dtype=float)
+    if logits.ndim!=2 or not logits.shape[1] or not np.isfinite(logits).all(): raise ValueError(&#x27;finite router matrix required&#x27;)
+    mass=np.exp(logits-logits.max(1,keepdims=True)); return mass/mass.sum(1,keepdims=True)
+def mixture(x,logits,experts,k):
+    x,logits,experts=(np.asarray(value,dtype=float) for value in (x,logits,experts))
+    if x.ndim!=2 or logits.ndim!=2 or experts.ndim!=3 or len(x)!=len(logits) or logits.shape[1]!=len(experts) or x.shape[1]!=experts.shape[1] or type(k) is not int or not 1&lt;=k&lt;=len(experts): raise ValueError(&#x27;expert shapes and top-k required&#x27;)
+    probabilities=softmax_rows(logits); indices=np.argsort(-logits,axis=1,kind=&#x27;stable&#x27;)[:,:k]; selected=np.take_along_axis(probabilities,indices,axis=1); gates=selected/selected.sum(1,keepdims=True)
+    output=np.zeros((len(x),experts.shape[2]))
+    for row in range(len(x)):
+        for slot,expert in enumerate(indices[row]): output[row]+=gates[row,slot]*(x[row]@experts[expert])
+    return output,indices,gates
+def capacity_route(x,logits,experts,capacity):
+    x,logits,experts=(np.asarray(value,dtype=float) for value in (x,logits,experts))
+    if type(capacity) is not int or capacity&lt;=0 or experts.shape[1:]!=(x.shape[1],x.shape[1]) or logits.shape!=(len(x),len(experts)): raise ValueError(&#x27;positive capacity and square expert shapes required&#x27;)
+    chosen=np.argmax(logits,axis=1); assigned=np.bincount(chosen,minlength=len(experts)); accepted=np.zeros(len(experts),dtype=int); dropped=np.zeros(len(x),dtype=bool); output=x.copy()
+    for row,expert in enumerate(chosen):
+        if accepted[expert]&gt;=capacity: dropped[row]=True; continue
+        output[row]+=x[row]@experts[expert]; accepted[expert]+=1
+    return output,dropped,assigned,accepted
+x=np.array([[1.,0.],[0.,1.],[1.,1.]])
+experts=np.stack([np.eye(2),2*np.eye(2),-np.eye(2)])
+logits=np.array([[np.log(3),0.,-100.],[0.,np.log(3),-100.],[-100.,0.,np.log(3)]])
+output,indices,gates=mixture(x,logits,experts,2)
+np.testing.assert_allclose(output,[[1.25,0],[0,1.75],[-.25,-.25]],atol=1e-12,rtol=0)
+np.testing.assert_allclose(gates.sum(1),1,atol=1e-12,rtol=0)</code></pre>
+<p><strong>Expected:</strong> outputs[1.25, 0], [0, 1.75], [-.25, -.25].</p>
+<h4 id="example-b-enforce-expert-capacity-with-residual-fallback">Example B: Enforce expert capacity with residual fallback<a class="heading-anchor" href="#example-b-enforce-expert-capacity-with-residual-fallback" aria-label="Link to this section">#</a></h4>
+<p>The dropped token is not deleted from the sequence or loss denominator. Its residual path is explicit, and the drop count remains available for quality and load analysis.</p>
+<pre><code class="language-python">tokens=np.array([[1.,0.],[0.,1.],[1.,1.],[2.,1.]])
+route_logits=np.array([[5.,0.],[4.,0.],[0.,4.],[3.,0.]])
+residual,dropped,assigned,accepted=capacity_route(tokens,route_logits,experts[:2],2)
+assert assigned.tolist()==[3,1] and accepted.tolist()==[2,1] and dropped.tolist()==[False,False,False,True]
+np.testing.assert_allclose(residual,[[2,0],[0,2],[3,3],[2,1]],atol=1e-12,rtol=0)</code></pre>
+<p><strong>Expected:</strong> assigned counts 3, 1; accepted 2, 1; last token drops its expert delta and keeps its input.</p>
+<h4 id="example-c-compute-a-load-balancing-term">Example C: Compute a load-balancing term<a class="heading-anchor" href="#example-c-compute-a-load-balancing-term" aria-label="Link to this section">#</a></h4>
+<p>The term measures a routing-related objective under the declared formula. A lower auxiliary value is not itself evidence that task loss, capacity drops or distributed utilization improved.</p>
+<pre><code class="language-python">fractions=np.array([.75,.25]); mean_probability=np.array([.7,.3]); coefficient=.01
+loss=coefficient*2*np.dot(fractions,mean_probability)
+np.testing.assert_allclose(loss,.012,atol=1e-12,rtol=0)
+np.testing.assert_allclose(coefficient*2*np.dot([.5,.5],[.5,.5]),.01,atol=1e-12,rtol=0)</code></pre>
+<p><strong>Expected:</strong> auxiliary loss .012; balanced fixture .01.</p>
+<h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
+<p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: outputs[1.25, 0], [0, 1.75], [-.25, -.25]. invalid policies raise ValueError; top-2 tie indices 0, 1. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Calculate a top2 expert mixture.</strong> Use experts I, 2I, -I and three token/router rows with selected probabilities 3/4 and 1/4. <strong>Expected:</strong> outputs[1.25, 0], [0, 1.75], [-.25, -.25]. <strong>Verify:</strong> Save the assertion results for exercise 1, including outputs[1.25, 0], [0, 1.75], [-.25, -.25].</li>
+</ol>
+<ol>
+<li><strong>Enforce expert capacity with residual fallback.</strong> Route four tokens to experts 0, 0, 1, 0 with capacity 2 and unit top1 gates. <strong>Expected:</strong> assigned counts 3, 1; accepted 2, 1; last token drops its expert delta and keeps its input. <strong>Verify:</strong> Save the assertion results for exercise 2, including assigned counts 3, 1; accepted 2, 1; last token drops its expert delta and keeps its input.</li>
+</ol>
+<ol>
+<li><strong>Compute a load-balancing term.</strong> Use hard fractions f[.75, .25], mean router probabilities P[.7, .3], expert count 2 and coefficient .01. <strong>Expected:</strong> auxiliary loss .012; balanced fixture .01. <strong>Verify:</strong> Save the assertion results for exercise 3, including auxiliary loss .012; balanced fixture .01.</li>
+</ol>
+<ol>
+<li><strong>Trace a local router gradient.</strong> Perturb the first logit of the first top-2 mixture row without changing selected experts. <strong>Expected:</strong> derivative of first output coordinate is -3/16 within 1e-8. <strong>Verify:</strong> Save the assertion results for exercise 4, including derivative of first output coordinate is -3/16 within 1e-8.</li>
+</ol>
+<ol>
+<li><strong>Separate total and active parameter counts.</strong> Use 8 two-layer experts with width 64, hidden 128 and top-2 activation, excluding router and biases. <strong>Expected:</strong> total 131072 expert weights; 32768 selected expert weights per token. <strong>Verify:</strong> Save the assertion results for exercise 5, including total 131072 expert weights; 32768 selected expert weights per token.</li>
+</ol>
+<ol>
+<li><strong>Validate routing policy and ties.</strong> Reject top-k 0 and capacity 0; check equal router logits choose lower indices deterministically. <strong>Expected:</strong> invalid policies raise ValueError; top-2 tie indices 0, 1. <strong>Verify:</strong> Save the assertion results for exercise 6, including invalid policies raise ValueError; top-2 tie indices 0, 1.</li>
+</ol>
+<h3 id="controlled-case-study">Controlled case study<a class="heading-anchor" href="#controlled-case-study" aria-label="Link to this section">#</a></h3>
+<p>A batch routes75 percent of its tokens to one of two experts, but capacity allows only half the batch per expert. Some expert deltas are dropped despite low average device utilization. Record assigned counts, accepted counts, drops and task errors for affected tokens. Increasing capacity may reduce drops while increasing activation memory. Router regularization may improve balance while changing task quality. These are measured tradeoffs, not consequences of parameter counts alone.</p>
+<h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
+<p>When router gradients disagree, check the selected expert identities before comparing numbers. Verify whether the implementation renormalizes selected mass, retains full-softmax gates or uses a unit residual delta. For capacity failures, retain token identities as well as assigned/accepted counts; the same histogram can hide a different dropped token after reordering.</p>
+<p>A lower auxiliary loss does not prove fewer drops or better task quality. The reference fixes tiny linear experts and uses a local router derivative away from selection boundaries. It neither trains a large sparse model nor executes distributed expert dispatch. Report those boundaries alongside any exact parameter or gate calculation.</p>
+<h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
+<p>First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise&#x27;s expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.</p>
+<h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
+<p>Close both worked examples. Explain Sparse expert activation, Router, Capacity using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>The final chapter keeps the target model&#x27;s sampling distribution fixed while changing the generation schedule. Speculative decoding uses a draft model to propose work and a correction rule to preserve the target law. Its correctness will depend on probability accounting and cache ownership rather than on treating a high acceptance rate as automatic evidence of speed.</p>
+<h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
+<p>API and mechanism reference: <a href="https://arxiv.org/abs/2101.03961">Switch Transformers</a>, reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. Current execution receipts are recorded in <code>docs/implementation/llm-expert-status.md</code>; authored content does not imply that a heavy runtime was executed.</p>
+<h3 id="additional-primary-references">Additional primary references<a class="heading-anchor" href="#additional-primary-references" aria-label="Link to this section">#</a></h3>
+<p><a href="https://arxiv.org/abs/2006.16668">GShard and expert parallelism</a>, <a href="https://arxiv.org/abs/2202.08906">ST-MoE training considerations</a>.</p>
+<h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for llm-047, Sparse experts, routing capacity and load balancing.
+Read courses/llm-theory/guides/llm-047.md and courses/llm-theory/lessons/llm-047.py. Direct prerequisites: `llm-046`.
+Explain the mental model, ask me to predict the worked example, review my attempt,
+give one hint, request output evidence, and ask a fresh retrieval question.
+Keep courses/llm-theory/solutions/ closed until I request comparison or show an attempt.
+Use only the declared local fixtures. Distinguish arithmetic checks, code execution,
+and evidence about generalization. Done when I can derive the worked values, pass all six exercise checks, explain a failed counterexample, and solve one fresh transfer case without solutions.</code></pre></article>
+  </main>
+</body>
+</html>

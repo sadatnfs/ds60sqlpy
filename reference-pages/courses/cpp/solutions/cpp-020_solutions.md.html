@@ -121,6 +121,14 @@
 <p>A template describes a family of functions parameterized by types. Deduction selects a type from arguments. A concept is a compile-time requirement that determines which template candidates are valid. A constraint improves the interface boundary, but it does not automatically prove arithmetic safety.</p>
 <h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Template deduction happens before any generated function runs. Equal int arguments select one specialization; int and long long arguments can produce conflicting deductions because this signature asks for one T. A concept rejects categories that lack the intended operations, often near the call site. It cannot make every admitted value safe. The overflow check in later lessons is still needed even though integral&lt;int&gt; is true.</p>
+<h3 id="templates-and-constraints-as-interface-documentation">Templates and constraints as interface documentation<a class="heading-anchor" href="#templates-and-constraints-as-interface-documentation" aria-label="Link to this section">#</a></h3>
+<p>A function template describes a family of functions parameterized by types or values. The compiler instantiates the needed specialization from a call. Generic syntax alone does not explain what operations are valid for a type, so constraints can make the intended domain visible before a deeply nested implementation error appears.</p>
+<p>The integral constraint says that the type belongs to the language/library concept for integral types. The complete program instantiates identity_sum for integers and checks2+3=5. The second program uses static_assert to establish that double is not integral. That assertion is checked during compilation and produces no runtime branch. The actual negative exercise attempts a constrained call with double and retains the compiler diagnostic.</p>
+<p>A syntactic constraint is not the whole semantic contract. Integral addition can still overflow for signed types, and mixing signed and unsigned arguments can affect deduction or conversions. A template constrained to integral types must still state supported value ranges and any overflow policy. Concepts should not be advertised as automatic arithmetic safety or proof of all algorithm assumptions.</p>
+<p>Template argument deduction also requires compatible inputs. A function taking two values of the same template parameter may reject an int and long combination even when a programmer considers both numbers. An explicit conversion can resolve the call, but it should be deliberate because narrowing or sign changes can lose meaning. Inspect the inferred types when a call does not match expectations.</p>
+<p>Good constraints describe the weakest capabilities the implementation actually needs. Requiring a random-access container for a one-pass accumulation unnecessarily excludes useful inputs. Conversely, accepting any type while relying on an undocumented operation shifts the error into the implementation. The aim is a readable contract and useful diagnostics, followed by ordinary value-boundary tests.</p>
+<h3 id="debugging-the-contract">Debugging the contract<a class="heading-anchor" href="#debugging-the-contract" aria-label="Link to this section">#</a></h3>
+<p>If template errors are long, find the first failed constraint or mismatched deduced type rather than the final cascade. If a valid type produces a wrong numeric result, inspect values and conversions: type constraints do not prevent overflow. If an interface rejects an input range unnecessarily, compare the declared capability with the operations actually used. Do not weaken every constraint to make one call compile without reviewing the algorithm assumptions.</p>
 <h3 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-cpp">assert(identity_sum(2,3)==5);</code></pre>
 <p>Expected: Deduction selects int and the result is 5.</p>
@@ -143,7 +151,7 @@
 <p><strong>Reasoning:</strong> A narrower category documents intent.</p>
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
 <h3 id="exercise-4-repair-mixed-deduction">Exercise 4: Repair mixed deduction<a class="heading-anchor" href="#exercise-4-repair-mixed-deduction" aria-label="Link to this section">#</a></h3>
-<p>Call identity_sum(2,3LL), then choose a deliberate common type.</p>
+<p>Call identity_sum(2, 3LL), then choose a deliberate common type.</p>
 <p><strong>Expected:</strong> Mixed call fails deduction; explicit long long arguments succeed.</p>
 <p><strong>Reasoning:</strong> Conflicting deductions need a policy, not an accidental conversion.</p>
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
@@ -154,7 +162,7 @@
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
 <h3 id="exercise-6-transfer-a-generic-test">Exercise 6: Transfer a generic test<a class="heading-anchor" href="#exercise-6-transfer-a-generic-test" aria-label="Link to this section">#</a></h3>
 <p>Run zero-identity tests for int and long long.</p>
-<p><strong>Expected:</strong> sum(x,0)==x for bounded x=7 in both types.</p>
+<p><strong>Expected:</strong> sum(x, 0)==x for bounded x=7 in both types.</p>
 <p><strong>Reasoning:</strong> A reusable law should be checked across admitted types.</p>
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p></article>
   </main>

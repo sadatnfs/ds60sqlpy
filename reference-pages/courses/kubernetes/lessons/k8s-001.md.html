@@ -149,7 +149,7 @@ observed namespace_uid=ns-202</code></pre>
 </ol>
 <h4 id="exercise-2-check-identity-beyond-names">Exercise 2: Check identity beyond names<a class="heading-anchor" href="#exercise-2-check-identity-beyond-names" aria-label="Link to this section">#</a></h4>
 <p>Review a context/namespace label against the fictional lease.</p>
-<p><strong>Inputs/evidence:</strong> For k8s-001 Exercise 2, context ds60-demo,cluster-77,lesson-a,ns-101.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-001 Exercise 2, context ds60-demo, cluster-77, lesson-a, ns-101.</p>
 <p><strong>Expected result/shape:</strong> For k8s-001 Exercise 2, all four identity/selection values must match the host-issued receipt before a mutation.</p>
 <p><strong>Verify:</strong> For k8s-001 Exercise 2, list each compared field; do not accept a matching context name alone.</p>
 <p><strong>Progressive hints:</strong></p>
@@ -160,7 +160,7 @@ observed namespace_uid=ns-202</code></pre>
 </ol>
 <h4 id="exercise-3-reject-expiry">Exercise 3: Reject expiry<a class="heading-anchor" href="#exercise-3-reject-expiry" aria-label="Link to this section">#</a></h4>
 <p>Inspect the same lease after its deadline.</p>
-<p><strong>Inputs/evidence:</strong> For k8s-001 Exercise 3, expires12:30Z;inspection12:31Z on the same date.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-001 Exercise 3, expires12:30Z; inspection12:31Z on the same date.</p>
 <p><strong>Expected result/shape:</strong> For k8s-001 Exercise 3, expired by1 minute; no mutation proceeds.</p>
 <p><strong>Verify:</strong> For k8s-001 Exercise 3, perform the explicit timestamp comparison and retain the refusal reason.</p>
 <p><strong>Progressive hints:</strong></p>
@@ -171,7 +171,7 @@ observed namespace_uid=ns-202</code></pre>
 </ol>
 <h4 id="exercise-4-reject-replacement">Exercise 4: Reject replacement<a class="heading-anchor" href="#exercise-4-reject-replacement" aria-label="Link to this section">#</a></h4>
 <p>Compare a recreated namespace with the old receipt.</p>
-<p><strong>Inputs/evidence:</strong> For k8s-001 Exercise 4, expected ns-101,observed ns-202,both named lesson-a.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-001 Exercise 4, expected ns-101, observed ns-202, both named lesson-a.</p>
 <p><strong>Expected result/shape:</strong> For k8s-001 Exercise 4, identity mismatch; refuse apply and cleanup under the old receipt.</p>
 <p><strong>Verify:</strong> For k8s-001 Exercise 4, name the two unequal UIDs and state that no deletion is authorized.</p>
 <p><strong>Progressive hints:</strong></p>
@@ -182,7 +182,7 @@ observed namespace_uid=ns-202</code></pre>
 </ol>
 <h4 id="exercise-5-keep-credentials-out-of-notes">Exercise 5: Keep credentials out of notes<a class="heading-anchor" href="#exercise-5-keep-credentials-out-of-notes" aria-label="Link to this section">#</a></h4>
 <p>Sort a proposed export into safe evidence and secret material.</p>
-<p><strong>Inputs/evidence:</strong> For k8s-001 Exercise 5, namespace UID,lease expiry,source hash,kubeconfig token.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-001 Exercise 5, namespace UID, lease expiry, source hash, kubeconfig token.</p>
 <p><strong>Expected result/shape:</strong> For k8s-001 Exercise 5, export nonsecret receipts; exclude the credential/token.</p>
 <p><strong>Verify:</strong> For k8s-001 Exercise 5, list the excluded field and its private ephemeral storage boundary.</p>
 <p><strong>Progressive hints:</strong></p>

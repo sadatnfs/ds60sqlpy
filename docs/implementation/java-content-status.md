@@ -1,27 +1,35 @@
-# Java authoring checkpoint
+# Java completion andexecution checkpoint
 
-Updated2026-10-22. User priority shifted to detailed applied LLM/NLP teaching, so Java authoring is paused after a coherent first batch.
+Updated2026-10-23. All36 reviewed IDs, `java-001` through `java-036`, are authored andregistered. Stable IDs andprerequisites are preserved. Each bundle has a standalone guide,two complete worked Main.java examples,six exercise contracts,an answer-free learner source,a separate executable reference andan explanatory solution. Guide word counts range from1436 to2176.
 
-Completed authored IDs: `java-001` through `java-012`,12 of36 planned lessons. Each has a standalone guide, two complete worked Main.java examples, six concrete exercise contracts, an answer-free learner source, executable reference and separate explanatory solutions. `lessons.json` registers only these12. `java-013` through `java-036` remain unregistered and unfinished.
+## Actual subject coverage
 
-Portable original authoring sources are in `courses/java/authoring/`. Run `python courses/java/authoring/build.py` from the repository root to regenerate the authored batch. The renderer writes source text as UTF-8 and preserves explicit Java Unicode surrogate escapes.
+The route includes language/type/object fundamentals,collections andgenerics,closures/streams,timezones andDST,owned filesystem work,Optional/error contracts,tests with meaningful mutants,search/sorting/DP,thread happens-before andlost updates,executor timeout/cancellation/backpressure,locks andatomics,Java21 virtual threads,reachability,module/classpath boundaries,reproducible JARs,loopbackHTTP,realH2/JDBC transactions,strict versioned binary serialization,ServiceLoader,JFR,application boundaries,ports/adapters,a tested local data service andrelease integrity checks.
 
-No Java lesson reference has been compiled or executed by this authoring pass. Root owns prepared-image compilation and runtime receipts. Do not infer reference acceptance from the already qualified Java21 worker. Focused Java content tests remain to be added when this workstream resumes.
+JDBC29 requires the prepared `/opt/course-libs/h2-2.5.252.jar`. It uses real `java.sql` operations against unique `jdbc:h2:mem:` fixtures,with bound parameters,commit/rollback,constraint failures andtwo-session READ_COMMITTED visibility. It doesnot simulate a database orcontact shared infrastructure. The serialization encoder anddecoder reject malformed UTF-8 andbounded-length violations. HTTP fixtures bind only127.0.0.1 andclose owned listeners.
 
-JDBC29 will use actual standard java.sql calls against an isolated H2 in-memory database. Root has selected the prepared driver path `/opt/course-libs/h2-2.5.252.jar`. No fake database should be labelled JDBC execution. No runtime package download belongs inside the lesson.
+## Source andmanual fixtures
 
-## Prepared-runtime acceptance readback
+Portable authoring sources are in `courses/java/authoring/`. Regenerate with:
 
-Root integration compiled and executed all12 authored Java references successfully in the prepared Java21/H2 Linux arm64 Docker image. Receipt: `work/java-lessons-acceptance.jsonl`. This supersedes the earlier authoring-pass unexecuted state for Java001..012. It does not claim the remaining24 Java lessons exist or that any native Windows/macOS Java environment was tested.
+```text
+python courses/java/authoring/build.py
+```
 
-## Second coherent authoring batch and priority change
+Manual source trees andcommands for026,027 and036 are in `courses/java/fixtures/`. Tests verify that these source files exactly match the literal programs compiled by the single-file references. Optional jlink image creation remains a manual,unexecuted path;tool presence is not reported as a built-runtime receipt. All generated learner work belongs under ignored learner-owned directories,not source or anephemeral browser pad.
 
-Java013..020 are now authored and registered,bringing the inventory to20 of36. The new batch covers functional interfaces,streams,time zones andDST,owned filesystem work,Optional contracts,tests that detect mutants,data structures and complexity,and binary search/stable sorting/dynamic programming. All have separate learner,reference and explanatory artifacts. The user then prioritized a dedicated PyTorch36 course matching TensorFlow depth,so Java021..036 remain unfinished and unregistered.
+## Focused validation
 
-`tests/test_java_lessons.py` checks authored identity,paths,teaching depth,exercise separation and prerequisites. Its actual JDK execution cases are opt-in throughDS60_TEST_JAVA=1,with assertions enabled and bounded compiler/process time. Root owns prepared-container reference receipts for the new batch. The earlier12-reference Docker pass does not automatically validate Java013..020. Portable authoring sources now include all20 completed lessons.
+```text
+python -m pytest tests/test_java_lessons.py -q --disable-warnings
+```
 
-## Third coherent authoring batch
+Host result: **4 passed, 36 skipped**. The skips are opt-in actual JDK execution cases. Structural checks cover all36 paths,prerequisites,minimum teaching depth,six exercises,solution separation,Main.java contracts,no em dashes,manual-source parity andreal JDBC boundaries.
 
-Java021..028 are now authored and registered,bringing the inventory to28 of36. They cover thread happens-before relationships,controlled lost updates,executor timeouts/cancellation/backpressure,locks andatomics,Java21 virtual threads,heap reachability,actual two-module compilation/execution,JAR reproducibility and a short-lived loopbackHTTP fixture. These new references await root's prepared-image execution. Root confirmed Java013..020 all passed,so the first20 are now execution-verified in that Linux arm64 image.
+All 36 Java references now have successful actual Java21/H2 Linux arm64 Docker evidence. The first 12 passed in `work/java-lessons-acceptance.jsonl`, 013-020 in `work/java-intermediate-acceptance.jsonl`, and 13 of 021-036 in `work/java-advanced-acceptance.jsonl`. Repaired 026, 027 and 036 passed in `work/java-packaging-repaired-acceptance.jsonl`.
 
-The user then prioritized six expert transformer-mechanism additions to LLM theory. Java029..036 remain unfinished and unregistered until that coherent addition is completed. The module/build lessons still need their separately checked-in manual fixture layouts and commands before the final Java freeze. Portable authoring sources contain the full28-lesson batch.
+Those three repairs preserve inherited JVM environment constraints and capture child stdout and stderr separately. The image's JAVA_TOOL_OPTIONS diagnostic is valid stderr, not part of an application's exact stdout contract. The release negative case checks stderr deliberately. Guide, learner, reference and portable specifications agree. The JDBC lesson uses the actual pinned H2 driver and passed in the same prepared image. Optional jlink image creation remains unexecuted.
+
+## Remaining work
+
+The JavaScript/TypeScript route and the substantive ML content quality pass remain active. Root owns shared runtime, Compose, navigation and whole-product delivery. No Git commit, push, engine change or package installation was performed by this content workstream.

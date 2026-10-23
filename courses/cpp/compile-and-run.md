@@ -139,7 +139,87 @@ ctest --test-dir build/debug --output-on-failure
 
 `-S` chooses source and `-B` generated build output. `add_executable` names the program sources, and `target_link_libraries` connects the caller to the library target. CTest actually executes registered checks. Debug and Release need separate build directories. See the [CMake 3.28 tutorial](https://cmake.org/cmake/help/v3.28/guide/tutorial/index.html).
 
-Missing CMake/Ninja leaves the CMake row unavailable even when direct compilation works. Do not infer CMake or CTest acceptance from a source review or compiler success. Do not install tools automatically during Run.
+Missing native CMake/Ninja leaves the native CMake route unavailable;the Docker-only route below uses the prepared image instead. Do not infer CMake or CTest acceptance from a source review or compiler success. Do not install tools automatically during Run.
+
+### Docker-only CMake project route
+
+Use this route when the host has Docker but no C++ compiler, CMake or Ninja. The already prepared `ds60sqlpy-worker-cpp20:0.3.0` image contains those tools. The commands override its worker entry point for a short, offline project operation. They do not require starting the classroom broker or mounting its token. Run from the repository root and use a local Linux-container engine. A remote Docker daemon cannot bind a folder from your local computer.
+
+Choose either `record-library` or `multifile`. Make a **new copy** before editing. The example name ends in `-01`; choose a new unused suffix for another attempt. Never point the writable project mount at the whole repository, your home folder or an existing learner project. A failure to create the new directory is a stop condition, not permission to overwrite it.
+
+On macOS or Linux, use a POSIX terminal:
+
+```sh
+cpp_fixture=record-library
+cpp_project="$PWD/.learning/cpp-projects/${cpp_fixture}-01"
+mkdir -p "$PWD/.learning/cpp-projects"
+mkdir "$cpp_project" && cp -R "courses/cpp/fixtures/$cpp_fixture/." "$cpp_project/"
+```
+
+Stop if either creation or copy fails. The absolute `cpp_project` path identifies the host folder. Quoting preserves spaces. The `--mount` syntax below treats commas as separators, so choose a project path without commas. On Docker Desktop for macOS, ensure this folder is inside an already shared location. On Linux, the UID/GID arguments below keep created files owned by your current user. If the engine's configured file-sharing or security policy denies the mount, diagnose that host setup rather than making the container privileged.
+
+```sh
+cpp_image=ds60sqlpy-worker-cpp20:0.3.0
+cpp_tool() {
+    cpp_entrypoint="$1"
+    shift
+    docker run --rm --pull never --network none --read-only \
+      --cap-drop ALL --security-opt no-new-privileges \
+      --pids-limit 128 --cpus 2 --memory 1g \
+      --user "$(id -u):$(id -g)" \
+      --tmpfs /tmp:rw,exec,nosuid,size=256m \
+      --mount "type=bind,source=$cpp_project,target=/project" \
+      --workdir /project --entrypoint "$cpp_entrypoint" "$cpp_image" "$@"
+}
+cpp_tool cmake -S /project -B /project/build/debug -G Ninja -DCMAKE_BUILD_TYPE=Debug &&
+cpp_tool cmake --build /project/build/debug --parallel 2 &&
+cpp_tool ctest --test-dir /project/build/debug --output-on-failure &&
+cpp_tool cmake --install /project/build/debug --prefix /project/install
+```
+
+Each `&&` requires the preceding phase to succeed. The final command status is available immediately as `$?`. A failure stops the chain, preserving the copied source and partial diagnostics for investigation. To capture a phase separately, run one `cpp_tool` command and inspect its status before continuing.
+
+On Windows, use PowerShell with Docker Desktop or another already configured local Linux-container engine. Use the actual Windows path returned by `Join-Path`/`Resolve-Path`; do not translate it manually into `/c/...`. If you use WSL instead, use the POSIX block with paths visible to that WSL-integrated engine and keep that choice consistent for the whole build directory.
+
+```powershell
+$CppFixture = 'record-library'
+$CppProject = Join-Path (Get-Location).Path ".learning/cpp-projects/$CppFixture-01"
+if (Test-Path -LiteralPath $CppProject) { throw 'Choose a new unused project suffix.' }
+New-Item -ItemType Directory -Path $CppProject -ErrorAction Stop | Out-Null
+Copy-Item -Path "courses/cpp/fixtures/$CppFixture/*" -Destination $CppProject -Recurse -ErrorAction Stop
+$CppProject = (Resolve-Path -LiteralPath $CppProject).Path
+$CppImage = 'ds60sqlpy-worker-cpp20:0.3.0'
+$CppDockerArgs = @(
+    'run', '--rm', '--pull', 'never', '--network', 'none', '--read-only',
+    '--cap-drop', 'ALL', '--security-opt', 'no-new-privileges',
+    '--pids-limit', '128', '--cpus', '2', '--memory', '1g',
+    '--user', '1000:1000', '--tmpfs', '/tmp:rw,exec,nosuid,size=256m',
+    '--mount', "type=bind,source=$CppProject,target=/project",
+    '--workdir', '/project'
+)
+function Invoke-CppTool {
+    param(
+        [string]$Tool,
+        [Parameter(ValueFromRemainingArguments=$true)][string[]]$ToolArgs
+    )
+    & docker @CppDockerArgs --entrypoint $Tool $CppImage @ToolArgs
+    if ($LASTEXITCODE -ne 0) { throw "Container tool $Tool failed with exit $LASTEXITCODE." }
+}
+Invoke-CppTool cmake -S /project -B /project/build/debug -G Ninja -DCMAKE_BUILD_TYPE=Debug
+Invoke-CppTool cmake --build /project/build/debug --parallel 2
+Invoke-CppTool ctest --test-dir /project/build/debug --output-on-failure
+Invoke-CppTool cmake --install /project/build/debug --prefix /project/install
+```
+
+The Windows route uses a nonroot container identity and Docker Desktop's host-file sharing. If the prepared engine cannot write that shared folder under this identity, leave the operation failed and resolve the documented sharing setup. Do not silently switch to privileged mode or mount an engine socket. The single quoted mount argument supports spaces; use a path without commas. Docker's [bind-mount guide](https://docs.docker.com/engine/storage/bind-mounts/) explains why the source path belongs to the daemon host and why files persist outside a removed container.
+
+Expected for `record-library`: CTest runs `record_contract` and reports one passing test. Installation writes `install/include/record.hpp`, `install/lib/libds60_records.a` and exported target files under `install/lib/cmake/ds60Records`. Expected for `multifile`: CTest runs `arithmetic_contract`, checks `add=5 subtract=2`, and reports one passing test. Installation writes `install/include/math.hpp`, `install/lib/libds60_math.a`, `install/bin/math_check` and exported target files under `install/lib/cmake/ds60Math`. To run that second workflow, choose `multifile` and a new project directory at the copy step; the configure/build/test/install commands stay the same.
+
+The copied source, `build/debug/`, CTest log `build/debug/Testing/Temporary/LastTest.log`, and `install/` are durable files in the learner-owned host project. `--rm` removes only each temporary container. It does not delete the bind-mounted project. The installed binaries and static libraries are Linux artifacts for the container architecture, even on Windows or macOS; do not try to launch them as native Windows `.exe` or macOS binaries. Run them inside the same prepared image, for example `cpp_tool /project/install/bin/math_check` or `Invoke-CppTool /project/install/bin/math_check` after the multifile installation.
+
+Use a separate `build/release` and install prefix for a Release comparison. Never reuse a native CMake cache inside Docker or a Docker cache on another architecture. A fresh directory preserves the compiler/path identity. Installing into `/project/install` is a local packaging exercise, not a system-wide installation. See the [CMake install interface](https://cmake.org/cmake/help/v3.28/manual/cmake.1.html#install-a-project) for the build/install distinction.
+
+This project route is separate from the browser pad, which still accepts one C++ translation unit. Save your project edits and phase logs with the project; they are not automatically copied into the classroom learner pad or its progress record.
 
 ## 7. Concurrency, instrumentation and evidence
 

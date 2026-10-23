@@ -3,7 +3,7 @@
   "status": "planned",
   "id": "llm-theory",
   "title": "Language models: mechanisms, training and evidence",
-  "summary": "A 42-lesson design from NumPy probability and causal attention to a small PyTorch transformer and a defensible system evaluation.",
+  "summary": "A48-lesson route from token probabilities and causal attention through tiny-model evidence and advanced transformer architecture,position,normalization,attention,expert-routing and exact decoding mechanisms.",
   "north_star": "Explain what each language-model component computes, test its information boundary and make a scoped system decision from reproducible evidence.",
   "entry_prerequisites": [
     "python-16"
@@ -624,7 +624,7 @@
       ],
       "runtime": "llm-torch-cpu",
       "outcome": "Explain how a supervised objective changes when only answer tokens receive loss.",
-      "lab": "Use short fixed instruction/answer records on the tiny model; compare full-sequence and answer-only loss masks.",
+      "lab": "Use short fixed instruction/answer records with independent literal logits; compare full-sequence and answer-only loss masks and their direct logit gradients.",
       "verification": "The answer-only denominator equals the number of answer targets, not prompt+answer length. Evaluation tasks are held out by template family.",
       "concepts": [
         "SFT",
@@ -848,6 +848,126 @@
         "reliability case",
         "go-no-go",
         "limitations"
+      ]
+    },
+    {
+      "id": "llm-043",
+      "title": "Encoder, decoder and encoder-decoder architectures and objectives",
+      "level": "advanced",
+      "minutes": 210,
+      "prerequisites": [
+        "llm-042"
+      ],
+      "runtime": "python-core",
+      "outcome": "Transformer architecture describes which positions exchange information and how those representations are used.",
+      "lab": "Use zero queries/keys and values[[2, 0], [0, 2], [6, 6]] under all-allowed and causal masks.",
+      "verification": "encoder rows all[8/3, 8/3]; decoder rows[2, 0], [1, 1], [8/3, 8/3]. both cross outputs[1, 1]; padded source weight0.",
+      "concepts": [
+        "Encoder",
+        "Causal decoder",
+        "Cross-attention",
+        "Teacher forcing",
+        "Objective mask"
+      ]
+    },
+    {
+      "id": "llm-044",
+      "title": "RoPE, relative positions, ALiBi and long-context limits",
+      "level": "advanced",
+      "minutes": 210,
+      "prerequisites": [
+        "llm-043"
+      ],
+      "runtime": "python-core",
+      "outcome": "Position mechanisms tell attention how token order or distance should influence a comparison.",
+      "lab": "Rotate[1, 0] bypi/2 andcheck length preservation.",
+      "verification": "approximately[0, 1]; norm1. finite vector; long_context_quality_verifiedFalse; odd width rejected.",
+      "concepts": [
+        "RoPE",
+        "Relative offset",
+        "ALiBi",
+        "Position offset",
+        "Length extrapolation"
+      ]
+    },
+    {
+      "id": "llm-045",
+      "title": "Pre/post normalization, RMSNorm and gated feed-forward networks",
+      "level": "advanced",
+      "minutes": 210,
+      "prerequisites": [
+        "llm-044"
+      ],
+      "runtime": "llm-torch-cpu",
+      "outcome": "Normalization placement changes the residual network's gradient path.",
+      "lab": "Normalizevector3, 4 withunitgain andepsilon1e-8.",
+      "verification": "RMSNorm mean nonzero; LayerNorm meanapproximately0. LayerNormshiftinvariant; RMSNormchanges; bothzerocasesfinite.",
+      "concepts": [
+        "Pre-norm",
+        "Post-norm",
+        "RMSNorm",
+        "SwiGLU",
+        "Jacobian"
+      ]
+    },
+    {
+      "id": "llm-046",
+      "title": "MHA, MQA, GQA and blockwise exact attention",
+      "level": "advanced",
+      "minutes": 210,
+      "prerequisites": [
+        "llm-045"
+      ],
+      "runtime": "python-core",
+      "outcome": "Attention architecture and attention execution are separate design dimensions.",
+      "lab": "Usebatch1, time5, queryheads4, headwidth2, float32, andcompareKVheads4, 2, 1.",
+      "verification": "rawKVbytes320, 160, 80; projection weights256, 192, 160 for modelwidth8 withoutbiases. both raiseValueError; no outputNaNs are accepted.",
+      "concepts": [
+        "MHA",
+        "MQA",
+        "GQA",
+        "Online softmax state",
+        "IO-aware kernel"
+      ]
+    },
+    {
+      "id": "llm-047",
+      "title": "Sparse experts, routing capacity and load balancing",
+      "level": "advanced",
+      "minutes": 210,
+      "prerequisites": [
+        "llm-046"
+      ],
+      "runtime": "python-core",
+      "outcome": "A mixture-of-experts layer routes each token to a subset of specialized transformations.",
+      "lab": "UseexpertsI, 2I, -I andthree token/router rows with selected probabilities3/4 and1/4.",
+      "verification": "outputs[1.25, 0], [0, 1.75], [-.25, -.25]. invalid policiesraiseValueError; top2tieindices0, 1.",
+      "concepts": [
+        "Sparse expert activation",
+        "Router",
+        "Capacity",
+        "Load-balancing loss",
+        "Expert parallelism"
+      ]
+    },
+    {
+      "id": "llm-048",
+      "title": "Exact speculative decoding and cache rollback",
+      "level": "advanced",
+      "minutes": 210,
+      "prerequisites": [
+        "llm-047"
+      ],
+      "runtime": "python-core",
+      "outcome": "Speculative decoding proposes several tokens with a cheaper draft model andverifies them against a target model.",
+      "lab": "Usep[.5, .3, .2] andq[.2, .5, .3]; calculate acceptedmass, rejectionmass andresidual.",
+      "verification": "acceptedmass[.2, .3, .2]; rejection.3; residual[1, 0, 0]; combinedmassp. rejection mass is0 and residual isNone; accepted EOS stops generation; the token cap is respected; unsupported proposals raiseValueError.",
+      "concepts": [
+        "Draft distribution",
+        "Acceptance probability",
+        "Residual distribution",
+        "Bonus token",
+        "Cache rollback"
       ]
     }
   ],

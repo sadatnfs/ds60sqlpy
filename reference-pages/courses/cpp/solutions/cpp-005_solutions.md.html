@@ -120,7 +120,15 @@
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>A function names a computation with parameters as inputs and a return value as its output. A precondition is a promise the caller must satisfy. A postcondition describes the result. Pure functions avoid hidden state, so the same inputs produce the same value and small boundary tests are meaningful.</p>
 <h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>
-<p>A caller has three distinct questions: are the bounds valid, is the value below/inside/above them, and may the call alter its input? The supplied function rejects reversed bounds first. Only then does it compute min(value,high), followed by max(low,...). The three ordinary cases cover each position relative to the interval, while equal bounds test a degenerate but valid interval. A return value can differ from the argument without mutating the caller because parameters are copies.</p>
+<p>A caller has three distinct questions: are the bounds valid, is the value below/inside/above them, and may the call alter its input? The supplied function rejects reversed bounds first. Only then does it compute min(value, high), followed by max(low, ...). The three ordinary cases cover each position relative to the interval, while equal bounds test a degenerate but valid interval. A return value can differ from the argument without mutating the caller because parameters are copies.</p>
+<h3 id="function-contracts-and-call-boundaries">Function contracts and call boundaries<a class="heading-anchor" href="#function-contracts-and-call-boundaries" aria-label="Link to this section">#</a></h3>
+<p>A function call creates a local computation with a clear interface. The caller supplies x, low and high; the function returns one integer or rejects an invalid interval. Pass by value gives each parameter its own integer value. If the caller stores x=12, calling clamp_reading(x, 0, 10) can return10 while the caller variable remains12. Returning a value and modifying a caller object are different interface choices.</p>
+<p>The contract has an ordering dependency. First establish low&lt;=high. Only then does the phrase clamp into the interval have a meaningful interpretation. The expression max(low, min(x, high)) implements the valid interval behavior, but it is not an interval validator. With reversed bounds, those library calls still produce an integer, which can hide a nonsensical request. Explicit rejection preserves the distinction between a valid answer and invalid input.</p>
+<p>Trace the three ordinary paths separately. Below the interval, min(x, high) leaves x and max raises it to low. Inside, both operations leave x unchanged. Above, min lowers x to high and max leaves it there. Equal bounds are valid: every input maps to the single permitted point. That fourth case checks that the validation uses &gt; rather than &gt;=.</p>
+<p>The exception type communicates why no result is returned. In the second worked program, the catch block sets a flag, and the program asserts that the flag became true. Merely writing an empty catch block would not prove the exception occurred. Uncaught exceptions terminate the program through a different path from an explicit status return, so the caller must choose where to translate failures into a user-facing diagnostic.</p>
+<p>For a larger API, document units and ranges as part of the contract. Integer cents and integer degrees use the same C++ type but represent different quantities. A pure clamp function is easy to test because it depends only on its arguments. A hidden global limit or filesystem read would add state that each test and caller must understand. Prefer that extra dependency to be explicit when it is actually needed.</p>
+<h3 id="debugging-the-contract">Debugging the contract<a class="heading-anchor" href="#debugging-the-contract" aria-label="Link to this section">#</a></h3>
+<p>A function-name typo or incompatible argument type is usually a compile problem. A declared but undefined function can compile at the call site and fail during linking. A reversed interval here is a runtime contract failure. Preserve the phase and diagnostic instead of treating all three as a generic failed function. If a caller value unexpectedly changes, inspect whether the real signature uses a nonconst reference or pointer rather than the copied parameters shown here.</p>
 <h3 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-cpp">assert(clamp_reading(12,0,10)==10);</code></pre>
 <p>Expected: 12 is above the upper bound, so the function returns 10.</p>
@@ -128,8 +136,8 @@
 <pre><code class="language-cpp">try { clamp_reading(5,10,0); } catch(const std::invalid_argument&amp;) { /* rejected */ }</code></pre>
 <p>Expected: The reversed interval raises invalid_argument before computing a result.</p>
 <h3 id="exercise-1-predict-the-contract">Exercise 1: Predict the contract<a class="heading-anchor" href="#exercise-1-predict-the-contract" aria-label="Link to this section">#</a></h3>
-<p>Evaluate -3,5,12 for bounds [0,10].</p>
-<p><strong>Expected:</strong> Results [0,5,10].</p>
+<p>Evaluate -3, 5, 12 for bounds [0, 10].</p>
+<p><strong>Expected:</strong> Results [0, 5, 10].</p>
 <p><strong>Reasoning:</strong> Below, inside and above are separate paths.</p>
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
 <h3 id="exercise-2-check-parameter-isolation">Exercise 2: Check parameter isolation<a class="heading-anchor" href="#exercise-2-check-parameter-isolation" aria-label="Link to this section">#</a></h3>
@@ -138,22 +146,22 @@
 <p><strong>Reasoning:</strong> Pass by value creates the parameter copy.</p>
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
 <h3 id="exercise-3-build-a-predicate">Exercise 3: Build a predicate<a class="heading-anchor" href="#exercise-3-build-a-predicate" aria-label="Link to this section">#</a></h3>
-<p>Write inside(x,low,high) with inclusive bounds.</p>
-<p><strong>Expected:</strong> inside(0,0,10) true; inside(11,0,10) false.</p>
+<p>Write inside(x, low, high) with inclusive bounds.</p>
+<p><strong>Expected:</strong> inside(0, 0, 10) true; inside(11, 0, 10) false.</p>
 <p><strong>Reasoning:</strong> Return a Boolean comparison conjunction.</p>
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
 <h3 id="exercise-4-repair-an-invalid-contract">Exercise 4: Repair an invalid contract<a class="heading-anchor" href="#exercise-4-repair-an-invalid-contract" aria-label="Link to this section">#</a></h3>
 <p>Remove the reversed-bounds check and explain the lost guarantee.</p>
-<p><strong>Expected:</strong> clamp(5,10,0) must be rejected after repair.</p>
+<p><strong>Expected:</strong> clamp(5, 10, 0) must be rejected after repair.</p>
 <p><strong>Reasoning:</strong> min/max alone do not validate the meaning of the bounds.</p>
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
 <h3 id="exercise-5-check-a-one-point-interval">Exercise 5: Check a one-point interval<a class="heading-anchor" href="#exercise-5-check-a-one-point-interval" aria-label="Link to this section">#</a></h3>
-<p>Evaluate x=2,3,4 with bounds [3,3].</p>
+<p>Evaluate x=2, 3, 4 with bounds [3, 3].</p>
 <p><strong>Expected:</strong> All return 3.</p>
 <p><strong>Reasoning:</strong> Equal bounds form a valid single-value interval.</p>
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
 <h3 id="exercise-6-transfer-to-money">Exercise 6: Transfer to money<a class="heading-anchor" href="#exercise-6-transfer-to-money" aria-label="Link to this section">#</a></h3>
-<p>Clamp a cents amount of 1250 to [0,1000].</p>
+<p>Clamp a cents amount of 1250 to [0, 1000].</p>
 <p><strong>Expected:</strong> 1000 integer cents, without floating conversion.</p>
 <p><strong>Reasoning:</strong> The contract applies to a different integer domain.</p>
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p></article>

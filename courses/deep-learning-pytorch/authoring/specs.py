@@ -120,9 +120,13 @@ ex('Observe grad-return behavior','Check that autograd.grad did not accumulate i
 ex('Reject invalid probes','Pass h0, negative h and a function returning infinity to the finite-difference helper.','all raise ValueError.', '''for function,h in [(lambda x:x*x,0),(lambda x:x*x,-.1),(lambda x:float('inf'),.1)]:
     try: central(function,0.,h)
     except ValueError: pass
-    else: raise AssertionError('invalid derivative probe accepted')''','Validation distinguishes an unusable numerical check from a disagreement with the analytic derivative. Widening a tolerance cannot repair undefined input.')],
+    else: raise AssertionError('invalid derivative probe accepted')
+try: central(lambda value:0.0,float('nan'),.1)
+except ValueError: pass
+else: raise AssertionError('nonfinite probe point accepted')''','Validation distinguishes an unusable numerical check from a disagreement with the analytic derivative. Widening a tolerance cannot repair undefined input.')],
 'TensorFlow GradientTape.gradient returns gradients explicitly, while PyTorch autograd.grad also returns them and backward accumulates into leaf.grad. Both must record the relevant forward computation. The same float64finite-difference oracle applies to either framework.',
 [('Why not make h arbitrarily tiny?','Subtraction of nearly equal floating-point values loses significant digits. A smaller mathematical step can produce a worse numerical estimate.'),('What does a zero derivative prove?','Only local stationarity for that variable and objective at the evaluated point. It does not by itself prove a global optimum or good generalization.')],helper='''def central(function,value,h):
+    if not np.isfinite(value): raise ValueError('finite probe point required')
     if not np.isfinite(h) or h<=0: raise ValueError('positive finite step required')
     left,right=function(value-h),function(value+h)
     if not np.isfinite([left,right]).all(): raise ValueError('finite probe values required')
@@ -134,7 +138,7 @@ lesson(6,
 [('Autograd graph','The recorded tensor-operation dependencies used for differentiation.'),('Saved tensor','An intermediate value retained because backward needs it.'),('In-place hazard','A mutation that changes data required by a recorded derivative.')],[
 ex('Trace the chain rule','Use w=1, z=2*w, a=z*z and loss=(a-1)**2.','z2, a4, loss9, gradient48.', '''w=torch.tensor(1.,dtype=torch.float64,requires_grad=True); z=2*w; a=z*z; loss=(a-1)**2
 gradient=torch.autograd.grad(loss,w)[0]
-assert (z.item(),a.item(),loss.item(),gradient.item())==(2.,4.,9.,48.)''','The factors are2(loss inner), 2z and2 from the affine input, with the outer residual included. Multiplying them gives48 at the supplied point.'),
+assert (z.item(),a.item(),loss.item(),gradient.item())==(2.,4.,9.,48.)''','The factors are dL/da=2(a-1)=6, da/dz=2z=4 and dz/dw=2. Multiplying6*4*2 gives48 at the supplied point.'),
 ex('Check an independent slope','Compare the chain derivative with a central difference of the complete scalar expression.','approximately48 within1e-5.', '''h=1e-5; f=lambda value:((2*value)**2-1)**2
 numeric=(f(1+h)-f(1-h))/(2*h)
 np.testing.assert_allclose(numeric,48,atol=1e-5,rtol=0)''','The finite difference treats the entire function as a black box. It can expose an incorrect manual chain factor without reading the graph internal s.'),
@@ -276,10 +280,14 @@ with torch.no_grad(): model.weight.zero_()
 optimizer=torch.optim.SGD(model.parameters(),lr=.1); initial=((model(x[train])-y[train])**2).mean().item(); curve=[]
 for _ in range(100):
     optimizer.zero_grad(set_to_none=True); loss=((model(x[train])-y[train])**2).mean(); curve.append(loss.item()); loss.backward(); optimizer.step()
-assert len(curve)==100 and np.isfinite(curve).all() and curve[-1]<initial''','The fixed budget is decided before assessment. A successful decrease demonstrates fitting on exposed data, not generalization by itself.'),
+assert len(curve)==100 and np.isfinite(curve).all() and curve[-1]<initial
+expected_weight=torch.tensor([[2.,-1.,1.]],dtype=torch.float64)*(1-.95**100)
+torch.testing.assert_close(model.weight,expected_weight,atol=1e-12,rtol=0)
+np.testing.assert_allclose([curve[0],curve[-1]],[1.5,1.5*.95**198],atol=1e-12,rtol=0)''','The fixed budget is decided before assessment. A successful decrease demonstrates fitting on exposed data, not generalization by itself.'),
 ex('Open the holdout after fitting','Calculate final training and holdout MSE without updates.','finite errors; holdout error below7.25on this fixture.', '''model.eval()
 with torch.no_grad(): train_error=((model(x[train])-y[train])**2).mean().item(); test_error=((model(x[test])-y[test])**2).mean().item()
-assert np.isfinite([train_error,test_error]).all() and test_error<baseline.item()''','The score is specific to two authored holdout rows. Do not tune the learning rate after this observation and still call the same data untouched.'),
+assert np.isfinite([train_error,test_error]).all() and test_error<baseline.item()
+np.testing.assert_allclose([train_error,test_error],[1.5*.95**200,10*.95**200],atol=1e-12,rtol=0)''','The score is specific to two authored holdout rows. Do not tune the learning rate after this observation and still call the same data untouched.'),
 ex('Retain an independent pilot oracle','Calculate the scalar first update directly from NumPy without using the module.','w28/15and loss56/675.', '''pilot=np.array([1.,2.,3.]); gradient=2*np.mean((-2*pilot)*pilot); updated=-.1*gradient
 np.testing.assert_allclose([updated,np.mean((updated*pilot-2*pilot)**2)],[28/15,56/675],atol=1e-12,rtol=0)''','The pilot protects the update mechanism independently of the feature model. A low final error could otherwise conceal a compensating implementation mistake.'),
 ex('Write the bounded evidence report','Record split IDs, 100steps, errors and the two-row limitation.','disjoint IDs; holdout count2; explicit limited scope.', '''report={'train_ids':train,'test_ids':test,'steps':100,'train_mse':train_error,'test_mse':test_error,'limit':'two synthetic holdout rows'}
@@ -344,13 +352,18 @@ assert padded.tolist()==[[2,3],[4,0]] and lengths.tolist()==[2,1]''','Padding eq
 ex('Preserve pairing after shuffle','Load values=2*IDs with shuffling and check each batch.','every target equals twice its ID.', '''paired=torch.utils.data.TensorDataset(torch.arange(6),2*torch.arange(6))
 for ids,targets in torch.utils.data.DataLoader(paired,batch_size=2,shuffle=True,generator=torch.Generator().manual_seed(9),num_workers=0):
     assert torch.equal(targets,2*ids)''','Sampling one joint dataset keeps the components together. Two independently shuffled loaders would not preserve the pairing.'),
-ex('Reject an empty sequence in this collator','Pass[[], [1]] to a collator whose contract requires positive lengths.','ValueError before padding.', '''try: collate([[],[1]])
+ex('Reject invalid sequence records','Pass an empty sequence and floating, Boolean, negative or overflowing token IDs to the collator.','ValueError before padding; token IDs must be nonnegative int64 integers.', '''try: collate([[],[1]])
 except ValueError: pass
-else: raise AssertionError('empty sequence accepted')''',"Some applications can represent empty sequences, but this lesson\'s recurrent contract cannot. Rejecting the case early keeps an undefined loss denominator from appearing later.")],
+else: raise AssertionError('empty sequence accepted')
+for invalid in [[[2.7]],[[True]],[[-1]],[[2**63]]]:
+    try: collate(invalid)
+    except ValueError: pass
+    else: raise AssertionError('invalid token ID accepted')''',"Some applications can represent empty sequences, but this lesson\'s recurrent contract cannot. Rejecting the case early keeps an undefined loss denominator from appearing later.")],
 "TensorFlow tf.data combines dataset transformations and pre fetching in its pipeline API. PyTorch commonly separates Dataset retrieval from DataLoader sampling/collation. Both need explicit cardinality, ordering and training-only preprocessing checks; num_workers0is this course\'s bounded default, not a throughput recommendation.",
 [('Why is a seed insufficient by itself?','Reproducibility also depends on which generator consumes which draws, worker behavior, dataset state and ordering. Record the whole data contract.'),('Does drop_last only change tensor shape?','No. It can remove observations from an epoch and change metric denominators. That statistical effect must be reported.')],helper='''def collate(sequences):
     if not sequences or any(len(sequence)==0 for sequence in sequences): raise ValueError('nonempty sequences required')
-    lengths=torch.tensor([len(sequence) for sequence in sequences]); batch=torch.zeros((len(sequences),int(lengths.max())),dtype=torch.long)
+    if any(isinstance(token,(bool,np.bool_)) or not isinstance(token,(int,np.integer)) or not 0<=int(token)<2**63 for sequence in sequences for token in sequence): raise ValueError('nonnegative int64 token IDs required')
+    lengths=torch.tensor([len(sequence) for sequence in sequences],dtype=torch.long); batch=torch.zeros((len(sequences),int(lengths.max())),dtype=torch.long)
     for row,sequence in enumerate(sequences): batch[row,:len(sequence)]=torch.tensor(sequence)
     return batch,lengths
 ''',source=('PyTorch2.9 DataLoader','https://docs.pytorch.org/docs/2.9/data.html'))
@@ -363,9 +376,14 @@ w=torch.tensor([[1.,-1.],[-1.,1.]])
 h=F.relu(x@w); output=h.sum(1)
 assert output.tolist()==[0.,1.,1.,0.]''','Each hidden unit detects one direction of difference. ReLU prevents positive and negative contributions from cancelling.'),
 ex('Remove the nonlinearity','Sum the raw difference features without ReLU.','all four outputs0.', '''assert (x@w).sum(1).tolist()==[0.,0.,0.,0.]''','The two columns are opposite s, so a linear sum cancels. Adding more linear layers would not create the piecewise behavior needed for XOR.'),
-ex('Map the construction into Linear','Seta2-to-2bias-free Linear weight to W.T and apply ReLU.','module features equal manual features.', '''layer=nn.Linear(2,2,bias=False)
+ex('Map the construction into Linear','Set a 2-to-2 bias-free Linear weight to W.T, then check a separate asymmetric matrix.','module features equal manual features; the asymmetric probe distinguishes the two orientations.', '''layer=nn.Linear(2,2,bias=False)
 with torch.no_grad(): layer.weight.copy_(w.T)
-torch.testing.assert_close(F.relu(layer(x)),h,atol=0,rtol=0)''',"The explicit transpose checks PyTorch\'s stored layout. A correct mathematical matrix with the wrong assignment orientation can change a function silently when shapes are square."),
+torch.testing.assert_close(F.relu(layer(x)),h,atol=0,rtol=0)
+asymmetric=torch.tensor([[1.,2.],[3.,4.]])
+probe=nn.Linear(2,2,bias=False)
+with torch.no_grad(): probe.weight.copy_(asymmetric.T)
+torch.testing.assert_close(probe(x),x@asymmetric,atol=0,rtol=0)
+assert not torch.equal(x@asymmetric,x@asymmetric.T)''',"The XOR matrix is symmetric, so that fixture alone cannot detect a missing transpose. The separate asymmetric matrix makes the two orientations produce different outputs and checks the Linear storage convention independently."),
 ex('Inspect activation gradients','Differentiate ReLU at-2 and2.','gradients0 and1.', '''z=torch.tensor([-2.,2.],requires_grad=True); F.relu(z).sum().backward()
 assert z.grad.tolist()==[0.,1.]''','An inactive unit receives no derivative from these inputs. This is a connected zero, so adding retain_grad or detach would not repair the learning condition.'),
 ex('Expose identical-unit symmetry','Initialize both stored Linear rows identically and compare their outputs.','two unit outputs match on every row.', '''symmetric=nn.Linear(2,2,bias=False)
@@ -409,7 +427,7 @@ ex('Translate momentum explicitly','Compute updates with old mean0, batch mean10
 assert torch_update==1 and keras_update==9''','To match a PyTorch new-statistic coefficient.1, the Keras old-statistic retention coefficient would be.9. Equal argument names are not enough evidence of equivalence.'),
 ex('Handle a constant feature row','Apply LayerNorm to5, 5 and inspect finiteness.','finite zeros with default affine initialization.', '''constant=ln(torch.tensor([[5.,5.]])); assert torch.isfinite(constant).all()
 torch.testing.assert_close(constant,torch.zeros((1,2)),atol=1e-6,rtol=0)''','Epsilon avoid division by zero and the centered numerator is zero. Learned affine offsets would need to be included in a general expected value.')],
-'The paired TensorFlow lesson uses momentum.5, where both old/new coefficients co incident all y match. Away from.5, the momentum conventions differ. Compare variance estimators, epsilon, affine parameters and training/evaluation behavior before expect in g parity.',
+'The paired TensorFlow lesson includes momentum0.5 and0.8 probes, explicit population-variance moving state and Keras BatchNorm trainable=False behavior. PyTorch momentum weights the new batch statistic; Keras momentum retains the old statistic. Translate the coefficient, then separately compare reduction axes, variance estimators, epsilon, affine parameters and mode behavior. Matching the running mean does not establish output or full-state parity.',
 [('Why can BatchNorm predictions depend on batch neighbors?','In training mode, the mean and variance a recomputed across batch observations. Changing a neighbor changes those shared statistics.'),('Why state buffers rather than just weights must be saved?','Running statistics and batch counter affect future inference even when all trainable parameters are the same. A weights-only mental model misses that state.')],source=('PyTorch2.9 BatchNorm1d','https://docs.pytorch.org/docs/2.9/generated/torch.nn.BatchNorm1d.html'))
 lesson(19,
 'Convolution applies a shared local kernel across spatial positions. PyTorch C on v2d expects NCHW layout:batch, channels, height, width. Its weight shape is output_channels, input_channels, kernel_height, kernel_width, which differs from the common TensorFlow NHWC image and HWIO kernel conventions. A legal reshape is not always a correct layout conversion; use permute to exchange the meaning of axes.\n\nThe operation is cross-correlation:the kernel slide s without spatial rotation. VALID-style padding0 includes only fully contained patches. Stride controls the gap between patch starts. The3x3ramp image and asymmetric2x2kernel produce an exact output of-4at all four positions, making orientation and layout mistakes visible before introducing learned filters.',

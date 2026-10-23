@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Spark 042 Solution · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course artifact</p>
+      <h1>Spark 042 Solution</h1>
+      <p class="source-path">Generated from <code>courses/scala-spark/solutions/spark-042_solution.py</code></p>
+    </header>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>from pyspark.sql import SparkSession, functions as F</span>
+<span>from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType</span>
+<span>from pathlib import Path</span>
+<span>import tempfile</span>
+<span>import shutil</span>
+<span>import json</span>
+<span>import uuid</span>
+<span> </span>
+<span>EVENT_SCHEMA=StructType([StructField(&quot;id&quot;,LongType(),True),StructField(&quot;cents&quot;,LongType(),True)])</span>
+<span>OWNED_QUERIES=[]</span>
+<span>def publish_file(root,input_path,name,lines):</span>
+<span>    import re,os</span>
+<span>    if re.fullmatch(r&quot;batch-[0-9]{2}\.json&quot;,name) is None or len(lines)&gt;8 or any(len(line)&gt;256 for line in lines):</span>
+<span>        raise ValueError(&quot;Fixed finite file contract required&quot;)</span>
+<span>    input_path.mkdir(exist_ok=True)</span>
+<span>    staged=root/(&quot;pending-&quot;+uuid.uuid4().hex+&quot;.json&quot;)</span>
+<span>    try:</span>
+<span>        with staged.open(&quot;x&quot;,encoding=&quot;utf-8&quot;) as handle:</span>
+<span>            handle.write(&quot;\n&quot;.join(lines)+&quot;\n&quot;)</span>
+<span>        if (input_path/name).exists():raise ValueError(&quot;Input file identity already exists&quot;)</span>
+<span>        os.rename(staged,input_path/name)</span>
+<span>    finally:</span>
+<span>        staged.unlink(missing_ok=True)</span>
+<span>def run_parquet(spark,input_path,checkpoint,output):</span>
+<span>    source=(spark.readStream.schema(EVENT_SCHEMA).option(&quot;maxFilesPerTrigger&quot;,1).option(&quot;mode&quot;,&quot;FAILFAST&quot;).json(str(input_path)))</span>
+<span>    query=(source.writeStream.format(&quot;parquet&quot;).outputMode(&quot;append&quot;)</span>
+<span>        .option(&quot;checkpointLocation&quot;,str(checkpoint)).trigger(availableNow=True).start(str(output)))</span>
+<span>    OWNED_QUERIES.append(query)</span>
+<span>    try:</span>
+<span>        if not query.awaitTermination(45):raise TimeoutError(&quot;Finite query exceeded45-second deadline&quot;)</span>
+<span>        if query.exception() is not None:raise RuntimeError(str(query.exception()))</span>
+<span>        progress=query.recentProgress</span>
+<span>        return {&quot;id&quot;:str(query.id),&quot;run_id&quot;:str(query.runId),&quot;input_rows&quot;:sum(p[&quot;numInputRows&quot;] for p in progress),&quot;batches&quot;:[p[&quot;batchId&quot;] for p in progress]}</span>
+<span>    finally:</span>
+<span>        if query.isActive:query.stop()</span>
+<span>def bag(spark,path):</span>
+<span>    frame=spark.read.parquet(str(path))</span>
+<span>    if [(f.name,f.dataType.simpleString()) for f in frame.schema.fields]!=[(&quot;id&quot;,&quot;bigint&quot;),(&quot;cents&quot;,&quot;bigint&quot;)]:raise ValueError(&quot;Result schema mismatch&quot;)</span>
+<span>    if frame.count()&gt;8:raise ValueError(&quot;Tiny result bound exceeded&quot;)</span>
+<span>    return [f&quot;{r.id}:{r.cents}&quot; for r in frame.orderBy(&quot;id&quot;,&quot;cents&quot;).collect()]</span>
+<span> </span>
+<span>PRODUCT_SCHEMA=StructType([StructField(&quot;delivery&quot;,LongType(),True),StructField(&quot;id&quot;,StringType(),True),StructField(&quot;event_second&quot;,LongType(),True),StructField(&quot;cents&quot;,LongType(),True)])</span>
+<span>PRODUCT_ATTEMPTS=[]</span>
+<span>PRODUCT_ATTEMPT_ROWS=[]</span>
+<span>PRODUCT_RUNS=[]</span>
+<span>def empty_product():return {&quot;accepted&quot;:{},&quot;deliveries&quot;:set(),&quot;duplicates&quot;:0,&quot;late&quot;:0,&quot;invalid&quot;:0,&quot;max_event&quot;:None}</span>
+<span>def product_sha(text):</span>
+<span>    import hashlib</span>
+<span>    return hashlib.sha256(text.encode(&quot;utf-8&quot;)).hexdigest()</span>
+<span>def decode_events(text):</span>
+<span>    rows=json.loads(text)</span>
+<span>    if not isinstance(rows,list) or len(rows)&gt;8:raise ValueError(&quot;Bounded event array required&quot;)</span>
+<span>    for row in rows:</span>
+<span>        if not isinstance(row,dict) or set(row)!={&quot;delivery&quot;,&quot;id&quot;,&quot;event_second&quot;,&quot;cents&quot;}:raise ValueError(&quot;Event field contract mismatch&quot;)</span>
+<span>        if type(row[&quot;delivery&quot;]) is not int or not 1&lt;=row[&quot;delivery&quot;]&lt;=12:raise ValueError(&quot;Delivery identity required&quot;)</span>
+<span>        if row[&quot;id&quot;] is not None and type(row[&quot;id&quot;]) is not str:raise ValueError(&quot;ID must be text or NULL&quot;)</span>
+<span>        if any(row[key] is not None and type(row[key]) is not int for key in (&quot;event_second&quot;,&quot;cents&quot;)):raise ValueError(&quot;Integer or NULL event fields required&quot;)</span>
+<span>    return rows</span>
+<span> </span>
+<span>def state_json(state):</span>
+<span>    node={&quot;accepted&quot;:[{&quot;cents&quot;:value[1],&quot;event_second&quot;:value[0],&quot;id&quot;:key} for key,value in sorted(state[&quot;accepted&quot;].items())],&quot;deliveries&quot;:sorted(state[&quot;deliveries&quot;]),&quot;duplicates&quot;:state[&quot;duplicates&quot;],&quot;invalid&quot;:state[&quot;invalid&quot;],&quot;late&quot;:state[&quot;late&quot;],&quot;max_event_second&quot;:state[&quot;max_event&quot;],&quot;total_cents&quot;:sum(value[1] for value in state[&quot;accepted&quot;].values())}</span>
+<span>    return json.dumps(node,sort_keys=True,separators=(&quot;,&quot;,&quot;:&quot;),ensure_ascii=False)</span>
+<span>def product_path(sink,batch_id):</span>
+<span>    if type(batch_id) is not int or not 0&lt;=batch_id&lt;=8:raise ValueError(&quot;Bounded batch ID required&quot;)</span>
+<span>    return sink/f&quot;batch-{batch_id:020d}.json&quot;</span>
+<span>def load_product(sink,batch_id):</span>
+<span>    node=json.loads(product_path(sink,batch_id).read_text(encoding=&quot;utf-8&quot;))</span>
+<span>    keys={&quot;query_identity&quot;,&quot;batch_id&quot;,&quot;previous_sha256&quot;,&quot;input_sha256&quot;,&quot;input_json&quot;,&quot;state_json&quot;}</span>
+<span>    if not isinstance(node,dict) or set(node)!=keys or type(node[&quot;batch_id&quot;]) is not int or node[&quot;batch_id&quot;]!=batch_id:raise ValueError(&quot;Commit fields or batch ID mismatch&quot;)</span>
+<span>    if any(type(node[key]) is not str for key in keys-{&quot;batch_id&quot;}) or node[&quot;query_identity&quot;]!=&quot;late-product-v1&quot;:raise ValueError(&quot;Commit identity/type mismatch&quot;)</span>
+<span>    previous=empty_product() if batch_id==0 else load_product(sink,batch_id-1)</span>
+<span>    previous_hash=&quot;&quot; if batch_id==0 else product_sha(product_path(sink,batch_id-1).read_text(encoding=&quot;utf-8&quot;))</span>
+<span>    if node[&quot;previous_sha256&quot;]!=previous_hash or node[&quot;input_sha256&quot;]!=product_sha(node[&quot;input_json&quot;]):raise ValueError(&quot;Commit chain/input mismatch&quot;)</span>
+<span>    expected=advance_policy(previous,decode_events(node[&quot;input_json&quot;]))</span>
+<span>    if node[&quot;state_json&quot;]!=state_json(expected):raise ValueError(&quot;Committed product state differs from event ledger&quot;)</span>
+<span>    return expected</span>
+<span> </span>
+<span>def commit_product(sink,batch_id,text,fail_after=False):</span>
+<span>    import os</span>
+<span>    target=product_path(sink,batch_id)</span>
+<span>    if target.exists():</span>
+<span>        node=json.loads(target.read_text(encoding=&quot;utf-8&quot;))</span>
+<span>        if node.get(&quot;input_json&quot;)!=text:raise ValueError(&quot;Replayed batch content changed&quot;)</span>
+<span>        return load_product(sink,batch_id)</span>
+<span>    previous=empty_product() if batch_id==0 else load_product(sink,batch_id-1)</span>
+<span>    next_state=advance_policy(previous,decode_events(text))</span>
+<span>    node={&quot;query_identity&quot;:&quot;late-product-v1&quot;,&quot;batch_id&quot;:batch_id,&quot;previous_sha256&quot;:&quot;&quot; if batch_id==0 else product_sha(product_path(sink,batch_id-1).read_text(encoding=&quot;utf-8&quot;)),&quot;input_sha256&quot;:product_sha(text),&quot;input_json&quot;:text,&quot;state_json&quot;:state_json(next_state)}</span>
+<span>    staged=sink/(&quot;pending-&quot;+uuid.uuid4().hex+&quot;.json&quot;)</span>
+<span>    try:</span>
+<span>        with staged.open(&quot;x&quot;,encoding=&quot;utf-8&quot;) as handle:json.dump(node,handle,sort_keys=True,separators=(&quot;,&quot;,&quot;:&quot;),ensure_ascii=False)</span>
+<span>        os.rename(staged,target)</span>
+<span>        if fail_after:raise RuntimeError(&quot;injected_after_publication&quot;)</span>
+<span>        return next_state</span>
+<span>    finally:staged.unlink(missing_ok=True)</span>
+<span>def run_product(spark,input_path,checkpoint,sink,fail_after=False):</span>
+<span>    binding=sink/&quot;binding.txt&quot;</span>
+<span>    contract=str(input_path.resolve())+&quot;\n&quot;+str(checkpoint.resolve())+&quot;\nlate-product-v1;cutoff=previous_max-10;limit=12&quot;</span>
+<span>    if binding.exists():</span>
+<span>        if binding.read_text(encoding=&quot;utf-8&quot;)!=contract:raise ValueError(&quot;Product namespace binding mismatch&quot;)</span>
+<span>    else:</span>
+<span>        with binding.open(&quot;x&quot;,encoding=&quot;utf-8&quot;) as handle:handle.write(contract)</span>
+<span>    frame=spark.readStream.schema(PRODUCT_SCHEMA).option(&quot;maxFilesPerTrigger&quot;,1).option(&quot;mode&quot;,&quot;FAILFAST&quot;).json(str(input_path))</span>
+<span>    def callback(batch,batch_id):</span>
+<span>        batch.persist()</span>
+<span>        try:</span>
+<span>            encoded=canonical_product_input(batch)</span>
+<span>            PRODUCT_ATTEMPTS.append(batch_id);PRODUCT_ATTEMPT_ROWS.append(len(decode_events(encoded)))</span>
+<span>            commit_product(sink,batch_id,encoded,fail_after)</span>
+<span>        finally:batch.unpersist()</span>
+<span>    query=(frame.writeStream.option(&quot;checkpointLocation&quot;,str(checkpoint)).trigger(availableNow=True).foreachBatch(callback).start())</span>
+<span>    OWNED_QUERIES.append(query);PRODUCT_RUNS.append((str(query.id),str(query.runId)))</span>
+<span>    try:</span>
+<span>        if not query.awaitTermination(45):raise TimeoutError(&quot;Product deadline exceeded&quot;)</span>
+<span>        if query.exception() is not None:raise RuntimeError(str(query.exception()))</span>
+<span>        progress=query.recentProgress</span>
+<span>        return {&quot;id&quot;:str(query.id),&quot;run_id&quot;:str(query.runId),&quot;input_rows&quot;:sum(p[&quot;numInputRows&quot;] for p in progress),&quot;batches&quot;:[p[&quot;batchId&quot;] for p in progress]}</span>
+<span>    finally:</span>
+<span>        if query.isActive:query.stop()</span>
+<span> </span>
+<span>def canonical_product_input(frame):</span>
+<span>    expected=[(&quot;delivery&quot;,&quot;bigint&quot;),(&quot;id&quot;,&quot;string&quot;),(&quot;event_second&quot;,&quot;bigint&quot;),(&quot;cents&quot;,&quot;bigint&quot;)]</span>
+<span>    if [(f.name,f.dataType.simpleString()) for f in frame.schema.fields]!=expected:raise ValueError(&quot;Product schema mismatch&quot;)</span>
+<span>    count_rows=frame.count()</span>
+<span>    if count_rows&gt;8 or frame.filter(F.col(&quot;delivery&quot;).isNull()|(F.col(&quot;delivery&quot;)&lt;1)|(F.col(&quot;delivery&quot;)&gt;12)).count():raise ValueError(&quot;Bounded delivery IDs required&quot;)</span>
+<span>    if frame.select(&quot;delivery&quot;).distinct().count()!=count_rows:raise ValueError(&quot;Delivery IDs must be unique within a microbatch&quot;)</span>
+<span>    rows=[{&quot;delivery&quot;:row.delivery,&quot;id&quot;:row.id,&quot;event_second&quot;:row.event_second,&quot;cents&quot;:row.cents} for row in frame.orderBy(&quot;delivery&quot;).collect()]</span>
+<span>    return json.dumps(rows,sort_keys=True,separators=(&quot;,&quot;,&quot;:&quot;),ensure_ascii=False)</span>
+<span> </span>
+<span>def advance_policy(previous,events):</span>
+<span>    import re</span>
+<span>    if len(previous[&quot;deliveries&quot;])+len(events)&gt;12:raise ValueError(&quot;Product occurrence budget exceeded&quot;)</span>
+<span>    cutoff=None if previous[&quot;max_event&quot;] is None else previous[&quot;max_event&quot;]-10</span>
+<span>    next_state={**previous,&quot;accepted&quot;:dict(previous[&quot;accepted&quot;]),&quot;deliveries&quot;:set(previous[&quot;deliveries&quot;])}</span>
+<span>    for event in sorted(events,key=lambda row:row[&quot;delivery&quot;]):</span>
+<span>        if event[&quot;delivery&quot;] in next_state[&quot;deliveries&quot;]:raise ValueError(&quot;Delivery identity repeated across logical batches&quot;)</span>
+<span>        next_state[&quot;deliveries&quot;].add(event[&quot;delivery&quot;])</span>
+<span>        valid=isinstance(event[&quot;id&quot;],str) and re.fullmatch(r&quot;[A-Z]&quot;,event[&quot;id&quot;]) is not None and type(event[&quot;event_second&quot;]) is int and 0&lt;=event[&quot;event_second&quot;]&lt;=1000 and type(event[&quot;cents&quot;]) is int and 0&lt;=event[&quot;cents&quot;]&lt;=1000</span>
+<span>        if not valid:next_state[&quot;invalid&quot;]+=1;continue</span>
+<span>        key=event[&quot;id&quot;];value=(event[&quot;event_second&quot;],event[&quot;cents&quot;])</span>
+<span>        if key in next_state[&quot;accepted&quot;]:</span>
+<span>            next_state[&quot;duplicates&quot; if next_state[&quot;accepted&quot;][key]==value else &quot;invalid&quot;]+=1</span>
+<span>        elif cutoff is not None and value[0]&lt;cutoff:next_state[&quot;late&quot;]+=1</span>
+<span>        else:</span>
+<span>            next_state[&quot;accepted&quot;][key]=value</span>
+<span>            next_state[&quot;max_event&quot;]=value[0] if next_state[&quot;max_event&quot;] is None else max(next_state[&quot;max_event&quot;],value[0])</span>
+<span>    if len(next_state[&quot;accepted&quot;])+next_state[&quot;duplicates&quot;]+next_state[&quot;late&quot;]+next_state[&quot;invalid&quot;]!=len(next_state[&quot;deliveries&quot;]):raise ValueError(&quot;Occurrence conservation failed&quot;)</span>
+<span>    return next_state</span>
+<span> </span>
+<span>def fail_after_commit(spark,input_path,checkpoint,sink):</span>
+<span>    from pyspark.errors import StreamingQueryException</span>
+<span>    try:</span>
+<span>        run_product(spark,input_path,checkpoint,sink,True)</span>
+<span>    except StreamingQueryException as error:</span>
+<span>        if &quot;injected_after_publication&quot; not in str(error):raise</span>
+<span>    else:</span>
+<span>        raise AssertionError(&quot;Expected after-publication query failure&quot;)</span>
+<span> </span>
+<span>def recover_product(spark,input_path,checkpoint,sink):</span>
+<span>    return run_product(spark,input_path,checkpoint,sink,False)</span>
+<span> </span>
+<span>def finish_product(spark,root,input_path,checkpoint,sink):</span>
+<span>    publish_file(root,input_path,&quot;batch-02.json&quot;,[&#x27;{&quot;delivery&quot;:5,&quot;id&quot;:&quot;E&quot;,&quot;event_second&quot;:120,&quot;cents&quot;:40}&#x27;, &#x27;{&quot;delivery&quot;:6,&quot;id&quot;:&quot;D&quot;,&quot;event_second&quot;:95,&quot;cents&quot;:0}&#x27;, &#x27;{&quot;delivery&quot;:7,&quot;id&quot;:&quot;C&quot;,&quot;event_second&quot;:94,&quot;cents&quot;:7}&#x27;, &#x27;{&quot;delivery&quot;:8,&quot;id&quot;:&quot;B&quot;,&quot;event_second&quot;:105,&quot;cents&quot;:20}&#x27;])</span>
+<span>    run_product(spark,input_path,checkpoint,sink,False)</span>
+<span>    after_b=load_product(sink,1)</span>
+<span>    if not(len(after_b[&quot;accepted&quot;])==4 and after_b[&quot;duplicates&quot;]==2 and after_b[&quot;late&quot;]==1 and after_b[&quot;invalid&quot;]==1 and after_b[&quot;accepted&quot;][&quot;D&quot;]==(95,0)):raise ValueError(&quot;BatchB oracle failed&quot;)</span>
+<span>    publish_file(root,input_path,&quot;batch-03.json&quot;,[&#x27;{&quot;delivery&quot;:9,&quot;id&quot;:&quot;B&quot;,&quot;event_second&quot;:105,&quot;cents&quot;:999}&#x27;, &#x27;{&quot;delivery&quot;:10,&quot;id&quot;:&quot;F&quot;,&quot;event_second&quot;:110,&quot;cents&quot;:5}&#x27;])</span>
+<span>    run_product(spark,input_path,checkpoint,sink,False)</span>
+<span>    return load_product(sink,2)</span>
+<span> </span>
+<span>def handoff_state(state):</span>
+<span>    if len(state[&quot;accepted&quot;])+state[&quot;duplicates&quot;]+state[&quot;late&quot;]+state[&quot;invalid&quot;]!=len(state[&quot;deliveries&quot;]):raise ValueError(&quot;Conservation mismatch&quot;)</span>
+<span>    return state_json(state)</span>
+<span> </span>
+<span>def main():</span>
+<span>    owned_root = None</span>
+<span>    spark = (SparkSession.builder.appName(&quot;ds60-spark-042&quot;).master(&quot;local[2]&quot;)</span>
+<span>        .config(&quot;spark.ui.enabled&quot;, &quot;false&quot;)</span>
+<span>        .config(&quot;spark.driver.host&quot;, &quot;127.0.0.1&quot;)</span>
+<span>        .config(&quot;spark.driver.bindAddress&quot;, &quot;127.0.0.1&quot;)</span>
+<span>        .config(&quot;spark.sql.shuffle.partitions&quot;, &quot;2&quot;)</span>
+<span>        .config(&quot;spark.sql.adaptive.enabled&quot;, &quot;false&quot;)</span>
+<span>        .config(&quot;spark.sql.ansi.enabled&quot;, &quot;true&quot;)</span>
+<span>        .config(&quot;spark.sql.session.timeZone&quot;, &quot;UTC&quot;).getOrCreate())</span>
+<span>    try:</span>
+<span>        assert spark.sparkContext.master == &quot;local[2]&quot;</span>
+<span>        spark.sparkContext.setLogLevel(&quot;ERROR&quot;)</span>
+<span>        if spark.version!=&quot;4.0.1&quot;:raise ValueError(&quot;Prepared Spark4.0.1 required&quot;)</span>
+<span>        spark.conf.set(&quot;spark.sql.streaming.stopTimeout&quot;,&quot;5000&quot;)</span>
+<span>        owned_root=Path(tempfile.mkdtemp(prefix=&quot;spark-042-&quot;,dir=Path.cwd()))</span>
+<span>        input_path=owned_root/&quot;input&quot;;checkpoint=owned_root/&quot;checkpoint&quot;;sink=owned_root/&quot;sink&quot;;sink.mkdir()</span>
+<span>        publish_file(owned_root,input_path,&quot;batch-01.json&quot;,[&#x27;{&quot;delivery&quot;:1,&quot;id&quot;:&quot;A&quot;,&quot;event_second&quot;:100,&quot;cents&quot;:10}&#x27;, &#x27;{&quot;delivery&quot;:2,&quot;id&quot;:&quot;B&quot;,&quot;event_second&quot;:105,&quot;cents&quot;:20}&#x27;, &#x27;{&quot;delivery&quot;:3,&quot;id&quot;:&quot;A&quot;,&quot;event_second&quot;:100,&quot;cents&quot;:10}&#x27;, &#x27;{&quot;delivery&quot;:4,&quot;id&quot;:null,&quot;event_second&quot;:106,&quot;cents&quot;:30}&#x27;])</span>
+<span>        static_a=spark.read.schema(PRODUCT_SCHEMA).json(str(input_path))</span>
+<span>        # Exercise 1: Validate and canonicalize each raw microbatch</span>
+<span>        first_input=canonical_product_input(static_a)</span>
+<span>        assert [row[&quot;delivery&quot;] for row in decode_events(first_input)]==[1,2,3,4] and decode_events(first_input)[-1][&quot;id&quot;] is None</span>
+<span>        try:</span>
+<span>            canonical_product_input(static_a.union(static_a).union(static_a))</span>
+<span>        except ValueError:</span>
+<span>            pass</span>
+<span>        else:</span>
+<span>            raise AssertionError(&quot;Oversized microbatch accepted&quot;)</span>
+<span>        # Exercise 2: Implement the explicit state and lateness policy</span>
+<span>        first_state=advance_policy(empty_product(),decode_events(first_input))</span>
+<span>        assert first_state[&quot;accepted&quot;]=={&quot;A&quot;:(100,10),&quot;B&quot;:(105,20)} and first_state[&quot;duplicates&quot;]==1 and first_state[&quot;invalid&quot;]==1 and first_state[&quot;late&quot;]==0 and first_state[&quot;max_event&quot;]==105</span>
+<span>        invalid_future=advance_policy(first_state,[{&quot;delivery&quot;:11,&quot;id&quot;:&quot;F&quot;,&quot;event_second&quot;:999,&quot;cents&quot;:-1}])</span>
+<span>        assert invalid_future[&quot;max_event&quot;]==105 and invalid_future[&quot;invalid&quot;]==2 and first_state[&quot;invalid&quot;]==1</span>
+<span>        # Exercise 3: Inject failure after publication but before query completion</span>
+<span>        fail_after_commit(spark,input_path,checkpoint,sink)</span>
+<span>        assert PRODUCT_ATTEMPTS==[0] and PRODUCT_ATTEMPT_ROWS==[4]</span>
+<span>        assert load_product(sink,0)==first_state and not OWNED_QUERIES[-1].isActive</span>
+<span>        committed_zero=product_path(sink,0).read_bytes()</span>
+<span>        # Exercise 4: Replay the committed batch without applying it twice</span>
+<span>        recovered=recover_product(spark,input_path,checkpoint,sink)</span>
+<span>        assert PRODUCT_ATTEMPTS==[0,0] and PRODUCT_ATTEMPT_ROWS==[4,4]</span>
+<span>        assert PRODUCT_RUNS[0][0]==PRODUCT_RUNS[1][0] and PRODUCT_RUNS[0][1]!=PRODUCT_RUNS[1][1]</span>
+<span>        assert product_path(sink,0).read_bytes()==committed_zero and load_product(sink,0)==first_state</span>
+<span>        # Exercise 5: Process late, boundary, duplicate and conflicting events</span>
+<span>        final_state=finish_product(spark,owned_root,input_path,checkpoint,sink)</span>
+<span>        assert set(final_state[&quot;accepted&quot;])=={&quot;A&quot;,&quot;B&quot;,&quot;D&quot;,&quot;E&quot;,&quot;F&quot;} and final_state[&quot;accepted&quot;][&quot;F&quot;]==(110,5)</span>
+<span>        assert final_state[&quot;duplicates&quot;]==2 and final_state[&quot;late&quot;]==1 and final_state[&quot;invalid&quot;]==2 and len(final_state[&quot;deliveries&quot;])==10 and sum(value[1] for value in final_state[&quot;accepted&quot;].values())==75</span>
+<span>        # Exercise 6: Hand off correctness, recovery and resource evidence</span>
+<span>        assert handoff_state(final_state)==&#x27;{&quot;accepted&quot;:[{&quot;cents&quot;:10,&quot;event_second&quot;:100,&quot;id&quot;:&quot;A&quot;},{&quot;cents&quot;:20,&quot;event_second&quot;:105,&quot;id&quot;:&quot;B&quot;},{&quot;cents&quot;:0,&quot;event_second&quot;:95,&quot;id&quot;:&quot;D&quot;},{&quot;cents&quot;:40,&quot;event_second&quot;:120,&quot;id&quot;:&quot;E&quot;},{&quot;cents&quot;:5,&quot;event_second&quot;:110,&quot;id&quot;:&quot;F&quot;}],&quot;deliveries&quot;:[1,2,3,4,5,6,7,8,9,10],&quot;duplicates&quot;:2,&quot;invalid&quot;:2,&quot;late&quot;:1,&quot;max_event_second&quot;:120,&quot;total_cents&quot;:75}&#x27;</span>
+<span>        assert PRODUCT_ATTEMPTS==[0,0,1,2] and PRODUCT_ATTEMPT_ROWS==[4,4,4,2] and sum(PRODUCT_ATTEMPT_ROWS)==14</span>
+<span>        query_count=len(OWNED_QUERIES)</span>
+<span>        try:</span>
+<span>            run_product(spark,input_path,owned_root/&quot;unrelated-checkpoint&quot;,sink,False)</span>
+<span>        except ValueError as error:</span>
+<span>            assert &quot;binding mismatch&quot; in str(error)</span>
+<span>        else:</span>
+<span>            raise AssertionError(&quot;Existing sink accepted another checkpoint&quot;)</span>
+<span>        assert len(OWNED_QUERIES)==query_count and all(not q.isActive for q in OWNED_QUERIES)</span>
+<span>        print(&quot;product=&quot;,handoff_state(final_state),&quot;callback_rows=&quot;,sum(PRODUCT_ATTEMPT_ROWS),&quot;logical_rows=&quot;,len(final_state[&quot;deliveries&quot;]),&quot;committed_batches=3&quot;)</span>
+<span>        print(&quot;spark-042: six PySpark reference contracts passed; Spark=&quot; + spark.version)</span>
+<span>    finally:</span>
+<span>        try:</span>
+<span>            for query in OWNED_QUERIES:</span>
+<span>                if query.isActive:query.stop()</span>
+<span>            if any(query.isActive for query in OWNED_QUERIES):raise RuntimeError(&quot;Do not remove scratch while an owned query is active&quot;)</span>
+<span>            if owned_root is not None:</span>
+<span>                if owned_root.parent!=Path.cwd() or not owned_root.name.startswith(&quot;spark-&quot;):raise ValueError(&quot;Owned cleanup boundary mismatch&quot;)</span>
+<span>                shutil.rmtree(owned_root)</span>
+<span>        finally:</span>
+<span>            spark.stop()</span>
+<span> </span>
+<span>if __name__ == &quot;__main__&quot;:</span>
+<span>    main()</span>
+<span> </span>
+<span># Exercise 1: Validate and canonicalize each raw microbatch. Inputs/task: Require the explicit four-field schema, at most 8 rows and unique delivery IDs 1..12. Preserve NULL/business-invalid fields for classification and emit deterministic JSON. Expected: BatchA has four occurrences with IDsA, B, A, NULL;NULL is preserved in canonical input. An oversized batch is rejected before collection. Verify: Compare decoded delivery IDs 1..4 and the NULL marker;reject a12-row union.</span>
+<span># Exercise 2: Implement the explicit state and lateness policy. Inputs/task: Freeze cutoff at previous committed max_event_second minus 10. Validate domain, then classify existing equal ID payload as duplicate, conflicting payload as invalid, new old event as late, and remaining event as accepted. Expected: AfterA:accepted 2, duplicate 1, late 0, invalid 1, total 30, max 105. An invalid far-future row does not advance max time. Verify: Assert exact state and an invalid future control;preserve the original state value.</span>
+<span># Exercise 3: Inject failure after publication but before query completion. Inputs/task: Run the actual foreachBatch query with one injected exception after the atomic commit file becomes visible. Expected: The query fails with injected_after_publication;commit 0 is readable and contains the correct first-state ledger. Verify: Inspect the expected streaming exception, attempt 0 and unchanged source/checkpoint ownership.</span>
+<span># Exercise 4: Replay the committed batch without applying it twice. Inputs/task: Restart the same compatible query and checkpoint. Validate the existing batch input/content/chain and reuse its state. Expected: Attempts 0,0 and callback rows 4,4;commit 0 bytes and logical state remain unchanged. Verify: Compare query/run identities, exact bytes and all first-state counters.</span>
+<span># Exercise 5: Process late, boundary, duplicate and conflicting events. Inputs/task: PublishBatchB thenBatchC as separate immutable files and run each finite invocation against the same checkpoint. Expected: Final accepted IDsA, B, D, E, F, total 75;duplicate 2, late 1, invalid 2;10 logical occurrences. Zero-valuedD and cutoff-boundaryF remain accepted. Verify: Compare intermediateB counts and the final literal state;the high-timeE must not make same-batchD late.</span>
+<span># Exercise 6: Hand off correctness, recovery and resource evidence. Inputs/task: Return the exact final canonical state, record callback work 14 versus logical occurrences 10, and reject binding the existing sink to a different checkpoint. Expected: Literal golden state matches;attempt IDs 0,0,1,2;callback rows 4,4,4,2;only owned inactive queries are eligible for cleanup. Verify: Compare the complete state JSON and namespace-refusal negative;state the single-writer/local-filesystem limitations.</span>
+<span> </span></code></pre></article>
+  </main>
+</body>
+</html>

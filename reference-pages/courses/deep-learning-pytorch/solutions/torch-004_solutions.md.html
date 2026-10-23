@@ -124,7 +124,15 @@
 <p><strong>Loss unit:</strong> The measurement unit implied by the objective.</p>
 <p><strong>Gradient scale:</strong> The magnitude change induced by objective scaling.</p>
 <h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
-<p>F.mse_loss accepts prediction and target tensors; this course validates exact shape equality before calling it. reduction=&#x27;none&#x27; preserves per-entry losses, &#x27;sum&#x27; adds them, and&#x27;mean&#x27; divides by the number of elements. autograd.grad returns derivatives without accumulating into leaf.grad. Use a fresh forward graph for each independent derivative comparison.</p>
+<p>F.mse_loss accepts prediction and target tensors; a paired-record application should validate exact shape equality before calling it; these literal fixtures construct matching shapes. reduction=&#x27;none&#x27; preserves per-entry losses, &#x27;sum&#x27; adds them, and&#x27;mean&#x27; divides by the number of elements. autograd.grad returns derivatives without accumulating into leaf.grad. Use a fresh forward graph for each independent derivative comparison.</p>
+<h3 id="the-denominator-determines-the-gradient">The denominator determines the gradient<a class="heading-anchor" href="#the-denominator-determines-the-gradient" aria-label="Link to this section">#</a></h3>
+<p>For predictions and targets with identical shape(B, D), let r_bd=prediction_bd-target_bd. The squared-error sum is S=Σ_bΣ_d r_bd². PyTorch&#x27;s mean MSE divides byB×D, so L=S/(BD). Its derivative with respect to each prediction is 2 r_bd/(BD). The sum objective instead gives 2 r_bd. This is why changing a reduction changes every gradient even when the forward residuals are identical. <a href="https://docs.pytorch.org/docs/2.9/generated/torch.nn.MSELoss.html">PyTorch 2.9 MSELoss</a>.</p>
+<p>For the residual vector[1, -1, 2], S=6 and N=3. The sum gradient is[2, -2, 4], while the mean gradient is[2/3, -2/3, 4/3]. Duplicating every record doubles the sum and duplicates its derivative contributions. The mean objective remains two because both numerator and denominator double. This argument assumes equal replication of all participating entries; selectively repeating hard examples changes their weighting.</p>
+<p>A two-output example makes the semantic unit visible. WithB=2, D=2 and all residuals equal to one, the element mean is one, the total sum is four, and the mean of per-example feature sums is two. The first objective gives each scalar derivative 0.5; the last gives each scalar derivative 1. Both can be mathematically legitimate, but they encode different scaling. A framework cannot infer which one the application intended from the word mean.</p>
+<p>Masking must use the same participation rule in the numerator and denominator. Keeping only the first two residuals gives numerator 2, count 2 and loss 1. Zeroing the third contribution and then averaging the original three positions gives 2/3. The valid mean gradient for the retained residuals is[1, -1]; dividing by the padded length shrinks it to[2/3, -2/3]. Padding can therefore change both reported quality and training updates without adding any new observation.</p>
+<p>An all-false mask is not the same as two accepted residuals equal to zero. The former has no defined mean denominator; the latter has a valid zero loss. Decide whether the surrounding pipeline should reject an empty objective orskip an update under an explicit policy. Silently calling it a perfect batch hides a missing-data condition.</p>
+<p>Group weighting provides another counterexample. If one group contains residual[2] and another contains[0, 0, 0], the all-record MSE is 4/4=1. The unweighted mean of group MSEs is(4+0)/2=2. The correct choice depends on whether equal influence belongs to observations or groups. Accumulation and distributed-gradient chapters return to this denominator problem when batch sizes differ.</p>
+<p>Finally, loss and evaluation metric need not rank candidates the same way. Residuals[0, 0, 4] have MAE 4/3 and MSE 16/3; residuals[2, 2, 2] have MAE 2 and MSE 4. Squared error prefers the second candidate because it penalizes the large miss more strongly, while absolute error prefers the first. State the objective and error costs before seeing the ranking.</p>
 <h3 id="exercise-1-compute-residual-reductions">Exercise 1: Compute residual reductions<a class="heading-anchor" href="#exercise-1-compute-residual-reductions" aria-label="Link to this section">#</a></h3>
 <p>The question is: Use residuals[1, -1, 2] against zero targets.</p>
 <p>The sum and mean differ only by the known count 3 here. Neither value can be interpreted without its denominator and squared-unit label.</p>
@@ -132,46 +140,46 @@
 assert F.mse_loss(residual,zero,reduction=&#x27;sum&#x27;).item()==6
 assert F.mse_loss(residual,zero,reduction=&#x27;mean&#x27;).item()==2
 torch.testing.assert_close(F.mse_loss(residual,zero,reduction=&#x27;none&#x27;),torch.tensor([1.,1.,4.],dtype=torch.float64))</code></pre>
-<p><strong>Expected:</strong> squared entries1, 1, 4; sum6; mean2.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with squared entries1, 1, 4; sum6; mean2.</p>
+<p><strong>Expected:</strong> squared entries 1, 1, 4; sum 6; mean 2.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with squared entries 1, 1, 4; sum 6; mean 2.</p>
 <h3 id="exercise-2-duplicate-the-batch">Exercise 2: Duplicate the batch<a class="heading-anchor" href="#exercise-2-duplicate-the-batch" aria-label="Link to this section">#</a></h3>
 <p>The question is: Repeat every residual twice and compare reductions.</p>
 <p>Duplicating observations does not create new information, but it changes a sum objective. This matters when comparing updates across batch sizes.</p>
 <pre><code class="language-python">duplicated=residual.repeat(2)
 assert F.mse_loss(duplicated,torch.zeros_like(duplicated),reduction=&#x27;sum&#x27;).item()==12
 assert F.mse_loss(duplicated,torch.zeros_like(duplicated),reduction=&#x27;mean&#x27;).item()==2</code></pre>
-<p><strong>Expected:</strong> sum12; mean2.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with sum12; mean2.</p>
+<p><strong>Expected:</strong> sum 12; mean 2.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with sum 12; mean 2.</p>
 <h3 id="exercise-3-compare-derivative-scale">Exercise 3: Compare derivative scale<a class="heading-anchor" href="#exercise-3-compare-derivative-scale" aria-label="Link to this section">#</a></h3>
-<p>The question is: Differentiate sum and mean squared loss for a fresh3-entry tensor.</p>
+<p>The question is: Differentiate sum and mean squared loss for a fresh 3-entry tensor.</p>
 <p>The reduction scales every derivative by the same factor. A learning-rate comparison that ignores this can mistake an objective change for optimizer behavior.</p>
 <pre><code class="language-python">a=residual.clone().requires_grad_(); gsum=torch.autograd.grad((a*a).sum(),a)[0]
 b=residual.clone().requires_grad_(); gmean=torch.autograd.grad((b*b).mean(),b)[0]
 torch.testing.assert_close(gsum,3*gmean,atol=1e-12,rtol=0)</code></pre>
-<p><strong>Expected:</strong> sum gradient equals3 times mean gradient.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with sum gradient equals3 times mean gradient.</p>
+<p><strong>Expected:</strong> sum gradient equals 3 times mean gradient.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with sum gradient equals 3 times mean gradient.</p>
 <h3 id="exercise-4-inspect-a-feature-denominator">Exercise 4: Inspect a feature denominator<a class="heading-anchor" href="#exercise-4-inspect-a-feature-denominator" aria-label="Link to this section">#</a></h3>
 <p>The question is: Use a2x2 residual matrix of ones and mean reduction.</p>
 <p>The framework does not know whether columns are features, tasks or repeated observations. The author must define whether averaging over all entries matches the intended objective.</p>
 <pre><code class="language-python">matrix=torch.ones((2,2),dtype=torch.float64)
 assert F.mse_loss(matrix,torch.zeros_like(matrix)).item()==1 and matrix.numel()==4</code></pre>
-<p><strong>Expected:</strong> loss1 and4 participating elements.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with loss1 and4 participating elements.</p>
+<p><strong>Expected:</strong> loss 1 and 4 participating elements.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with loss 1 and 4 participating elements.</p>
 <h3 id="exercise-5-mask-numerator-and-denominator-together">Exercise 5: Mask numerator and denominator together<a class="heading-anchor" href="#exercise-5-mask-numerator-and-denominator-together" aria-label="Link to this section">#</a></h3>
 <p>The question is: Use losses[1, 4, 100] with mask True, True, False.</p>
 <p>Excluded targets must not remain in the denominator. Appending more masked entries should leave the result unchanged.</p>
 <pre><code class="language-python">losses=torch.tensor([1.,4.,100.]); mask=torch.tensor([True,True,False])
 valid=losses[mask].sum()/mask.sum()
 assert valid.item()==2.5 and valid.item()!=5/3</code></pre>
-<p><strong>Expected:</strong> valid mean2.5, not5/3.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with valid mean2.5, not5/3.</p>
+<p><strong>Expected:</strong> valid mean 2.5, not 5/3.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with valid mean 2.5, not 5/3.</p>
 <h3 id="exercise-6-separate-a-metric-from-the-objective">Exercise 6: Separate a metric from the objective<a class="heading-anchor" href="#exercise-6-separate-a-metric-from-the-objective" aria-label="Link to this section">#</a></h3>
 <p>The question is: Compare mean absolute residual and mean squared residual for[1, -1, 2].</p>
 <p>The two measures have different units and emphasize large errors differently. Reporting one does not prove the other was optimized.</p>
 <pre><code class="language-python">np.testing.assert_allclose(residual.abs().mean().item(),4/3,atol=1e-12,rtol=0)
 assert residual.square().mean().item()==2</code></pre>
-<p><strong>Expected:</strong> MAE4/3; MSE2.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with MAE4/3; MSE2.</p>
+<p><strong>Expected:</strong> MAE 4/3; MSE 2.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with MAE 4/3; MSE 2.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
 <p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
   </main>

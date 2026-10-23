@@ -116,7 +116,6 @@
       <p class="source-path">Generated from <code>courses/cpp/guides/cpp-007.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-007-vectors-and-standard-algorithms">cpp-007: Vectors and standard algorithms<a class="heading-anchor" href="#cpp-007-vectors-and-standard-algorithms" aria-label="Link to this section">#</a></h2>
-<p>Authored beta content. Content completion and runtime qualification are separate evidence.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Beginner; 90 minutes. Direct prerequisites: <code>cpp-005</code>.</p>
 <p>Learner artifact: <a href="../lessons/cpp-007.cpp.html">cpp-007.cpp</a>. Keep <a href="../solutions/cpp-007_solutions.md.html">official solutions</a> closed until an attempt. The immutable <a href="../fixtures/cpp-007-cases.json.html">case ledger</a> records exercise inputs and expected observations.</p>
@@ -127,56 +126,112 @@
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p><code>std::sort(xs.begin(),xs.end())</code> sorts the half-open range in place. <code>std::accumulate(...,0LL)</code> chooses a long long accumulator from its initial value. A sorted vector still contains duplicate elements unless a separate operation removes them.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>
-<p>A vector is a bag of ordered elements, not a set. The two threes in [3,1,3,0] occupy separate positions after sorting. Erasing duplicates is a new semantic decision. The common sort/unique/erase sequence has two phases after sorting: unique rearranges the retained prefix and returns a new logical end, while erase changes vector size. Inspect both the values and size so a stale tail cannot masquerade as a unique result.</p>
+<p>A vector is a bag of ordered elements, not a set. The two threes in [3, 1, 3, 0] occupy separate positions after sorting. Erasing duplicates is a new semantic decision. The common sort/unique/erase sequence has two phases after sorting: unique rearranges the retained prefix and returns a new logical end, while erase changes vector size. Inspect both the values and size so a stale tail cannot masquerade as a unique result.</p>
+<h3 id="vector-ownership-capacity-and-iterator-validity">Vector ownership, capacity and iterator validity<a class="heading-anchor" href="#vector-ownership-capacity-and-iterator-validity" aria-label="Link to this section">#</a></h3>
+<p>A vector has a size and a capacity. Size counts constructed elements that the program may access. Capacity describes how many elements the current storage can accommodate before another allocation is needed. reserve(4) requests capacity for at least four elements but leaves an empty vector at size 0. Writing xs[0] after reserve alone is invalid because no element has been constructed there. push_back creates a new element and increases size; resize changes size and constructs or destroys elements as needed.</p>
+<p>Contiguous storage means the elements occupy adjacent positions, which makes indexed access and many algorithms efficient. It also explains reallocation. If growth requires a new buffer, the vector moves or copies elements into that buffer and releases the old storage. Every pointer, reference and iterator into the old element storage is then invalid. Do not demonstrate this by dereferencing a stale pointer: that is undefined behavior, so even an apparently correct printed value is not evidence of safety.</p>
+<p>The second program forces a capacity increase with reserve(capacity()+1) after adding one element. It retains an index, not an element pointer, and reacquires access as xs[index] after the operation. This is safe for that example because reallocation preserves the sequence and index 0 still names the same element. It is not a general fix for erase or insert before an index, which can change what a position means. Stable business identity may need an ID lookup rather than a remembered position.</p>
+<p>begin and end define a half-open range. begin names the first element when one exists; end names the position after the last and must not be dereferenced. Empty vectors have begin==end, so algorithms can handle them without a special invalid first-element access. Sorting rearranges values within the range. It preserves multiplicity: the two threes remain two elements. Copying original before sorting gives a separate owner, so the original order remains available for comparison.</p>
+<p>accumulate uses its initial value both as the starting total and to determine the accumulator type. Starting with 0LL selects long long and the additive identity. Starting with 10LL adds an unwanted ten even though the element traversal is otherwise correct. Starting with int0 can introduce a narrower intermediate accumulator for large values. A wider accumulator reduces some overflow risks but is not an unlimited arithmetic guarantee.</p>
+<p>The sort/unique/erase idiom has separate contracts. sort brings equal values together. unique rearranges a retained prefix and returns its logical end; it does not shrink the vector. erase removes the tail and changes size. Code that prints the whole vector after unique but before erase can show unspecified leftover tail values and mistakenly believe deduplication failed. Inspect the retained range and final size, not just one displayed element.</p>
+<p>Insertion and erasure have their own invalidation rules even when no reallocation occurs. Erasing shifts later elements left, invalidating positions at or after the erased point. The safe iteration pattern uses the iterator returned by erase rather than incrementing an invalid old iterator. These rules matter because a vector is a sequence with ownership and position semantics, not a set or a permanently stable collection of element addresses.</p>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">std::vector&lt;int&gt; xs{3,1,3,0}; std::sort(xs.begin(),xs.end());</code></pre>
-<p><strong>Expected:</strong> The sorted bag is [0,1,3,3], preserving both threes.</p>
+<p><a href="../examples/cpp-007-example-1.cpp.html">Complete program 1</a></p>
+<pre><code class="language-cpp">#include &lt;algorithm&gt;
+#include &lt;cassert&gt;
+#include &lt;iostream&gt;
+#include &lt;numeric&gt;
+#include &lt;vector&gt;
+
+
+int main() {
+    std::vector&lt;int&gt; original{3,1,3,0};
+    auto sorted=original;
+    std::sort(sorted.begin(),sorted.end());
+    assert((sorted==std::vector&lt;int&gt;{0,1,3,3}));
+    assert((original==std::vector&lt;int&gt;{3,1,3,0}));
+    std::cout &lt;&lt; &quot;sorted:&quot;;
+    for (int value:sorted) std::cout &lt;&lt; &quot; &quot; &lt;&lt; value;
+    std::cout &lt;&lt; &quot;\nsum=&quot; &lt;&lt; std::accumulate(sorted.begin(),sorted.end(),0LL) &lt;&lt; &quot;\n&quot;;
+    std::cout &lt;&lt; &quot;cpp-007 example 1 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">sorted: 0 1 3 3
+sum=7
+cpp-007 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">std::vector&lt;int&gt; xs; auto sum=std::accumulate(xs.begin(),xs.end(),0LL);</code></pre>
-<p><strong>Expected:</strong> The empty sum is 0, and begin equals end.</p>
+<p><a href="../examples/cpp-007-example-2.cpp.html">Complete program 2</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;cstddef&gt;
+#include &lt;iostream&gt;
+#include &lt;numeric&gt;
+#include &lt;vector&gt;
+
+
+int main() {
+    std::vector&lt;int&gt; xs;
+    xs.reserve(4);
+    assert(xs.size()==0 &amp;&amp; xs.capacity()&gt;=4);
+    assert(xs.begin()==xs.end());
+    assert(std::accumulate(xs.begin(),xs.end(),0LL)==0);
+    xs.push_back(8);
+    const auto index=std::size_t{0};
+    xs.reserve(xs.capacity()+1);
+    // Any old element pointer or iterator is invalid after this reallocation.
+    assert(xs[index]==8);
+    std::cout &lt;&lt; &quot;size=&quot; &lt;&lt; xs.size() &lt;&lt; &quot; value=&quot; &lt;&lt; xs[index] &lt;&lt; &quot;\n&quot;;
+    std::cout &lt;&lt; &quot;cpp-007 example 2 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">size=1 value=8
+cpp-007 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-predict-sorting">Exercise 1: Predict sorting<a class="heading-anchor" href="#exercise-1-predict-sorting" aria-label="Link to this section">#</a></h4>
-<p>Sort [3,1,3,0] on paper.</p>
-<p><strong>Expected result/shape:</strong> [0,1,3,3], size 4.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: [0,1,3,3], size 4.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Ordering does not remove multiplicity.</p>
+<p>Sort [3, 1, 3, 0] on paper.</p>
+<p><strong>Expected result/shape:</strong> [0, 1, 3, 3], size 4.</p>
+<p><strong>Verify:</strong> [0, 1, 3, 3], size 4.</p>
+<p><strong>Progressive hints:</strong> Ordering does not remove multiplicity.</p>
 <h4 id="exercise-2-preserve-evidence">Exercise 2: Preserve evidence<a class="heading-anchor" href="#exercise-2-preserve-evidence" aria-label="Link to this section">#</a></h4>
 <p>Sort a copy and compare the original.</p>
-<p><strong>Expected result/shape:</strong> Original remains [3,1,3,0].</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Original remains [3,1,3,0].</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Copying creates a separately owned buffer.</p>
+<p><strong>Expected result/shape:</strong> Original remains [3, 1, 3, 0].</p>
+<p><strong>Verify:</strong> Original remains [3, 1, 3, 0].</p>
+<p><strong>Progressive hints:</strong> Copying creates a separately owned buffer.</p>
 <h4 id="exercise-3-count-a-boundary">Exercise 3: Count a boundary<a class="heading-anchor" href="#exercise-3-count-a-boundary" aria-label="Link to this section">#</a></h4>
 <p>Use count_if to count &gt;=3.</p>
 <p><strong>Expected result/shape:</strong> 2 matching elements.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: 2 matching elements.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Both equal-valued rows count.</p>
+<p><strong>Verify:</strong> 2 matching elements.</p>
+<p><strong>Progressive hints:</strong> Both equal-valued rows count.</p>
 <h4 id="exercise-4-repair-a-wrong-total">Exercise 4: Repair a wrong total<a class="heading-anchor" href="#exercise-4-repair-a-wrong-total" aria-label="Link to this section">#</a></h4>
 <p>Replace accumulate start 0LL with 10LL, then repair.</p>
 <p><strong>Expected result/shape:</strong> Wrong total 17; correct total 7.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Wrong total 17; correct total 7.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: The initial value participates in the fold.</p>
+<p><strong>Verify:</strong> Wrong total 17; correct total 7.</p>
+<p><strong>Progressive hints:</strong> The initial value participates in the fold.</p>
 <h4 id="exercise-5-check-an-empty-vector">Exercise 5: Check an empty vector<a class="heading-anchor" href="#exercise-5-check-an-empty-vector" aria-label="Link to this section">#</a></h4>
 <p>Sort, count and sum an empty vector.</p>
 <p><strong>Expected result/shape:</strong> Size 0, count 0, sum 0; no dereference.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Size 0, count 0, sum 0; no dereference.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Algorithms accept an empty half-open range.</p>
+<p><strong>Verify:</strong> Size 0, count 0, sum 0; no dereference.</p>
+<p><strong>Progressive hints:</strong> Algorithms accept an empty half-open range.</p>
 <h4 id="exercise-6-transfer-to-ordered-unique-values">Exercise 6: Transfer to ordered unique values<a class="heading-anchor" href="#exercise-6-transfer-to-ordered-unique-values" aria-label="Link to this section">#</a></h4>
-<p>Sort [3,1,3,0], then erase the unique tail.</p>
-<p><strong>Expected result/shape:</strong> [0,1,3], size 3.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: [0,1,3], size 3.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: unique moves survivors but erase actually changes vector size.</p>
+<p>Sort [3, 1, 3, 0], then erase the unique tail.</p>
+<p><strong>Expected result/shape:</strong> [0, 1, 3], size 3.</p>
+<p><strong>Verify:</strong> [0, 1, 3], size 3.</p>
+<p><strong>Progressive hints:</strong> unique moves survivors but erase actually changes vector size.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
-<p>Explain why this observation follows from the mechanism: The sorted bag is [0,1,3,3], preserving both threes. Then explain the changed condition in example 2 without opening the answer.</p>
+<p>Explain why this observation follows from the mechanism: The sorted bag is [0, 1, 3, 3], preserving both threes. Then explain the changed condition in example 2 without opening the answer.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
-<p><code>std::sort(xs.begin(),xs.end())</code> sorts the half-open range in place. <code>std::accumulate(...,0LL)</code> chooses a long long accumulator from its initial value. A sorted vector still contains duplicate elements unless a separate operation removes them.</p>
-<p>If the result disagrees, preserve the original input and inspect the first differing value or condition. The initial value participates in the fold.</p>
+<p>A capacity of 4 with size 0 is not four accessible integers. Use at(index) for a checked diagnostic while learning, and remember that operator[] requires a valid index. If a bug appears only after growth, inspect every retained pointer/reference/iterator across push_back or reserve. If a deduplicated result still has size 4, check whether erase was omitted. If a total differs by ten, inspect the accumulate identity before blaming sort.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
 <p>Close the source. Reconstruct the reasoning for Exercise 6: Transfer to ordered unique values. Explain which assumptions would fail on a larger input or another runtime.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue with <a href="cpp-008.md.html">cpp-008</a> after saving the six observations.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<p><a href="https://eel.is/c++draft/vector.capacity">Vector capacity and invalidation</a></p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach cpp-007.
 Read courses/cpp/guides/cpp-007.md and courses/cpp/lessons/cpp-007.cpp.

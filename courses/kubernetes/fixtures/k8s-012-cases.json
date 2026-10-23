@@ -1,0 +1,38 @@
+{
+  "lesson_id": "k8s-012",
+  "provenance": "synthetic teaching cases, not runtime observations",
+  "capability": "paired synthetic incident analysis and selected bounded negative Runs",
+  "browser_source": false,
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Place API acceptance,scheduling,container start,readiness and client response in order.",
+      "expected": "A trace identifies the first missing or failed boundary for each case."
+    },
+    {
+      "exercise": 2,
+      "task": "Use case A to name one minimal source/configuration check.",
+      "expected": "Inspect referenced ConfigMap name/key and availability;do not claim the process crashed."
+    },
+    {
+      "exercise": 3,
+      "task": "Use case B to propose and predict a one-field repair.",
+      "expected": "Change /missing to the admitted /ready path;then require new Ready and client evidence."
+    },
+    {
+      "exercise": 4,
+      "task": "Use case C to distinguish deliberate task failure from timeout or image absence.",
+      "expected": "Task exit2 and terminal Failed condition identify the injected application outcome."
+    },
+    {
+      "exercise": 5,
+      "task": "Record observation,hypothesis,one change and acceptance condition for one case.",
+      "expected": "Each claim cites a bounded field/line and object identity;synthetic facts are labeled."
+    },
+    {
+      "exercise": 6,
+      "task": "State the post-repair evidence and exact cleanup boundary.",
+      "expected": "Relevant controller/application checks pass and only recorded owned UIDs are removed."
+    }
+  ]
+}

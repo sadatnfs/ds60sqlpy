@@ -5,15 +5,15 @@ Copy to .learning before editing. Six independent attempts belong below.
 """
 
 # Exercise 1: Predict a valid batch
-# Use float32 CPU rows1, 2 and3, 4.
-# Expected: outputs0, 2 with shape(2, ).
+# Use float32 CPU rows 1, 2 and 3, 4.
+# Expected: outputs 0, 2 with shape(2, ).
 
 # Exercise 2: Check per-record batching parity
 # Predict each row alone and concatenate.
 # Expected: same values as batch prediction.
 
 # Exercise 3: Reject empty and oversized batches
-# Pass shapes0 x2 and5 x2.
+# Pass shapes 0 x2 and 5 x2.
 # Expected: ValueError naming batch limit.
 
 # Exercise 4: Reject shape and dtype ambiguity

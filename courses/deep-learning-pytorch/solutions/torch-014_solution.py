@@ -25,7 +25,7 @@ def verify():
     scores=torch.tensor([[2.,0.,-2.],[0.,1.,3.]])
     probs=torch.softmax(scores,dim=1); torch.testing.assert_close(probs.sum(1),torch.ones(2),atol=1e-6,rtol=0)
 
-    # Exercise 5: Name the multi label denominator
+    # Exercise 5: Name the multilabel denominator
     per_entry=F.binary_cross_entropy_with_logits(torch.zeros_like(labels),labels,reduction='none')
     np.testing.assert_allclose([per_entry.sum().item(),per_entry.mean().item()],[6*np.log(2),np.log(2)],atol=1e-6,rtol=0)
 

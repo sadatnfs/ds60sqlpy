@@ -20,6 +20,43 @@ This chapter performs real CPU gradient updates on the course's small causal dec
 
 Construct shifted inputs and answer-only labels, using-100 for the prompt-prediction position. Set a local seed before model creation. Adam receives all model parameters. Each step clears gradients, calculates logits, flattens the batch/time axes for cross entropy, backpropagates and applies one update. A detached clone records initial state. Evaluation usesmodel.eval andtorch.no_grad, then calculates the same active-target objective on held-out IDs.
 
+## Trace the full-SFT state and objective
+
+The model uses vocabulary16, width32, two attention heads and context capacity32. For a training batch with B=2, T=3, token and position embeddings combine into[2, 3, 32]. The QKV projection produces[2, 3, 96], then each component becomes[2, 2, 3, 16] after splitting into two heads. Attention scores have shape[2, 2, 3, 3], with a causal allowed-position relation. The output logits return to[2, 3, 16].
+
+The trainable parameter ledger is explicit:
+
+| Component | Entries |
+| --- | --- |
+| Token embedding16×32 | 512 |
+| Position embedding32×32 | 1024 |
+| Two LayerNorm scales and biases | 128 |
+| Bias-free QKV32×96 | 3072 |
+| Bias-free attention projection32×32 | 1024 |
+| Feed-forward32→64→32 including biases | 4192 |
+| Bias-free vocabulary projection32×16 | 512 |
+| Total | 10464 |
+
+No weights are tied in this decoder. Parameter count does not equal total training memory: gradients, Adam moment state, activations and temporary attention tensors contribute separately. The CPU example does not measure GPU peak allocation or optimizer sharding.
+
+The two sequences yield four active targets:5, 3, 6, 3. For an independent zero-logit probe, each class initially has probability1/16 and each active event has loss log16. The mean over the four active events is still log16. At an active position, the target-logit gradient is(1/16-1)/4=-15/64, and every other class gradient is1/64. The ignored prompt-prediction positions have zero direct logit gradient. These derivatives explain both the mask and the denominator without relying on the trained decoder's internal state.
+
+Each optimizer iteration computes loss at the current parameters, records it, backpropagates and then updates. Thus a20-entry curve records states before updates1 through20: its final element describes the model after19 updates. It is useful optimization history, but it is not the post-twentieth-update loss. The repaired final evaluation recomputes training and held-out objectives from the same frozen final state. This prevents a reporting label from mixing two parameter versions.
+
+The objective is teacher-forced next-token cross entropy. It conditions each position on the supplied prefix, including previous true answer tokens. Autoregressive generation instead conditions later positions on its own earlier outputs. A lower teacher-forced loss does not guarantee exact generated answers or correct stopping behavior. The lesson deliberately evaluates token loss and parameter changes; it does not silently substitute them for a generation-quality test.
+
+The held-out sequence[7, 2, 5, 3] changes the first prompt token while preserving the second prompt token2 and the answer[5, 3]. A model could succeed by learning a shortcut from token2 to5 and then to3, without using the first prompt token meaningfully. That makes the example a small transfer probe, not a demonstration of unseen factual reasoning. Multiple counterexamples that require both prompt components would be needed to assess compositional dependence.
+
+The decoder returns a detached key/value cache, but this training objective discards it and uses full uncached sequences. Reusing that detached cache across training segments would change the gradient boundary. Treat it as an inference facility unless a separate truncated-training objective is explicitly designed and tested.
+
+### Interview reasoning with explanatory answers
+
+**What proves that full-model optimization occurred?** The optimizer receives all trainable parameters, updates actually run, losses are observed and an embedding parameter changes. This establishes a concrete update path, not that every scalar must change on every batch.
+
+**Why recompute final loss?** The last logged training loss precedes the last optimizer step. A final-state comparison needs a fresh forward evaluation after all declared updates.
+
+**Why can held-out token loss improve without domain competence?** The task may share a simple token shortcut, and teacher forcing differs from free generation. The fixture contains literal IDs and one visible transfer case, so broader claims require different evidence.
+
 ## Exercise 1: Build an explicit SFT batch
 
 The question is: Use sequences[1, 2, 5, 3] and[1, 4, 6, 3], masking the first shifted target.
@@ -95,7 +132,9 @@ A held-out score may improve or worsen. The lesson reports the observation rathe
 
 ```python
 model.eval(); saved=model.output.weight.detach().clone()
-with torch.no_grad(): final_held=objective(model,held[:,:-1],held_labels).item()
+with torch.no_grad():
+    final_held=objective(model,held[:,:-1],held_labels).item()
+    final_train=objective(model,inputs,labels).item()
 assert np.isfinite(final_held) and torch.equal(saved,model.output.weight.detach())
 ```
 
@@ -110,8 +149,9 @@ The question is: Record update count, active training targets, train/heldout los
 A real adaptation report should also include data/model hashes, environment and retained baseline tasks. The tiny receipt illustrates those evidence categories without overstating its task.
 
 ```python
-receipt={'updates':20,'active_training_targets':4,'initial_train':initial_train,'final_train':curve[-1],'initial_held':initial_held,'final_held':final_held,'scope':'literal token task, not a pretrained subject assistant'}
+receipt={'updates':20,'active_training_targets':4,'initial_train':initial_train,'final_train':final_train,'initial_held':initial_held,'final_held':final_held,'scope':'literal token task, not a pretrained subject assistant'}
 assert receipt['updates']==20 and receipt['active_training_targets']==4 and 'not a pretrained' in receipt['scope']
+with torch.no_grad(): np.testing.assert_allclose(receipt['final_train'],objective(model,inputs,labels).item(),atol=1e-12,rtol=0)
 ```
 
 **Expected:** receipt says20 updates, 4 active training targets and no natural-language competence claim.

@@ -20,6 +20,30 @@ RLHF is a broader family of workflows in which human feedback informs a reward o
 
 Represent the policy log-probability difference as a trainable scalar for the smallest diagnostic. The reference difference is fixed. Compute margin=beta*(policy_difference-reference_difference) andloss=softplus(-margin). Backpropagate and apply oneSGD update. Reversing chosen/rejected labels reverses the margin and gradient direction. Keep response identities attached to scores when forming pairs.
 
+## Derive the DPO-style scalar update
+
+Let d be the policy chosen-minus-rejected log-probability difference and r the same difference under a fixed reference. The adjusted margin is z=beta*(d-r), and the loss is log(1+exp(-z)), implemented through softplus for numerical stability. Its derivative with respect to d is-beta*sigmoid(-z). The second derivative is beta²*sigmoid(z)*sigmoid(-z), nonnegative, so this scalar loss is convex in d for a fixed reference.
+
+At d=r=0 and beta 0.5, the loss is log2, about0.693147. The derivative is-0.5*0.5=-0.25, and the curvature is0.25*0.25=0.0625. SGD with learning rate 0.2 moves d to0-0.2*(-0.25)=0.05. The new adjusted margin is0.025 and the loss is about0.680725. This is an actual scalar gradient update in the reference.
+
+A positive step increases the chosen-response advantage relative to the reference, but it does not uniquely specify the two response probabilities. Many pairs of chosen/rejected log probabilities can have the same difference. The fixture optimizes a free scalar and does not implement a vocabulary softmax, sequence model, KL measurement or normalized policy distribution. Calling it DPO-style margin mechanics preserves that distinction.
+
+In a language model, a response log probability is normally assembled from token-level conditional log probabilities under a declared response mask. Summing them and averaging by response length are different scoring rules. Prompt tokens, end markers, truncation and chosen/rejected identities must be handled consistently for both policy and reference. Otherwise the margin can reward a formatting or length artifact instead of the intended preference.
+
+Reversing a preference means reversing the corresponding chosen-minus-rejected comparisons. At the symmetric zero-reference fixture, the derivative changes from-0.25 to+0.25. In a nonzero-reference case, swapping only a label string while leaving score orientation unchanged would not define the intended opposite comparison. Preserve both response records and their model scores rather than manipulating an anonymous scalar after the fact.
+
+The full DPO formulation connects offline preference comparisons to a reference-regularized policy objective. That theoretical relationship is broader than this scalar probe, which does not train a complete language model. Likewise, the example does not train a reward model or run online reinforcement learning. [Direct Preference Optimization](https://arxiv.org/abs/2305.18290).
+
+Feedback quality remains decisive. If annotators prefer a confident but unsupported denominator, the optimization signal rewards that preference. A lower preference loss can coexist with worse grounded correctness. Evaluate source support, abstention, domain task utility and retained capabilities separately from agreement with training pair labels.
+
+### Interview reasoning with explanatory answers
+
+**Why include a reference difference?** It anchors the policy's chosen/rejected advantage relative to a fixed comparison distribution. Omitting or changing the reference changes the adjusted margin being optimized.
+
+**Does a lower preference loss establish factuality?** It establishes better agreement with the supplied preference objective on the measured pairs. Factual support depends on the rubric, evidence and independent evaluation.
+
+**Why does beta matter beyond a name in configuration?** It scales the margin, derivative and curvature. At zero margin the gradient magnitude is beta/2; changing it changes the update even before considering a full model's dynamics.
+
 ## Exercise 1: Calculate the equal-margin loss
 
 The question is: Set policy difference0, reference difference0, beta.5.

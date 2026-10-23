@@ -73,6 +73,7 @@ _SOURCE_LANGUAGES = {
     ".sh": "bash",
     ".csv": "csv",
     ".toml": "toml",
+    ".lock": "text",
 }
 _REFERENCE_SUFFIXES = {".md", ".ipynb", *_SOURCE_LANGUAGES}
 _PRIVATE_REFERENCE_PARTS = {"artifacts", "htmlcov", "mlruns", "node_modules", "__pycache__"}

@@ -18,7 +18,12 @@ x-classroom-worker: &classroom-worker
 services:
   postgres:
     extends: {file: compose.yaml, service: postgres}
+    image: ${DS60_POSTGRES_IMAGE:-postgres:17}
     networks: [default, module-private]
+    # Host ports can be engine-selected while the app keeps its fixed inner port.
+    ports: !override
+      - "127.0.0.1:${DS60_POSTGRES_PORT:-55432}:5432"
+      - "127.0.0.1:${DS60_CLASSROOM_PORT:-${DS60_LAB_PORT:-8765}}:${DS60_LAB_PORT:-8765}"
 
   classroom-init:
     image: ds60sqlpy-lab:0.3.0
@@ -56,6 +61,7 @@ services:
       DS60_UID: "1000"
       DS60_GID: "1000"
       DS60_ROOTLESS: "0"
+      DS60_PUBLIC_PORT: ${DS60_PUBLIC_PORT:-${DS60_CLASSROOM_PORT:-${DS60_LAB_PORT:-8765}}}
       DS60_MODULE_TOKEN_FILE: /run/ds60/worker-token/token
       DS60_MODULE_ENDPOINTS: '{"python-core":"http://python-core-worker:8081","cpp20":"http://cpp-worker:8081","tensorflow-cpu":"http://tensorflow-worker:8081","scala-jvm":"http://scala-worker:8081","spark-local-scala":"http://spark-scala-worker:8081","spark-local-python":"http://spark-python-worker:8081","llm-torch-cpu":"http://llm-worker:8081","java21":"http://java-worker:8081","javascript-node":"http://javascript-worker:8081","typescript-node":"http://typescript-worker:8081"}'
     volumes:

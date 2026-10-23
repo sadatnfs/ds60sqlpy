@@ -3,9 +3,9 @@ import json,textwrap
 ROOT=Path(__file__).resolve().parents[3]
 SPECS={}
 def ex(title,prompt,expected,code,why):return dict(title=title,prompt=prompt,expected=expected,code=textwrap.dedent(code).strip(),why=why)
-def add(n,mental,anatomy,terms,exercises,helper='',imports='import java.util.*;',source='https://docs.oracle.com/en/java/javase/21/docs/api/index.html'):
+def add(n,mental,anatomy,terms,exercises,helper='',imports='import java.util.*;',source='https://docs.oracle.com/en/java/javase/21/docs/api/index.html',run_notes=''):
  assert len(exercises)==6
- SPECS[f'java-{n:03d}']=dict(mental=mental,anatomy=anatomy,terms=terms,exercises=exercises,helper=textwrap.dedent(helper).strip(),imports=imports,source=source)
+ SPECS[f'java-{n:03d}']=dict(mental=mental,anatomy=anatomy,terms=terms,exercises=exercises,helper=textwrap.dedent(helper).strip(),imports=imports,source=source,run_notes=run_notes)
 def program(s,blocks):
  return s['imports']+'\n\npublic class Main {\n'+textwrap.indent(s['helper'],'    ')+'\n    public static void main(String[] args) throws Exception {\n'+textwrap.indent('\n\n'.join(blocks),'        ')+'\n    }\n}\n'
 def write_all():
@@ -27,8 +27,6 @@ Use Java21 and the declared offline fixture. Done when I can explain the state
 transitions, pass all six exercise contracts, diagnose one failure and solve a
 new boundary case without copying the solution.'''
   guide_text=f'''# {id}: {p['title']}
-
-Authored course content. Java21 runtime qualification and execution receipts are recorded separately in the implementation checkpoint. A saved source file is not proof that the code was compiled or that the learner understands it.
 
 ## Level and prerequisites
 
@@ -57,7 +55,9 @@ javac --release 21 Main.java
 java -ea Main
 ```
 
-The public class name and source filename must agree. Each worked example below is a complete file. Example B includes the setup it needs from Example A, so it can be compiled by itself. The six exercise reference blocks form one complete program in the separate solution. Keep your original prediction, source and diagnostic text together. The default examples use only prepared JDK libraries and tiny local fixtures. Any lesson-specific library or additional file is named explicitly; do not download packages from inside a learner program. Resource examples close their owned files, executors or loopback servers.
+The public class name and source filename must agree. Each worked example below is a complete file. Example B includes the setup it needs from Example A, so it can be compiled by itself. The six exercise reference blocks form one complete program in the separate solution. Keep your original prediction, source and diagnostic text together. Most examples use prepared JDK libraries and tiny local fixtures; any additional dependency is specified in the lesson notes below. Any lesson-specific library or additional file is named explicitly; do not download packages from inside a learner program. Resource examples close their owned files, executors or loopback servers.
+
+{s.get('run_notes','')}
 
 ## Syntax anatomy and execution trace
 

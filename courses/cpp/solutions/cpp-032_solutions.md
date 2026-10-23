@@ -10,6 +10,24 @@ Bounded parallel work limits simultaneous workers and queued items. Backpressure
 
 The two-task future example makes a fixed worker bound visible and propagates failure through get. It is deliberately smaller than a production executor. A real executor also needs a queue capacity, an admission policy and a rule for accepted work when one task fails. The owner must observe each result or exception and account for pending/cancelled work before publishing a total. Discarded exceptions and partial aggregates are not successful parallel execution.
 
+<!-- depth:start -->
+## Futures, launch policy and bounded work ownership
+
+A future represents a result that may become available later. It carries either a value or an exception from the asynchronous operation. Calling get waits as needed and retrieves that outcome. A valid future is normally consumed once by get; treating it as a reusable result object can produce a no-state error on a later call.
+
+The examples use std::launch::async explicitly so the operation is launched asynchronously rather than leaving a deferred policy choice to the implementation. That still does not define a production thread pool. Launching one async task per row in a very large input can create an unacceptable amount of concurrency or resource pressure. The lesson uses a fixed small number of tasks so the ownership and result flow are visible.
+
+The success program computes the square of 3 and observes9 through get. The failure program launches a task with -1, where checked_square throws invalid_argument. The exception is stored and rethrown when main calls get. A flag confirms that the specific error was observed. Ignoring the future or never retrieving its outcome can hide a failed task from the application report.
+
+When combining multiple tasks, define whether one failure aborts the whole result or whether partial results have a valid meaning. A total assembled from successful tasks alone can look plausible while silently omitting failures. Keep accepted, completed, failed and cancelled work accounting explicit. Cancellation of pending work also needs a mechanism; future by itself is not a general cancel operation.
+
+A real executor has at least worker count, queue capacity, submission policy, result ownership and shutdown behavior. Those are separate choices. The fixed-two-task example illustrates result propagation but does not implement every executor feature. The final capstone returns to bounded admission and conservation of work so that a failed parallel computation cannot publish an unexplained partial total.
+
+## Debugging the contract
+
+If an asynchronous error never appears, inspect whether every accepted task has its future observed. If too many threads appear, check whether input size is directly controlling async launch count. If get is called twice, store the first returned value rather than reusing a consumed future. If a partial aggregate is printed after one task fails, repair the publication and accounting policy before discussing performance.
+<!-- depth:end -->
+
 ## Worked example 1
 
 ```cpp

@@ -119,7 +119,7 @@
 <p>Compare after an attempt or an explicit reveal. The <a href="../guides/k8s-002.md.html">guide</a> defines the learner contract. An authored reference is not a platform acceptance receipt.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>An image is a packaged filesystem/configuration template. A container is an instance created from image content; it normally runs one main application process and can exit or restart. Two container instances can use the same image. A tag is a mutable human-readable reference, while a digest identifies content. The course will preload one exact fixture image and record its digest; reading a tag in YAML is not proof of cached content.</p>
-<p>A port is an endpoint number within a network namespace. A container listening on8080 is different from a host forwarding127.0.0.1:8765 to it. Inside another container,127.0.0.1 refers to that container itself. Inside a Kubernetes namespace, a Service name selects a cluster routing path. Declaring containerPort does not create a listening server or a host port. This lesson traces supplied evidence and performs no engine or network action.</p>
+<p>A port is an endpoint number within a network namespace. A container listening on8080 is different from a host forwarding127.0.0.1:8765 to it. Inside another container, 127.0.0.1 refers to that container itself. Inside a Kubernetes namespace, a Service name selects a cluster routing path. Declaring containerPort does not create a listening server or a host port. This lesson traces supplied evidence and performs no engine or network action.</p>
 <ul>
 <li><strong>image:</strong> the packaged content used to create containers</li>
 <li><strong>container:</strong> a running or stopped instance, separate from its image</li>
@@ -143,7 +143,7 @@ process listens on8080</code></pre>
 <h3 id="exercises-and-explanatory-solutions">Exercises and explanatory solutions<a class="heading-anchor" href="#exercises-and-explanatory-solutions" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-count-images-and-containers">Exercise 1: Count images and containers<a class="heading-anchor" href="#exercise-1-count-images-and-containers" aria-label="Link to this section">#</a></h4>
 <p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 1, C1 andC2 both useI1.</p>
-<p><strong>Expected result/shape:</strong> For k8s-002 Exercise 1, 1 image,2 containers,independent running/exited states.</p>
+<p><strong>Expected result/shape:</strong> For k8s-002 Exercise 1, 1 image, 2 containers, independent running/exited states.</p>
 <p><strong>Verify:</strong> For k8s-002 Exercise 1, count image identities and instance identities separately.</p>
 <p>Instances can share packaged content without sharing process state. An exited container is not evidence that the image file vanished.</p>
 <h4 id="exercise-2-resolve-the-browser-endpoint">Exercise 2: Resolve the browser endpoint<a class="heading-anchor" href="#exercise-2-resolve-the-browser-endpoint" aria-label="Link to this section">#</a></h4>
@@ -152,12 +152,12 @@ process listens on8080</code></pre>
 <p><strong>Verify:</strong> For k8s-002 Exercise 2, trace both sides without changing the application listening port.</p>
 <p>The forwarding rule translates the destination. Using host8080 is unsupported unless another explicit mapping exists.</p>
 <h4 id="exercise-3-separate-declaration-and-listener">Exercise 3: Separate declaration and listener<a class="heading-anchor" href="#exercise-3-separate-declaration-and-listener" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 3, declared8080;process not running.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 3, declared8080; process not running.</p>
 <p><strong>Expected result/shape:</strong> For k8s-002 Exercise 3, no working listener established by the declaration.</p>
 <p><strong>Verify:</strong> For k8s-002 Exercise 3, name the missing running application evidence.</p>
 <p>Metadata documents an intended port for tools/controllers. It does not start a process or make an exited application healthy.</p>
 <h4 id="exercise-4-interpret-replacement">Exercise 4: Interpret replacement<a class="heading-anchor" href="#exercise-4-interpret-replacement" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 4, oldC1,newC3,contentI1.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 4, oldC1, newC3, contentI1.</p>
 <p><strong>Expected result/shape:</strong> For k8s-002 Exercise 4, container identity changes; image identity staysI1.</p>
 <p><strong>Verify:</strong> For k8s-002 Exercise 4, record both instance IDs and the same digest receipt.</p>
 <p>Identity lets a learner distinguish application restart/reconciliation from an image update. A new Pod name alone does not prove new application content.</p>
@@ -167,7 +167,7 @@ process listens on8080</code></pre>
 <p><strong>Verify:</strong> For k8s-002 Exercise 5, classify missing preload and preserve progress rather than substituting an arbitrary public image.</p>
 <p>Offline mode depends on preparation. A correct manifest cannot manufacture missing image bytes, and switching to Always would change the lesson network contract.</p>
 <h4 id="exercise-6-transfer-the-client-path">Exercise 6: Transfer the client path<a class="heading-anchor" href="#exercise-6-transfer-the-client-path" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 6, Service hello on8080;client has its own loopback.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 6, Service hello on8080; client has its own loopback.</p>
 <p><strong>Expected result/shape:</strong> For k8s-002 Exercise 6, http://hello:8080/version, not host127.0.0.1:8765.</p>
 <p><strong>Verify:</strong> For k8s-002 Exercise 6, explain both network namespaces and the Service DNS name.</p>
 <p>The client must exercise Service routing and the application response. Host port-forwarding can inspect a process but cannot substitute for this in-cluster path.</p>

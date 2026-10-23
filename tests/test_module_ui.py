@@ -30,4 +30,4 @@ def test_async_module_ui_behaviors() -> None:
     )
     assert result.returncode == 0, result.stdout + result.stderr
     receipt = json.loads(result.stdout.splitlines()[-1])
-    assert receipt == {"checks": 29, "passed": True, "final": True}
+    assert receipt == {"checks": 36, "passed": True, "final": True}

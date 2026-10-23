@@ -130,8 +130,9 @@
 <span># Expected: ValueError before any computation.</span>
 <span> </span>
 <span># Exercise 3: Reject invalid numeric values</span>
-<span># Replace onevalue withTrue, NaN orNone under the strict numeric policy.</span>
-<span># Expected: each invalid row is rejected.</span>
+<span># Replace one value with True, NaN or None, then check large finite values and</span>
+<span># cancellation under the same numeric policy.</span>
+<span># Expected: invalid rows are rejected; equal1e308 values have finite mean1e308 and opposite values have mean0.</span>
 <span> </span>
 <span># Exercise 4: Enforce identity and work limits</span>
 <span># Duplicatea1, then supply21 unique rows.</span>

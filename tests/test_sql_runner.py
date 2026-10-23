@@ -66,7 +66,13 @@ def test_solution_files_follow_catalog_and_are_sql(runner: SqlRunner) -> None:
     assert len(paths) == len(runner.catalog.lessons("sql"))
     assert all(path.suffix == ".sql" for path in paths)
     assert paths[0].name == "sql_start_01_tables_and_grain_solutions.sql"
-    assert paths[-1].name == "sql_concurrency_01_isolation_and_versions_solutions.sql"
+    expected = tuple(
+        runner.catalog.resolve(path)
+        for lesson in runner.catalog.lessons("sql")
+        for path in lesson.solution_paths
+        if path.endswith(".sql")
+    )
+    assert paths == expected
     assert all(isinstance(path, Path) for path in paths)
 
 

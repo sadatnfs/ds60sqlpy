@@ -5,7 +5,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 """
 
 # Exercise 1: Calculate two penalties
-# Use weights1, -2 and compute L1 and squared L2 sums.
+# Use weights 1, -2 and compute L1and squared L2sums.
 # Expected: L1=3; squared L2=5.
 
 # Exercise 2: Check evaluation dropout
@@ -14,11 +14,11 @@ Copy to .learning before editing. Six independent attempts belong below.
 
 # Exercise 3: Check training invariants
 # Switch the same layer to train mode and inspect output values.
-# Expected: shape(4, 8); only0 or2.
+# Expected: shape(4, 8); only 0 or2.
 
 # Exercise 4: Separate data and penalty terms
-# Combine data loss2 with coefficient.1 times squared L2.
-# Expected: penalty.5; total2.5.
+# Combine data loss 2 with coefficient.1 times squared L2.
+# Expected: penalty.5; total 2.5.
 
 # Exercise 5: Differentiate the explicit penalty
 # Differentiate .1*sum(v*v) at v=[1, -2].

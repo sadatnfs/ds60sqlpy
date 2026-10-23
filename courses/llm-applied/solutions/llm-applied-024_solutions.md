@@ -20,6 +20,38 @@ The default capstone assembles an offline extractive RAG baseline over authored 
 
 The Assistant class stores versioned documents and an allowed-scope set. It filters before matching an authored question-to-evidence map, returns a cited source span for supported definitions, and abstains otherwise. A separate conversion tool validates integer counts and a positive denominator. Each answer trace names the corpus version and admitted document ID. Evaluation uses fixed question IDs and expected statuses, not a self-reported confidence score. The final decision requires all boundary checks and reports unexecuted production surfaces explicitly.
 
+## Audit the complete local path without inventing missing integration
+
+At construction, the Assistant copies only documents whose scope appears in the supplied set. A public instance therefore lacks private-v1 in its internal document dictionary. answer then maps a fixed question key to a document ID, retrieves that admitted document and returns its first sentence with versioned character offsets. An unsupported or excluded target returns unknown with no restricted document identity in the response.
+
+This is an explicit lookup-and-extraction baseline. It does not embed a natural-language question, execute BM25, learn a retrieval policy or generate a new paraphrase. The controlled map makes identity and disclosure behavior transparent. A broader natural-language interface would need its own intent mapping and retrieval evaluation rather than inheriting success from these exact keys.
+
+| Capability | Local capstone evidence | Separate evidence still needed for a larger assistant |
+| --- | --- | --- |
+| Scope filtering | Restricted target absent from public instance | Authenticated dynamic policy integration |
+| Source extraction | Exact first-sentence slice and version | General claim support and conflict handling |
+| Numerical calculation | Validated3/10=0.3 and invalid-count rejection | Real input provenance and analysis design |
+| Task statuses | Three fixed expected statuses match | Independent question families and utility |
+| Model generation | Not invoked by this baseline | Actual candidate outputs and grounding evaluation |
+
+The three status cases include one answered definition and two correct unknowns: missing comet evidence and a restricted threshold under public scope. Status accuracy is3/3, but answer coverage is1/3. That is appropriate for these authored cases; it is not evidence that every future question is answered correctly. A high status score can coexist with low usefulness if the evaluation contains too many easy refusals.
+
+Citation integrity is checked separately by slicing the original document. This catches a corrupted span even if status remains answered. It does not prove that the first sentence contains every caveat needed by a future question. The metric document's second sentence excludes test accounts, while the returned first sentence gives the formula. A question requiring eligibility details would need the additional span; the current fixed key is not a general policy-synthesis test.
+
+The conversion helper accepts integer purchases and visits with 0<=purchases<=visits and a positive denominator. Its0.3 output is descriptive arithmetic under the stated counting rule. Source evidence defines eligible visits, but actual eligible counts still need validated observations. Neither this ratio nor the assistant's explanation establishes sampling uncertainty or a causal effect.
+
+The instance captures its permitted documents at construction. It does not dynamically reevaluate revocations, implement the previous chapter's freshness gate or connect to a real identity provider. Those earlier components illustrate contracts that a larger service should integrate and test. Their separate existence in the course does not mean this small class already exercises them end to end.
+
+The optional pretrained recipe supplies another real but separate result: training, reload and generation executed, while the formula in its generated answer was incorrect despite supplied evidence. The capstone's local receipt correctly says pretrained_generation_executed=False for this particular run. It must not be read as a global denial that the separate recipe ran, or as a reason to discard its quality failure. A release report should reference both artifacts and retain their distinct scopes.
+
+### Interview reasoning with explanatory answers
+
+**Why can a successful capstone still conclude no-go?** Its local contracts pass while required operational and domain-quality evidence remains absent or has failed. A bounded success is useful without satisfying every release criterion.
+
+**What would justify replacing the extractive stage with generation?** Measured utility on cases requiring synthesis or explanation, with access, supported claims, citations, deterministic calculations and appropriate abstention preserved. Fluency alone does not establish that improvement.
+
+**How do you know whether all previous components are integrated?** Trace the actual call path and execution artifacts. A list of available modules or completed lessons is not an end-to-end runtime receipt.
+
 ## Exercise 1: Answer a supported domain definition
 
 The question is: Ask the public assistant forconversion_definition.

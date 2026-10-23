@@ -1,11 +1,12 @@
 # Docker learning lab, from a new computer to your first lesson
 
-For the new module courses, start with the
-[Docker-only classroom walkthrough](docker-classroom.md). After installing a
-local Linux-container engine, it needs only Docker commands on Windows, macOS,
-and Linux. Its saved work uses a Docker-managed volume. This older walkthrough
-keeps the optional setup wizards and host-folder `.learning` route; the two
-storage locations do not merge automatically.
+For the current classroom, use the [one-command guide](one-command-classroom.md).
+`./classroom` builds, starts, checks readiness and opens the browser. Windows
+uses a normal Ubuntu/WSL 2 distribution with Docker engine integration. The
+older installation wizard below can prepare an engine without such a user
+Linux distribution, so complete the one-command guide's WSL step before using
+the new shared launcher. This older walkthrough retains the host-folder
+`.learning` route; it does not merge that state into classroom named volumes.
 
 This guide starts before the terminal commands. You will install a local
 container engine, download the course, start its Python and PostgreSQL

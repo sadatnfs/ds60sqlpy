@@ -122,7 +122,7 @@
 <span>&quot;&quot;&quot;</span>
 <span> </span>
 <span># Exercise 1: Calculate a known affine layer</span>
-<span># UseX[[1, 2, 3], [0, 1, 0]], weight[[1, 0, -1]], bias2.</span>
+<span># UseX[[1, 2, 3], [0, 1, 0]], weight[[1, 0, -1]], bias 2.</span>
 <span># Expected: outputs[[0], [2]], shape(2, 1).</span>
 <span> </span>
 <span># Exercise 2: Inspect registered state</span>
@@ -135,14 +135,14 @@
 <span> </span>
 <span># Exercise 4: Remove the intercept explicitly</span>
 <span># Create a bias-free layer with the same stored weights.</span>
-<span># Expected: 3 parameters; outputs-2 and0.</span>
+<span># Expected: 3 parameters; outputs-2 and 0.</span>
 <span> </span>
 <span># Exercise 5: Expose an unregistered tensor</span>
 <span># Compare a Module holding a plain requires_grad tensor with one holding Parameter.</span>
-<span># Expected: plain module has0 registered parameters; proper module has1.</span>
+<span># Expected: plain module has 0 registered parameters; proper module has 1.</span>
 <span> </span>
 <span># Exercise 6: Reject wrong feature width</span>
-<span># Pass a2-feature row to the3-input layer.</span>
+<span># Pass a2-feature row to the 3-input layer.</span>
 <span># Expected: RuntimeError from incompatible matrix dimensions.</span>
 <span> </span>
 <span>if __name__ == &quot;__main__&quot;:</span>

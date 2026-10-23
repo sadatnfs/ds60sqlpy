@@ -1,0 +1,59 @@
+{
+  "lesson_id": "spark-022",
+  "scope": "Tiny paired local contracts;root-owned runtime qualification is separate.",
+  "cases": [
+    {
+      "exercise": 1,
+      "title": "Establish the high-cardinality fixture oracle",
+      "input_contract": "Compute input row count, distinct key count and total id sum. Confirm the key formula supports exactly 20 occurrences per key.",
+      "expected": "Metrics(20000,1000,199990000);keys 0..999 each occur 20 times by construction.",
+      "verification": "Assert the aggregate tuple and independent arithmetic sum 0+...+19999."
+    },
+    {
+      "exercise": 2,
+      "title": "Build and execute a controlled grouped query",
+      "input_contract": "Require 1..16 shuffle partitions, set that configuration in the owned session and return key, n from groupBy/count. Execute the two-partition case under the supplied unique job group.",
+      "expected": "Sorted output[(0,20),...,(999,20)], with total counts 20000 and an Exchange in the executed plan.",
+      "verification": "Assert every key/count pair and the plan Exchange marker. Reject an out-of-budget partition request."
+    },
+    {
+      "exercise": 3,
+      "title": "Read actual exchange metrics after the action",
+      "input_contract": "Traverse the executed classic Spark plan, collecting each Exchange metric map. Use the version-pinned internal diagnostic API only for evidence after collection.",
+      "expected": "One exchange map for this aggregate, with numPartitions 2 and dataSize>0. Record other available metrics without inventing units or missing values.",
+      "verification": "Assert one observed exchange, its partition metric and positive serialized data size;print the complete available map."
+    },
+    {
+      "exercise": 4,
+      "title": "Attach stage and task evidence to the named action",
+      "input_contract": "Use the status tracker to find jobs for a supplied group and their retained stages. Return stage_id, num_tasks, completed_tasks, failed_tasks ordered by stage identity.",
+      "expected": "Nonempty retained stage evidence for the p2 action, including a stage with 2 tasks. All task counters are nonnegative.",
+      "verification": "Assert nonempty stage rows and a two-task stage, and print the actual counters rather than asserting a universal stage count."
+    },
+    {
+      "exercise": 5,
+      "title": "Change reduce parallelism while preserving the complete result",
+      "input_contract": "Run the same source aggregation with 5 shuffle partitions under its own job group. Compare all 1000 group tuples, then report exchange and stage evidence tied to p5.",
+      "expected": "Exact output matches p2 and the literal oracle. Exchange numPartitions 5 and positive dataSize;retained task evidence includes a five-task stage.",
+      "verification": "Assert result parity before inspecting the 5-partition metric and corresponding action-group stages."
+    },
+    {
+      "exercise": 6,
+      "title": "Separate a workload model from measured evidence",
+      "input_contract": "For the declared 20000-row,1000-key, four-mapper fixture, return source_rows_per_mapper, partial_group_upper and average_output_groups_per_reducer for a positive reducer count. Label them as arithmetic estimates and print version/configuration beside the actual metrics.",
+      "expected": "For reducers 2:5000,4000,500. For reducers 5:5000,4000,200. These values do not assert actual balanced hash buckets or network bytes.",
+      "verification": "Assert the two model tuples and print Spark 4.0.1, AQEfalse, local[2] with the distinct p2/p5 observations."
+    }
+  ],
+  "golden": {
+    "source_rows": 20000,
+    "keys": 1000,
+    "per_key": 20,
+    "input_partitions": 4,
+    "reduce_partitions": [
+      2,
+      5
+    ],
+    "metrics_scope": "Actual executed classic Spark4.0.1 Exchange metrics;dataSize is serialized exchange data,not claimed remote network bytes."
+  }
+}

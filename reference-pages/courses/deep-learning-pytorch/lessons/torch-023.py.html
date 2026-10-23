@@ -126,12 +126,12 @@
 <span># Expected: detached loss requires_grad False; backward raises RuntimeError.</span>
 <span> </span>
 <span># Exercise 2: Repair two exact updates</span>
-<span># Usex1, 2, 3, y2x, w0 and two SGD.1 steps with gradient clearing.</span>
-<span># Expected: weights28/15 then448/225.</span>
+<span># Usex 1, 2, 3, y2x, w0 and two SGD.1 steps with gradient clearing.</span>
+<span># Expected: weights 28/15 then 448/225.</span>
 <span> </span>
 <span># Exercise 3: Inspect norm clipping</span>
-<span># Assign gradient3, 4 to a parameter vector and clip to norm1.</span>
-<span># Expected: returned norm5; new gradient approximately.6, .8.</span>
+<span># Assign gradient 3, 4 to a parameter vector and clip to norm 1.</span>
+<span># Expected: returned norm 5; new gradient approximately.6, .8.</span>
 <span> </span>
 <span># Exercise 4: Apply the clipped update</span>
 <span># Use SGD.1 after clipping and inspect the parameter.</span>
@@ -144,7 +144,7 @@
 <span># Exercise 6: Recompute post-update loss</span>
 <span># Calculate current loss after the two scalar updates and compare with the one-step</span>
 <span># oracle.</span>
-<span># Expected: nonnegative and below56/675.</span>
+<span># Expected: nonnegative and below 56/675.</span>
 <span> </span>
 <span>if __name__ == &quot;__main__&quot;:</span>
 <span>    print(&quot;Read the guide and implement the six exercises in your saved copy.&quot;)</span>

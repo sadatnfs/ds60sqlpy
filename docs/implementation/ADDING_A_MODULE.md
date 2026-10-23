@@ -63,6 +63,7 @@ backends still require updating and testing these deliberate gates:
 | Worker operation | `worker_operations.py`: fixed `PROFILES`, argv, preparation and typed verifier |
 | External resource ownership | A dedicated adapter, as in `kubernetes_module.py` |
 | Image and resource budget | `docker/workers/`, an explicit Compose profile and private network |
+| One-command setup | Add a new ordinary runtime to the fixed profile/service mapping in `scripts/classroom.sh` and its startup-order tests; new subjects reusing a runtime need no launcher change |
 | Host preparation | Both module launchers, local engine checks and private session handling |
 | Reader and tutor delivery | `lesson_reader.py`, module UI and read-only MCP module tools |
 | Portable payload | `desktop.py` allowlist and starter archive validation |
@@ -87,8 +88,9 @@ image does not establish Linux amd64 or Windows host acceptance. Record exact
 image IDs, architecture, reference results, rejected misconceptions, timeout,
 cancellation, saved-work recovery and the platform actually tested.
 
-Keep beta modules separate from the 168-lesson published catalog until their
-prerequisite chains and publication gates pass. Update the checkpoint and owner
+Keep module manifests separate from the numbered legacy catalog and preserve
+existing IDs and progress namespaces. Check prerequisite chains and publication
+gates before presenting a complete route. Update the checkpoint and owner
 status after each coherent batch. Future agents should resume from those files
 and actual receipts, rather than infer completion from the number of plan entries.
 

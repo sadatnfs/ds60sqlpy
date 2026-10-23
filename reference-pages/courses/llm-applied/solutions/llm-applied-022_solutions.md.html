@@ -126,6 +126,19 @@
 <p><strong>Interpretation boundary:</strong> The distinction between a computed statistic and a broader claim.</p>
 <h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
 <p>The tool request has exactlyoperation, group_by andvalue fields. Allowed values aregroup_mean, group andvalue. Input rows haveid, group, value with unique IDs and at most20 records. Rejectbool even though it is anint subclass. Group values with a dictionary, then emit sorted rows containinggroup, count, mean. Keep the tool result separate from any prose proposal and verify quoted numbers against it.</p>
+<h3 id="trace-a-typed-tool-from-proposal-to-descriptive-result">Trace a typed tool from proposal to descriptive result<a class="heading-anchor" href="#trace-a-typed-tool-from-proposal-to-descriptive-result" aria-label="Link to this section">#</a></h3>
+<p>The accepted request is exactly operation=group_mean, group_by=group, value=value. An extra query field or operation=run_sql is rejected rather than interpreted. The dispatcher therefore selects a fixed implementation; it does not execute model-generated source code. The literal rows are already in memory, so this example makes no claim about authenticating a database connection or binding SQL parameters in a live engine.</p>
+<p>The input grain is one identified observation per row. The output grain is one row per group, carrying count and mean. For A values1, 3, the sum is four, count two and mean two. B has value ten, count one and mean ten. The descriptive difference B minus A is eight. The output preserves the different sample counts instead of presenting both means as equally supported by data.</p>
+<p>Aggregation can change meaning. The overall observation mean is(1+3+10)/3=14/3. Averaging the two group means gives(2+10)/2=6 and weights groups equally rather than observations. Carrying counts makes the distinction reconstructible. The request schema does not authorize a later explanation to substitute either aggregate silently.</p>
+<p>Finite input checks alone do not prevent intermediate overflow. With values[1e308, 1e308], ordinary floating summation can become infinity before division by two, although the mathematical mean is1e308. The repaired calculation uses s=max(abs(values)), computes a mean of scaled values v/s, then multiplies by s. Every scaled magnitude is at most one, so the bounded group cannot overflow that summation. A zero scale returns zero directly. The result is also checked for finiteness.</p>
+<p>For the two large equal values, scaled values are[1, 1], their mean is one and the output is1e308. For equal opposite values, the scaled terms cancel to zero. This is an arithmetic stability improvement, not a guarantee of exactness for every representable combination; rounding and underflow remain part of floating-point computation. Use an explicitly different numeric representation if the task requires exact monetary units or exact decimal rounding rules.</p>
+<p>Missing values and booleans are rejected under this strict policy. Dropping None would change count and potentially bias the result; accepting True as one would conflate logical and measured data. A different missingness policy may be appropriate for another task, but it should have its own output count, denominator and explanation. Duplicate IDs are also a data-quality failure because repeated observations would change weights.</p>
+<p>The explanation check in the fixture compares the computed mean two with a proposed value twenty. It demonstrates an independent numeric anchor, but it is not a parser that validates every arbitrary sentence. A real report interface can carry structured claims referring to result cells and render them through reviewed templates, or use a separately evaluated extraction/validation stage for free-form prose.</p>
+<p>Finally, group membership is not a treatment-assignment design. The difference eight does not by itself estimate the causal effect of changing an observation from A to B. Sampling, measurement, confounding and assignment assumptions remain outside the grouped-mean arithmetic. The assistant can state which additional evidence is needed, but fluent explanation cannot supply it.</p>
+<h4 id="interview-reasoning-with-explanatory-answers">Interview reasoning with explanatory answers<a class="heading-anchor" href="#interview-reasoning-with-explanatory-answers" aria-label="Link to this section">#</a></h4>
+<p><strong>Why keep counts beside means?</strong> They identify denominators and allow correct recombination. They also expose a one-record group that a mean alone could conceal.</p>
+<p><strong>Why validate outputs after validated inputs?</strong> Correct primitive types and finite inputs do not exclude numerical overflow or implementation errors. The computed artifact has its own contract.</p>
+<p><strong>Does a narrow tool replace data access policy?</strong> No. It restricts allowed operations. The application must separately determine which rows the principal may use and how results may be disclosed.</p>
 <h3 id="exercise-1-execute-a-bounded-grouped-mean">Exercise 1: Execute a bounded grouped mean<a class="heading-anchor" href="#exercise-1-execute-a-bounded-grouped-mean" aria-label="Link to this section">#</a></h3>
 <p>The question is: Use rowsA1, A3, B10 and the admittedgroup_mean request.</p>
 <p>The output grain is one row pergroup. Counts remain beside means so a one-record group does not look as well supported as a larger group.</p>
@@ -145,15 +158,19 @@ assert result==[{&#x27;group&#x27;:&#x27;A&#x27;,&#x27;count&#x27;:2,&#x27;mean&
 <p><strong>Expected:</strong> ValueError before any computation.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with ValueError before any computation.</p>
 <h3 id="exercise-3-reject-invalid-numeric-values">Exercise 3: Reject invalid numeric values<a class="heading-anchor" href="#exercise-3-reject-invalid-numeric-values" aria-label="Link to this section">#</a></h3>
-<p>The question is: Replace onevalue withTrue, NaN orNone under the strict numeric policy.</p>
+<p>The question is: Replace one value with True, NaN or None, then check large finite values and cancellation under the same numeric policy.</p>
 <p>Silently dropping or coercing these values would change the denominator or meaning. A different missingness policy must be explicitly designed and reported.</p>
 <pre><code class="language-python">for bad in [True,float(&#x27;nan&#x27;),None]:
     changed=[dict(r) for r in rows]; changed[0][&#x27;value&#x27;]=bad
     try: dispatch(request,changed)
     except (TypeError,ValueError): pass
-    else: raise AssertionError(&#x27;invalid numeric value accepted&#x27;)</code></pre>
-<p><strong>Expected:</strong> each invalid row is rejected.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with each invalid row is rejected.</p>
+    else: raise AssertionError(&#x27;invalid numeric value accepted&#x27;)
+huge=[{&#x27;id&#x27;:&#x27;h1&#x27;,&#x27;group&#x27;:&#x27;A&#x27;,&#x27;value&#x27;:1e308},{&#x27;id&#x27;:&#x27;h2&#x27;,&#x27;group&#x27;:&#x27;A&#x27;,&#x27;value&#x27;:1e308}]
+assert dispatch(request,huge)==[{&#x27;group&#x27;:&#x27;A&#x27;,&#x27;count&#x27;:2,&#x27;mean&#x27;:1e308}]
+huge[1][&#x27;value&#x27;]=-1e308
+assert dispatch(request,huge)[0][&#x27;mean&#x27;]==0.0</code></pre>
+<p><strong>Expected:</strong> invalid rows are rejected; equal1e308 values have finite mean1e308 and opposite values have mean0.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with invalid rows are rejected; equal1e308 values have finite mean1e308 and opposite values have mean0.</p>
 <h3 id="exercise-4-enforce-identity-and-work-limits">Exercise 4: Enforce identity and work limits<a class="heading-anchor" href="#exercise-4-enforce-identity-and-work-limits" aria-label="Link to this section">#</a></h3>
 <p>The question is: Duplicatea1, then supply21 unique rows.</p>
 <p>Repeated records can bias aggregates, and unbounded inputs can exceed a tool budget. Both checks occur before the grouped calculation.</p>

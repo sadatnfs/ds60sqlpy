@@ -116,67 +116,106 @@
       <p class="source-path">Generated from <code>courses/cpp/guides/cpp-023.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-023-library-boundaries-and-abi">cpp-023: Library boundaries and ABI<a class="heading-anchor" href="#cpp-023-library-boundaries-and-abi" aria-label="Link to this section">#</a></h2>
-<p>Authored beta content. Content completion and runtime qualification are separate evidence.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Intermediate; 105 minutes. Direct prerequisites: <code>cpp-012</code>, <code>cpp-017</code>, <code>cpp-021</code>.</p>
 <p>Learner artifact: <a href="../lessons/cpp-023.cpp.html">cpp-023.cpp</a>. Keep <a href="../solutions/cpp-023_solutions.md.html">official solutions</a> closed until an attempt. The immutable <a href="../fixtures/cpp-023-cases.json.html">case ledger</a> records exercise inputs and expected observations.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <p>Separate source compatibility from binary compatibility.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
-<p>An API is the source-level interface callers use. An ABI is the compiled calling, layout and symbol convention needed to link binaries. C++ standard library objects are risky across independently compiled boundaries. A narrow C interface uses fixed-width values, explicit ownership and status codes to reduce coupling.</p>
+<p>An API is the source-level interface callers use. An ABI is the compiled calling, layout and symbol convention needed to link binaries. C++ standard library objects are risky across independently compiled boundaries. A narrow C interface uses agreed primitive representations, explicit ownership and status codes to reduce coupling. This example uses platform int; a cross-platform serialized format needs its own fixed-width encoding contract.</p>
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p><code>extern &quot;C&quot;</code> requests C language linkage for symbols; it does not make arbitrary C++ types portable or safe. Keep exceptions inside the boundary. Rebuilding all dependents can resolve an API-compatible but ABI-incompatible change; a version string alone cannot prove compatibility.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>The caller and library must agree on the function symbol and how its arguments/results cross the machine boundary. extern C reduces name-mangling ambiguity but does not specify all platform ABI details. The caller owns the output integer, while the function owns only the act of validating and assigning it. The overflow case returns before assignment, so the previous output value remains a useful check that failure did not publish a partial result.</p>
+<h3 id="c-compatible-boundaries-and-error-translation">C-compatible boundaries and error translation<a class="heading-anchor" href="#c-compatible-boundaries-and-error-translation" aria-label="Link to this section">#</a></h3>
+<p>A C-compatible function boundary is useful when code crosses a language or binary interface. extern &quot;C&quot; changes language linkage conventions for the named function; it does not automatically make every C++ parameter, exception or object layout safe for a C caller. The public signature should use a deliberately constrained representation and a documented ownership/error policy.</p>
+<p>add_checked takes two integers and an output pointer, returning a status code. Status0 means the output was written successfully; status 1 denotes a null output pointer; status 2 denotes signed-int overflow. Both failure paths return before assigning the output, so its previous value is preserved. The interface uses this platform&#x27;s int representation, not a fixed-width wire format. A caller must check status before consuming the output. Returning an integer sum alone would leave no distinct channel for a failure if every integer value could also be legitimate data.</p>
+<p>A null check can reject a missing pointer, but it cannot prove that an arbitrary nonnull pointer points to writable live storage. The caller still has a precondition to supply a valid output object. After an object is destroyed, a dangling address may remain nonnull. C-style interfaces therefore need precise lifetime and buffer-size contracts in addition to defensive null checks.</p>
+<p>Exceptions must not escape a boundary that promises not to throw. A wrapper around potentially throwing C++ work should catch exceptions and translate them into the declared status result while preserving cleanup through RAII. noexcept is a promise enforced by termination if an exception escapes, it is not a catch block. Marking a function noexcept without controlling its implementation can make failure less recoverable.</p>
+<p>The single-file program proves the illustrated call and error conventions within one C++ executable. It does not prove dynamic loading, ABI compatibility across compilers or successful use by another language. The later opaque-handle and host-library exercises add those boundaries separately. Keep source linkage, linker success and real foreign-consumer acceptance as distinct evidence.</p>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">int out=0; assert(add_checked(2,3,&amp;out)==0 &amp;&amp; out==5);</code></pre>
-<p><strong>Expected:</strong> Status 0 publishes value 5 through the caller-owned pointer.</p>
+<p><a href="../examples/cpp-023-example-1.cpp.html">Complete program 1</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;iostream&gt;
+#include &lt;limits&gt;
+
+extern &quot;C&quot; int add_checked(int a,int b,int* out) noexcept  {
+     if(!out)return 1;
+     if((b&gt;0 &amp;&amp; a&gt;std::numeric_limits&lt;int&gt;::max()-b)||(b&lt;0 &amp;&amp; a&lt;std::numeric_limits&lt;int&gt;::min()-b))return 2;
+     *out=a+b;
+    return 0;
+}
+int main() {
+    int out=0; assert(add_checked(2,3,&amp;out)==0 &amp;&amp; out==5);
+    std::cout &lt;&lt; &quot;cpp-023 example 1 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-023 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">assert(add_checked(2,3,nullptr)==1);</code></pre>
-<p><strong>Expected:</strong> Null output pointer returns status 1 without dereferencing it.</p>
+<p><a href="../examples/cpp-023-example-2.cpp.html">Complete program 2</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;iostream&gt;
+#include &lt;limits&gt;
+
+extern &quot;C&quot; int add_checked(int a,int b,int* out) noexcept  {
+     if(!out)return 1;
+     if((b&gt;0 &amp;&amp; a&gt;std::numeric_limits&lt;int&gt;::max()-b)||(b&lt;0 &amp;&amp; a&lt;std::numeric_limits&lt;int&gt;::min()-b))return 2;
+     *out=a+b;
+    return 0;
+}
+int main() {
+    assert(add_checked(2,3,nullptr)==1);
+    std::cout &lt;&lt; &quot;cpp-023 example 2 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-023 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-separate-interfaces">Exercise 1: Separate interfaces<a class="heading-anchor" href="#exercise-1-separate-interfaces" aria-label="Link to this section">#</a></h4>
 <p>List the add_checked source contract and binary assumptions.</p>
 <p><strong>Expected result/shape:</strong> Names/types/statuses versus compiler/platform/linkage distinguished.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Names/types/statuses versus compiler/platform/linkage distinguished.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: An ABI includes details the header alone cannot prove.</p>
+<p><strong>Verify:</strong> Names/types/statuses versus compiler/platform/linkage distinguished.</p>
+<p><strong>Progressive hints:</strong> An ABI includes details the header alone cannot prove.</p>
 <h4 id="exercise-2-call-a-valid-boundary">Exercise 2: Call a valid boundary<a class="heading-anchor" href="#exercise-2-call-a-valid-boundary" aria-label="Link to this section">#</a></h4>
-<p>Pass 2,3 and a writable output integer.</p>
+<p>Pass 2, 3 and a writable output integer.</p>
 <p><strong>Expected result/shape:</strong> Status 0 and output 5.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Status 0 and output 5.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Caller owns the destination storage.</p>
+<p><strong>Verify:</strong> Status 0 and output 5.</p>
+<p><strong>Progressive hints:</strong> Caller owns the destination storage.</p>
 <h4 id="exercise-3-reject-null-output">Exercise 3: Reject null output<a class="heading-anchor" href="#exercise-3-reject-null-output" aria-label="Link to this section">#</a></h4>
 <p>Pass nullptr for out.</p>
 <p><strong>Expected result/shape:</strong> Status 1, no invalid access.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Status 1, no invalid access.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Validate pointers before dereference.</p>
+<p><strong>Verify:</strong> Status 1, no invalid access.</p>
+<p><strong>Progressive hints:</strong> Validate pointers before dereference.</p>
 <h4 id="exercise-4-repair-exception-leakage">Exercise 4: Repair exception leakage<a class="heading-anchor" href="#exercise-4-repair-exception-leakage" aria-label="Link to this section">#</a></h4>
 <p>Review a C wrapper that lets std::runtime_error escape.</p>
 <p><strong>Expected result/shape:</strong> Catch inside wrapper and map to a documented status.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Catch inside wrapper and map to a documented status.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Foreign callers cannot assume a compatible exception runtime.</p>
+<p><strong>Verify:</strong> Catch inside wrapper and map to a documented status.</p>
+<p><strong>Progressive hints:</strong> Foreign callers cannot assume a compatible exception runtime.</p>
 <h4 id="exercise-5-check-overflow">Exercise 5: Check overflow<a class="heading-anchor" href="#exercise-5-check-overflow" aria-label="Link to this section">#</a></h4>
 <p>Call INT_MAX plus 1.</p>
 <p><strong>Expected result/shape:</strong> Status 2; no overflowing addition.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Status 2; no overflowing addition.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Check arithmetic before evaluating it.</p>
+<p><strong>Verify:</strong> Status 2; no overflowing addition.</p>
+<p><strong>Progressive hints:</strong> Check arithmetic before evaluating it.</p>
 <h4 id="exercise-6-transfer-a-shared-library">Exercise 6: Transfer a shared library<a class="heading-anchor" href="#exercise-6-transfer-a-shared-library" aria-label="Link to this section">#</a></h4>
 <p>Build the wrapper separately in an owned host project and record compiler/architecture.</p>
 <p><strong>Expected result/shape:</strong> Real link/load receipt plus matching header, no inferred portability.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Real link/load receipt plus matching header, no inferred portability.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: The browser single-file run does not exercise a shared-library ABI.</p>
+<p><strong>Verify:</strong> Real link/load receipt plus matching header, no inferred portability.</p>
+<p><strong>Progressive hints:</strong> The browser single-file run does not exercise a shared-library ABI.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: Status 0 publishes value 5 through the caller-owned pointer. Then explain the changed condition in example 2 without opening the answer.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
-<p><code>extern &quot;C&quot;</code> requests C language linkage for symbols; it does not make arbitrary C++ types portable or safe. Keep exceptions inside the boundary. Rebuilding all dependents can resolve an API-compatible but ABI-incompatible change; a version string alone cannot prove compatibility.</p>
-<p>If the result disagrees, preserve the original input and inspect the first differing value or condition. Foreign callers cannot assume a compatible exception runtime.</p>
+<p>If the caller reads output after a nonzero status, it may be using an old value. If a null check passes but access crashes, inspect lifetime and buffer validity rather than assuming nonnull means safe. If an exception crosses a C boundary, add translation at the boundary and preserve a stable error contract. If a symbol cannot be found during linking, check language linkage and the actual exported name separately from runtime pointer behavior.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
 <p>Close the source. Reconstruct the reasoning for Exercise 6: Transfer a shared library. Explain which assumptions would fail on a larger input or another runtime.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue with <a href="cpp-024.md.html">cpp-024</a> after saving the six observations.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines">C++ Core Guidelines</a></p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach cpp-023.
 Read courses/cpp/guides/cpp-023.md and courses/cpp/lessons/cpp-023.cpp.

@@ -8,15 +8,15 @@ Read the guide, record a prediction, then answer the six cases without opening s
    **Expected:** 3 training rows, 4 holdout rows, one prediction per row.
    **Verify:** Save the reasoning table for exercise 1, including 3 training rows, 4 holdout rows, one prediction per row.
 
-2. **Calculate a mean baseline.** Use training targets2, 4, 6 to predict the constant training mean on holdout8, 10, 12, 14.
-   **Expected:** mean4; holdout squared errors16, 36, 64, 100; MSE54.
-   **Verify:** Save the reasoning table for exercise 2, including mean4; holdout squared errors16, 36, 64, 100; MSE54.
+2. **Calculate a mean baseline.** Use training targets 2, 4, 6 to predict the constant training mean on holdout 8, 10, 12, 14.
+   **Expected:** mean 4; holdout squared errors 16, 36, 64, 100; MSE 54.
+   **Verify:** Save the reasoning table for exercise 2, including mean 4; holdout squared errors 16, 36, 64, 100; MSE 54.
 
-3. **Separate an exact relation from learned evidence.** Compare a hand-specified rule y=2 x with a model trained on the three points.
+3. **Separate an exact relation from learned evidence.** Compare a hand-specified rule y=2x with a model trained on the three points.
    **Expected:** the hand rule predicts the fixture exactly but was not learned by running an optimizer.
    **Verify:** Save the reasoning table for exercise 3, including the hand rule predicts the fixture exactly but was not learned by running an optimizer.
 
-4. **Audit selection leakage.** After looking at holdout errors, a research e r changes the learning rate and reports the better result as final.
+4. **Audit selection leakage.** After looking at holdout errors, a researcher changes the learning rate and reports the better result as final.
    **Expected:** holdout was used for selection; new untouched assessment needed.
    **Verify:** Save the reasoning table for exercise 4, including holdout was used for selection; new untouched assessment needed.
 
@@ -25,5 +25,5 @@ Read the guide, record a prediction, then answer the six cases without opening s
    **Verify:** Save the reasoning table for exercise 5, including same data pairing, dtype, initial weight, loss reduction, rate and optimizer rule.
 
 6. **Bound the conclusion.** Write a report for a successful tiny CPU reference that avoids a production-quality claim.
-   **Expected:** report says arithmetic/software checked; population reliability u n established.
-   **Verify:** Save the reasoning table for exercise 6, including report says arithmetic/software checked; population reliability u n established.
+   **Expected:** report says arithmetic/software checked; population reliability unestablished.
+   **Verify:** Save the reasoning table for exercise 6, including report says arithmetic/software checked; population reliability unestablished.

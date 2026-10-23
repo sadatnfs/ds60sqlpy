@@ -7,12 +7,12 @@ cataloged lesson, the target is `max(6, 2 × audited baseline)` and must
 be visible in the learner artifact, companion guide, and every
 explanatory solution artifact.
 
-- Lessons passing all three surfaces: **180/180**
+- Lessons passing all three surfaces: **186/186**
 - Audited baseline prompts: **534**
-- Required prompts per surface: **1384**
-- Current learner-artifact prompts: **1442**
-- Current companion-guide prompts: **1439**
-- Current explanatory-solution prompts: **1439**
+- Required prompts per surface: **1420**
+- Current learner-artifact prompts: **1478**
+- Current companion-guide prompts: **1475**
+- Current explanatory-solution prompts: **1475**
 
 | Lesson | Baseline | Target | Learner | Guide | Solution minimum | Status |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
@@ -183,6 +183,12 @@ explanatory solution artifact.
 | `sql-quality-01` | 0 | 6 | 6 | 6 | 6 | PASS |
 | `sql-scale-01` | 0 | 6 | 6 | 6 | 6 | PASS |
 | `sql-concurrency-01` | 0 | 6 | 6 | 6 | 6 | PASS |
+| `sql-deep-01` | 0 | 6 | 6 | 6 | 6 | PASS |
+| `sql-deep-02` | 0 | 6 | 6 | 6 | 6 | PASS |
+| `sql-deep-03` | 0 | 6 | 6 | 6 | 6 | PASS |
+| `sql-deep-04` | 0 | 6 | 6 | 6 | 6 | PASS |
+| `sql-deep-05` | 0 | 6 | 6 | 6 | 6 | PASS |
+| `sql-deep-06` | 0 | 6 | 6 | 6 | 6 | PASS |
 | `bridge-01` | 5 | 10 | 10 | 10 | 10 | PASS |
 | `bridge-02` | 6 | 12 | 12 | 12 | 12 | PASS |
 | `bridge-03` | 5 | 10 | 10 | 10 | 10 | PASS |

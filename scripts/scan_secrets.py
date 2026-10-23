@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Fail when repository files contain common credential material.
 
-This is a fast, offline guard for obvious secrets. It complements—not
-replaces—review and a dedicated secret scanner when one is available.
+This is a fast, offline guard for obvious secrets. It complements review
+and a dedicated secret scanner when one is available.
 """
 
 from __future__ import annotations

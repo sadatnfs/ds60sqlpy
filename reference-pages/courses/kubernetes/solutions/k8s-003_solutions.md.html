@@ -136,7 +136,7 @@ metadata:
   name: vocabulary
 data:
   label: learner</code></pre>
-<p><strong>Expected:</strong> name vocabulary;one data string; no spec or status is required for this kind.</p>
+<p><strong>Expected:</strong> name vocabulary; one data string; no spec or status is required for this kind.</p>
 <h4 id="worked-example-2-reject-the-wrong-replica-type">Worked example 2: Reject the wrong replica type<a class="heading-anchor" href="#worked-example-2-reject-the-wrong-replica-type" aria-label="Link to this section">#</a></h4>
 <p>The snippet is deliberately incomplete and invalid; do not apply it hoping to create a workload. Separate a YAML parse from API-schema acceptance.</p>
 <pre><code class="language-yaml">apiVersion: apps/v1
@@ -149,7 +149,7 @@ spec:
 <h3 id="exercises-and-explanatory-solutions">Exercises and explanatory solutions<a class="heading-anchor" href="#exercises-and-explanatory-solutions" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-read-the-request-envelope">Exercise 1: Read the request envelope<a class="heading-anchor" href="#exercise-1-read-the-request-envelope" aria-label="Link to this section">#</a></h4>
 <p><strong>Inputs/evidence:</strong> For k8s-003 Exercise 1, the complete hello Deployment learner source.</p>
-<p><strong>Expected result/shape:</strong> For k8s-003 Exercise 1, apps/v1,Deployment,hello.</p>
+<p><strong>Expected result/shape:</strong> For k8s-003 Exercise 1, apps/v1, Deployment, hello.</p>
 <p><strong>Verify:</strong> For k8s-003 Exercise 1, read the three exact fields at their declared levels.</p>
 <p>These fields identify what API object is requested. They do not establish current replica health or authorize a target cluster.</p>
 <h4 id="exercise-2-validate-a-numeric-field">Exercise 2: Validate a numeric field<a class="heading-anchor" href="#exercise-2-validate-a-numeric-field" aria-label="Link to this section">#</a></h4>
@@ -163,17 +163,17 @@ spec:
 <p><strong>Verify:</strong> For k8s-003 Exercise 3, compare the exact pair on both sides.</p>
 <p>Selectors express membership; matching only the key while changing the value is not enough. This controller relation is separate from a later Service selector.</p>
 <h4 id="exercise-4-bind-only-the-owned-namespace">Exercise 4: Bind only the owned namespace<a class="heading-anchor" href="#exercise-4-bind-only-the-owned-namespace" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For k8s-003 Exercise 4, source omits namespace;private lease specifies lesson-a with verified UID.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-003 Exercise 4, source omits namespace; private lease specifies lesson-a with verified UID.</p>
 <p><strong>Expected result/shape:</strong> For k8s-003 Exercise 4, the reviewed operation binds lesson-a; no ambient fallback or source namespace escape.</p>
 <p><strong>Verify:</strong> For k8s-003 Exercise 4, inspect the bound request and receipt; refuse when the lease is absent.</p>
 <p>Omission is deliberate in this workflow. It delegates target binding to the typed operation, not to a kubectl default namespace or an arbitrary browser field.</p>
 <h4 id="exercise-5-separate-intent-from-observation">Exercise 5: Separate intent from observation<a class="heading-anchor" href="#exercise-5-separate-intent-from-observation" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For k8s-003 Exercise 5, desired1,observed ready0.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-003 Exercise 5, desired1, observed ready0.</p>
 <p><strong>Expected result/shape:</strong> For k8s-003 Exercise 5, the request can be accepted while readiness is not established.</p>
 <p><strong>Verify:</strong> For k8s-003 Exercise 5, record generation/observedGeneration and readiness after bounded reconciliation; do not edit status into the source.</p>
 <p>A controller observes and acts after the request. API acceptance and application readiness answer different questions, so preserve both rather than declaring success early.</p>
 <h4 id="exercise-6-verify-server-identity-and-safe-cleanup">Exercise 6: Verify server identity and safe cleanup<a class="heading-anchor" href="#exercise-6-verify-server-identity-and-safe-cleanup" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For k8s-003 Exercise 6, name hello,namespace from lease,server-assigned UID.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-003 Exercise 6, name hello, namespace from lease, server-assigned UID.</p>
 <p><strong>Expected result/shape:</strong> For k8s-003 Exercise 6, namespace matches the lease; UID is recorded from readback and used for owned cleanup.</p>
 <p><strong>Verify:</strong> For k8s-003 Exercise 6, check actual returned identity; never fabricate a fixed UID from this document.</p>
 <p>UIDs, resource versions and timing vary. The exact check is relational: the object is in the verified namespace and cleanup still refers to the recorded object instance.</p>

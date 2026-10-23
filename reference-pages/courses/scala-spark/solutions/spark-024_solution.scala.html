@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Spark 024 Solution · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course artifact</p>
+      <h1>Spark 024 Solution</h1>
+      <p class="source-path">Generated from <code>courses/scala-spark/solutions/spark-024_solution.scala</code></p>
+    </header>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-scala"><code><span>import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}</span>
+<span>import org.apache.spark.sql.functions._</span>
+<span>import org.apache.spark.sql.types._</span>
+<span> </span>
+<span> </span>
+<span>object Main {</span>
+<span>  def canonicalRows(frame: DataFrame): Seq[(Long,Long,Long,Long)] = {</span>
+<span>    frame.collect().toSeq.map(r =&gt; (r.getLong(0),r.getLong(1),r.getLong(2),r.getLong(3))).sortBy(_._1)</span>
+<span>  }</span>
+<span>  def partitionLoads(frame: DataFrame, keys: Seq[String]): Seq[(Int,Long)] = {</span>
+<span>    frame.repartition(8,keys.map(col):_*).select(spark_partition_id().as(&quot;pid&quot;))</span>
+<span>      .groupBy(&quot;pid&quot;).count().collect().toSeq.map(r =&gt; (r.getInt(0),r.getLong(1))).sortBy(_._1)</span>
+<span>  }</span>
+<span> </span>
+<span>  def keyFrequencies(facts: DataFrame): Seq[(Long,Long)] = {</span>
+<span>    facts.groupBy(&quot;key&quot;).count().collect().toSeq.map(r =&gt; (r.getLong(0),r.getLong(1))).sortBy(_._1)</span>
+<span>  }</span>
+<span> </span>
+<span>  def baselineJoin(facts: DataFrame, dimension: DataFrame): DataFrame = {</span>
+<span>    facts.sparkSession.conf.set(&quot;spark.sql.adaptive.enabled&quot;,&quot;false&quot;)</span>
+<span>    facts.join(dimension,Seq(&quot;key&quot;),&quot;inner&quot;).select(&quot;fact_id&quot;,&quot;key&quot;,&quot;amount&quot;,&quot;factor&quot;)</span>
+<span>  }</span>
+<span> </span>
+<span>  def adaptiveJoin(facts: DataFrame, dimension: DataFrame): DataFrame = {</span>
+<span>    val conf = facts.sparkSession.conf</span>
+<span>    conf.set(&quot;spark.sql.adaptive.enabled&quot;,&quot;true&quot;)</span>
+<span>    conf.set(&quot;spark.sql.adaptive.skewJoin.enabled&quot;,&quot;true&quot;)</span>
+<span>    conf.set(&quot;spark.sql.adaptive.coalescePartitions.enabled&quot;,&quot;false&quot;)</span>
+<span>    conf.set(&quot;spark.sql.adaptive.skewJoin.skewedPartitionFactor&quot;,&quot;2&quot;)</span>
+<span>    conf.set(&quot;spark.sql.adaptive.skewJoin.skewedPartitionThresholdInBytes&quot;,&quot;1024&quot;)</span>
+<span>    conf.set(&quot;spark.sql.adaptive.advisoryPartitionSizeInBytes&quot;,&quot;16384&quot;)</span>
+<span>    facts.join(dimension,Seq(&quot;key&quot;),&quot;inner&quot;).select(&quot;fact_id&quot;,&quot;key&quot;,&quot;amount&quot;,&quot;factor&quot;)</span>
+<span>  }</span>
+<span> </span>
+<span>  def saltFacts(facts: DataFrame): DataFrame = {</span>
+<span>    facts.withColumn(&quot;salt&quot;,when(col(&quot;key&quot;) === 0L,pmod(col(&quot;fact_id&quot;),lit(4L))).otherwise(lit(0L)))</span>
+<span>  }</span>
+<span> </span>
+<span>  def expandDimension(dimension: DataFrame): DataFrame = {</span>
+<span>    dimension.withColumn(&quot;salts&quot;,when(col(&quot;key&quot;) === 0L,array(lit(0L),lit(1L),lit(2L),lit(3L))).otherwise(array(lit(0L)))).withColumn(&quot;salt&quot;,explode(col(&quot;salts&quot;))).drop(&quot;salts&quot;)</span>
+<span>  }</span>
+<span> </span>
+<span>  def saltedJoin(facts: DataFrame, dimension: DataFrame): DataFrame = {</span>
+<span>    facts.join(dimension,Seq(&quot;key&quot;,&quot;salt&quot;),&quot;inner&quot;).select(&quot;fact_id&quot;,&quot;key&quot;,&quot;amount&quot;,&quot;factor&quot;)</span>
+<span>  }</span>
+<span> </span>
+<span>  def main(args: Array[String]): Unit = {</span>
+<span> </span>
+<span>    val spark = SparkSession.builder().appName(&quot;ds60-spark-024&quot;).master(&quot;local[2]&quot;)</span>
+<span>      .config(&quot;spark.ui.enabled&quot;,&quot;false&quot;)</span>
+<span>      .config(&quot;spark.driver.host&quot;,&quot;127.0.0.1&quot;)</span>
+<span>      .config(&quot;spark.driver.bindAddress&quot;,&quot;127.0.0.1&quot;)</span>
+<span>      .config(&quot;spark.sql.shuffle.partitions&quot;,&quot;2&quot;)</span>
+<span>      .config(&quot;spark.sql.adaptive.enabled&quot;,&quot;false&quot;)</span>
+<span>      .config(&quot;spark.sql.ansi.enabled&quot;,&quot;true&quot;)</span>
+<span>      .config(&quot;spark.sql.session.timeZone&quot;,&quot;UTC&quot;).getOrCreate()</span>
+<span>    try {</span>
+<span>      require(spark.sparkContext.master == &quot;local[2]&quot;, &quot;local-only course session&quot;)</span>
+<span>      spark.sparkContext.setLogLevel(&quot;ERROR&quot;)</span>
+<span>      spark.conf.set(&quot;spark.sql.autoBroadcastJoinThreshold&quot;,&quot;-1&quot;)</span>
+<span>      spark.conf.set(&quot;spark.sql.adaptive.autoBroadcastJoinThreshold&quot;,&quot;-1&quot;)</span>
+<span>      spark.conf.set(&quot;spark.sql.join.preferSortMergeJoin&quot;,&quot;true&quot;)</span>
+<span>      spark.conf.set(&quot;spark.sql.shuffle.partitions&quot;,&quot;4&quot;)</span>
+<span>      val facts = spark.range(0L,10000L,1L,4).withColumnRenamed(&quot;id&quot;,&quot;fact_id&quot;).withColumn(&quot;key&quot;,when(col(&quot;fact_id&quot;) &lt; 9000L,0L).otherwise((col(&quot;fact_id&quot;) - 9000L) % 10L + 1L)).withColumn(&quot;amount&quot;,lit(1L))</span>
+<span>      val dimension = spark.range(0L,11L,1L,2).withColumnRenamed(&quot;id&quot;,&quot;key&quot;).withColumn(&quot;factor&quot;,col(&quot;key&quot;) + 1L)</span>
+<span>      // Exercise 1: Measure the key-frequency imbalance</span>
+<span>      val frequency = keyFrequencies(facts)</span>
+<span>      assert(frequency == Seq((0L,9000L)) ++ (1L to 10L).map(key =&gt; (key,100L)))</span>
+<span>      assert(frequency.map(_._2).sum == 10000L &amp;&amp; frequency.head._2.toDouble/10000.0 == 0.9)</span>
+<span>      // Exercise 2: Establish a baseline join with exact identity conservation</span>
+<span>      val baseline = baselineJoin(facts,dimension)</span>
+<span>      val baselineRows = canonicalRows(baseline)</span>
+<span>      val expected = (0L until 10000L).map { id =&gt; val key = if(id &lt; 9000L) 0L else (id-9000L)%10L+1L;(id,key,1L,key+1L) }</span>
+<span>      assert(baselineRows == expected &amp;&amp; baselineRows.map(_._3).sum == 10000L &amp;&amp; baselineRows.map(r =&gt; r._3*r._4).sum == 15500L)</span>
+<span>      println(&quot;baseline_plan=&quot; + baseline.queryExecution.executedPlan.toString)</span>
+<span>      // Exercise 3: Observe an adaptive plan before and after execution</span>
+<span>      val adaptive = adaptiveJoin(facts,dimension)</span>
+<span>      val initialPlan = adaptive.queryExecution.executedPlan.toString</span>
+<span>      val adaptiveRows = canonicalRows(adaptive)</span>
+<span>      val finalPlan = adaptive.queryExecution.executedPlan.toString</span>
+<span>      assert(initialPlan.contains(&quot;AdaptiveSparkPlan&quot;) &amp;&amp; finalPlan.contains(&quot;isFinalPlan=true&quot;))</span>
+<span>      assert(adaptiveRows == baselineRows)</span>
+<span>      println(&quot;aqe_initial=&quot; + initialPlan + &quot;;aqe_final=&quot; + finalPlan + &quot;;skew_threshold=1024;advisory=16384&quot;)</span>
+<span>      // Exercise 4: Split the hot logical key with a deterministic helper</span>
+<span>      spark.conf.set(&quot;spark.sql.adaptive.enabled&quot;,&quot;false&quot;)</span>
+<span>      val saltedFacts = saltFacts(facts)</span>
+<span>      assert(saltedFacts.filter(col(&quot;key&quot;) === 0L).groupBy(&quot;salt&quot;).count().orderBy(&quot;salt&quot;).collect().toSeq.map(r =&gt; (r.getLong(0),r.getLong(1))) == (0L until 4L).map(salt =&gt; (salt,2250L)))</span>
+<span>      val unsaltedLoads = partitionLoads(facts,Seq(&quot;key&quot;));val saltedLoads = partitionLoads(saltedFacts,Seq(&quot;key&quot;,&quot;salt&quot;))</span>
+<span>      assert(unsaltedLoads.map(_._2).sum == 10000L &amp;&amp; saltedLoads.map(_._2).sum == 10000L &amp;&amp; unsaltedLoads.map(_._2).max &gt;= 9000L)</span>
+<span>      println(&quot;unsalted_row_loads=&quot; + unsaltedLoads + &quot;;salted_row_loads=&quot; + saltedLoads)</span>
+<span>      // Exercise 5: Replicate only the matching small-side hot row</span>
+<span>      val expanded = expandDimension(dimension)</span>
+<span>      assert(expanded.count() == 14L &amp;&amp; expanded.select(&quot;key&quot;,&quot;salt&quot;).distinct().count() == 14L)</span>
+<span>      assert(expanded.filter(col(&quot;key&quot;) === 0L).select(&quot;salt&quot;).orderBy(&quot;salt&quot;).collect().toSeq.map(_.getLong(0)) == Seq(0L,1L,2L,3L))</span>
+<span>      assert(expanded.filter(col(&quot;key&quot;) =!= 0L &amp;&amp; col(&quot;salt&quot;) =!= 0L).count() == 0L)</span>
+<span>      // Exercise 6: Remove the physical helper and reconcile the business relation</span>
+<span>      val salted = saltedJoin(saltedFacts,expanded)</span>
+<span>      assert(salted.columns.toSeq == Seq(&quot;fact_id&quot;,&quot;key&quot;,&quot;amount&quot;,&quot;factor&quot;))</span>
+<span>      val saltedRows = canonicalRows(salted)</span>
+<span>      assert(saltedRows == baselineRows &amp;&amp; saltedRows == adaptiveRows &amp;&amp; saltedRows.map(r =&gt; r._3*r._4).sum == 15500L)</span>
+<span>      println(&quot;salted_plan=&quot; + salted.queryExecution.executedPlan.toString)</span>
+<span>      println(&quot;spark-024: six Scala reference contracts passed; Spark=&quot; + spark.version + &quot;; Scala=&quot; + scala.util.Properties.versionNumberString)</span>
+<span>    } finally { try { () } finally { spark.stop() } }</span>
+<span>  }</span>
+<span>}</span>
+<span> </span>
+<span>// Exercise 1: Measure the key-frequency imbalance. Inputs/task: Return ordered(key, n) counts for the fact relation. Derive total population and the hot-key fraction from this ledger. Expected: Key 0 has 9000;keys 1..10 each 100. Total 10000 and hot fraction 0.9. Verify: Assert all 11 ledger rows and the exact population/fraction.</span>
+<span>// Exercise 2: Establish a baseline join with exact identity conservation. Inputs/task: Build an inner join withAQE disabled and broadcasting thresholds disabled, returning fact_id, key, amount, factor. Materialize the bounded result and compare every tuple with the generation formula. Expected: 10000 unique fact identities, amount total 10000 and weighted total 15500. The baseline plan contains a join and is printed. Verify: Assert all 10000 literal formula tuples and both totals before examining any optimization.</span>
+<span>// Exercise 3: Observe an adaptive plan before and after execution. Inputs/task: Build a freshAQE-enabled join with skew handling enabled, coalescing disabled, skew factor 2, threshold 1024 bytes and advisory size 16384 bytes. Capture the initial plan, materialize the same DataFrame and capture the final plan. Expected: Initial/final text identifies AdaptiveSparkPlan;after materialization isFinalPlan=true. Every result tuple matches the baseline. Actual skew splitting is reported only if visible. Verify: Assert adaptive finalization and full row parity;print both plans and the small demonstration thresholds.</span>
+<span>// Exercise 4: Split the hot logical key with a deterministic helper. Inputs/task: Add salt=fact_id modulo 4 only for key 0 and salt 0 otherwise. WithAQE disabled, compare eight-partition row-load ledgers by key and by(key, salt). Expected: Hot salt buckets 0..3 each have 2250 rows;cold facts all have salt 0. Both physical ledgers reconcile to 10000, and the unsalted maximum is at least 9000. Verify: Assert all four hot bucket counts and both reconciled ledgers;print actual salted loads without inventing perfect hash balance.</span>
+<span>// Exercise 5: Replicate only the matching small-side hot row. Inputs/task: Expand dimension key 0 to salts 0,1,2,3 and every other dimension key to salt 0. Retain factor and verify uniqueness on the composite key. Expected: 14 dimension rows, with four key 0 variants and ten cold rows. Every(key, salt) pair is unique. Verify: Assert row count 14, distinct composite keys 14 and exact hot/cold salt populations.</span>
+<span>// Exercise 6: Remove the physical helper and reconcile the business relation. Inputs/task: Join salted facts to the expanded dimension on key and salt, then project only fact_id, key, amount, factor. Compare the complete result with baseline and adaptive variants. Expected: All 10000 fact tuples remain exactly equal, with amount 10000 and weighted total 15500. Salt is absent from the final schema. Verify: Assert exact canonical bag equality and final column names;report the salted plan and row-load evidence separately from any speed claim.</span>
+<span> </span></code></pre></article>
+  </main>
+</body>
+</html>

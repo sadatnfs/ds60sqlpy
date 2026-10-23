@@ -116,7 +116,6 @@
       <p class="source-path">Generated from <code>courses/cpp/guides/cpp-029.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-029-threads-joining-and-cancellation">cpp-029: Threads, joining and cancellation<a class="heading-anchor" href="#cpp-029-threads-joining-and-cancellation" aria-label="Link to this section">#</a></h2>
-<p>Authored beta content. Content completion and runtime qualification are separate evidence.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Advanced; 120 minutes. Direct prerequisites: <code>cpp-028</code>.</p>
 <p>Learner artifact: <a href="../lessons/cpp-029.cpp.html">cpp-029.cpp</a>. Keep <a href="../solutions/cpp-029_solutions.md.html">official solutions</a> closed until an attempt. The immutable <a href="../fixtures/cpp-029-cases.json.html">case ledger</a> records exercise inputs and expected observations.</p>
@@ -128,55 +127,97 @@
 <p>Capture a variable by reference only while the owner outlives the worker. Calling join creates the synchronization needed before reading the worker result. The portable demonstration uses thread and an atomic stop flag; the guide contrasts the equivalent jthread pattern because some host standard libraries lack jthread.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Thread startup, cancellation request and completion are separate events. The promise reports startup, the atomic flag requests cancellation and join confirms completion. A fixed delay cannot replace any of these events because scheduling may be slower or faster than expected. A reference capture borrows a local variable, so scope must not end first. jthread adds automatic joining and stop support, but cooperative code still has to inspect its token.</p>
+<h3 id="thread-lifetime-and-cooperative-cancellation">Thread lifetime and cooperative cancellation<a class="heading-anchor" href="#thread-lifetime-and-cooperative-cancellation" aria-label="Link to this section">#</a></h3>
+<p>Starting a thread creates another flow of execution; it does not wait for that work to finish. A reference capture borrows an object from the creating scope. The owner must keep that object alive until the worker&#x27;s last access. In the first program, answer belongs to main, the thread writes42, and join completes before main reads the result or ends the scope. The join is part of the correctness argument, not an optional delay.</p>
+<p>A thread object that remains joinable at destruction is a serious lifecycle error for std::thread. Every path after successful creation needs an ownership decision: join the work or deliberately transfer its management. Detaching makes lifetime reasoning harder because the creating scope can disappear while the worker still uses borrowed state. The course examples retain and join every worker instead.</p>
+<p>Cancellation is a request, not an asynchronous kill. The second example uses a promise/future to establish that the worker reached its startup point, then an atomic flag to request stop. The worker repeatedly observes the flag and exits its loop. join confirms actual completion. A fixed sleep would prove neither startup nor completion and can fail on a slower or more heavily loaded machine.</p>
+<p>The memory used for the flag must support concurrent access. A plain bool read and written by different threads without synchronization would introduce a data race. Atomic access makes the flag communication defined. That does not imply every other shared object is safe; each shared value needs its own ownership or synchronization argument.</p>
+<p>std::jthread can automate joining and provide a stop token, but cooperative work still has to check the request at useful points. A blocking operation that never returns may prevent timely cancellation. Production design therefore needs bounded I/O, a shutdown deadline and a policy for unresponsive work. The tiny fixture teaches the request/observation/join sequence without pretending to solve arbitrary thread interruption.</p>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">int answer=0; std::thread t([&amp;]{answer=42;}); t.join(); assert(answer==42);</code></pre>
-<p><strong>Expected:</strong> After join the result is 42 and the borrowed local is still alive.</p>
+<p><a href="../examples/cpp-029-example-1.cpp.html">Complete program 1</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;iostream&gt;
+#include &lt;thread&gt;
+
+
+int main() {
+    int answer=0; std::thread t([&amp;]{answer=42;}); t.join(); assert(answer==42);
+    std::cout &lt;&lt; &quot;cpp-029 example 1 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-029 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">std::atomic&lt;bool&gt; stop{false}; // worker checks stop; owner requests and joins</code></pre>
-<p><strong>Expected:</strong> A stop flag requests cooperation; the owner still waits for termination.</p>
+<p><a href="../examples/cpp-029-example-2.cpp.html">Complete program 2</a></p>
+<pre><code class="language-cpp">#include &lt;atomic&gt;
+#include &lt;cassert&gt;
+#include &lt;future&gt;
+#include &lt;iostream&gt;
+#include &lt;thread&gt;
+
+
+int main() {
+    std::atomic&lt;bool&gt; stop{false};
+    std::promise&lt;void&gt; ready;
+    auto started=ready.get_future();
+    std::thread worker([&amp;]{
+        ready.set_value();
+        while(!stop.load()) std::this_thread::yield();
+    });
+    started.get();
+    stop.store(true);
+    worker.join();
+    assert(stop.load());
+    std::cout &lt;&lt; &quot;cpp-029 example 2 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-029 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-trace-lifetimes">Exercise 1: Trace lifetimes<a class="heading-anchor" href="#exercise-1-trace-lifetimes" aria-label="Link to this section">#</a></h4>
 <p>Draw result, worker creation, write, join and scope exit.</p>
 <p><strong>Expected result/shape:</strong> The owner remains alive until after join.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: The owner remains alive until after join.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: The reference capture borrows local state.</p>
+<p><strong>Verify:</strong> The owner remains alive until after join.</p>
+<p><strong>Progressive hints:</strong> The reference capture borrows local state.</p>
 <h4 id="exercise-2-read-after-joining">Exercise 2: Read after joining<a class="heading-anchor" href="#exercise-2-read-after-joining" aria-label="Link to this section">#</a></h4>
 <p>Compute 42 on one worker and read afterward.</p>
 <p><strong>Expected result/shape:</strong> 42, with a documented join before access.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: 42, with a documented join before access.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: join establishes completion and synchronization.</p>
+<p><strong>Verify:</strong> 42, with a documented join before access.</p>
+<p><strong>Progressive hints:</strong> join establishes completion and synchronization.</p>
 <h4 id="exercise-3-request-cancellation">Exercise 3: Request cancellation<a class="heading-anchor" href="#exercise-3-request-cancellation" aria-label="Link to this section">#</a></h4>
 <p>Run the supplied ready handshake then set stop and join.</p>
 <p><strong>Expected result/shape:</strong> Worker terminates without a sleep-based timing assumption.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Worker terminates without a sleep-based timing assumption.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: The promise proves startup before cancellation.</p>
+<p><strong>Verify:</strong> Worker terminates without a sleep-based timing assumption.</p>
+<p><strong>Progressive hints:</strong> The promise proves startup before cancellation.</p>
 <h4 id="exercise-4-repair-detach">Exercise 4: Repair detach<a class="heading-anchor" href="#exercise-4-repair-detach" aria-label="Link to this section">#</a></h4>
 <p>Review detaching a worker that captures a local by reference.</p>
 <p><strong>Expected result/shape:</strong> Reject detached borrow; keep ownership until join.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Reject detached borrow; keep ownership until join.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Detached lifetime can outlast the referenced variable.</p>
+<p><strong>Verify:</strong> Reject detached borrow; keep ownership until join.</p>
+<p><strong>Progressive hints:</strong> Detached lifetime can outlast the referenced variable.</p>
 <h4 id="exercise-5-translate-to-jthread">Exercise 5: Translate to jthread<a class="heading-anchor" href="#exercise-5-translate-to-jthread" aria-label="Link to this section">#</a></h4>
 <p>On a qualified C++20 library use jthread and stop_token.</p>
 <p><strong>Expected result/shape:</strong> request_stop followed by scope exit joins; record compiler/library support.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: request_stop followed by scope exit joins; record compiler/library support.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: A stop request only works if the body checks the token.</p>
+<p><strong>Verify:</strong> request_stop followed by scope exit joins; record compiler/library support.</p>
+<p><strong>Progressive hints:</strong> A stop request only works if the body checks the token.</p>
 <h4 id="exercise-6-transfer-failure-cleanup">Exercise 6: Transfer failure cleanup<a class="heading-anchor" href="#exercise-6-transfer-failure-cleanup" aria-label="Link to this section">#</a></h4>
 <p>Add an owner-side early return and keep joining mandatory.</p>
 <p><strong>Expected result/shape:</strong> No joinable thread reaches destructor; no dangling capture.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: No joinable thread reaches destructor; no dangling capture.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: RAII joining or a scope guard must cover exceptional paths.</p>
+<p><strong>Verify:</strong> No joinable thread reaches destructor; no dangling capture.</p>
+<p><strong>Progressive hints:</strong> RAII joining or a scope guard must cover exceptional paths.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: After join the result is 42 and the borrowed local is still alive. Then explain the changed condition in example 2 without opening the answer.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
-<p>Capture a variable by reference only while the owner outlives the worker. Calling join creates the synchronization needed before reading the worker result. The portable demonstration uses thread and an atomic stop flag; the guide contrasts the equivalent jthread pattern because some host standard libraries lack jthread.</p>
-<p>If the result disagrees, preserve the original input and inspect the first differing value or condition. Detached lifetime can outlast the referenced variable.</p>
+<p>If a test occasionally reads0 instead of 42, inspect whether it observes completion before reading shared state. If shutdown hangs, locate the next cancellation check or blocking call rather than adding a longer sleep. If a function exits while a thread borrows its locals, fix the ownership scope. If thread creation can throw after another worker starts, join the already created worker during the failure path before propagating the exception.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
 <p>Close the source. Reconstruct the reasoning for Exercise 6: Transfer failure cleanup. Explain which assumptions would fail on a larger input or another runtime.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue with <a href="cpp-030.md.html">cpp-030</a> after saving the six observations.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<p><a href="https://eel.is/c++draft/thread.thread.member">Thread join contract</a></p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach cpp-029.
 Read courses/cpp/guides/cpp-029.md and courses/cpp/lessons/cpp-029.cpp.

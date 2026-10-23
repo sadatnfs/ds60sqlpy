@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Spark 009 Solution · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course artifact</p>
+      <h1>Spark 009 Solution</h1>
+      <p class="source-path">Generated from <code>courses/scala-spark/solutions/spark-009_solution.scala</code></p>
+    </header>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-scala"><code><span>import java.io.{ByteArrayInputStream, ByteArrayOutputStream, ObjectInputStream, ObjectOutputStream, NotSerializableException}</span>
+<span> </span>
+<span>object Main {</span>
+<span>  final class Owner(val factor: Long) {</span>
+<span>    val resource: Object = new Object()</span>
+<span>    def bad: Long =&gt; Long = value =&gt; factor * value</span>
+<span>  }</span>
+<span> </span>
+<span>  def artifactCoordinate(base: String, scalaBinary: String, sparkVersion: String): String = {</span>
+<span>    require(base != null &amp;&amp; base.matches(&quot;[a-z][a-z0-9-]*&quot;), &quot;invalid artifact base&quot;)</span>
+<span>    require(scalaBinary == &quot;2.13&quot; &amp;&amp; sparkVersion == &quot;4.0.1&quot;, &quot;unsupported prepared target tuple&quot;)</span>
+<span>    s&quot;org.apache.spark:${base}_${scalaBinary}:${sparkVersion}&quot;</span>
+<span>  }</span>
+<span> </span>
+<span>  def localMaster(value: String): String = {</span>
+<span>    require(value == &quot;local[2]&quot;, &quot;only the prepared local[2] master is allowed&quot;)</span>
+<span>    value</span>
+<span>  }</span>
+<span> </span>
+<span>  def captureValue(owner: Owner): Long =&gt; Long = {</span>
+<span>    val factor = owner.factor</span>
+<span>    require(factor &gt;= 0L &amp;&amp; factor &lt;= 1000000L, &quot;factor outside domain&quot;)</span>
+<span>    (value: Long) =&gt; {</span>
+<span>      require(value &gt;= -1000000L &amp;&amp; value &lt;= 1000000L, &quot;input outside domain&quot;)</span>
+<span>      factor * value</span>
+<span>    }</span>
+<span>  }</span>
+<span> </span>
+<span>  def serializedSize(value: AnyRef): Int = {</span>
+<span>    val bytes = new ByteArrayOutputStream()</span>
+<span>    val output = new ObjectOutputStream(bytes)</span>
+<span>    try { output.writeObject(value); output.flush(); bytes.size() }</span>
+<span>    finally output.close()</span>
+<span>  }</span>
+<span> </span>
+<span>  def roundTrip(function: Long =&gt; Long): Long =&gt; Long = {</span>
+<span>    val bytes = new ByteArrayOutputStream()</span>
+<span>    val output = new ObjectOutputStream(bytes)</span>
+<span>    try { output.writeObject(function); output.flush() } finally output.close()</span>
+<span>    val input = new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray))</span>
+<span>    try input.readObject().asInstanceOf[Long =&gt; Long] finally input.close()</span>
+<span>  }</span>
+<span> </span>
+<span>  def versionReport(): Map[String, String] = {</span>
+<span>    Map(&quot;scala_actual&quot; -&gt; scala.util.Properties.versionNumberString,</span>
+<span>        &quot;java_actual&quot; -&gt; System.getProperty(&quot;java.specification.version&quot;),</span>
+<span>        &quot;spark_target&quot; -&gt; &quot;4.0.1&quot;)</span>
+<span>  }</span>
+<span> </span>
+<span>  def expectIllegalArgument(body: =&gt; Any): Unit = {</span>
+<span>    var caught = false</span>
+<span>    try body catch { case _: IllegalArgumentException =&gt; caught = true }</span>
+<span>    assert(caught, &quot;Expected IllegalArgumentException&quot;)</span>
+<span>  }</span>
+<span>  def expectArithmetic(body: =&gt; Any): Unit = {</span>
+<span>    var caught = false</span>
+<span>    try body catch { case _: ArithmeticException =&gt; caught = true }</span>
+<span>    assert(caught, &quot;Expected ArithmeticException&quot;)</span>
+<span>  }</span>
+<span> </span>
+<span>  def main(args: Array[String]): Unit = {</span>
+<span>    // Exercise 1: Validate the prepared dependency family</span>
+<span>    assert(artifactCoordinate(&quot;spark-sql&quot;,&quot;2.13&quot;,&quot;4.0.1&quot;) == &quot;org.apache.spark:spark-sql_2.13:4.0.1&quot;)</span>
+<span>    expectIllegalArgument(artifactCoordinate(&quot;spark-sql&quot;,&quot;3&quot;,&quot;4.0.1&quot;))</span>
+<span>    expectIllegalArgument(artifactCoordinate(&quot;spark-sql&quot;,&quot;2.12&quot;,&quot;4.0.1&quot;))</span>
+<span>    expectIllegalArgument(artifactCoordinate(&quot;spark-sql&quot;,&quot;2.13&quot;,&quot;4.2.0&quot;))</span>
+<span>    expectIllegalArgument(artifactCoordinate(&quot;bad/name&quot;,&quot;2.13&quot;,&quot;4.0.1&quot;))</span>
+<span>    // Exercise 2: Keep execution local and bounded</span>
+<span>    assert(localMaster(&quot;local[2]&quot;) == &quot;local[2]&quot;)</span>
+<span>    Seq(&quot;local[*]&quot;,&quot;spark://example:7077&quot;,null).foreach(value =&gt; expectIllegalArgument(localMaster(value)))</span>
+<span>    // Exercise 3: Capture data instead of a resource owner</span>
+<span>    val owner = new Owner(3L)</span>
+<span>    val safe = captureValue(owner)</span>
+<span>    assert(safe(7L) == 21L &amp;&amp; safe(-2L) == -6L)</span>
+<span>    expectIllegalArgument(safe(1000001L))</span>
+<span>    // Exercise 4: Observe the captured object graph</span>
+<span>    assert(serializedSize(safe.asInstanceOf[AnyRef]) &gt; 0)</span>
+<span>    var rejected = false</span>
+<span>    try serializedSize(owner.bad.asInstanceOf[AnyRef]) catch { case _: NotSerializableException =&gt; rejected = true }</span>
+<span>    assert(rejected, &quot;capturing the nonserializable owner must fail&quot;)</span>
+<span>    // Exercise 5: Verify behavior after a local serialization round trip</span>
+<span>    val restored = roundTrip(safe)</span>
+<span>    assert(Seq(-2L,0L,7L).forall(value =&gt; restored(value) == safe(value)))</span>
+<span>    assert(restored(7L) == 21L)</span>
+<span>    // Exercise 6: Separate runtime readback from a target declaration</span>
+<span>    val report = versionReport()</span>
+<span>    assert(report.keySet == Set(&quot;scala_actual&quot;,&quot;java_actual&quot;,&quot;spark_target&quot;))</span>
+<span>    assert(report(&quot;scala_actual&quot;).startsWith(&quot;2.13.&quot;) &amp;&amp; report(&quot;java_actual&quot;) == &quot;17&quot;)</span>
+<span>    assert(report(&quot;spark_target&quot;) == &quot;4.0.1&quot;)</span>
+<span>    println(&quot;spark-009: six reference contracts passed&quot;)</span>
+<span>    println(&quot;Scala=&quot; + scala.util.Properties.versionNumberString + &quot;; Java=&quot; + System.getProperty(&quot;java.version&quot;))</span>
+<span>  }</span>
+<span>}</span>
+<span> </span>
+<span>// Exercise 1: Validate the prepared dependency family. Inputs/task: Construct an org.apache.spark coordinate for a lowercase hyphenated artifact base, requiring Scala binary 2.13 and Spark target 4.0.1. Reject other binary/version tuples and malformed base names. Do not download anything. Expected: spark-sql,2.13,4.0.1 yields org.apache.spark:spark-sql_2.13:4.0.1. Binary 3 or 2.12 and version 4.2.0 are outside this prepared target contract. Verify: Assert the exact coordinate and catch each unsupported tuple or malformed artifact base.</span>
+<span>// Exercise 2: Keep execution local and bounded. Inputs/task: Accept exactly local[2] as the course master and reject remote addresses, local[*] and null. Return the accepted value without starting a session. Expected: local[2] passes;local[*], spark://example:7077 and null raise IllegalArgumentException. Verify: Assert the accepted literal and all three rejected values with no network action.</span>
+<span>// Exercise 3: Capture data instead of a resource owner. Inputs/task: Return a multiplier closure that copies only owner.factor into a local immutable value. Require factor and input magnitude at most 1000000 so multiplication is within Long range. Do not retain owner or its nonserializable resource. Expected: Owner factor 3 produces 7-&gt;21 and-2-&gt;-6. An input outside the bounded domain is rejected. The function is suitable for the later serialization check. Verify: Assert both signed results and the domain rejection, then compare serializability with owner.bad in Exercise 4.</span>
+<span>// Exercise 4: Observe the captured object graph. Inputs/task: Serialize a locally constructed object into an in-memory byte array and return its byte size, closing the stream. Demonstrate that the safe closure serializes and owner.bad fails with NotSerializableException. Expected: The safe closure produces a positive byte count; the bad closure retaining Owner raises NotSerializableException. No file or external service is used. Verify: Assert positive size for safe and catch the exact serialization exception for owner.bad.</span>
+<span>// Exercise 5: Verify behavior after a local serialization round trip. Inputs/task: Serialize the supplied local function to memory, deserialize only those self-produced bytes and return the recovered function. Close both streams. Compare original and recovered outputs on a bounded fixture. Expected: The safe factor 3 closure returns identical results after round trip for-2,0,7. The check proves more than a nonempty byte array. Verify: Assert exact output equality for all three inputs and an expected 21 result for 7.</span>
+<span>// Exercise 6: Separate runtime readback from a target declaration. Inputs/task: Return actual Scala version and Java specification version plus the declared spark_target4.0.1. Do not label the target string as an observed Spark runtime version. The prepared foundation profile should report Scala 2.13 and Java 17. Expected: Keys are scala_actual, java_actual, spark_target. Scala starts with 2.13., Java is 17, and target is 4.0.1. Exact Scala patch comes from the run. Verify: Assert the keys and version families, then retain the printed runtime line as platform-specific evidence.</span>
+<span> </span></code></pre></article>
+  </main>
+</body>
+</html>

@@ -125,36 +125,61 @@
 <span> </span>
 <span>def verify():</span>
 <span>    # Exercise 1: Check eager arithmetic</span>
-<span>    x=tf.constant([1.,2.],tf.float32); eager=x*x+1</span>
-<span>    np.testing.assert_array_equal(eager.numpy(),[2,5])</span>
+<span>    x = tf.constant([1., 2.], dtype=tf.float32)</span>
+<span>    eager = x * x + 1</span>
+<span>    np.testing.assert_array_equal(eager.numpy(), [2, 5])</span>
 <span> </span>
-<span>    # Exercise 2: Compile and compare</span>
+<span>    # Exercise 2: Trace a graph and compare</span>
 <span>    @tf.function</span>
-<span>    def f(value): return value*value+1</span>
-<span>    np.testing.assert_array_equal(f(x).numpy(),eager.numpy()); first=f.experimental_get_tracing_count()</span>
-<span>    assert first&gt;=1</span>
+<span>    def f(value):</span>
+<span>        return value * value + 1</span>
+<span> </span>
+<span>    np.testing.assert_array_equal(f(x).numpy(), eager.numpy())</span>
+<span>    first = f.experimental_get_tracing_count()</span>
+<span>    assert first &gt;= 1</span>
 <span> </span>
 <span>    # Exercise 3: Reuse an equal signature</span>
-<span>    np.testing.assert_array_equal(f(tf.constant([3.,4.],tf.float32)).numpy(),[10,17])</span>
-<span>    assert f.experimental_get_tracing_count()==first</span>
+<span>    same_signature = tf.constant([3., 4.], dtype=tf.float32)</span>
+<span>    np.testing.assert_array_equal(f(same_signature).numpy(), [10, 17])</span>
+<span>    assert f.experimental_get_tracing_count() == first</span>
 <span> </span>
 <span>    # Exercise 4: Change dtype deliberately</span>
-<span>    out=f(tf.constant([1.,2.],tf.float64))</span>
-<span>    assert out.dtype==tf.float64 and f.experimental_get_tracing_count()&gt;first</span>
-<span>    np.testing.assert_array_equal(out.numpy(),[2,5])</span>
+<span>    different_dtype = tf.constant([1., 2.], dtype=tf.float64)</span>
+<span>    output = f(different_dtype)</span>
+<span>    assert output.dtype == tf.float64</span>
+<span>    assert f.experimental_get_tracing_count() &gt; first</span>
+<span>    np.testing.assert_array_equal(output.numpy(), [2, 5])</span>
 <span> </span>
 <span>    # Exercise 5: Measure only warmed calls</span>
 <span>    import time</span>
-<span>    f(x).numpy(); start=time.perf_counter()</span>
-<span>    for _ in range(10): result=f(x).numpy()</span>
-<span>    elapsed=time.perf_counter()-start</span>
-<span>    assert elapsed&gt;=0 and np.isfinite(result).all()</span>
+<span> </span>
+<span>    f(x).numpy()</span>
+<span>    start = time.perf_counter()</span>
+<span>    observations = [f(x).numpy() for _ in range(10)]</span>
+<span>    elapsed = time.perf_counter() - start</span>
+<span>    assert len(observations) == 10</span>
+<span>    assert elapsed &gt;= 0</span>
+<span>    for observed in observations:</span>
+<span>        assert np.isfinite(observed).all()</span>
+<span>        np.testing.assert_array_equal(observed, [2, 5])</span>
 <span> </span>
 <span>    # Exercise 6: Separate shape contracts</span>
-<span>    @tf.function(input_signature=[tf.TensorSpec([None],tf.float32)])</span>
-<span>    def g(value): return value*value+1</span>
-<span>    g(tf.constant([1.,2.])); count=g.experimental_get_tracing_count()</span>
-<span>    assert tuple(g(tf.constant([1.,2.,3.])).shape)==(3,) and g.experimental_get_tracing_count()==count</span>
+<span>    @tf.function(input_signature=[tf.TensorSpec([None], tf.float32)])</span>
+<span>    def g(value):</span>
+<span>        return value * value + 1</span>
+<span> </span>
+<span>    g(tf.constant([1., 2.], dtype=tf.float32))</span>
+<span>    count = g.experimental_get_tracing_count()</span>
+<span>    output = g(tf.constant([1., 2., 3.], dtype=tf.float32))</span>
+<span>    assert tuple(output.shape) == (3,)</span>
+<span>    assert g.experimental_get_tracing_count() == count</span>
+<span>    for incompatible in [tf.constant([[1., 2.]], dtype=tf.float32), tf.constant([1., 2.], dtype=tf.float64)]:</span>
+<span>        try:</span>
+<span>            g(incompatible)</span>
+<span>        except (TypeError, ValueError):</span>
+<span>            pass</span>
+<span>        else:</span>
+<span>            raise AssertionError(&#x27;incompatible signature accepted&#x27;)</span>
 <span>    return {&quot;checks&quot;: 6, &quot;status&quot;: &quot;passed&quot;}</span>
 <span> </span>
 <span> </span>

@@ -4,11 +4,15 @@ Read [Predicate Proof, Partial Indexes, and Conditional Mutation Contracts](../c
 
 ## Exercises and reasoning
 
-### Exercise 1: State the exact eligible queue predicate
+## Exercise 1: State the exact eligible queue predicate
 
 Return job_id, priority for tenant 1 jobs whose status equals ready, ordered by priority descending then job_id ascending. Preserve the three eligible job identities and exclude another tenant, blocked, done and unknown statuses.
 
-**Expected:** Rows are(1,10),(3,5),(6,5). The tie between 3 and 6 follows job identity, not unspecified physical row order.
+**Inputs/evidence:** For sql-deep-05 Exercise 1, Return job_id, priority for tenant 1 jobs whose status equals ready, ordered by priority descending then job_id ascending. Preserve the three eligible job identities and exclude another tenant, blocked, done and unknown statuses.
+
+**Expected result/shape:** For sql-deep-05 Exercise 1, Rows are(1,10),(3,5),(6,5). The tie between 3 and 6 follows job identity, not unspecified physical row order.
+
+**Verify:** For sql-deep-05 Exercise 1, list eligible queue IDs from the status and attempt conditions, including the NULL-attempt case, before considering whether an index could support the predicate.
 
 ```sql
 SELECT job_id,priority FROM deep5_jobs WHERE tenant_id=1 AND status='ready'
@@ -17,11 +21,15 @@ ORDER BY priority DESC,job_id;
 
 The predicate states both authorization-like tenant scope and operational eligibility. Equality to ready also implies the partial-index predicate, although the planner may still choose another access method. The outer ordering includes job_id so equal priorities have a deterministic presentation. Replacing the status condition with not-done would change semantics before it changed performance.
 
-### Exercise 2: Produce a counterexample to an invalid predicate rewrite
+## Exercise 2: Produce a counterexample to an invalid predicate rewrite
 
 Return job_id, status for tenant 1 rows selected by status<>done but not satisfying status=ready under a known nonready value. One row represents one counterexample, ordered by job_id. Explain why the ready-only partial index cannot cover the broader query.
 
-**Expected:** Only job 5 with status blocked is returned. Unknown status is not selected by ordinary inequality and is not silently classified as ready.
+**Inputs/evidence:** For sql-deep-05 Exercise 2, Return job_id, status for tenant 1 rows selected by status<>done but not satisfying status=ready under a known nonready value. One row represents one counterexample, ordered by job_id. Explain why the ready-only partial index cannot cover the broader query.
+
+**Expected result/shape:** For sql-deep-05 Exercise 2, Only job 5 with status blocked is returned. Unknown status is not selected by ordinary inequality and is not silently classified as ready.
+
+**Verify:** For sql-deep-05 Exercise 2, project both the original and rewritten predicates on the same rows; retain the counterexample where their truth values differ instead of relying on coincidentally equal counts.
 
 ```sql
 SELECT job_id,status FROM deep5_jobs
@@ -31,11 +39,15 @@ ORDER BY job_id;
 
 A single admitted blocked row disproves implication, so a ready-only index cannot supply every row of the broader predicate. The NULL-status row does not pass status<>done because that comparison is unknown. Using an explicit counterexample query is often clearer than arguing from a plan screenshot: it tests semantic equivalence before considering cost or index availability.
 
-### Exercise 3: Inspect index existence without inventing a plan guarantee
+## Exercise 3: Inspect index existence without inventing a plan guarantee
 
 Return one row with index_name, is_partial, key_columns, ready_rows for the temporary deep 5_ready_idx. Use pg_index and pg_class to verify a predicate exists and there are three key attributes; count ready source rows separately. Do not assert that the planner must choose this index.
 
-**Expected:** The row is deep 5_ready_idx, true,3,4. The ready count includes tenant 2 job 4 because the index predicate restricts status, not tenant.
+**Inputs/evidence:** For sql-deep-05 Exercise 3, Return one row with index_name, is_partial, key_columns, ready_rows for the temporary deep 5_ready_idx. Use pg_index and pg_class to verify a predicate exists and there are three key attributes; count ready source rows separately. Do not assert that the planner must choose this index.
+
+**Expected result/shape:** For sql-deep-05 Exercise 3, The row is deep 5_ready_idx, true,3,4. The ready count includes tenant 2 job 4 because the index predicate restricts status, not tenant.
+
+**Verify:** For sql-deep-05 Exercise 3, inspect the catalog index name, definition and predicate; confirm existence separately from planner choice, which would require actual EXPLAIN evidence.
 
 ```sql
 SELECT c.relname AS index_name,i.indpred IS NOT NULL AS is_partial,
@@ -47,11 +59,15 @@ WHERE i.indexrelid='pg_temp.deep5_ready_idx'::regclass;
 
 The catalog query verifies an actual index object in the current temporary namespace rather than inferring it from source text. indpred distinguishes a partial index, and indnkeyatts counts key attributes independently of included columns. The source-row count explains the predicate population. None of these facts establishes a latency improvement or a chosen execution plan on a larger workload.
 
-### Exercise 4: Apply a version-checked mutation and inspect its receipt
+## Exercise 4: Apply a version-checked mutation and inspect its receipt
 
 Within the exercise savepoint, increment attempts and version for job 1 only when tenant 1, status ready and expected version 1 still match. Capture ROW_COUNT and return action, affected, job_id, attempts, version in one row. Roll back after checking.
 
-**Expected:** action first, affected 1, job_id1, attempts 1, version 2. A read followed by an unguarded update is not an acceptable substitute for the combined predicate.
+**Inputs/evidence:** For sql-deep-05 Exercise 4, Within the exercise savepoint, increment attempts and version for job 1 only when tenant 1, status ready and expected version 1 still match. Capture ROW_COUNT and return action, affected, job_id, attempts, version in one row. Roll back after checking.
+
+**Expected result/shape:** For sql-deep-05 Exercise 4, action first, affected 1, job_id1, attempts 1, version 2. A read followed by an unguarded update is not an acceptable substitute for the combined predicate.
+
+**Verify:** For sql-deep-05 Exercise 4, read the original value and version before writing, inspect the RETURNING receipt, and verify the committed-in-transaction state equals one increment with one version increase.
 
 ```sql
 CREATE TEMP TABLE deep5_receipt(action text,affected integer) ON COMMIT DROP;
@@ -70,11 +86,15 @@ FROM deep5_receipt AS r CROSS JOIN deep5_jobs AS j WHERE j.job_id=1 ORDER BY r.a
 
 The version and eligibility checks occur in the same UPDATE that changes the row, eliminating a separate check-then-write gap in this contract. GET DIAGNOSTICS captures the actual row count immediately after that statement. The result then verifies both the receipt and stored state. A printed UPDATE command tag alone would not establish which job changed or whether its version advanced correctly.
 
-### Exercise 5: Reject a stale replay without a second increment
+## Exercise 5: Reject a stale replay without a second increment
 
 Starting from the original fixture, perform the same expected-version 1 update twice and capture first/stale receipts. Return action, affected, attempts, version for both receipts ordered by action. Both rows report final stored state; this is a sequential stale-version model, not a multi-session timing proof.
 
-**Expected:** first affected 1 and stale affected 0; both show final attempts 1, version 2. The second attempt must not raise attempts to 2.
+**Inputs/evidence:** For sql-deep-05 Exercise 5, Starting from the original fixture, perform the same expected-version 1 update twice and capture first/stale receipts. Return action, affected, attempts, version for both receipts ordered by action. Both rows report final stored state; this is a sequential stale-version model, not a multi-session timing proof.
+
+**Expected result/shape:** For sql-deep-05 Exercise 5, first affected 1 and stale affected 0; both show final attempts 1, version 2. The second attempt must not raise attempts to 2.
+
+**Verify:** For sql-deep-05 Exercise 5, apply the stale version a second time and inspect its empty RETURNING receipt; compare the final value and version with the first successful update to prove no second increment.
 
 ```sql
 CREATE TEMP TABLE deep5_receipt(action text,affected integer) ON COMMIT DROP;
@@ -93,11 +113,15 @@ CROSS JOIN deep5_jobs AS j WHERE j.job_id=1 ORDER BY r.action;
 
 The first mutation changes the version to two, so the identical second predicate no longer matches. Zero affected rows is the expected conflict signal for this fixture, while other real cases could involve missing identity or changed eligibility. The single-session sequence verifies the state predicate and prevents an accidental double increment. It does not establish all lock, isolation or network-response behavior of a concurrent application.
 
-### Exercise 6: Make retry identity distinct from payload identity
+## Exercise 6: Make retry identity distinct from payload identity
 
 Implement a temporary apply_request function that stores request_key, job_id, a positive delta and applies a tenant 1 ready-job increment only on a new key. Replay the same key/payload without applying again, then reject the same key with a changed delta using SQLSTATE 22023. Return one row with request_key, first_applied, replay_applied, conflict_rejected, attempts, version, request_count.
 
-**Expected:** request-a, true, false, true,1,2,1. The changed-payload attempt is caught as an expected error and must not change the job or create another request row.
+**Inputs/evidence:** For sql-deep-05 Exercise 6, Implement a temporary apply_request function that stores request_key, job_id, a positive delta and applies a tenant 1 ready-job increment only on a new key. Replay the same key/payload without applying again, then reject the same key with a changed delta using SQLSTATE 22023. Return one row with request_key, first_applied, replay_applied, conflict_rejected, attempts, version, request_count.
+
+**Expected result/shape:** For sql-deep-05 Exercise 6, request-a, true, false, true,1,2,1. The changed-payload attempt is caught as an expected error and must not change the job or create another request row.
+
+**Verify:** For sql-deep-05 Exercise 6, perform an identical idempotent retry and then a conflicting payload under the same key; verify one stored receipt row and one increment, while the conflicting request raises the declared error.
 
 ```sql
 CREATE FUNCTION pg_temp.apply_request(p_key text,p_job integer,p_delta integer)

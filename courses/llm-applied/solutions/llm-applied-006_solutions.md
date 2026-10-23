@@ -20,6 +20,30 @@ This implementation uses lowercase ASCII word tokens and a fixed local corpus. I
 
 For querytermq, BM25 usesidf=log(1+(N-df+.5)/(df+.5)). Each document contribution multipliesidf bytf*(k1+1)/(tf+k1*(1-b+b*length/avg_length)). The defaults here arek1=1.2, b=.75, declared as fixture choices. Count query terms once to avoid an accidental repeated-query weighting policy. Empty corpora and empty documents need explicit handling so average length never becomes an unexplained zero denominator.
 
+## Calculate the score and isolate each modeling choice
+
+The three documents each have two tokens, so average document length is two. The query randomization appears once in document a and nowhere else. With N=3, df=1, the implemented IDF is log(1+2.5/1.5)=log(8/3), about0.980829. The matching document's normalized length ratio is one. With tf=1 and k1=1.2, its frequency factor is2.2/(1+1.2)=1, so the final score is exactly that IDF. The other documents receive zero because the query term is absent.
+
+For account, df=2 and IDF is log(1+1.5/2.5)=log(1.6), about0.470004. The rarer query term therefore receives more weight in this fixed corpus. Document frequency counts presence per document: repeating account ten times inside one document still contributes one to df. Token frequency and document frequency are different denominators.
+
+Write K=k1*(1-b+b*L/avgL). The frequency factor is f(tf)=(k1+1)*tf/(tf+K). Holding document length and corpus statistics fixed, its derivative for positive K is(k1+1)*K/(tf+K)^2, positive and decreasing. The second derivative is negative, so additional repetitions have diminishing gain. As tf becomes large under that fixed-length mathematical comparison, the factor approaches k1+1. If actual repetitions also lengthen the document, K changes too; do not silently hold one effect fixed while interpreting a real edit.
+
+With b=0, K=k1. For tf1, 2, 10 at k1=1.2, the factors are1, 1.375 and about1.964286. Ten repetitions do not create ten times the score. At b=1, the normalization depends fully on L/avgL; at b=0, document length does not enter K. For the same tf=1, k1=1.2 and b=0.75, a document twice the average length has K=2.1 and factor2.2/3.1, about0.709677. One half the average length has K=0.75 and factor2.2/1.75, about1.257143.
+
+This positive-IDF convention and the roles of k1 and b are documented in Lucene's versioned BM25 API. The fixture is its own transparent calculation and does not execute Lucene or claim identical index-analysis behavior. [Lucene10.3.1 BM25Similarity](https://lucene.apache.org/core/10_3_1/core/org/apache/lucene/search/similarities/BM25Similarity.html).
+
+The corpus definition changes the scores. Splitting one source into many chunks changes N, lengths and possibly df. Repeating the same heading in every chunk can make a previously rare term common. A score threshold learned before rechunking therefore may not retain the same meaning afterward. Authorization filtering also defines which corpus is eligible for ranking; the later access chapter makes that boundary explicit.
+
+The local tokenizer lowercases and retains ASCII letter/digit runs. It will split punctuation-delimited identifiers, discard non-ASCII letters under this pattern and treat exact spellings according to that policy. A query token absent from every document gives no positive contribution, while a repeated query term is counted once because the code uses a set. Those are concrete design choices, not intrinsic properties of every BM25 system.
+
+### Interview reasoning with explanatory answers
+
+**Is a BM25 score a relevance probability?** No. It is an ordering score under specified corpus statistics and parameters. A threshold needs task calibration, and changing the corpus can change its interpretation.
+
+**Why can chunking change rankings even when the source text is unchanged?** The retrieval documents and their lengths/frequencies have changed. The scoring unit is the indexed chunk, not automatically the original source family.
+
+**Why does a synonym query miss buy when searching purchase?** The implementation has no learned or curated equivalence between those tokens. Adding expansion or a dense branch is a separate intervention that needs both positive and false-match tests.
+
 ## Exercise 1: Rank a discriminating term
 
 The question is: Rank documents a=account randomization, b=visit counts and c=account outcomes for the query randomization.

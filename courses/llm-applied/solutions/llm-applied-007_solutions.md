@@ -20,6 +20,30 @@ This lesson uses a literal three-dimensional table whose axes are explicitly des
 
 Convert vectors to a float64 matrix with documents on rows and features on columns. Divide each row by its norm, rejecting zero or nonfinite norms. Normalize the query with the same convention, then matrix-multiply document rows by the query. Sort by descending score and stable document ID. Keep model identity and preprocessing policy with the index, because equal vector dimensions do not make two embedding spaces compatible.
 
+## Derive the ranking and distinguish geometry from meaning
+
+For nonzero vectors q and d, cosine is(q dot d)/(norm(q)*norm(d)). The query[1, 0, 0] already has norm one. The purchase vector[1, 0.1, 0] has norm sqrt(1.01), so its cosine is1/sqrt(1.01), about0.995037. The mixed vector[0.5, 0.5, 0] has norm sqrt(0.5), giving cosine1/sqrt(2), about0.707107. Geometry[0, 1, 0] gives zero. These calculations establish purchase, mixed, geometry as the order under the authored coordinates.
+
+Positive scaling preserves direction: replacing d by 10d multiplies both numerator and norm by ten, leaving cosine unchanged. A raw dot product multiplies by ten. Negative scaling reverses direction and changes the cosine's sign, so the invariance claim is specifically about positive magnitude scaling. A document with a large norm can dominate dot-product search even when its direction is less aligned; whether that norm carries useful information depends on the encoder's training contract.
+
+For unit-normalized vectors, squared Euclidean distance is norm(q-d)^2=2-2(q dot d). Thus sorting by decreasing cosine and increasing squared distance gives the same exact order when both sides are unit vectors. This identity is conditional on normalization; it does not make every distance metric interchangeable on raw embeddings.
+
+An embedding coordinate system has no universal axis meaning. Apply the same orthogonal rotation R to both q and d, and their dot product is unchanged because R^T R is identity. Rotate only one side, and the cross-space comparison changes. For example, one encoder may represent the relevant concept by[1, 0] while another represents it by[0, 1]. Both vectors have width two and each can work correctly within its own space, but their cross-model dot product is zero. Equal width is therefore a shape check, not a semantic compatibility proof.
+
+The fixture assigns buy and purchase the same literal vector. Their equivalence is authored knowledge, not a measured generalization by a language model. Sentence-BERT is an example of learning sentence representations suitable for efficient similarity comparison; the local table does not reproduce its training or encode arbitrary text. [Sentence-BERT](https://arxiv.org/abs/1908.10084).
+
+A real dual encoder permits document vectors to be computed in advance and query vectors at request time. Exact scoring over M documents of dimension D requires work proportional to M*D and stored vectors proportional to M*D. Approximate nearest-neighbor methods trade search work against candidate recall. Measure that search recall against the exact vector ranking separately from semantic relevance recall against human-labeled evidence. An approximate index can perfectly imitate a bad semantic ranking, and a good encoder can lose its best document through approximation.
+
+The helper rejects zero vectors, nonfinite coordinates and a norm that is zero or nonfinite after computation. That is a bounded numerical contract, not a promise to normalize every mathematically finite nonzero vector. Extremely large or tiny float64 coordinates can overflow or underflow during a naive norm calculation. A scaled norm can extend the useful range, but changing that implementation would require its own tests. The supplied tiny vectors stay well inside the demonstrated range.
+
+### Interview reasoning with explanatory answers
+
+**Is cosine0.9 a90% relevance probability?** No. It describes an angle under a particular representation. Relevance calibration needs labeled examples and can shift with corpus, encoder or task.
+
+**Why keep exact identifiers in evaluation?** A semantic encoder can place a nearby but wrong identifier close to the query. Lexical and semantic mechanisms may make complementary errors, so average paraphrase quality does not settle the choice.
+
+**How do you localize a missing relevant document?** Compare exact vector ranking, approximate-index candidates and relevance labels. That separates encoder geometry from search loss and downstream context truncation.
+
 ## Exercise 1: Rank fixed topic vectors
 
 The question is: Use query[1, 0, 0] and documents purchase[1, .1, 0], geometry[0, 1, 0], mixed[.5, .5, 0].
@@ -96,9 +120,9 @@ query_meta={'model':'A','width':3,'normalization':'unit'}; index_meta={'model':'
 assert query_meta!=index_meta
 ```
 
-**Expected:** space identity mismatch blocks retrieval.
+**Expected:** metadata identity mismatch is detected; the caller must enforce the retrieval gate.
 
-**Verify:** Compare the computed values or written argument with space identity mismatch blocks retrieval.
+**Verify:** Compare the computed values or written argument with metadata identity mismatch is detected; the caller must enforce the retrieval gate.
 
 ## Exercise 6: Measure a domain failure
 

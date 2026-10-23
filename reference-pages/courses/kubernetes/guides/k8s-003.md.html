@@ -118,8 +118,10 @@
     <article class="document"><h2 id="k8s-003-kubernetes-objects-and-yaml-anatomy">k8s-003: Kubernetes objects and YAML anatomy<a class="heading-anchor" href="#k8s-003-kubernetes-objects-and-yaml-anatomy" aria-label="Link to this section">#</a></h2>
 <p>Authored beta teaching content. Publication and runtime qualification are separate gates. Read the current capability notice before running. No opening or saving this lesson installs tools, starts a cluster or proves mastery.</p>
 <p>The prepared <code>k8s-kind</code> app operation accepts this Deployment-only source, observes the actual controller and Ready Pod identities, then cleans up its exact owned UID. This execution path passed a Linux aarch64 live qualification. It requires the <a href="../../../docs/modules-runtime.md.html#prepare-and-run-the-owned-kubernetes-lab">explicit private session setup</a>. No Service/client check or automatic course grading is inferred for this foundation.</p>
+<h3 id="fixture-contract-update">Fixture contract update<a class="heading-anchor" href="#fixture-contract-update" aria-label="Link to this section">#</a></h3>
+<p>The checked-in source now uses fixture image <code>ds60sqlpy-k8s-fixture:0.2.0</code>. The legacy <code>/ready</code> and <code>/version</code> response behavior is preserved, while ConfigMap/task/probe capabilities are added. Earlier historical receipts described below used the previous image. A fresh contract-2 Linux aarch64 qualification now passed twelve positive, negative and cleanup cases, including the configured environment/file path, finite task and startup probe. See the <a href="../../../docs/implementation/kubernetes-content-status.md.html">current content/runtime status</a> for exact receipt scope. Prepare a fresh owned lease immediately before Run; the credential lasts fifteen minutes. An old saved learner pad is preserved and receives an actionable version refusal until its owner deliberately reviews and updates the image field.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Beginner; 90 minutes. Direct design prerequisites: <code>k8s-002</code>. An ID in this prerequisite list may still be unpublished. Use its concept diagnostic or wait for the authored bridge; do not infer an executable prerequisite from a planning ID.</p>
+<p>Beginner; 90 minutes. Direct design prerequisites: <code>k8s-002</code>. All 42 planned guides now have authored bodies. Follow the direct prerequisites and each lesson&#x27;s explicit runtime or host-lab boundary.</p>
 <p>Learner artifact: <a href="../lessons/k8s-003.yaml.html">k8s-003.yaml</a>. Keep <a href="../solutions/k8s-003_solutions.md.html">solutions</a> closed until an attempt or explicit reveal.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -145,7 +147,7 @@ metadata:
   name: vocabulary
 data:
   label: learner</code></pre>
-<p><strong>Expected:</strong> name vocabulary;one data string; no spec or status is required for this kind.</p>
+<p><strong>Expected:</strong> name vocabulary; one data string; no spec or status is required for this kind.</p>
 <h4 id="worked-example-2-reject-the-wrong-replica-type">Worked example 2: Reject the wrong replica type<a class="heading-anchor" href="#worked-example-2-reject-the-wrong-replica-type" aria-label="Link to this section">#</a></h4>
 <p>The snippet is deliberately incomplete and invalid; do not apply it hoping to create a workload. Separate a YAML parse from API-schema acceptance.</p>
 <pre><code class="language-yaml">apiVersion: apps/v1
@@ -159,7 +161,7 @@ spec:
 <h4 id="exercise-1-read-the-request-envelope">Exercise 1: Read the request envelope<a class="heading-anchor" href="#exercise-1-read-the-request-envelope" aria-label="Link to this section">#</a></h4>
 <p>Identify version, kind and resource name.</p>
 <p><strong>Inputs/evidence:</strong> For k8s-003 Exercise 1, the complete hello Deployment learner source.</p>
-<p><strong>Expected result/shape:</strong> For k8s-003 Exercise 1, apps/v1,Deployment,hello.</p>
+<p><strong>Expected result/shape:</strong> For k8s-003 Exercise 1, apps/v1, Deployment, hello.</p>
 <p><strong>Verify:</strong> For k8s-003 Exercise 1, read the three exact fields at their declared levels.</p>
 <p><strong>Progressive hints:</strong></p>
 <ol>
@@ -191,7 +193,7 @@ spec:
 </ol>
 <h4 id="exercise-4-bind-only-the-owned-namespace">Exercise 4: Bind only the owned namespace<a class="heading-anchor" href="#exercise-4-bind-only-the-owned-namespace" aria-label="Link to this section">#</a></h4>
 <p>Review the missing namespace in the source.</p>
-<p><strong>Inputs/evidence:</strong> For k8s-003 Exercise 4, source omits namespace;private lease specifies lesson-a with verified UID.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-003 Exercise 4, source omits namespace; private lease specifies lesson-a with verified UID.</p>
 <p><strong>Expected result/shape:</strong> For k8s-003 Exercise 4, the reviewed operation binds lesson-a; no ambient fallback or source namespace escape.</p>
 <p><strong>Verify:</strong> For k8s-003 Exercise 4, inspect the bound request and receipt; refuse when the lease is absent.</p>
 <p><strong>Progressive hints:</strong></p>
@@ -201,8 +203,8 @@ spec:
 <li>No lease means no mutation.</li>
 </ol>
 <h4 id="exercise-5-separate-intent-from-observation">Exercise 5: Separate intent from observation<a class="heading-anchor" href="#exercise-5-separate-intent-from-observation" aria-label="Link to this section">#</a></h4>
-<p>Compare spec.replicas1 with a returned status.readyReplicas0.</p>
-<p><strong>Inputs/evidence:</strong> For k8s-003 Exercise 5, desired1,observed ready0.</p>
+<p>Compare spec.replicas 1 with a returned status.readyReplicas0.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-003 Exercise 5, desired1, observed ready0.</p>
 <p><strong>Expected result/shape:</strong> For k8s-003 Exercise 5, the request can be accepted while readiness is not established.</p>
 <p><strong>Verify:</strong> For k8s-003 Exercise 5, record generation/observedGeneration and readiness after bounded reconciliation; do not edit status into the source.</p>
 <p><strong>Progressive hints:</strong></p>
@@ -213,7 +215,7 @@ spec:
 </ol>
 <h4 id="exercise-6-verify-server-identity-and-safe-cleanup">Exercise 6: Verify server identity and safe cleanup<a class="heading-anchor" href="#exercise-6-verify-server-identity-and-safe-cleanup" aria-label="Link to this section">#</a></h4>
 <p>After an owned apply, inspect returned metadata.</p>
-<p><strong>Inputs/evidence:</strong> For k8s-003 Exercise 6, name hello,namespace from lease,server-assigned UID.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-003 Exercise 6, name hello, namespace from lease, server-assigned UID.</p>
 <p><strong>Expected result/shape:</strong> For k8s-003 Exercise 6, namespace matches the lease; UID is recorded from readback and used for owned cleanup.</p>
 <p><strong>Verify:</strong> For k8s-003 Exercise 6, check actual returned identity; never fabricate a fixed UID from this document.</p>
 <p><strong>Progressive hints:</strong></p>
@@ -232,13 +234,13 @@ spec:
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
 <p>A YAML parser does not replace API-schema validation. A correct source namespace must not override a different owned target. Do not invent status, UID or resourceVersion values in a learner manifest, and do not interpret apply exit0 as application readiness.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
-<p>The design continues with k8s004-007 before <a href="k8s-008.md.html">k8s-008</a>. Those bridges may still be unpublished; review the <a href="../../../docs/expansion/tracks/kubernetes.md.html">full plan</a> rather than skipping unexplained Pod/Service concepts.</p>
+<p>Continue through <a href="k8s-004.md.html">k8s-004</a>, <a href="k8s-005.md.html">k8s-005</a>, <a href="k8s-006.md.html">k8s-006</a> and <a href="k8s-007.md.html">k8s-007</a> before <a href="k8s-008.md.html">k8s-008</a>. These authored bridges explain ownership, Pods, Deployments and Service selection.</p>
 <h3 id="initial-app-operation-boundary">Initial app operation boundary<a class="heading-anchor" href="#initial-app-operation-boundary" aria-label="Link to this section">#</a></h3>
 <p>The initial app Run is a bounded one-shot operation. It prepares/proves only the fixed hello Deployment and optional hello Service, runs its trusted client when applicable, then removes only recorded matching object UIDs. Your source and evidence remain saved, and the private cluster lease remains until explicit host release. Rolling changes, Pod deletion and second-Service transfer in this guide are scoped manual/teacher exercises until typed stateful operations are implemented. A successful initial app check does not automatically grade all six exercises.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach k8s-003.
 Read courses/kubernetes/guides/k8s-003.md and courses/kubernetes/lessons/k8s-003.yaml.
-Direct design prerequisites: `k8s-002`. This is authored beta content; check actual runtime capability and unpublished prerequisites.
+Direct design prerequisites: `k8s-002`. This is authored beta content; check actual runtime capability and direct prerequisites.
 Explain one mechanism, ask me to predict, let me attempt one exercise, then give one hint at a time.
 Do not read courses/kubernetes/solutions/ until I make an honest attempt or explicitly ask for a reveal.
 Review my exact values, diagnostics or written evidence; distinguish source inspection, process success and verified understanding.

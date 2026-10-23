@@ -126,6 +126,43 @@
 <p><strong>Stopping rule:</strong> A condition ending retrieval before unbounded exploration.</p>
 <h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
 <p>Tokenize the query, apply only declared synonym substitutions and retain the original text in a trace. A bounded breadth-first traversal uses a queue, visited set and maximum-hop count. Follow only explicit local document links. The visited set prevents cycles from consuming the budget indefinitely. A new query or link cannot add an unauthorized document because the same admitted corpus is used throughout.</p>
+<h3 id="trace-the-retrieval-frontier-and-the-stopping-policy">Trace the retrieval frontier and the stopping policy<a class="heading-anchor" href="#trace-the-retrieval-frontier-and-the-stopping-policy" aria-label="Link to this section">#</a></h3>
+<p>The fixture starts at metric with depth zero. A queue entry records both node and distance in edges from the start. Removing metric from the queue emits it; if the depth is below the limit, its admitted neighbor exclusions is enqueued at depth one. Removing exclusions then enqueues test_accounts at depth two. At a maximum of two, that final node is emitted but its outgoing links are not followed.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Step</th>
+<th>Removed entry</th>
+<th>Newly admitted queue entry</th>
+<th>Emitted IDs so far</th>
+</tr></thead><tbody>
+<tr>
+<td>1</td>
+<td>(metric, 0)</td>
+<td>(exclusions, 1)</td>
+<td>metric</td>
+</tr>
+<tr>
+<td>2</td>
+<td>(exclusions, 1)</td>
+<td>(test_accounts, 2)</td>
+<td>metric, exclusions</td>
+</tr>
+<tr>
+<td>3</td>
+<td>(test_accounts, 2)</td>
+<td>none at the depth boundary</td>
+<td>metric, exclusions, test_accounts</td>
+</tr>
+</tbody></table></div>
+<p>The visited set is updated when a node is enqueued, not only when it is removed. That prevents two parent nodes from adding the same child repeatedly while it is already waiting. In an unweighted graph with this breadth-first order, the first discovered path has minimum edge count. A depth bound therefore has a precise interpretation. Weighted relevance or confidence costs would require a different search policy; breadth-first order does not optimize them.</p>
+<p>The original validation only rejected a negative max_hops. A fractional value such as1.5 could pass that check, but integer depths never equaled1.5 at the stopping comparison, so the walk could continue across the whole finite graph. The repaired contract requires a nonnegative Python integer and rejects Boolean, fractional and NaN values before traversal. This is a real configuration boundary, not a numerical-tolerance issue.</p>
+<p>Even an integer hop limit can admit many nodes. With branching factor b and depth h in a tree without merging, the number reachable through that depth is1+b+...+b^h. For b=10, h=3, that is1111 nodes. A visited set prevents repeated identities, but it does not make all reachable evidence cheap. A remote retrieval service needs explicit candidate/work budgets and failure behavior beyond this bounded local graph.</p>
+<p>Reachability is not support. An edge from a metric page to an exclusion page may be a navigation link, a reference or merely a related-topic connection. To conclude that an exclusion applies to the metric, the system must inspect the bridge&#x27;s meaning and version. A graph path alone cannot license a factual inference. The fixture&#x27;s edges are authored to demonstrate traversal; they do not implement semantic entailment.</p>
+<p>Likewise, the rewrite maps lowercased whitespace tokens through a curated dictionary. It replaces buy with purchase but does not perform contextual disambiguation. A phrase such as “buy back shares” can have a different meaning from a retail purchase question. Punctuation attached to a token also follows this simple split policy. A learned rewriter may handle more cases, but it adds its own unsupported-expansion and intent-preservation risks.</p>
+<p>Authorization remains fixed across hops. The helper follows a target only when it is a key in the admitted graph. A link to an excluded node is not permission to fetch it. A larger system must ensure the graph itself was constructed under the correct policy and recheck any external fetch; the walk does not authenticate a principal.</p>
+<h4 id="interview-reasoning-with-explanatory-answers">Interview reasoning with explanatory answers<a class="heading-anchor" href="#interview-reasoning-with-explanatory-answers" aria-label="Link to this section">#</a></h4>
+<p><strong>Why preserve a visited set if a hop limit exists?</strong> It prevents repeated work and duplicate evidence within the permitted depth. The depth limit and identity deduplication solve different problems.</p>
+<p><strong>Does another hop always improve an answer?</strong> It can add required evidence, irrelevant context or a contradiction. Continue only when a named missing dependency justifies the extra work, then measure sufficiency and support.</p>
+<p><strong>What does a cycle test establish?</strong> That this finite traversal emits each admitted node at most once. It does not establish that remote requests time out correctly or that every followed link supports an inference.</p>
 <h3 id="exercise-1-apply-a-controlled-synonym-rewrite">Exercise 1: Apply a controlled synonym rewrite<a class="heading-anchor" href="#exercise-1-apply-a-controlled-synonym-rewrite" aria-label="Link to this section">#</a></h3>
 <p>The question is: Rewritebuy rate usingbuy-&gt;purchase while preserving the original question.</p>
 <p>The substitution is explicitly authored. A learned rewrite would need evaluation for intent preservation and unsupported expansion.</p>
@@ -148,11 +185,15 @@ assert walk(&#x27;metric&#x27;,graph,2)==[&#x27;metric&#x27;,&#x27;exclusions&#x
 <p><strong>Expected:</strong> visitedmetric, exclusions, test_accounts.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with visitedmetric, exclusions, test_accounts.</p>
 <h3 id="exercise-4-stop-at-the-declared-depth">Exercise 4: Stop at the declared depth<a class="heading-anchor" href="#exercise-4-stop-at-the-declared-depth" aria-label="Link to this section">#</a></h3>
-<p>The question is: Run the same graph with a one-hop bound.</p>
+<p>The question is: Run the same graph with a one-hop bound, then reject fractional, Boolean, NaN and negative budgets.</p>
 <p>The budget is a real behavior constraint. Returning the deeper document would mean the implementation ignored the configured stopping rule.</p>
-<pre><code class="language-python">assert walk(&#x27;metric&#x27;,graph,1)==[&#x27;metric&#x27;,&#x27;exclusions&#x27;]</code></pre>
-<p><strong>Expected:</strong> test_accounts is absent.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with test_accounts is absent.</p>
+<pre><code class="language-python">assert walk(&#x27;metric&#x27;,graph,1)==[&#x27;metric&#x27;,&#x27;exclusions&#x27;]
+for bad_budget in [1.5,True,float(&#x27;nan&#x27;),-1]:
+    try: walk(&#x27;metric&#x27;,graph,bad_budget)
+    except ValueError: pass
+    else: raise AssertionError(&#x27;invalid hop budget accepted&#x27;)</code></pre>
+<p><strong>Expected:</strong> test_accounts is absent; invalid budgets raise ValueError before traversal.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with test_accounts is absent; invalid budgets raise ValueError before traversal.</p>
 <h3 id="exercise-5-break-a-retrieval-cycle">Exercise 5: Break a retrieval cycle<a class="heading-anchor" href="#exercise-5-break-a-retrieval-cycle" aria-label="Link to this section">#</a></h3>
 <p>The question is: Addtest_accounts-&gt;metric and traverse with a larger bound.</p>
 <p>A visited set prevents repeated evidence from masquerading as additional support and keeps cycles from consuming unlimited work.</p>

@@ -1,15 +1,17 @@
 # Natural Language Processing
 
-This24lesson route is being authored. [track.json](track.json) describes the
-sequence and [lessons.json](lessons.json) lists complete authored lesson sets.
-Planned entries remain clearly marked until their guides and executable
-examples exist and have been checked.
+All 24 lessons are available in the browser journey, with guides, local examples,
+learner sources and separate explanations. [track.json](track.json) describes
+prerequisites and order; [lessons.json](lessons.json) lists the teaching files.
+The complete reference programs have passed in the prepared Python Core Docker
+worker. Start through the [Docker classroom guide](../../docs/docker-classroom.md)
+and choose Natural Language Processing in `/journeys`.
 
 Start with how language becomes data, then work through tokenization, sparse
 features, classification, sequences, entities, embeddings, topics, contextual
 models and evaluation. The advanced section covers multilingual data,
 annotation, weak supervision, leakage, ranking and an end-to-end text analytics
-case study. Each chapter should explain the mathematics, code and failure modes.
+case study. The chapters connect mathematical mechanisms, code and failure modes.
 
 Continue into [LLM theory](../llm-theory/README.md) for transformer training
 and [applied LLM systems](../llm-applied/README.md) for fine-tuning, RAG and

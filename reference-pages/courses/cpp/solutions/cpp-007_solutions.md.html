@@ -120,21 +120,31 @@
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>A vector owns a contiguous sequence and knows its current size. An iterator identifies a position for a standard algorithm. Algorithms separate traversal from intent: sorting orders values, counting measures a predicate, and accumulation combines values. Sorting a copy preserves the original evidence.</p>
 <h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>
-<p>A vector is a bag of ordered elements, not a set. The two threes in [3,1,3,0] occupy separate positions after sorting. Erasing duplicates is a new semantic decision. The common sort/unique/erase sequence has two phases after sorting: unique rearranges the retained prefix and returns a new logical end, while erase changes vector size. Inspect both the values and size so a stale tail cannot masquerade as a unique result.</p>
+<p>A vector is a bag of ordered elements, not a set. The two threes in [3, 1, 3, 0] occupy separate positions after sorting. Erasing duplicates is a new semantic decision. The common sort/unique/erase sequence has two phases after sorting: unique rearranges the retained prefix and returns a new logical end, while erase changes vector size. Inspect both the values and size so a stale tail cannot masquerade as a unique result.</p>
+<h3 id="vector-ownership-capacity-and-iterator-validity">Vector ownership, capacity and iterator validity<a class="heading-anchor" href="#vector-ownership-capacity-and-iterator-validity" aria-label="Link to this section">#</a></h3>
+<p>A vector has a size and a capacity. Size counts constructed elements that the program may access. Capacity describes how many elements the current storage can accommodate before another allocation is needed. reserve(4) requests capacity for at least four elements but leaves an empty vector at size 0. Writing xs[0] after reserve alone is invalid because no element has been constructed there. push_back creates a new element and increases size; resize changes size and constructs or destroys elements as needed.</p>
+<p>Contiguous storage means the elements occupy adjacent positions, which makes indexed access and many algorithms efficient. It also explains reallocation. If growth requires a new buffer, the vector moves or copies elements into that buffer and releases the old storage. Every pointer, reference and iterator into the old element storage is then invalid. Do not demonstrate this by dereferencing a stale pointer: that is undefined behavior, so even an apparently correct printed value is not evidence of safety.</p>
+<p>The second program forces a capacity increase with reserve(capacity()+1) after adding one element. It retains an index, not an element pointer, and reacquires access as xs[index] after the operation. This is safe for that example because reallocation preserves the sequence and index 0 still names the same element. It is not a general fix for erase or insert before an index, which can change what a position means. Stable business identity may need an ID lookup rather than a remembered position.</p>
+<p>begin and end define a half-open range. begin names the first element when one exists; end names the position after the last and must not be dereferenced. Empty vectors have begin==end, so algorithms can handle them without a special invalid first-element access. Sorting rearranges values within the range. It preserves multiplicity: the two threes remain two elements. Copying original before sorting gives a separate owner, so the original order remains available for comparison.</p>
+<p>accumulate uses its initial value both as the starting total and to determine the accumulator type. Starting with 0LL selects long long and the additive identity. Starting with 10LL adds an unwanted ten even though the element traversal is otherwise correct. Starting with int0 can introduce a narrower intermediate accumulator for large values. A wider accumulator reduces some overflow risks but is not an unlimited arithmetic guarantee.</p>
+<p>The sort/unique/erase idiom has separate contracts. sort brings equal values together. unique rearranges a retained prefix and returns its logical end; it does not shrink the vector. erase removes the tail and changes size. Code that prints the whole vector after unique but before erase can show unspecified leftover tail values and mistakenly believe deduplication failed. Inspect the retained range and final size, not just one displayed element.</p>
+<p>Insertion and erasure have their own invalidation rules even when no reallocation occurs. Erasing shifts later elements left, invalidating positions at or after the erased point. The safe iteration pattern uses the iterator returned by erase rather than incrementing an invalid old iterator. These rules matter because a vector is a sequence with ownership and position semantics, not a set or a permanently stable collection of element addresses.</p>
+<h3 id="debugging-the-contract">Debugging the contract<a class="heading-anchor" href="#debugging-the-contract" aria-label="Link to this section">#</a></h3>
+<p>A capacity of 4 with size 0 is not four accessible integers. Use at(index) for a checked diagnostic while learning, and remember that operator[] requires a valid index. If a bug appears only after growth, inspect every retained pointer/reference/iterator across push_back or reserve. If a deduplicated result still has size 4, check whether erase was omitted. If a total differs by ten, inspect the accumulate identity before blaming sort.</p>
 <h3 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-cpp">std::vector&lt;int&gt; xs{3,1,3,0}; std::sort(xs.begin(),xs.end());</code></pre>
-<p>Expected: The sorted bag is [0,1,3,3], preserving both threes.</p>
+<p>Expected: The sorted bag is [0, 1, 3, 3], preserving both threes.</p>
 <h3 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-cpp">std::vector&lt;int&gt; xs; auto sum=std::accumulate(xs.begin(),xs.end(),0LL);</code></pre>
 <p>Expected: The empty sum is 0, and begin equals end.</p>
 <h3 id="exercise-1-predict-sorting">Exercise 1: Predict sorting<a class="heading-anchor" href="#exercise-1-predict-sorting" aria-label="Link to this section">#</a></h3>
-<p>Sort [3,1,3,0] on paper.</p>
-<p><strong>Expected:</strong> [0,1,3,3], size 4.</p>
+<p>Sort [3, 1, 3, 0] on paper.</p>
+<p><strong>Expected:</strong> [0, 1, 3, 3], size 4.</p>
 <p><strong>Reasoning:</strong> Ordering does not remove multiplicity.</p>
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
 <h3 id="exercise-2-preserve-evidence">Exercise 2: Preserve evidence<a class="heading-anchor" href="#exercise-2-preserve-evidence" aria-label="Link to this section">#</a></h3>
 <p>Sort a copy and compare the original.</p>
-<p><strong>Expected:</strong> Original remains [3,1,3,0].</p>
+<p><strong>Expected:</strong> Original remains [3, 1, 3, 0].</p>
 <p><strong>Reasoning:</strong> Copying creates a separately owned buffer.</p>
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
 <h3 id="exercise-3-count-a-boundary">Exercise 3: Count a boundary<a class="heading-anchor" href="#exercise-3-count-a-boundary" aria-label="Link to this section">#</a></h3>
@@ -153,8 +163,8 @@
 <p><strong>Reasoning:</strong> Algorithms accept an empty half-open range.</p>
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
 <h3 id="exercise-6-transfer-to-ordered-unique-values">Exercise 6: Transfer to ordered unique values<a class="heading-anchor" href="#exercise-6-transfer-to-ordered-unique-values" aria-label="Link to this section">#</a></h3>
-<p>Sort [3,1,3,0], then erase the unique tail.</p>
-<p><strong>Expected:</strong> [0,1,3], size 3.</p>
+<p>Sort [3, 1, 3, 0], then erase the unique tail.</p>
+<p><strong>Expected:</strong> [0, 1, 3], size 3.</p>
 <p><strong>Reasoning:</strong> unique moves survivors but erase actually changes vector size.</p>
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p></article>
   </main>

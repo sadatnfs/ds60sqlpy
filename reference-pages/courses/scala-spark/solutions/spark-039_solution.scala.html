@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Spark 039 Solution · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course artifact</p>
+      <h1>Spark 039 Solution</h1>
+      <p class="source-path">Generated from <code>courses/scala-spark/solutions/spark-039_solution.scala</code></p>
+    </header>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-scala"><code><span>import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}</span>
+<span>import org.apache.spark.sql.functions._</span>
+<span>import org.apache.spark.sql.types._</span>
+<span>import java.nio.file.{Files,Path,Paths,StandardOpenOption,StandardCopyOption}</span>
+<span>import java.nio.charset.StandardCharsets</span>
+<span>import java.util.UUID</span>
+<span>import scala.jdk.CollectionConverters._</span>
+<span>import org.apache.spark.sql.streaming.{StreamingQuery,Trigger}</span>
+<span>import scala.collection.mutable.ArrayBuffer</span>
+<span> </span>
+<span>object Main {</span>
+<span>  val eventSchema = StructType(Seq(StructField(&quot;id&quot;,LongType,true),StructField(&quot;cents&quot;,LongType,true)))</span>
+<span>  val ownedQueries = ArrayBuffer.empty[StreamingQuery]</span>
+<span>  case class RunReceipt(id: String,runId: String,inputRows: Long,batches: Seq[Long])</span>
+<span>  def deleteOwned(root: Path): Unit = {</span>
+<span>    require(root.getFileName.toString.startsWith(&quot;spark-&quot;))</span>
+<span>    require(root.getParent == Paths.get(&quot;.&quot;).toAbsolutePath.normalize())</span>
+<span>    val walk = Files.walk(root)</span>
+<span>    try walk.iterator().asScala.toVector.sortBy(_.getNameCount).reverse.foreach(p =&gt; Files.delete(p))</span>
+<span>    finally walk.close()</span>
+<span>  }</span>
+<span>  def publishFile(root: Path,input: Path,name: String,lines: Seq[String]): Unit = {</span>
+<span>    require(name.matches(&quot;batch-[0-9]{2}\\.json&quot;))</span>
+<span>    require(lines.size &lt;= 8 &amp;&amp; lines.forall(_.length &lt;= 256))</span>
+<span>    Files.createDirectories(input)</span>
+<span>    val staged = root.resolve(&quot;pending-&quot;+UUID.randomUUID().toString+&quot;.json&quot;)</span>
+<span>    try {</span>
+<span>      Files.writeString(staged,lines.mkString(&quot;\n&quot;)+&quot;\n&quot;,StandardCharsets.UTF_8,StandardOpenOption.CREATE_NEW)</span>
+<span>      Files.move(staged,input.resolve(name),StandardCopyOption.ATOMIC_MOVE)</span>
+<span>    } finally Files.deleteIfExists(staged)</span>
+<span>  }</span>
+<span>  def runParquet(spark: SparkSession,input: Path,checkpoint: Path,output: Path): RunReceipt = {</span>
+<span>    val source = spark.readStream.schema(eventSchema).option(&quot;maxFilesPerTrigger&quot;,1).option(&quot;mode&quot;,&quot;FAILFAST&quot;).json(input.toString)</span>
+<span>    val query = source.writeStream.format(&quot;parquet&quot;).outputMode(&quot;append&quot;)</span>
+<span>      .option(&quot;checkpointLocation&quot;,checkpoint.toString).trigger(Trigger.AvailableNow()).start(output.toString)</span>
+<span>    ownedQueries += query</span>
+<span>    try {</span>
+<span>      require(query.awaitTermination(45000L),&quot;Finite query exceeded45-second deadline&quot;)</span>
+<span>      require(query.exception.isEmpty,&quot;Finite query failed&quot;)</span>
+<span>      RunReceipt(query.id.toString,query.runId.toString,query.recentProgress.map(_.numInputRows).sum,query.recentProgress.map(_.batchId).toSeq)</span>
+<span>    } finally { if(query.isActive) query.stop() }</span>
+<span>  }</span>
+<span>  def bag(spark: SparkSession,path: Path): Seq[String] = {</span>
+<span>    val frame=spark.read.parquet(path.toString)</span>
+<span>    require(frame.schema.fields.map(f =&gt; (f.name,f.dataType.simpleString)).toSeq == Seq((&quot;id&quot;,&quot;bigint&quot;),(&quot;cents&quot;,&quot;bigint&quot;)))</span>
+<span>    require(frame.count() &lt;= 8L,&quot;Tiny result bound exceeded&quot;)</span>
+<span>    frame.orderBy(&quot;id&quot;,&quot;cents&quot;).collect().map(r =&gt; s&quot;${r.getLong(0)}:${r.getLong(1)}&quot;).toSeq</span>
+<span>  }</span>
+<span> </span>
+<span>  case class BudgetReport(rows: Seq[(Long,Long)],partitions: Int,bucketRows: Seq[Long],files: Int,elapsedNanos: Long,metrics: Seq[(String,Map[String,Long])],stages: Seq[(Int,Int,Int,Int)])</span>
+<span>  def allMetrics(frame: DataFrame): Seq[(String,Map[String,Long])] = frame.queryExecution.executedPlan.collect { case node =&gt; (node.nodeName,node.metrics.map { case (key,value) =&gt; key -&gt; value.value }.toMap) }</span>
+<span>  def metric(report: BudgetReport,key: String): Option[Long] = {</span>
+<span>    val values=report.metrics.flatMap(_._2.get(key))</span>
+<span>    if(values.isEmpty) None else Some(values.sum)</span>
+<span>  }</span>
+<span>  def retainedStages(spark: SparkSession,group: String): Seq[(Int,Int,Int,Int)] = {</span>
+<span>    val tracker=spark.sparkContext.statusTracker</span>
+<span>    val ids=tracker.getJobIdsForGroup(group).flatMap(id =&gt; tracker.getJobInfo(id).toSeq.flatMap(_.stageIds)).distinct.sorted</span>
+<span>    ids.flatMap(id =&gt; tracker.getStageInfo(id).map(x =&gt; (id,x.numTasks,x.numCompletedTasks,x.numFailedTasks))).toSeq</span>
+<span>  }</span>
+<span>  def measured(spark: SparkSession,source: DataFrame,partitions: Int,root: Path): BudgetReport = {</span>
+<span>    require(partitions&gt;=1 &amp;&amp; partitions&lt;=8)</span>
+<span>    val group=&quot;budget-&quot;+partitions+&quot;-&quot;+UUID.randomUUID().toString</span>
+<span>    val previous=spark.conf.get(&quot;spark.sql.shuffle.partitions&quot;)</span>
+<span>    spark.conf.set(&quot;spark.sql.shuffle.partitions&quot;,partitions.toString)</span>
+<span>    try {</span>
+<span>      val shuffled=source.repartition(partitions,col(&quot;key&quot;))</span>
+<span>      val grouped=shuffled.groupBy(&quot;key&quot;).agg(count(lit(1)).as(&quot;n&quot;))</span>
+<span>      val begin=System.nanoTime()</span>
+<span>      spark.sparkContext.setJobGroup(group,&quot;Bounded budget comparison&quot;,true)</span>
+<span>      val rows=try grouped.collect().toSeq.map(r =&gt; (r.getLong(0),r.getLong(1))).sortBy(_._1) finally spark.sparkContext.clearJobGroup()</span>
+<span>      val elapsed=System.nanoTime()-begin</span>
+<span>      val metrics=allMetrics(grouped);val stages=retainedStages(spark,group)</span>
+<span>      val counts=shuffled.select(spark_partition_id().as(&quot;partition&quot;)).groupBy(&quot;partition&quot;).count().collect().map(r =&gt; r.getInt(0)-&gt;r.getLong(1)).toMap</span>
+<span>      val bucketRows=(0 until partitions).map(id =&gt; counts.getOrElse(id,0L))</span>
+<span>      val output=root.resolve(&quot;product-&quot;+partitions)</span>
+<span>      grouped.write.mode(&quot;errorifexists&quot;).parquet(output.toString)</span>
+<span>      val readback=spark.read.parquet(output.toString).orderBy(&quot;key&quot;).collect().toSeq.map(r =&gt; (r.getLong(0),r.getLong(1)))</span>
+<span>      require(readback==rows,&quot;Persisted product differs&quot;)</span>
+<span>      val listing=Files.list(output)</span>
+<span>      val files=try listing.iterator().asScala.count(p =&gt; p.getFileName.toString.endsWith(&quot;.parquet&quot;)) finally listing.close()</span>
+<span>      BudgetReport(rows,partitions,bucketRows,files,elapsed,metrics,stages)</span>
+<span>    } finally spark.conf.set(&quot;spark.sql.shuffle.partitions&quot;,previous)</span>
+<span>  }</span>
+<span> </span>
+<span>  def fixtureMetrics(source: DataFrame): Seq[Long] = {</span>
+<span>    val r=source.agg(count(lit(1)),countDistinct(&quot;id&quot;),countDistinct(&quot;key&quot;),sum(&quot;id&quot;)).first()</span>
+<span>    Seq(r.getLong(0),r.getLong(1),r.getLong(2),r.getLong(3))</span>
+<span>  }</span>
+<span> </span>
+<span>  def measureTwo(spark: SparkSession,source: DataFrame,root: Path): BudgetReport = {</span>
+<span>    measured(spark,source,2,root)</span>
+<span>  }</span>
+<span> </span>
+<span>  def measureFour(spark: SparkSession,source: DataFrame,root: Path): BudgetReport = {</span>
+<span>    measured(spark,source,4,root)</span>
+<span>  }</span>
+<span> </span>
+<span>  def imbalance(counts: Seq[Long]): Double = {</span>
+<span>    require(counts.nonEmpty &amp;&amp; counts.forall(_&gt;=0L) &amp;&amp; counts.sum&gt;0L)</span>
+<span>    counts.max.toDouble/(counts.sum.toDouble/counts.size)</span>
+<span>  }</span>
+<span> </span>
+<span>  def estimatedCost(vcpu: Double,seconds: Double,gib: Double,days: Double): Double = {</span>
+<span>    require(Seq(vcpu,seconds,gib,days).forall(x =&gt; x&gt;=0.0 &amp;&amp; x.isFinite))</span>
+<span>    vcpu*(seconds/3600.0)*0.05 + gib*(days/30.0)*0.02</span>
+<span>  }</span>
+<span> </span>
+<span>  def withinBudget(rows: Long,partitions: Int): Boolean = {</span>
+<span>    rows&gt;=1L &amp;&amp; rows&lt;=20000L &amp;&amp; partitions&gt;=1 &amp;&amp; partitions&lt;=8</span>
+<span>  }</span>
+<span> </span>
+<span>  def main(args: Array[String]): Unit = {</span>
+<span>    var ownedRoot: Path = null</span>
+<span>    val spark = SparkSession.builder().appName(&quot;ds60-spark-039&quot;).master(&quot;local[2]&quot;)</span>
+<span>      .config(&quot;spark.ui.enabled&quot;,&quot;false&quot;)</span>
+<span>      .config(&quot;spark.driver.host&quot;,&quot;127.0.0.1&quot;)</span>
+<span>      .config(&quot;spark.driver.bindAddress&quot;,&quot;127.0.0.1&quot;)</span>
+<span>      .config(&quot;spark.sql.shuffle.partitions&quot;,&quot;2&quot;)</span>
+<span>      .config(&quot;spark.sql.adaptive.enabled&quot;,&quot;false&quot;)</span>
+<span>      .config(&quot;spark.sql.ansi.enabled&quot;,&quot;true&quot;)</span>
+<span>      .config(&quot;spark.sql.session.timeZone&quot;,&quot;UTC&quot;).getOrCreate()</span>
+<span>    try {</span>
+<span>      require(spark.sparkContext.master == &quot;local[2]&quot;, &quot;local-only course session&quot;)</span>
+<span>      spark.sparkContext.setLogLevel(&quot;ERROR&quot;)</span>
+<span>      require(spark.version == &quot;4.0.1&quot;,&quot;Prepared Spark4.0.1 required&quot;)</span>
+<span>      spark.conf.set(&quot;spark.sql.streaming.stopTimeout&quot;,&quot;5000&quot;)</span>
+<span>      ownedRoot=Files.createTempDirectory(Paths.get(&quot;.&quot;).toAbsolutePath.normalize(),&quot;spark-039-&quot;)</span>
+<span>      val source=spark.range(0L,20000L,1L,4).withColumn(&quot;key&quot;,when(col(&quot;id&quot;)&lt;16000L,lit(0L)).otherwise(col(&quot;id&quot;)%100L))</span>
+<span>      // Exercise 1: Validate the generated skewed fixture</span>
+<span>      assert(fixtureMetrics(source)==Seq(20000L,20000L,100L,199990000L))</span>
+<span>      assert(source.filter(col(&quot;key&quot;)===0L).count()==16040L)</span>
+<span>      // Exercise 2: Measure the two-partition configuration</span>
+<span>      val two=measureTwo(spark,source,ownedRoot)</span>
+<span>      val expected=(0L until 100L).map(key =&gt; (key,if(key==0L)16040L else 40L))</span>
+<span>      assert(two.rows==expected &amp;&amp; two.bucketRows.sum==20000L &amp;&amp; two.files&gt;=1 &amp;&amp; two.files&lt;=2 &amp;&amp; two.stages.nonEmpty)</span>
+<span>      assert(metric(two,&quot;dataSize&quot;).exists(_&gt;0L))</span>
+<span>      // Exercise 3: Compare four partitions without assuming a speedup</span>
+<span>      val four=measureFour(spark,source,ownedRoot)</span>
+<span>      assert(four.rows==expected &amp;&amp; four.rows==two.rows &amp;&amp; four.bucketRows.sum==20000L &amp;&amp; four.files&gt;=1 &amp;&amp; four.files&lt;=4)</span>
+<span>      assert(metric(four,&quot;dataSize&quot;).exists(_&gt;0L))</span>
+<span>      // Exercise 4: Interpret work imbalance and spill honestly</span>
+<span>      assert(imbalance(two.bucketRows)&gt;1.0 &amp;&amp; imbalance(four.bucketRows)&gt;1.0)</span>
+<span>      Seq(two,four).foreach(r =&gt; println(&quot;partitions=&quot;+r.partitions+&quot;;bucket_rows=&quot;+r.bucketRows+&quot;;work_ratio=&quot;+imbalance(r.bucketRows)+&quot;;files=&quot;+r.files+&quot;;elapsed_ns=&quot;+r.elapsedNanos+&quot;;dataSize=&quot;+metric(r,&quot;dataSize&quot;)+&quot;;shuffleBytesWritten=&quot;+metric(r,&quot;shuffleBytesWritten&quot;)+&quot;;spillSize=&quot;+metric(r,&quot;spillSize&quot;)+&quot;;stages=&quot;+r.stages))</span>
+<span>      // Exercise 5: Compute a separate hypothetical cost model</span>
+<span>      assert(math.abs(estimatedCost(2.0,3600.0,2.0,30.0)-0.14)&lt;1e-12)</span>
+<span>      var costRejected=false</span>
+<span>      try estimatedCost(2.0,-1.0,2.0,30.0) catch { case _: IllegalArgumentException =&gt; costRejected=true }</span>
+<span>      assert(costRejected)</span>
+<span>      // Exercise 6: Enforce the stop budget before scaling data</span>
+<span>      assert(withinBudget(20000L,4) &amp;&amp; !withinBudget(20001L,4) &amp;&amp; !withinBudget(20000L,9))</span>
+<span>      assert(spark.conf.get(&quot;spark.sql.shuffle.partitions&quot;)==&quot;2&quot;)</span>
+<span>      println(&quot;spark-039: six Scala reference contracts passed; Spark=&quot; + spark.version + &quot;; Scala=&quot; + scala.util.Properties.versionNumberString)</span>
+<span>    } finally { try { ownedQueries.foreach(q =&gt; if(q.isActive) q.stop())</span>
+<span>require(!ownedQueries.exists(_.isActive),&quot;Do not remove scratch while an owned query is active&quot;)</span>
+<span>if(ownedRoot != null) deleteOwned(ownedRoot) } finally { spark.stop() } }</span>
+<span>  }</span>
+<span>}</span>
+<span> </span>
+<span>// Exercise 1: Validate the generated skewed fixture. Inputs/task: Require 20000 rows, IDs 0..19999,100 keys and total ID sum 199990000. Explain key 0 occurs 16040 times. Expected: Exact population tuple 20000,20000,100,199990000;key 0 count 16040, other keys 40. Verify: Compare aggregate counts and the independent formula 16000+4000/100.</span>
+<span>// Exercise 2: Measure the two-partition configuration. Inputs/task: Execute the bounded grouped query under a unique job group, read actual executed metrics, measure partition row counts and persist/read back the product. Expected: 100 exact key/count pairs, total 20000;nonempty retained stage evidence;one or two data files. Verify: Compare all rows with the literal formula before accepting any work/time report.</span>
+<span>// Exercise 3: Compare four partitions without assuming a speedup. Inputs/task: Repeat with 4 partitions and a separate output directory. Expected: All 100 result tuples match the same oracle;four buckets sum 20000 and one to four files are observed. Verify: Assert parity and print actual elapsed time/file/metric values without an ordering claim.</span>
+<span>// Exercise 4: Interpret work imbalance and spill honestly. Inputs/task: Compute maximum bucket rows divided by mean bucket rows;report available dataSize, shuffleBytesWritten and spillSize metrics without inventing missing values. Expected: Both observed work ratios exceed 1;unavailable metrics remain None/None-equivalent. Verify: Assert row conservation and positive ratio, then print exact available metric maps and stage receipts.</span>
+<span>// Exercise 5: Compute a separate hypothetical cost model. Inputs/task: Use a hypothetical rate 0.05 currency units per vCPU-hour and 0.02 per GiB-month. Evaluate 2 vCPUs for 1 hour plus 2 GiB retained for 30 days under a30-day month. Expected: Estimated 0.14 currency units, not an actual cloud bill or a price recommendation. Verify: Check each unit conversion and reject negative durations/resources.</span>
+<span>// Exercise 6: Enforce the stop budget before scaling data. Inputs/task: Accept only row counts 1..20000 and partition counts 1..8 for this local exercise. Reject an attempted larger fixture before constructing it. Expected: 20000/4 accepted;20001/4 and 20000/9 rejected. Verify: Assert both refusals and confirm the session shuffle setting restored to 2.</span>
+<span> </span></code></pre></article>
+  </main>
+</body>
+</html>

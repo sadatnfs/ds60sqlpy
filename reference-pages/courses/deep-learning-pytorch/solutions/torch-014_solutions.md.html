@@ -118,50 +118,91 @@
     <article class="document"><h2 id="torch-014-explanatory-solutions">torch-014: explanatory solutions<a class="heading-anchor" href="#torch-014-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <p>Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>Multiclass classification chooses exactly one outcome among mutually exclusive classes. Multi label classification makes several independent binary decisions, so multiple labels can be present. A final layer with three outputs can serve either task; the target meaning determines the loss. PyTorch CrossEntropyLoss expects raw class logits and class-index targets by default. It includes log-softmax internally, so applying softmax first changes the intended calculation.</p>
-<p>The class axis convention matters. For ordinary batches, logits have shape(N, C) and targets(N). For spatial tasks, the class axis remains dimension1, unlike many channels-last examples in other frameworks. Multi label BCEWithLogitsLoss instead expects a target matrix matching the logits. Report which axes are averaged before comparing losses with different output widths.</p>
+<p>Multiclass classification chooses exactly one outcome among mutually exclusive classes. Multilabel classification makes several independent binary decisions, so multiple labels can be present. A final layer with three outputs can serve either task; the target meaning determines the loss. PyTorch CrossEntropyLoss expects raw class logits and class-index targets by default. It includes log-softmax internally, so applying softmax first changes the intended calculation.</p>
+<p>The class axis convention matters. For ordinary batches, logits have shape(N, C) and targets(N). For spatial tasks, the class axis remains dimension 1, unlike many channels-last examples in other frameworks. Multilabel BCEWithLogitsLoss instead expects a target matrix matching the logits. Report which axes are averaged before comparing losses with different output widths.</p>
 <p><strong>Multiclass target:</strong> One class identity among mutually exclusive alternatives.</p>
-<p><strong>Multi label target:</strong> A binary presence value for each independently meaningful label.</p>
+<p><strong>Multilabel target:</strong> A binary presence value for each independently meaningful label.</p>
 <p><strong>Class axis:</strong> The dimension indexing alternative categories in a logit tensor.</p>
 <h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
-<p>UseF.cross_entropy with long integer class indices and floating logits. Sparse target indices must satisfy0&lt;=target&lt;C. For independent labels, use floating0/1targets with F.binary_cross_entropy_with_logits. softmax(dim=1) creates a class distribution for reporting. A uniform three-class logit vector gives loss log3, while three independent binary logits at zero each give probability.5.</p>
+<p>Use F.cross_entropy with long integer class indices and floating logits. Sparse target indices must satisfy 0&lt;=target&lt;C. For independent labels, use floating 0/1targets with F.binary_cross_entropy_with_logits. softmax(dim=1) creates a class distribution for reporting. A uniform three-class logit vector gives loss log 3, while three independent binary logits at zero each give probability.5.</p>
+<h3 id="derive-the-class-competition-and-its-tensor-contract">Derive the class competition and its tensor contract<a class="heading-anchor" href="#derive-the-class-competition-and-its-tensor-contract" aria-label="Link to this section">#</a></h3>
+<p>For a single multiclass record with logits z_0..z_(C-1), softmax assigns p_c=exp(z_c)/Σ_j exp(z_j). The indexed-target loss is<code>logsumexp(z)-z_y</code>. It compares the observed class with all alternatives through one shared normalization. Adding the same constant to every logit leaves the probabilities and loss unchanged, which is why a numerically stable implementation can subtract a row maximum.</p>
+<p>At three zero logits and target class 1, p=[1/3, 1/3, 1/3] and loss=log 3. The gradient with respect to the three logits is[1/3, -2/3, 1/3] before a batch reduction. The components sum to zero because raising every score equally cannot change class competition. This provides a derivative interpretation beyond the forward scalar.</p>
+<p>PyTorch&#x27;s indexed-target shapes are:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Task</th>
+<th>Logits</th>
+<th>Integer target</th>
+<th>Class axis</th>
+</tr></thead><tbody>
+<tr>
+<td>One record</td>
+<td>(C, )</td>
+<td>scalar</td>
+<td>The only logit axis</td>
+</tr>
+<tr>
+<td>Ordinary batch</td>
+<td>(N, C)</td>
+<td>(N, )</td>
+<td>Dimension 1</td>
+</tr>
+<tr>
+<td>Spatial labels</td>
+<td>(N, C, H, W)</td>
+<td>(N, H, W)</td>
+<td>Dimension 1</td>
+</tr>
+<tr>
+<td>Independent multilabel batch</td>
+<td>(N, C)</td>
+<td>Floating(N, C)</td>
+<td>Each label is a binary event</td>
+</tr>
+</tbody></table></div>
+<p>A sparse target index is a category identity, not a numeric value to regress. It must be a valid class index under the declared vocabulary. Probability-target forms instead match the logit shape and require a meaningful distribution across the class axis. The application should validate nonnegativity and normalization rather than assuming a floating tensor automatically supplies valid soft labels. The official API distinguishes these forms and their reductions. <a href="https://docs.pytorch.org/docs/2.9/generated/torch.nn.CrossEntropyLoss.html">PyTorch 2.9 CrossEntropyLoss</a>.</p>
+<p>Applying softmax before CrossEntropyLoss feeds probabilities into an API that interprets them as logits and normalizes again. Uniform scores are a poor detector of this bug because any equal-valued score vector still produces a uniform distribution and losslog 3. A nonuniform fixture such as[2, 0, -2] exposes the changed confidence and objective. This is another reason to retain asymmetric, nonuniform examples alongside exact symmetric reference points.</p>
+<p>Multilabel prediction has a different denominator and probability meaning. For two records and three binary labels, there are six binary events. Zero logits give each marginal probability 0.5, so the three probabilities in a row sum to 1.5 rather than one. That sum can represent an expected count of positive labels; it is not itself a probability of one mutually exclusive outcome. Shared features can still relate the labels, and independent binary losses do not automatically describe their full joint distribution.</p>
+<p>Each zero-logit binary entry contributeslog 2. Summing all six gives 6 log2; the element mean giveslog 2; the mean across records of a sum across three labels gives 3 log2. All three are possible reductions, but they imply different objective and gradient scales. State whether the denominator counts records, labels, valid pixels or another participation unit.</p>
+<p>Weights and ignored entries require another check. For class-index targets with class weights, PyTorch&#x27;s weighted mean uses the participating target-class weights in its denominator, and ignore_index excludes designated targets from that participation. Do not transfer that exact formula automatically to soft-target cross entropy orpositive-weighted binary loss. A padded spatial orsequence target can otherwise change training scale while the displayed output tensor shape remains plausible.</p>
+<p>For Keras comparisons, the default class-axis convention is often the last axis, whereas the PyTorch spatial categorical interface expects classes at dimension 1. Reorder axes and align target indexing explicitly; merely matching total element count can normalize across the wrong population orcouple unrelated observations.</p>
 <h3 id="exercise-1-calculate-uniform-multiclass-loss">Exercise 1: Calculate uniform multiclass loss<a class="heading-anchor" href="#exercise-1-calculate-uniform-multiclass-loss" aria-label="Link to this section">#</a></h3>
-<p>The question is: Use one row of three zero logits and target class1.</p>
+<p>The question is: Use one row of three zero logits and target class 1.</p>
 <p>Every class has probability one-third. The target index identifies a category, not a numeric magnitude to regress.</p>
 <pre><code class="language-python">logits=torch.zeros((1,3),dtype=torch.float64); target=torch.tensor([1],dtype=torch.long)
 np.testing.assert_allclose(F.cross_entropy(logits,target).item(),np.log(3),atol=1e-12,rtol=0)</code></pre>
-<p><strong>Expected:</strong> cross entropy log3.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with cross entropy log3.</p>
+<p><strong>Expected:</strong> cross entropy log 3.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with cross entropy log 3.</p>
 <h3 id="exercise-2-contrast-independent-binary-outputs">Exercise 2: Contrast independent binary outputs<a class="heading-anchor" href="#exercise-2-contrast-independent-binary-outputs" aria-label="Link to this section">#</a></h3>
-<p>The question is: Apply sigmoid to the same three zero logits for a multi label task.</p>
+<p>The question is: Apply sigmoid to the same three zero logits for a multilabel task.</p>
 <p>Independent probabilities need not sum to one. A softmax would force labels to compete and change the task.</p>
 <pre><code class="language-python">independent=torch.sigmoid(logits)
 assert independent.tolist()==[[.5,.5,.5]] and independent.sum().item()==1.5</code></pre>
-<p><strong>Expected:</strong> probabilities.5, .5, .5 with sum1.5.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with probabilities.5, .5, .5 with sum1.5.</p>
+<p><strong>Expected:</strong> probabilities.5, .5, .5 with sum 1.5.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with probabilities.5, .5, .5 with sum 1.5.</p>
 <h3 id="exercise-3-inspect-target-shapes-and-types">Exercise 3: Inspect target shapes and types<a class="heading-anchor" href="#exercise-3-inspect-target-shapes-and-types" aria-label="Link to this section">#</a></h3>
-<p>The question is: Create class indices2, 0 and binary rows[1, 0, 1], [0, 1, 0].</p>
+<p>The question is: Create class indices 2, 0 and binary rows[1, 0, 1], [0, 1, 0].</p>
 <p>The target contracts differ because the prediction events differ. Reshaping or casting without understanding those events can make a wrong task appear accepted.</p>
 <pre><code class="language-python">classes=torch.tensor([2,0],dtype=torch.long); labels=torch.tensor([[1.,0.,1.],[0.,1.,0.]])
 assert tuple(classes.shape)==(2,) and tuple(labels.shape)==(2,3) and classes.dtype==torch.long and labels.is_floating_point()</code></pre>
 <p><strong>Expected:</strong> shapes(2, ) and(2, 3); long versus floating.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with shapes(2, ) and(2, 3); long versus floating.</p>
 <h3 id="exercise-4-check-class-axis-normalization">Exercise 4: Check class-axis normalization<a class="heading-anchor" href="#exercise-4-check-class-axis-normalization" aria-label="Link to this section">#</a></h3>
-<p>The question is: Apply softmax(dim1) to a2x3matrix.</p>
-<p>Normalizing over the batch axis would couple unrelated observations. Row mass isa direct axis check.</p>
+<p>The question is: Apply softmax(dim 1) to a2x3matrix.</p>
+<p>Normalizing over the batch axis would couple unrelated observations. Row mass is a direct axis check.</p>
 <pre><code class="language-python">scores=torch.tensor([[2.,0.,-2.],[0.,1.,3.]])
 probs=torch.softmax(scores,dim=1); torch.testing.assert_close(probs.sum(1),torch.ones(2),atol=1e-6,rtol=0)</code></pre>
-<p><strong>Expected:</strong> each row sums1.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with each row sums1.</p>
-<h3 id="exercise-5-name-the-multi-label-denominator">Exercise 5: Name the multi label denominator<a class="heading-anchor" href="#exercise-5-name-the-multi-label-denominator" aria-label="Link to this section">#</a></h3>
-<p>The question is: Compute B C E over two rows and three labels of zero logits.</p>
+<p><strong>Expected:</strong> each row sums 1.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with each row sums 1.</p>
+<h3 id="exercise-5-name-the-multilabel-denominator">Exercise 5: Name the multilabel denominator<a class="heading-anchor" href="#exercise-5-name-the-multilabel-denominator" aria-label="Link to this section">#</a></h3>
+<p>The question is: Compute BCE over two rows and three labels of zero logits.</p>
 <p>There are six binary events but two records. A mean per record of summed label loss would differ by a factor of three.</p>
 <pre><code class="language-python">per_entry=F.binary_cross_entropy_with_logits(torch.zeros_like(labels),labels,reduction=&#x27;none&#x27;)
 np.testing.assert_allclose([per_entry.sum().item(),per_entry.mean().item()],[6*np.log(2),np.log(2)],atol=1e-6,rtol=0)</code></pre>
-<p><strong>Expected:</strong> sum6log2; mean log2.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with sum6log2; mean log2.</p>
+<p><strong>Expected:</strong> sum 6 log2; mean log 2.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with sum 6 log2; mean log 2.</p>
 <h3 id="exercise-6-reject-an-out-of-vocabulary-class">Exercise 6: Reject an out-of-vocabulary class<a class="heading-anchor" href="#exercise-6-reject-an-out-of-vocabulary-class" aria-label="Link to this section">#</a></h3>
-<p>The question is: Use class index3 for a three-class row.</p>
+<p>The question is: Use class index 3 for a three-class row.</p>
 <p>Class indices are bounded by the output vocabulary. Validation at the data boundary gives a clearer diagnostic before loss calculation.</p>
 <pre><code class="language-python">try: F.cross_entropy(torch.zeros((1,3)),torch.tensor([3]))
 except (IndexError,RuntimeError): pass

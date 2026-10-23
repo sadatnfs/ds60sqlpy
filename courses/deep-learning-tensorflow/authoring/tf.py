@@ -1,4 +1,4 @@
-from render import add,ex
+from render import add,ex,SPECS
 TF=('TensorFlow guide','https://www.tensorflow.org/guide')
 KERAS=('Keras API','https://keras.io/api/')
 NP=('NumPy reference','https://numpy.org/doc/stable/reference/')
@@ -192,25 +192,8 @@ with tf.GradientTape() as tape: penalty=.1*tf.reduce_sum(v*v)
 np.testing.assert_allclose(tape.gradient(penalty,v).numpy(),[.2,-.4],atol=1e-6,rtol=0)''','The derivative is2*lambda*w under the stated convention. A half-scaled penalty would have a different gradient, so a coefficient cannot be copied blindly between definitions.'),
 ex('Scale weights deliberately','Double both weights and compare the new penalties with the original values.','L1 doubles to6; squaredL2 quadruples to20.', '''assert float(tf.reduce_sum(tf.abs(2*w)))==6
 assert float(tf.reduce_sum((2*w)**2))==20''','The different scaling explains why the penalties discourage large coefficients differently. This arithmetic does not establish which choice will work better on an unseen dataset.')],TF,'import numpy as np\nimport tensorflow as tf')
-add('tf-018',
-'''Normalization can introduce state and dependencies between observations. Batch normalization estimates statistics over a training batch and updates moving statistics for later inference. Layer normalization computes statistics across each example's features, so an unrelated example should not alter a row's output. These are different mechanisms even when both produce centered values. Batch normalization's moving mean starts at zero here. With momentum.5 and batch mean[2,4], one update produces[1,2]. Evaluation uses the stored state and should not update it. In sequence models, normalization across time can leak future information; tokenwise feature normalization avoids that particular dependency.''',
-'''BatchNormalization(momentum=.5) keeps nontrainable moving variables as well as scale and offset parameters. training=True updates the moving mean using momentum*old+(1-momentum)*batch. LayerNormalization(axis=-1) reduces only the trailing feature axis. Its epsilon prevents division by zero and means the normalized variance is approximately, rather than exactly, one.''',
-[('Moving statistic','Stored estimate updated during training.'),('Batch coupling','One observation affecting another through shared batch statistics.'),('Feature axis','The dimension reduced independently within each row.')],[
-ex('Update moving state','Apply BatchNorm with momentum.5 to rows[1,3],[3,5].','moving mean[1,2].', '''bn=tf.keras.layers.BatchNormalization(momentum=.5); x=tf.constant([[1.,3.],[3.,5.]])
-bn(x,training=True)
-np.testing.assert_allclose(bn.moving_mean.numpy(),[1,2],atol=1e-6,rtol=0)''','The batch mean is[2,4], so blending it equally with the initial zero state gives[1,2]. It is not yet the full batch mean.'),
-ex('Freeze evaluation state','Call BatchNorm in evaluation with a very different batch and compare moving means.','state remains[1,2].', '''before=bn.moving_mean.numpy().copy(); bn(tf.constant([[100.,200.]]),training=False)
-np.testing.assert_array_equal(before,bn.moving_mean.numpy())''','The inference call uses learned state rather than adapting to the new observation. Accidental training=True would make predictions depend on evaluation batch composition and mutate the model.'),
-ex('Test row independence','Apply LayerNorm to one row and to the same row beside[100,200].','first row matches within1e-6.', '''ln=tf.keras.layers.LayerNormalization(axis=-1)
-a=ln(tf.constant([[1.,3.]])).numpy()[0]; b=ln(tf.constant([[1.,3.],[100.,200.]])).numpy()[0]
-np.testing.assert_allclose(a,b,atol=1e-6,rtol=0)''','Each row computes its own feature mean and variance. The unrelated row has no role in those reductions, providing a direct test of the axis choice.'),
-ex('Expose batch dependence','Compare raw batch-centered first rows before and after adding an extreme row.','first row changes from[-1,-1] to[-33,-66].', '''small=np.array([[1.,3.],[3.,5.]]); large=np.vstack([small,[98.,199.]])
-np.testing.assert_array_equal(small[0]-small.mean(0),[-1,-1])
-np.testing.assert_array_equal(large[0]-large.mean(0),[-33,-66])''','Centering alone already exhibits the coupling; division by variance is not required to expose it. The example isolates one part of BatchNorm with simple arithmetic.'),
-ex('Repeat the state update','Apply the original batch a second time in training mode.','moving mean[1.5,3].', '''bn(x,training=True)
-np.testing.assert_allclose(bn.moving_mean.numpy(),[1.5,3],atol=1e-6,rtol=0)''','The second update starts from the stored[1,2], not zero. The history of training batches therefore matters even when all trainable weights are frozen.'),
-ex('Handle a constant feature row','Normalize a row[5,5] with LayerNorm and default zero offset.','finite output[0,0].', '''constant=ln(tf.constant([[5.,5.]])).numpy()
-assert np.isfinite(constant).all(); np.testing.assert_allclose(constant,[[0,0]],atol=1e-6,rtol=0)''','A constant row has zero variance. Epsilon avoids division by zero, and the centered numerator is zero. Removing epsilon would turn this valid input into an undefined calculation.')],TF,'import numpy as np\nimport tensorflow as tf')
+import tf018
+
 add('tf-019',
 '''Convolutional layers reuse a small kernel at many positions. Each output sees a local patch, so the kernel has fewer parameters than an unconstrained map from every input pixel to every output pixel. TensorFlow applies cross-correlation: it slides the kernel without rotating it. A mathematical convolution would reverse spatial axes. Channels and batches add axes but do not change the basic local dot product. VALID padding includes only patches entirely inside the image; SAME padding inserts boundary values under a defined convention. The output shape depends on input size, kernel size, stride and padding, not on the apparent visual size of a plotted image.''',
 '''tf.nn.conv2d expects image shape(batch,height,width,channels) and filter shape(height,width,input_channels,output_channels). A3x3 single-channel image and2x2 kernel with stride1 and VALID padding produce shape(1,2,2,1). The first result is1-5=-4. Rotating the kernel changes that sign. Keep the batch/channel singleton axes visible when checking shapes.''',
@@ -639,3 +622,14 @@ assert not all(value is True for value in gates.values())
 gates.update(restart=True,schema=False); assert not all(value is True for value in gates.values())''','Unknown evidence is not a pass. The lesson deliberately avoids fabricating a restart receipt and shows that even three passing checks cannot compensate for a required failed fourth check.'),
 ex('Retain a rollback decision','Construct a release record with previous artifact ID, holdout count and limits; keep no-go when any gate fails.','decisionno-go and previous artifactv1 retained.', '''record={'candidate':'v2','previous':'v1','holdout_count':2,'decision':'go' if all(v is True for v in gates.values()) else 'no-go','limits':['synthetic fixture only']}
 assert record['decision']=='no-go' and record['previous']=='v1' and record['holdout_count']==2''','A release record should explain what can be restored and why a candidate was blocked. A failed capstone check is useful evidence, not an invitation to bypass the gate.')],('TensorFlow model persistence','https://www.tensorflow.org/guide/keras/serialization_and_saving'),'import numpy as np\nimport tensorflow as tf')
+
+from tf031_depth import deepen as deepen_tracing
+deepen_tracing(SPECS['tf-031'])
+
+
+# Prose-only review layer; executable exercise contracts remain in this module.
+from depth_reviews_tf import DEPTH_NOTES, DIAGNOSIS_NOTES
+for identity, notes in DEPTH_NOTES.items():
+    SPECS[identity]["mechanism_notes"] = notes
+for identity, notes in DIAGNOSIS_NOTES.items():
+    SPECS[identity]["diagnosis"] = notes

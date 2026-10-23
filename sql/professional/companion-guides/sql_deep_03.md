@@ -24,13 +24,17 @@ If the prepared database is unavailable, return to classroom setup rather than c
 
 ## Level and prerequisites
 
-Advanced. Direct catalog prerequisites: `sql-22`, `sql-analytics-01`. The guide still defines each new mechanism before relying on it. Every fixture is local, deterministic and rolled back; no prior lesson state is required.
+- **Level:** Advanced. The guide defines each new mechanism before relying on it.
+- **Prerequisites:** [`sql-22`](../../postgres-60day/companion-guides/day22_advanced_windows.md), [`sql-analytics-01`](sql_analytics_01_query_patterns.md).
+- **Artifacts:** [Learner SQL](../lessons/sql_deep_03.sql), [explained reference](../solutions/sql_deep_03_solutions.md), and [executable reference](../solutions/sql_deep_03_solutions.sql). Every fixture is local, deterministic and rolled back; no prior lesson state is required.
 
 ## Learning objectives
 
-State the output grain and identity before writing a query. Explain the new SQL mechanism, produce each exact projected result, expose the listed counterexample and verify rollback-safe behavior without relying on a final success message.
+- State the output grain and identity before writing a query, including the NULL and duplicate policies.
+- Explain the new SQL mechanism, produce each exact projected result and expose the listed counterexample.
+- Verify rollback-safe behavior from inspected result rows and assertions without relying on a final success message.
 
-## Vocabulary and mental model
+## Vocabulary and concepts
 
 - **Window partition:** The rows eligible to contribute to a window function before ordering and frame restrictions are applied.
 
@@ -52,7 +56,7 @@ LAST_VALUE is especially sensitive to frame boundaries. Under a frame ending at 
 
 Sessionization combines multiple window stages. First calculate the prior timestamp with LAG, then mark the first event or a gap exceeding the threshold, then cumulatively sum those flags. A window result cannot be nested directly inside another window expression in the same SELECT level. Named CTE stages expose the changing columns while preserving event grain until the final session aggregation.
 
-## Worked examples and query anatomy
+## Worked example / walkthrough
 
 ### Example 1
 
@@ -81,39 +85,64 @@ One output row per event_id has default_last3 then 9, while partition_last is 9 
 
 1. **Compare row and peer running totals.** For customer a only, return event_id, row_total, peer_total. Use ROWS with occurred_at, event_id for row_total and RANGE with occurred_at alone for peer_total. Both frames start at UNBOUNDED PRECEDING and end at CURRENT ROW. Order final rows by event_id.
 
-**Expected:** IDs 1..5 have row_total[1,3,6,10,15] and peer_total[3,3,6,10,15]. The two 10:00 events share only the peer-aware total.
+**Inputs/evidence:** For sql-deep-03 Exercise 1, For customer a only, return event_id, row_total, peer_total. Use ROWS with occurred_at, event_id for row_total and RANGE with occurred_at alone for peer_total. Both frames start at UNBOUNDED PRECEDING and end at CURRENT ROW. Order final rows by event_id.
+
+**Expected result/shape:** For sql-deep-03 Exercise 1, IDs 1..5 have row_total[1,3,6,10,15] and peer_total[3,3,6,10,15]. The two 10:00 events share only the peer-aware total.
+
+**Verify:** For sql-deep-03 Exercise 1, inspect the tied timestamp rows together: ROWS advances by the full ordering while RANGE includes all peers at the same timestamp.
 
 2. **Compare neighboring rows with neighboring peer groups.** For customer a, return event_id, two_rows, two_groups. The first frame is ROWS BETWEEN 1 PRECEDING AND CURRENT ROW ordered by timestamp, event_id; the second is GROUPS BETWEEN 1 PRECEDING AND CURRENT ROW ordered by timestamp alone. Final order is event_id.
 
-**Expected:** two_rows is[1,3,5,7,9] and two_groups is[3,3,6,7,9]. At event 3 the previous peer group contains both events 1 and 2.
+**Inputs/evidence:** For sql-deep-03 Exercise 2, For customer a, return event_id, two_rows, two_groups. The first frame is ROWS BETWEEN 1 PRECEDING AND CURRENT ROW ordered by timestamp, event_id; the second is GROUPS BETWEEN 1 PRECEDING AND CURRENT ROW ordered by timestamp alone. Final order is event_id.
+
+**Expected result/shape:** For sql-deep-03 Exercise 2, two_rows is[1,3,5,7,9] and two_groups is[3,3,6,7,9]. At event 3 the previous peer group contains both events 1 and 2.
+
+**Verify:** For sql-deep-03 Exercise 2, write each frame membership as a set of event IDs for the tied rows and boundary rows; sum amounts from those memberships independently.
 
 3. **Distinguish the three exclusion policies.** For customer a, return event_id, without_current, without_group, without_other_ties using a RANGE unbounded-preceding-to-current frame ordered by timestamp. Apply EXCLUDE CURRENT ROW, EXCLUDE GROUP and EXCLUDE TIES respectively. Preserve NULL for empty frames and order by event_id.
 
-**Expected:** ID 1 gives 2, NULL,1; ID 2 gives 1, NULL,2; ID 3 gives 3,3,6; ID 4 gives 6,6,10; ID 5 gives 10,10,15.
+**Inputs/evidence:** For sql-deep-03 Exercise 3, For customer a, return event_id, without_current, without_group, without_other_ties using a RANGE unbounded-preceding-to-current frame ordered by timestamp. Apply EXCLUDE CURRENT ROW, EXCLUDE GROUP and EXCLUDE TIES respectively. Preserve NULL for empty frames and order by event_id.
+
+**Expected result/shape:** For sql-deep-03 Exercise 3, ID 1 gives 2, NULL,1; ID 2 gives 1, NULL,2; ID 3 gives 3,3,6; ID 4 gives 6,6,10; ID 5 gives 10,10,15.
+
+**Verify:** For sql-deep-03 Exercise 3, compare CURRENT ROW, GROUP and TIES using the same base frame; confirm TIES retains the current row while removing its other peers.
 
 4. **Make LAST_VALUE refer to the intended horizon.** For customer a, return event_id, prefix_last, partition_last. Order both windows by timestamp, event_id. Use the default ordered frame for prefix_last and explicit ROWS UNBOUNDED PRECEDING TO UNBOUNDED FOLLOWING for partition_last. Final order is event_id.
 
-**Expected:** prefix_last is[1,2,3,4,5], while partition_last is 5 for every row. No row is removed or collapsed.
+**Inputs/evidence:** For sql-deep-03 Exercise 4, For customer a, return event_id, prefix_last, partition_last. Order both windows by timestamp, event_id. Use the default ordered frame for prefix_last and explicit ROWS UNBOUNDED PRECEDING TO UNBOUNDED FOLLOWING for partition_last. Final order is event_id.
+
+**Expected result/shape:** For sql-deep-03 Exercise 4, prefix_last is[1,2,3,4,5], while partition_last is 5 for every row. No row is removed or collapsed.
+
+**Verify:** For sql-deep-03 Exercise 4, compare the default frame last value with a frame extending to UNBOUNDED FOLLOWING; check both peer groups and the final row.
 
 5. **Build a strictly prior elapsed-time feature.** For all customers return event_id, prior_30m over [occurred_at-30minutes, occurred_at), excluding every event at the current timestamp. Use a timestamp RANGE frame plus EXCLUDE GROUP and partition by customer_id. Treat an empty complete-log window as zero. Order by event_id.
 
-**Expected:** IDs 1..7 yield prior_30m[0,0,3,3,0,0,10]. Event 4 includes the exact 10:10 lower boundary; event 5 excludes 10:40 because it is 31 minutes old.
+**Inputs/evidence:** For sql-deep-03 Exercise 5, For all customers return event_id, prior_30m over [occurred_at-30minutes, occurred_at), excluding every event at the current timestamp. Use a timestamp RANGE frame plus EXCLUDE GROUP and partition by customer_id. Treat an empty complete-log window as zero. Order by event_id.
+
+**Expected result/shape:** For sql-deep-03 Exercise 5, IDs 1..7 yield prior_30m[0,0,3,3,0,0,10]. Event 4 includes the exact 10:10 lower boundary; event 5 excludes 10:40 because it is 31 minutes old.
+
+**Verify:** For sql-deep-03 Exercise 5, enumerate timestamps inside the elapsed-time interval and exclude every event at the current timestamp; confirm a prior physical row with the same timestamp cannot leak.
 
 6. **Derive sessions in separate window stages.** Define a new session for a customer's first event or a gap strictly greater than 30 minutes. Return customer_id, session_id, event_count, first_event_id, last_event_id, one row per customer/session, ordered by customer_id, session_id. Use deterministic timestamp, event_id ordering and separate lag, flag, cumulative stages.
 
-**Expected:** Rows are(a,1,4,1,4),(a,2,1,5,5),(b,1,2,6,7). Exact 30-minute gaps stay in the same session; the 31-minute a gap starts session 2.
+**Inputs/evidence:** For sql-deep-03 Exercise 6, Define a new session for a customer's first event or a gap strictly greater than 30 minutes. Return customer_id, session_id, event_count, first_event_id, last_event_id, one row per customer/session, ordered by customer_id, session_id. Use deterministic timestamp, event_id ordering and separate lag, flag, cumulative stages.
+
+**Expected result/shape:** For sql-deep-03 Exercise 6, Rows are(a,1,4,1,4),(a,2,1,5,5),(b,1,2,6,7). Exact 30-minute gaps stay in the same session; the 31-minute a gap starts session 2.
+
+**Verify:** For sql-deep-03 Exercise 6, compute each lag gap, then the break flag, then its cumulative sum in separate stages; check exactly the threshold and the first event of each user.
 
 ## Common mistakes and diagnosis
 
 If a running total jumps across tied timestamps, inspect RANGE peers before assuming duplicate ingestion. If adding a tie breaker changes a peer-aware result, recognize that the peer definition changed. If a prior feature includes same-time events, compare EXCLUDE CURRENT ROW with EXCLUDE GROUP. If LAST_VALUE returns the current value, inspect its frame end. If session logic raises a nested-window error, separate the lag and cumulative calculations into CTEs. Always distinguish the inner window order from the final result order.
 
-## Self-check and retrieval
+## Self-check
 
-Explain the row grain after each FROM, JOIN, filter, grouping or window step in one exercise. Name the identity columns that prove rows were neither lost nor multiplied. Reconstruct a boundary result by hand, then compare with the query output. Explain why the tempting wrong query fails even if it returns the same total on an easier fixture.
+- Explain the row grain after each FROM, JOIN, filter, grouping or window step. Name the identity columns that prove rows were neither lost nor multiplied.
+- Reconstruct a boundary result by hand, then compare with the query output. Explain why the tempting wrong query fails even if it returns the same total on an easier fixture.
 
-## Next steps
+## Next step
 
-Transfer the same reasoning to a new small fixture before using it on larger data. Keep the result columns, ordering, NULL policy and observation horizon explicit. The [professional SQL track](../README.md) contains the prerequisite operational and modeling lessons.
+Transfer the same reasoning to a new small fixture before using it on larger data, then continue with [the next deepening lesson](sql_deep_04.md). Keep the result columns, ordering, NULL policy and observation horizon explicit. The [professional SQL track](../README.md) provides the wider route.
 
 ## Primary sources and official APIs
 

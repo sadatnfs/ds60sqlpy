@@ -363,27 +363,23 @@
 <p>Finally, choose comparison tolerances from units and scale. Absolute tolerance controls behavior near zero, while relative tolerance scales with a reference magnitude. Comparing arrays with mismatched shapes through broadcasting can accidentally validate unrelated outputs, so the exercise&#x27;s comparison contract requires identical shapes. A tolerance should explain which differences are operationally negligible, not be enlarged until a failing computation passes.</p>
 <h4 id="guide--worked-examples-and-syntax-anatomy">Worked examples and syntax anatomy<a class="heading-anchor" href="#guide--worked-examples-and-syntax-anatomy" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">import math
-import numpy as np
-
-scores=np.array([1000.,1001.,999.])
-shifted=scores-scores.max()
-probability=np.exp(shifted)/np.exp(shifted).sum()
-assert np.isfinite(probability).all() and np.isclose(probability.sum(),1)
-assert probability.argmax()==1
-print(&quot;Stable probabilities:&quot;,probability.tolist())</code></pre>
+<pre><code class="language-python">scores = np.array([1000.0, 1001.0, 999.0])
+shifted = scores - scores.max()
+probability = np.exp(shifted) / np.exp(shifted).sum()
+assert np.isfinite(probability).all() and np.isclose(probability.sum(), 1)
+assert probability.argmax() == 1
+print(&quot;Stable probabilities:&quot;, probability.tolist())</code></pre>
 <p>The raw exponentials would overflow at these scores, while subtracting 1001 changes neither their relative ratios nor the resulting probabilities. The maximum-score class remains the most probable. Checking finite values, normalization and ordering gives three independent observations about the transformation.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">import math
-import numpy as np
-
-values=[1e16,1.,-1e16]
-ordinary=float(np.sum(values));accurate=math.fsum(values)
-assert accurate==1. and ordinary==0.
-a=np.array([[2.,0.],[0.,4.]])
-b=np.array([6.,8.]);x=np.linalg.solve(a,b)
-assert np.allclose(x,[3.,2.]) and np.allclose(a@x,b)
-print(&quot;Summation:&quot;,ordinary,accurate,&quot;linear solution:&quot;,x.tolist())</code></pre>
+<pre><code class="language-python">values = [1e16, 1.0, -1e16]
+ordinary = float(np.sum(values))
+accurate = math.fsum(values)
+assert accurate == 1.0 and ordinary == 0.0
+a = np.array([[2.0, 0.0], [0.0, 4.0]])
+b = np.array([6.0, 8.0])
+x = np.linalg.solve(a, b)
+assert np.allclose(x, [3.0, 2.0]) and np.allclose(a @ x, b)
+print(&quot;Summation:&quot;, ordinary, accurate, &quot;linear solution:&quot;, x.tolist())</code></pre>
 <p>The summation counterexample exposes lost low-order information. The diagonal system then makes a solver result independently inspectable: two times three is six and four times two is eight. A library success flag is weaker evidence than both the expected solution and a checked residual on a known fixture.</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <ol>
@@ -470,75 +466,133 @@ Done when all six contracts and their boundary cases have inspected evidence and
 <span>&quot;&quot;&quot;</span>
 <span> </span>
 <span>import math</span>
+<span> </span>
 <span>import numpy as np</span>
 <span> </span>
+<span> </span>
 <span>def logsumexp(values: np.ndarray) -&gt; float:</span>
-<span>    &quot;&quot;&quot;Implement stable log(sum(exp(values))) for a one-dimensional array. Allow finite values and negative infinity; reject NaN or positive infinity. Define the empty input and an all-negative-infinity input as negative infinity.&quot;&quot;&quot;</span>
+<span>    &quot;&quot;&quot;</span>
+<span>    Implement stable log(sum(exp(values))) for a one-dimensional array. Allow finite values</span>
+<span>    and negative infinity; reject NaN or positive infinity. Define the empty input and an</span>
+<span>    all-negative-infinity input as negative infinity.</span>
+<span>    &quot;&quot;&quot;</span>
 <span>    raise NotImplementedError(&quot;Implement logsumexp&quot;)</span>
 <span> </span>
+<span> </span>
 <span>def softmax(scores: np.ndarray) -&gt; np.ndarray:</span>
-<span>    &quot;&quot;&quot;Return softmax probabilities for a nonempty finite vector using a maximum shift. Preserve the source and reject NaN, infinity, empty or nonvector inputs. Test invariance when a constant is added to every score.&quot;&quot;&quot;</span>
+<span>    &quot;&quot;&quot;</span>
+<span>    Return softmax probabilities for a nonempty finite vector using a maximum shift.</span>
+<span>    Preserve the source and reject NaN, infinity, empty or nonvector inputs. Test invariance</span>
+<span>    when a constant is added to every score.</span>
+<span>    &quot;&quot;&quot;</span>
 <span>    raise NotImplementedError(&quot;Implement softmax&quot;)</span>
 <span> </span>
+<span> </span>
 <span>def accurate_sum(values: np.ndarray) -&gt; float:</span>
-<span>    &quot;&quot;&quot;Sum a finite one-dimensional array using math.fsum after conversion to Python floats. Return zero for empty input. Reject nonfinite inputs or a final overflow with ValueError. Demonstrate a cancellation case rather than only positive small integers.&quot;&quot;&quot;</span>
+<span>    &quot;&quot;&quot;</span>
+<span>    Sum a finite one-dimensional array using math.fsum after conversion to Python floats.</span>
+<span>    Return zero for empty input. Reject nonfinite inputs or a final overflow with</span>
+<span>    ValueError. Demonstrate a cancellation case rather than only positive small integers.</span>
+<span>    &quot;&quot;&quot;</span>
 <span>    raise NotImplementedError(&quot;Implement accurate_sum&quot;)</span>
 <span> </span>
+<span> </span>
 <span>def floating_dot(left: np.ndarray, right: np.ndarray) -&gt; float:</span>
-<span>    &quot;&quot;&quot;Compute a floating dot product of equal-length finite vectors, converting operands before multiplication. Reject shape mismatch or an unrepresentable nonfinite result. Empty equal vectors return zero. This contract is approximate floating arithmetic, not exact integer accounting.&quot;&quot;&quot;</span>
+<span>    &quot;&quot;&quot;</span>
+<span>    Compute a floating dot product of equal-length finite vectors, converting operands</span>
+<span>    before multiplication. Reject shape mismatch or an unrepresentable nonfinite result.</span>
+<span>    Empty equal vectors return zero. This contract is approximate floating arithmetic, not</span>
+<span>    exact integer accounting.</span>
+<span>    &quot;&quot;&quot;</span>
 <span>    raise NotImplementedError(&quot;Implement floating_dot&quot;)</span>
 <span> </span>
-<span>def solve_checked(matrix: np.ndarray, target: np.ndarray, max_condition: float = 1e10) -&gt; np.ndarray:</span>
-<span>    &quot;&quot;&quot;Solve a nonempty finite square system with a matching finite target vector. Require a finite condition limit of at least one and reject systems whose condition number exceeds it. Use np.linalg.solve, not an explicit inverse.&quot;&quot;&quot;</span>
+<span> </span>
+<span>def solve_checked(</span>
+<span>    matrix: np.ndarray, target: np.ndarray, max_condition: float = 1e10</span>
+<span>) -&gt; np.ndarray:</span>
+<span>    &quot;&quot;&quot;</span>
+<span>    Solve a nonempty finite square system with a matching finite target vector. Require a</span>
+<span>    finite condition limit of at least one and reject systems whose condition number exceeds</span>
+<span>    it. Use np.linalg.solve, not an explicit inverse.</span>
+<span>    &quot;&quot;&quot;</span>
 <span>    raise NotImplementedError(&quot;Implement solve_checked&quot;)</span>
 <span> </span>
+<span> </span>
 <span>def within_tolerance(actual: np.ndarray, expected: np.ndarray, atol: float, rtol: float) -&gt; bool:</span>
-<span>    &quot;&quot;&quot;Compare finite arrays with exactly equal shapes using abs(actual-expected)&lt;=atol+rtol*abs(expected) elementwise. Require finite nonnegative tolerances. Reject broadcasting-compatible but unequal shapes and nonfinite values. Empty equal arrays return True.&quot;&quot;&quot;</span>
+<span>    &quot;&quot;&quot;</span>
+<span>    Compare finite arrays with exactly equal shapes using</span>
+<span>    abs(actual-expected)&lt;=atol+rtol*abs(expected) elementwise. Require finite nonnegative</span>
+<span>    tolerances. Reject broadcasting-compatible but unequal shapes and nonfinite values.</span>
+<span>    Empty equal arrays return True.</span>
+<span>    &quot;&quot;&quot;</span>
 <span>    raise NotImplementedError(&quot;Implement within_tolerance&quot;)</span>
 <span> </span>
-<span>def worked_examples():</span>
-<span>    scores=np.array([1000.,1001.,999.])</span>
-<span>    shifted=scores-scores.max()</span>
-<span>    probability=np.exp(shifted)/np.exp(shifted).sum()</span>
-<span>    assert np.isfinite(probability).all() and np.isclose(probability.sum(),1)</span>
-<span>    assert probability.argmax()==1</span>
-<span>    print(&quot;Stable probabilities:&quot;,probability.tolist())</span>
 <span> </span>
-<span>    values=[1e16,1.,-1e16]</span>
-<span>    ordinary=float(np.sum(values));accurate=math.fsum(values)</span>
-<span>    assert accurate==1. and ordinary==0.</span>
-<span>    a=np.array([[2.,0.],[0.,4.]])</span>
-<span>    b=np.array([6.,8.]);x=np.linalg.solve(a,b)</span>
-<span>    assert np.allclose(x,[3.,2.]) and np.allclose(a@x,b)</span>
-<span>    print(&quot;Summation:&quot;,ordinary,accurate,&quot;linear solution:&quot;,x.tolist())</span>
+<span>def worked_examples() -&gt; None:</span>
+<span>    scores = np.array([1000.0, 1001.0, 999.0])</span>
+<span>    shifted = scores - scores.max()</span>
+<span>    probability = np.exp(shifted) / np.exp(shifted).sum()</span>
+<span>    assert np.isfinite(probability).all() and np.isclose(probability.sum(), 1)</span>
+<span>    assert probability.argmax() == 1</span>
+<span>    print(&quot;Stable probabilities:&quot;, probability.tolist())</span>
+<span> </span>
+<span>    values = [1e16, 1.0, -1e16]</span>
+<span>    ordinary = float(np.sum(values))</span>
+<span>    accurate = math.fsum(values)</span>
+<span>    assert accurate == 1.0 and ordinary == 0.0</span>
+<span>    a = np.array([[2.0, 0.0], [0.0, 4.0]])</span>
+<span>    b = np.array([6.0, 8.0])</span>
+<span>    x = np.linalg.solve(a, b)</span>
+<span>    assert np.allclose(x, [3.0, 2.0]) and np.allclose(a @ x, b)</span>
+<span>    print(&quot;Summation:&quot;, ordinary, accurate, &quot;linear solution:&quot;, x.tolist())</span>
+<span> </span>
 <span> </span>
 <span>if __name__ == &quot;__main__&quot;:</span>
 <span>    worked_examples()</span>
 <span>    print(&quot;Worked examples passed. Complete the six task functions and their boundary checks.&quot;)</span>
 <span> </span>
 <span># Exercise 1: Aggregate log weights without overflow</span>
-<span># Prompt: Implement stable log(sum(exp(values))) for a one-dimensional array. Allow finite values and negative infinity; reject NaN or positive infinity. Define the empty input and an all-negative-infinity input as negative infinity.</span>
-<span># Expected: [1000,1000] yields 1000+log(2) without infinity; [-inf,-inf] and empty return-inf. [NaN] and [inf] raise ValueError.</span>
+<span># Prompt: Implement stable log(sum(exp(values))) for a one-dimensional array. Allow finite values</span>
+<span># and negative infinity; reject NaN or positive infinity. Define the empty input and an</span>
+<span># all-negative-infinity input as negative infinity.</span>
+<span># Expected: [1000,1000] yields 1000+log(2) without infinity; [-inf,-inf] and empty return-inf.</span>
+<span># [NaN] and [inf] raise ValueError.</span>
 <span> </span>
 <span># Exercise 2: Normalize large scores</span>
-<span># Prompt: Return softmax probabilities for a nonempty finite vector using a maximum shift. Preserve the source and reject NaN, infinity, empty or nonvector inputs. Test invariance when a constant is added to every score.</span>
-<span># Expected: [1000,1001] returns finite probabilities summing to one with the second larger. Adding-1000 produces the same probabilities; equal scores give [.5,.5].</span>
+<span># Prompt: Return softmax probabilities for a nonempty finite vector using a maximum shift.</span>
+<span># Preserve the source and reject NaN, infinity, empty or nonvector inputs. Test invariance when a</span>
+<span># constant is added to every score.</span>
+<span># Expected: [1000,1001] returns finite probabilities summing to one with the second larger.</span>
+<span># Adding-1000 produces the same probabilities; equal scores give [.5,.5].</span>
 <span> </span>
 <span># Exercise 3: Preserve small contributions</span>
-<span># Prompt: Sum a finite one-dimensional array using math.fsum after conversion to Python floats. Return zero for empty input. Reject nonfinite inputs or a final overflow with ValueError. Demonstrate a cancellation case rather than only positive small integers.</span>
+<span># Prompt: Sum a finite one-dimensional array using math.fsum after conversion to Python floats.</span>
+<span># Return zero for empty input. Reject nonfinite inputs or a final overflow with ValueError.</span>
+<span># Demonstrate a cancellation case rather than only positive small integers.</span>
 <span># Expected: [1e16,1,-1e16] returns 1; empty returns 0; [inf] and [1e308,1e308] raise ValueError.</span>
 <span> </span>
 <span># Exercise 4: Promote before multiplying</span>
-<span># Prompt: Compute a floating dot product of equal-length finite vectors, converting operands before multiplication. Reject shape mismatch or an unrepresentable nonfinite result. Empty equal vectors return zero. This contract is approximate floating arithmetic, not exact integer accounting.</span>
-<span># Expected: int64[2**62] dotted with int64[4] yields float(2**64), not integer overflow zero. Length mismatch raises ValueError, and empty vectors return 0.</span>
+<span># Prompt: Compute a floating dot product of equal-length finite vectors, converting operands</span>
+<span># before multiplication. Reject shape mismatch or an unrepresentable nonfinite result. Empty equal</span>
+<span># vectors return zero. This contract is approximate floating arithmetic, not exact integer</span>
+<span># accounting.</span>
+<span># Expected: int64[2**62] dotted with int64[4] yields float(2**64), not integer overflow zero.</span>
+<span># Length mismatch raises ValueError, and empty vectors return 0.</span>
 <span> </span>
 <span># Exercise 5: Separate solver residual from conditioning</span>
-<span># Prompt: Solve a nonempty finite square system with a matching finite target vector. Require a finite condition limit of at least one and reject systems whose condition number exceeds it. Use np.linalg.solve, not an explicit inverse.</span>
-<span># Expected: diag(2,4) with [6,8] returns [3,2] and a zero residual within tolerance. A duplicate-row system and diag(1,1e-12) at default limit raise ValueError.</span>
+<span># Prompt: Solve a nonempty finite square system with a matching finite target vector. Require a</span>
+<span># finite condition limit of at least one and reject systems whose condition number exceeds it. Use</span>
+<span># np.linalg.solve, not an explicit inverse.</span>
+<span># Expected: diag(2,4) with [6,8] returns [3,2] and a zero residual within tolerance. A</span>
+<span># duplicate-row system and diag(1,1e-12) at default limit raise ValueError.</span>
 <span> </span>
 <span># Exercise 6: Make numerical comparison semantics explicit</span>
-<span># Prompt: Compare finite arrays with exactly equal shapes using abs(actual-expected)&lt;=atol+rtol*abs(expected) elementwise. Require finite nonnegative tolerances. Reject broadcasting-compatible but unequal shapes and nonfinite values. Empty equal arrays return True.</span>
-<span># Expected: Actual[1e8+1,1e-9] versus expected[1e8,0] passes with atol 1 e-8, rtol 1 e-7; it fails with zero tolerances. Shapes(2,) and (1,2) raise ValueError.</span>
+<span># Prompt: Compare finite arrays with exactly equal shapes using</span>
+<span># abs(actual-expected)&lt;=atol+rtol*abs(expected) elementwise. Require finite nonnegative</span>
+<span># tolerances. Reject broadcasting-compatible but unequal shapes and nonfinite values. Empty equal</span>
+<span># arrays return True.</span>
+<span># Expected: Actual[1e8+1,1e-9] versus expected[1e8,0] passes with atol 1 e-8, rtol 1 e-7; it fails</span>
+<span># with zero tolerances. Shapes(2,) and (1,2) raise ValueError.</span>
 <span> </span></code></pre></div>
       </section>
 
@@ -579,102 +633,141 @@ Done when all six contracts and their boundary cases have inspected evidence and
 <p>Implement stable log(sum(exp(values))) for a one-dimensional array. Allow finite values and negative infinity; reject NaN or positive infinity. Define the empty input and an all-negative-infinity input as negative infinity.</p>
 <p><strong>Expected:</strong> [1000,1000] yields 1000+log(2) without infinity; [-inf,-inf] and empty return-inf. [NaN] and [inf] raise ValueError.</p>
 <pre><code class="language-python">def logsumexp(values: np.ndarray) -&gt; float:
-    x=np.asarray(values,dtype=float)
-    if x.ndim!=1 or np.isnan(x).any() or np.isposinf(x).any():
+    x = np.asarray(values, dtype=float)
+    if x.ndim != 1 or np.isnan(x).any() or np.isposinf(x).any():
         raise ValueError(&quot;Expected finite or negative-infinite log weights&quot;)
-    if x.size==0 or np.isneginf(x).all():
+    if x.size == 0 or np.isneginf(x).all():
         return -math.inf
-    maximum=float(x.max())
+    maximum = float(x.max())
     with np.errstate(over=&quot;ignore&quot;):
-        shifted=x-maximum
-    return maximum+math.log(float(np.exp(shifted).sum()))</code></pre>
+        shifted = x - maximum
+    return maximum + math.log(float(np.exp(shifted).sum()))</code></pre>
 <p>The maximum shift bounds all exponential inputs above by zero. A very negative shifted value can become negative infinity through subtraction overflow, which correctly contributes zero exponential weight; this specific operation is handled explicitly. The all-negative-infinity case is separated before subtracting to avoid an undefined infinity-minus-infinity operation. Empty aggregation has zero total weight, whose logarithm is the declared negative-infinity identity.</p>
-<pre><code class="language-python">assert math.isclose(logsumexp(np.array([1000.,1000.])),1000+math.log(2))
-assert logsumexp(np.array([-np.inf,-np.inf]))==-np.inf
-assert logsumexp(np.array([]))==-np.inf
-expect_value_error(lambda:logsumexp(np.array([np.nan])))
-expect_value_error(lambda:logsumexp(np.array([np.inf])))</code></pre>
+<pre><code class="language-python">assert math.isclose(logsumexp(np.array([1000.0, 1000.0])), 1000 + math.log(2))
+assert logsumexp(np.array([-np.inf, -np.inf])) == -np.inf
+assert logsumexp(np.array([])) == -np.inf
+expect_value_error(lambda: logsumexp(np.array([np.nan])))
+expect_value_error(lambda: logsumexp(np.array([np.inf])))</code></pre>
 <h5 id="solution-1--exercise-2-normalize-large-scores">Exercise 2: Normalize large scores<a class="heading-anchor" href="#solution-1--exercise-2-normalize-large-scores" aria-label="Link to this section">#</a></h5>
 <p>Return softmax probabilities for a nonempty finite vector using a maximum shift. Preserve the source and reject NaN, infinity, empty or nonvector inputs. Test invariance when a constant is added to every score.</p>
 <p><strong>Expected:</strong> [1000,1001] returns finite probabilities summing to one with the second larger. Adding-1000 produces the same probabilities; equal scores give [.5,.5].</p>
 <pre><code class="language-python">def softmax(scores: np.ndarray) -&gt; np.ndarray:
-    x=np.asarray(scores,dtype=float)
-    if x.ndim!=1 or x.size==0 or not np.isfinite(x).all():
+    x = np.asarray(scores, dtype=float)
+    if x.ndim != 1 or x.size == 0 or not np.isfinite(x).all():
         raise ValueError(&quot;Expected a nonempty finite score vector&quot;)
     with np.errstate(over=&quot;ignore&quot;):
-        weight=np.exp(x-x.max())
-    return weight/weight.sum()</code></pre>
+        weight = np.exp(x - x.max())
+    return np.asarray(weight / weight.sum())</code></pre>
 <p>At least one shifted score is zero, so at least one exponential is one and the denominator cannot vanish. Other sufficiently negative scores can underflow to zero without causing normalization failure. Shift invariance is a mathematical property independent of the exact printed probabilities. The result is a normalized score transformation, not proof that the probabilities are statistically calibrated for any real classification problem.</p>
-<pre><code class="language-python">s=np.array([1000.,1001.]);p=softmax(s)
-assert np.isfinite(p).all() and np.isclose(p.sum(),1) and p[1]&gt;p[0]
-assert np.allclose(p,softmax(s-1000)) and np.allclose(softmax(np.array([7.,7.])),[.5,.5])
-expect_value_error(lambda:softmax(np.array([])))
-expect_value_error(lambda:softmax(np.array([np.inf])))</code></pre>
+<pre><code class="language-python">s = np.array([1000.0, 1001.0])
+p = softmax(s)
+assert np.isfinite(p).all() and np.isclose(p.sum(), 1) and p[1] &gt; p[0]
+assert np.allclose(p, softmax(s - 1000)) and np.allclose(softmax(np.array([7.0, 7.0])), [0.5, 0.5])
+expect_value_error(lambda: softmax(np.array([])))
+expect_value_error(lambda: softmax(np.array([np.inf])))</code></pre>
 <h5 id="solution-1--exercise-3-preserve-small-contributions">Exercise 3: Preserve small contributions<a class="heading-anchor" href="#solution-1--exercise-3-preserve-small-contributions" aria-label="Link to this section">#</a></h5>
 <p>Sum a finite one-dimensional array using math.fsum after conversion to Python floats. Return zero for empty input. Reject nonfinite inputs or a final overflow with ValueError. Demonstrate a cancellation case rather than only positive small integers.</p>
 <p><strong>Expected:</strong> [1e16,1,-1e16] returns 1; empty returns 0; [inf] and [1e308,1e308] raise ValueError.</p>
 <pre><code class="language-python">def accurate_sum(values: np.ndarray) -&gt; float:
-    x=np.asarray(values,dtype=float)
-    if x.ndim!=1 or not np.isfinite(x).all():
+    x = np.asarray(values, dtype=float)
+    if x.ndim != 1 or not np.isfinite(x).all():
         raise ValueError(&quot;Expected finite summands&quot;)
     try:
         return math.fsum(float(value) for value in x)
     except OverflowError as error:
         raise ValueError(&quot;The sum exceeds floating-point range&quot;) from error</code></pre>
 <p>Compensated partial-sum logic avoids losing the small contribution in the supplied cancellation example. Converting inputs to Python floats makes the representation boundary explicit. The overflow case distinguishes precision loss that an improved algorithm can reduce from a final result the representation cannot hold. Returning infinity would violate the finite-result interpretation, so overflow is surfaced as a contract error.</p>
-<pre><code class="language-python">assert accurate_sum(np.array([1e16,1.,-1e16]))==1.
-assert accurate_sum(np.array([]))==0.
-expect_value_error(lambda:accurate_sum(np.array([np.inf])))
-expect_value_error(lambda:accurate_sum(np.array([1e308,1e308])))</code></pre>
+<pre><code class="language-python">assert accurate_sum(np.array([1e16, 1.0, -1e16])) == 1.0
+assert accurate_sum(np.array([])) == 0.0
+expect_value_error(lambda: accurate_sum(np.array([np.inf])))
+expect_value_error(lambda: accurate_sum(np.array([1e308, 1e308])))</code></pre>
 <h5 id="solution-1--exercise-4-promote-before-multiplying">Exercise 4: Promote before multiplying<a class="heading-anchor" href="#solution-1--exercise-4-promote-before-multiplying" aria-label="Link to this section">#</a></h5>
 <p>Compute a floating dot product of equal-length finite vectors, converting operands before multiplication. Reject shape mismatch or an unrepresentable nonfinite result. Empty equal vectors return zero. This contract is approximate floating arithmetic, not exact integer accounting.</p>
 <p><strong>Expected:</strong> int64[2<strong>62] dotted with int64[4] yields float(2</strong>64), not integer overflow zero. Length mismatch raises ValueError, and empty vectors return 0.</p>
 <pre><code class="language-python">def floating_dot(left: np.ndarray, right: np.ndarray) -&gt; float:
-    a=np.asarray(left,dtype=float);b=np.asarray(right,dtype=float)
-    if a.ndim!=1 or b.ndim!=1 or a.shape!=b.shape or not np.isfinite(a).all() or not np.isfinite(b).all():
+    a = np.asarray(left, dtype=float)
+    b = np.asarray(right, dtype=float)
+    if (
+        a.ndim != 1
+        or b.ndim != 1
+        or a.shape != b.shape
+        or not np.isfinite(a).all()
+        or not np.isfinite(b).all()
+    ):
         raise ValueError(&quot;Expected equal finite vectors&quot;)
-    with np.errstate(over=&quot;ignore&quot;,invalid=&quot;ignore&quot;):
-        result=float(np.dot(a,b))
+    with np.errstate(over=&quot;ignore&quot;, invalid=&quot;ignore&quot;):
+        result = float(np.dot(a, b))
     if not math.isfinite(result):
         raise ValueError(&quot;Dot product exceeds finite floating range&quot;)
     return result</code></pre>
 <p>Promotion happens before the multiplication, which avoids wrapping the int64 product. The chosen power-of-two result is exactly representable as a float, making the expected value unambiguous. Other large integers may lose low-order digits on conversion, so this is not an exactness guarantee for arbitrary integer values. A finite-output check catches arithmetic range failures that a successful array shape match cannot detect.</p>
-<pre><code class="language-python">a=np.array([2**62],dtype=np.int64);b=np.array([4],dtype=np.int64)
-assert floating_dot(a,b)==float(2**64)
-assert floating_dot(np.array([]),np.array([]))==0
-expect_value_error(lambda:floating_dot(np.array([1]),np.array([1,2])))
-expect_value_error(lambda:floating_dot(np.array([1e308]),np.array([1e308])))</code></pre>
+<pre><code class="language-python">a = np.array([2**62], dtype=np.int64)
+b = np.array([4], dtype=np.int64)
+assert floating_dot(a, b) == float(2**64)
+assert floating_dot(np.array([]), np.array([])) == 0
+expect_value_error(lambda: floating_dot(np.array([1]), np.array([1, 2])))
+expect_value_error(lambda: floating_dot(np.array([1e308]), np.array([1e308])))</code></pre>
 <h5 id="solution-1--exercise-5-separate-solver-residual-from-conditioning">Exercise 5: Separate solver residual from conditioning<a class="heading-anchor" href="#solution-1--exercise-5-separate-solver-residual-from-conditioning" aria-label="Link to this section">#</a></h5>
 <p>Solve a nonempty finite square system with a matching finite target vector. Require a finite condition limit of at least one and reject systems whose condition number exceeds it. Use np.linalg.solve, not an explicit inverse.</p>
 <p><strong>Expected:</strong> diag(2,4) with [6,8] returns [3,2] and a zero residual within tolerance. A duplicate-row system and diag(1,1e-12) at default limit raise ValueError.</p>
-<pre><code class="language-python">def solve_checked(matrix: np.ndarray, target: np.ndarray, max_condition: float = 1e10) -&gt; np.ndarray:
-    a=np.asarray(matrix,dtype=float);b=np.asarray(target,dtype=float)
-    if a.ndim!=2 or a.shape[0]==0 or a.shape[0]!=a.shape[1] or b.shape!=(a.shape[0],) or not np.isfinite(a).all() or not np.isfinite(b).all() or not math.isfinite(max_condition) or max_condition&lt;1:
+<pre><code class="language-python">def solve_checked(
+    matrix: np.ndarray, target: np.ndarray, max_condition: float = 1e10
+) -&gt; np.ndarray:
+    a = np.asarray(matrix, dtype=float)
+    b = np.asarray(target, dtype=float)
+    if (
+        a.ndim != 2
+        or a.shape[0] == 0
+        or a.shape[0] != a.shape[1]
+        or b.shape != (a.shape[0],)
+        or not np.isfinite(a).all()
+        or not np.isfinite(b).all()
+        or not math.isfinite(max_condition)
+        or max_condition &lt; 1
+    ):
         raise ValueError(&quot;Expected a finite square system and valid condition limit&quot;)
-    condition=float(np.linalg.cond(a))
-    if not math.isfinite(condition) or condition&gt;max_condition:
+    condition = float(np.linalg.cond(a))
+    if not math.isfinite(condition) or condition &gt; max_condition:
         raise ValueError(&quot;System is singular or exceeds the condition policy&quot;)
-    return np.linalg.solve(a,b)</code></pre>
+    return np.asarray(np.linalg.solve(a, b))</code></pre>
 <p>The condition-number gate is an explicit policy about sensitivity, not a universal scientific cutoff. A matrix can be invertible yet too sensitive for the intended precision. Solving directly avoids forming an unnecessary inverse, while the residual check verifies the answer against the supplied equations. It does not prove that small changes to measured matrix entries would leave the solution stable; that is why conditioning is examined separately.</p>
-<pre><code class="language-python">a=np.diag([2.,4.]);b=np.array([6.,8.]);x=solve_checked(a,b)
-assert np.allclose(x,[3,2]) and np.linalg.norm(a@x-b)&lt;1e-12
-expect_value_error(lambda:solve_checked(np.ones((2,2)),np.ones(2)))
-expect_value_error(lambda:solve_checked(np.diag([1.,1e-12]),np.ones(2)))</code></pre>
+<pre><code class="language-python">a = np.diag([2.0, 4.0])
+b = np.array([6.0, 8.0])
+x = solve_checked(a, b)
+assert np.allclose(x, [3, 2]) and np.linalg.norm(a @ x - b) &lt; 1e-12
+expect_value_error(lambda: solve_checked(np.ones((2, 2)), np.ones(2)))
+expect_value_error(lambda: solve_checked(np.diag([1.0, 1e-12]), np.ones(2)))</code></pre>
 <h5 id="solution-1--exercise-6-make-numerical-comparison-semantics-explicit">Exercise 6: Make numerical comparison semantics explicit<a class="heading-anchor" href="#solution-1--exercise-6-make-numerical-comparison-semantics-explicit" aria-label="Link to this section">#</a></h5>
 <p>Compare finite arrays with exactly equal shapes using abs(actual-expected)&lt;=atol+rtol*abs(expected) elementwise. Require finite nonnegative tolerances. Reject broadcasting-compatible but unequal shapes and nonfinite values. Empty equal arrays return True.</p>
 <p><strong>Expected:</strong> Actual[1e8+1,1e-9] versus expected[1e8,0] passes with atol 1 e-8, rtol 1 e-7; it fails with zero tolerances. Shapes(2,) and (1,2) raise ValueError.</p>
 <pre><code class="language-python">def within_tolerance(actual: np.ndarray, expected: np.ndarray, atol: float, rtol: float) -&gt; bool:
-    a=np.asarray(actual,dtype=float);b=np.asarray(expected,dtype=float)
-    if a.shape!=b.shape or not np.isfinite(a).all() or not np.isfinite(b).all() or not math.isfinite(atol) or not math.isfinite(rtol) or atol&lt;0 or rtol&lt;0:
+    a = np.asarray(actual, dtype=float)
+    b = np.asarray(expected, dtype=float)
+    if (
+        a.shape != b.shape
+        or not np.isfinite(a).all()
+        or not np.isfinite(b).all()
+        or not math.isfinite(atol)
+        or not math.isfinite(rtol)
+        or atol &lt; 0
+        or rtol &lt; 0
+    ):
         raise ValueError(&quot;Expected equal finite shapes and nonnegative tolerances&quot;)
-    with np.errstate(over=&quot;ignore&quot;):
-        return bool(np.all(np.abs(a-b)&lt;=atol+rtol*np.abs(b)))</code></pre>
-<p>Absolute tolerance allows a small error near a zero reference, while relative tolerance scales with the expected magnitude. The comparison is deliberately reference-oriented rather than symmetric. Exact shape equality prevents broadcasting from turning a structural error into a passing numerical check. Empty matching arrays satisfy the all-elements condition vacuously, but a caller still needs separate evidence that an empty output is scientifically appropriate.</p>
-<pre><code class="language-python">a=np.array([1e8+1,1e-9]);b=np.array([1e8,0.])
-assert within_tolerance(a,b,1e-8,1e-7) and not within_tolerance(a,b,0,0)
-assert within_tolerance(np.array([]),np.array([]),0,0)
-expect_value_error(lambda:within_tolerance(np.ones(2),np.ones((1,2)),0,0))
-expect_value_error(lambda:within_tolerance(a,b,-1,0))</code></pre>
+    scale = np.maximum(np.abs(a), np.abs(b))
+    safe_scale = np.where(scale == 0, 1.0, scale)
+    with np.errstate(over=&quot;ignore&quot;, under=&quot;ignore&quot;):
+        distance = np.abs(a / safe_scale - b / safe_scale)
+        allowance = atol / safe_scale + rtol * (np.abs(b) / safe_scale)
+    return bool(np.all(distance &lt;= allowance))</code></pre>
+<p>Absolute tolerance allows a small error near a zero reference, while relative tolerance scales with the expected magnitude. Scaling both sides by the larger absolute input avoids an infinity-versus-infinity comparison when opposite large finite values are subtracted. The comparison remains reference-oriented rather than symmetric. Exact shape equality prevents broadcasting from turning a structural error into a passing numerical check. Empty matching arrays satisfy the all-elements condition vacuously, but a caller still needs separate evidence that an empty output is scientifically appropriate.</p>
+<pre><code class="language-python">a = np.array([1e8 + 1, 1e-9])
+b = np.array([1e8, 0.0])
+assert within_tolerance(a, b, 1e-8, 1e-7) and not within_tolerance(a, b, 0, 0)
+assert within_tolerance(np.array([]), np.array([]), 0, 0)
+assert not within_tolerance(np.array([1.7e308]), np.array([-1.7e308]), 0, 1.9)
+assert within_tolerance(np.array([1.7e308]), np.array([-1.7e308]), 0, 2.0)
+expect_value_error(lambda: within_tolerance(np.ones(2), np.ones((1, 2)), 0, 0))
+expect_value_error(lambda: within_tolerance(a, b, -1, 0))</code></pre>
 <h4 id="solution-1--verification-and-interpretation">Verification and interpretation<a class="heading-anchor" href="#solution-1--verification-and-interpretation" aria-label="Link to this section">#</a></h4>
 <p>Run <code>python python/professional/solutions/py_numpy_04_solution.py</code> from the repository root with the prepared interpreter. The code checks normal inputs and explicit edge cases before printing its success line. Assertions are the evidence; the printed sentence alone is not. The helper <code>expect_value_error</code> requires an actual <code>ValueError</code> and fails if a function silently accepts an invalid input. Inspect each function&#x27;s mutation and ordering behavior as part of its contract.</p></div>
       </section>
@@ -712,105 +805,157 @@ expect_value_error(lambda:within_tolerance(a,b,-1,0))</code></pre>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Reference implementation and exact boundary checks for python-numpy-04.&quot;&quot;&quot;</span>
 <span> </span>
 <span>import math</span>
+<span>from collections.abc import Callable</span>
+<span> </span>
 <span>import numpy as np</span>
 <span> </span>
+<span> </span>
 <span>def logsumexp(values: np.ndarray) -&gt; float:</span>
-<span>    x=np.asarray(values,dtype=float)</span>
-<span>    if x.ndim!=1 or np.isnan(x).any() or np.isposinf(x).any():</span>
+<span>    x = np.asarray(values, dtype=float)</span>
+<span>    if x.ndim != 1 or np.isnan(x).any() or np.isposinf(x).any():</span>
 <span>        raise ValueError(&quot;Expected finite or negative-infinite log weights&quot;)</span>
-<span>    if x.size==0 or np.isneginf(x).all():</span>
+<span>    if x.size == 0 or np.isneginf(x).all():</span>
 <span>        return -math.inf</span>
-<span>    maximum=float(x.max())</span>
+<span>    maximum = float(x.max())</span>
 <span>    with np.errstate(over=&quot;ignore&quot;):</span>
-<span>        shifted=x-maximum</span>
-<span>    return maximum+math.log(float(np.exp(shifted).sum()))</span>
+<span>        shifted = x - maximum</span>
+<span>    return maximum + math.log(float(np.exp(shifted).sum()))</span>
+<span> </span>
 <span> </span>
 <span>def softmax(scores: np.ndarray) -&gt; np.ndarray:</span>
-<span>    x=np.asarray(scores,dtype=float)</span>
-<span>    if x.ndim!=1 or x.size==0 or not np.isfinite(x).all():</span>
+<span>    x = np.asarray(scores, dtype=float)</span>
+<span>    if x.ndim != 1 or x.size == 0 or not np.isfinite(x).all():</span>
 <span>        raise ValueError(&quot;Expected a nonempty finite score vector&quot;)</span>
 <span>    with np.errstate(over=&quot;ignore&quot;):</span>
-<span>        weight=np.exp(x-x.max())</span>
-<span>    return weight/weight.sum()</span>
+<span>        weight = np.exp(x - x.max())</span>
+<span>    return np.asarray(weight / weight.sum())</span>
+<span> </span>
 <span> </span>
 <span>def accurate_sum(values: np.ndarray) -&gt; float:</span>
-<span>    x=np.asarray(values,dtype=float)</span>
-<span>    if x.ndim!=1 or not np.isfinite(x).all():</span>
+<span>    x = np.asarray(values, dtype=float)</span>
+<span>    if x.ndim != 1 or not np.isfinite(x).all():</span>
 <span>        raise ValueError(&quot;Expected finite summands&quot;)</span>
 <span>    try:</span>
 <span>        return math.fsum(float(value) for value in x)</span>
 <span>    except OverflowError as error:</span>
 <span>        raise ValueError(&quot;The sum exceeds floating-point range&quot;) from error</span>
 <span> </span>
+<span> </span>
 <span>def floating_dot(left: np.ndarray, right: np.ndarray) -&gt; float:</span>
-<span>    a=np.asarray(left,dtype=float);b=np.asarray(right,dtype=float)</span>
-<span>    if a.ndim!=1 or b.ndim!=1 or a.shape!=b.shape or not np.isfinite(a).all() or not np.isfinite(b).all():</span>
+<span>    a = np.asarray(left, dtype=float)</span>
+<span>    b = np.asarray(right, dtype=float)</span>
+<span>    if (</span>
+<span>        a.ndim != 1</span>
+<span>        or b.ndim != 1</span>
+<span>        or a.shape != b.shape</span>
+<span>        or not np.isfinite(a).all()</span>
+<span>        or not np.isfinite(b).all()</span>
+<span>    ):</span>
 <span>        raise ValueError(&quot;Expected equal finite vectors&quot;)</span>
-<span>    with np.errstate(over=&quot;ignore&quot;,invalid=&quot;ignore&quot;):</span>
-<span>        result=float(np.dot(a,b))</span>
+<span>    with np.errstate(over=&quot;ignore&quot;, invalid=&quot;ignore&quot;):</span>
+<span>        result = float(np.dot(a, b))</span>
 <span>    if not math.isfinite(result):</span>
 <span>        raise ValueError(&quot;Dot product exceeds finite floating range&quot;)</span>
 <span>    return result</span>
 <span> </span>
-<span>def solve_checked(matrix: np.ndarray, target: np.ndarray, max_condition: float = 1e10) -&gt; np.ndarray:</span>
-<span>    a=np.asarray(matrix,dtype=float);b=np.asarray(target,dtype=float)</span>
-<span>    if a.ndim!=2 or a.shape[0]==0 or a.shape[0]!=a.shape[1] or b.shape!=(a.shape[0],) or not np.isfinite(a).all() or not np.isfinite(b).all() or not math.isfinite(max_condition) or max_condition&lt;1:</span>
+<span> </span>
+<span>def solve_checked(</span>
+<span>    matrix: np.ndarray, target: np.ndarray, max_condition: float = 1e10</span>
+<span>) -&gt; np.ndarray:</span>
+<span>    a = np.asarray(matrix, dtype=float)</span>
+<span>    b = np.asarray(target, dtype=float)</span>
+<span>    if (</span>
+<span>        a.ndim != 2</span>
+<span>        or a.shape[0] == 0</span>
+<span>        or a.shape[0] != a.shape[1]</span>
+<span>        or b.shape != (a.shape[0],)</span>
+<span>        or not np.isfinite(a).all()</span>
+<span>        or not np.isfinite(b).all()</span>
+<span>        or not math.isfinite(max_condition)</span>
+<span>        or max_condition &lt; 1</span>
+<span>    ):</span>
 <span>        raise ValueError(&quot;Expected a finite square system and valid condition limit&quot;)</span>
-<span>    condition=float(np.linalg.cond(a))</span>
-<span>    if not math.isfinite(condition) or condition&gt;max_condition:</span>
+<span>    condition = float(np.linalg.cond(a))</span>
+<span>    if not math.isfinite(condition) or condition &gt; max_condition:</span>
 <span>        raise ValueError(&quot;System is singular or exceeds the condition policy&quot;)</span>
-<span>    return np.linalg.solve(a,b)</span>
+<span>    return np.asarray(np.linalg.solve(a, b))</span>
+<span> </span>
 <span> </span>
 <span>def within_tolerance(actual: np.ndarray, expected: np.ndarray, atol: float, rtol: float) -&gt; bool:</span>
-<span>    a=np.asarray(actual,dtype=float);b=np.asarray(expected,dtype=float)</span>
-<span>    if a.shape!=b.shape or not np.isfinite(a).all() or not np.isfinite(b).all() or not math.isfinite(atol) or not math.isfinite(rtol) or atol&lt;0 or rtol&lt;0:</span>
+<span>    a = np.asarray(actual, dtype=float)</span>
+<span>    b = np.asarray(expected, dtype=float)</span>
+<span>    if (</span>
+<span>        a.shape != b.shape</span>
+<span>        or not np.isfinite(a).all()</span>
+<span>        or not np.isfinite(b).all()</span>
+<span>        or not math.isfinite(atol)</span>
+<span>        or not math.isfinite(rtol)</span>
+<span>        or atol &lt; 0</span>
+<span>        or rtol &lt; 0</span>
+<span>    ):</span>
 <span>        raise ValueError(&quot;Expected equal finite shapes and nonnegative tolerances&quot;)</span>
-<span>    with np.errstate(over=&quot;ignore&quot;):</span>
-<span>        return bool(np.all(np.abs(a-b)&lt;=atol+rtol*np.abs(b)))</span>
+<span>    scale = np.maximum(np.abs(a), np.abs(b))</span>
+<span>    safe_scale = np.where(scale == 0, 1.0, scale)</span>
+<span>    with np.errstate(over=&quot;ignore&quot;, under=&quot;ignore&quot;):</span>
+<span>        distance = np.abs(a / safe_scale - b / safe_scale)</span>
+<span>        allowance = atol / safe_scale + rtol * (np.abs(b) / safe_scale)</span>
+<span>    return bool(np.all(distance &lt;= allowance))</span>
 <span> </span>
-<span>def expect_value_error(call):</span>
+<span> </span>
+<span>def expect_value_error(call: Callable[[], object]) -&gt; None:</span>
 <span>    try:</span>
 <span>        call()</span>
 <span>    except ValueError:</span>
 <span>        return</span>
 <span>    raise AssertionError(&quot;Expected ValueError&quot;)</span>
 <span> </span>
-<span>def main():</span>
+<span> </span>
+<span>def main() -&gt; None:</span>
 <span>    # Exercise 1: Aggregate log weights without overflow</span>
-<span>    assert math.isclose(logsumexp(np.array([1000.,1000.])),1000+math.log(2))</span>
-<span>    assert logsumexp(np.array([-np.inf,-np.inf]))==-np.inf</span>
-<span>    assert logsumexp(np.array([]))==-np.inf</span>
-<span>    expect_value_error(lambda:logsumexp(np.array([np.nan])))</span>
-<span>    expect_value_error(lambda:logsumexp(np.array([np.inf])))</span>
+<span>    assert math.isclose(logsumexp(np.array([1000.0, 1000.0])), 1000 + math.log(2))</span>
+<span>    assert logsumexp(np.array([-np.inf, -np.inf])) == -np.inf</span>
+<span>    assert logsumexp(np.array([])) == -np.inf</span>
+<span>    expect_value_error(lambda: logsumexp(np.array([np.nan])))</span>
+<span>    expect_value_error(lambda: logsumexp(np.array([np.inf])))</span>
 <span>    # Exercise 2: Normalize large scores</span>
-<span>    s=np.array([1000.,1001.]);p=softmax(s)</span>
-<span>    assert np.isfinite(p).all() and np.isclose(p.sum(),1) and p[1]&gt;p[0]</span>
-<span>    assert np.allclose(p,softmax(s-1000)) and np.allclose(softmax(np.array([7.,7.])),[.5,.5])</span>
-<span>    expect_value_error(lambda:softmax(np.array([])))</span>
-<span>    expect_value_error(lambda:softmax(np.array([np.inf])))</span>
+<span>    s = np.array([1000.0, 1001.0])</span>
+<span>    p = softmax(s)</span>
+<span>    assert np.isfinite(p).all() and np.isclose(p.sum(), 1) and p[1] &gt; p[0]</span>
+<span>    assert np.allclose(p, softmax(s - 1000)) and np.allclose(</span>
+<span>        softmax(np.array([7.0, 7.0])), [0.5, 0.5]</span>
+<span>    )</span>
+<span>    expect_value_error(lambda: softmax(np.array([])))</span>
+<span>    expect_value_error(lambda: softmax(np.array([np.inf])))</span>
 <span>    # Exercise 3: Preserve small contributions</span>
-<span>    assert accurate_sum(np.array([1e16,1.,-1e16]))==1.</span>
-<span>    assert accurate_sum(np.array([]))==0.</span>
-<span>    expect_value_error(lambda:accurate_sum(np.array([np.inf])))</span>
-<span>    expect_value_error(lambda:accurate_sum(np.array([1e308,1e308])))</span>
+<span>    assert accurate_sum(np.array([1e16, 1.0, -1e16])) == 1.0</span>
+<span>    assert accurate_sum(np.array([])) == 0.0</span>
+<span>    expect_value_error(lambda: accurate_sum(np.array([np.inf])))</span>
+<span>    expect_value_error(lambda: accurate_sum(np.array([1e308, 1e308])))</span>
 <span>    # Exercise 4: Promote before multiplying</span>
-<span>    a=np.array([2**62],dtype=np.int64);b=np.array([4],dtype=np.int64)</span>
-<span>    assert floating_dot(a,b)==float(2**64)</span>
-<span>    assert floating_dot(np.array([]),np.array([]))==0</span>
-<span>    expect_value_error(lambda:floating_dot(np.array([1]),np.array([1,2])))</span>
-<span>    expect_value_error(lambda:floating_dot(np.array([1e308]),np.array([1e308])))</span>
+<span>    a = np.array([2**62], dtype=np.int64)</span>
+<span>    b = np.array([4], dtype=np.int64)</span>
+<span>    assert floating_dot(a, b) == float(2**64)</span>
+<span>    assert floating_dot(np.array([]), np.array([])) == 0</span>
+<span>    expect_value_error(lambda: floating_dot(np.array([1]), np.array([1, 2])))</span>
+<span>    expect_value_error(lambda: floating_dot(np.array([1e308]), np.array([1e308])))</span>
 <span>    # Exercise 5: Separate solver residual from conditioning</span>
-<span>    a=np.diag([2.,4.]);b=np.array([6.,8.]);x=solve_checked(a,b)</span>
-<span>    assert np.allclose(x,[3,2]) and np.linalg.norm(a@x-b)&lt;1e-12</span>
-<span>    expect_value_error(lambda:solve_checked(np.ones((2,2)),np.ones(2)))</span>
-<span>    expect_value_error(lambda:solve_checked(np.diag([1.,1e-12]),np.ones(2)))</span>
+<span>    a = np.diag([2.0, 4.0])</span>
+<span>    b = np.array([6.0, 8.0])</span>
+<span>    x = solve_checked(a, b)</span>
+<span>    assert np.allclose(x, [3, 2]) and np.linalg.norm(a @ x - b) &lt; 1e-12</span>
+<span>    expect_value_error(lambda: solve_checked(np.ones((2, 2)), np.ones(2)))</span>
+<span>    expect_value_error(lambda: solve_checked(np.diag([1.0, 1e-12]), np.ones(2)))</span>
 <span>    # Exercise 6: Make numerical comparison semantics explicit</span>
-<span>    a=np.array([1e8+1,1e-9]);b=np.array([1e8,0.])</span>
-<span>    assert within_tolerance(a,b,1e-8,1e-7) and not within_tolerance(a,b,0,0)</span>
-<span>    assert within_tolerance(np.array([]),np.array([]),0,0)</span>
-<span>    expect_value_error(lambda:within_tolerance(np.ones(2),np.ones((1,2)),0,0))</span>
-<span>    expect_value_error(lambda:within_tolerance(a,b,-1,0))</span>
+<span>    a = np.array([1e8 + 1, 1e-9])</span>
+<span>    b = np.array([1e8, 0.0])</span>
+<span>    assert within_tolerance(a, b, 1e-8, 1e-7) and not within_tolerance(a, b, 0, 0)</span>
+<span>    assert within_tolerance(np.array([]), np.array([]), 0, 0)</span>
+<span>    assert not within_tolerance(np.array([1.7e308]), np.array([-1.7e308]), 0, 1.9)</span>
+<span>    assert within_tolerance(np.array([1.7e308]), np.array([-1.7e308]), 0, 2.0)</span>
+<span>    expect_value_error(lambda: within_tolerance(np.ones(2), np.ones((1, 2)), 0, 0))</span>
+<span>    expect_value_error(lambda: within_tolerance(a, b, -1, 0))</span>
 <span>    print(&quot;python-numpy-04: all six normal and boundary contracts passed&quot;)</span>
+<span> </span>
 <span> </span>
 <span>if __name__ == &quot;__main__&quot;:</span>
 <span>    main()</span>

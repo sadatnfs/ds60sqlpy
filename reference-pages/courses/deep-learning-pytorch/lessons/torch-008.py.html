@@ -122,24 +122,24 @@
 <span>&quot;&quot;&quot;</span>
 <span> </span>
 <span># Exercise 1: Calculate the initial loss</span>
-<span># Use float64x1, 2, 3, y2x and scalar w0.</span>
-<span># Expected: mean squared loss56/3.</span>
+<span># Use float64 x1, 2, 3, y2x and scalar w0.</span>
+<span># Expected: mean squared loss 56/3.</span>
 <span> </span>
 <span># Exercise 2: Inspect the gradient before updating</span>
 <span># Back propagate the initial loss and compare with-56/3.</span>
-<span># Expected: gradient-56/3; weight still0.</span>
+<span># Expected: gradient-56/3; weight still 0.</span>
 <span> </span>
 <span># Exercise 3: Apply exactly one SGD update</span>
 <span># Use SGD learning rate.1 onw and recompute the objective afterward.</span>
-<span># Expected: w28/15; loss56/675.</span>
+<span># Expected: w28/15; loss 56/675.</span>
 <span> </span>
 <span># Exercise 4: Expose the broadcast counterexample</span>
 <span># At a fresh w0, compare vector predictions with column targets shaped(3, 1).</span>
-<span># Expected: initial loss still56/3, but gradient-16.</span>
+<span># Expected: initial loss still 56/3, but gradient-16.</span>
 <span> </span>
 <span># Exercise 5: Check a finite-difference gradient</span>
 <span># Use a plain NumPy scalar objective around w0 with h.001.</span>
-<span># Expected: slope-56/3 within1e-9.</span>
+<span># Expected: slope-56/3 within 1e-9.</span>
 <span> </span>
 <span># Exercise 6: Clear the consumed gradient</span>
 <span># Call optimizer.zero_grad(set_to_none=True) after the step and inspect state.</span>

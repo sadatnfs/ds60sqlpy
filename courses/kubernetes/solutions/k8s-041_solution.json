@@ -1,0 +1,20 @@
+{
+  "apiVersion": "v1",
+  "kind": "List",
+  "items": [
+    {
+      "apiVersion": "v1",
+      "kind": "ConfigMap",
+      "metadata": {
+        "name": "recovery-plan"
+      },
+      "data": {
+        "start": "declared service interruption",
+        "finish": "application response and independent restored marker pass",
+        "rto_seconds": "120",
+        "rpo_seconds": "30",
+        "scope": "synthetic immutable marker rehearsal"
+      }
+    }
+  ]
+}

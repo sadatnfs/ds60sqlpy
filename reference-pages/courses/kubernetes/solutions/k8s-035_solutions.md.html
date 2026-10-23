@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>k8s-035: Explanatory solutions · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>k8s-035: Explanatory solutions</h1>
+      <p class="source-path">Generated from <code>courses/kubernetes/solutions/k8s-035_solutions.md</code></p>
+    </header>
+    <article class="document"><h2 id="k8s-035-explanatory-solutions">k8s-035: Explanatory solutions<a class="heading-anchor" href="#k8s-035-explanatory-solutions" aria-label="Link to this section">#</a></h2>
+<p>These answers explain the stated synthetic and scoped runtime contracts. Static checks do not prove cluster acceptance.</p>
+<h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
+<p>A read-modify-write operation can lose another client&#x27;s change if it assumes the object stayed unchanged after reading. Kubernetes uses resourceVersion for optimistic concurrency. The client submits a conditional update based on the version it read; if the stored object changed, the server can reject the stale update with409 Conflict. The correct recovery is to read current state and recompute the intended change, not repeatedly force the old snapshot over newer state.</p>
+<p>resourceVersion is an opaque token supplied by the server. Treat it as a string for the API contract. Do not increment it, subtract two versions to estimate elapsed time or use it as a user-defined clock. UID identifies an object lifetime, while resourceVersion identifies a state version within API semantics. Recreating the same name can change UID and invalidate an operation&#x27;s ownership assumptions.</p>
+<p>A watch streams changes after a starting point, reducing repeated full-list work. It can disconnect, deliver repeated information or expire beyond the server&#x27;s retained history. A robust observer rebuilds a current snapshot when required and reconciles from that state. The normal course credential does not offer arbitrary watch/update operations; this is a host-scoped advanced activity with an offline trace model.</p>
+<h3 id="exercise-1-separate-name-uid-and-version">Exercise 1: Separate name, UID and version<a class="heading-anchor" href="#exercise-1-separate-name-uid-and-version" aria-label="Link to this section">#</a></h3>
+<p>The distinctions prevent accidental updates after replacement and incorrect arithmetic on server tokens. A human-friendly name is useful navigation, but it is not enough for a destructive or ownership-sensitive operation.</p>
+<p><strong>Expected:</strong> Name addresses an object; UID its lifetime; resourceVersion is an opaque API token.</p>
+<h3 id="exercise-2-predict-the-conflict">Exercise 2: Predict the conflict<a class="heading-anchor" href="#exercise-2-predict-the-conflict" aria-label="Link to this section">#</a></h3>
+<p>Optimistic concurrency detects that the read premise became stale. The rejection protects the newer state, but the client still has to handle it explicitly rather than treating conflict as an unexplained generic failure.</p>
+<p><strong>Expected:</strong> 409-style conflict with current data unchanged.</p>
+<h3 id="exercise-3-recompute-after-reread">Exercise 3: Recompute after reread<a class="heading-anchor" href="#exercise-3-recompute-after-reread" aria-label="Link to this section">#</a></h3>
+<p>A correct retry is a fresh decision based on current state. The desired change may no longer be necessary or appropriate. Bounded retries and cancellation make contention visible instead of hiding an endless loop.</p>
+<p><strong>Expected:</strong> A new conditional request uses current state and a bounded retry count.</p>
+<h3 id="exercise-4-stop-on-replacement-identity">Exercise 4: Stop on replacement identity<a class="heading-anchor" href="#exercise-4-stop-on-replacement-identity" aria-label="Link to this section">#</a></h3>
+<p>The new object may belong to another actor or a later operation. Updating it solely because the name matches violates the original operation scope, even if its content looks familiar.</p>
+<p><strong>Expected:</strong> Refuse the mutation across object replacement.</p>
+<h3 id="exercise-5-recover-from-watch-expiration">Exercise 5: Recover from watch expiration<a class="heading-anchor" href="#exercise-5-recover-from-watch-expiration" aria-label="Link to this section">#</a></h3>
+<p>The server no longer promises the requested historical stream. Rebuilding from current state is compatible with level-driven reconciliation and avoids fabricating a sequence that may never have happened.</p>
+<p><strong>Expected:</strong> Current u2 snapshot retained; watcher restarts from the new list token.</p>
+<h3 id="exercise-6-handle-bookmarks-and-duplicates">Exercise 6: Handle bookmarks and duplicates<a class="heading-anchor" href="#exercise-6-handle-bookmarks-and-duplicates" aria-label="Link to this section">#</a></h3>
+<p>The observer should separate stream progress from application objects and make side effects idempotent. A watch reconnect is expected operational behavior, not evidence that each event must trigger another create or external call.</p>
+<p><strong>Expected:</strong> Bookmark advances progress; duplicate state does not repeat external effects.</p>
+<h3 id="boundary-and-troubleshooting-review">Boundary and troubleshooting review<a class="heading-anchor" href="#boundary-and-troubleshooting-review" aria-label="Link to this section">#</a></h3>
+<p>A conditional replace, a patch with appropriate preconditions and server-side apply have different merge/ownership semantics. This lesson models compare-and-swap on a tiny object; it does not teach that every PATCH automatically prevents lost updates. Specify the actual API operation and precondition when reviewing a live client.</p>
+<p>A supplied409 or410 trace is a deterministic teaching fixture. A live receipt must include the exact owned identity, request outcome and bounded recovery observation without exposing credentials. Do not enable broad watch or write permissions merely to make a reading exercise runnable in the normal module pad.</p></article>
+  </main>
+</body>
+</html>

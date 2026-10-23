@@ -1,24 +1,24 @@
 # torch-027: Transfer learning, frozen layers and optimizer membership
 
-Status: authored PyTorch course content. The manifest inventories complete teaching files; runtime readiness remains a separate, measured property.
-
 ## Level and prerequisites
 
 Advanced; approximately 120 minutes. Direct prerequisites: `torch-026`. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
 
 ## Learning objectives
 
-Transfer learning reuses a representation while adapting a task-specific head. The central investigation is concrete: Create a bias-free2-to-2 identity Linear base and disable its parameter gradients. The finish condition is base output equals input; all base parameters frozen. base weight now changes. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Transfer learning reuses a representation while adapting a task-specific head. The central investigation is concrete: Create a bias-free 2-to-2identity Linear base and disable its parameter gradients. The finish condition is base output equals input; all base parameters frozen. base weight now changes. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
-Transfer learning reuses a representation while adapting a task-specific head. Freezing requires both a gradient policy and a correct optimizer membership policy. Setting requires_grad=False prevents new derivatives for those parameters, but an optimizer can still contain stale gradient state if the transition is handled care lessly. Clear old gradients and deliberately select trainable parameters. Evaluation mode is a separate concern: a frozen BatchNorm base can still update running buffers if left in training mode.
+Transfer learning reuses a representation while adapting a task-specific head. Freezing requires both a gradient policy and a correct optimizer membership policy. Setting requires_grad=False prevents new derivatives for those parameters, but an optimizer can still contain stale gradient state if the transition is handled carelessly. Clear old gradients and deliberately select trainable parameters. Evaluation mode is a separate concern: a frozen BatchNorm base can still update running buffers if left in training mode.
 
 The local fixture uses a fixed identity base and a new linear head, so a byte-level snapshot can verify that only the head changes. A later unfreeze phase creates a new optimizer with a declared rate and membership list. No pretrained weights are downloaded. The lesson teaches the state transition required for transfer rather than claiming that freezing always improves quality.
 
 ## Design decisions and when to use this method
 
+Freeze a base when reusing its current representation is a deliberate adaptation strategy, and define whether its running buffers and stochastic behavior must remain fixed too. Separate requires_grad, optimizer membership, stored gradients and train/eval mode. None of those controls alone proves the complete freeze contract.
 
+Treat unfreezing as a new training phase with a stated learning rate, parameter set and optimizer-state policy. Creating a fresh optimizer is the simple policy used here. Adding a reviewed parameter group to an existing optimizer is another supported choice when preserving prior head state is intended; it should not happen implicitly.
 
 ## Paired TensorFlow comparison
 
@@ -38,13 +38,33 @@ Keras trainable flags and the training argument interact with layer tracking and
 
 ## How to run this lesson
 
-Use a prepared `llm-torch-cpu` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/torch-027/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: `& $CoursePython courses/deep-learning-pytorch/lessons/torch-027.py`. For macOS/Linux use `.venv/bin/python courses/deep-learning-pytorch/lessons/torch-027.py` from the repository root.
+Use a prepared `llm-torch-cpu` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/torch-027/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: `& $CoursePython courses/deep-learning-pytorch/lessons/torch-027.py`. For macOS/Linux, use the interpreter explicitly selected for a separately prepared native PyTorch environment, and invoke that interpreter on `courses/deep-learning-pytorch/lessons/torch-027.py` from the repository root. The repository's general `.venv` is not assumed to contain PyTorch; the prepared classroom profile is the default execution route.
 
-Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.
+Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the explicit tolerance in each assertion. Several analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone is not a universal numerical-error bound. Finite differences, reductions and conditioning can require different justified tolerances. Integer counts, identities and boolean decisions should be exact.
 
 ## Syntax anatomy and reasoning sequence
 
 Call requires_grad_(False) on base parameters, clear their grad fields, and construct the head optimizer from head.parameters only. Use base.eval when its mode-dependent state should remain fixed. Snapshot all base state_dict tensors with clone. After training the head, compare both parameters and buffers. Unfreezing changes the intended update set and requires an explicit optimizer policy.
+
+## Trace what freezing preserves and what it does not
+
+The base is a bias-free 2-to-2 Linear layer initialized to identity. Its stored weight has shape(2, 2), and base(x)=x for the three fixture rows. The head has shape(1, 2) and begins at zero. Disabling base parameter gradients and supplying only head.parameters() to SGD establishes two distinct boundaries: the base does not receive new parameter derivatives, and the optimizer is not asked to update it.
+
+The head update has an independent analytic value. With targets[1, 2, 3], zero predictions and mean squared error, the residuals are[-1, -2, -3]. The head gradient is(2/3) times the feature-weighted residual sum, namely[-8/3, -10/3]. SGD at 0.1 produces head weights[4/15, 1/3] and predictions[4/15, 1/3, 3/5]. This explains both the observed nonzero head update and why the base need not change for the head to learn.
+
+When the base is later unfrozen, the derivative path through it becomes relevant. If its stored weight is B and the head row is h, features are XB^T and logits are XB^T h^T. The base gradient combines the output residuals with h and X. After the head has nonzero weights, that gradient can be nonzero. Enabling requires_grad does not add B to an optimizer that was constructed from head parameters only. The update set must be changed deliberately.
+
+A parameter can remain in an optimizer after requires_grad becomes false. That flag prevents new gradient construction for the leaf, but it does not erase an old .grad tensor. An optimizer step using that stale tensor can still change the parameter. Clear stored gradients at the phase boundary and inspect the exact optimizer-held objects. For the supplied built-in update policy, grad=None skips the corresponding update; an allocated zero gradient and a missing gradient are not interchangeable in every state/decay situation.
+
+Freezing parameters is also different from wrapping computation in no_grad. If a trainable upstream adapter needs gradients through a fixed base, its input derivative must remain connected even though base parameters are frozen. no_grad around the whole base would sever that upstream path. Conversely, when features are truly fixed and no earlier component is trained, avoiding unnecessary graph construction can be an intentional efficiency choice. State the intended gradient destination first.
+
+Mode-dependent buffers form another axis. BatchNorm affine weights can be frozen while training-mode forward still updates running mean, running variance and batch counters. Dropout can remain stochastic without any trainable parameter of its own. base.eval() changes those module behaviors; it does not disable autograd or alter optimizer membership. A later parent_model.train() can recursively put the base back into training mode, so the intended fixed-mode policy must be restored or encoded deliberately in the training procedure.
+
+A freeze receipt should compare the complete intended tensor state, not just the Linear weight. Clone the relevant state_dict tensors before the phase so the snapshot does not alias later mutations. Record mode flags separately because they are not ordinary learned tensors in state_dict. The tiny Linear base has no running statistics, while the separate BatchNorm exercise makes this hidden-state issue observable.
+
+At unfreeze, there are two different optimizer-state policies. A new optimizer resets momentum/adaptive state for the head as well as introducing the base, which changes the trajectory. add_param_group can preserve existing head state while adding previously excluded parameters with explicit group options. It requires avoiding duplicate membership and deciding rates, decay and scheduler behavior for the new group. The API supports this use, but the resulting experiment still needs its own state receipt. [PyTorch 2.9 add_param_group](https://docs.pytorch.org/docs/2.9/generated/torch.optim.Optimizer.add_param_group.html).
+
+The paired Keras guide uses trainable flags and a deliberate training argument for the base. Those mechanisms are not a one-to-one spelling substitution for PyTorch requires_grad, optimizer lists and train/eval. In either framework, verify before/after tensors, buffer behavior and actual updated identities. The local identity base is a controlled ownership fixture, not a downloaded pretrained model or evidence that transfer will improve an unseen task.
 
 ## Worked example / walkthrough
 
@@ -97,11 +117,11 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Exercises
 
-1. **Freeze a known base.** Create a bias-free2-to-2 identity Linear base and disable its parameter gradients.
+1. **Freeze a known base.** Create a bias-free 2-to-2identity Linear base and disable its parameter gradients.
    **Expected:** base output equals input; all base parameters frozen.
    **Verify:** Save the assertion results for exercise 1, including base output equals input; all base parameters frozen.
 
-2. **Train a new head.** Attach a zero-initialized2-to-1 head and take one SGD.1 step toward targets1, 2, 3.
+2. **Train a new head.** Attach a zero-initialized 2-to-1head and take one SGD.1step toward targets 1, 2, 3.
    **Expected:** head changes; base remains exact identity.
    **Verify:** Save the assertion results for exercise 2, including head changes; base remains exact identity.
 
@@ -123,7 +143,9 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Common pitfalls and diagnosis
 
-When a result disagrees, locate the first intermediate value that violates this explanation. Inspect shapes and identities before aggregates, and inspect counts before averages. Preserve the original fixture and introduce only one controlled change at a time. If an arithmetic identity passes but a data-boundary condition fails, the experiment is still invalid. If a runtime is unavailable, record the unexecuted code as unverified rather than replacing its output with the expected text. The separate explanation discusses why the tempting alternative in each case changes the result.
+If a supposedly frozen weight changes, inspect stale .grad values, optimizer membership, decay and explicit in-place writes. If weights stay fixed but predictions drift, inspect running buffers and stochastic training mode. If an unfrozen parameter gets a gradient but does not move, check whether the current optimizer contains that exact object.
+
+If upstream adaptation stops learning after freezing the base, look for a broad no_grad/detach boundary that removed the needed input derivative. If an unfreeze run differs from continuation, compare the chosen optimizer reset versus retained-state policy before blaming the learning rate. A snapshot that shares storage with the current model cannot prove preservation; clone it and test a controlled changed tensor.
 
 ## Progressive hints
 

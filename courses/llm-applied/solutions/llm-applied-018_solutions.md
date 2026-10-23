@@ -20,6 +20,30 @@ This chapter trains two real tiny decoders on the same literal answer task. One 
 
 Create one base model, copy itsstate_dict into two new instances, and snapshot the initial logits. Freeze every parameter in the adapter candidate before replacing its output projection withLoRAHead. Optimize onlyparameters withrequires_gradTrue. Keep the full and adapter optimizers separate. Evaluate both with the same held-out labels underno_grad. The output head has input width32 and vocabulary16, so rank 2 adds96 trainable entries.
 
+## Trace the two candidate models from one base
+
+The full candidate starts with 10464 trainable parameters from the decoder ledger. The adapter candidate retains those base values frozen and adds A[32, 2] and B[2, 16] to the output projection, for64+32=96 trainable entries. The trainable ratio is96/10464=1/109, about0.917%. Total stored parameter entries are larger in the unmerged adapter object because the frozen base and the additional factors both remain present.
+
+The output-head function is base_output(H)+(HAB)*(alpha/r), with hidden states H shaped[B, T, 32]. In this fixture alpha=r=2, so the scale is one. B starts at zero and therefore preserves initial logits regardless of the random nonzero A. Comparing logits verifies function preservation, while exact parameter comparisons verify that the copied base states agree. The two checks answer different questions.
+
+Only the final vocabulary mapping is adapted. Token embeddings, position embeddings, attention and feed-forward transformations remain fixed in that candidate. The full model can change all of them. This constrains which representation failures the adapter can repair. A low training loss from the output head may be sufficient for the tiny task, while a task requiring different hidden-state distinctions could need another target module or a different method.
+
+The rank-two update has at most rank two, but its numerical rank can be smaller. For one hidden vector, many different factor pairs produce the same output adjustment. A parameter count does not identify a unique learned mechanism. Keep module placement, scale and actual singular-value or behavior checks separate from the configured rank label.
+
+The full optimizer uses learning rate 0.01 and the adapter optimizer0.03, each for20 updates. These are fixed fixture settings rather than held-out selections, but they are not the same optimizer policy. A claim that one update method is inherently better cannot be isolated from those settings with this single run. A more informative study might allocate a declared tuning budget to each method using development data, then compare frozen choices on untouched families.
+
+The frozen-state check snapshots every nontrainable adapted parameter and compares it exactly afterward. That can catch explicit accidental assignments even if requires_grad remains False. It does not prove the full absence of mutable nonparameter state in arbitrary architectures; models with BatchNorm or other buffers need those state objects checked too. This decoder uses LayerNorm and no running-batch-statistic buffers.
+
+The held-out record again changes a prefix token while preserving a known second prompt token and answer. Both candidates are evaluated using teacher-forced active-target loss, without requiring a particular winner. A meaningful report should preserve those actual values, question identity and mask. It should not turn one finite loss comparison into evidence of natural-language generation, domain knowledge or source-grounded correctness.
+
+### Interview reasoning with explanatory answers
+
+**Why copy one state_dict instead of merely using one seed?** Model construction consumes random draws. Creating multiple models after one seed can yield different initial weights; copying the same state explicitly establishes the intended starting point.
+
+**Does freezing the base guarantee no gradient is needed through it?** Not universally. If trainable modules precede a frozen block, derivatives may need to pass through that block to reach them. Here the only added trainable module is the output head, so the specific dependency structure is narrower.
+
+**What does the96-parameter result establish?** The trainable size of this output-head adapter. It does not measure peak memory, latency or the quality of adapting attention projections in a different architecture.
+
 ## Exercise 1: Clone one base into two candidates
 
 The question is: Create a seed 31 decoder and copy its state into full and adapted candidates.

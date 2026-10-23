@@ -1,0 +1,79 @@
+{
+  "lesson_id": "spark-007",
+  "scope": "Tiny deterministic local contracts; runtime qualification is separate.",
+  "cases": [
+    {
+      "exercise": 1,
+      "title": "Validate source identity explicitly",
+      "input_contract": "Trim an ID token and return Right for nonempty text. Return Left(missing_id) for null, empty or whitespace-only tokens. Do not invent an identifier.",
+      "expected": "\" a1 \" gives Right(\"a1\");null,\"\" and\"  \" each give Left(\"missing_id\").",
+      "verification": "Assert one normalized identity and all three missing representations without throwing."
+    },
+    {
+      "exercise": 2,
+      "title": "Reject unsupported domain states",
+      "input_contract": "Accept only trimmed lowercase paid or void. Return Left(unknown_status) for all other supplied values, including uppercase PAID and null. Do not silently case-fold unless the source contract explicitly permits it.",
+      "expected": "\" paid \" and\"void\" return Right(\"paid\") and Right(\"void\");\"mystery\",\"PAID\" and null are rejected.",
+      "verification": "Assert both valid states and three unsupported forms; confirm that whitespace normalization is separate from case normalization."
+    },
+    {
+      "exercise": 3,
+      "title": "Preserve exact bounded cents",
+      "input_contract": "Accept trimmed ASCII digits representing 0 through 1000000 as a Long. Return Left(invalid_amount) for null, blank, signed, decimal, overflowing or out-of-domain text.",
+      "expected": "\"0\" and\"100\" become Right(0L), Right(100L);\"bad\",\"-1\",\"1.5\",\"1000001\" and a huge integer token are rejected.",
+      "verification": "Assert zero separately from rejection, and test both lexical failure and numeric range failure."
+    },
+    {
+      "exercise": 4,
+      "title": "Compose fields with declared error precedence",
+      "input_contract": "Require exactly three pipe-separated fields and compose ID, status, amount validation in that order using a for comprehension. Return Left(malformed_record) for null or wrong field count. Preserve empty trailing fields for validation.",
+      "expected": "a1|paid|100 becomes Right(Record(a1, paid,100));a2|paid| becomes invalid_amount;an empty-ID malformed-status record reports missing_id first;two fields report malformed_record.",
+      "verification": "Assert a valid record, trailing-empty rejection, first-error precedence and field-count failure."
+    },
+    {
+      "exercise": 5,
+      "title": "Retain a complete rejection ledger",
+      "input_contract": "Parse every input line and return accepted records plus rejected(position, raw, reason) tuples. Position is the zero-based occurrence index; preserve encounter order in both outputs and never discard a Left.",
+      "expected": "The six-line fixture has three accepted records and rejections at positions 3,4,5 with missing_id, invalid_amount, unknown_status. Accepted plus rejected equals six.",
+      "verification": "Assert accepted IDs[a1, a2, a3], the exact rejected positions/reasons and count conservation."
+    },
+    {
+      "exercise": 6,
+      "title": "Separate valid records from eligible revenue",
+      "input_contract": "From already accepted records, return paid-event count and checked paid cents total. Retain an observed zero paid event in the count and exclude valid void records only at this business-report stage.",
+      "expected": "The three accepted records yield paid count 2, total 100. A void record with malformed amount must have been rejected by parseRecord before this function can run.",
+      "verification": "Assert the paid metrics and show that a4|void|bad produces Left(invalid_amount), not a silently skipped valid void."
+    }
+  ],
+  "golden": {
+    "lines": [
+      "a1|paid|100",
+      "a2|paid|0",
+      "a3|void|50",
+      "|paid|20",
+      "a5|paid|bad",
+      "a6|mystery|10"
+    ],
+    "accepted_ids": [
+      "a1",
+      "a2",
+      "a3"
+    ],
+    "rejected": [
+      [
+        3,
+        "missing_id"
+      ],
+      [
+        4,
+        "invalid_amount"
+      ],
+      [
+        5,
+        "unknown_status"
+      ]
+    ],
+    "paid_count": 2,
+    "paid_total": 100
+  }
+}

@@ -274,3 +274,17 @@ prerequisite plans, lesson resources and prompts, and checks that these
 operations create no learner-state files. This checks the adapter's evidence
 and interface. It is separate from evaluating an AI model's teaching quality
 with actual learners.
+
+## Expanded-library protocol acceptance
+
+The final local stdio smoke used the installed MCP SDK 2.3.0 and Python 3.12.13
+with the current documented source entrypoint and isolated read-only learning
+state. It discovered all 11 subjects and 412 unique canonical lessons across
+nine result pages, then read the exact current Java036 and statistics011 files.
+The statistics response retained tutorial mode without exams or solution gates.
+The 11 advertised tools include no code-execution or default mutation tool.
+False solution reveals and disabled progress calls were rejected. The audit
+recorded no network, child-process, official-solution, real-state or write
+attempts; the isolated state remained empty and stderr was empty. This proves
+the exercised local protocol/content boundary, not execution inside a different
+Codex installation or a guarantee of learner mastery.

@@ -12,24 +12,24 @@ Count unordered distinct index pairs with explicit nested loops, requiring a non
 
 ```python
 def pair_comparisons(size: int) -> int:
-    if isinstance(size,bool) or not isinstance(size,int) or size<0:
+    if isinstance(size, bool) or not isinstance(size, int) or size < 0:
         raise ValueError("Expected a nonnegative integer size")
-    count=0
+    count = 0
     for left in range(size):
-        for right in range(left+1,size):
-            count+=1
+        for _right in range(left + 1, size):
+            count += 1
     return count
 ```
 
 The loop embodies the work being measured, while the closed-form identity is an independent oracle. Starting the second index at left+1 excludes self-pairs and avoids counting both orientations. Empty and singleton inputs naturally contain no pairs. Rejecting Boolean size avoids treating True as an accidental one-item problem. The implementation is deliberately quadratic because the lesson is about observing that growth, not optimizing this count.
 
 ```python
-assert [pair_comparisons(n) for n in [0,1,4,8]]==[0,0,6,28]
+assert [pair_comparisons(n) for n in [0, 1, 4, 8]] == [0, 0, 6, 28]
 for n in range(20):
-    assert pair_comparisons(n)==n*(n-1)//2
-expect_value_error(lambda:pair_comparisons(-1))
-expect_value_error(lambda:pair_comparisons(True))
-expect_value_error(lambda:pair_comparisons(2.5))
+    assert pair_comparisons(n) == n * (n - 1) // 2
+expect_value_error(lambda: pair_comparisons(-1))
+expect_value_error(lambda: pair_comparisons(True))
+expect_value_error(lambda: pair_comparisons(2.5))  # type: ignore[arg-type]  # Invalid-type boundary.
 ```
 
 ### Exercise 2: Return the first repeated occurrence
@@ -40,7 +40,7 @@ Scan integer values left to right and return the value whose repeated occurrence
 
 ```python
 def first_duplicate(values: list[int]) -> int | None:
-    seen=set()
+    seen = set()
     for value in values:
         if value in seen:
             return value
@@ -51,10 +51,10 @@ def first_duplicate(values: list[int]) -> int | None:
 Membership is checked before inserting the current value, so the function identifies the first repeated occurrence in scan order. Sorting first would answer a different question and mutate or reorder the evidence. None is used as the absence sentinel because zero is a valid data value. Expected time is linear with state proportional to the distinct values seen before the first duplicate.
 
 ```python
-a=[4,1,4,1]
-assert first_duplicate(a)==4 and a==[4,1,4,1]
-assert first_duplicate([1,2,2,1])==2 and first_duplicate([0,0])==0
-assert first_duplicate([]) is None and first_duplicate([1,2,3]) is None
+values_2 = [4, 1, 4, 1]
+assert first_duplicate(values_2) == 4 and values_2 == [4, 1, 4, 1]
+assert first_duplicate([1, 2, 2, 1]) == 2 and first_duplicate([0, 0]) == 0
+assert first_duplicate([]) is None and first_duplicate([1, 2, 3]) is None
 ```
 
 ### Exercise 3: Build counts while preserving first appearance
@@ -65,18 +65,19 @@ Return a dictionary of occurrence counts for string values in first-appearance o
 
 ```python
 def frequencies(values: list[str]) -> dict[str, int]:
-    counts={}
+    counts: dict[str, int] = {}
     for value in values:
-        counts[value]=counts.get(value,0)+1
+        counts[value] = counts.get(value, 0) + 1
     return counts
 ```
 
 get supplies zero only for a previously unseen key, then every occurrence increments its count. Updating an existing dictionary entry does not move its insertion position in the supported Python versions. The count-sum invariant catches accidental dropping or double-counting, while the explicit key-order assertion checks a different part of the contract. A set would preserve neither multiplicity nor this presentation policy.
 
 ```python
-a=["b","a","b","c","a","b"];r=frequencies(a)
-assert list(r)==["b","a","c"] and r=={"b":3,"a":2,"c":1}
-assert sum(r.values())==len(a) and frequencies([])=={}
+values_3 = ["b", "a", "b", "c", "a", "b"]
+result_3 = frequencies(values_3)
+assert list(result_3) == ["b", "a", "c"] and result_3 == {"b": 3, "a": 2, "c": 1}
+assert sum(result_3.values()) == len(values_3) and frequencies([]) == {}
 ```
 
 ### Exercise 4: Reconcile occurrences in both directions
@@ -87,16 +88,17 @@ Return sorted string keys whose left count minus right count is nonzero. Preserv
 
 ```python
 def bag_difference(left: list[str], right: list[str]) -> dict[str, int]:
-    a=Counter(left);b=Counter(right)
-    return {key:a[key]-b[key] for key in sorted(a.keys()|b.keys()) if a[key]!=b[key]}
+    a = Counter(left)
+    b = Counter(right)
+    return {key: a[key] - b[key] for key in sorted(a.keys() | b.keys()) if a[key] != b[key]}
 ```
 
 The union of keys includes values present on only one side, and Counter returns zero for absent keys. Explicit signed subtraction is required because Counter's subtraction operator discards zero and negative counts. Sorting keys makes the diagnostic deterministic without changing bag semantics. Equality of total lengths is insufficient: a missing occurrence of one value can be offset by an extra occurrence of another.
 
 ```python
-assert bag_difference(["a","a","b"],["a","b","b"])=={"a":1,"b":-1}
-assert bag_difference(["b","a"],["a","b"])=={}
-assert bag_difference([],["x","x"])=={"x":-2}
+assert bag_difference(["a", "a", "b"], ["a", "b", "b"]) == {"a": 1, "b": -1}
+assert bag_difference(["b", "a"], ["a", "b"]) == {}
+assert bag_difference([], ["x", "x"]) == {"x": -2}
 ```
 
 ### Exercise 5: Index every occurrence instead of overwriting
@@ -107,19 +109,22 @@ Build a key-to-list-of-positions index for string values. Preserve positions in 
 
 ```python
 def position_index(values: list[str]) -> dict[str, list[int]]:
-    index={}
-    for position,value in enumerate(values):
-        index.setdefault(value,[]).append(position)
+    index: dict[str, list[int]] = {}
+    for position, value in enumerate(values):
+        index.setdefault(value, []).append(position)
     return index
 ```
 
 A single-value dictionary assignment would overwrite the earlier position of a, losing a legitimate occurrence. A list at each key retains all matches and therefore supports duplicate-aware joins. The flattened-position invariant verifies that indexing neither loses nor invents rows. Memory is linear in the input size because every position is stored once, even if the number of distinct keys is much smaller.
 
 ```python
-a=["a","b","a"];r=position_index(a)
-assert r=={"a":[0,2],"b":[1]} and list(r)==["a","b"]
-assert sorted(position for positions in r.values() for position in positions)==list(range(len(a)))
-assert position_index([])=={}
+values_5 = ["a", "b", "a"]
+result_5 = position_index(values_5)
+assert result_5 == {"a": [0, 2], "b": [1]} and list(result_5) == ["a", "b"]
+assert sorted(position for positions in result_5.values() for position in positions) == list(
+    range(len(values_5))
+)
+assert position_index([]) == {}
 ```
 
 ### Exercise 6: Produce an output-sensitive equality join
@@ -130,21 +135,27 @@ Return every matching(left_position, right_position) pair using a hash index of 
 
 ```python
 def indexed_pairs(left: list[str], right: list[str]) -> list[tuple[int, int]]:
-    index=position_index(right)
-    result=[]
-    for left_position,value in enumerate(left):
-        for right_position in index.get(value,[]):
-            result.append((left_position,right_position))
+    index = position_index(right)
+    result = []
+    for left_position, value in enumerate(left):
+        for right_position in index.get(value, []):
+            result.append((left_position, right_position))
     return result
 ```
 
 Building the right index costs expected linear work, and probing it costs expected linear work in left size plus the number of emitted matches. The output can still be quadratic when every key repeats on both sides, because those pairs are genuinely required. This explains why an efficient hash join does not make an unintended many-to-many relationship harmless. Complexity and row-grain correctness must both be reviewed.
 
 ```python
-assert indexed_pairs(["a","a","b"],["a","b","a"])==[(0,0),(0,2),(1,0),(1,2),(2,1)]
-assert indexed_pairs(["a"],["b"])==[]
-assert len(indexed_pairs(["a","a"],["a","a"]))==4
-assert indexed_pairs([],[])==[]
+assert indexed_pairs(["a", "a", "b"], ["a", "b", "a"]) == [
+    (0, 0),
+    (0, 2),
+    (1, 0),
+    (1, 2),
+    (2, 1),
+]
+assert indexed_pairs(["a"], ["b"]) == []
+assert len(indexed_pairs(["a", "a"], ["a", "a"])) == 4
+assert indexed_pairs([], []) == []
 ```
 
 ## Verification and interpretation

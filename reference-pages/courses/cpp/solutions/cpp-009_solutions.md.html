@@ -178,7 +178,7 @@ if (current != 6 || values.size() != 4) return 1;</code></pre>
     return result;
 }</code></pre>
 <p>The source is borrowed read-only during the call. The result owns new elements and preserves encounter order. Returning this vector value transfers the result to the caller through normal value semantics; no manual pointer ownership is introduced.</p>
-<p><strong>Expected:</strong> <code>{3,-1,0,5}</code> becomes <code>{3,0,5}</code>. Empty/all-negative inputs produce an empty vector. Changing the result&#x27;s first value to99 leaves the source&#x27;s first value3.</p>
+<p><strong>Expected:</strong> <code>{3,-1,0,5}</code> becomes <code>{3,0,5}</code>. Empty/all-negative inputs produce an empty vector. Changing the result&#x27;s first value to 99 leaves the source&#x27;s first value 3.</p>
 <p><strong>Verify:</strong> all three filtering checks pass, including input immutability and independence after result mutation. Reusing the input as output would fail those checks. This lesson does not claim that reserving capacity or changing syntax necessarily improves performance; that requires a later measured comparison.</p>
 <h3 id="complete-exercise-implementation">Complete exercise implementation<a class="heading-anchor" href="#complete-exercise-implementation" aria-label="Link to this section">#</a></h3>
 <p>Save this as <code>exercises.cpp</code> only after comparing your attempt. It matches the declarations and check program in the learner guide.</p>

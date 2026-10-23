@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello
+  labels:
+    app: hello
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hello
+  template:
+    metadata:
+      labels:
+        app: hello
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: hello
+        image: ds60sqlpy-k8s-fixture:0.2.0
+        imagePullPolicy: Never
+        command:
+        - python
+        - /fixture.py
+        - server
+        ports:
+        - name: http
+          containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: http
+          periodSeconds: 2
+          failureThreshold: 2
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            cpu: 100m
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        env:
+        - name: DS60_STARTUP_DELAY_SECONDS
+          value: '3'
+        startupProbe:
+          httpGet:
+            path: /startup
+            port: http
+          periodSeconds: 1
+          failureThreshold: 10
+        livenessProbe:
+          httpGet:
+            path: /live
+            port: http
+          periodSeconds: 2
+          failureThreshold: 2
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello
+spec:
+  selector:
+    app: hello
+  ports:
+  - name: http
+    port: 8080
+    targetPort: http
+
+# Exercise 1: Name each question. Explain the decision made by startup,readiness and liveness. Expected: Initialization gate,traffic eligibility and restart policy are distinguished.
+# Exercise 2: Run the healthy delayed fixture. Use the admitted source and record its actual bounded healthy result. Expected: Startup delay is configured3;controller/backend/client checks eventually establish the observed healthy baseline.
+# Exercise 3: Trace readiness removal. Analyze case A and identify what additional evidence would show recovery. Expected: No direct restart claim;new Ready/endpoint/client observations are required after repair.
+# Exercise 4: Trace liveness restart. Analyze case B and distinguish restart from replacement. Expected: Same Pod UID with increased container restartCount.
+# Exercise 5: Predict a wrong fixed path. Compare /startup or /live with /missing in a scratch admitted configuration. Expected: The wrong path returns404;the actual bounded result and cleanup must be recorded rather than inventing a fixed timing.
+# Exercise 6: Choose a production probe policy. Explain why a downstream outage should not automatically restart every caller. Expected: A concrete design separates process-deadlock detection from traffic readiness and dependency behavior.

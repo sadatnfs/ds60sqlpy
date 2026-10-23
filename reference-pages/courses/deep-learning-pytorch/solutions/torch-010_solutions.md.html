@@ -122,17 +122,50 @@
 <p>This lesson implements a tiny map-style Dataset over eight literal account records. Each item includes identity, group and numeric value so split and pairing checks remain possible. The dataset is deterministic and contains no file or network reads. Grouped splitting, training-only normalization and an explicit held-out perturbation distinguish data-interface correctness from evaluation validity.</p>
 <p><strong>Map-style Dataset:</strong> A dataset providing indexed item retrieval and a length.</p>
 <p><strong>Subset:</strong> An index selection over an existing dataset.</p>
-<p><strong>Split unit:</strong> The entity assigned who ll y to one partition.</p>
+<p><strong>Split unit:</strong> The entity assigned wholly to one partition.</p>
 <p><strong>Training-only fit:</strong> Estimating preprocessing state without assessment inputs.</p>
 <h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
-<p>Subclass Dataset and implement<strong>len</strong> and<strong>get item</strong>. A Subset stores a sequence of indices and delegates item retrieval to the original dataset. Build training indices from whole account groups before calculating any statistic. Stack only selected training values to estimate the mean. Use sets of group IDs to check isolation; disjoint row indices alone are insufficient.</p>
+<p>Subclass Dataset and implement <strong>len</strong> and<strong>getitem</strong>. A Subset stores a sequence of indices and delegates item retrieval to the original dataset. Build training indices from whole account groups before calculating any statistic. Stack only selected training values to estimate the mean. Use sets of group IDs to check isolation; disjoint row indices alone are insufficient.</p>
+<h3 id="trace-selection-fitted-state-and-delegated-access">Trace selection, fitted state and delegated access<a class="heading-anchor" href="#trace-selection-fitted-state-and-delegated-access" aria-label="Link to this section">#</a></h3>
+<p>The eight literal records form four account groups. Training selects original indices 0, 1, 2, 3 fromA and B; assessment selects 4, 5, 6, 7 fromC and D. The two Subset objects do not copy orredefine those records. They map their local index into the original dataset. Thus assessment[0] returns original identity 4, accountC, value 20. A local batch position zero is not a replacement for the source identity.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Population</th>
+<th>Original identities</th>
+<th>Values</th>
+<th>Mean</th>
+</tr></thead><tbody>
+<tr>
+<td>Training accountsA, B</td>
+<td>0, 1, 2, 3</td>
+<td>1, 3, 5, 7</td>
+<td>4</td>
+</tr>
+<tr>
+<td>Assessment accountsC, D</td>
+<td>4, 5, 6, 7</td>
+<td>20, 22, 30, 32</td>
+<td>26</td>
+</tr>
+<tr>
+<td>All records</td>
+<td>0..7</td>
+<td>All eight values</td>
+<td>15</td>
+</tr>
+</tbody></table></div>
+<p>Each item returns a scalar tensor plus identity and group metadata. Stacking the four selected training scalars creates a tensor shaped(4, ), whose mean is the fitted normalization state. Applying that scalar to four assessment values yields[16, 18, 26, 28]. Those transformed assessment values do not have mean zero, and they should not be forced to. Their nonzero mean is information about the assessment population relative to the training baseline.</p>
+<p>The held-out perturbation is a direct test of the information boundary. Replacing only the final assessment value 32 with 3200 leaves the training values and mean four unchanged. The global mean changes from 15 to 411 because the total becomes 3288 over eight records. A preprocessing path whose fitted training mean changes under this perturbation has consumed assessment information, even if no target label was read.</p>
+<p>Alternating row indices produces superficially balanced four-row sets but puts one row from every account on each side. Row-ID intersections are empty while the account-group intersection isA, B, C, D. If the claim concerns new accounts, this is a failure before any neural layer is built. A stronger optimizer or more epochs cannot undo that information crossing.</p>
+<p>Dataset is an access interface, not an isolation orimmutability guarantee. Subset delegates to the underlying dataset, so later mutation of that object&#x27;s values can change what a subset returns. A retrieved scalar tensor may also share storage with its source. Use out-of-place transformations or an explicit ownership boundary when mutation is intended, and freeze the fitted preprocessing state independently of mutable dataset access. <a href="https://docs.pytorch.org/docs/2.9/data.html">PyTorch 2.9 Dataset, Subset and data loading</a>.</p>
+<p>Keeping identity and group fields does not require feeding them into the model as features. They support split checks, duplicate detection, pairing and error analysis. An account identifier used as an embedding feature would require a separate justification about availability and the meaning of unseen account IDs; it should not enter the model accidentally merely because it travels through the loader.</p>
+<p>Finally, four assessment rows here represent only two held-out account families. The fixture is too small and too structured to establish reliable population performance. Its useful evidence is that the access interface, group isolation and preprocessing boundary behave as declared. Later evaluation should preserve the relevant independent units when estimating uncertainty rather than treating correlated rows as additional independent accounts.</p>
 <h3 id="exercise-1-inspect-a-literal-dataset">Exercise 1: Inspect a literal Dataset<a class="heading-anchor" href="#exercise-1-inspect-a-literal-dataset" aria-label="Link to this section">#</a></h3>
-<p>The question is: Create eight records with groups A, A, B, B, C, C, D, D and values1, 3, 5, 7, 20, 22, 30, 32.</p>
+<p>The question is: Create eight records with groups A, A, B, B, C, C, D, D and values 1, 3, 5, 7, 20, 22, 30, 32.</p>
 <p>The dataset returns metadata beside the tensor. A value-only interface would make it harder to audit group membership and record conservation.</p>
 <pre><code class="language-python">dataset=Accounts(); assert len(dataset)==8
 identity,group,value=dataset[0]; assert identity==0 and group==&#x27;A&#x27; and value.item()==1</code></pre>
-<p><strong>Expected:</strong> length8; item0has ID0, group A, value 1.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with length8; item0has ID0, group A, value 1.</p>
+<p><strong>Expected:</strong> length 8; item 0 has ID 0, group A, value 1.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with length 8; item 0 has ID 0, group A, value 1.</p>
 <h3 id="exercise-2-select-whole-groups">Exercise 2: Select whole groups<a class="heading-anchor" href="#exercise-2-select-whole-groups" aria-label="Link to this section">#</a></h3>
 <p>The question is: Train on accounts A, B and holdout C, D using Subset.</p>
 <p>The grouping policy precedes the subset construction. Subset itself would happily accept a leaking row-level split.</p>
@@ -145,18 +178,18 @@ assert len(train)==len(test)==4 and not {row[1] for row in train}&amp;{row[1] fo
 <p>The question is: Calculate the mean from the four training tensors.</p>
 <p>The statistic is fitted state. Even without labels, it would leak assessment information if computed over the entire dataset.</p>
 <pre><code class="language-python">mean=torch.stack([row[2] for row in train]).mean(); assert mean.item()==4</code></pre>
-<p><strong>Expected:</strong> mean4.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with mean4.</p>
+<p><strong>Expected:</strong> mean 4.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with mean 4.</p>
 <h3 id="exercise-4-perturb-only-assessment-values">Exercise 4: Perturb only assessment values<a class="heading-anchor" href="#exercise-4-perturb-only-assessment-values" aria-label="Link to this section">#</a></h3>
 <p>The question is: Replace the final held-out value with 3200 in a copied dataset and recompute the training mean.</p>
 <p>This controlled perturbation directly tests the information boundary. A correct implementation is invariant to held-out-only changes during fitting.</p>
 <pre><code class="language-python">changed=Accounts(); changed.values=changed.values.clone(); changed.values[-1]=3200
 new_mean=torch.stack([changed[i][2] for i in train_ids]).mean()
 assert new_mean.item()==4 and changed.values.mean()!=dataset.values.mean()</code></pre>
-<p><strong>Expected:</strong> training mean unchanged4; global mean changes.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with training mean unchanged4; global mean changes.</p>
+<p><strong>Expected:</strong> training mean unchanged 4; global mean changes.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with training mean unchanged 4; global mean changes.</p>
 <h3 id="exercise-5-expose-row-level-leakage">Exercise 5: Expose row-level leakage<a class="heading-anchor" href="#exercise-5-expose-row-level-leakage" aria-label="Link to this section">#</a></h3>
-<p>The question is: Assign alter nat in g indices to train/test and inspect group intersection.</p>
+<p>The question is: Assign alternating indices to train/test and inspect group intersection.</p>
 <p>Balanced row counts can hide complete group leakage. The independent entity identities determine whether assessment is genuinely unseen.</p>
 <pre><code class="language-python">left={dataset[i][1] for i in range(0,8,2)}; right={dataset[i][1] for i in range(1,8,2)}
 assert left&amp;right==set(&#x27;ABCD&#x27;)</code></pre>

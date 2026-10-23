@@ -116,7 +116,6 @@
       <p class="source-path">Generated from <code>courses/cpp/guides/cpp-013.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-013-warnings-and-ctest-as-feedback">cpp-013: Warnings and CTest as feedback<a class="heading-anchor" href="#cpp-013-warnings-and-ctest-as-feedback" aria-label="Link to this section">#</a></h2>
-<p>Authored beta content. Content completion and runtime qualification are separate evidence.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Beginner; 90 minutes. Direct prerequisites: <code>cpp-009</code>, <code>cpp-012</code>.</p>
 <p>Learner artifact: <a href="../lessons/cpp-013.cpp.html">cpp-013.cpp</a>. Keep <a href="../solutions/cpp-013_solutions.md.html">official solutions</a> closed until an attempt. The immutable <a href="../fixtures/cpp-013-cases.json.html">case ledger</a> records exercise inputs and expected observations.</p>
@@ -128,57 +127,97 @@
 <p><code>if (actual != expected) return 1;</code> is an always-active test. <code>-Wall -Wextra -Wpedantic</code> requests common warning groups; it is not a proof of correctness. A successful CMake configure does not execute tests; run ctest and inspect the executed count.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>A test has two jobs: perform a check and make failure observable. With NDEBUG, assert(expression) can remove expression entirely, including side effects accidentally placed inside it. An ordinary if condition and nonzero return stay active in Release. CTest adds process orchestration but cannot invent checks inside a program. Inspect the executed test count as well as the pass label, because a project with zero registered tests has not validated the intended behavior.</p>
+<h3 id="build-configuration-and-always-active-checks">Build configuration and always-active checks<a class="heading-anchor" href="#build-configuration-and-always-active-checks" aria-label="Link to this section">#</a></h3>
+<p>A build configuration selects compiler options and dependency relationships. CMake describes targets and their requirements; it does not replace the compiler or infer a correct source contract. A clean configure/build sequence should identify the source directory, build directory, selected generator, compiler and target. Keeping generated build files outside the source tree makes it easier to distinguish authored inputs from tool output.</p>
+<p>Debug and Release commonly differ in optimization and assertion configuration, but those names alone are not a universal specification. Inspect the actual flags. The standard assert macro can be removed when NDEBUG is defined. Any expression inside assert can then disappear, including side effects. A validation step that must happen in every build should use an ordinary condition and explicit failure result rather than relying on assert.</p>
+<p>The first complete example uses if to return failure when twice(3) is wrong. It remains active under NDEBUG. The second deliberately increments a counter inside assert to expose the macro behavior: without NDEBUG the counter reaches1; with NDEBUG it stays0. This is a teaching negative pattern, not a recommendation. It explains why tests should not initialize data or perform required work solely inside assert.</p>
+<p>CMake target properties express requirements for one executable or library. A language standard requirement belongs to the target, and include/link dependencies should be scoped according to whether consumers need them. Global flags copied into every directory can accidentally couple unrelated targets and hide missing public dependencies. The real multifile fixture is the appropriate place to inspect this behavior.</p>
+<p>A successful configuration only generates a build system. A successful build produces an artifact. Running the artifact and checking its output is another step. If the generator supports multiple configurations, the build/run path must select the intended configuration explicitly. The course host instructions distinguish those operations; the browser profile invokes its own fixed compiler pipeline and does not run arbitrary CMake projects.</p>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">if (twice(3)!=6) return 1;</code></pre>
-<p><strong>Expected:</strong> The process returns nonzero if the result is wrong, including Release builds.</p>
+<p><a href="../examples/cpp-013-example-1.cpp.html">Complete program 1</a></p>
+<pre><code class="language-cpp">#include &lt;iostream&gt;
+
+int twice(int x)  {
+     return x*2;
+}
+int main() {
+    if(twice(3)!=6) return 1;
+    std::cout &lt;&lt; &quot;always-active check passed\n&quot;;
+    std::cout &lt;&lt; &quot;cpp-013 example 1 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">always-active check passed
+cpp-013 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">#ifdef NDEBUG
-// assert expressions can be removed here.
-#endif</code></pre>
-<p><strong>Expected:</strong> NDEBUG changes assertions, not ordinary if-based contract checks.</p>
+<p><a href="../examples/cpp-013-example-2.cpp.html">Complete program 2</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;iostream&gt;
+
+int twice(int x)  {
+     return x*2;
+}
+int main() {
+    int evaluations=0;
+    assert(++evaluations==1);
+    #ifdef NDEBUG
+    if(evaluations!=0) return 1;
+    std::cout &lt;&lt; &quot;assert removed: evaluations=0\n&quot;;
+    #else
+    if(evaluations!=1) return 1;
+    std::cout &lt;&lt; &quot;assert active: evaluations=1\n&quot;;
+    #endif
+    std::cout &lt;&lt; &quot;cpp-013 example 2 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">assert active: evaluations=1
+cpp-013 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-read-flags">Exercise 1: Read flags<a class="heading-anchor" href="#exercise-1-read-flags" aria-label="Link to this section">#</a></h4>
 <p>Explain -std=c++20, -Wall, -Wextra and -Wpedantic.</p>
 <p><strong>Expected result/shape:</strong> Language selection and three diagnostic groups distinguished.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Language selection and three diagnostic groups distinguished.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Warnings are feedback rather than successful tests.</p>
+<p><strong>Verify:</strong> Language selection and three diagnostic groups distinguished.</p>
+<p><strong>Progressive hints:</strong> Warnings are feedback rather than successful tests.</p>
 <h4 id="exercise-2-run-named-tests">Exercise 2: Run named tests<a class="heading-anchor" href="#exercise-2-run-named-tests" aria-label="Link to this section">#</a></h4>
 <p>Use the supplied CMake project and ctest --output-on-failure.</p>
 <p><strong>Expected result/shape:</strong> One or more registered tests actually execute; record count and status.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: One or more registered tests actually execute; record count and status.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Configure/build/test are three phases.</p>
+<p><strong>Verify:</strong> One or more registered tests actually execute; record count and status.</p>
+<p><strong>Progressive hints:</strong> Configure/build/test are three phases.</p>
 <h4 id="exercise-3-create-a-failing-check">Exercise 3: Create a failing check<a class="heading-anchor" href="#exercise-3-create-a-failing-check" aria-label="Link to this section">#</a></h4>
 <p>Change the expected twice(3) result to 7 in a scratch copy.</p>
 <p><strong>Expected result/shape:</strong> Executable exit 1 and failing test.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Executable exit 1 and failing test.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: A failed assertion needs to be observable outside the process.</p>
+<p><strong>Verify:</strong> Executable exit 1 and failing test.</p>
+<p><strong>Progressive hints:</strong> A failed assertion needs to be observable outside the process.</p>
 <h4 id="exercise-4-repair-a-disabled-test">Exercise 4: Repair a disabled test<a class="heading-anchor" href="#exercise-4-repair-a-disabled-test" aria-label="Link to this section">#</a></h4>
 <p>Build a scratch assert-only test with -DNDEBUG.</p>
 <p><strong>Expected result/shape:</strong> The wrong assert disappears; an if-based test still fails.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: The wrong assert disappears; an if-based test still fails.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Do not use disabled assertions as the only release oracle.</p>
+<p><strong>Verify:</strong> The wrong assert disappears; an if-based test still fails.</p>
+<p><strong>Progressive hints:</strong> Do not use disabled assertions as the only release oracle.</p>
 <h4 id="exercise-5-test-zero">Exercise 5: Test zero<a class="heading-anchor" href="#exercise-5-test-zero" aria-label="Link to this section">#</a></h4>
 <p>Keep the always-active twice(0)==0 check.</p>
 <p><strong>Expected result/shape:</strong> Exit 0 for the correct function.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Exit 0 for the correct function.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Boundary behavior is a separate test input.</p>
+<p><strong>Verify:</strong> Exit 0 for the correct function.</p>
+<p><strong>Progressive hints:</strong> Boundary behavior is a separate test input.</p>
 <h4 id="exercise-6-transfer-a-regression">Exercise 6: Transfer a regression<a class="heading-anchor" href="#exercise-6-transfer-a-regression" aria-label="Link to this section">#</a></h4>
 <p>Break twice to x+x+1, run both tests, then restore.</p>
 <p><strong>Expected result/shape:</strong> Both normal and zero contracts reject the broken function.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Both normal and zero contracts reject the broken function.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: A test suite earns confidence by detecting a plausible defect.</p>
+<p><strong>Verify:</strong> Both normal and zero contracts reject the broken function.</p>
+<p><strong>Progressive hints:</strong> A test suite earns confidence by detecting a plausible defect.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: The process returns nonzero if the result is wrong, including Release builds. Then explain the changed condition in example 2 without opening the answer.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
-<p><code>if (actual != expected) return 1;</code> is an always-active test. <code>-Wall -Wextra -Wpedantic</code> requests common warning groups; it is not a proof of correctness. A successful CMake configure does not execute tests; run ctest and inspect the executed count.</p>
-<p>If the result disagrees, preserve the original input and inspect the first differing value or condition. Do not use disabled assertions as the only release oracle.</p>
+<p>If Release passes instantly while Debug catches a failure, inspect NDEBUG and any side effects inside assert. If CMake configures but linking fails, read the target&#x27;s actual source/link inputs rather than assuming configuration validated them. If the wrong executable runs, inspect the selected build directory and configuration path. Record an always-active checksum before interpreting an optimized timing result, because a faster program that skipped required work is not an improvement.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
 <p>Close the source. Reconstruct the reasoning for Exercise 6: Transfer a regression. Explain which assumptions would fail on a larger input or another runtime.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue with <a href="cpp-014.md.html">cpp-014</a> after saving the six observations.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<p><a href="https://cmake.org/cmake/help/v3.28/guide/tutorial/index.html">CMake3.28 tutorial</a></p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach cpp-013.
 Read courses/cpp/guides/cpp-013.md and courses/cpp/lessons/cpp-013.cpp.

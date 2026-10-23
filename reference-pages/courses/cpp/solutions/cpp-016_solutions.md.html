@@ -121,9 +121,17 @@
 <p>Move semantics lets a value transfer expensive internal resources. An rvalue reference marks a candidate for transfer, while std::move is a cast that permits a move overload. The rule of zero means letting standard members manage their own copy, move and destruction behavior. A moved-from vector remains valid but its contents are unspecified.</p>
 <h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>
 <p>std::move changes which overloads may be selected; it does not move bytes by itself. The type&#x27;s move constructor performs the transfer. Standard library members let Batch use compiler-generated special members, so ownership behavior composes without custom cleanup code. After the transfer the receiver has the old value; the source remains an object that can be assigned a new value. Testing one implementation&#x27;s empty moved-from vector would overstate the portable contract.</p>
+<h3 id="copy-move-and-the-state-left-behind">Copy, move and the state left behind<a class="heading-anchor" href="#copy-move-and-the-state-left-behind" aria-label="Link to this section">#</a></h3>
+<p>Copying a value preserves the source and creates another value with the type&#x27;s copy semantics. Moving allows a destination to take resources from a source that will no longer be used in the same way. std::move itself is a cast that makes a move-capable overload eligible; it does not perform resource transfer on its own. The selected constructor or assignment operator determines what actually happens.</p>
+<p>Batch contains vector and string members, so generated operations compose those members&#x27; semantics. Copying a Batch copies its vector elements and label. Mutating the copied vector does not change the original. Moving a Batch can transfer member resources efficiently, but the source remains a valid object whose exact values should not be assumed unless its type contract specifies them. In particular, do not assert that every moved-from vector or string must be empty.</p>
+<p>The second program checks the destination values and then assigns a fresh Batch to the moved-from source. This tests a useful guaranteed operation: reusing a valid object through assignment. Reading an unspecified old label and treating it as a meaningful business value would be a different, unjustified assumption. Valid means permitted operations remain possible under their preconditions, not that all previous content survives.</p>
+<p>The rule of zero favors types composed of well-behaved owning members so that manually written copy/move/destruction logic is unnecessary. Once a class owns a raw resource directly, those special operations must be designed together to avoid shallow copies, double release or lost ownership. A custom destructor can also affect implicit move generation, so adding one is not always a harmless logging change.</p>
+<p>Performance claims need observation. Moving a tiny value can be no cheaper than copying, and library exception guarantees may influence whether a container copies or moves elements during reallocation. Correctness should follow the type contract first. A benchmark can then measure the actual workload and implementation rather than assuming every occurrence of std::move made the program faster.</p>
+<h3 id="debugging-the-contract">Debugging the contract<a class="heading-anchor" href="#debugging-the-contract" aria-label="Link to this section">#</a></h3>
+<p>If changing a copy changes the original, inspect whether the member is truly owning or merely a pointer/view. If a moved-from value is used for business logic, replace the assumption with a documented post-move operation or explicit reassignment. If a class becomes unexpectedly non-movable after adding a destructor, review the generated special-member rules. Do not add std::move indiscriminately to return statements or const objects without understanding overload selection.</p>
 <h3 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-cpp">Batch a{{1,2},&quot;A&quot;}; Batch b=a; b.values[0]=9;</code></pre>
-<p>Expected: a remains [1,2]; b becomes [9,2].</p>
+<p>Expected: a remains [1, 2]; b becomes [9, 2].</p>
 <h3 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-cpp">Batch b=std::move(a); a=Batch{{4},&quot;new&quot;};</code></pre>
 <p>Expected: b receives the old values; assigning a new valid value to a is safe.</p>
@@ -133,8 +141,8 @@
 <p><strong>Reasoning:</strong> The vector member owns its own copied storage.</p>
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
 <h3 id="exercise-2-inspect-the-receiver">Exercise 2: Inspect the receiver<a class="heading-anchor" href="#exercise-2-inspect-the-receiver" aria-label="Link to this section">#</a></h3>
-<p>Move Batch([1,2,3]) into a new owner.</p>
-<p><strong>Expected:</strong> Receiver values exactly [1,2,3].</p>
+<p>Move Batch([1, 2, 3]) into a new owner.</p>
+<p><strong>Expected:</strong> Receiver values exactly [1, 2, 3].</p>
 <p><strong>Reasoning:</strong> The target has a specified transferred value.</p>
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
 <h3 id="exercise-3-reuse-the-source">Exercise 3: Reuse the source<a class="heading-anchor" href="#exercise-3-reuse-the-source" aria-label="Link to this section">#</a></h3>

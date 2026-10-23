@@ -116,7 +116,6 @@
       <p class="source-path">Generated from <code>courses/cpp/guides/cpp-019.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-019-ranges-and-deliberate-algorithms">cpp-019: Ranges and deliberate algorithms<a class="heading-anchor" href="#cpp-019-ranges-and-deliberate-algorithms" aria-label="Link to this section">#</a></h2>
-<p>Authored beta content. Content completion and runtime qualification are separate evidence.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Intermediate; 105 minutes. Direct prerequisites: <code>cpp-018</code>.</p>
 <p>Learner artifact: <a href="../lessons/cpp-019.cpp.html">cpp-019.cpp</a>. Keep <a href="../solutions/cpp-019_solutions.md.html">official solutions</a> closed until an attempt. The immutable <a href="../fixtures/cpp-019-cases.json.html">case ledger</a> records exercise inputs and expected observations.</p>
@@ -127,56 +126,101 @@
 <h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p><code>xs | std::views::filter(predicate) | std::views::transform(function)</code> composes lazy operations using the pipe operator. The referenced owner must outlive traversal. Materialize into a vector when an independent stable result is needed.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>
-<p>A lazy filter does not produce a new vector when it is declared. Iteration asks the source for successive values, applies the predicate and then transforms accepted values. The view therefore shares the source lifetime and may observe source changes. Materializing [0,6] makes a stable owned result. Sorting Score by a projection reorders whole records rather than sorting a detached points column, which preserves each ID-to-points relationship.</p>
+<p>A lazy filter does not produce a new vector when it is declared. Iteration asks the source for successive values, applies the predicate and then transforms accepted values. The view therefore shares the source lifetime and may observe source changes. Materializing [0, 6] makes a stable owned result. Sorting Score by a projection reorders whole records rather than sorting a detached points column, which preserves each ID-to-points relationship.</p>
+<h3 id="lazy-ranges-predicates-and-projections">Lazy ranges, predicates and projections<a class="heading-anchor" href="#lazy-ranges-predicates-and-projections" aria-label="Link to this section">#</a></h3>
+<p>A range provides a sequence to traverse. A view is commonly a lightweight, lazy description of a transformation over a range. Building a filter view does not necessarily evaluate the predicate for every element immediately. Iteration performs the work needed to produce values. This distinction matters when the underlying data changes or a predicate has side effects.</p>
+<p>The first program filters [-1, 0, 3] with x&gt;=0 and materializes the observed result into a vector. Zero is retained because the boundary is inclusive. The view itself does not erase -1 from the original vector. Materialization creates an owning result with a stable sequence independent of later changes to the input. Without that step, the view remains coupled to its source and its lifetime/invalidation rules.</p>
+<p>The projection in ranges::sort(scores, {}, &amp;Score::points) selects which member participates in comparison. The empty braces choose the default comparator; the member pointer supplies a projection from Score to points. Sorting moves whole Score values, so IDs remain attached to their corresponding points. Sorting a separate points vector without preserving identity would answer a different question.</p>
+<p>A predicate should be understandable as a rule over an element. Side effects such as incrementing an external counter can make the result depend on how often and when the range implementation evaluates it. Do not use an assumed predicate-call count as a business result unless the algorithm explicitly guarantees it. Keep counting as a separate deliberate operation when that count is part of the contract.</p>
+<p>Views also require care around temporary owners. A pipeline that safely owns or references its source under one type combination is not proof that every returned view survives. When a function returns a filtered result for later use, an owning vector may be the simplest correct interface. The later generic-pipeline lesson develops this boundary for single-pass input ranges.</p>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">auto view=xs|std::views::filter([](int x){return x&gt;=0;});</code></pre>
-<p><strong>Expected:</strong> For [-1,0,3], traversal yields 0 and 3.</p>
+<p><a href="../examples/cpp-019-example-1.cpp.html">Complete program 1</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;iostream&gt;
+#include &lt;ranges&gt;
+#include &lt;vector&gt;
+
+struct Score  {
+     int id;
+     int points;
+};
+int main() {
+    std::vector&lt;int&gt; xs{-1,0,3};
+    auto view=xs|std::views::filter([](int x){return x&gt;=0;});
+    std::vector&lt;int&gt; observed;
+    for(int value:view) observed.push_back(value);
+    assert((observed==std::vector&lt;int&gt;{0,3}));
+    std::cout &lt;&lt; &quot;cpp-019 example 1 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-019 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">std::ranges::sort(scores,{},&amp;Score::points);</code></pre>
-<p><strong>Expected:</strong> Records order by points while carrying their original IDs.</p>
+<p><a href="../examples/cpp-019-example-2.cpp.html">Complete program 2</a></p>
+<pre><code class="language-cpp">#include &lt;algorithm&gt;
+#include &lt;cassert&gt;
+#include &lt;iostream&gt;
+#include &lt;ranges&gt;
+#include &lt;vector&gt;
+
+struct Score  {
+     int id;
+     int points;
+};
+int main() {
+    std::vector&lt;Score&gt; scores{{1,9},{2,4}};
+    std::ranges::sort(scores,{},&amp;Score::points);
+    assert(scores[0].id==2 &amp;&amp; scores[1].id==1);
+    std::cout &lt;&lt; &quot;cpp-019 example 2 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-019 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-predict-lazy-output">Exercise 1: Predict lazy output<a class="heading-anchor" href="#exercise-1-predict-lazy-output" aria-label="Link to this section">#</a></h4>
-<p>Filter &gt;=0 then double [-1,0,3].</p>
-<p><strong>Expected result/shape:</strong> [0,6].</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: [0,6].</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: The predicate runs before transformation.</p>
+<p>Filter &gt;=0 then double [-1, 0, 3].</p>
+<p><strong>Expected result/shape:</strong> [0, 6].</p>
+<p><strong>Verify:</strong> [0, 6].</p>
+<p><strong>Progressive hints:</strong> The predicate runs before transformation.</p>
 <h4 id="exercise-2-change-composition">Exercise 2: Change composition<a class="heading-anchor" href="#exercise-2-change-composition" aria-label="Link to this section">#</a></h4>
 <p>Double first, then filter &gt;0.</p>
 <p><strong>Expected result/shape:</strong> [6]; zero is excluded by the new predicate.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: [6]; zero is excluded by the new predicate.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Changing order or boundary changes the contract.</p>
+<p><strong>Verify:</strong> [6]; zero is excluded by the new predicate.</p>
+<p><strong>Progressive hints:</strong> Changing order or boundary changes the contract.</p>
 <h4 id="exercise-3-materialize-ownership">Exercise 3: Materialize ownership<a class="heading-anchor" href="#exercise-3-materialize-ownership" aria-label="Link to this section">#</a></h4>
 <p>Collect the view into vector&lt;int&gt;.</p>
-<p><strong>Expected result/shape:</strong> Stored [0,6] remains independent of later source changes.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Stored [0,6] remains independent of later source changes.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Materialization gives the result ownership.</p>
+<p><strong>Expected result/shape:</strong> Stored [0, 6] remains independent of later source changes.</p>
+<p><strong>Verify:</strong> Stored [0, 6] remains independent of later source changes.</p>
+<p><strong>Progressive hints:</strong> Materialization gives the result ownership.</p>
 <h4 id="exercise-4-repair-dangling-view">Exercise 4: Repair dangling view<a class="heading-anchor" href="#exercise-4-repair-dangling-view" aria-label="Link to this section">#</a></h4>
 <p>Review a view returned over a local vector.</p>
 <p><strong>Expected result/shape:</strong> Reject; keep the owner outside or return a vector.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Reject; keep the owner outside or return a vector.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: A lazy pipeline still borrows the original storage.</p>
+<p><strong>Verify:</strong> Reject; keep the owner outside or return a vector.</p>
+<p><strong>Progressive hints:</strong> A lazy pipeline still borrows the original storage.</p>
 <h4 id="exercise-5-sort-records">Exercise 5: Sort records<a class="heading-anchor" href="#exercise-5-sort-records" aria-label="Link to this section">#</a></h4>
-<p>Sort scores (id1,9),(id2,4) by points.</p>
-<p><strong>Expected result/shape:</strong> ID order [2,1].</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: ID order [2,1].</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Projection selects the comparison key, not the output type.</p>
+<p>Sort scores (id1, 9), (id2, 4) by points.</p>
+<p><strong>Expected result/shape:</strong> ID order [2, 1].</p>
+<p><strong>Verify:</strong> ID order [2, 1].</p>
+<p><strong>Progressive hints:</strong> Projection selects the comparison key, not the output type.</p>
 <h4 id="exercise-6-transfer-stable-ties">Exercise 6: Transfer stable ties<a class="heading-anchor" href="#exercise-6-transfer-stable-ties" aria-label="Link to this section">#</a></h4>
-<p>Add (id3,4) and define deterministic ordering by points then ID.</p>
-<p><strong>Expected result/shape:</strong> ID order [2,3,1].</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: ID order [2,3,1].</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: A tie-breaker makes equal-key order explicit.</p>
+<p>Add (id3, 4) and define deterministic ordering by points then ID.</p>
+<p><strong>Expected result/shape:</strong> ID order [2, 3, 1].</p>
+<p><strong>Verify:</strong> ID order [2, 3, 1].</p>
+<p><strong>Progressive hints:</strong> A tie-breaker makes equal-key order explicit.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
-<p>Explain why this observation follows from the mechanism: For [-1,0,3], traversal yields 0 and 3. Then explain the changed condition in example 2 without opening the answer.</p>
+<p>Explain why this observation follows from the mechanism: For [-1, 0, 3], traversal yields 0 and 3. Then explain the changed condition in example 2 without opening the answer.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
-<p><code>xs | std::views::filter(predicate) | std::views::transform(function)</code> composes lazy operations using the pipe operator. The referenced owner must outlive traversal. Materialize into a vector when an independent stable result is needed.</p>
-<p>If the result disagrees, preserve the original input and inspect the first differing value or condition. A lazy pipeline still borrows the original storage.</p>
+<p>If the original vector changed after filtering, inspect whether the code actually used an erasing algorithm. If a view later reads garbage, trace its owner lifetime and invalidation. If IDs no longer match scores, check whether fields were sorted separately. If a lambda counter produces a surprising total, remove side effects and reason from the algorithm&#x27;s traversal contract rather than guessing how many times the predicate runs.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
 <p>Close the source. Reconstruct the reasoning for Exercise 6: Transfer stable ties. Explain which assumptions would fail on a larger input or another runtime.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue with <a href="cpp-020.md.html">cpp-020</a> after saving the six observations.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines">C++ Core Guidelines</a></p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach cpp-019.
 Read courses/cpp/guides/cpp-019.md and courses/cpp/lessons/cpp-019.cpp.

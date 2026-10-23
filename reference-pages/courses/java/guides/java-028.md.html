@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>java-028: HTTP services and clients · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>java-028: HTTP services and clients</h1>
+      <p class="source-path">Generated from <code>courses/java/guides/java-028.md</code></p>
+    </header>
+    <article class="document"><h2 id="java-028-http-services-and-clients">java-028: HTTP services and clients<a class="heading-anchor" href="#java-028-http-services-and-clients" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Advanced, approximately 120 minutes. Direct prerequisites: <code>java-027</code></p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Explain http status, loopback binding, request timeout, exchange lifetime using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Start the fixture andGET/health. The final exercise transfers the mechanism to verify local-only target and closure.</p>
+<h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
+<p>HTTP is a request/response protocol with method,path,status,headers andbody. A successful network exchange can still return an application error such as404 or400. Aclient must inspect status before interpreting thebody. Timeouts bound waiting but do not prove that a remote operation didnot happen. Response bodies andserver exchanges own resources that need closure.</p>
+<p>This lesson starts one short-lived server bound only to127.0.0.1 on an operating-system-selected port,then uses theJDKHttpClient tocall it. It doesnot contact anexternal service orstart a persistent deployment. Thehandler accepts anexactpath andGETmethod,returns explicitUTF-8content,andcloses everyexchange. try-with-resources owns both client andserver wrapper inJava21. Thefixture exposes prefix-routing andmethod-validation mistakes without requiring a web framework.</p>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<p><strong>HTTP status:</strong> The response code describing protocol/application outcome.</p>
+<p><strong>Loopback binding:</strong> A listener restricted to thelocal host network interface.</p>
+<p><strong>Request timeout:</strong> A bound on client waiting for a request.</p>
+<p><strong>Exchange lifetime:</strong> Ownership of request/response streams andconnection state.</p>
+<h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
+<p>Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as <code>Main.java</code> with <code>javac --release 21</code> and executed with <code>java -ea Main</code>. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws <code>AssertionError</code> and the process should fail. Do not remove assertions to obtain a green result.</p>
+<p>For a prepared native JDK, copy a worked example into your own <code>Main.java</code> under ignored <code>.learning/expansion/java-028/</code>. From that directory run the same two commands on PowerShell, macOS or Linux:</p>
+<pre><code class="language-text">javac --release 21 Main.java
+java -ea Main</code></pre>
+<p>The public class name and source filename must agree. Each worked example below is a complete file. Example B includes the setup it needs from Example A, so it can be compiled by itself. The six exercise reference blocks form one complete program in the separate solution. Keep your original prediction, source and diagnostic text together. Most examples use prepared JDK libraries and tiny local fixtures; any additional dependency is specified in the lesson notes below. Any lesson-specific library or additional file is named explicitly; do not download packages from inside a learner program. Resource examples close their owned files, executors or loopback servers.</p>
+<h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
+<p>HttpServer.create binds anInetSocketAddress withport0,thengetAddress reveals the actualport. createContext uses prefixmatching,so thehandler should validate anexactpath when that is thecontract. HttpRequest specifies a timeout andmethod. HttpResponse exposes statusCode,headers andbody separately. stop(0) releases the ownedlistener when thefixture closes.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="example-a-call-an-owned-loopback-endpoint">Example A: Call an owned loopback endpoint<a class="heading-anchor" href="#example-a-call-an-owned-loopback-endpoint" aria-label="Link to this section">#</a></h4>
+<p>The request reaches a real localHTTPserver. A returnedStringalonewouldnotverify routing,status orresourceclosure.</p>
+<pre><code class="language-java">import java.util.*;
+
+public class Main {
+    static final class LocalServer implements AutoCloseable {
+        final com.sun.net.httpserver.HttpServer server;boolean closed;
+        LocalServer() throws java.io.IOException {
+            server=com.sun.net.httpserver.HttpServer.create(new java.net.InetSocketAddress(&quot;127.0.0.1&quot;,0),0);
+            server.createContext(&quot;/health&quot;,exchange -&gt; {try(exchange){int status;String body;if(!exchange.getRequestURI().getPath().equals(&quot;/health&quot;)){status=404;body=&quot;not found&quot;;}else if(!exchange.getRequestMethod().equals(&quot;GET&quot;)){status=405;body=&quot;method not allowed&quot;;}else{status=200;body=&quot;ok&quot;;}byte[] bytes=body.getBytes(java.nio.charset.StandardCharsets.UTF_8);exchange.getResponseHeaders().set(&quot;Content-Type&quot;,&quot;text/plain; charset=utf-8&quot;);exchange.sendResponseHeaders(status,bytes.length);try(var output=exchange.getResponseBody()){output.write(bytes);}}});server.start();
+        }
+        java.net.URI uri(String path){return java.net.URI.create(&quot;http://127.0.0.1:&quot;+server.getAddress().getPort()+path);}
+        public void close(){server.stop(0);closed=true;}
+    }
+    public static void main(String[] args) throws Exception {
+        try(LocalServer server=new LocalServer();var client=java.net.http.HttpClient.newBuilder().connectTimeout(java.time.Duration.ofSeconds(2)).build()) {
+            var response=client.send(java.net.http.HttpRequest.newBuilder(server.uri(&quot;/health&quot;)).timeout(java.time.Duration.ofSeconds(2)).GET().build(),java.net.http.HttpResponse.BodyHandlers.ofString());
+            assert response.statusCode()==200 &amp;&amp; response.body().equals(&quot;ok&quot;);
+        }
+    }
+}
+</code></pre>
+<p><strong>Expected:</strong> status200 andbodyok.</p>
+<h4 id="example-b-inspect-content-metadata">Example B: Inspect content metadata<a class="heading-anchor" href="#example-b-inspect-content-metadata" aria-label="Link to this section">#</a></h4>
+<p>Theencoding contract belongs in the response metadata as well as thebyte-writing code. Clients should not guess aplatform default.</p>
+<pre><code class="language-java">import java.util.*;
+
+public class Main {
+    static final class LocalServer implements AutoCloseable {
+        final com.sun.net.httpserver.HttpServer server;boolean closed;
+        LocalServer() throws java.io.IOException {
+            server=com.sun.net.httpserver.HttpServer.create(new java.net.InetSocketAddress(&quot;127.0.0.1&quot;,0),0);
+            server.createContext(&quot;/health&quot;,exchange -&gt; {try(exchange){int status;String body;if(!exchange.getRequestURI().getPath().equals(&quot;/health&quot;)){status=404;body=&quot;not found&quot;;}else if(!exchange.getRequestMethod().equals(&quot;GET&quot;)){status=405;body=&quot;method not allowed&quot;;}else{status=200;body=&quot;ok&quot;;}byte[] bytes=body.getBytes(java.nio.charset.StandardCharsets.UTF_8);exchange.getResponseHeaders().set(&quot;Content-Type&quot;,&quot;text/plain; charset=utf-8&quot;);exchange.sendResponseHeaders(status,bytes.length);try(var output=exchange.getResponseBody()){output.write(bytes);}}});server.start();
+        }
+        java.net.URI uri(String path){return java.net.URI.create(&quot;http://127.0.0.1:&quot;+server.getAddress().getPort()+path);}
+        public void close(){server.stop(0);closed=true;}
+    }
+    public static void main(String[] args) throws Exception {
+        try(LocalServer server=new LocalServer();var client=java.net.http.HttpClient.newBuilder().connectTimeout(java.time.Duration.ofSeconds(2)).build()) {
+            var response=client.send(java.net.http.HttpRequest.newBuilder(server.uri(&quot;/health&quot;)).timeout(java.time.Duration.ofSeconds(2)).GET().build(),java.net.http.HttpResponse.BodyHandlers.ofString());
+            assert response.statusCode()==200 &amp;&amp; response.body().equals(&quot;ok&quot;);
+        }
+
+        try(LocalServer server=new LocalServer();var client=java.net.http.HttpClient.newHttpClient()) {
+            var response=client.send(java.net.http.HttpRequest.newBuilder(server.uri(&quot;/health&quot;)).timeout(java.time.Duration.ofSeconds(2)).GET().build(),java.net.http.HttpResponse.BodyHandlers.ofString());
+            assert response.headers().firstValue(&quot;Content-Type&quot;).orElseThrow().equals(&quot;text/plain; charset=utf-8&quot;);
+        }
+    }
+}
+</code></pre>
+<p><strong>Expected:</strong> text/plain withUTF-8 charset.</p>
+<h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
+<p>Read the source from the entry point and name each value before executing it. Identify which operations create new values, which mutate existing state and which can fail. Predict the first observable output or assertion result. For a compile-time failure, explain which source rule is violated before discussing runtime state: a program that did not compile never reached its main method. Keep normal, boundary and invalid inputs separate so each check has a clear purpose.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Call an owned loopback endpoint.</strong> Start the fixture andGET/health. <strong>Expected:</strong> status200 andbodyok. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with status200 andbodyok.</li>
+</ol>
+<ol>
+<li><strong>Inspect content metadata.</strong> ReadContent-Type on the successfulresponse. <strong>Expected:</strong> text/plain withUTF-8 charset. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with text/plain withUTF-8 charset.</li>
+</ol>
+<ol>
+<li><strong>Reject an unsupported method.</strong> POSTto/health underaGET-onlycontract. <strong>Expected:</strong> status405 andmethod not allowed body. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with status405 andmethod not allowed body.</li>
+</ol>
+<ol>
+<li><strong>Reject a prefix lookalike.</strong> GET/health-extra,whichmatchesthecontextprefixbutnot thedeclaredexactpath. <strong>Expected:</strong> status404. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with status404.</li>
+</ol>
+<ol>
+<li><strong>Keep error status separate from transport success.</strong> GETanunknownpathandinspectthecompletedresponse. <strong>Expected:</strong> HTTPexchangecompletes with404 ratherthan a fabricated200. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with HTTPexchangecompletes with404 ratherthan a fabricated200.</li>
+</ol>
+<ol>
+<li><strong>Verify local-only target and closure.</strong> Inspecttheboundhostandpositiveephemeralport,thenclose thewrapper. <strong>Expected:</strong> host127.0.0.1;portpositive;closedflagtrue. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with host127.0.0.1;portpositive;closedflagtrue.</li>
+</ol>
+<h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
+<p>When a check fails, keep the smallest source file that still demonstrates the failure. Read the first relevant compiler diagnostic before editing several lines; later diagnostics can be consequences of the same missing delimiter or wrong type. For a runtime exception, identify the first frame belonging to your code and compare its input with the method contract. For an assertion failure, inspect the actual value and the independent expected value. A passing process exit is weaker than a checked invariant, and a checked invariant applies only under its stated assumptions.</p>
+<p>Do not replace a precise exception with a catch-all that returns a plausible default. That can hide an invalid input or an unfinished operation. If an example owns a resource, verify its lifetime on both the success and failure paths. If an operation is concurrent, use ordering primitives to establish the relationship you need; an observed timing coincidence is not a synchronization guarantee. The solution explanations identify the specific alternative that would break each exercise.</p>
+<h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
+<p>First reconstruct the values and identities in the worked example. Next isolate the line that changes the result when one input is altered. Finally compare the normal and failure paths with the stated contract. Use a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.</p>
+<h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
+<p>Close the solution and explain HTTP status, Loopback binding, Request timeout in your own words. Reconstruct one example from a blank <code>Main.java</code>, then add a new boundary input. Explain why the new case should pass or fail before compiling it. Identify a situation where this technique is appropriate and one where a different data structure, lifetime policy or abstraction would be clearer. This is a reasoning check, not a memorization test for an API spelling.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>Preserve the saved pad and the six exercise observations. Continue to the next lesson only when you can explain the invariants without reading the answer. Later chapters reuse these contracts in larger programs, so keep a failing counterexample as well as a repaired result. A reference implementation demonstrates one valid design under the stated assumptions; it is not a universal design rule.</p>
+<h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
+<p><a href="https://docs.oracle.com/en/java/javase/21/docs/api/jdk.httpserver/com/sun/net/httpserver/HttpServer.html">Official Java21 API or language reference</a>, reviewed2026-10-22. Examples and exercise fixtures are original course material. Consult <code>docs/implementation/java-content-status.md</code> for the actual compile/run receipts. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.</p>
+<h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning for java-028: HTTP services and clients.
+Read courses/java/guides/java-028.md and courses/java/lessons/java-028.java. Direct prerequisites: `java-027`.
+Explain the mechanism, ask for a prediction, review my attempt, give one hint,
+request compiler/runtime evidence, and ask a fresh retrieval question.
+Keep courses/java/solutions/ closed until I request comparison or show an attempt.
+Use Java21 and the declared offline fixture. Done when I can explain the state
+transitions, pass all six exercise contracts, diagnose one failure and solve a
+new boundary case without copying the solution.</code></pre></article>
+  </main>
+</body>
+</html>

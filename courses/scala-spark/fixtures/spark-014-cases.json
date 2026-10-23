@@ -1,0 +1,219 @@
+{
+  "lesson_id": "spark-014",
+  "scope": "Tiny paired local contracts;root-owned runtime qualification is separate.",
+  "cases": [
+    {
+      "exercise": 1,
+      "title": "Classify defects without dropping source occurrences",
+      "input_contract": "Add a nullable rejection_reason Column using the declared precedence:missing_id, invalid_id, unknown_status, negative_amount. Keep every source field and row. Unknown amounts are allowed;unknown statuses are not.",
+      "expected": "Source row 11 has unknown_status, row 12 has missing_id, and the other 10 reasons are NULL. All 12 source_row identities remain.",
+      "verification": "Assert the exact two(source_row, reason) pairs and the unchanged source count 12."
+    },
+    {
+      "exercise": 2,
+      "title": "Create the accepted event relation",
+      "input_contract": "Return source_row, event_id, team, amount_cents, status only for rows with no rejection reason. Preserve the valid void event and all accepted zero/NULL amounts.",
+      "expected": "Accepted event IDs are 1 through 10, with 10 rows. Event 5 remains accepted as void;IDs 2 and 7 remain accepted with unknown amounts.",
+      "verification": "Assert the complete accepted ID list, count 10, one void row and two NULL-amount rows."
+    },
+    {
+      "exercise": 3,
+      "title": "Retain a complete quarantine row",
+      "input_contract": "Return source_row, event_id, team, amount_cents, status, rejection_reason for rejected records, ordered by source_row when inspected. Keep the original values, including the missing event ID.",
+      "expected": "Rows are(11,11, A,10, mystery, unknown_status) and (12, NULL, A,5, paid, missing_id). Accepted and quarantined counts sum to 12.",
+      "verification": "Compare every quarantined field with literal expected rows and check count conservation independently."
+    },
+    {
+      "exercise": 4,
+      "title": "Publish a NULL-aware paid summary",
+      "input_contract": "From accepted records, filter paid and group by team into team, rows, valued, total_cents. Count every event, only nonnull amounts, and the exact Long sum. Preserve a NULL team group and a NULL-only amount group.",
+      "expected": "Groups are A:(3,2,200), B:(2,2,25), C:(1,0, NULL), D:(1,1,200), E:(1,1,0), NULL:(1,1,50). Paid metrics are 9 rows,7 valued,475 cents.",
+      "verification": "Assert the full typed canonical group list and the global paid metrics against independent literals."
+    },
+    {
+      "exercise": 5,
+      "title": "Expose projection-plus-distinct loss",
+      "input_contract": "Return a paid row-level projection retaining event_id, team, amount_cents. Compare it with the deliberately wrong team/amount distinct projection and explain the lost 100-cent event.",
+      "expected": "The correct projection has metrics(9,7,475);the wrong projection has(8,6,375). IDs 1 and 6 must both remain despite equal team/amount values.",
+      "verification": "Assert both metric tuples and verify that correct event IDs include 1 and 6 separately."
+    },
+    {
+      "exercise": 6,
+      "title": "Gate the SQL report on identity and conservation",
+      "input_contract": "Validate at most 100 unique nonmissing source_row occurrences, unique positive accepted event IDs, and accepted-plus-quarantine conservation before returning a SQL paid summary. Reject a duplicate accepted event ID. Compare SQL output to the same literal groups.",
+      "expected": "The base 12-row batch passes and matches all six golden groups. Appending source_row13 with a second event_id1 rejects publication instead of choosing a winner.",
+      "verification": "Assert base SQL parity and a real failure for the duplicate-ID extension;retain the validation failure rather than publishing a partial report."
+    }
+  ],
+  "golden": {
+    "rows": [
+      [
+        1,
+        1,
+        "A",
+        100,
+        "paid"
+      ],
+      [
+        2,
+        2,
+        "A",
+        null,
+        "paid"
+      ],
+      [
+        3,
+        3,
+        "B",
+        0,
+        "paid"
+      ],
+      [
+        4,
+        4,
+        null,
+        50,
+        "paid"
+      ],
+      [
+        5,
+        5,
+        "B",
+        150,
+        "void"
+      ],
+      [
+        6,
+        6,
+        "A",
+        100,
+        "paid"
+      ],
+      [
+        7,
+        7,
+        "C",
+        null,
+        "paid"
+      ],
+      [
+        8,
+        8,
+        "B",
+        25,
+        "paid"
+      ],
+      [
+        9,
+        9,
+        "E",
+        0,
+        "paid"
+      ],
+      [
+        10,
+        10,
+        "D",
+        200,
+        "paid"
+      ],
+      [
+        11,
+        11,
+        "A",
+        10,
+        "mystery"
+      ],
+      [
+        12,
+        null,
+        "A",
+        5,
+        "paid"
+      ]
+    ],
+    "accepted_ids": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "quarantine": [
+      [
+        11,
+        11,
+        "unknown_status"
+      ],
+      [
+        12,
+        null,
+        "missing_id"
+      ]
+    ],
+    "paid_ids": [
+      1,
+      2,
+      3,
+      4,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "paid_metrics": [
+      9,
+      7,
+      475
+    ],
+    "wrong_distinct_metrics": [
+      8,
+      6,
+      375
+    ],
+    "groups": [
+      [
+        "A",
+        3,
+        2,
+        200
+      ],
+      [
+        "B",
+        2,
+        2,
+        25
+      ],
+      [
+        "C",
+        1,
+        0,
+        null
+      ],
+      [
+        "D",
+        1,
+        1,
+        200
+      ],
+      [
+        "E",
+        1,
+        1,
+        0
+      ],
+      [
+        null,
+        1,
+        1,
+        50
+      ]
+    ]
+  }
+}

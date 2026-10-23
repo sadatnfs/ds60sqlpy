@@ -151,22 +151,22 @@ observed namespace_uid=ns-202</code></pre>
 <p><strong>Verify:</strong> For k8s-001 Exercise 1, name both categories and explain that acceptance does not prove readiness.</p>
 <p>A saved manifest can be reviewed before any cluster exists. A response to apply says the API accepted a request, not that an application is serving traffic.</p>
 <h4 id="exercise-2-check-identity-beyond-names">Exercise 2: Check identity beyond names<a class="heading-anchor" href="#exercise-2-check-identity-beyond-names" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For k8s-001 Exercise 2, context ds60-demo,cluster-77,lesson-a,ns-101.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-001 Exercise 2, context ds60-demo, cluster-77, lesson-a, ns-101.</p>
 <p><strong>Expected result/shape:</strong> For k8s-001 Exercise 2, all four identity/selection values must match the host-issued receipt before a mutation.</p>
 <p><strong>Verify:</strong> For k8s-001 Exercise 2, list each compared field; do not accept a matching context name alone.</p>
 <p>Connection names can be reused or redirected. The host receipt and observed namespace UID bind this lesson to its disposable target rather than the ambient current-context.</p>
 <h4 id="exercise-3-reject-expiry">Exercise 3: Reject expiry<a class="heading-anchor" href="#exercise-3-reject-expiry" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For k8s-001 Exercise 3, expires12:30Z;inspection12:31Z on the same date.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-001 Exercise 3, expires12:30Z; inspection12:31Z on the same date.</p>
 <p><strong>Expected result/shape:</strong> For k8s-001 Exercise 3, expired by1 minute; no mutation proceeds.</p>
 <p><strong>Verify:</strong> For k8s-001 Exercise 3, perform the explicit timestamp comparison and retain the refusal reason.</p>
 <p>The fixture uses UTC instants to avoid local-time ambiguity. Re-running a command with ambient credentials is not a repair for an expired lease.</p>
 <h4 id="exercise-4-reject-replacement">Exercise 4: Reject replacement<a class="heading-anchor" href="#exercise-4-reject-replacement" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For k8s-001 Exercise 4, expected ns-101,observed ns-202,both named lesson-a.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-001 Exercise 4, expected ns-101, observed ns-202, both named lesson-a.</p>
 <p><strong>Expected result/shape:</strong> For k8s-001 Exercise 4, identity mismatch; refuse apply and cleanup under the old receipt.</p>
 <p><strong>Verify:</strong> For k8s-001 Exercise 4, name the two unequal UIDs and state that no deletion is authorized.</p>
 <p>The old lease does not own a newly created object merely because its name matches. This rule protects both failed-lab recovery and other learner work.</p>
 <h4 id="exercise-5-keep-credentials-out-of-notes">Exercise 5: Keep credentials out of notes<a class="heading-anchor" href="#exercise-5-keep-credentials-out-of-notes" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For k8s-001 Exercise 5, namespace UID,lease expiry,source hash,kubeconfig token.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-001 Exercise 5, namespace UID, lease expiry, source hash, kubeconfig token.</p>
 <p><strong>Expected result/shape:</strong> For k8s-001 Exercise 5, export nonsecret receipts; exclude the credential/token.</p>
 <p><strong>Verify:</strong> For k8s-001 Exercise 5, list the excluded field and its private ephemeral storage boundary.</p>
 <p>A useful handoff explains what target was used without granting access to it. Kubeconfig contents, bearer tokens and admin certificates are not progress notes.</p>

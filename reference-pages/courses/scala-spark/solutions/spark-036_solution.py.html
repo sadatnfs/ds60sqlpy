@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Spark 036 Solution · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course artifact</p>
+      <h1>Spark 036 Solution</h1>
+      <p class="source-path">Generated from <code>courses/scala-spark/solutions/spark-036_solution.py</code></p>
+    </header>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>from pyspark.sql import SparkSession, functions as F</span>
+<span>from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType</span>
+<span>from pathlib import Path</span>
+<span>import tempfile</span>
+<span>import shutil</span>
+<span>import json</span>
+<span>import uuid</span>
+<span> </span>
+<span>EVENT_SCHEMA=StructType([StructField(&quot;id&quot;,LongType(),True),StructField(&quot;cents&quot;,LongType(),True)])</span>
+<span>OWNED_QUERIES=[]</span>
+<span>def publish_file(root,input_path,name,lines):</span>
+<span>    import re,os</span>
+<span>    if re.fullmatch(r&quot;batch-[0-9]{2}\.json&quot;,name) is None or len(lines)&gt;8 or any(len(line)&gt;256 for line in lines):</span>
+<span>        raise ValueError(&quot;Fixed finite file contract required&quot;)</span>
+<span>    input_path.mkdir(exist_ok=True)</span>
+<span>    staged=root/(&quot;pending-&quot;+uuid.uuid4().hex+&quot;.json&quot;)</span>
+<span>    try:</span>
+<span>        with staged.open(&quot;x&quot;,encoding=&quot;utf-8&quot;) as handle:</span>
+<span>            handle.write(&quot;\n&quot;.join(lines)+&quot;\n&quot;)</span>
+<span>        if (input_path/name).exists():raise ValueError(&quot;Input file identity already exists&quot;)</span>
+<span>        os.rename(staged,input_path/name)</span>
+<span>    finally:</span>
+<span>        staged.unlink(missing_ok=True)</span>
+<span>def run_parquet(spark,input_path,checkpoint,output):</span>
+<span>    source=(spark.readStream.schema(EVENT_SCHEMA).option(&quot;maxFilesPerTrigger&quot;,1).option(&quot;mode&quot;,&quot;FAILFAST&quot;).json(str(input_path)))</span>
+<span>    query=(source.writeStream.format(&quot;parquet&quot;).outputMode(&quot;append&quot;)</span>
+<span>        .option(&quot;checkpointLocation&quot;,str(checkpoint)).trigger(availableNow=True).start(str(output)))</span>
+<span>    OWNED_QUERIES.append(query)</span>
+<span>    try:</span>
+<span>        if not query.awaitTermination(45):raise TimeoutError(&quot;Finite query exceeded45-second deadline&quot;)</span>
+<span>        if query.exception() is not None:raise RuntimeError(str(query.exception()))</span>
+<span>        progress=query.recentProgress</span>
+<span>        return {&quot;id&quot;:str(query.id),&quot;run_id&quot;:str(query.runId),&quot;input_rows&quot;:sum(p[&quot;numInputRows&quot;] for p in progress),&quot;batches&quot;:[p[&quot;batchId&quot;] for p in progress]}</span>
+<span>    finally:</span>
+<span>        if query.isActive:query.stop()</span>
+<span>def bag(spark,path):</span>
+<span>    frame=spark.read.parquet(str(path))</span>
+<span>    if [(f.name,f.dataType.simpleString()) for f in frame.schema.fields]!=[(&quot;id&quot;,&quot;bigint&quot;),(&quot;cents&quot;,&quot;bigint&quot;)]:raise ValueError(&quot;Result schema mismatch&quot;)</span>
+<span>    if frame.count()&gt;8:raise ValueError(&quot;Tiny result bound exceeded&quot;)</span>
+<span>    return [f&quot;{r.id}:{r.cents}&quot; for r in frame.orderBy(&quot;id&quot;,&quot;cents&quot;).collect()]</span>
+<span> </span>
+<span>ATTEMPTS=[]</span>
+<span>STARTED_QUERIES=[]</span>
+<span>def canonical_batch(frame):</span>
+<span>    if [(f.name,f.dataType.simpleString()) for f in frame.schema.fields]!=[(&quot;id&quot;,&quot;bigint&quot;),(&quot;cents&quot;,&quot;bigint&quot;)]:raise ValueError(&quot;Schema mismatch&quot;)</span>
+<span>    if frame.count()&gt;8:raise ValueError(&quot;At most8 rows per teaching microbatch&quot;)</span>
+<span>    if frame.filter(F.col(&quot;id&quot;).isNull()|F.col(&quot;cents&quot;).isNull()|(F.col(&quot;id&quot;)&lt;=0)|(F.col(&quot;cents&quot;)&lt;0)).count():raise ValueError(&quot;Invalid records&quot;)</span>
+<span>    return &quot;&quot;.join(f&quot;{r.id},{r.cents}\n&quot; for r in frame.orderBy(&quot;id&quot;,&quot;cents&quot;).collect())</span>
+<span>def sha(text):</span>
+<span>    import hashlib</span>
+<span>    return hashlib.sha256(text.encode(&quot;utf-8&quot;)).hexdigest()</span>
+<span>def commit_path(root,identity,batch_id):</span>
+<span>    import re</span>
+<span>    if re.fullmatch(r&quot;[a-z][a-z0-9-]{0,31}&quot;,identity) is None or type(batch_id) is not int or not 0&lt;=batch_id&lt;=1000:raise ValueError(&quot;Invalid query identity or bounded batch ID&quot;)</span>
+<span>    return root/identity/f&quot;batch-{batch_id:020d}.json&quot;</span>
+<span>def publish_batch(root,identity,batch_id,text,fail_before=False):</span>
+<span>    import os</span>
+<span>    target=commit_path(root,identity,batch_id);target.parent.mkdir(exist_ok=True)</span>
+<span>    node={&quot;query_identity&quot;:identity,&quot;batch_id&quot;:batch_id,&quot;sha256&quot;:sha(text),&quot;data&quot;:text}</span>
+<span>    if target.exists():</span>
+<span>        existing=json.loads(target.read_text(encoding=&quot;utf-8&quot;))</span>
+<span>        if not isinstance(existing,dict) or set(existing)!=set(node) or type(existing.get(&quot;batch_id&quot;)) is not int or any(type(existing.get(key)) is not str for key in (&quot;query_identity&quot;,&quot;sha256&quot;,&quot;data&quot;)) or existing!=node:</span>
+<span>            raise ValueError(&quot;Batch key reused for different content&quot;)</span>
+<span>        return False</span>
+<span>    staged=target.parent/(&quot;pending-&quot;+uuid.uuid4().hex+&quot;.json&quot;)</span>
+<span>    try:</span>
+<span>        with staged.open(&quot;x&quot;,encoding=&quot;utf-8&quot;) as handle:json.dump(node,handle,sort_keys=True)</span>
+<span>        if fail_before:raise RuntimeError(&quot;injected_before_publication&quot;)</span>
+<span>        os.rename(staged,target)</span>
+<span>        return True</span>
+<span>    finally:</span>
+<span>        staged.unlink(missing_ok=True)</span>
+<span>def published_rows(root,identity):</span>
+<span>    import re</span>
+<span>    if re.fullmatch(r&quot;[a-z][a-z0-9-]{0,31}&quot;,identity) is None:raise ValueError(&quot;Invalid identity&quot;)</span>
+<span>    rows=[]</span>
+<span>    for path in sorted((root/identity).glob(&quot;batch-*.json&quot;)):</span>
+<span>        node=json.loads(path.read_text(encoding=&quot;utf-8&quot;));text=node[&quot;data&quot;]</span>
+<span>        if node[&quot;query_identity&quot;]!=identity or node[&quot;sha256&quot;]!=sha(text):raise ValueError(&quot;Published receipt mismatch&quot;)</span>
+<span>        rows.extend(text.splitlines())</span>
+<span>    return sorted(rows)</span>
+<span>def run_foreach(spark,input_path,checkpoint,sink,identity,fail_before=False):</span>
+<span>    commit_path(sink,identity,0)</span>
+<span>    binding=sink/(identity+&quot;-binding.txt&quot;)</span>
+<span>    expected=str(input_path.resolve())+&quot;\n&quot;+str(checkpoint.resolve())+&quot;\nid:bigint,cents:bigint&quot;</span>
+<span>    if binding.exists():</span>
+<span>        if binding.read_text(encoding=&quot;utf-8&quot;)!=expected:raise ValueError(&quot;Query namespace bound to another source/checkpoint/schema&quot;)</span>
+<span>    else:</span>
+<span>        with binding.open(&quot;x&quot;,encoding=&quot;utf-8&quot;) as handle:handle.write(expected)</span>
+<span>    frame=spark.readStream.schema(EVENT_SCHEMA).option(&quot;maxFilesPerTrigger&quot;,1).option(&quot;mode&quot;,&quot;FAILFAST&quot;).json(str(input_path))</span>
+<span>    def callback(batch,batch_id):</span>
+<span>        ATTEMPTS.append(batch_id)</span>
+<span>        batch.persist()</span>
+<span>        try:publish_batch(sink,identity,batch_id,canonical_batch(batch),fail_before)</span>
+<span>        finally:batch.unpersist()</span>
+<span>    query=(frame.writeStream.option(&quot;checkpointLocation&quot;,str(checkpoint)).trigger(availableNow=True).foreachBatch(callback).start())</span>
+<span>    OWNED_QUERIES.append(query);STARTED_QUERIES.append((str(query.id),str(query.runId)))</span>
+<span>    try:</span>
+<span>        if not query.awaitTermination(45):raise TimeoutError(&quot;Finite foreachBatch deadline exceeded&quot;)</span>
+<span>        if query.exception() is not None:raise RuntimeError(str(query.exception()))</span>
+<span>        progress=query.recentProgress</span>
+<span>        return {&quot;id&quot;:str(query.id),&quot;run_id&quot;:str(query.runId),&quot;input_rows&quot;:sum(p[&quot;numInputRows&quot;] for p in progress),&quot;batches&quot;:[p[&quot;batchId&quot;] for p in progress]}</span>
+<span>    finally:</span>
+<span>        if query.isActive:query.stop()</span>
+<span> </span>
+<span>def encode_batch(frame):</span>
+<span>    return canonical_batch(frame)</span>
+<span> </span>
+<span>def publish_once(root,identity,batch_id,text):</span>
+<span>    return publish_batch(root,identity,batch_id,text,False)</span>
+<span> </span>
+<span>def fail_callback(spark,input_path,checkpoint,sink):</span>
+<span>    from pyspark.errors import StreamingQueryException</span>
+<span>    try:</span>
+<span>        run_foreach(spark,input_path,checkpoint,sink,&quot;stream-v1&quot;,True)</span>
+<span>    except StreamingQueryException as error:</span>
+<span>        if &quot;injected_before_publication&quot; not in str(error):raise</span>
+<span>    else:</span>
+<span>        raise AssertionError(&quot;Expected injected streaming failure&quot;)</span>
+<span> </span>
+<span>def recover_callback(spark,input_path,checkpoint,sink):</span>
+<span>    return run_foreach(spark,input_path,checkpoint,sink,&quot;stream-v1&quot;,False)</span>
+<span> </span>
+<span>def unsafe_append(path,text):</span>
+<span>    with path.open(&quot;a&quot;,encoding=&quot;utf-8&quot;) as handle:handle.write(text)</span>
+<span> </span>
+<span>def reject_collision(root,text):</span>
+<span>    try:</span>
+<span>        publish_batch(root,&quot;manual-v1&quot;,7,text+&quot;9,999\n&quot;,False)</span>
+<span>    except ValueError:</span>
+<span>        pass</span>
+<span>    else:</span>
+<span>        raise AssertionError(&quot;Changed content reused a committed batch key&quot;)</span>
+<span> </span>
+<span>def main():</span>
+<span>    owned_root = None</span>
+<span>    spark = (SparkSession.builder.appName(&quot;ds60-spark-036&quot;).master(&quot;local[2]&quot;)</span>
+<span>        .config(&quot;spark.ui.enabled&quot;, &quot;false&quot;)</span>
+<span>        .config(&quot;spark.driver.host&quot;, &quot;127.0.0.1&quot;)</span>
+<span>        .config(&quot;spark.driver.bindAddress&quot;, &quot;127.0.0.1&quot;)</span>
+<span>        .config(&quot;spark.sql.shuffle.partitions&quot;, &quot;2&quot;)</span>
+<span>        .config(&quot;spark.sql.adaptive.enabled&quot;, &quot;false&quot;)</span>
+<span>        .config(&quot;spark.sql.ansi.enabled&quot;, &quot;true&quot;)</span>
+<span>        .config(&quot;spark.sql.session.timeZone&quot;, &quot;UTC&quot;).getOrCreate())</span>
+<span>    try:</span>
+<span>        assert spark.sparkContext.master == &quot;local[2]&quot;</span>
+<span>        spark.sparkContext.setLogLevel(&quot;ERROR&quot;)</span>
+<span>        if spark.version!=&quot;4.0.1&quot;:raise ValueError(&quot;Prepared Spark4.0.1 required&quot;)</span>
+<span>        spark.conf.set(&quot;spark.sql.streaming.stopTimeout&quot;,&quot;5000&quot;)</span>
+<span>        owned_root=Path(tempfile.mkdtemp(prefix=&quot;spark-036-&quot;,dir=Path.cwd()))</span>
+<span>        input_path=owned_root/&quot;input&quot;;checkpoint=owned_root/&quot;checkpoint&quot;;sink=owned_root/&quot;sink&quot;;sink.mkdir()</span>
+<span>        publish_file(owned_root,input_path,&quot;batch-01.json&quot;,[&#x27;{&quot;id&quot;:1,&quot;cents&quot;:100}&#x27;,&#x27;{&quot;id&quot;:2,&quot;cents&quot;:200}&#x27;])</span>
+<span>        static_frame=spark.read.schema(EVENT_SCHEMA).json(str(input_path))</span>
+<span>        # Exercise 1: Define canonical bounded microbatch content</span>
+<span>        encoded=encode_batch(static_frame)</span>
+<span>        assert encoded==&quot;1,100\n2,200\n&quot; and sha(encode_batch(static_frame.repartition(2)))==sha(encoded)</span>
+<span>        try:</span>
+<span>            encode_batch(static_frame.withColumn(&quot;cents&quot;,F.lit(None).cast(&quot;long&quot;)))</span>
+<span>        except ValueError:</span>
+<span>            pass</span>
+<span>        else:</span>
+<span>            raise AssertionError(&quot;NULL cents accepted&quot;)</span>
+<span>        # Exercise 2: Publish one logical batch idempotently</span>
+<span>        assert publish_once(sink,&quot;manual-v1&quot;,7,encoded)</span>
+<span>        original=commit_path(sink,&quot;manual-v1&quot;,7).read_bytes()</span>
+<span>        assert not publish_once(sink,&quot;manual-v1&quot;,7,encoded)</span>
+<span>        assert commit_path(sink,&quot;manual-v1&quot;,7).read_bytes()==original and published_rows(sink,&quot;manual-v1&quot;)==[&quot;1,100&quot;,&quot;2,200&quot;]</span>
+<span>        # Exercise 3: Inject a real callback failure before publication</span>
+<span>        fail_callback(spark,input_path,checkpoint,sink)</span>
+<span>        assert ATTEMPTS==[0] and published_rows(sink,&quot;stream-v1&quot;)==[] and not OWNED_QUERIES[-1].isActive</span>
+<span>        # Exercise 4: Recover the same checkpoint and observe replay</span>
+<span>        recovered=recover_callback(spark,input_path,checkpoint,sink)</span>
+<span>        assert ATTEMPTS==[0,0] and published_rows(sink,&quot;stream-v1&quot;)==[&quot;1,100&quot;,&quot;2,200&quot;]</span>
+<span>        assert STARTED_QUERIES[0][0]==STARTED_QUERIES[1][0] and STARTED_QUERIES[0][1]!=STARTED_QUERIES[1][1]</span>
+<span>        # Exercise 5: Expose a non-idempotent append counterexample</span>
+<span>        unsafe=owned_root/&quot;unsafe-demo.txt&quot;</span>
+<span>        unsafe_append(unsafe,encoded);unsafe_append(unsafe,encoded)</span>
+<span>        assert unsafe.read_text().splitlines()==[&quot;1,100&quot;,&quot;2,200&quot;,&quot;1,100&quot;,&quot;2,200&quot;]</span>
+<span>        assert len(published_rows(sink,&quot;stream-v1&quot;))==2</span>
+<span>        # Exercise 6: Reject identity collisions and admit the next batch</span>
+<span>        reject_collision(sink,encoded)</span>
+<span>        assert commit_path(sink,&quot;manual-v1&quot;,7).read_bytes()==original</span>
+<span>        publish_file(owned_root,input_path,&quot;batch-02.json&quot;,[&#x27;{&quot;id&quot;:3,&quot;cents&quot;:300}&#x27;])</span>
+<span>        recover_callback(spark,input_path,checkpoint,sink)</span>
+<span>        assert ATTEMPTS==[0,0,1] and published_rows(sink,&quot;stream-v1&quot;)==[&quot;1,100&quot;,&quot;2,200&quot;,&quot;3,300&quot;]</span>
+<span>        print(&quot;spark-036: six PySpark reference contracts passed; Spark=&quot; + spark.version)</span>
+<span>    finally:</span>
+<span>        try:</span>
+<span>            for query in OWNED_QUERIES:</span>
+<span>                if query.isActive:query.stop()</span>
+<span>            if any(query.isActive for query in OWNED_QUERIES):raise RuntimeError(&quot;Do not remove scratch while an owned query is active&quot;)</span>
+<span>            if owned_root is not None:</span>
+<span>                if owned_root.parent!=Path.cwd() or not owned_root.name.startswith(&quot;spark-&quot;):raise ValueError(&quot;Owned cleanup boundary mismatch&quot;)</span>
+<span>                shutil.rmtree(owned_root)</span>
+<span>        finally:</span>
+<span>            spark.stop()</span>
+<span> </span>
+<span>if __name__ == &quot;__main__&quot;:</span>
+<span>    main()</span>
+<span> </span>
+<span># Exercise 1: Define canonical bounded microbatch content. Inputs/task: Validate the explicit bigint schema, nonnegative cents, positive IDs and at most 8 rows;return sorted id, cents newline records preserving multiplicity. Expected: Exact text 1,100 newline 2,200 newline, with a stable SHA256 after repartitioning. Verify: Compare exact bytes and reject NULL cents before publication.</span>
+<span># Exercise 2: Publish one logical batch idempotently. Inputs/task: Publish the same canonical content twice under identity manual-v1 and batch 7. Compare the existing receipt instead of appending. Expected: First call publishes true;second returns false;exactly 2 logical rows remain. Verify: Assert return values, unchanged receipt bytes and one batch file.</span>
+<span># Exercise 3: Inject a real callback failure before publication. Inputs/task: Run the actual foreachBatch query with failure after staging and before rename. Retain the wrapped streaming exception and attempted batch ID. Expected: The query fails with injected_before_publication;no stream-v1 batch is visible and the attempted batch ID is 0. Verify: Check the exception marker, empty published rows and inactive query.</span>
+<span># Exercise 4: Recover the same checkpoint and observe replay. Inputs/task: Restart the same source/checkpoint/query namespace without failure. Compare attempts and logical query/run IDs. Expected: Batch 0 is attempted again and publishes 2 rows once. Query ID persists;run ID changes. Verify: Assert attempt sequence 0,0, exact rows and corresponding identities.</span>
+<span># Exercise 5: Expose a non-idempotent append counterexample. Inputs/task: Append the same canonical batch text twice to a separate unsafe-demo file, then compare it with the idempotent published batch. Expected: Unsafe append has 4 row occurrences;the committed batch remains 2. Verify: Compare exact repeated lines and preserve the unsafe file as a separate diagnostic until owned cleanup.</span>
+<span># Exercise 6: Reject identity collisions and admit the next batch. Inputs/task: Reject different content under an existing batch key, then publish a new source file 3:300 and resume the real query. Expected: The conflicting key fails without replacing its receipt. Stream batch 1 adds one row, leaving IDs 1,2,3 and total 600 across two batch files. Verify: Assert collision rejection, old receipt equality, attempt sequence 0,0,1 and exact 3-row sink.</span>
+<span> </span></code></pre></article>
+  </main>
+</body>
+</html>

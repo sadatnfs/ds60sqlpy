@@ -15,7 +15,13 @@ def dispatch(request,rows):
         if type(value) not in (int,float): raise TypeError('numeric value required')
         if not math.isfinite(value): raise ValueError('finite value required')
         groups[row['group']].append(value)
-    return [{'group':key,'count':len(values),'mean':sum(values)/len(values)} for key,values in sorted(groups.items())]
+    result=[]
+    for key,values in sorted(groups.items()):
+        scale=max(abs(value) for value in values)
+        mean=0.0 if scale==0 else scale*(math.fsum(value/scale for value in values)/len(values))
+        if not math.isfinite(mean): raise ValueError('finite group mean required')
+        result.append({'group':key,'count':len(values),'mean':mean})
+    return result
 
 
 def verify():
@@ -37,6 +43,10 @@ def verify():
         try: dispatch(request,changed)
         except (TypeError,ValueError): pass
         else: raise AssertionError('invalid numeric value accepted')
+    huge=[{'id':'h1','group':'A','value':1e308},{'id':'h2','group':'A','value':1e308}]
+    assert dispatch(request,huge)==[{'group':'A','count':2,'mean':1e308}]
+    huge[1]['value']=-1e308
+    assert dispatch(request,huge)[0]['mean']==0.0
 
     # Exercise 4: Enforce identity and work limits
     too_many=[{'id':str(i),'group':'A','value':1.} for i in range(21)]

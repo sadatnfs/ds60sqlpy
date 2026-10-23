@@ -47,27 +47,33 @@ SELECT day,sum(units) AS units_at_day FROM states GROUP BY day ORDER BY day;
 -- Write attempts in your ignored working copy before the final ROLLBACK.
 
 -- 1. Preserve undefined customer ratios
--- Prompt: Return customer_id, revenue, visits, revenue_per_visit, ratio_defined from deep 2_usage, one row per customer ordered by customer_id. Use NULLIF for a zero denominator and retain the zero-visit customer.
--- Expected: Customer 1 ratio 10, true; customer 2 ratio 30, true; customer 3 ratioNULL, false. Revenue/visits remain 10/1,90/3,0/0.
+-- Inputs/evidence: For sql-deep-02 Exercise 1, Return customer_id, revenue, visits, revenue_per_visit, ratio_defined from deep 2_usage, one row per customer ordered by customer_id. Use NULLIF for a zero denominator and retain the zero-visit customer.
+-- Expected result/shape: For sql-deep-02 Exercise 1, Customer 1 ratio 10, true; customer 2 ratio 30, true; customer 3 ratioNULL, false. Revenue/visits remain 10/1,90/3,0/0.
+-- Verify: For sql-deep-02 Exercise 1, recompute each numerator and denominator from its customer rows; retain a NULL ratio when the denominator is zero rather than substituting an observed zero.
 
 -- 2. Compare ratio weighting and population counts
--- Prompt: Return one row keyed by metric_id=all_customers with columns metric_id, customer_count, defined_ratio_count, ratio_of_totals, mean_customer_ratio. Compute both ratio targets from the same source, retaining the denominator policy from Exercise 1.
--- Expected: The row is all_customers,3,2,25,20. Ratio of totals uses 100 revenue/4 visits, while the mean customer ratio averages 10 and 30.
+-- Inputs/evidence: For sql-deep-02 Exercise 2, Return one row keyed by metric_id=all_customers with columns metric_id, customer_count, defined_ratio_count, ratio_of_totals, mean_customer_ratio. Compute both ratio targets from the same source, retaining the denominator policy from Exercise 1.
+-- Expected result/shape: For sql-deep-02 Exercise 2, The row is all_customers,3,2,25,20. Ratio of totals uses 100 revenue/4 visits, while the mean customer ratio averages 10 and 30.
+-- Verify: For sql-deep-02 Exercise 2, calculate the pooled numerator divided by the pooled denominator independently of the average of defined customer ratios; report how many customer ratios each calculation includes.
 
 -- 3. Choose one state per product at a cutoff
--- Prompt: As of 2026-01-02, return product_id, snapshot_day, units from the latest eligible stock snapshot per product. Break same-day ties by greatest snapshot_id. One row represents one product and final order is product_id. Exclude the future January 3 snapshot.
--- Expected: Product 1 uses January 2 units 12 and product 2 uses January 2 units 17. Their as-of total is 29; product 1 future units 99 must not enter.
+-- Inputs/evidence: For sql-deep-02 Exercise 3, As of 2026-01-02, return product_id, snapshot_day, units from the latest eligible stock snapshot per product. Break same-day ties by greatest snapshot_id. One row represents one product and final order is product_id. Exclude the future January 3 snapshot.
+-- Expected result/shape: For sql-deep-02 Exercise 3, Product 1 uses January 2 units 12 and product 2 uses January 2 units 17. Their as-of total is 29; product 1 future units 99 must not enter.
+-- Verify: For sql-deep-02 Exercise 3, check the chosen timestamp is at or before the cutoff and no later eligible snapshot exists for the same product; sum only those chosen states.
 
 -- 4. Audit allocation conservation before aggregation
--- Prompt: Return order_id, weight_sum only for orders whose total bridge weight is not exactly 1, including orders with no bridge rows. Preserve one diagnostic row per invalid order and order by order_id. Use exact numeric weights from the fixture.
--- Expected: Only order 3 appears with weight_sum0.9. Orders 1 and 2 sum to 1. The diagnostic must exist before any channel totals are treated as complete allocations.
+-- Inputs/evidence: For sql-deep-02 Exercise 4, Return order_id, weight_sum only for orders whose total bridge weight is not exactly 1, including orders with no bridge rows. Preserve one diagnostic row per invalid order and order by order_id. Use exact numeric weights from the fixture.
+-- Expected result/shape: For sql-deep-02 Exercise 4, Only order 3 appears with weight_sum0.9. Orders 1 and 2 sum to 1. The diagnostic must exist before any channel totals are treated as complete allocations.
+-- Verify: For sql-deep-02 Exercise 4, sum the bridge weights separately for each source identity before multiplying amounts; inspect the per-source weight-sum output to identify the source whose weights fail conservation.
 
 -- 5. Repair and reconcile a weighted allocation
--- Prompt: Within this exercise savepoint, change order 3 direct weight to 0.3. Return channel, allocated_amount ordered by channel, requiring every order weight total to equal 1 before producing any allocations. Verify that channel amounts sum to original order total 200.
--- Expected: Rows are direct 12, email 120, search 68. A failed global weight gate would return no allocation rows rather than silently exclude the invalid order. Roll back the repair after the case.
+-- Inputs/evidence: For sql-deep-02 Exercise 5, Within this exercise savepoint, change order 3 direct weight to 0.3. Return channel, allocated_amount ordered by channel, requiring every order weight total to equal 1 before producing any allocations. Verify that channel amounts sum to original order total 200.
+-- Expected result/shape: For sql-deep-02 Exercise 5, Rows are direct 12, email 120, search 68. A failed global weight gate would return no allocation rows rather than silently exclude the invalid order. Roll back the repair after the case.
+-- Verify: For sql-deep-02 Exercise 5, compare the repaired source-level weight sums with one and reconcile the allocated total to the original source total; inspect the named destination allocation as well.
 
 -- 6. Expose temporal dimension ambiguity without multiplying events
--- Prompt: For every event return event_id, match_count, segment, match_status. Match customer history over valid_from<=occurred_at<valid_to. Only exactly one version supplies segment; zero matches is missing and multiple matches is ambiguous. One row per event, ordered by event_id.
--- Expected: Event 1 is 1, basic, matched; event 2 is 1, premium, matched; event 3 is 2, NULL, ambiguous; event 4 is 0, NULL, missing. The exact January 2 boundary belongs only to premium.
+-- Inputs/evidence: For sql-deep-02 Exercise 6, For every event return event_id, match_count, segment, match_status. Match customer history over valid_from<=occurred_at<valid_to. Only exactly one version supplies segment; zero matches is missing and multiple matches is ambiguous. One row per event, ordered by event_id.
+-- Expected result/shape: For sql-deep-02 Exercise 6, Event 1 is 1, basic, matched; event 2 is 1, premium, matched; event 3 is 2, NULL, ambiguous; event 4 is 0, NULL, missing. The exact January 2 boundary belongs only to premium.
+-- Verify: For sql-deep-02 Exercise 6, count effective interval matches per event before choosing a dimension value; preserve an event with zero matches and expose an event with multiple matches instead of arbitrary deduplication.
 
 ROLLBACK;

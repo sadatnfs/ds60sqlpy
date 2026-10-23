@@ -1,0 +1,645 @@
+{
+  "review_date": "2026-10-23",
+  "chapters": [
+    {
+      "id": "torch-001",
+      "title": "A bounded PyTorch investigation and framework comparison",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "The published holdout needed a clearer distinction from a blind assessment.",
+        "Experiment selection and extrapolation needed a concrete decision trace.",
+        "Malformed words obscured the evidence boundary."
+      ],
+      "paired_guide_reviewed": "tf-001",
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "torch-002",
+      "title": "Tensors, devices, dtypes, strides and views",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "The decision section was empty.",
+        "Storage offsets, contiguity and ownership needed separate reasoning.",
+        "Broadcast pairing needed a complete numerical counterexample."
+      ],
+      "paired_guide_reviewed": "tf-002",
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "torch-003",
+      "title": "Linear modules, parameters and matrix contracts",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "The decision section was empty.",
+        "Forward layout and parameter count needed a shape ledger.",
+        "Registration, differentiation and optimizer membership needed clearer separation."
+      ],
+      "paired_guide_reviewed": "tf-003",
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "torch-004",
+      "title": "Loss functions, reductions and gradient scale",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "The decision section was empty.",
+        "Mean reduction needed a batch-by-output derivation and masked-gradient trace.",
+        "Objective weighting and metric preference needed concrete comparisons."
+      ],
+      "paired_guide_reviewed": "tf-004",
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "torch-005",
+      "title": "Derivatives, requires_grad and finite-difference checks",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "The decision section was empty.",
+        "Finite differences needed a truncation/cancellation derivation and a distinction from learning-rate steps.",
+        "The numerical helper did not reject a nonfinite point when a constant function hid it."
+      ],
+      "paired_guide_reviewed": "tf-005",
+      "executable_change": true,
+      "worked_code_change": true,
+      "review_runtime_evidence": [
+        {
+          "source_path": "courses/deep-learning-pytorch/solutions/torch-005_solution.py",
+          "source_sha256": "bbc9ca56deaebe89dd9b10248a8c72b4ac83311912ff3979c1260ead0e5c4819",
+          "worker_sha256": "000f34ecf8fb5227ace79e7da4ae25aa1b2bf1177f0a4fa3bc14ba9773e4a854",
+          "image_id": "sha256:7f647b9b20fee4d88f4553622a49fd180ff0bea9def7178b039a90d62b1c0230",
+          "status": "succeeded",
+          "elapsed": 1.013,
+          "lesson_id": "torch-005",
+          "kind": "reference",
+          "runtime_profile": "llm-torch-cpu",
+          "receipt_path": "work/pytorch-depth-repaired-acceptance.jsonl"
+        },
+        {
+          "source_path": "work/pytorch-depth-worked/torch-005-abc.py",
+          "source_sha256": "fdbbe5e392a0aa5e96c726e71c04c6b56fb24c1c92545b817b82be8796164d81",
+          "guide_path": "courses/deep-learning-pytorch/guides/torch-005.md",
+          "guide_sha256": "77cb87a8d7098898c4f4137fc21d0a023df290e68733ca50d2553da9b6345fda",
+          "image_id": "sha256:7f647b9b20fee4d88f4553622a49fd180ff0bea9def7178b039a90d62b1c0230",
+          "status": "succeeded",
+          "elapsed": 0.937,
+          "execution_contract": "sequential_examples_A_B_C_in_one_fresh_process",
+          "lesson_id": "torch-005",
+          "kind": "worked_sequence",
+          "runtime_profile": "llm-torch-cpu",
+          "receipt_path": "work/ml-worked-pytorch-depth-repaired-acceptance.jsonl"
+        }
+      ]
+    },
+    {
+      "id": "torch-006",
+      "title": "Autograd graphs, the chain rule and in-place hazards",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "The decision section was empty.",
+        "The chain factors needed an exact forward/backward table.",
+        "In-place version checking and saved-graph lifetime needed a concrete failure sequence."
+      ],
+      "paired_guide_reviewed": "tf-006",
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "torch-007",
+      "title": "Leaf tensors, detach, no_grad and gradient accumulation",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "The decision section was empty.",
+        "Graph history, gradient buffers, storage ownership and module mode needed a separate-state comparison.",
+        "None-versus-zero gradients needed an optimizer-aware interpretation."
+      ],
+      "paired_guide_reviewed": "tf-007",
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "torch-008",
+      "title": "One optimizer step you can audit",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "The decision section was empty.",
+        "The one-step oracle needed a full objective and stability derivation.",
+        "The broadcast counterexample needed to show a changed optimum,not only a different first gradient."
+      ],
+      "paired_guide_reviewed": "tf-008",
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "torch-009",
+      "title": "Batches, zero_grad and repeated updates",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "The decision section was empty.",
+        "Batch/update counts needed an exact parameter-state trace.",
+        "Metric weighting needed separation from evaluation at the final model state."
+      ],
+      "paired_guide_reviewed": "tf-009",
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "torch-010",
+      "title": "Datasets, held-out families and leakage controls",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "The decision section was empty.",
+        "Subset delegation and split identity needed a concrete index/shape trace.",
+        "The held-out perturbation needed exact fitted-statistic arithmetic and claim limits."
+      ],
+      "paired_guide_reviewed": "tf-010",
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "torch-011",
+      "title": "nn.Module, registered parameters and explicit training loops",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "The decision section was empty.",
+        "Module state categories needed a concrete ownership and persistence table.",
+        "Optimizer object membership and dtype conversion needed an operational ordering explanation."
+      ],
+      "paired_guide_reviewed": "tf-011",
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "torch-012",
+      "title": "Capstone: an auditable tiny PyTorch regressor",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "The capstone decision section was empty.",
+        "The special basis-vector fixture allowed an independent closed-form100-step oracle that was missing.",
+        "The final-model metric needed distinction from the last pre-update loss in the curve."
+      ],
+      "paired_guide_reviewed": "tf-012",
+      "executable_change": true,
+      "worked_code_change": true,
+      "review_runtime_evidence": [
+        {
+          "source_path": "courses/deep-learning-pytorch/solutions/torch-012_solution.py",
+          "source_sha256": "7065ba3acadffa38430501fbfd147066d8cf46daa817ae0a8b68a0da786755af",
+          "worker_sha256": "000f34ecf8fb5227ace79e7da4ae25aa1b2bf1177f0a4fa3bc14ba9773e4a854",
+          "image_id": "sha256:7f647b9b20fee4d88f4553622a49fd180ff0bea9def7178b039a90d62b1c0230",
+          "status": "succeeded",
+          "elapsed": 1.498,
+          "lesson_id": "torch-012",
+          "kind": "reference",
+          "runtime_profile": "llm-torch-cpu",
+          "receipt_path": "work/pytorch-depth-repaired-acceptance.jsonl"
+        },
+        {
+          "source_path": "work/pytorch-depth-worked/torch-012-abc.py",
+          "source_sha256": "2d297a5a840c43f8c8351baddc4f69d2b519651212056713f63e08e7ef1b42c9",
+          "guide_path": "courses/deep-learning-pytorch/guides/torch-012.md",
+          "guide_sha256": "90019fddbdacdf0c6efe211c13e708e2a93f9549195c89e9635322afa688aef3",
+          "image_id": "sha256:7f647b9b20fee4d88f4553622a49fd180ff0bea9def7178b039a90d62b1c0230",
+          "status": "succeeded",
+          "elapsed": 1.501,
+          "execution_contract": "sequential_examples_A_B_C_in_one_fresh_process",
+          "lesson_id": "torch-012",
+          "kind": "worked_sequence",
+          "runtime_profile": "llm-torch-cpu",
+          "receipt_path": "work/ml-worked-pytorch-depth-repaired-acceptance.jsonl"
+        }
+      ]
+    },
+    {
+      "id": "torch-013",
+      "title": "Binary logits, BCEWithLogitsLoss and thresholds",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "The decision section was empty.",
+        "Stable binary loss needed its algebra and gradient,not only API naming.",
+        "Threshold cost assumptions,double-sigmoid gradients andcalibration limits needed concrete reasoning."
+      ],
+      "paired_guide_reviewed": "tf-013",
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "torch-014",
+      "title": "CrossEntropyLoss, multiclass and multilabel contracts",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "The decision section was empty.",
+        "Class-axis andtarget contracts needed a spatial/batched shape table.",
+        "Cross-entropy gradients,soft targets andweighted denominators needed clearer boundaries."
+      ],
+      "paired_guide_reviewed": "tf-014",
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_runtime_evidence": [
+        {
+          "source_path": "courses/deep-learning-pytorch/solutions/torch-014_solution.py",
+          "source_sha256": "e399b32881779b12c4f2f24a25f90c5e89ff3be6b0a3c8dceb7acd028a5bcf70",
+          "worker_sha256": "000f34ecf8fb5227ace79e7da4ae25aa1b2bf1177f0a4fa3bc14ba9773e4a854",
+          "image_id": "sha256:7f647b9b20fee4d88f4553622a49fd180ff0bea9def7178b039a90d62b1c0230",
+          "status": "succeeded",
+          "elapsed": 0.97,
+          "lesson_id": "torch-014",
+          "kind": "reference",
+          "runtime_profile": "llm-torch-cpu",
+          "receipt_path": "work/pytorch-depth-repaired-acceptance.jsonl"
+        }
+      ]
+    },
+    {
+      "id": "torch-015",
+      "title": "Dataset, DataLoader, collation and reproducible sampling",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "The decision section was empty.",
+        "Sampler state,collation masks andtail populations needed distinct contracts.",
+        "The collator silently truncated floating token IDs into a Long tensor."
+      ],
+      "paired_guide_reviewed": "tf-015",
+      "executable_change": true,
+      "worked_code_change": true,
+      "review_runtime_evidence": [
+        {
+          "source_path": "courses/deep-learning-pytorch/solutions/torch-015_solution.py",
+          "source_sha256": "3f02a8dc38300a37e69604626966f9cbfb5a43c8d50b0570ee5f7564afd9461d",
+          "worker_sha256": "000f34ecf8fb5227ace79e7da4ae25aa1b2bf1177f0a4fa3bc14ba9773e4a854",
+          "image_id": "sha256:7f647b9b20fee4d88f4553622a49fd180ff0bea9def7178b039a90d62b1c0230",
+          "status": "succeeded",
+          "elapsed": 0.854,
+          "lesson_id": "torch-015",
+          "kind": "reference",
+          "runtime_profile": "llm-torch-cpu",
+          "receipt_path": "work/pytorch-depth-repaired-acceptance.jsonl"
+        },
+        {
+          "source_path": "work/pytorch-depth-worked/torch-015-abc.py",
+          "source_sha256": "eac8fb051853d2f1a3cd051580fe78f6c96d4dbf5c62d2da8dbac97603eb6767",
+          "guide_path": "courses/deep-learning-pytorch/guides/torch-015.md",
+          "guide_sha256": "04bb96e04a3cc0c8beb3ff3aad8d9ae45c7ce740e3afa4c614e50afe4b965eaa",
+          "image_id": "sha256:7f647b9b20fee4d88f4553622a49fd180ff0bea9def7178b039a90d62b1c0230",
+          "status": "succeeded",
+          "elapsed": 0.849,
+          "execution_contract": "sequential_examples_A_B_C_in_one_fresh_process",
+          "lesson_id": "torch-015",
+          "kind": "worked_sequence",
+          "runtime_profile": "llm-torch-cpu",
+          "receipt_path": "work/ml-worked-pytorch-depth-repaired-acceptance.jsonl"
+        }
+      ]
+    },
+    {
+      "id": "torch-016",
+      "title": "Initialization, nonlinearities and gradient diagnostics",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "The decision section was empty.",
+        "XOR needed an affine impossibility proof and a full hidden-feature trace.",
+        "The symmetric XOR matrix could not detect the claimed transpose mistake.",
+        "Initialization symmetry needed conditions on downstream gradients and activation regions."
+      ],
+      "paired_guide_reviewed": "tf-016",
+      "executable_change": true,
+      "worked_code_change": true,
+      "review_runtime_evidence": [
+        {
+          "source_path": "courses/deep-learning-pytorch/solutions/torch-016_solution.py",
+          "source_sha256": "93994c908a91da36691412c1c33e170d720dec5df333cf0bf15e3a19f23d29cb",
+          "worker_sha256": "000f34ecf8fb5227ace79e7da4ae25aa1b2bf1177f0a4fa3bc14ba9773e4a854",
+          "image_id": "sha256:7f647b9b20fee4d88f4553622a49fd180ff0bea9def7178b039a90d62b1c0230",
+          "status": "succeeded",
+          "elapsed": 0.845,
+          "lesson_id": "torch-016",
+          "kind": "reference",
+          "runtime_profile": "llm-torch-cpu",
+          "receipt_path": "work/pytorch-depth-repaired-acceptance.jsonl"
+        },
+        {
+          "source_path": "work/pytorch-depth-worked/torch-016-abc.py",
+          "source_sha256": "58f5d5c0385a08809a78a58e92835f6156b521c81f616d09126c08b83b8930b6",
+          "guide_path": "courses/deep-learning-pytorch/guides/torch-016.md",
+          "guide_sha256": "208d77980330fe66a1b917dba3f396f8a71291aa52df4e935cb03acd08bc105b",
+          "image_id": "sha256:7f647b9b20fee4d88f4553622a49fd180ff0bea9def7178b039a90d62b1c0230",
+          "status": "succeeded",
+          "elapsed": 0.96,
+          "execution_contract": "sequential_examples_A_B_C_in_one_fresh_process",
+          "lesson_id": "torch-016",
+          "kind": "worked_sequence",
+          "runtime_profile": "llm-torch-cpu",
+          "receipt_path": "work/ml-worked-pytorch-depth-repaired-acceptance.jsonl"
+        }
+      ]
+    },
+    {
+      "id": "torch-017",
+      "title": "Dropout, regularization, train and eval modes",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "The decision section was empty.",
+        "Dropout expectation was stated without its variance or backward trace.",
+        "Penalty coefficients, loss reduction and adaptive weight decay needed an explicit comparison."
+      ],
+      "paired_guide_reviewed": "tf-017",
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "torch-018",
+      "title": "BatchNorm, LayerNorm and stateful normalization",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "The decision section was empty.",
+        "Axis retention versus reduction needed a complete shape ledger.",
+        "Momentum parity needed a non-half coefficient and distinct variance estimators.",
+        "Freezing affine gradients was not distinguished from freezing running statistics."
+      ],
+      "paired_guide_reviewed": "tf-018",
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "torch-019",
+      "title": "Convolutions, channel layouts and shared computation",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "Output-size, dilation and parameter-sharing rules lacked a symbolic shape derivation.",
+        "The forward patch example did not explain how shared kernel and input gradients accumulate.",
+        "Semantic layout conversion, memory format and translation equivariance needed separate contracts."
+      ],
+      "paired_guide_reviewed": "tf-019",
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "torch-020",
+      "title": "Pooling, local augmentation and label invariants",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "Pooling information loss needed a backward-sensitivity trace and boundary counterexamples.",
+        "A flip round trip was not distinguished fully from a valid target transformation.",
+        "Pooling defaults and ownership of deterministic evaluation outputs needed explicit decisions."
+      ],
+      "paired_guide_reviewed": "tf-020",
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "torch-021",
+      "title": "Embeddings, padded sequences and recurrent models",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "Embedding lookup gradients and padding semantics needed an exact row-by-row trace.",
+        "Packed recurrent output, final-state axes and the detached worked-example boundary needed explanation.",
+        "Zero padding, mask propagation and valid-token versus per-sequence objectives were conflated by insufficient detail."
+      ],
+      "paired_guide_reviewed": "tf-021",
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "torch-022",
+      "title": "Attention, transformer masks and information boundaries",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "Query/key/value axes and the softmax Jacobian needed a concrete forward/backward trace.",
+        "Mask polarity differences needed a parameter-level table and a float-mask counterexample.",
+        "Prefix agreement was overinterpreted as a complete arithmetic or model-causality check."
+      ],
+      "paired_guide_reviewed": "tf-022",
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "torch-023",
+      "title": "Debugging custom loops, accumulation and clipping",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "The scalar update sequence needed exact before/loss/gradient/after states.",
+        "Accumulation weighting and clipping order were named without an unequal-microbatch counterexample.",
+        "Missing gradients,nonfinite gradients and optimizer displacement needed different diagnostic meanings."
+      ],
+      "paired_guide_reviewed": "tf-023",
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "torch-024",
+      "title": "Capstone: a small classifier with honest evaluation",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "The classifier capstone needed an independently derived first update and preprocessing denominator comparison.",
+        "Visible synthetic labels and two test rows were insufficiently separated from population reliability.",
+        "Confusion accounting,threshold ties and subgroup denominators needed a complete decision trace."
+      ],
+      "paired_guide_reviewed": "tf-024",
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "torch-025",
+      "title": "Contrastive embeddings and negative sampling",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "Contrastive temperature needed an exact loss/gradient derivation rather than a sharpness label.",
+        "The projection-gradient check needed its actual trainable branch and expected matrix explained.",
+        "False negatives,zero norms and changing candidate populations needed distinct failure contracts."
+      ],
+      "paired_guide_reviewed": "tf-025",
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "torch-026",
+      "title": "Custom modules, residual paths, buffers and autograd checks",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "Residual forward identity needed a nonzero branch-gradient derivation.",
+        "Parameter objects,buffers,constructor metadata and optimizer identity needed distinct state roles.",
+        "Custom backward needed a vector-Jacobian-product explanation and clearer gradcheck limits."
+      ],
+      "paired_guide_reviewed": "tf-026",
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "torch-027",
+      "title": "Transfer learning, frozen layers and optimizer membership",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "Freeze semantics needed a four-part state/mode/gradient/optimizer contract.",
+        "The head update and newly available base-gradient path lacked an exact local derivation.",
+        "Unfreezing needed explicit optimizer-state choices rather than implying recreation is mandatory."
+      ],
+      "paired_guide_reviewed": "tf-027",
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "torch-028",
+      "title": "Restartable training, optimizer state and RNG evidence",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "Restart parity needed a state-dependency ledger and a precise RNG draw timeline.",
+        "The fixed data-position marker was not clearly separated from restoring a real loader or sampler.",
+        "Snapshot aliasing,optimizer reconstruction and checkpoint publication limits needed explanation."
+      ],
+      "paired_guide_reviewed": "tf-028",
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "torch-029",
+      "title": "Stable objectives, precision and mixed-precision boundaries",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "Stable softmax/cross-entropy needed an exact shifted-logit and gradient derivation.",
+        "Range,precision and cancellation were not distinguished by concrete dtype comparisons.",
+        "Autocast,gradient scaling and clipping order needed separate hardware-qualified boundaries."
+      ],
+      "paired_guide_reviewed": "tf-029",
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "torch-030",
+      "title": "Distributed gradients and accumulation semantics on CPU",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "Unequal-shard weighting needed a direct connection to backend averaging conventions.",
+        "The full-batch and sequential-microbatch trajectories needed exact distinct endpoints.",
+        "Empty shards,regularization and batch-dependent forward behavior needed explicit assumptions."
+      ],
+      "paired_guide_reviewed": "tf-030",
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_runtime_evidence": [
+        {
+          "source_path": "courses/deep-learning-pytorch/solutions/torch-030_solution.py",
+          "source_sha256": "226f37bfe24d12cbeabdcf0bc0d88aab44d0072c07660370a9523b90a24ed623",
+          "worker_sha256": "000f34ecf8fb5227ace79e7da4ae25aa1b2bf1177f0a4fa3bc14ba9773e4a854",
+          "image_id": "sha256:7f647b9b20fee4d88f4553622a49fd180ff0bea9def7178b039a90d62b1c0230",
+          "status": "succeeded",
+          "elapsed": 1.299,
+          "lesson_id": "torch-030",
+          "kind": "reference",
+          "runtime_profile": "llm-torch-cpu",
+          "receipt_path": "work/pytorch-depth-repaired-acceptance.jsonl"
+        }
+      ]
+    },
+    {
+      "id": "torch-031",
+      "title": "Profiling, torch.compile and honest performance measurement",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "Graph capture,backend execution and optimizing compilation needed a phase-by-phase distinction.",
+        "The graph counter and timing interval needed precise observable meanings.",
+        "Profiler totals,signature diversity and setup amortization needed concrete interpretation."
+      ],
+      "paired_guide_reviewed": "tf-031",
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "torch-032",
+      "title": "state_dict, torch.export and inference parity",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "State reconstruction and exported-program constraints needed a direct interface comparison.",
+        "Static batch specialization and declared dynamic bounds needed precise tested-versus-declared scope.",
+        "Feature semantics,artifact ownership and inference versus training continuation needed distinct acceptance gates."
+      ],
+      "paired_guide_reviewed": "tf-032",
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "torch-033",
+      "title": "Inference mode, model contracts and bounded batching",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "Inference mode,eval and an owned normal output tensor needed a precise lifetime/gradient explanation.",
+        "Per-record batching parity needed its stateless-model assumptions and singleton-axis trace.",
+        "Input finiteness,batch bounds and output-value guarantees needed clearer scope."
+      ],
+      "paired_guide_reviewed": "tf-033",
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "torch-034",
+      "title": "Robustness, privacy and evidence beyond a score",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "Duplicate weighting and subgroup uncertainty needed exact denominator counterexamples.",
+        "Perturbation outcomes needed a stated target policy rather than an unchanged-prediction slogan.",
+        "Privacy mechanisms,severity gates and finite empirical evidence needed separate meanings."
+      ],
+      "paired_guide_reviewed": "tf-034",
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "torch-035",
+      "title": "Paired model comparisons and uncertainty",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "The paired loss comparison needed its full per-ID table and covariance explanation.",
+        "The three-point bootstrap needed an exact empirical distribution and a distinction from new evidence.",
+        "Resampling units,training variability and selection history needed separate uncertainty contracts."
+      ],
+      "paired_guide_reviewed": "tf-035",
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "torch-036",
+      "title": "Capstone: release a small reproducible PyTorch model",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "The release capstone needed an analytic training/holdout oracle and explicit artifact boundaries.",
+        "Hash integrity,metadata validation and publisher trust needed separate meanings.",
+        "Local acceptance,negative-gate success,rollback identity and production readiness needed precise scope."
+      ],
+      "paired_guide_reviewed": "tf-036",
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_runtime_evidence": []
+    }
+  ]
+}

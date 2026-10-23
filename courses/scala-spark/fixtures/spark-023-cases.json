@@ -1,0 +1,57 @@
+{
+  "lesson_id": "spark-023",
+  "scope": "Tiny paired local contracts;root-owned runtime qualification is separate.",
+  "cases": [
+    {
+      "exercise": 1,
+      "title": "Inspect statistics and the automatic threshold separately",
+      "input_contract": "Return the optimized-plan size estimate for dimension as a nonnegative integer, and record the configured automatic broadcast threshold and actual dimension row count.",
+      "expected": "A positive finite estimate below 10485760 bytes, threshold 10485760 and actual row count 20. The estimate is not a peak-memory measurement.",
+      "verification": "Assert the finite estimate range and print estimate, threshold, rows andSpark version as separate fields."
+    },
+    {
+      "exercise": 2,
+      "title": "Observe the automatic plan and verify its relational output",
+      "input_contract": "Build an ordinary inner equality join on key, projecting fact_id, key, amount, factor. Execute logical metrics and record the physical plan chosen with the declared threshold.",
+      "expected": "Metrics(20000,20000,79997,839916). The observed plan identifies a join strategy and is printed with current threshold.",
+      "verification": "Assert all metrics and a join operator marker. Report the observed automatic strategy without treating a default as a universal guarantee."
+    },
+    {
+      "exercise": 3,
+      "title": "Disable automatic broadcasting for a fresh comparison",
+      "input_contract": "Set automatic broadcast threshold to-1, build a fresh ordinary join and record its plan withAQE disabled. Keep the logical result contract.",
+      "expected": "Same metrics as automatic. No BroadcastHashJoin in this fresh query underAQEfalse and threshold-1.",
+      "verification": "Assert all four metrics, the disabled setting and observed absence of BroadcastHashJoin."
+    },
+    {
+      "exercise": 4,
+      "title": "Request an eligible explicit broadcast and reconcile bags",
+      "input_contract": "Apply broadcast to the dimension for an inner equality join while automatic threshold remains-1. Project the same columns and compare duplicate-sensitive output with the ordinary join in both directions.",
+      "expected": "BroadcastHashJoin and BroadcastExchange appear. Both exceptAll differences are empty and logical metrics remain exact.",
+      "verification": "Assert the two operator markers, all metrics and both bag differences."
+    },
+    {
+      "exercise": 5,
+      "title": "Observe an unsupported hint without changing the business result",
+      "input_contract": "Request a broadcast dimension in a full outer equality join and inspect the chosen plan. Explain why this fixture still has the same output rows as the inner join.",
+      "expected": "No BroadcastHashJoin for this unsupported full-outer hash strategy. Metrics remain(20000,20000,79997,839916) because both key domains are fully covered.",
+      "verification": "Assert the observed absence of BroadcastHashJoin and exact output metrics;report a hint warning if emitted rather than hiding it."
+    },
+    {
+      "exercise": 6,
+      "title": "Gate a broadcast candidate on explicit bounded evidence",
+      "input_contract": "Reject streaming inputs, more than 100 rows, missing/duplicate keys, or an estimated size outside(0,1MiB]. Return the bounded dimension with a broadcast hint only after those checks.",
+      "expected": "The 20-row dimension passes;the same dimension with a duplicate key and a101-row candidate fail. No unbounded input is collected or materialized by the gate.",
+      "verification": "Assert accepted logical join metrics and explicit rejection for duplicate and row-budget cases."
+    }
+  ],
+  "golden": {
+    "facts": 20000,
+    "dimension_rows": 20,
+    "amount_total": 79997,
+    "weighted_total": 839916,
+    "automatic_threshold": 10485760,
+    "gate_rows": 100,
+    "gate_estimated_bytes": 1048576
+  }
+}

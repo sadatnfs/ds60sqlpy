@@ -1,0 +1,76 @@
+{
+  "lesson_id": "spark-035",
+  "scope": "Tiny paired local contracts;root-owned runtime qualification is separate.",
+  "cases": [
+    {
+      "exercise": 1,
+      "title": "Validate the finite input and output grain",
+      "input_contract": "Read a static copy of the two-row schema fixture and require bigint id/cents, known nonnull values and at most 8 rows. Return its canonical ordered bag without removing duplicates.",
+      "expected": "The first bag is 1:100,2:200. A NULL identity or cents value is rejected.",
+      "verification": "Compare the exact two-row bag and reject an explicit null-id DataFrame."
+    },
+    {
+      "exercise": 2,
+      "title": "Run the first finite file stream",
+      "input_contract": "Execute the AvailableNow Parquet query with its owned checkpoint/output and retain query ID, run ID, input count and batch IDs.",
+      "expected": "Two input rows and exactly 1:100,2:200 in the committed sink.",
+      "verification": "Assert the progress input count is 2, query is terminated, and readback bag is exact."
+    },
+    {
+      "exercise": 3,
+      "title": "Resume the same checkpoint after a new file",
+      "input_contract": "Publish a second file with 2:200 and 3:300, then restart the compatible query with the same checkpoint and sink.",
+      "expected": "Only 2 new input rows are processed. The sink bag is 1:100,2:200,2:200,3:300. Query ID persists and run ID changes.",
+      "verification": "Compare both identities, progress count and all 4 output occurrences."
+    },
+    {
+      "exercise": 4,
+      "title": "Resume with no new source files",
+      "input_contract": "Run the same compatible query again without adding input and compare output before/after.",
+      "expected": "Zero new input rows and an unchanged 4-row output bag.",
+      "verification": "Assert zero progress input sum and exact unchanged sink rows."
+    },
+    {
+      "exercise": 5,
+      "title": "Replay with a separate checkpoint and output",
+      "input_contract": "Start from a new checkpoint only when the output namespace is also new. Replay the same source and preserve the old checkpoint/sink.",
+      "expected": "The separate output has 4 rows, with a new logical query ID. The old output remains 4 rows.",
+      "verification": "Assert checkpoint/output paths differ and both independent bags equal the literal 4-row oracle."
+    },
+    {
+      "exercise": 6,
+      "title": "Write a guarantee ledger from exact counts",
+      "input_contract": "Return output row count, distinct business IDs and total cents, then explain why source recovery is not business-ID deduplication or a universal exactly-once guarantee.",
+      "expected": "4 occurrences,3 distinct IDs, total 800.",
+      "verification": "Compare all three independent values and preserve the duplicate occurrence."
+    }
+  ],
+  "golden": {
+    "first": [
+      "1:100",
+      "2:200"
+    ],
+    "final": [
+      "1:100",
+      "2:200",
+      "2:200",
+      "3:300"
+    ],
+    "run_input_rows": [
+      2,
+      2,
+      0,
+      4
+    ],
+    "counts": [
+      4,
+      3,
+      800
+    ],
+    "maximum_source_rows": 8,
+    "query_deadline_seconds": 45,
+    "same_checkpoint_query_id": "equal",
+    "same_checkpoint_run_id": "different",
+    "new_checkpoint_sink": "separate"
+  }
+}

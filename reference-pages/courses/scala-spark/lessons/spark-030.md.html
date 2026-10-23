@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>spark-030: Learner architecture worksheet · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>spark-030: Learner architecture worksheet</h1>
+      <p class="source-path">Generated from <code>courses/scala-spark/lessons/spark-030.md</code></p>
+    </header>
+    <article class="document"><h2 id="spark-030-learner-architecture-worksheet">spark-030: Learner architecture worksheet<a class="heading-anchor" href="#spark-030-learner-architecture-worksheet" aria-label="Link to this section">#</a></h2>
+<p>Read the <a href="../guides/spark-030.md.html">guide</a>. These are sanitized reasoning fixtures, not executable deployment instructions. Retain an independent answer and the evidence supporting it for each task.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="worked-example-1-a-local-path-that-does-not-cross-the-boundary">Worked example 1: A local path that does not cross the boundary<a class="heading-anchor" href="#worked-example-1-a-local-path-that-does-not-cross-the-boundary" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-text">Driver host: /driver-local/input.parquet exists
+Executor host: same path absent
+Task: read that path directly inside executor code
+Expected observation: path availability is not established on the executor</code></pre>
+<p>The existence check proves only one host&#x27;s local state. The corrected design must specify authorized shared storage or an explicit bounded distribution mechanism and verify it where the task runs. It must not claim that client deploy mode alone makes the file shared.</p>
+<h4 id="worked-example-2-a-classic-diagnostic-that-needs-a-new-adapter">Worked example 2: A classic diagnostic that needs a new adapter<a class="heading-anchor" href="#worked-example-2-a-classic-diagnostic-that-needs-a-new-adapter" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-text">Existing lesson: frame._jdf.queryExecution().executedPlan()
+Proposed client: Spark Connect
+Available evidence: local classic worker receipt only
+Review result: Connect diagnostic path is unimplemented and unqualified</code></pre>
+<p>The logical transformation may have a supported Connect equivalent while the internal JVM inspection does not. Keep the useful semantic oracle, replace the diagnostic boundary through supported capabilities, and qualify that adapter separately before presenting it as runnable.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<h4 id="exercise-1-assign-responsibilities-in-three-deployment-diagrams">Exercise 1: Assign responsibilities in three deployment diagrams<a class="heading-anchor" href="#exercise-1-assign-responsibilities-in-three-deployment-diagrams" aria-label="Link to this section">#</a></h4>
+<p>Annotate the local, client-mode and cluster-mode diagrams with driver location, executor/task execution, resource allocation and result collection. Explain one failure introduced by moving the driver.</p>
+<p><strong>Inputs/evidence:</strong> For spark-030 Exercise 1, The three diagrams and the proposal stating cluster deploy mode.</p>
+<p><strong>Expected result/shape:</strong> For spark-030 Exercise 1, A role/location table for all three layouts, with collect returning to the driver wherever it runs and resource allocation assigned to the cluster manager.</p>
+<p><strong>Verify:</strong> Name every role and trace a collected 30-row result to the actual driver process in each layout; identify the submitting-host-loss or remote-driver-environment failure.</p>
+<p><strong>Progressive hint:</strong> Deploy mode changes driver placement; the cluster manager and executors do not become synonyms for the driver.</p>
+<h4 id="exercise-2-repair-a-driver-only-input-path-assumption">Exercise 2: Repair a driver-only input path assumption<a class="heading-anchor" href="#exercise-2-repair-a-driver-only-input-path-assumption" aria-label="Link to this section">#</a></h4>
+<p>Review the proposed/driver-local/input.parquet path. State the visibility problem and specify a bounded replacement contract without choosing or contacting a real service.</p>
+<p><strong>Inputs/evidence:</strong> For spark-030 Exercise 2, The input path in the sanitized proposal and evidence that the file exists only on the submitting machine.</p>
+<p><strong>Expected result/shape:</strong> For spark-030 Exercise 2, An explicit data-location/distribution contract naming driver and executor visibility, authorization,30-row fixture identity and readback verification.</p>
+<p><strong>Verify:</strong> Reject automatic shared-path assumptions and list the exact host/process where existence and content must be checked.</p>
+<p><strong>Progressive hint:</strong> A path string is interpreted in a filesystem namespace; identical spelling does not imply identical storage.</p>
+<h4 id="exercise-3-map-dependencies-to-driver-and-executor-environments">Exercise 3: Map dependencies to driver and executor environments<a class="heading-anchor" href="#exercise-3-map-dependencies-to-driver-and-executor-environments" aria-label="Link to this section">#</a></h4>
+<p>Produce a dependency matrix for the Scala jar, purePythonrules.zip, a hypothetical native-extension wheel and JDK/Spark runtime. State which proposed substitution is unsupported.</p>
+<p><strong>Inputs/evidence:</strong> For spark-030 Exercise 3, Spark 4.0.1, Scala binary 2.13, JDK 17, course_2.13.jar, rules.zip and an unqualified native-extension wheel.</p>
+<p><strong>Expected result/shape:</strong> For spark-030 Exercise 3, A matrix locating each dependency and its qualification evidence; reject a Scala 3 binary substitution and treating a native wheel as an ordinary pure-Python source zip.</p>
+<p><strong>Verify:</strong> Name compiler/binary family, Python interpreter/platform compatibility and worker import checks separately.</p>
+<p><strong>Progressive hint:</strong> A source archive can distribute modules without supplying an interpreter or native shared libraries.</p>
+<h4 id="exercise-4-review-a-captured-connection-and-a-retrying-task">Exercise 4: Review a captured connection and a retrying task<a class="heading-anchor" href="#exercise-4-review-a-captured-connection-and-a-retrying-task" aria-label="Link to this section">#</a></h4>
+<p>Reject a task closure that captures an open driver database connection and writes one audit row per invocation. Propose separate serialization, lifecycle and idempotency contracts.</p>
+<p><strong>Inputs/evidence:</strong> For spark-030 Exercise 4, An open driver connection captured by a task function and evidence that a failed task can be retried.</p>
+<p><strong>Expected result/shape:</strong> For spark-030 Exercise 4, No connection object serialized from the driver; a defined task-side resource lifecycle if externalIO is later authorized, and a stable operation identity preventing duplicate external effects.</p>
+<p><strong>Verify:</strong> Explain why serializability alone would not guarantee exactly-once writes and name the cleanup and deduplication evidence needed.</p>
+<p><strong>Progressive hint:</strong> Task execution can repeat. Resource process ownership and external-write logical identity are separate issues.</p>
+<h4 id="exercise-5-define-the-connect-adapter-boundary-honestly">Exercise 5: Define the Connect adapter boundary honestly<a class="heading-anchor" href="#exercise-5-define-the-connect-adapter-boundary-honestly" aria-label="Link to this section">#</a></h4>
+<p>Classify which existing classic capabilities can be assumed in a proposedConnect profile, and list the compatibility and lifecycle tests required before exposing it as ready.</p>
+<p><strong>Inputs/evidence:</strong> For spark-030 Exercise 5, The existing _jdf/queryExecution and RDD-based diagnostic helpers, plus the proposed remote logical-plan client.</p>
+<p><strong>Expected result/shape:</strong> For spark-030 Exercise 5, Classic internals are not assumed available; semantic goldens are retained while a separate supported diagnostic/runtime adapter is qualified.</p>
+<p><strong>Verify:</strong> List client/server version checks, API support, cancellation, result limits, authentication and cleanup receipts without claiming any already ran.</p>
+<p><strong>Progressive hint:</strong> A server URL does not implement the missing API and lifecycle boundary.</p>
+<h4 id="exercise-6-write-a-reviewable-deployment-acceptance-checklist">Exercise 6: Write a reviewable deployment acceptance checklist<a class="heading-anchor" href="#exercise-6-write-a-reviewable-deployment-acceptance-checklist" aria-label="Link to this section">#</a></h4>
+<p>Turn the sanitized proposal into a go/no-go review record with explicit evidence tiers and rollback ownership. Keep the worksheet read-only.</p>
+<p><strong>Inputs/evidence:</strong> For spark-030 Exercise 6, All previous design findings, the 30-row/schema/digest contract and only an existing local classic runtime receipt.</p>
+<p><strong>Expected result/shape:</strong> For spark-030 Exercise 6, A bounded acceptance plan separating proposed configuration, artifact inspection, remote execution and production readiness; unresolved path/package/Connect gaps remain explicit.</p>
+<p><strong>Verify:</strong> Name concrete artifacts and receipts, owners and failure actions; do not mark deployment accepted based on diagram orsyntax alone.</p>
+<p><strong>Progressive hint:</strong> A checked configuration is useful evidence but is not a completed remote run.</p></article>
+  </main>
+</body>
+</html>

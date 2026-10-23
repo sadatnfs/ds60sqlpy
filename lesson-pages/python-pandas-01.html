@@ -363,26 +363,20 @@
 <p>Finally, concatenation appends rows but does not guarantee that keys remain unique or schemas match. Require explicit columns and dtype compatibility when combining typed batches. A result that prints nicely may still have silently widened a nullable integer to object or duplicated an entity. The exercises build narrow reusable boundaries that reject ambiguity while preserving input tables.</p>
 <h4 id="guide--worked-examples-and-syntax-anatomy">Worked examples and syntax anatomy<a class="heading-anchor" href="#guide--worked-examples-and-syntax-anatomy" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">import numpy as np
-import pandas as pd
-
-left=pd.Series([20,10],index=[&quot;b&quot;,&quot;a&quot;])
-right=pd.Series([1,2],index=[&quot;a&quot;,&quot;b&quot;])
-result=left-right
-assert result.to_dict()=={&quot;a&quot;:9,&quot;b&quot;:18}
-assert (left.to_numpy()-right.to_numpy()).tolist()==[19,8]
-print(&quot;Label subtraction:&quot;,result.to_dict())</code></pre>
+<pre><code class="language-python">left = pd.Series([20, 10], index=[&quot;b&quot;, &quot;a&quot;])
+right = pd.Series([1, 2], index=[&quot;a&quot;, &quot;b&quot;])
+result = left - right
+assert result.to_dict() == {&quot;a&quot;: 9, &quot;b&quot;: 18}
+assert (left.to_numpy() - right.to_numpy()).tolist() == [19, 8]
+print(&quot;Label subtraction:&quot;, result.to_dict())</code></pre>
 <p>The two arithmetic expressions answer different questions. Series subtraction matches a with a and b with b, while array subtraction pairs the first elements regardless of identity. The resulting numbers differ even though every input has length two. Labels are part of the data contract.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
-<pre><code class="language-python">import numpy as np
-import pandas as pd
-
-values=pd.Series([1,pd.NA,-2],dtype=&quot;Int64&quot;,index=[&quot;a&quot;,&quot;b&quot;,&quot;c&quot;])
-mask=values.gt(0)
-assert str(mask.dtype)==&quot;boolean&quot; and pd.isna(mask.loc[&quot;b&quot;])
-selected=values.loc[mask.fillna(False)]
-assert selected.index.tolist()==[&quot;a&quot;]
-print(&quot;Known positive rows:&quot;,selected.to_dict())</code></pre>
+<pre><code class="language-python">values = pd.Series([1, pd.NA, -2], dtype=&quot;Int64&quot;, index=[&quot;a&quot;, &quot;b&quot;, &quot;c&quot;])
+mask = values.gt(0)
+assert str(mask.dtype) == &quot;boolean&quot; and pd.isna(mask.loc[&quot;b&quot;])
+selected = values.loc[mask.fillna(False)]
+assert selected.index.tolist() == [&quot;a&quot;]
+print(&quot;Known positive rows:&quot;, selected.to_dict())</code></pre>
 <p>The comparison preserves uncertainty for b rather than inventing a negative measurement. The filter then explicitly chooses to retain only known True rows. Filling the mask is a decision policy at the selection boundary, not an instruction to replace missing source values with zero.</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <ol>
@@ -465,75 +459,124 @@ Done when all six contracts and their boundary cases have inspected evidence and
 <span>Official implementations remain in solutions/.</span>
 <span>&quot;&quot;&quot;</span>
 <span> </span>
-<span>import numpy as np</span>
-<span>import pandas as pd</span>
+<span>import pandas as pd  # type: ignore[import-untyped]</span>
+<span> </span>
 <span> </span>
 <span>def aligned_difference(left: pd.Series, right: pd.Series) -&gt; pd.Series:</span>
-<span>    &quot;&quot;&quot;Subtract right from left after requiring unique indices and exactly the same label set. Preserve left index order. Reject missing or duplicate labels with ValueError; do not silently form a union and invent missing results.&quot;&quot;&quot;</span>
+<span>    &quot;&quot;&quot;</span>
+<span>    Subtract right from left after requiring unique indices and exactly the same label set.</span>
+<span>    Preserve left index order. Reject missing or duplicate labels with ValueError; do not</span>
+<span>    silently form a union and invent missing results.</span>
+<span>    &quot;&quot;&quot;</span>
 <span>    raise NotImplementedError(&quot;Implement aligned_difference&quot;)</span>
 <span> </span>
+<span> </span>
 <span>def assign_by_label(frame: pd.DataFrame, name: str, values: pd.Series) -&gt; pd.DataFrame:</span>
-<span>    &quot;&quot;&quot;Return a copied frame with a column assigned from a uniquely indexed Series covering exactly the frame index. Preserve frame order and existing source data. Reject duplicate or mismatched indices rather than assigning by position.&quot;&quot;&quot;</span>
+<span>    &quot;&quot;&quot;</span>
+<span>    Return a copied frame with a column assigned from a uniquely indexed Series covering</span>
+<span>    exactly the frame index. Preserve frame order and existing source data. Reject duplicate</span>
+<span>    or mismatched indices rather than assigning by position.</span>
+<span>    &quot;&quot;&quot;</span>
 <span>    raise NotImplementedError(&quot;Implement assign_by_label&quot;)</span>
 <span> </span>
+<span> </span>
 <span>def nullable_positive(values: pd.Series) -&gt; pd.Series:</span>
-<span>    &quot;&quot;&quot;Require an Int64 nullable Series and return a nullable Boolean mask for values greater than zero. Preserve its index and unknown entries. Reject another dtype with ValueError so the missing-value representation is explicit.&quot;&quot;&quot;</span>
+<span>    &quot;&quot;&quot;</span>
+<span>    Require an Int64 nullable Series and return a nullable Boolean mask for values greater</span>
+<span>    than zero. Preserve its index and unknown entries. Reject another dtype with ValueError</span>
+<span>    so the missing-value representation is explicit.</span>
+<span>    &quot;&quot;&quot;</span>
 <span>    raise NotImplementedError(&quot;Implement nullable_positive&quot;)</span>
 <span> </span>
+<span> </span>
 <span>def select_known_true(frame: pd.DataFrame, mask: pd.Series) -&gt; pd.DataFrame:</span>
-<span>    &quot;&quot;&quot;Filter a uniquely indexed frame with a Boolean or nullable-Boolean Series covering the same unique labels. Align by label, retain only known True entries, preserve frame order and return a copy. Reject integer flags or mismatched labels.&quot;&quot;&quot;</span>
+<span>    &quot;&quot;&quot;</span>
+<span>    Filter a uniquely indexed frame with a Boolean or nullable-Boolean Series covering the</span>
+<span>    same unique labels. Align by label, retain only known True entries, preserve frame order</span>
+<span>    and return a copy. Reject integer flags or mismatched labels.</span>
+<span>    &quot;&quot;&quot;</span>
 <span>    raise NotImplementedError(&quot;Implement select_known_true&quot;)</span>
 <span> </span>
+<span> </span>
 <span>def reindex_with_presence(values: pd.Series, labels: list[str]) -&gt; pd.DataFrame:</span>
-<span>    &quot;&quot;&quot;For unique source labels and unique target labels, return a DataFrame indexed in target order with value and present columns. Reindex values without filling them; present indicates whether the label existed in the source even if its value was missing.&quot;&quot;&quot;</span>
+<span>    &quot;&quot;&quot;</span>
+<span>    For unique source labels and unique target labels, return a DataFrame indexed in target</span>
+<span>    order with value and present columns. Reindex values without filling them; present</span>
+<span>    indicates whether the label existed in the source even if its value was missing.</span>
+<span>    &quot;&quot;&quot;</span>
 <span>    raise NotImplementedError(&quot;Implement reindex_with_presence&quot;)</span>
 <span> </span>
+<span> </span>
 <span>def strict_concat(frames: list[pd.DataFrame]) -&gt; pd.DataFrame:</span>
-<span>    &quot;&quot;&quot;Concatenate a nonempty list of frames with exactly matching column order and dtypes, and globally unique row indices. Reject schema differences or duplicate identities with ValueError. Permit an empty typed frame within the list.&quot;&quot;&quot;</span>
+<span>    &quot;&quot;&quot;</span>
+<span>    Concatenate a nonempty list of frames with exactly matching column order and dtypes, and</span>
+<span>    globally unique row indices. Reject schema differences or duplicate identities with</span>
+<span>    ValueError. Permit an empty typed frame within the list.</span>
+<span>    &quot;&quot;&quot;</span>
 <span>    raise NotImplementedError(&quot;Implement strict_concat&quot;)</span>
 <span> </span>
-<span>def worked_examples():</span>
-<span>    left=pd.Series([20,10],index=[&quot;b&quot;,&quot;a&quot;])</span>
-<span>    right=pd.Series([1,2],index=[&quot;a&quot;,&quot;b&quot;])</span>
-<span>    result=left-right</span>
-<span>    assert result.to_dict()=={&quot;a&quot;:9,&quot;b&quot;:18}</span>
-<span>    assert (left.to_numpy()-right.to_numpy()).tolist()==[19,8]</span>
-<span>    print(&quot;Label subtraction:&quot;,result.to_dict())</span>
 <span> </span>
-<span>    values=pd.Series([1,pd.NA,-2],dtype=&quot;Int64&quot;,index=[&quot;a&quot;,&quot;b&quot;,&quot;c&quot;])</span>
-<span>    mask=values.gt(0)</span>
-<span>    assert str(mask.dtype)==&quot;boolean&quot; and pd.isna(mask.loc[&quot;b&quot;])</span>
-<span>    selected=values.loc[mask.fillna(False)]</span>
-<span>    assert selected.index.tolist()==[&quot;a&quot;]</span>
-<span>    print(&quot;Known positive rows:&quot;,selected.to_dict())</span>
+<span>def worked_examples() -&gt; None:</span>
+<span>    left = pd.Series([20, 10], index=[&quot;b&quot;, &quot;a&quot;])</span>
+<span>    right = pd.Series([1, 2], index=[&quot;a&quot;, &quot;b&quot;])</span>
+<span>    result = left - right</span>
+<span>    assert result.to_dict() == {&quot;a&quot;: 9, &quot;b&quot;: 18}</span>
+<span>    assert (left.to_numpy() - right.to_numpy()).tolist() == [19, 8]</span>
+<span>    print(&quot;Label subtraction:&quot;, result.to_dict())</span>
+<span> </span>
+<span>    values = pd.Series([1, pd.NA, -2], dtype=&quot;Int64&quot;, index=[&quot;a&quot;, &quot;b&quot;, &quot;c&quot;])</span>
+<span>    mask = values.gt(0)</span>
+<span>    assert str(mask.dtype) == &quot;boolean&quot; and pd.isna(mask.loc[&quot;b&quot;])</span>
+<span>    selected = values.loc[mask.fillna(False)]</span>
+<span>    assert selected.index.tolist() == [&quot;a&quot;]</span>
+<span>    print(&quot;Known positive rows:&quot;, selected.to_dict())</span>
+<span> </span>
 <span> </span>
 <span>if __name__ == &quot;__main__&quot;:</span>
 <span>    worked_examples()</span>
 <span>    print(&quot;Worked examples passed. Complete the six task functions and their boundary checks.&quot;)</span>
 <span> </span>
 <span># Exercise 1: Subtract by validated identities</span>
-<span># Prompt: Subtract right from left after requiring unique indices and exactly the same label set. Preserve left index order. Reject missing or duplicate labels with ValueError; do not silently form a union and invent missing results.</span>
-<span># Expected: left b=20, a=10 and right a=1, b=2 return b=18, a=9 in that order. A right Series missing b or with duplicate a raises ValueError.</span>
+<span># Prompt: Subtract right from left after requiring unique indices and exactly the same label set.</span>
+<span># Preserve left index order. Reject missing or duplicate labels with ValueError; do not silently</span>
+<span># form a union and invent missing results.</span>
+<span># Expected: left b=20, a=10 and right a=1, b=2 return b=18, a=9 in that order. A right Series</span>
+<span># missing b or with duplicate a raises ValueError.</span>
 <span> </span>
 <span># Exercise 2: Assign without swapping entities</span>
-<span># Prompt: Return a copied frame with a column assigned from a uniquely indexed Series covering exactly the frame index. Preserve frame order and existing source data. Reject duplicate or mismatched indices rather than assigning by position.</span>
-<span># Expected: Frame index[b, a] and Series a=100, b=200 create column[200,100]. The original frame has no new column; an extra Series label c raises ValueError.</span>
+<span># Prompt: Return a copied frame with a column assigned from a uniquely indexed Series covering</span>
+<span># exactly the frame index. Preserve frame order and existing source data. Reject duplicate or</span>
+<span># mismatched indices rather than assigning by position.</span>
+<span># Expected: Frame index[b, a] and Series a=100, b=200 create column[200,100]. The original frame</span>
+<span># has no new column; an extra Series label c raises ValueError.</span>
 <span> </span>
 <span># Exercise 3: Keep unknown comparison results</span>
-<span># Prompt: Require an Int64 nullable Series and return a nullable Boolean mask for values greater than zero. Preserve its index and unknown entries. Reject another dtype with ValueError so the missing-value representation is explicit.</span>
-<span># Expected: Int64[2, NA,0,-1] gives [True, NA, False, False] with dtype boolean. A plain float Series is rejected; an empty Int64 Series returns empty boolean.</span>
+<span># Prompt: Require an Int64 nullable Series and return a nullable Boolean mask for values greater</span>
+<span># than zero. Preserve its index and unknown entries. Reject another dtype with ValueError so the</span>
+<span># missing-value representation is explicit.</span>
+<span># Expected: Int64[2, NA,0,-1] gives [True, NA, False, False] with dtype boolean. A plain float</span>
+<span># Series is rejected; an empty Int64 Series returns empty boolean.</span>
 <span> </span>
 <span># Exercise 4: Apply an explicit unknown-filter policy</span>
-<span># Prompt: Filter a uniquely indexed frame with a Boolean or nullable-Boolean Series covering the same unique labels. Align by label, retain only known True entries, preserve frame order and return a copy. Reject integer flags or mismatched labels.</span>
-<span># Expected: Frame index[b, a, c] and mask a=True, b=NA, c=False retain only a. The output can be mutated without changing frame; Int64[1,0,1] is rejected.</span>
+<span># Prompt: Filter a uniquely indexed frame with a Boolean or nullable-Boolean Series covering the</span>
+<span># same unique labels. Align by label, retain only known True entries, preserve frame order and</span>
+<span># return a copy. Reject integer flags or mismatched labels.</span>
+<span># Expected: Frame index[b, a, c] and mask a=True, b=NA, c=False retain only a. The output can be</span>
+<span># mutated without changing frame; Int64[1,0,1] is rejected.</span>
 <span> </span>
 <span># Exercise 5: Distinguish absent labels from unknown values</span>
-<span># Prompt: For unique source labels and unique target labels, return a DataFrame indexed in target order with value and present columns. Reindex values without filling them; present indicates whether the label existed in the source even if its value was missing.</span>
-<span># Expected: Source a=NA, b=5 and targets[b, a, c] yield present[True, True, False] with b value 5 and missing a, c. Duplicate target labels raise ValueError.</span>
+<span># Prompt: For unique source labels and unique target labels, return a DataFrame indexed in target</span>
+<span># order with value and present columns. Reindex values without filling them; present indicates</span>
+<span># whether the label existed in the source even if its value was missing.</span>
+<span># Expected: Source a=NA, b=5 and targets[b, a, c] yield present[True, True, False] with b value 5</span>
+<span># and missing a, c. Duplicate target labels raise ValueError.</span>
 <span> </span>
 <span># Exercise 6: Append typed batches without hiding identity conflicts</span>
-<span># Prompt: Concatenate a nonempty list of frames with exactly matching column order and dtypes, and globally unique row indices. Reject schema differences or duplicate identities with ValueError. Permit an empty typed frame within the list.</span>
-<span># Expected: Two Int64 frames indexed a and b concatenate to index[a, b] preserving Int64. Repeated a, reversed columns, changed dtype or an empty list is rejected.</span>
+<span># Prompt: Concatenate a nonempty list of frames with exactly matching column order and dtypes, and</span>
+<span># globally unique row indices. Reject schema differences or duplicate identities with ValueError.</span>
+<span># Permit an empty typed frame within the list.</span>
+<span># Expected: Two Int64 frames indexed a and b concatenate to index[a, b] preserving Int64. Repeated</span>
+<span># a, reversed columns, changed dtype or an empty list is rejected.</span>
 <span> </span></code></pre></div>
       </section>
 
@@ -574,91 +617,120 @@ Done when all six contracts and their boundary cases have inspected evidence and
 <p>Subtract right from left after requiring unique indices and exactly the same label set. Preserve left index order. Reject missing or duplicate labels with ValueError; do not silently form a union and invent missing results.</p>
 <p><strong>Expected:</strong> left b=20, a=10 and right a=1, b=2 return b=18, a=9 in that order. A right Series missing b or with duplicate a raises ValueError.</p>
 <pre><code class="language-python">def aligned_difference(left: pd.Series, right: pd.Series) -&gt; pd.Series:
-    if not left.index.is_unique or not right.index.is_unique or len(left)!=len(right) or not left.index.isin(right.index).all():
+    if (
+        not left.index.is_unique
+        or not right.index.is_unique
+        or len(left) != len(right)
+        or not left.index.isin(right.index).all()
+    ):
         raise ValueError(&quot;Expected the same unique labels&quot;)
-    return left-right.reindex(left.index)</code></pre>
+    return left - right.reindex(left.index)</code></pre>
 <p>The identity check precedes subtraction so no union-generated missing row can be mistaken for a real arithmetic result. Reindexing right to the left index makes output order explicit even though pandas also supports automatic alignment. Duplicate labels are rejected because the contract promises one value per identity. This does not require values to be nonmissing; a known identity with an unknown value can legitimately retain a missing difference.</p>
-<pre><code class="language-python">a=pd.Series([20,10],index=[&quot;b&quot;,&quot;a&quot;]);b=pd.Series([1,2],index=[&quot;a&quot;,&quot;b&quot;])
-r=aligned_difference(a,b)
-assert r.index.tolist()==[&quot;b&quot;,&quot;a&quot;] and r.tolist()==[18,9]
-expect_value_error(lambda:aligned_difference(a,b.iloc[:1]))
-expect_value_error(lambda:aligned_difference(a,pd.Series([1,2],index=[&quot;a&quot;,&quot;a&quot;])))</code></pre>
+<pre><code class="language-python">a = pd.Series([20, 10], index=[&quot;b&quot;, &quot;a&quot;])
+b = pd.Series([1, 2], index=[&quot;a&quot;, &quot;b&quot;])
+r = aligned_difference(a, b)
+assert r.index.tolist() == [&quot;b&quot;, &quot;a&quot;] and r.tolist() == [18, 9]
+expect_value_error(lambda: aligned_difference(a, b.iloc[:1]))
+expect_value_error(lambda: aligned_difference(a, pd.Series([1, 2], index=[&quot;a&quot;, &quot;a&quot;])))</code></pre>
 <h5 id="solution-1--exercise-2-assign-without-swapping-entities">Exercise 2: Assign without swapping entities<a class="heading-anchor" href="#solution-1--exercise-2-assign-without-swapping-entities" aria-label="Link to this section">#</a></h5>
 <p>Return a copied frame with a column assigned from a uniquely indexed Series covering exactly the frame index. Preserve frame order and existing source data. Reject duplicate or mismatched indices rather than assigning by position.</p>
 <p><strong>Expected:</strong> Frame index[b, a] and Series a=100, b=200 create column[200,100]. The original frame has no new column; an extra Series label c raises ValueError.</p>
 <pre><code class="language-python">def assign_by_label(frame: pd.DataFrame, name: str, values: pd.Series) -&gt; pd.DataFrame:
-    if not frame.index.is_unique or not values.index.is_unique or len(frame)!=len(values) or not frame.index.isin(values.index).all():
+    if (
+        not frame.index.is_unique
+        or not values.index.is_unique
+        or len(frame) != len(values)
+        or not frame.index.isin(values.index).all()
+    ):
         raise ValueError(&quot;Assignment needs the same unique row identities&quot;)
-    result=frame.copy()
-    result[name]=values.reindex(frame.index)
+    result = frame.copy()
+    result[name] = values.reindex(frame.index)
     return result</code></pre>
 <p>The new frame owns its tabular mutation boundary, and the Series is explicitly aligned before assignment. This avoids relying on coincidental physical order. A caller can replace an existing column through the same function, but the original frame remains unchanged. The extra-label rejection is deliberate: silently dropping c could hide an upstream population mismatch even though pandas can technically perform the assignment.</p>
-<pre><code class="language-python">frame=pd.DataFrame({&quot;old&quot;:[1,2]},index=[&quot;b&quot;,&quot;a&quot;]);values=pd.Series([100,200],index=[&quot;a&quot;,&quot;b&quot;])
-r=assign_by_label(frame,&quot;new&quot;,values)
-assert r[&quot;new&quot;].tolist()==[200,100] and &quot;new&quot; not in frame
-expect_value_error(lambda:assign_by_label(frame,&quot;new&quot;,pd.Series([1,2,3],index=[&quot;a&quot;,&quot;b&quot;,&quot;c&quot;])))</code></pre>
+<pre><code class="language-python">frame = pd.DataFrame({&quot;old&quot;: [1, 2]}, index=[&quot;b&quot;, &quot;a&quot;])
+values = pd.Series([100, 200], index=[&quot;a&quot;, &quot;b&quot;])
+r = assign_by_label(frame, &quot;new&quot;, values)
+assert r[&quot;new&quot;].tolist() == [200, 100] and &quot;new&quot; not in frame
+expect_value_error(
+    lambda: assign_by_label(frame, &quot;new&quot;, pd.Series([1, 2, 3], index=[&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]))
+)</code></pre>
 <h5 id="solution-1--exercise-3-keep-unknown-comparison-results">Exercise 3: Keep unknown comparison results<a class="heading-anchor" href="#solution-1--exercise-3-keep-unknown-comparison-results" aria-label="Link to this section">#</a></h5>
 <p>Require an Int64 nullable Series and return a nullable Boolean mask for values greater than zero. Preserve its index and unknown entries. Reject another dtype with ValueError so the missing-value representation is explicit.</p>
 <p><strong>Expected:</strong> Int64[2, NA,0,-1] gives [True, NA, False, False] with dtype boolean. A plain float Series is rejected; an empty Int64 Series returns empty boolean.</p>
 <pre><code class="language-python">def nullable_positive(values: pd.Series) -&gt; pd.Series:
-    if str(values.dtype)!=&quot;Int64&quot;:
+    if str(values.dtype) != &quot;Int64&quot;:
         raise ValueError(&quot;Expected pandas nullable Int64&quot;)
     return values.gt(0)</code></pre>
 <p>A nullable integer comparison yields nullable Boolean values, retaining the distinction between unknown and known false. The strict dtype requirement is a teaching contract that prevents a different missingness convention from entering silently. Empty typed Series preserve schema even without observations. Downstream code must still decide how unknown truth values affect filtering, aggregation or validation; this function intentionally does not make that policy decision.</p>
-<pre><code class="language-python">s=pd.Series([2,pd.NA,0,-1],dtype=&quot;Int64&quot;)
-r=nullable_positive(s)
-assert str(r.dtype)==&quot;boolean&quot; and r.iloc[0] and pd.isna(r.iloc[1]) and not r.iloc[2]
-assert str(nullable_positive(pd.Series([],dtype=&quot;Int64&quot;)).dtype)==&quot;boolean&quot;
-expect_value_error(lambda:nullable_positive(pd.Series([1.0,np.nan])))</code></pre>
+<pre><code class="language-python">s = pd.Series([2, pd.NA, 0, -1], dtype=&quot;Int64&quot;)
+r = nullable_positive(s)
+assert str(r.dtype) == &quot;boolean&quot; and r.iloc[0] and pd.isna(r.iloc[1]) and not r.iloc[2]
+assert str(nullable_positive(pd.Series([], dtype=&quot;Int64&quot;)).dtype) == &quot;boolean&quot;
+expect_value_error(lambda: nullable_positive(pd.Series([1.0, np.nan])))</code></pre>
 <h5 id="solution-1--exercise-4-apply-an-explicit-unknown-filter-policy">Exercise 4: Apply an explicit unknown-filter policy<a class="heading-anchor" href="#solution-1--exercise-4-apply-an-explicit-unknown-filter-policy" aria-label="Link to this section">#</a></h5>
 <p>Filter a uniquely indexed frame with a Boolean or nullable-Boolean Series covering the same unique labels. Align by label, retain only known True entries, preserve frame order and return a copy. Reject integer flags or mismatched labels.</p>
 <p><strong>Expected:</strong> Frame index[b, a, c] and mask a=True, b=NA, c=False retain only a. The output can be mutated without changing frame; Int64[1,0,1] is rejected.</p>
 <pre><code class="language-python">def select_known_true(frame: pd.DataFrame, mask: pd.Series) -&gt; pd.DataFrame:
-    if not frame.index.is_unique or not mask.index.is_unique or len(frame)!=len(mask) or not frame.index.isin(mask.index).all() or str(mask.dtype) not in {&quot;bool&quot;,&quot;boolean&quot;}:
+    if (
+        not frame.index.is_unique
+        or not mask.index.is_unique
+        or len(frame) != len(mask)
+        or not frame.index.isin(mask.index).all()
+        or str(mask.dtype) not in {&quot;bool&quot;, &quot;boolean&quot;}
+    ):
         raise ValueError(&quot;Expected one Boolean mask value per unique frame label&quot;)
-    keep=mask.reindex(frame.index).fillna(False)
+    keep = mask.reindex(frame.index).fillna(False)
     return frame.loc[keep].copy()</code></pre>
 <p>Unknown mask entries are converted to false only after index validation and alignment, so the choice is attached to the correct entity. The explicit copy establishes a safe modification boundary independent of pandas chained-assignment behavior or copy-on-write settings. Rejecting numeric flags prevents a common ambiguity between a mask and positional indexer. A different policy, such as returning unknown rows separately for review, should be a separately named contract.</p>
-<pre><code class="language-python">frame=pd.DataFrame({&quot;x&quot;:[2,1,3]},index=[&quot;b&quot;,&quot;a&quot;,&quot;c&quot;]);mask=pd.Series([True,pd.NA,False],index=[&quot;a&quot;,&quot;b&quot;,&quot;c&quot;],dtype=&quot;boolean&quot;)
-r=select_known_true(frame,mask)
-assert r.index.tolist()==[&quot;a&quot;]
-r.loc[&quot;a&quot;,&quot;x&quot;]=99
-assert frame.loc[&quot;a&quot;,&quot;x&quot;]==1
-expect_value_error(lambda:select_known_true(frame,pd.Series([1,0,1],index=frame.index,dtype=&quot;Int64&quot;)))</code></pre>
+<pre><code class="language-python">frame = pd.DataFrame({&quot;x&quot;: [2, 1, 3]}, index=[&quot;b&quot;, &quot;a&quot;, &quot;c&quot;])
+mask = pd.Series([True, pd.NA, False], index=[&quot;a&quot;, &quot;b&quot;, &quot;c&quot;], dtype=&quot;boolean&quot;)
+r = select_known_true(frame, mask)
+assert r.index.tolist() == [&quot;a&quot;]
+r.loc[&quot;a&quot;, &quot;x&quot;] = 99
+assert frame.loc[&quot;a&quot;, &quot;x&quot;] == 1
+expect_value_error(
+    lambda: select_known_true(frame, pd.Series([1, 0, 1], index=frame.index, dtype=&quot;Int64&quot;))
+)</code></pre>
 <h5 id="solution-1--exercise-5-distinguish-absent-labels-from-unknown-values">Exercise 5: Distinguish absent labels from unknown values<a class="heading-anchor" href="#solution-1--exercise-5-distinguish-absent-labels-from-unknown-values" aria-label="Link to this section">#</a></h5>
 <p>For unique source labels and unique target labels, return a DataFrame indexed in target order with value and present columns. Reindex values without filling them; present indicates whether the label existed in the source even if its value was missing.</p>
 <p><strong>Expected:</strong> Source a=NA, b=5 and targets[b, a, c] yield present[True, True, False] with b value 5 and missing a, c. Duplicate target labels raise ValueError.</p>
 <pre><code class="language-python">def reindex_with_presence(values: pd.Series, labels: list[str]) -&gt; pd.DataFrame:
-    target=pd.Index(labels)
+    target = pd.Index(labels)
     if not values.index.is_unique or not target.is_unique:
         raise ValueError(&quot;Expected unique source and target labels&quot;)
-    return pd.DataFrame({&quot;value&quot;:values.reindex(target),&quot;present&quot;:target.isin(values.index)},index=target)</code></pre>
+    return pd.DataFrame(
+        {&quot;value&quot;: values.reindex(target), &quot;present&quot;: target.isin(values.index)}, index=target
+    )</code></pre>
 <p>The value column alone cannot distinguish an absent source label from an existing label with a missing measurement. The presence indicator records membership before reindexing, preserving that provenance. Target order is explicit and need not be sorted. This pattern is useful for reconciliation and feature availability because filling both cases with zero would erase the reason information is unavailable.</p>
-<pre><code class="language-python">s=pd.Series([pd.NA,5],index=[&quot;a&quot;,&quot;b&quot;],dtype=&quot;Int64&quot;)
-r=reindex_with_presence(s,[&quot;b&quot;,&quot;a&quot;,&quot;c&quot;])
-assert r.index.tolist()==[&quot;b&quot;,&quot;a&quot;,&quot;c&quot;] and r[&quot;present&quot;].tolist()==[True,True,False]
-assert r.loc[&quot;b&quot;,&quot;value&quot;]==5 and pd.isna(r.loc[&quot;a&quot;,&quot;value&quot;]) and pd.isna(r.loc[&quot;c&quot;,&quot;value&quot;])
-expect_value_error(lambda:reindex_with_presence(s,[&quot;a&quot;,&quot;a&quot;]))</code></pre>
+<pre><code class="language-python">s = pd.Series([pd.NA, 5], index=[&quot;a&quot;, &quot;b&quot;], dtype=&quot;Int64&quot;)
+r = reindex_with_presence(s, [&quot;b&quot;, &quot;a&quot;, &quot;c&quot;])
+assert r.index.tolist() == [&quot;b&quot;, &quot;a&quot;, &quot;c&quot;] and r[&quot;present&quot;].tolist() == [True, True, False]
+assert r.loc[&quot;b&quot;, &quot;value&quot;] == 5 and pd.isna(r.loc[&quot;a&quot;, &quot;value&quot;]) and pd.isna(r.loc[&quot;c&quot;, &quot;value&quot;])
+expect_value_error(lambda: reindex_with_presence(s, [&quot;a&quot;, &quot;a&quot;]))</code></pre>
 <h5 id="solution-1--exercise-6-append-typed-batches-without-hiding-identity-conflicts">Exercise 6: Append typed batches without hiding identity conflicts<a class="heading-anchor" href="#solution-1--exercise-6-append-typed-batches-without-hiding-identity-conflicts" aria-label="Link to this section">#</a></h5>
 <p>Concatenate a nonempty list of frames with exactly matching column order and dtypes, and globally unique row indices. Reject schema differences or duplicate identities with ValueError. Permit an empty typed frame within the list.</p>
 <p><strong>Expected:</strong> Two Int64 frames indexed a and b concatenate to index[a, b] preserving Int64. Repeated a, reversed columns, changed dtype or an empty list is rejected.</p>
 <pre><code class="language-python">def strict_concat(frames: list[pd.DataFrame]) -&gt; pd.DataFrame:
     if not frames:
         raise ValueError(&quot;At least one typed frame is required&quot;)
-    first=frames[0]
-    if any(not frame.columns.equals(first.columns) or not frame.dtypes.equals(first.dtypes) for frame in frames):
+    first = frames[0]
+    if any(
+        not frame.columns.equals(first.columns) or not frame.dtypes.equals(first.dtypes)
+        for frame in frames
+    ):
         raise ValueError(&quot;Batch columns and dtypes must match exactly&quot;)
     try:
-        return pd.concat(frames,axis=0,verify_integrity=True)
+        return pd.concat(frames, axis=0, verify_integrity=True)
     except ValueError as error:
         raise ValueError(&quot;Batch row identities must be globally unique&quot;) from error</code></pre>
 <p>Concatenation is not a schema validator by default, so the function checks both ordered columns and logical dtypes first. verify_integrity then rejects duplicate row identities across the combined batches. This avoids silently resetting identities merely to make concatenation succeed. An empty list has no schema from which to construct a meaningful typed result, while an empty frame with the agreed schema can safely contribute no rows.</p>
-<pre><code class="language-python">a=pd.DataFrame({&quot;x&quot;:pd.Series([1],index=[&quot;a&quot;],dtype=&quot;Int64&quot;)});b=pd.DataFrame({&quot;x&quot;:pd.Series([2],index=[&quot;b&quot;],dtype=&quot;Int64&quot;)})
-r=strict_concat([a,b])
-assert r.index.tolist()==[&quot;a&quot;,&quot;b&quot;] and str(r[&quot;x&quot;].dtype)==&quot;Int64&quot;
-expect_value_error(lambda:strict_concat([a,a]))
-expect_value_error(lambda:strict_concat([a,b.astype(float)]))
-expect_value_error(lambda:strict_concat([]))</code></pre>
+<pre><code class="language-python">a = pd.DataFrame({&quot;x&quot;: pd.Series([1], index=[&quot;a&quot;], dtype=&quot;Int64&quot;)})
+b = pd.DataFrame({&quot;x&quot;: pd.Series([2], index=[&quot;b&quot;], dtype=&quot;Int64&quot;)})
+r = strict_concat([a, b])
+assert r.index.tolist() == [&quot;a&quot;, &quot;b&quot;] and str(r[&quot;x&quot;].dtype) == &quot;Int64&quot;
+expect_value_error(lambda: strict_concat([a, a]))
+expect_value_error(lambda: strict_concat([a, b.astype(float)]))
+expect_value_error(lambda: strict_concat([]))</code></pre>
 <h4 id="solution-1--verification-and-interpretation">Verification and interpretation<a class="heading-anchor" href="#solution-1--verification-and-interpretation" aria-label="Link to this section">#</a></h4>
 <p>Run <code>python python/professional/solutions/py_pandas_01_solution.py</code> from the repository root with the prepared interpreter. The code checks normal inputs and explicit edge cases before printing its success line. Assertions are the evidence; the printed sentence alone is not. The helper <code>expect_value_error</code> requires an actual <code>ValueError</code> and fails if a function silently accepts an invalid input. Inspect each function&#x27;s mutation and ordering behavior as part of its contract.</p></div>
       </section>
@@ -695,95 +767,137 @@ expect_value_error(lambda:strict_concat([]))</code></pre>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Reference implementation and exact boundary checks for python-pandas-01.&quot;&quot;&quot;</span>
 <span> </span>
+<span>from collections.abc import Callable</span>
+<span> </span>
 <span>import numpy as np</span>
-<span>import pandas as pd</span>
+<span>import pandas as pd  # type: ignore[import-untyped]</span>
+<span> </span>
 <span> </span>
 <span>def aligned_difference(left: pd.Series, right: pd.Series) -&gt; pd.Series:</span>
-<span>    if not left.index.is_unique or not right.index.is_unique or len(left)!=len(right) or not left.index.isin(right.index).all():</span>
+<span>    if (</span>
+<span>        not left.index.is_unique</span>
+<span>        or not right.index.is_unique</span>
+<span>        or len(left) != len(right)</span>
+<span>        or not left.index.isin(right.index).all()</span>
+<span>    ):</span>
 <span>        raise ValueError(&quot;Expected the same unique labels&quot;)</span>
-<span>    return left-right.reindex(left.index)</span>
+<span>    return left - right.reindex(left.index)</span>
+<span> </span>
 <span> </span>
 <span>def assign_by_label(frame: pd.DataFrame, name: str, values: pd.Series) -&gt; pd.DataFrame:</span>
-<span>    if not frame.index.is_unique or not values.index.is_unique or len(frame)!=len(values) or not frame.index.isin(values.index).all():</span>
+<span>    if (</span>
+<span>        not frame.index.is_unique</span>
+<span>        or not values.index.is_unique</span>
+<span>        or len(frame) != len(values)</span>
+<span>        or not frame.index.isin(values.index).all()</span>
+<span>    ):</span>
 <span>        raise ValueError(&quot;Assignment needs the same unique row identities&quot;)</span>
-<span>    result=frame.copy()</span>
-<span>    result[name]=values.reindex(frame.index)</span>
+<span>    result = frame.copy()</span>
+<span>    result[name] = values.reindex(frame.index)</span>
 <span>    return result</span>
 <span> </span>
+<span> </span>
 <span>def nullable_positive(values: pd.Series) -&gt; pd.Series:</span>
-<span>    if str(values.dtype)!=&quot;Int64&quot;:</span>
+<span>    if str(values.dtype) != &quot;Int64&quot;:</span>
 <span>        raise ValueError(&quot;Expected pandas nullable Int64&quot;)</span>
 <span>    return values.gt(0)</span>
 <span> </span>
+<span> </span>
 <span>def select_known_true(frame: pd.DataFrame, mask: pd.Series) -&gt; pd.DataFrame:</span>
-<span>    if not frame.index.is_unique or not mask.index.is_unique or len(frame)!=len(mask) or not frame.index.isin(mask.index).all() or str(mask.dtype) not in {&quot;bool&quot;,&quot;boolean&quot;}:</span>
+<span>    if (</span>
+<span>        not frame.index.is_unique</span>
+<span>        or not mask.index.is_unique</span>
+<span>        or len(frame) != len(mask)</span>
+<span>        or not frame.index.isin(mask.index).all()</span>
+<span>        or str(mask.dtype) not in {&quot;bool&quot;, &quot;boolean&quot;}</span>
+<span>    ):</span>
 <span>        raise ValueError(&quot;Expected one Boolean mask value per unique frame label&quot;)</span>
-<span>    keep=mask.reindex(frame.index).fillna(False)</span>
+<span>    keep = mask.reindex(frame.index).fillna(False)</span>
 <span>    return frame.loc[keep].copy()</span>
 <span> </span>
+<span> </span>
 <span>def reindex_with_presence(values: pd.Series, labels: list[str]) -&gt; pd.DataFrame:</span>
-<span>    target=pd.Index(labels)</span>
+<span>    target = pd.Index(labels)</span>
 <span>    if not values.index.is_unique or not target.is_unique:</span>
 <span>        raise ValueError(&quot;Expected unique source and target labels&quot;)</span>
-<span>    return pd.DataFrame({&quot;value&quot;:values.reindex(target),&quot;present&quot;:target.isin(values.index)},index=target)</span>
+<span>    return pd.DataFrame(</span>
+<span>        {&quot;value&quot;: values.reindex(target), &quot;present&quot;: target.isin(values.index)}, index=target</span>
+<span>    )</span>
+<span> </span>
 <span> </span>
 <span>def strict_concat(frames: list[pd.DataFrame]) -&gt; pd.DataFrame:</span>
 <span>    if not frames:</span>
 <span>        raise ValueError(&quot;At least one typed frame is required&quot;)</span>
-<span>    first=frames[0]</span>
-<span>    if any(not frame.columns.equals(first.columns) or not frame.dtypes.equals(first.dtypes) for frame in frames):</span>
+<span>    first = frames[0]</span>
+<span>    if any(</span>
+<span>        not frame.columns.equals(first.columns) or not frame.dtypes.equals(first.dtypes)</span>
+<span>        for frame in frames</span>
+<span>    ):</span>
 <span>        raise ValueError(&quot;Batch columns and dtypes must match exactly&quot;)</span>
 <span>    try:</span>
-<span>        return pd.concat(frames,axis=0,verify_integrity=True)</span>
+<span>        return pd.concat(frames, axis=0, verify_integrity=True)</span>
 <span>    except ValueError as error:</span>
 <span>        raise ValueError(&quot;Batch row identities must be globally unique&quot;) from error</span>
 <span> </span>
-<span>def expect_value_error(call):</span>
+<span> </span>
+<span>def expect_value_error(call: Callable[[], object]) -&gt; None:</span>
 <span>    try:</span>
 <span>        call()</span>
 <span>    except ValueError:</span>
 <span>        return</span>
 <span>    raise AssertionError(&quot;Expected ValueError&quot;)</span>
 <span> </span>
-<span>def main():</span>
+<span> </span>
+<span>def main() -&gt; None:</span>
 <span>    # Exercise 1: Subtract by validated identities</span>
-<span>    a=pd.Series([20,10],index=[&quot;b&quot;,&quot;a&quot;]);b=pd.Series([1,2],index=[&quot;a&quot;,&quot;b&quot;])</span>
-<span>    r=aligned_difference(a,b)</span>
-<span>    assert r.index.tolist()==[&quot;b&quot;,&quot;a&quot;] and r.tolist()==[18,9]</span>
-<span>    expect_value_error(lambda:aligned_difference(a,b.iloc[:1]))</span>
-<span>    expect_value_error(lambda:aligned_difference(a,pd.Series([1,2],index=[&quot;a&quot;,&quot;a&quot;])))</span>
+<span>    a = pd.Series([20, 10], index=[&quot;b&quot;, &quot;a&quot;])</span>
+<span>    b = pd.Series([1, 2], index=[&quot;a&quot;, &quot;b&quot;])</span>
+<span>    r = aligned_difference(a, b)</span>
+<span>    assert r.index.tolist() == [&quot;b&quot;, &quot;a&quot;] and r.tolist() == [18, 9]</span>
+<span>    expect_value_error(lambda: aligned_difference(a, b.iloc[:1]))</span>
+<span>    expect_value_error(lambda: aligned_difference(a, pd.Series([1, 2], index=[&quot;a&quot;, &quot;a&quot;])))</span>
 <span>    # Exercise 2: Assign without swapping entities</span>
-<span>    frame=pd.DataFrame({&quot;old&quot;:[1,2]},index=[&quot;b&quot;,&quot;a&quot;]);values=pd.Series([100,200],index=[&quot;a&quot;,&quot;b&quot;])</span>
-<span>    r=assign_by_label(frame,&quot;new&quot;,values)</span>
-<span>    assert r[&quot;new&quot;].tolist()==[200,100] and &quot;new&quot; not in frame</span>
-<span>    expect_value_error(lambda:assign_by_label(frame,&quot;new&quot;,pd.Series([1,2,3],index=[&quot;a&quot;,&quot;b&quot;,&quot;c&quot;])))</span>
+<span>    frame = pd.DataFrame({&quot;old&quot;: [1, 2]}, index=[&quot;b&quot;, &quot;a&quot;])</span>
+<span>    values = pd.Series([100, 200], index=[&quot;a&quot;, &quot;b&quot;])</span>
+<span>    r = assign_by_label(frame, &quot;new&quot;, values)</span>
+<span>    assert r[&quot;new&quot;].tolist() == [200, 100] and &quot;new&quot; not in frame</span>
+<span>    expect_value_error(</span>
+<span>        lambda: assign_by_label(frame, &quot;new&quot;, pd.Series([1, 2, 3], index=[&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]))</span>
+<span>    )</span>
 <span>    # Exercise 3: Keep unknown comparison results</span>
-<span>    s=pd.Series([2,pd.NA,0,-1],dtype=&quot;Int64&quot;)</span>
-<span>    r=nullable_positive(s)</span>
-<span>    assert str(r.dtype)==&quot;boolean&quot; and r.iloc[0] and pd.isna(r.iloc[1]) and not r.iloc[2]</span>
-<span>    assert str(nullable_positive(pd.Series([],dtype=&quot;Int64&quot;)).dtype)==&quot;boolean&quot;</span>
-<span>    expect_value_error(lambda:nullable_positive(pd.Series([1.0,np.nan])))</span>
+<span>    s = pd.Series([2, pd.NA, 0, -1], dtype=&quot;Int64&quot;)</span>
+<span>    r = nullable_positive(s)</span>
+<span>    assert str(r.dtype) == &quot;boolean&quot; and r.iloc[0] and pd.isna(r.iloc[1]) and not r.iloc[2]</span>
+<span>    assert str(nullable_positive(pd.Series([], dtype=&quot;Int64&quot;)).dtype) == &quot;boolean&quot;</span>
+<span>    expect_value_error(lambda: nullable_positive(pd.Series([1.0, np.nan])))</span>
 <span>    # Exercise 4: Apply an explicit unknown-filter policy</span>
-<span>    frame=pd.DataFrame({&quot;x&quot;:[2,1,3]},index=[&quot;b&quot;,&quot;a&quot;,&quot;c&quot;]);mask=pd.Series([True,pd.NA,False],index=[&quot;a&quot;,&quot;b&quot;,&quot;c&quot;],dtype=&quot;boolean&quot;)</span>
-<span>    r=select_known_true(frame,mask)</span>
-<span>    assert r.index.tolist()==[&quot;a&quot;]</span>
-<span>    r.loc[&quot;a&quot;,&quot;x&quot;]=99</span>
-<span>    assert frame.loc[&quot;a&quot;,&quot;x&quot;]==1</span>
-<span>    expect_value_error(lambda:select_known_true(frame,pd.Series([1,0,1],index=frame.index,dtype=&quot;Int64&quot;)))</span>
+<span>    frame = pd.DataFrame({&quot;x&quot;: [2, 1, 3]}, index=[&quot;b&quot;, &quot;a&quot;, &quot;c&quot;])</span>
+<span>    mask = pd.Series([True, pd.NA, False], index=[&quot;a&quot;, &quot;b&quot;, &quot;c&quot;], dtype=&quot;boolean&quot;)</span>
+<span>    r = select_known_true(frame, mask)</span>
+<span>    assert r.index.tolist() == [&quot;a&quot;]</span>
+<span>    r.loc[&quot;a&quot;, &quot;x&quot;] = 99</span>
+<span>    assert frame.loc[&quot;a&quot;, &quot;x&quot;] == 1</span>
+<span>    expect_value_error(</span>
+<span>        lambda: select_known_true(frame, pd.Series([1, 0, 1], index=frame.index, dtype=&quot;Int64&quot;))</span>
+<span>    )</span>
 <span>    # Exercise 5: Distinguish absent labels from unknown values</span>
-<span>    s=pd.Series([pd.NA,5],index=[&quot;a&quot;,&quot;b&quot;],dtype=&quot;Int64&quot;)</span>
-<span>    r=reindex_with_presence(s,[&quot;b&quot;,&quot;a&quot;,&quot;c&quot;])</span>
-<span>    assert r.index.tolist()==[&quot;b&quot;,&quot;a&quot;,&quot;c&quot;] and r[&quot;present&quot;].tolist()==[True,True,False]</span>
-<span>    assert r.loc[&quot;b&quot;,&quot;value&quot;]==5 and pd.isna(r.loc[&quot;a&quot;,&quot;value&quot;]) and pd.isna(r.loc[&quot;c&quot;,&quot;value&quot;])</span>
-<span>    expect_value_error(lambda:reindex_with_presence(s,[&quot;a&quot;,&quot;a&quot;]))</span>
+<span>    s = pd.Series([pd.NA, 5], index=[&quot;a&quot;, &quot;b&quot;], dtype=&quot;Int64&quot;)</span>
+<span>    r = reindex_with_presence(s, [&quot;b&quot;, &quot;a&quot;, &quot;c&quot;])</span>
+<span>    assert r.index.tolist() == [&quot;b&quot;, &quot;a&quot;, &quot;c&quot;] and r[&quot;present&quot;].tolist() == [True, True, False]</span>
+<span>    assert (</span>
+<span>        r.loc[&quot;b&quot;, &quot;value&quot;] == 5 and pd.isna(r.loc[&quot;a&quot;, &quot;value&quot;]) and pd.isna(r.loc[&quot;c&quot;, &quot;value&quot;])</span>
+<span>    )</span>
+<span>    expect_value_error(lambda: reindex_with_presence(s, [&quot;a&quot;, &quot;a&quot;]))</span>
 <span>    # Exercise 6: Append typed batches without hiding identity conflicts</span>
-<span>    a=pd.DataFrame({&quot;x&quot;:pd.Series([1],index=[&quot;a&quot;],dtype=&quot;Int64&quot;)});b=pd.DataFrame({&quot;x&quot;:pd.Series([2],index=[&quot;b&quot;],dtype=&quot;Int64&quot;)})</span>
-<span>    r=strict_concat([a,b])</span>
-<span>    assert r.index.tolist()==[&quot;a&quot;,&quot;b&quot;] and str(r[&quot;x&quot;].dtype)==&quot;Int64&quot;</span>
-<span>    expect_value_error(lambda:strict_concat([a,a]))</span>
-<span>    expect_value_error(lambda:strict_concat([a,b.astype(float)]))</span>
-<span>    expect_value_error(lambda:strict_concat([]))</span>
+<span>    a = pd.DataFrame({&quot;x&quot;: pd.Series([1], index=[&quot;a&quot;], dtype=&quot;Int64&quot;)})</span>
+<span>    b = pd.DataFrame({&quot;x&quot;: pd.Series([2], index=[&quot;b&quot;], dtype=&quot;Int64&quot;)})</span>
+<span>    r = strict_concat([a, b])</span>
+<span>    assert r.index.tolist() == [&quot;a&quot;, &quot;b&quot;] and str(r[&quot;x&quot;].dtype) == &quot;Int64&quot;</span>
+<span>    expect_value_error(lambda: strict_concat([a, a]))</span>
+<span>    expect_value_error(lambda: strict_concat([a, b.astype(float)]))</span>
+<span>    expect_value_error(lambda: strict_concat([]))</span>
 <span>    print(&quot;python-pandas-01: all six normal and boundary contracts passed&quot;)</span>
+<span> </span>
 <span> </span>
 <span>if __name__ == &quot;__main__&quot;:</span>
 <span>    main()</span>

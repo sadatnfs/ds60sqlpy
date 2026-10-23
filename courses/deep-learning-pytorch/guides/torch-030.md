@@ -1,30 +1,30 @@
 # torch-030: Distributed gradients and accumulation semantics on CPU
 
-Status: authored PyTorch course content. The manifest inventories complete teaching files; runtime readiness remains a separate, measured property.
-
 ## Level and prerequisites
 
 Advanced; approximately 120 minutes. Direct prerequisites: `torch-029`. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
 
 ## Learning objectives
 
-Distributed and accumulated gradients should represent a declared global objective. The central investigation is concrete: Combine means2, 6 with counts1, 3. The finish condition is global mean5; unweighted sha rd mean4. empty sha rd contributes0; global mean5. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Distributed and accumulated gradients should represent a declared global objective. The central investigation is concrete: Combine means 2, 6 with counts 1, 3. The finish condition is global mean 5; unweighted shard mean 4. empty shard contributes 0; global mean 5. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
-Distributed and accumulated gradients should represent a declared global objective. Equal averaging of sha rd means weights shards equally, not examples. If one sha rd contains one observation with mean gradient2 and another contains three with mean6, the global example mean is5 rather than4. The same issue appears with unequal microbatches on one CPU.
+Distributed and accumulated gradients should represent a declared global objective. Equal averaging of shard means weights shards equally, not examples. If one shard contains one observation with mean gradient 2 and another contains three with mean 6, the global example mean is 5 rather than 4. The same issue appears with unequal microbatches on one CPU.
 
 To reproduce a full-batch mean through accumulation, hold parameters fixed while adding gradient sums, divide by the total active count, and apply one optimizer update. Stepping after each microbatch is a different trajectory because later gradients use changed weights. Distributed Data Parallel has its own reduction semantics; this lesson does not launch multiple processes or claim scaling. It derives the weighting rule that a real distributed implementation must preserve and explains which additional runtime evidence would be required.
 
 ## Design decisions and when to use this method
 
+Define the global statistical objective before choosing communication or accumulation mechanics. Decide whether examples, tokens, weights or groups receive equal influence, and carry the corresponding denominator alongside every local numerator. Equal rank weight is correct only when that is the intended objective or local denominators agree.
 
+Use the one-CPU fixture to validate the algebra and one-update boundary. A real distributed run additionally needs compatible process participation, collective ordering, parameter state and failure handling. Do not infer those operational properties from a correct scalar weighted mean.
 
 ## Paired TensorFlow comparison
 
 Compare [tf-030](../../deep-learning-tensorflow/guides/tf-030.md) after deriving the shared numerical contract.
 
-TensorFlow distributed strategies andPyTorchDDP can use different default reduction conventions. The paired CPU arithmetic establishes the intended example-weighted result; it does not demonstrate either backend's communication, scaling or failure behavior.
+TensorFlow distributed strategies and PyTorchDDP can use different default reduction conventions. The paired CPU arithmetic establishes the intended example-weighted result; it does not demonstrate either backend's communication, scaling or failure behavior.
 
 ## Vocabulary and concepts
 
@@ -38,17 +38,39 @@ TensorFlow distributed strategies andPyTorchDDP can use different default reduct
 
 ## How to run this lesson
 
-Use a prepared `llm-torch-cpu` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/torch-030/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: `& $CoursePython courses/deep-learning-pytorch/lessons/torch-030.py`. For macOS/Linux use `.venv/bin/python courses/deep-learning-pytorch/lessons/torch-030.py` from the repository root.
+Use a prepared `llm-torch-cpu` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/torch-030/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: `& $CoursePython courses/deep-learning-pytorch/lessons/torch-030.py`. For macOS/Linux, use the interpreter explicitly selected for a separately prepared native PyTorch environment, and invoke that interpreter on `courses/deep-learning-pytorch/lessons/torch-030.py` from the repository root. The repository's general `.venv` is not assumed to contain PyTorch; the prepared classroom profile is the default execution route.
 
-Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.
+Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the explicit tolerance in each assertion. Several analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone is not a universal numerical-error bound. Finite differences, reductions and conditioning can require different justified tolerances. Integer counts, identities and boolean decisions should be exact.
 
 ## Syntax anatomy and reasoning sequence
 
 Use reduction='sum' for each microbatch, call backward without stepping, then divide accumulated gradients by the total count before one step. Clear gradients before starting the accumulation group. Count active masked targets when appropriate, not merely tensor storage size. If a distributed backend averages gradients across ranks, the local loss scaling must account for that reduction and unequal local counts.
 
+## Derive the global gradient and the reduction factor
+
+Let rank or shard r contain n_r participating examples, local gradient sum S_r and local mean g_r=S_r/n_r when n_r>0. The global example-mean gradient is(sum_r S_r)/(sum_r n_r), equivalently(sum_r n_r g_r)/N. For means 2 and 6 with counts 1 and 3, the numerator is 2+18=20 and N=4, giving five. Averaging the two means gives four and defines a different objective with equal shard weight.
+
+The vector[2, 4, 6, 8] is an independent four-example oracle. Splitting it 1:3 gives sums 2 and 18, which recombine to 20/4=5. An empty shard contributes sum zero and count zero; its local mean need not be evaluated at all. A globally empty collection has N=0 and must not be divided by zero or described as a valid zero-gradient batch without an explicit skip policy.
+
+For the actual squared-loss fixture, x=[1, 2, 3, 4], y=2x and w=0. The per-example derivatives are -4x^2, or[-4, -16, -36, -64]. Their sum is-120 and global mean-30. The two backward calls in Example C accumulate the summed objectives at the same unchanged w, then divide once by four. One SGD update at 0.01 gives w=0.3.
+
+Stepping after each microbatch changes both normalization and evaluation state. The first one-row mean has gradient-4, so w becomes 0.04. The second three-row mean is then evaluated at that new value and has derivative(58/3)(0.04-2), approximately-37.893333. Its second update ends at approximately 0.418933, not 0.3. This discrepancy is expected because it is a different optimization trajectory, not an accumulation bug to hide with a tolerance.
+
+A distributed reducer introduces another factor. Under a fixed R-rank configuration that averages gradients across ranks, backpropagating a local summed loss divided by global N would produce only 1/R of the intended global gradient after averaging. One appropriate local scaling for this stated convention is L_r=(R/N)×sum_i loss_ri. The reducer then returns(1/R)sum_r(R S_r/N)=sum_r S_r/N. Equivalently, weight each nonempty local mean by R n_r/N. When all n_r are equal, the ordinary mean of local means already has the intended weighting.
+
+That derivation assumes the documented reducer behavior and a fixed participation set. Custom communication hooks, uneven-input mechanisms and changed divisors require a fresh derivation. PyTorch DDP documents that its gradient synchronization semantics depend on the loss reduction and participating processes. [PyTorch 2.9 DistributedDataParallel](https://docs.pytorch.org/docs/2.9/generated/torch.nn.parallel.DistributedDataParallel.html). The current lesson launches no process group and therefore verifies none of that communication behavior experimentally.
+
+Padding and sample weights replace the simple n_r with the relevant valid weight mass. Counting tensor storage positions instead of supervised tokens can scale the gradient according to padding. A rank with no valid targets may still need to participate in the distributed protocol; simply skipping its backward while other ranks enter collectives can be an operational error. The CPU arithmetic handles an empty contribution, but a real implementation needs a separately tested participation policy.
+
+Regularization also needs one global meaning. If the objective is mean data loss plus lambda R(theta), adding the full regularizer independently for every accumulated microbatch and then summing multiplies its contribution by the microbatch count. Add it once per intended update or distribute its coefficient deliberately. Optimizer weight decay has its own update semantics and likewise should not be assumed equivalent when the number of optimizer steps changes.
+
+The equivalence requires more than denominators. Parameters and relevant model state must stay fixed while local contributions are formed. BatchNorm statistics, dropout draws, contrastive negative sets and cross-example losses can differ when a large batch is split. Even a mathematically correct reduction cannot make those different forward computations identical. For stateful optimizers, the one-step boundary preserves the intended momentum/adaptive update count; multiple steps change that history.
+
+A future distributed acceptance packet should join the global objective, rank counts, actual reducer convention, parameter synchronization, cancellation and next-step parity. It should also report communication and throughput only after those quantities are measured. The paired TensorFlow chapter derives the same global arithmetic but does not qualify a TensorFlow strategy or a PyTorch backend merely by simulating shards on one CPU.
+
 ## Worked example / walkthrough
 
-### Example A: Weight unequal sha rd means
+### Example A: Weight unequal shard means
 
 Each mean must be multiplied by its denominator to recover a sum. Averaging means directly discards that information.
 
@@ -62,18 +84,18 @@ means=torch.tensor([2.,6.]); counts=torch.tensor([1.,3.])
 assert (means*counts).sum().div(counts.sum()).item()==5 and means.mean().item()==4
 ```
 
-**Expected:** global mean5; unweighted sha rd mean4.
+**Expected:** global mean 5; unweighted shard mean 4.
 
 ### Example B: Reconstruct an example mean
 
-The per-example vector is an independent oracle for the sha rd formula. It catches a checker that merely repeats a wrong averaging assumption.
+The per-example vector is an independent oracle for the shard formula. It catches a checker that merely repeats a wrong averaging assumption.
 
 ```python
 values=torch.tensor([2.,4.,6.,8.]); parts=[values[:1],values[1:]]
 assert sum(part.sum() for part in parts).div(sum(part.numel() for part in parts)).item()==values.mean().item()==5
 ```
 
-**Expected:** global mean5.
+**Expected:** global mean 5.
 
 ### Example C: Accumulate one full-batch gradient
 
@@ -91,19 +113,19 @@ oracle=torch.tensor(0.,dtype=torch.float64,requires_grad=True); full=((oracle*x-
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: global mean5; unweighted sha rd mean4. empty sha rd contributes0; global mean5. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: global mean 5; unweighted shard mean 4. empty shard contributes 0; global mean 5. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
-1. **Weight unequal sha rd means.** Combine means2, 6 with counts1, 3.
-   **Expected:** global mean5; unweighted sha rd mean4.
-   **Verify:** Save the assertion results for exercise 1, including global mean5; unweighted sha rd mean4.
+1. **Weight unequal shard means.** Combine means 2, 6 with counts 1, 3.
+   **Expected:** global mean 5; unweighted shard mean 4.
+   **Verify:** Save the assertion results for exercise 1, including global mean 5; unweighted shard mean 4.
 
-2. **Reconstruct an example mean.** Split gradients2, 4, 6, 8 into one and three elements and recombine sums/counts.
-   **Expected:** global mean5.
-   **Verify:** Save the assertion results for exercise 2, including global mean5.
+2. **Reconstruct an example mean.** Split gradients 2, 4, 6, 8 into one and three elements and recombine sums/counts.
+   **Expected:** global mean 5.
+   **Verify:** Save the assertion results for exercise 2, including global mean 5.
 
-3. **Accumulate one full-batch gradient.** Atw0, usex1..4, y2 x, accumulate squared-loss sums forshards1 and3, and divide by 4.
+3. **Accumulate one full-batch gradient.** At w=0, usex 1..4, y2x, accumulate squared-loss sums forshards 1 and 3, and divide by 4.
    **Expected:** gradient-30, matching full-batch mean.
    **Verify:** Save the assertion results for exercise 3, including gradient-30, matching full-batch mean.
 
@@ -111,17 +133,19 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** new weight.3.
    **Verify:** Save the assertion results for exercise 4, including new weight.3.
 
-5. **Contrast separate microbatch updates.** Reset w0 and step after eachs hard mean instead.
+5. **Contrast separate microbatch updates.** Reset w0and step after each shard mean instead.
    **Expected:** endpoint differs from.3.
    **Verify:** Save the assertion results for exercise 5, including endpoint differs from.3.
 
-6. **Represent empty-sha rd contributions.** Combine an emptys hard and the four real gradients using sums and counts.
-   **Expected:** empty sha rd contributes0; global mean5.
-   **Verify:** Save the assertion results for exercise 6, including empty sha rd contributes0; global mean5.
+6. **Represent empty-shard contributions.** Combine an empty shard and the four real gradients using sums and counts.
+   **Expected:** empty shard contributes 0; global mean 5.
+   **Verify:** Save the assertion results for exercise 6, including empty shard contributes 0; global mean 5.
 
 ## Common pitfalls and diagnosis
 
-When a result disagrees, locate the first intermediate value that violates this explanation. Inspect shapes and identities before aggregates, and inspect counts before averages. Preserve the original fixture and introduce only one controlled change at a time. If an arithmetic identity passes but a data-boundary condition fails, the experiment is still invalid. If a runtime is unavailable, record the unexecuted code as unverified rather than replacing its output with the expected text. The separate explanation discusses why the tempting alternative in each case changes the result.
+If gradients differ by a constant factor, inspect local loss reduction, global valid count and the backend's sum-versus-average rule. If only unequal batches fail, compare n_r explicitly instead of assuming rank means have equal denominators. If the endpoint differs after microbatching, check whether parameters were stepped between contributions.
+
+If an empty shard hangs a distributed experiment, the arithmetic zero contribution is not the whole participation contract; inspect collective ordering and the chosen uneven-input mechanism. If accumulation changes results despite correct weighting, inspect BatchNorm, dropout and cross-example objectives. Keep regularization and optimizer-step frequency visible. A successful CPU mean calculation is not evidence of multi-process setup, device behavior or scaling.
 
 ## Progressive hints
 

@@ -1,0 +1,38 @@
+{
+  "lesson_id": "k8s-040",
+  "provenance": "synthetic teaching cases, not runtime observations",
+  "capability": "one fixed host fault with UID-bound restoration and timestamped application evidence",
+  "browser_source": false,
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Capture selector,Pod label,endpoint count and fixed response before the fault.",
+      "expected": "A connected selection graph and successful application control."
+    },
+    {
+      "exercise": 2,
+      "task": "List crash,selector mismatch and target-port mismatch with a distinguishing observation for each.",
+      "expected": "Three specific evidence checks rather than a generic restart."
+    },
+    {
+      "exercise": 3,
+      "task": "Find the field change and the earliest observation supporting its effect.",
+      "expected": "Selector changes at10;zero endpoints observed at15 while readiness remains1."
+    },
+    {
+      "exercise": 4,
+      "task": "Restore the verified selector only if the Service UID and current update precondition match.",
+      "expected": "Owned svc-1 repaired;replacement UID causes refusal."
+    },
+    {
+      "exercise": 5,
+      "task": "Read endpoint selection and the ordinary Service response after the repair.",
+      "expected": "One endpoint and expected payload,with actual timestamps if live."
+    },
+    {
+      "exercise": 6,
+      "task": "Summarize cause,evidence,repair,unrelated-state preservation and remaining uncertainty.",
+      "expected": "A timestamped bounded incident packet with no unsupported broad resilience claim."
+    }
+  ]
+}

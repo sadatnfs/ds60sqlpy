@@ -1,0 +1,95 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hello-config
+data:
+  message: reviewer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello
+  labels:
+    app: hello
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hello
+  template:
+    metadata:
+      labels:
+        app: hello
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: hello
+        image: ds60sqlpy-k8s-fixture:0.2.0
+        imagePullPolicy: Never
+        command:
+        - python
+        - /fixture.py
+        - server
+        ports:
+        - name: http
+          containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: http
+          periodSeconds: 2
+          failureThreshold: 2
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            cpu: 100m
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        env:
+        - name: DS60_MESSAGE
+          valueFrom:
+            configMapKeyRef:
+              name: hello-config
+              key: message
+        volumeMounts:
+        - name: lesson-config
+          mountPath: /config
+          readOnly: true
+      volumes:
+      - name: lesson-config
+        configMap:
+          name: hello-config
+          items:
+          - key: message
+            path: message
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello
+spec:
+  selector:
+    app: hello
+  ports:
+  - name: http
+    port: 8080
+    targetPort: http
+
+# Exercise 1: Review the complete desired set. Explain the purpose and references of ConfigMap,Deployment and Service before Run. Expected: Two replicas,matching app labels,fixed port chain and both message consumers are identified.
+# Exercise 2: Establish controller ownership. Observe desired/updated/ready state and the Deployment-to-ReplicaSet-to-Pod UID chain. Expected: Exactly two owned Ready Pod identities for the intended generation.
+# Exercise 3: Verify routing and values. Compare ready endpoint UIDs and fresh client responses with the fixed contract. Expected: UID sets match;version and both message values are exact.
+# Exercise 4: Inject one bounded fault. Predict and run one admitted selector/probe/task negative case. Expected: The named check fails within budget and cleanup still targets only owned UIDs.
+# Exercise 5: Repair and compare a fresh run. Restore the relevant field and execute a new bounded operation. Expected: The intended checks pass with new actual resource identities.
+# Exercise 6: Hand off acceptance and limits. Prepare the finite service packet for a second learner. Expected: Source,nonsecret target identity,controller/backend/client/failure/cleanup evidence and unqualified surfaces are explicit.

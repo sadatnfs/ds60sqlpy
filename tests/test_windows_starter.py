@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import subprocess
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
@@ -15,6 +16,17 @@ def test_starter_includes_launch_assets_and_excludes_private_files(tmp_path: Pat
     root = tmp_path / "course"
     assets = {
         "START_DOCKER_LAB.cmd": "@echo off\r\n",
+        "classroom": "#!/usr/bin/env bash\n",
+        "classroom.cmd": "@echo off\r\n",
+        "scripts/classroom.sh": "#!/usr/bin/env bash\n",
+        "START_DOCKER_CLASSROOM.cmd": "@echo off\r\n",
+        "START_DOCKER_CLASSROOM.command": "#!/usr/bin/env bash\n",
+        "compose.classroom.yaml": "services: {}\n",
+        "compose.classroom.kubernetes.yaml": "services: {}\n",
+        "courses/browser/favicon.svg": "<svg></svg>\n",
+        "docker/workers/typescript/package-lock.json": "{}\n",
+        "docker/workers/typescript/node_modules/pkg/index.js": "local installed dependency\n",
+        "courses/example/.mypy_cache/local.json": "local checker cache\n",
         "scripts/start_docker_windows.ps1": "Write-Host 'Welcome'\n",
         "scripts/docker_lab.ps1": "Write-Host 'Docker'\n",
         "Dockerfile": "FROM python:3.12-slim-bookworm\n",
@@ -46,6 +58,12 @@ def test_starter_includes_launch_assets_and_excludes_private_files(tmp_path: Pat
         assert archive.testzip() is None
         assert {
             "START_DOCKER_LAB.cmd",
+            "START_DOCKER_CLASSROOM.cmd",
+            "START_DOCKER_CLASSROOM.command",
+            "compose.classroom.yaml",
+            "compose.classroom.kubernetes.yaml",
+            "courses/browser/favicon.svg",
+            "docker/workers/typescript/package-lock.json",
             "scripts/start_docker_windows.ps1",
             "scripts/docker_lab.ps1",
             "Dockerfile",
@@ -58,6 +76,8 @@ def test_starter_includes_launch_assets_and_excludes_private_files(tmp_path: Pat
         } <= names
         assert not names & {
             "docs/.env",
+            "docker/workers/typescript/node_modules/pkg/index.js",
+            "courses/example/.mypy_cache/local.json",
             "docs/local.KEY",
             "docs/Credentials.json",
             "docs/.learning/notes.json",
@@ -101,3 +121,33 @@ def test_staging_omits_windows_junction_contents_on_python_311(
     stage_course(destination, source_root=source)
     assert (destination / "docs/guide.md").read_text() == "Public authored guide."
     assert not (destination / "docs/redirected-folder").exists()
+
+
+def test_starter_cli_invokes_the_real_module_validator_with_supported_options(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from scripts import build_windows_starter as builder
+
+    original_run = subprocess.run
+    validated: list[subprocess.CompletedProcess[str]] = []
+    packaged: list[Path] = []
+
+    def run_check(command: list[str], **kwargs: Any) -> Any:
+        if Path(command[1]).name == "check_modules.py":
+            result = original_run(command, **kwargs, capture_output=True, text=True)
+            validated.append(result)
+            return result
+        return SimpleNamespace(returncode=0)
+
+    def record_archive(output: Path) -> int:
+        packaged.append(output)
+        return 1
+
+    monkeypatch.setattr("scripts.build_windows_starter.subprocess.run", run_check)
+    monkeypatch.setattr(builder, "build_archive", record_archive)
+    output = tmp_path / "starter.zip"
+    assert builder.main(["--output", str(output)]) == 0
+    assert len(validated) == 1
+    assert validated[0].returncode == 0, validated[0].stderr
+    assert "Validated" in validated[0].stdout
+    assert packaged == [output]

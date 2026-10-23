@@ -62,14 +62,13 @@ All timestamps in these fixtures are already timezone-aware UTC. The functions r
 ### Example 1
 
 ```python
-import numpy as np
-import pandas as pd
-
-events=pd.DataFrame({"event_id":[1,2,3],"customer_id":["a","b","c"]})
-dimension=pd.DataFrame({"customer_id":["a","b"],"segment":["small","large"]})
-joined=events.merge(dimension,on="customer_id",how="left",validate="many_to_one",indicator=True)
-assert len(joined)==3 and joined.loc[joined.event_id==3,"_merge"].iloc[0]=="left_only"
-print("Join coverage:",joined[["event_id","_merge"]].astype(str).values.tolist())
+events = pd.DataFrame({"event_id": [1, 2, 3], "customer_id": ["a", "b", "c"]})
+dimension = pd.DataFrame({"customer_id": ["a", "b"], "segment": ["small", "large"]})
+joined = events.merge(
+    dimension, on="customer_id", how="left", validate="many_to_one", indicator=True
+)
+assert len(joined) == 3 and joined.loc[joined.event_id == 3, "_merge"].iloc[0] == "left_only"
+print("Join coverage:", joined[["event_id", "_merge"]].astype(str).values.tolist())
 ```
 
 The left join retains every event. Cardinality validation protects against multiplying rows, while the indicator distinguishes a missing dimension match from a successfully attached segment. An inner join would quietly remove customer c and change the population.
@@ -77,14 +76,25 @@ The left join retains every event. Cardinality validation protects against multi
 ### Example 2
 
 ```python
-import numpy as np
-import pandas as pd
-
-requests=pd.DataFrame({"request_id":[1,2],"at":pd.to_datetime(["2026-01-01T10:30Z","2026-01-01T12:00Z"])})
-history=pd.DataFrame({"available_at":pd.to_datetime(["2026-01-01T10:00Z","2026-01-01T11:00Z"]),"value":[10.,20.]})
-joined=pd.merge_asof(requests,history,left_on="at",right_on="available_at",direction="backward",tolerance=pd.Timedelta("45min"))
-assert joined.loc[0,"value"]==10 and pd.isna(joined.loc[1,"value"])
-print("Bounded availability lookup:",joined["value"].tolist())
+requests = pd.DataFrame(
+    {"request_id": [1, 2], "at": pd.to_datetime(["2026-01-01T10:30Z", "2026-01-01T12:00Z"])}
+)
+history = pd.DataFrame(
+    {
+        "available_at": pd.to_datetime(["2026-01-01T10:00Z", "2026-01-01T11:00Z"]),
+        "value": [10.0, 20.0],
+    }
+)
+joined = pd.merge_asof(
+    requests,
+    history,
+    left_on="at",
+    right_on="available_at",
+    direction="backward",
+    tolerance=pd.Timedelta("45min"),
+)
+assert joined.loc[0, "value"] == 10 and pd.isna(joined.loc[1, "value"])
+print("Bounded availability lookup:", joined["value"].tolist())
 ```
 
 The second request is one hour after the last available value, exceeding the 45-minute freshness policy. Returning missing is the correct result, not an execution failure. A forward direction would introduce future information and a missing tolerance would silently change the policy.

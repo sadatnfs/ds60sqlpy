@@ -57,3 +57,13 @@ id_rsa
 **/*.p12
 **/*.pfx
 **/*.jks
+
+# Host package installs and nested checker caches are not image inputs.
+**/node_modules
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+**/.hypothesis
+
+# Local launcher ports, URL and transient per-project lock.
+.classroom/

@@ -20,6 +20,32 @@ An oracle-context control supplies the authored relevant evidence directly while
 
 Recall@k is the number of relevant IDs retrieved divided by total relevant IDs. Reciprocal rank is1 divided by the first relevant rank, or0 when none appears. For unanswerable questions, returnNone for recall and score abstention separately. Keep retrieval misses, unsupported claims, incorrect answers and appropriate abstentions as distinct counters. Compare observed and oracle results by the same question ID.
 
+## Calculate metrics without losing the task's evidence structure
+
+For relevant IDs R={a, c} and retrieved list[b, c, a], both relevant documents appear, giving recall2/2=1. The first relevant item is at rank two, giving reciprocal rank 1/2. If the caller truncates to the first two items, recall becomes1/2 while reciprocal rank remains1/2. The helper accepts the supplied list as its evaluation depth; it has no separate k argument. Name that cutoff when reporting Recall@k.
+
+A first-hit metric cannot establish multi-evidence sufficiency. If a question requires both a definition and its exclusion rule, retrieving only one can give reciprocal rank one but an incomplete answer context. Conversely, a relevance set may contain several interchangeable documents, where any one is sufficient. The evaluation label should distinguish all required evidence from alternative supporting sources. The set arithmetic alone cannot infer that logic.
+
+Duplicate retrieved IDs are rejected before metrics. Without that boundary, a naive count could reward repeated evidence. The current recall uses a set intersection, which prevents numerator inflation, but duplicate list entries would still distort ranks and consumed budget. Requiring unique identities makes the evaluation unit explicit.
+
+For an unanswerable question, the relevant set is empty. Recall has a zero denominator, so the helper returns None and separately assigns reciprocal rank zero. Treating undefined recall as one would reward a system merely for facing a question with no evidence. Treating it as zero inside every average would confound retriever quality on answerable cases with the prevalence of unanswerable cases. Report the number of answerable cases and score abstention separately.
+
+Suppose one question has one relevant document and retrieves it, while another has nine relevant documents and retrieves one. Macro-average recall is(1+1/9)/2=5/9. Micro recall over all relevant IDs is2/10=0.2. Neither arithmetic result is inherently wrong: one weights questions equally, the other weights relevant-document opportunities equally. The population and task contract must choose the estimand before seeing which number looks better.
+
+The oracle fixture contains saved labels observed={q1:0, q2:0} and oracle={q1:1, q2:0}. It calculates a paired gain of one for q1 and zero for q2, averaging0.5 over those two fixed IDs. No language model is invoked by those dictionaries, and the values are not empirical measurements of a named model. They demonstrate how an actual paired result would be represented and analyzed.
+
+In a real oracle run, improvement after supplying sufficient evidence suggests that context selection was a useful intervention. A remaining failure may concern answer behavior, prompt construction, source interpretation or an incorrect rubric. If oracle context is much shorter or removes conflicting passages, its improvement does not isolate missing-document recall alone. Preserve those differences and use narrower ablations when causal attribution between engineering components matters.
+
+Support and correctness form separate axes. A correct-looking answer with unsupported citations may have come from memorized knowledge or chance; an accurately quoted but irrelevant source may be supported in a literal sense while failing the question. Define support at the claim level under the question's intended meaning. Schema validity, fluent text and citation count should remain diagnostic signals rather than substitutes for the full rubric.
+
+### Interview reasoning with explanatory answers
+
+**Why inspect oracle context?** It helps test whether the answer stage can succeed when sufficient evidence is supplied. It is a controlled diagnostic, not a guarantee that every remaining error belongs exclusively to generation.
+
+**Which average should a retrieval report use?** The one matching the intended evaluation unit, with its denominator stated. Report enough counts to reconstruct it and avoid silently mixing undefined unanswerable cases with answerable recall.
+
+**Can an LLM judge replace the reference labels?** It can supply another measurement proposal, but its disagreement, bias and repeatability need validation. Deterministic identity/format checks and human-reviewed support cases remain valuable independent anchors.
+
 ## Exercise 1: Calculate recall and reciprocal rank
 
 The question is: Use relevant IDs a, c and retrieved b, c, a.

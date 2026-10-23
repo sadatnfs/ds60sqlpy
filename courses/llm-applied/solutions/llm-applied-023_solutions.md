@@ -20,6 +20,30 @@ This lesson implements deterministic freshness and budget checks using an inject
 
 Use timezone-aware UTC datetimes and reject naive timestamps. Compareage=now-published with a nonnegative maximum age, also rejecting future publication times. A Budget object increments only for admitted operations and raises before exceeding its limit. Cache identity includes policy and corpus versions. Trace construction uses an allowlist of metadata fields and excludes source text, credentials and raw private queries.
 
+## Trace temporal admission, work consumption and diagnosis
+
+The freshness helper computes age=now-published and accepts0<=age<=maximum_age. Both boundaries are inclusive. At a two-day limit, a source exactly two days old is admitted; a source two days plus one microsecond old is not. A future publication has negative age and fails rather than remaining perpetually fresh. These comparisons implement a chosen policy, not a test that the document is factually correct.
+
+The supplied fixtures use timezone-aware UTC datetimes. Rejection of naive timestamps prevents one obvious ambiguity, but a complete real-time interface also needs normalization and a policy for source clocks. Civil-time transitions and ambiguous local timestamps deserve separate tests if non-UTC input is supported. An aware timestamp alone should not be described as a complete clock-quality guarantee.
+
+Different temporal fields should remain distinguishable. A policy may be published yesterday but effective next month, or discovered today after applying for weeks. A current answer might require both applicability and a recent verification event. A historical answer might intentionally use an old source that was effective at the event time. The simple published-age gate cannot decide those cases without additional metadata.
+
+The Budget object starts with used=0. Three consume calls move it to one, two, three. The fourth checks used>=limit before incrementing and raises, leaving used at three. A zero limit permits no calls. The limit is a nonnegative integer, so a Boolean or fractional configuration is rejected instead of becoming an accidental count policy.
+
+The counter measures admitted attempts when consume is called before an operation. If an admitted tool later fails, the budget has still been consumed. Refunding it automatically could permit an unbounded retry loop; never refunding it may reduce task completion. Choose and document the retry policy rather than letting it emerge from exception placement. A counter also cannot stop one admitted operation from running forever. The execution layer needs a real deadline, cancellation propagation and resource boundaries.
+
+The trace helper retains request_id, corpus_version, policy, result and excludes fields named secret or source_text. That is a useful key-level allowlist, but it does not inspect the contents of the allowed values. If a raw private question is placed inside request_id, the allowlist will retain it. A production trace schema therefore needs typed identifiers, value-length limits, permitted categories and an access/retention policy, not merely approved field names.
+
+Authorization and freshness are independent gates. The final example combines an authorized source with stale=False admission, resulting in unknown. An error response should explain the failure category without revealing restricted source identities or copying content into logs. The exact user-visible reason may need to distinguish absence, staleness and forbidden access internally while preserving the outward disclosure policy.
+
+### Interview reasoning with explanatory answers
+
+**Why inject time instead of reading the wall clock inside the test?** It makes boundary cases repeatable and allows exact checks at the permitted age limit. It does not remove the need to handle real clock quality in deployment.
+
+**Does a three-call budget bound latency?** No. One call can take arbitrarily long unless the execution layer enforces a deadline and cancellation. Count and duration are different resource dimensions.
+
+**Does an allowlisted trace guarantee no sensitive data leaks?** It restricts keys. Allowed values, downstream access, retention and correlation can still disclose information, so their contracts need separate validation.
+
 ## Exercise 1: Check evidence freshness
 
 The question is: Use fixedUTCnow2026-10-22 and a document published one day earlier under a two-day limit.

@@ -1,48 +1,72 @@
-# Applied LLM content and execution checkpoint
+# Applied LLM content, depth review and execution checkpoint
 
-Updated2026-10-22. All24 reviewed lesson IDs, `llm-applied-001` through `llm-applied-024`, have complete authored bundles registered in `courses/llm-applied/lessons.json`. The course covers subject-assistant design, data-science extraction, prompt/context engineering, corpus provenance, chunking, lexical and embedding retrieval, hybrid ranking, ACLs, multi-hop retrieval, grounded answers, evaluation, SFT, LoRA, quantized frozen bases, DPO-style updates, retrieval-model training, optional pretrained adaptation, typed analysis tools and a bounded capstone.
+Updated 23 October 2026. All **24 lesson bundles are authored and substantively reviewed**. This pass reviewed23 chapters; the independently completed LoRA016 review was preserved. Lesson021 remains a reading chapter with a separate optional pretrained recipe. The other23 use their existing17 Core and six PyTorch runtime profiles. No default program downloads a model or dataset.
 
-## Teaching artifacts
+## Completed topic review
 
-Every guide has three worked examples, mechanism and design explanations, vocabulary, syntax/reasoning anatomy, six inspectable exercises, failure diagnosis, hints, retrieval questions and a lesson-specific Codex prompt. Code lessons have separate answer-free learner worksheets, executable references and explanatory solutions. Lesson021 is a reading worksheet with a separate optional pretrained recipe. Guide word counts range from1639 to2316 after removing repeated helper code from later worked blocks.
+The review adds explicit formulas, state/shape traces, counterexamples, stage-specific decisions, diagnosis and69 explanatory interview answers across the23 reviewed chapters. It distinguishes literal retrieval/extraction baselines, actual tiny-model training, observed pretrained mechanics and domain-quality acceptance. The [machine-readable matrix](../../courses/llm-applied/authoring/review_matrix.json) records every chapter's concrete findings and executable-change scope.
 
-The original portable authoring sources are in `courses/llm-applied/authoring/`. Regenerate with:
+| Chapter | Substantive review outcome |
+| --- | --- |
+| [llm-applied-001](../../courses/llm-applied/guides/llm-applied-001.md) | Stage-level routing, capability evidence and conditional pipeline success |
+| [llm-applied-002](../../courses/llm-applied/guides/llm-applied-002.md) | Typed extraction, provenance coordinates, estimands and rejected-record coverage |
+| [llm-applied-003](../../courses/llm-applied/guides/llm-applied-003.md) | Context overhead, greedy allocation, prompt identity and injection-test scope |
+| [llm-applied-004](../../courses/llm-applied/guides/llm-applied-004.md) | Version lineage, historical applicability, integrity and source admission |
+| [llm-applied-005](../../courses/llm-applied/guides/llm-applied-005.md) | Window-count derivation, overlap cost and Unicode citation coordinates |
+| [llm-applied-006](../../courses/llm-applied/guides/llm-applied-006.md) | Exact BM25 scores, saturation, length normalization and corpus dependence |
+| [llm-applied-007](../../courses/llm-applied/guides/llm-applied-007.md) | Cosine geometry, encoder-space compatibility and search-versus-relevance recall |
+| [llm-applied-008](../../courses/llm-applied/guides/llm-applied-008.md) | Exact RRF gaps, correlated rankings and reranking evidence ceilings |
+| [llm-applied-009](../../courses/llm-applied/guides/llm-applied-009.md) | Pre-filtering, cache equivalence, revocation and trusted policy inputs |
+| [llm-applied-010](../../courses/llm-applied/guides/llm-applied-010.md) | BFS frontier, integer hop bounds, branching and semantic bridge limits |
+| [llm-applied-011](../../courses/llm-applied/guides/llm-applied-011.md) | Span integrity, entailment, computed claims and abstention utility |
+| [llm-applied-012](../../courses/llm-applied/guides/llm-applied-012.md) | Cutoffs, macro/micro denominators, oracle controls and saved-label scope |
+| [llm-applied-013](../../courses/llm-applied/guides/llm-applied-013.md) | Exact family-bootstrap distribution, pairing and selective-answer metrics |
+| [llm-applied-014](../../courses/llm-applied/guides/llm-applied-014.md) | Shifted answer masks, conditioning gradients, truncation and packing boundaries |
+| [llm-applied-015](../../courses/llm-applied/guides/llm-applied-015.md) | Decoder shapes/parameter counts, target gradients and final-state loss reporting |
+| [llm-applied-016](../../courses/llm-applied/guides/llm-applied-016.md) | Independent LoRA orientation, first-step derivatives, rank and merge review |
+| [llm-applied-017](../../courses/llm-applied/guides/llm-applied-017.md) | Quantization codes/bytes, output error, adapter objective and memory levels |
+| [llm-applied-018](../../courses/llm-applied/guides/llm-applied-018.md) | Controlled SFT/adapter state, target modules and optimization-budget limits |
+| [llm-applied-019](../../courses/llm-applied/guides/llm-applied-019.md) | Preference derivative/curvature, reference identity and scalar-versus-policy scope |
+| [llm-applied-020](../../courses/llm-applied/guides/llm-applied-020.md) | Retrieval projection/reranker gradients, analytic boundary and negative-label quality |
+| [llm-applied-021](../../courses/llm-applied/guides/llm-applied-021.md) | Qualified pretrained evidence ladder, real masks, repeatability and quality failure |
+| [llm-applied-022](../../courses/llm-applied/guides/llm-applied-022.md) | Typed analysis grain, stable finite means, reporting lineage and causal limits |
+| [llm-applied-023](../../courses/llm-applied/guides/llm-applied-023.md) | Time boundaries, admitted attempts, cancellation and trace-value contracts |
+| [llm-applied-024](../../courses/llm-applied/guides/llm-applied-024.md) | Actual integrated call path, coverage, evidence gates and bounded no-go |
 
-```text
-python courses/llm-applied/authoring/build.py
-```
+The guides contain about2136-3283 whitespace words each after this pass. Counts describe size; the derivations, independent counterexamples and explicit limits are the content evidence. Every guide retains three worked cases, six distinct tasks and separate learner/reference/explained artifacts. Reading021 now has a written-case study contract instead of instructions to execute its text cases as a program.
 
-The authored corpus and vector fixtures are literal local data. The fixed embedding table, lexical ranker and extractive answerer are explicitly labelled baselines. The tiny decoder and adapter lessons perform actual gradient updates but do not claim pretrained natural-language capability. Lesson017 implements uniform signed4-bit packing and adapter gradients, explicitly distinguishing these from NF4, double quantization, paged optimizers and GPU memory evidence.
+## Durable authoring and code preservation
 
-## Focused checks
+The separate `authoring/depth_reviews_applied.py` supplies the new explanations through a hook after the existing LoRA review. It adds to the rendered anatomy and decisions and replaces generic diagnosis. The original `lora_depth.py`, its derivative oracle and the optional pretrained fixture remain separately owned and were not changed by this review. The applied renderer now gives Docker-first directions while preserving the declared profiles.
 
-Using the existing prepared course Python environment from the repository root:
+An immutable [review baseline](../../courses/llm-applied/authoring/review_baseline.json) records reference and sequential worked-program hashes before the pass. Tests require every unchanged program to match that baseline. The only reference behavior changes are010,015 and022; only010 and022 change the sequential worked program. All other default executable content is byte-identical to the baseline. The three A-C blocks remain one documented sequential fresh-process program.
 
-```text
-python -m pytest tests/test_llm_applied.py -q --disable-warnings
-```
+## Concrete repaired defects and runtime evidence
 
-Latest result: **31 passed,6 skipped**. The six skips are the explicit host-side PyTorch execution tests. All24 lessons pass the shared depth and practice gates inside this suite. Every authored Python source and optional recipe script parses. The17 core reference functions were also executed directly and passed.
+- **010, bounded graph traversal:** fractional max_hops previously passed validation but could never equal an integer depth, so it bypassed the intended stop. The helper now requires a nonnegative Python integer and rejects fractional, Boolean, NaN and negative budgets before traversal. Reference and sequential guide both passed current Core Docker. Receipts: `work/applied010-depth-repaired-acceptance.jsonl` and `work/ml-worked-applied010-depth-repaired-acceptance.jsonl`.
+- **015, training receipt:** curve[-1] described the state before the twentieth optimizer update while held-out loss described the state after it. Final training loss is now recomputed from the same frozen final model and checked in the receipt. The changed reference passed current PyTorch CPU Docker in `work/applied015-final-state-repaired-acceptance.jsonl`. The worked A-C program was unchanged.
+- **022, grouped mean:** finite values[1e308,1e308] could overflow an intermediate sum despite having a finite mean. Scaled summation now returns1e308 and handles opposite-sign cancellation, with an output-finiteness check. Reference and sequential guide passed current Core Docker. Receipts: `work/applied022-stable-mean-repaired-acceptance.jsonl` and `work/ml-worked-applied022-stable-mean-repaired-acceptance.jsonl`.
 
-Independent tests exercise source offsets and overlap, an arithmetic BM25 oracle, embedding shape/norm failures, duplicate-resistant RRF, access-partitioned cache identity, bounded cyclic traversal, SFT target-mask truncation, restricted-answer non-disclosure, optional asset tamper detection, dataset family isolation and local-only pretrained loading. The optional acquisition entry point is separately identified and requires explicit network acknowledgement.
+The checked-in [review runtime evidence](../../courses/llm-applied/authoring/review_runtime_evidence.json) preserves all three reference and two guide-program results with source/image identities and applicable worker/guide hashes. Focused tests recompute those hashes. Qualification used the existing bounded production worker, network disabled, read-only course mounts and one2CPU slot at a time. This author did not build images, acquire models or modify the optional fixture.
 
-## Actual prepared-container execution
+Earlier parent-owned receipts establish all23 default references and the sequential example baseline: `work/applied-llm-core-acceptance.jsonl`, `work/applied-llm-torch-acceptance.jsonl` and the records associated with `work/ml-sequential-examples-manifest.json`. The current three repairs are covered by the new receipts above rather than being attributed to older source versions.
 
-Root integration executed all23 runnable references successfully in prepared Linux arm64 Docker images with network disabled, unprivileged UID65534 and bounded resources:
+## Focused validation
 
-- `llm-applied-001` through `llm-applied-014`, plus `llm-applied-022` through `llm-applied-024`:17 core references passed.
-- `llm-applied-015` through `llm-applied-020`:6 actual PyTorch training/adaptation references passed.
+The applied suite now passes **36 tests**, with six explicit host-side PyTorch execution skips. The combined applied/PyTorch command passes **46 tests with44 declared host runtime skips**. Actual heavy-runtime proof is the separate prepared-worker evidence above; skipped host tests are not presented as numerical execution. Both test files pass Ruff, formatting and strict MyPy. The new prose-review module also passes strict MyPy. A read-only independent review verified the017 quantization/adapter derivatives and020 projection/reranker arithmetic, and clarified that gradients do not flow through discrete tokenization. Additional NumPy checks covered exact source spans,2805 chunk-window configurations, the RRF score gap, the family-bootstrap distribution, parameter counts and preference arithmetic.
 
-The local implementation receipts are `work/applied-llm-core-acceptance.jsonl` and `work/applied-llm-torch-acceptance.jsonl`. Their per-lesson status rows were read back and all report `succeeded`. This is bounded reference execution on the prepared Linux arm64 images. It does not establish native Windows/macOS execution, GPU performance, pretrained adaptation quality, production readiness or learner mastery.
+The checks cover complete routes and profiles, practice/depth contracts, literal Core execution, chunk coordinates, independent BM25 arithmetic, vector failures, duplicate-resistant fusion, access-separated caches, integer-bounded cyclic traversal, answer masks, restricted-answer nondisclosure, optional asset tamper detection, local-only loading, the preserved LoRA finite-difference oracle, complete review records, immutable unchanged-code baselines and matching repair receipts.
 
-## Optional pretrained recipe remains unexecuted
+## Optional pretrained execution and its observed quality failure
 
-Lesson021 links `courses/llm-applied/fixtures/pretrained/README.md`. The recipe includes direct package pins, an immutable SmolLM2-135M-Instruct revision, model-card license metadata, explicit connected acquisition, local file hashes, offline-only model loading, chat-template prefix checks, completion-mask checks, full/LoRA modes, a10-step CPU budget and a local inference probe. A separate optional Dockerfile requires a reviewed digest-pinned base image; its manual offline run bind-mounts learner-owned model and output directories instead of using an ephemeral browser pad.
+The separate recipe is fully documented under [fixtures/pretrained](../../courses/llm-applied/fixtures/pretrained/README.md). Parent-owned evidence records locked preparation, explicit pinned acquisition, offline local loading, mask inspection, ten full-SFT updates, ten LoRA updates and saved-adapter reload on Linux arm64. Full SFT updated134515008 parameters; LoRA updated230400. The supplied data has four authored training records and one held-out entity label sharing an extraction task/template. Its loss changes are mechanics observations, not an independent domain benchmark.
 
-Only model/package metadata was read during authoring. No pretrained weights or datasets were downloaded, no packages were installed, no optional image was built and no pretrained training or inference was executed. The model tree reports269,060,552 weight-file bytes. Memory figures in the recipe are arithmetic planning estimates, not measurements. Direct dependency pins are not presented as a complete transitive lock or a qualified environment. No pretrained success receipt exists in the repository.
+The saved adapter generated an incorrect conversion formula despite supplied correct evidence. That output was not accepted as a supported answer. The review retains this concrete failure: successful acquisition, training, saving and reload do not establish subject-assistant quality. Two same-environment LoRA runs matched artifact hashes and loss after seed placement was corrected before construction. Platform locks for other architectures are preparation evidence, not executed platform qualification.
 
-## Remaining integration and workstream boundary
+The reading chapter separates this observed maintainer run from a hypothetical new learner who has not yet acquired assets or trained. A learner still needs an explicit optional preparation and execution path. The capstone's pretrained_generation_executed=False field concerns its local extractive run, not the separately executed recipe.
 
-Root owns shared catalog/runtime registration, generated dashboard/readers and browser acceptance. The source bundles and focused checks are complete. The default capstone is an evaluated extractive subject-assistant baseline, while the optional pretrained proposal stage requires its own preparation and validation receipts. A causal or inferential statistical conclusion still requires valid design and deterministic analysis evidence.
+## Remaining evidence limits and handoff
 
-Java authoring resumes separately at `java-013`; Java001..012 are already authored and passed root's prepared-image execution. This applied LLM completion does not claim the remaining Java or other queued language lessons are finished.
+There are no pending chapter-authoring or changed-program requalification gaps in this review. The explanations retain bounded local limits: metadata comparisons are not automatically integrated authorization gates; an extractive span constructor is not a general entailment checker; finite score fixtures are not a calibrated relevance model; low teacher-forced loss is not generation quality; local clocks/counters do not implement remote deadlines or real identity-provider integration.
+
+The default capstone is an access-filtered fixed-lookup/extractive baseline with a separate validated calculation. It does not secretly integrate the learned retriever, tiny decoder, dynamic revocation service or pretrained adapter. Its local success and no-go production decision remain compatible. Root owns final evidence-index refresh, generated classroom/readers, full-suite checks and browser delivery. No further executable changes are pending from this author.

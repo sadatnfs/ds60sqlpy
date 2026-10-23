@@ -6,7 +6,7 @@ Compare these answers only after an attempt or an explicit solution reveal. They
 
 A realistic pretrained-model adaptation recipe introduces dependencies that the tiny offline exercises deliberately avoid: model weights, tokenizer files, chat templates, library versions, artifact licenses and larger resource needs. These are part of the experiment, not setup trivia. A model name pointing to a moving branch is not a reproducible identity. Pin an exact repository revision and record hashes of the downloaded files. Keep the acquisition step separate from local training so an offline run cannot silently fetch missing assets.
 
-The optional recipe targetsHuggingFaceTB/SmolLM2-135M-Instruct at revision12fd25f77366fa6b3b4b768ec3050bf629380bac, whose model card was checked asApache-2.0 during authoring. This is a small pretrained model for a bounded demonstration, not a recommended production assistant. The recipe pins direct package versions, uses a literal local prompt-completion dataset, checks chat-template prefix alignment and answer-only masks, and runs at most10CPU updates. It is authored but intentionally unexecuted unless the learner separately prepares dependencies and assets. No default lesson downloads a model or calls a paid service.
+The optional recipe targetsHuggingFaceTB/SmolLM2-135M-Instruct at revision12fd25f77366fa6b3b4b768ec3050bf629380bac, whose model card was checked asApache-2.0 during authoring. This is a small pretrained model for a bounded demonstration, not a recommended production assistant. The recipe pins direct package versions, uses a literal local prompt-completion dataset, checks chat-template prefix alignment and answer-only masks, and runs at most10CPU updates. The optional recipe has separate bounded Linux arm64 execution evidence for ten full-SFT and LoRA updates, while its generation probe produced an incorrect formula despite evidence. Learners must still explicitly prepare their own dependencies and assets; mechanics success does not establish subject expertise. No default lesson downloads a model or calls a paid service.
 
 **Pinned revision:** An immutable model-repository commit identifying exact source artifacts.
 
@@ -19,6 +19,32 @@ The optional recipe targetsHuggingFaceTB/SmolLM2-135M-Instruct at revision12fd25
 ## Reading the implementation
 
 The prepared scripts live underfixtures/pretrained. prepare_assets.py requires an explicit network acknowledgement and downloads only the pinned model snapshot into a new learner-owned directory. It records SHA256 hashes. train_local.py useslocal_files_only=True andtrust_remote_code=False, checks the manifest and refuses a nonempty output directory. TRL SFTTrainer receives conversational prompt/completion records withcompletion_only_loss=True. Before training, the script inspects tokenized examples and a collated batch to ensure prompt labels are ignored and answer labels remain active. The model itself performs the causal label shift; do not shift labels twice.
+
+## Read the qualified recipe as several independent evidence tiers
+
+The pinned revision identifies a particular repository state; the local manifest identifies the acquired files and their hashes. The lock identifies resolved dependency artifacts for a platform. The image identifies the executable environment. None of these identities alone establishes that training happened. A run receipt and saved artifact provide that next tier, followed by separate reload and task-quality observations.
+
+The existing recipe record reports13 acquired files and actual10-update CPU runs for both full SFT and LoRA. Full SFT has134515008 trainable parameters; the rank-four q_proj/v_proj adapter path has230400. The recorded held-out losses changed from6.721148 to0.008058 for full SFT and from6.721148 to6.474194 for LoRA. These are observations from the qualified recipe, not reruns performed by this prose review. [Optional recipe evidence and workflow](../fixtures/pretrained/README.md).
+
+The evaluation dataset contains one held-out entity label, while the four training records share an assignment-unit extraction task and prompt template. Distinct family labels do not automatically produce independent business domains. The dramatic full-SFT loss drop therefore needs that narrow context. It does not establish that full SFT generally beats LoRA or that either model understands unrelated statistical questions.
+
+The generation probe is particularly informative because it tests a different boundary. It supplies the correct conversion definition as evidence, yet the saved adapter produced a fluent incorrect formula: eligible visits divided by eligible visits. That is a task-quality failure despite successful asset loading, masking, optimization, save and reload. The output also did not establish claim-level citation support. Preserve the failure rather than replacing it with a hypothetical correct answer.
+
+Mask alignment differs from the earlier manual tiny-token helper. In the TRL path, active labels equal the corresponding input token IDs and ignored prompt positions contain-100. The causal model shifts labels internally when calculating next-token loss. Manually shifting those labels again would train the wrong target. The processed completion mask and actual collated batch are inspected before training, and records longer than the declared128-token limit are rejected rather than silently losing answers.
+
+Chat-template prefix equality is another concrete gate. The prompt rendered with a generation marker must be an exact token prefix of the full prompt-plus-completion rendering. This checks the specific template's boundary, not a universal property of all templates. A different model or tokenizer may require a different valid construction. Preserve the actual tokenized example and prefix lengths in the receipt.
+
+Two LoRA runs in the same qualified image produced matching adapter hashes and evaluation loss after seeding before adapter construction. Setting a trainer seed later cannot retroactively recreate already sampled adapter matrices. That repeatability result is valuable but is limited to the tested environment and ordering. An amd64 dependency lock is preparation evidence; it is not an executed amd64 or Windows result.
+
+A successful local loader must not silently fall back to a remote model ID when a file is missing. The recipe's explicit connected acquisition phase and later local-only, networking-disabled runs make those behaviors separable. Hash verification detects modified artifacts; it does not make a model's generated claims true or establish approval for every downstream dataset and use.
+
+### Interview reasoning with explanatory answers
+
+**What does the pinned revision prove?** It identifies the selected upstream artifact state. Actual local verification, execution and task quality need their own evidence.
+
+**Why can low held-out token loss coexist with a wrong generated formula?** The evaluation record and teacher-forced objective can be narrow, while generation faces another task and its own rollout. The observed output must be scored under the intended domain contract.
+
+**Why inspect labels instead of trusting a completion-only flag?** Configuration expresses intent. Processed examples and a real collated batch show whether the chosen trainer/template combination produced the intended active targets before optimization.
 
 ## Exercise 1: Inspect the pinned artifact contract
 
@@ -108,16 +134,17 @@ Evaluate the same held-out families and retain both receipts.
 
 **Verify:** Compare the computed values or written argument with mode and trainable-parameter count recorded; no automatic quality winner.
 
-## Exercise 6: Refuse a false execution claim
+## Exercise 6: Distinguish an unexecuted learner scenario
 
-The question is: Write the status when scripts are authored and syntax-checked but weights were not acquired or training was not run.
+The question is: For a hypothetical new learner who has only reviewed scripts, write the status without overwriting the separately qualified maintainer recipe.
 
 An optional recipe remains valuable without pretending it has executed. The status must distinguish code review, asset preparation, training and task-quality acceptance.
 
 ```text
-Status: recipe authored and statically checked.
-Model/data downloads performed by this authoring pass: none.
-Pretrained training executed: no.
+Scenario: a new learner has only reviewed the recipe.
+Assets acquired for this learner run: no.
+Training executed for this learner run: no.
+Separate maintainer recipe: qualified mechanics with an observed generation-quality failure.
 Required next evidence: local asset verification,mask inspection,actual run receipt,held-out evaluation.
 ```
 

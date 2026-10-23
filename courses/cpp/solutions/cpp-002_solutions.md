@@ -86,13 +86,13 @@ The compiler may point at the following token because that is where the grammar 
 
 ### Exercise 5: Inspect an intentional nonzero exit
 
-**Inputs/evidence:** For cpp-002 Exercise 5, stderr fixture rejected;return2.
+**Inputs/evidence:** For cpp-002 Exercise 5, stderr fixture rejected; return2.
 
 **Expected result/shape:** For cpp-002 Exercise 5, nonzero runtime result2 and the diagnostic; this is expected failure evidence.
 
 **Verify:** For cpp-002 Exercise 5, distinguish the successful build from failed execution.
 
-The compiler accepts valid code that deliberately returns2. That demonstrates why build success and program success must remain separate phases.
+The compiler accepts valid code that deliberately returns 2. That demonstrates why build success and program success must remain separate phases.
 
 ### Exercise 6: Verify the named CMake target
 

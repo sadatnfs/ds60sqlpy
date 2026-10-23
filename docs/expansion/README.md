@@ -1,8 +1,15 @@
 # Five new learning journeys
 
-Design review: 22 October 2026. Status: **planned curricula and an interactive teaching prototype**.
+Original design review:22October2026. This folder retains the five original
+curriculum blueprints and their interactive design preview. Active authored
+lessons now live under `courses/` and run through `/journeys`; additional
+subjects use additive track manifests. The [implementation checkpoint](../implementation/CHECKPOINT.md)
+records current content, runtime evidence and remaining work. The
+[Docker classroom](../docker-classroom.md) is the learner entry point.
 
-The existing 168 published Python, SQL, and bridge lessons remain the working course. These plans describe the next courses; they do not add unfinished lessons to the active catalog, install dependencies, or claim that new language runners work. Each subject has a complete curriculum blueprint and a detailed pilot lesson with a separate solution guide.
+The design preview remains useful for reviewing the original sequencing. It
+does not execute code or report current runtime readiness. Consult the actual
+journey for authored lessons and the declared runtime profile for each pad.
 
 ## Start the review
 

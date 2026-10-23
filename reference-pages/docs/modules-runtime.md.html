@@ -117,6 +117,7 @@
     </header>
     <article class="document"><h2 id="optional-module-runtimes">Optional module runtimes<a class="heading-anchor" href="#optional-module-runtimes" aria-label="Link to this section">#</a></h2>
 <p>The module application sends source to explicitly prepared private workers. The original Python/SQL pads and the reading path continue to work without these profiles. Preparing one subject does not install every framework.</p>
+<p>For the primary Docker-only route, start with the <a href="docker-classroom.md.html">classroom walkthrough</a>. It uses named progress volumes and direct Compose commands. The launchers below are the optional host-folder route; do not mix their storage instructions.</p>
 <h3 id="prepare-only-the-profiles-you-need">Prepare only the profiles you need<a class="heading-anchor" href="#prepare-only-the-profiles-you-need" aria-label="Link to this section">#</a></h3>
 <p>Start the ordinary Docker lab first. From the extracted complete course folder, use the host launcher to build and start selected workers. The launcher owns engine access; the browser and worker receive no Docker socket.</p>
 <p>macOS or Linux:</p>
@@ -165,6 +166,21 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\module_lab.ps1
 <td><code>spark-local-python</code></td>
 <td><code>main.py</code>, local Spark submit</td>
 <td>Same Spark/JDK, Python 3.12, <code>local[2]</code></td>
+</tr>
+<tr>
+<td><code>java21</code></td>
+<td><code>Main.java</code>, compile then run <code>Main</code></td>
+<td>Java21, assertions enabled, prepared H2 JDBC teaching library</td>
+</tr>
+<tr>
+<td><code>javascript-node</code></td>
+<td><code>main.mjs</code>, Node ES module</td>
+<td>Node24 with strict unhandled rejections</td>
+</tr>
+<tr>
+<td><code>typescript-node</code></td>
+<td><code>main.mts</code>, strict check/compile then execute</td>
+<td>TypeScript5.9.3 and Node24 with NodeNext module rules</td>
 </tr>
 </tbody></table></div>
 <p>The NumPy attention foundation uses <code>python-core</code>; it does not require PyTorch. A successful fixed compiler operation does not establish a CMake/CTest project build. The current browser operation compiles a single source file directly. Multi-file CMake, interactive REPL state, package resolvers, arbitrary compiler flags, arbitrary command lines, GPU jobs, distributed Spark and external model endpoints are outside this operation.</p>

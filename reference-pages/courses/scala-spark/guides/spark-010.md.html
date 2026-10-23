@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>spark-010: Laziness, iterators, and safe side effects · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>spark-010: Laziness, iterators, and safe side effects</h1>
+      <p class="source-path">Generated from <code>courses/scala-spark/guides/spark-010.md</code></p>
+    </header>
+    <article class="document"><h2 id="spark-010-laziness-iterators-and-safe-side-effects">spark-010: Laziness, iterators, and safe side effects<a class="heading-anchor" href="#spark-010-laziness-iterators-and-safe-side-effects" aria-label="Link to this section">#</a></h2>
+<p>Authored tutorial and practice content. The prepared Scala/JVM worker executes a bounded program; process success and understanding remain distinct. No source file installs a tool or downloads a dependency.</p>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Beginner; approximately 105 minutes. Direct design prerequisites: <code>spark-009</code>. The lesson uses Scala 2.13 syntax and the prepared JDK 17 worker. The older design document proposed a different Spark/JDK tuple; use the current <a href="../execution-baseline.md.html">execution baseline</a> for this authored material.</p>
+<h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
+<p>Open <code>spark-010</code> in the classroom, select the Scala source, prepare the <code>scala-jvm</code> profile and run the saved pad. The worker stages the single source as <code>Main.scala</code> and invokes <code>object Main</code>. Read the terminal output and exact assertions. The <a href="../lessons/spark-010.scala.html">learner source</a> runs two complete demonstrations; its six task functions remain explicit stubs until you implement them. Preserve your saved attempt. The <a href="../solutions/spark-010_solution.scala.html">reference program</a> and <a href="../solutions/spark-010_solutions.md.html">explained solutions</a> are separate and should be opened after an attempt or an explicit worked-comparison request. If the profile is unavailable, reading and saving remain available; opening this guide does not prepare a runtime.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Predict when local lazy transformations run and explain why retryable distributed work must not hide side effects.</li>
+<li>Explain the result of both worked examples before running them.</li>
+<li>Implement the six contracts, inspect normal and boundary evidence, and explain a counterexample in your own words.</li>
+</ul>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Iterator:</strong> A consumable traversal whose elements are produced on demand and usually cannot be traversed again after exhaustion.</li>
+</ul>
+<ul>
+<li><strong>Strict collection:</strong> A collection whose values are already materialized, so a normal map/filter computes a new collection when called.</li>
+</ul>
+<ul>
+<li><strong>Evaluation boundary:</strong> The operation that requests values from a lazy pipeline and causes its deferred work to run.</li>
+</ul>
+<ul>
+<li><strong>Retryable side effect:</strong> An externally visible action that may occur again when work is re-evaluated or retried, requiring a separate delivery contract.</li>
+</ul>
+<p>Laziness concerns when work happens. A strict Seq.map evaluates its transformation while building the output. An Iterator.map describes a transformation applied as elements are requested. Creating the iterator therefore need not run the transformation at all. Calling next, taking a prefix or collecting values moves the evaluation boundary and can trigger work.</p>
+<p>Iterator is one-shot state. After toVector consumes it, a second toVector is normally empty. A function returning a fresh iterator can support repeated traversals of the same immutable source. That factory differs from storing one iterator and returning the same exhausted object repeatedly. A LazyList has its own memoization behavior and should not be treated as interchangeable with an Iterator.</p>
+<p>The lesson uses an ArrayBuffer of trace strings only as a local diagnostic. Filter and map steps append messages so you can predict exactly which source values were examined for a requested prefix. That trace is not a business counter or a payment mechanism. A filter may examine several source elements before producing one output, and checking hasNext can cause filtering work before next returns a value.</p>
+<p>A pure transformation can be recomputed safely because its result depends only on its inputs. An external increment, email or database write inside a transformation can happen again if evaluation is repeated. Spark introduces distributed task retries and recomputation on top of laziness, so a function that appeared to run once in a small local example does not establish exactly-once side effects.</p>
+<p>The retry illustration calculates naive delivered totals and a logical identity-based total from a tiny ledger. Equal event IDs with conflicting amounts are rejected; repeated identical IDs represent delivery replay. This pure calculation shows the difference in quantities, but it is not an implementation of an atomic production sink. Durable idempotency needs an explicit transaction or publication boundary, which later streaming lessons will examine.</p>
+<p>Bounded consumption is another contract. Taking three values from an infinite iterator is safe when the consumer never asks for more; collecting the whole iterator would never terminate. The exercise permits only limits from 0 through 1000 and confirms that limit 0 does not consume the first value. A count of returned rows is not enough to prove a filter did bounded source work when matching values are rare, so input and output budgets must be distinguished.</p>
+<p>These are Scala collection semantics. They prepare the mental model for Spark transformations and actions, but Spark may perform planning, metadata reads or schema inference before a familiar action. Later lessons use explicit schemas and actual plan/runtime evidence rather than transferring the local iterator trace as an exact description of engine behavior.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-scala">var visits = 0
+val pipeline = Seq(1,2,3).iterator.map { value =&gt; visits += 1; value * 2 }
+assert(visits == 0)
+assert(pipeline.next() == 2 &amp;&amp; visits == 1)
+assert(pipeline.toVector == Vector(4,6) &amp;&amp; visits == 3)
+assert(pipeline.toVector.isEmpty)
+println(s&quot;visits=$visits after complete consumption&quot;)</code></pre>
+<p>Creating the mapped iterator does no mapped work. Each requested value increments the diagnostic counter once, and the second full traversal is empty because the iterator was exhausted. The mutable counter is confined to this demonstration and is deliberately not used to define the numerical result.</p>
+<h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-scala">val source = Seq(1,2,3,4)
+def fresh(): Iterator[Int] = source.iterator.filter(_ % 2 == 0).map(_ * 2)
+assert(fresh().toVector == Vector(4,8))
+assert(fresh().toVector == Vector(4,8))
+assert(source == Seq(1,2,3,4))
+println(&quot;A factory creates a new traversal each time&quot;)</code></pre>
+<p>Each call constructs a fresh iterator over unchanged source values. Repetition produces equal data without depending on the state of a previously consumed iterator. This is a useful pattern when repeated local evaluation is intended, and it keeps the repeatability claim separate from external side effects.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<h4 id="exercise-1-establish-a-pure-strict-result">Exercise 1: Establish a pure strict result<a class="heading-anchor" href="#exercise-1-establish-a-pure-strict-result" aria-label="Link to this section">#</a></h4>
+<p>For inputs between-1000000 and 1000000, retain even values and double them in order. Preserve input and duplicates. Reject values outside the bound so Int multiplication is safe.</p>
+<p><strong>Expected result/shape:</strong> Seq(1,2,3,4) becomes Seq(4,8); Seq(0,2,2) becomes Seq(0,4,4); empty remains empty.</p>
+<p><strong>Verify:</strong> Assert the exact results, input preservation and the out-of-domain rejection.</p>
+<p><strong>Progressive hint:</strong> Separate the even predicate from the doubling map and validate the domain first.</p>
+<h4 id="exercise-2-locate-the-evaluation-boundary">Exercise 2: Locate the evaluation boundary<a class="heading-anchor" href="#exercise-2-locate-the-evaluation-boundary" aria-label="Link to this section">#</a></h4>
+<p>Return a lazy even-filter/double-map iterator with local trace messages filter: value and map: value. Validate the same numeric domain before construction. The trace should remain empty until consumption.</p>
+<p><strong>Expected result/shape:</strong> Taking one output from 1,2,3,4 yields 4 with trace filter:1, filter:2, map:2. Consuming the rest yields 8 and appends filter:3, filter:4, map:4.</p>
+<p><strong>Verify:</strong> Assert the empty initial trace, both exact output pieces and all six messages in order.</p>
+<p><strong>Progressive hint:</strong> Put diagnostic appends inside filter/map lambdas, not in an eager preprocessing loop.</p>
+<h4 id="exercise-3-expose-one-shot-traversal-state">Exercise 3: Expose one-shot traversal state<a class="heading-anchor" href="#exercise-3-expose-one-shot-traversal-state" aria-label="Link to this section">#</a></h4>
+<p>Consume a supplied iterator into a Vector twice and return both results. Do not cache or recreate the iterator inside this function. Explain why this intentionally returns an empty second traversal.</p>
+<p><strong>Expected result/shape:</strong> A fresh iterator over 1,2,3 yields (Vector(1,2,3), Vector.empty). An already empty iterator yields two empty Vectors.</p>
+<p><strong>Verify:</strong> Assert both tuple components and the already-exhausted case.</p>
+<p><strong>Progressive hint:</strong> Call toVector twice on the same iterator reference.</p>
+<h4 id="exercise-4-provide-repeatability-deliberately">Exercise 4: Provide repeatability deliberately<a class="heading-anchor" href="#exercise-4-provide-repeatability-deliberately" aria-label="Link to this section">#</a></h4>
+<p>Return a factory creating a fresh bounded even-filter/double-map iterator on each call. Validate source values once and preserve them. Do not return the same iterator object repeatedly.</p>
+<p><strong>Expected result/shape:</strong> Two factory calls both yield Vector(4,8) for 1,2,3,4, even after the first is exhausted.</p>
+<p><strong>Verify:</strong> Consume two independently obtained iterators and assert both exact results; verify the immutable source remains unchanged.</p>
+<p><strong>Progressive hint:</strong> Put values.iterator inside the returned zero-argument lambda.</p>
+<h4 id="exercise-5-separate-repeated-delivery-from-logical-identity">Exercise 5: Separate repeated delivery from logical identity<a class="heading-anchor" href="#exercise-5-separate-repeated-delivery-from-logical-identity" aria-label="Link to this section">#</a></h4>
+<p>For bounded nonnegative event amounts and nonblank IDs, compute naive delivered cents over attempts and logical once-per-ID cents when attempts&gt;0. Reject conflicting amounts for one ID and negative attempt counts. This is a pure ledger calculation, not a real sink.</p>
+<p><strong>Expected result/shape:</strong> Records(a,100),(b,50),(a,100) with two attempts give naive 500, logical 150. Zero attempts gives (0,0); same ID with 100 and 101 is rejected.</p>
+<p><strong>Verify:</strong> Assert both totals, the zero-attempt identity and a conflicting-payload failure.</p>
+<p><strong>Progressive hint:</strong> Validate payload consistency per ID, then compare every-delivery summation with one value per identity.</p>
+<h4 id="exercise-6-consume-only-a-declared-bounded-prefix">Exercise 6: Consume only a declared bounded prefix<a class="heading-anchor" href="#exercise-6-consume-only-a-declared-bounded-prefix" aria-label="Link to this section">#</a></h4>
+<p>Return at most limit values from an iterator, requiring 0&lt;=limit&lt;=1000. Support infinite iterators without collecting the whole source. Limit 0 must leave the next source value unconsumed.</p>
+<p><strong>Expected result/shape:</strong> Taking three values from Iterator.from(1) yields 1,2,3 and leaves 4 next. Limit 0 yields empty and leaves 1 next; limit 1001 is rejected.</p>
+<p><strong>Verify:</strong> Use a local next-value counter to assert three produced values, and test zero consumption and the upper-budget failure.</p>
+<p><strong>Progressive hint:</strong> Use take(limit).toVector after validating the budget.</p>
+<h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
+<p>If a trace appears before consumption, find an eager collection operation or side effect outside the iterator body. If the second traversal is empty, check whether a cursor rather than a factory was reused. If retry totals grow, move external effects out of pure transformations and define a durable idempotency boundary instead of trusting a local counter. If an infinite iterator hangs, inspect for an unbounded terminal collection. If a prefix limit appears safe but a rare filter scans indefinitely, distinguish output count from source-work budget.</p>
+<h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
+<p>Without opening the reference, trace the listed boundary case through <code>strictPipeline</code>. Then explain why <code>boundedTake</code> needs its declared invariant or input restriction. Name the exact assertion that would reject one tempting wrong implementation. Retain the observed values and explain how they support the lesson outcome: Predict when local lazy transformations run and explain why retryable distributed work must not hide side effects.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>Continue to the next lesson only after you can explain the boundary behavior. The <a href="../README.md.html">course route</a> shows authored material and runtime evidence separately.</p>
+<h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://docs.scala-lang.org/overviews/collections-2.13/iterators.html">Scala 2.13 iterator semantics</a>.</li>
+</ul>
+<ul>
+<li><a href="https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html">Spark 4.0.1 RDD laziness and closure semantics</a>.</li>
+</ul>
+<h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through spark-010: Laziness, iterators, and safe side effects.
+Read courses/scala-spark/guides/spark-010.md and courses/scala-spark/lessons/spark-010.scala. Direct prerequisites: spark-009.
+Explain the Scala 2.13 syntax and data contract, ask me to predict a concrete result, then inspect my attempt. Give one hint at a time, review exact assertion evidence and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt. Use only the prepared scala-jvm profile and preserve my saved work; do not install or download dependencies.
+Done when all six contracts and their boundary cases have inspected evidence and I can explain why an incorrect implementation fails.</code></pre></article>
+  </main>
+</body>
+</html>

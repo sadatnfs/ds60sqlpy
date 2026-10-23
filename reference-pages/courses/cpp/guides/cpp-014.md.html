@@ -116,7 +116,6 @@
       <p class="source-path">Generated from <code>courses/cpp/guides/cpp-014.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-014-capstone-1-auditable-readings-cli">cpp-014: Capstone 1: auditable readings CLI<a class="heading-anchor" href="#cpp-014-capstone-1-auditable-readings-cli" aria-label="Link to this section">#</a></h2>
-<p>Authored beta content. Content completion and runtime qualification are separate evidence.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Beginner; 180 minutes. Direct prerequisites: <code>cpp-010</code>, <code>cpp-011</code>, <code>cpp-013</code>.</p>
 <p>Learner artifact: <a href="../lessons/cpp-014.cpp.html">cpp-014.cpp</a>. Keep <a href="../solutions/cpp-014_solutions.md.html">official solutions</a> closed until an attempt. The immutable <a href="../fixtures/cpp-014-cases.json.html">case ledger</a> records exercise inputs and expected observations.</p>
@@ -128,57 +127,120 @@
 <p>Parse each complete field with from_chars, require the entire string to be consumed, then add only valid nonnegative values. Maintain accepted and rejected counts independently from the sum. Returning nonzero is appropriate for a fatal file failure; per-row rejection can be a documented partial-report policy.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Reconciliation is a conservation rule: input_count equals accepted_count plus rejected_count. The total alone is too weak because losing a valid zero changes count without changing money. Keep one ledger row for every raw input before grouping. The malformed suffix 25x is a useful negative control because a convenient prefix parser produces an apparently reasonable but incorrect amount. The capstone succeeds only when another learner can repeat both the normal result and the rejected shortcut.</p>
+<h3 id="a-small-cli-with-an-explicit-data-contract">A small CLI with an explicit data contract<a class="heading-anchor" href="#a-small-cli-with-an-explicit-data-contract" aria-label="Link to this section">#</a></h3>
+<p>The capstone is a pipeline with boundaries: obtain raw lines, validate each field, classify each record, aggregate accepted values, then publish a report. Each stage has a different failure policy. A malformed row contributes to rejected count; a missing input file or exceeded input budget is a fatal operation failure. Treating both as an empty successful dataset would make operational errors indistinguishable from legitimate data.</p>
+<p>The five-row fixture contains10, 0, bad, -2 and 25. Under the declared nonnegative integer grammar, three rows are accepted and two rejected. The accepted values sum to 35. The conservation equation accepted+rejected=input rows is an independent check: a correct total can still hide a dropped zero or an uncounted malformed row. Preserve all three report values rather than testing only the sum.</p>
+<p>Parsing and aggregation should not be interleaved in a way that publishes partially trusted values. For10x, a prefix conversion may yield10, but full consumption fails and the row must not contribute. For0, optional presence is true even though the number is zero. For -2, integer parsing succeeds but the domain policy rejects negative readings. These are three different branches that the reference exercises.</p>
+<p>The browser example uses an embedded deterministic vector. The separate executable reference also supports --input FILE for a host file-driven run. It caps row count and line length, checks open/read failures and returns status 2 for fatal errors. The ordinary successful report returns 0. A malformed row is counted under the declared report policy rather than necessarily aborting the whole file. That policy must be stated, because strict-all-or-nothing ingestion would be a different product.</p>
+<p>File format is part of the interface. These fixtures are one decimal reading per line, not CSV with headers, quoted fields or comma-separated records. A filename ending in csv does not turn the parser into a CSV implementation. The working directory controls relative path resolution, while the command-line argument chooses the file. Keep the source path, executable path and input path distinct in the handoff.</p>
+<p>A bounded program also needs a publication rule. The report should be emitted only after the reader has finished within its budget and any fatal I/O condition has been checked. Otherwise a caller may mistake a partial total printed before a later failure for the final answer. The capstone&#x27;s fixed output schema gives another program an inspectable contract without requiring it to infer meaning from a mixture of progress text and data.</p>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">for (auto raw : {&quot;10&quot;,&quot;0&quot;,&quot;bad&quot;,&quot;-2&quot;,&quot;25&quot;}) { /* classify once */ }</code></pre>
-<p><strong>Expected:</strong> Three accepted, two rejected, total 35.</p>
+<p><a href="../examples/cpp-014-example-1.cpp.html">Complete program 1</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;charconv&gt;
+#include &lt;iostream&gt;
+#include &lt;optional&gt;
+#include &lt;string&gt;
+#include &lt;string_view&gt;
+#include &lt;system_error&gt;
+#include &lt;vector&gt;
+
+std::optional&lt;int&gt; parse_reading(std::string_view s)  {
+     int n=0;
+    auto [p,e]=std::from_chars(s.data(),s.data()+s.size(),n);
+    if(e!=std::errc {
+    }||p!=s.data()+s.size()||n&lt;0)return  {
+    };
+    return n;
+}
+int main() {
+    const std::vector&lt;std::string&gt; rows{&quot;10&quot;,&quot;0&quot;,&quot;bad&quot;,&quot;-2&quot;,&quot;25&quot;};
+    int accepted=0,rejected=0;
+    long long total=0;
+    for (const auto&amp; raw:rows) {
+        if(auto value=parse_reading(raw)) { ++accepted; total+=*value; }
+        else { ++rejected; }
+    }
+    assert(accepted==3 &amp;&amp; rejected==2 &amp;&amp; total==35);
+    std::cout &lt;&lt; &quot;accepted=&quot; &lt;&lt; accepted &lt;&lt; &quot; rejected=&quot; &lt;&lt; rejected &lt;&lt; &quot; total=&quot; &lt;&lt; total &lt;&lt; &quot;\n&quot;;
+    std::cout &lt;&lt; &quot;cpp-014 example 1 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">accepted=3 rejected=2 total=35
+cpp-014 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">assert(parse_reading(&quot;0&quot;)==0); assert(!parse_reading(&quot;10x&quot;));</code></pre>
-<p><strong>Expected:</strong> Zero remains valid, while a numeric prefix with trailing junk is rejected.</p>
+<p><a href="../examples/cpp-014-example-2.cpp.html">Complete program 2</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;charconv&gt;
+#include &lt;iostream&gt;
+#include &lt;optional&gt;
+#include &lt;string&gt;
+#include &lt;string_view&gt;
+#include &lt;system_error&gt;
+
+std::optional&lt;int&gt; parse_reading(std::string_view s)  {
+     int n=0;
+    auto [p,e]=std::from_chars(s.data(),s.data()+s.size(),n);
+    if(e!=std::errc {
+    }||p!=s.data()+s.size()||n&lt;0)return  {
+    };
+    return n;
+}
+int main() {
+    assert(parse_reading(&quot;0&quot;)==0); assert(!parse_reading(&quot;10x&quot;));
+    std::cout &lt;&lt; &quot;cpp-014 example 2 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-014 example 2 checks passed</code></pre>
 <h4 id="file-driven-reference-handoff">File-driven reference handoff<a class="heading-anchor" href="#file-driven-reference-handoff" aria-label="Link to this section">#</a></h4>
 <p>The separate reference also accepts <code>--input FILE</code>. It reads at most 100 lines of at most 32 characters each, reports accepted/rejected counts and exact total, and rejects fatal open/read/budget failures with status 2. Copy the <a href="../fixtures/cpp-014-input.txt.html">five-line input</a> to an owned local directory. After compiling the reference as analyzer, POSIX runs <code>./analyzer --input readings.txt</code>; PowerShell runs <code>&amp; .\analyzer.exe --input .\readings.txt</code>. Expected output: <code>accepted=3 rejected=2 total=35</code>. The browser executes the embedded fixture without command-line arguments. Supplying a missing file must produce nonzero status, not an empty successful report.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-define-the-input-contract">Exercise 1: Define the input contract<a class="heading-anchor" href="#exercise-1-define-the-input-contract" aria-label="Link to this section">#</a></h4>
 <p>Write the grammar and rejection policy for the five rows.</p>
 <p><strong>Expected result/shape:</strong> Nonnegative base-10 whole fields; bad and -2 rejected.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Nonnegative base-10 whole fields; bad and -2 rejected.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Syntax and domain checks have separate reasons.</p>
+<p><strong>Verify:</strong> Nonnegative base-10 whole fields; bad and -2 rejected.</p>
+<p><strong>Progressive hints:</strong> Syntax and domain checks have separate reasons.</p>
 <h4 id="exercise-2-implement-the-ledger">Exercise 2: Implement the ledger<a class="heading-anchor" href="#exercise-2-implement-the-ledger" aria-label="Link to this section">#</a></h4>
 <p>Store raw row, accepted value or rejection reason.</p>
 <p><strong>Expected result/shape:</strong> 5 ledger entries, 3 accepted, 2 rejected.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: 5 ledger entries, 3 accepted, 2 rejected.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Every source row needs an accountable outcome.</p>
+<p><strong>Verify:</strong> 5 ledger entries, 3 accepted, 2 rejected.</p>
+<p><strong>Progressive hints:</strong> Every source row needs an accountable outcome.</p>
 <h4 id="exercise-3-produce-the-report">Exercise 3: Produce the report<a class="heading-anchor" href="#exercise-3-produce-the-report" aria-label="Link to this section">#</a></h4>
 <p>Calculate accepted count and exact total.</p>
 <p><strong>Expected result/shape:</strong> accepted=3 rejected=2 total=35.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: accepted=3 rejected=2 total=35.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Counts and total are independent contracts.</p>
+<p><strong>Verify:</strong> accepted=3 rejected=2 total=35.</p>
+<p><strong>Progressive hints:</strong> Counts and total are independent contracts.</p>
 <h4 id="exercise-4-inject-trailing-junk">Exercise 4: Inject trailing junk<a class="heading-anchor" href="#exercise-4-inject-trailing-junk" aria-label="Link to this section">#</a></h4>
 <p>Replace 25 with 25x.</p>
 <p><strong>Expected result/shape:</strong> accepted=2 rejected=3 total=10.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: accepted=2 rejected=3 total=10.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Full consumption changes the row disposition.</p>
+<p><strong>Verify:</strong> accepted=2 rejected=3 total=10.</p>
+<p><strong>Progressive hints:</strong> Full consumption changes the row disposition.</p>
 <h4 id="exercise-5-test-empty-input">Exercise 5: Test empty input<a class="heading-anchor" href="#exercise-5-test-empty-input" aria-label="Link to this section">#</a></h4>
 <p>Run no rows through the same pipeline.</p>
 <p><strong>Expected result/shape:</strong> 0 accepted, 0 rejected, total 0.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: 0 accepted, 0 rejected, total 0.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: An empty valid file differs from a failed file open.</p>
+<p><strong>Verify:</strong> 0 accepted, 0 rejected, total 0.</p>
+<p><strong>Progressive hints:</strong> An empty valid file differs from a failed file open.</p>
 <h4 id="exercise-6-hand-off-reproducibility">Exercise 6: Hand off reproducibility<a class="heading-anchor" href="#exercise-6-hand-off-reproducibility" aria-label="Link to this section">#</a></h4>
 <p>Package source, fixture, commands, test results and limitations.</p>
 <p><strong>Expected result/shape:</strong> Reviewer reproduces the 5-row ledger and failed suffix case.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Reviewer reproduces the 5-row ledger and failed suffix case.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: The handoff needs observed statuses, not just source inspection.</p>
+<p><strong>Verify:</strong> Reviewer reproduces the 5-row ledger and failed suffix case.</p>
+<p><strong>Progressive hints:</strong> The handoff needs observed statuses, not just source inspection.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: Three accepted, two rejected, total 35. Then explain the changed condition in example 2 without opening the answer.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
-<p>Parse each complete field with from_chars, require the entire string to be consumed, then add only valid nonnegative values. Maintain accepted and rejected counts independently from the sum. Returning nonzero is appropriate for a fatal file failure; per-row rejection can be a documented partial-report policy.</p>
-<p>If the result disagrees, preserve the original input and inspect the first differing value or condition. Full consumption changes the row disposition.</p>
+<p>When total35 passes but counts do not, inspect zero handling and rejected-row accounting. When a missing file reports success, check the file-open guard and process exit code. When a suffix is accepted, inspect both from_chars outputs. When a large input consumes too much memory before rejection, enforce line/row budgets during reading rather than after loading the entire file. A learner should be able to explain which errors are per-record rejections and which prevent publication of any final report.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
 <p>Close the source. Reconstruct the reasoning for Exercise 6: Hand off reproducibility. Explain which assumptions would fail on a larger input or another runtime.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue with <a href="cpp-015.md.html">cpp-015</a> after saving the six observations.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines">C++ Core Guidelines</a></p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach cpp-014.
 Read courses/cpp/guides/cpp-014.md and courses/cpp/lessons/cpp-014.cpp.

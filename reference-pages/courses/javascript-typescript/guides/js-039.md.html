@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>js-039: Functional core and state machines · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>js-039: Functional core and state machines</h1>
+      <p class="source-path">Generated from <code>courses/javascript-typescript/guides/js-039.md</code></p>
+    </header>
+    <article class="document"><h2 id="js-039-functional-core-and-state-machines">js-039: Functional core and state machines<a class="heading-anchor" href="#js-039-functional-core-and-state-machines" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Advanced, approximately 120 minutes. Direct prerequisites: <code>js-038</code></p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Explain state machine, event, functional core, replay with a concrete program. Trace how the values change, identify the assumptions, and make a boundary or invalid case observable. The first investigation is: Start a queued job and complete it with value 7. The final task tests preserve input state and validate success values.</p>
+<h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
+<p>A state machine makes allowed transitions explicit. Instead of several independent booleans such as started, failed and done, a discriminated union represents one coherent state. An event requests a transition; a pure transition function either produces the next valid state or rejects an invalid event for the current state. This prevents combinations such as simultaneously running and completed from being expressible in ordinary checked code.</p>
+<p>A functional core computes decisions without performing I/O. An outer shell can persist the decision, send a message or render it. Keeping the transition pure makes replay and failure analysis straightforward: the same initial state and event sequence should produce the same final state. It does not make external side effects automatically exactly once. The shell still needs a durable transaction and idempotency policy if it coordinates real storage or remote work.</p>
+<p>The fixture models a bounded job lifecycle: queued, running, succeeded, failed or cancelled. Starting increments an attempt count. A failed job may retry only while fewer than three attempts have been started. Succeeded and cancelled are terminal. Cancellation is a state transition in this pure model; it does not physically stop a worker or cancel a socket. An integration layer must connect the decision to those operational actions and report their outcomes.</p>
+<p>Readonly types express the intended consumer view. The tests also verify that transition does not mutate the input object, because static annotations alone do not prove runtime immutability. Invalid numeric results remain a runtime domain problem even when success carries a TypeScript number.</p>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<p><strong>State machine:</strong> A set of coherent states and allowed transitions between them.</p>
+<p><strong>Event:</strong> A request to transition under the current state.</p>
+<p><strong>Functional core:</strong> Pure decision logic separated from I/O effects.</p>
+<p><strong>Replay:</strong> Recomputing state from an initial value and an event sequence.</p>
+<h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
+<p>Use the prepared TypeScript 5.9.3 profile. The classroom saves main.mts, checks strict NodeNext resolution with noEmitOnError and an ES2022 target, then runs compiled/main.mjs on Node 24.22.1. Node typings 24.10.0 are prepared. Compilation and execution are separate stages. Types are erased and do not validate external JSON. No npm installation belongs inside the lesson.</p>
+<p>Save your own learner copy under ignored <code>.learning/expansion/js-039/</code> or use a saved classroom pad. Record predictions before execution. Each worked program includes its helper definitions. The reference puts the six exercises in separate scopes, so a task cannot silently rely on a variable from a previous task. A successful assertion is silent; the final JSON receipt reports how many exercise blocks completed. A failing assertion must produce a failed process, not a generic success message.</p>
+<h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
+<p>Each state has kind plus common id and attempt fields. Events form another closed union. switch narrows the event, and state guards define where it is legal. New objects are returned with spread or explicit fields. A never guard protects event exhaustiveness. replay uses reduce to apply the same transition repeatedly. The attempt invariant is checked before retrying, not after accidentally starting a fourth attempt.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="example-a-complete-one-valid-job-lifecycle">Example A: Complete one valid job lifecycle<a class="heading-anchor" href="#example-a-complete-one-valid-job-lifecycle" aria-label="Link to this section">#</a></h4>
+<p>The transition sequence carries the attempt count forward. Completion is accepted only after a start established the running state.</p>
+<pre><code class="language-typescript">import { strict as assert } from &#x27;node:assert&#x27;;
+
+type Base = { readonly id: string; readonly attempt: number };
+type State = Base &amp; ({ readonly kind: &#x27;queued&#x27; } | { readonly kind: &#x27;running&#x27; } | { readonly kind: &#x27;succeeded&#x27;; readonly value: number } | { readonly kind: &#x27;failed&#x27;; readonly reason: string } | { readonly kind: &#x27;cancelled&#x27;; readonly reason: string });
+type Event = { type: &#x27;start&#x27; } | { type: &#x27;complete&#x27;; value: number } | { type: &#x27;fail&#x27;; reason: string } | { type: &#x27;retry&#x27; } | { type: &#x27;cancel&#x27;; reason: string };
+function initial(): State { return { id: &#x27;A&#x27;, attempt: 0, kind: &#x27;queued&#x27; }; }
+function assertNever(value: never): never { throw new Error(&#x27;unknown event: &#x27; + JSON.stringify(value)); }
+function transition(state: State, event: Event): State {
+  if (state.kind === &#x27;succeeded&#x27; || state.kind === &#x27;cancelled&#x27;) throw new Error(&#x27;terminal state&#x27;);
+  switch (event.type) {
+    case &#x27;start&#x27;:
+      if (state.kind !== &#x27;queued&#x27;) throw new Error(&#x27;invalid transition to running&#x27;);
+      return { id: state.id, attempt: state.attempt + 1, kind: &#x27;running&#x27; };
+    case &#x27;complete&#x27;:
+      if (state.kind !== &#x27;running&#x27;) throw new Error(&#x27;invalid transition to succeeded&#x27;);
+      if (!Number.isFinite(event.value)) throw new RangeError(&#x27;finite result required&#x27;);
+      return { ...state, kind: &#x27;succeeded&#x27;, value: event.value };
+    case &#x27;fail&#x27;:
+      if (state.kind !== &#x27;running&#x27;) throw new Error(&#x27;invalid transition to failed&#x27;);
+      return { ...state, kind: &#x27;failed&#x27;, reason: event.reason };
+    case &#x27;retry&#x27;:
+      if (state.kind !== &#x27;failed&#x27;) throw new Error(&#x27;invalid transition to queued&#x27;);
+      if (state.attempt &gt;= 3) throw new Error(&#x27;retry budget exhausted&#x27;);
+      return { id: state.id, attempt: state.attempt, kind: &#x27;queued&#x27; };
+    case &#x27;cancel&#x27;: return { id: state.id, attempt: state.attempt, kind: &#x27;cancelled&#x27;, reason: event.reason };
+    default: return assertNever(event);
+  }
+}
+function replay(state: State, events: readonly Event[]): State { return events.reduce(transition, state); }
+
+export async function verify(): Promise&lt;{ checks: number; status: string }&gt; {
+  // Worked example
+  {
+    const started = transition(initial(), { type: &#x27;start&#x27; });
+    const completed = transition(started, { type: &#x27;complete&#x27;, value: 7 });
+    assert.deepEqual(completed, { id: &#x27;A&#x27;, attempt: 1, kind: &#x27;succeeded&#x27;, value: 7 });
+  }
+
+  return { checks: 1, status: &quot;passed&quot; };
+}
+
+console.log(JSON.stringify(await verify()));
+</code></pre>
+<p><strong>Expected:</strong> succeeded with attempt 1 and value 7.</p>
+<h4 id="example-b-reject-a-result-arriving-before-start">Example B: Reject a result arriving before start<a class="heading-anchor" href="#example-b-reject-a-result-arriving-before-start" aria-label="Link to this section">#</a></h4>
+<p>An unexpected event is visible rather than silently ignored. Ignoring it could hide ordering or duplicate-delivery defects in an outer integration.</p>
+<pre><code class="language-typescript">import { strict as assert } from &#x27;node:assert&#x27;;
+
+type Base = { readonly id: string; readonly attempt: number };
+type State = Base &amp; ({ readonly kind: &#x27;queued&#x27; } | { readonly kind: &#x27;running&#x27; } | { readonly kind: &#x27;succeeded&#x27;; readonly value: number } | { readonly kind: &#x27;failed&#x27;; readonly reason: string } | { readonly kind: &#x27;cancelled&#x27;; readonly reason: string });
+type Event = { type: &#x27;start&#x27; } | { type: &#x27;complete&#x27;; value: number } | { type: &#x27;fail&#x27;; reason: string } | { type: &#x27;retry&#x27; } | { type: &#x27;cancel&#x27;; reason: string };
+function initial(): State { return { id: &#x27;A&#x27;, attempt: 0, kind: &#x27;queued&#x27; }; }
+function assertNever(value: never): never { throw new Error(&#x27;unknown event: &#x27; + JSON.stringify(value)); }
+function transition(state: State, event: Event): State {
+  if (state.kind === &#x27;succeeded&#x27; || state.kind === &#x27;cancelled&#x27;) throw new Error(&#x27;terminal state&#x27;);
+  switch (event.type) {
+    case &#x27;start&#x27;:
+      if (state.kind !== &#x27;queued&#x27;) throw new Error(&#x27;invalid transition to running&#x27;);
+      return { id: state.id, attempt: state.attempt + 1, kind: &#x27;running&#x27; };
+    case &#x27;complete&#x27;:
+      if (state.kind !== &#x27;running&#x27;) throw new Error(&#x27;invalid transition to succeeded&#x27;);
+      if (!Number.isFinite(event.value)) throw new RangeError(&#x27;finite result required&#x27;);
+      return { ...state, kind: &#x27;succeeded&#x27;, value: event.value };
+    case &#x27;fail&#x27;:
+      if (state.kind !== &#x27;running&#x27;) throw new Error(&#x27;invalid transition to failed&#x27;);
+      return { ...state, kind: &#x27;failed&#x27;, reason: event.reason };
+    case &#x27;retry&#x27;:
+      if (state.kind !== &#x27;failed&#x27;) throw new Error(&#x27;invalid transition to queued&#x27;);
+      if (state.attempt &gt;= 3) throw new Error(&#x27;retry budget exhausted&#x27;);
+      return { id: state.id, attempt: state.attempt, kind: &#x27;queued&#x27; };
+    case &#x27;cancel&#x27;: return { id: state.id, attempt: state.attempt, kind: &#x27;cancelled&#x27;, reason: event.reason };
+    default: return assertNever(event);
+  }
+}
+function replay(state: State, events: readonly Event[]): State { return events.reduce(transition, state); }
+
+export async function verify(): Promise&lt;{ checks: number; status: string }&gt; {
+  // Worked example
+  {
+    const queued = initial();
+    assert.throws(() =&gt; transition(queued, { type: &#x27;complete&#x27;, value: 7 }), /invalid transition/u);
+    assert.deepEqual(queued, { id: &#x27;A&#x27;, attempt: 0, kind: &#x27;queued&#x27; });
+  }
+
+  return { checks: 1, status: &quot;passed&quot; };
+}
+
+console.log(JSON.stringify(await verify()));
+</code></pre>
+<p><strong>Expected:</strong> invalid transition error; original remains queued.</p>
+<h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
+<p>Trace the entry point and identify the values that exist before each operation. Distinguish a value from a reference to an object, a returned Promise from its eventual result, and a compile-time type from a runtime check. Write down the first observation that would disprove your explanation. A useful prediction includes an expected value or failure category, not merely a claim that the program should work.</p>
+<p>For a loop, write the state before and after one iteration. For a callback, identify the caller and the arguments it supplies. For an asynchronous operation, identify who starts it, who awaits it, and who owns cleanup. These small traces make failures local: you can compare the first incorrect state instead of guessing from a much later symptom.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Complete one valid job lifecycle.</strong> Start a queued job and complete it with value 7. <strong>Expected:</strong> succeeded with attempt 1 and value 7. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
+</ol>
+<ol>
+<li><strong>Reject a result arriving before start.</strong> Send complete directly to queued. <strong>Expected:</strong> invalid transition error; original remains queued. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
+</ol>
+<ol>
+<li><strong>Enforce the retry budget.</strong> Fail three started attempts and try to retry once more. <strong>Expected:</strong> attempt 3 remains failed; further retry rejects. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
+</ol>
+<ol>
+<li><strong>Keep cancellation terminal.</strong> Cancel a running job, then deliver a late completion. <strong>Expected:</strong> cancelled state remains; late completion rejects. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
+</ol>
+<ol>
+<li><strong>Replay deterministically from the same history.</strong> Replay start, failure, retry, start and completion twice. <strong>Expected:</strong> both runs produce the same succeeded attempt-2 state. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
+</ol>
+<ol>
+<li><strong>Preserve input state and validate success values.</strong> Compare input before and after a transition, then reject NaN as a result. <strong>Expected:</strong> input unchanged; new object returned; NaN rejects. <strong>Verify:</strong> Record the observed value, exception or browser state and compare it with that expectation.</li>
+</ol>
+<h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
+<p>Keep the smallest fixture that distinguishes the intended behavior from a tempting alternative. Read the assertion message and inspect the input, return value and state at that point. Do not remove a failing check just to reach the success receipt. Preserve the original failure, repair the responsible assumption, then check the normal path and the negative case again.</p>
+<p>If a host API is absent, confirm the actual host and version before changing the algorithm. A successful parse does not prove that an API exists. Compiler success does not prove that external data satisfies a type. A browser interaction requires browser evidence. For resource-owning examples, inspect cleanup after failure as carefully as the happy path. The separate explanations discuss the specific mistaken inference in each exercise.</p>
+<h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
+<p>Start by comparing the actual value with the literal expected result. Next, isolate the expression that transforms it or the boundary where its type or ownership changes. If the discrepancy involves scheduling, replace unrelated work with a small trace array and await the exact completion you intend to observe. Finally, ask for one hint about the first incorrect assumption before opening the reference. Keep one controlled failure that would catch the same mistake returning.</p>
+<h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
+<p>Close the solution and explain State machine, Event, Functional core using the fixture. Reconstruct one example from a blank saved copy. Change a boundary input and predict the new result before running it. Explain the assumptions under which the mechanism is useful and a situation in which its cost or host requirements make another design preferable. A copied program is useful rehearsal; a fresh case demonstrates transfer.</p>
+<h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
+<p><a href="https://www.typescriptlang.org/docs/handbook/2/narrowing.html">Official language or host reference</a>. Fixtures and exercises are original course material. Actual prepared Node, TypeScript and browser execution evidence is tracked in <code>docs/implementation/javascript-content-status.md</code>. Manual-only steps remain unqualified until performed. No default lesson installs dependencies, downloads a model or contacts a shared service.</p>
+<h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning for js-039: Functional core and state machines.
+Read courses/javascript-typescript/guides/js-039.md and courses/javascript-typescript/lessons/js-039.mts. Direct prerequisites: `js-038`.
+Explain the mechanism, ask me to predict a value or failure, review my own attempt,
+give one hint, request compile/runtime/browser evidence, and ask a fresh retrieval question.
+Keep courses/javascript-typescript/solutions/ closed until I request comparison or show an attempt.
+Done when I can explain the state and host contracts, pass all six exercise checks,
+diagnose a controlled failure, and solve a new boundary case without copying the answer.</code></pre></article>
+  </main>
+</body>
+</html>

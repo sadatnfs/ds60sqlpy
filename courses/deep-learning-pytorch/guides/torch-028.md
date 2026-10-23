@@ -1,14 +1,12 @@
 # torch-028: Restartable training, optimizer state and RNG evidence
 
-Status: authored PyTorch course content. The manifest inventories complete teaching files; runtime readiness remains a separate, measured property.
-
 ## Level and prerequisites
 
 Advanced; approximately 135 minutes. Direct prerequisites: `torch-027`. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
 
 ## Learning objectives
 
-Restartable training requires the state that determines the next update, not merely weights that reproduce the current prediction. The central investigation is concrete: Take two Adam updates of a zero-weight linear model onx1, 2 andy2 x. The finish condition is optimizer step2 and positive weight. directory absent; no distributed-loader claim. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Restartable training requires the state that determines the next update, not merely weights that reproduce the current prediction. The central investigation is concrete: Take two Adam updates of a zero-weight linear model onx 1, 2 and y 2 x. The finish condition is optimizer step 2 and positive weight. directory absent; no distributed-loader claim. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -18,7 +16,9 @@ This lesson saves a small linear model, Adam state, CPU RNG state and an explici
 
 ## Design decisions and when to use this method
 
+Choose a checkpoint boundary by asking what determines the next update. An inference artifact may need only the predictor's parameters, buffers and construction/preprocessing contract. A training continuation also needs optimizer history and every active source of randomness, scheduling and data position. Save only the components actually used, while stating which are fixed or absent.
 
+Use a fresh-process next-step comparison to test reconstruction. Match the next batch and stochastic draws before comparing updated weights. The lesson deliberately uses one CPU generator and a literal batch; restoring workers, distributed sampling or partially consumed external streams remains a separate contract.
 
 ## Paired TensorFlow comparison
 
@@ -38,13 +38,44 @@ TensorFlow Checkpoints track model and optimizer objects; PyTorch commonly saves
 
 ## How to run this lesson
 
-Use a prepared `llm-torch-cpu` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/torch-028/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: `& $CoursePython courses/deep-learning-pytorch/lessons/torch-028.py`. For macOS/Linux use `.venv/bin/python courses/deep-learning-pytorch/lessons/torch-028.py` from the repository root.
+Use a prepared `llm-torch-cpu` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/torch-028/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: `& $CoursePython courses/deep-learning-pytorch/lessons/torch-028.py`. For macOS/Linux, use the interpreter explicitly selected for a separately prepared native PyTorch environment, and invoke that interpreter on `courses/deep-learning-pytorch/lessons/torch-028.py` from the repository root. The repository's general `.venv` is not assumed to contain PyTorch; the prepared classroom profile is the default execution route.
 
-Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.
+Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the explicit tolerance in each assertion. Several analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone is not a universal numerical-error bound. Finite differences, reductions and conditioning can require different justified tolerances. Integer counts, identities and boolean decisions should be exact.
 
 ## Syntax anatomy and reasoning sequence
 
 Save a dictionary of model.state_dict, optimizer.state_dict, torch.get_rng_state and simple metadata. Reconstruct fresh objects before load_state_dict, and restore RNG after object construction so initialization draws do not advance the restored stream. torch.load uses weights_only=True for this trusted tensor-and-primitive checkpoint. The child program is dedented, compiled before launch, bounded by a timeout, and includes stderr in a failure.
+
+## Reconstruct the next state transition, not just the current prediction
+
+Training state is the input to a transition. A useful inventory separates components by how they influence the next step:
+
+| Component | Role in this fixture | What weights alone omit |
+| --- | --- | --- |
+| model tensors | current scalar predictor | current value if absent |
+| Adam moments and step | update direction/normalization | history-dependent next update |
+| optimizer group options | rate and optimizer configuration | the intended update policy |
+| CPU RNG state | next probe and target-noise draws | position in the random stream |
+| data_position=2 | declared completed-update marker | progress metadata |
+| literal x and target rule | fixed next-batch construction | a reproducible input contract |
+
+Adam maintains m_t=beta 1*m_(t-1)+(1-beta 1)*g_t and v_t=beta 2*v_(t-1)+(1-beta 2)*g_t^2, then uses step-dependent bias correction and an epsilon-stabilized normalized update. Two models with identical weights but different m, v, t need not take the same next step. Saving after two real updates makes those histories nontrivial; checkpointing before any update would leave a much weaker test.
+
+The weights-only negative control is deliberately given the same next noise tensor as the uninterrupted run. Its different result therefore isolates missing optimizer history rather than simultaneously changing the batch and the optimizer. It is a stronger experiment than comparing two restarted jobs whose data order and RNG streams are also unknown. The paired TensorFlow chapter tests the same reconstruction principle, although its scalar objective and optimizer rate differ from this PyTorch fixture; their literal weights are not a cross-framework equality oracle.
+
+The RNG timeline has an easily missed construction step. torch.manual_seed(7) sets an initial stream. Creating nn.Linear consumes initialization randomness even though the code subsequently overwrites its weight with zero. The two initial updates use zero noise and no further random draws. The saved RNG state therefore represents a particular position after construction, not simply the number 7. The uninterrupted path next draws a three-value probe, then a2×1 noise tensor, and then updates.
+
+The child reconstructs the model and optimizer, loads their saved state, and only then restores torch RNG state. Restoring before constructing Linear would let initialization consume a draw from the restored stream. Setting the seed again would return to the stream's beginning instead of its saved position. Matching the three-value probe checks this ordering directly before the weight comparison tests the next noisy update. [PyTorch 2.9 reproducibility guidance](https://docs.pytorch.org/docs/2.9/notes/randomness.html).
+
+Other randomness is absent from this particular continuation. Python random, NumPy Generator objects, DataLoader generators, worker processes and accelerator generators would need their own explicit treatment if used. A global torch seed does not automatically serialize every library's current generator state. Likewise, a data_position integer does not restore a real iterator here: the next batch is always constructed from literal x=[1, 2]. Incrementing the marker to three proves the stated bookkeeping, not worker-prefetch or distributed-sampler recovery.
+
+State dictionaries also have ownership semantics. model.state_dict() provides references to model state tensors; holding that mapping in memory is not an immutable copy while later updates mutate the model. The example immediately serializes the mapping before continuation, so the file preserves that point. For an in-memory before/after comparison, clone the values; for a restore comparison, reload the completed saved file rather than assuming a still-live dictionary remained unchanged.
+
+Reconstruct the same architecture and optimizer parameter-group structure before loading. Optimizer state is associated with the supplied parameter groups and their ordering; similar tensor shapes do not prove the state was attached to the intended semantic parameter after an architecture edit. A scheduler, gradient scaler, EMA model or accumulated-but-not-yet-stepped gradients would add more continuation state when present. None is silently claimed restored by this small Adam example.
+
+weights_only=True restricts the object forms used by the local tensor-and-primitive checkpoint loader. It is not a publisher-authentication mechanism or a complete resource/shape validation policy for arbitrary outside files. map_location='cpu' establishes the intended device boundary. The child process uses the existing interpreter, has a timeout and exposes stderr on failure, so a failed reconstruction is not replaced by expected output text.
+
+Finally, the tested boundary is a completed torch.save followed by a fresh-process load. It does not inject a crash halfway through writing or prove power-loss durability. A persistent production checkpoint needs its own staged-publication, integrity and retention procedure. The local directory is owned and disposable, and the successful test removes it. Next-step parity is valuable evidence for this exact transition and environment, not a promise of bitwise agreement across versions, hardware or nondeterministic pipelines.
 
 ## Worked example / walkthrough
 
@@ -71,7 +102,7 @@ for _ in range(2): step(model,optimizer,torch.zeros((2,1)))
 parameter=next(model.parameters()); assert optimizer.state[parameter]['step'].item()==2 and parameter.item()>0
 ```
 
-**Expected:** optimizer step2 and positive weight.
+**Expected:** optimizer step 2 and positive weight.
 
 ### Example B: Save the complete local contract
 
@@ -83,7 +114,7 @@ checkpoint={'model':model.state_dict(),'optimizer':optimizer.state_dict(),'rng':
 torch.save(checkpoint,path); assert path.is_file() and checkpoint['data_position']==2
 ```
 
-**Expected:** file exists and metadata position2.
+**Expected:** file exists and metadata position 2.
 
 ### Example C: Record uninterrupted continuation
 
@@ -94,29 +125,29 @@ probe=torch.rand(3); noise=torch.rand((2,1))*.01; step(model,optimizer,noise); e
 assert torch.isfinite(probe).all() and optimizer.state[parameter]['step'].item()==3 and np.isfinite(expected)
 ```
 
-**Expected:** finite weight, step3, and saved three-value random probe.
+**Expected:** finite weight, step 3, and saved three-value random probe.
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: optimizer step2 and positive weight. directory absent; no distributed-loader claim. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: optimizer step 2 and positive weight. directory absent; no distributed-loader claim. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
-1. **Create nontrivial training state.** Take two Adam updates of a zero-weight linear model onx1, 2 andy2 x.
-   **Expected:** optimizer step2 and positive weight.
-   **Verify:** Save the assertion results for exercise 1, including optimizer step2 and positive weight.
+1. **Create nontrivial training state.** Take two Adam updates of a zero-weight linear model onx 1, 2 and y 2 x.
+   **Expected:** optimizer step 2 and positive weight.
+   **Verify:** Save the assertion results for exercise 1, including optimizer step 2 and positive weight.
 
 2. **Save the complete local contract.** Write model, optimizer, RNG and data_position2 into an owned temporary checkpoint.
-   **Expected:** file exists and metadata position2.
-   **Verify:** Save the assertion results for exercise 2, including file exists and metadata position2.
+   **Expected:** file exists and metadata position 2.
+   **Verify:** Save the assertion results for exercise 2, including file exists and metadata position 2.
 
 3. **Record uninterrupted continuation.** Draw three random values, then a small target perturbation, and perform the third update.
-   **Expected:** finite weight, step3, and saved three-value random probe.
-   **Verify:** Save the assertion results for exercise 3, including finite weight, step3, and saved three-value random probe.
+   **Expected:** finite weight, step 3, and saved three-value random probe.
+   **Verify:** Save the assertion results for exercise 3, including finite weight, step 3, and saved three-value random probe.
 
 4. **Restore in a fresh interpreter.** Recreate model and Adam, restore all state, repeat the same draws and update.
-   **Expected:** probe matches and next weight agrees within1e-6; position3.
-   **Verify:** Save the assertion results for exercise 4, including probe matches and next weight agrees within1e-6; position3.
+   **Expected:** probe matches and next weight agrees within 1e-6; position 3.
+   **Verify:** Save the assertion results for exercise 4, including probe matches and next weight agrees within 1e-6; position 3.
 
 5. **Expose a weights-only restart.** Restore only the saved model into fresh Adam and take the same third batch update.
    **Expected:** next weight differs from full-state continuation.
@@ -128,7 +159,9 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Common pitfalls and diagnosis
 
-When a result disagrees, locate the first intermediate value that violates this explanation. Inspect shapes and identities before aggregates, and inspect counts before averages. Preserve the original fixture and introduce only one controlled change at a time. If an arithmetic identity passes but a data-boundary condition fails, the experiment is still invalid. If a runtime is unavailable, record the unexecuted code as unverified rather than replacing its output with the expected text. The separate explanation discusses why the tempting alternative in each case changes the result.
+If immediate predictions match but the next weight diverges, compare Adam step/moments, group options and the exact next input before changing tolerances. If the random probe differs, inspect restore order and every intervening draw, including model construction. If the probe matches but the update does not, inspect optimizer reconstruction and loss configuration.
+
+If a supposed saved snapshot changes in memory, check state_dict aliasing. If the data-position marker is correct but a real pipeline repeats or skips records, the marker did not restore its loader/sampler contract. Treat child timeout, nonzero exit or incompatible tensor shapes as a failed continuation with retained diagnostics. Do not describe a completed-file test as crash-safe publication or a one-CPU-generator test as distributed reproducibility.
 
 ## Progressive hints
 

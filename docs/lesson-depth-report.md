@@ -5,7 +5,7 @@ This generated report enforces the complete-amateur teaching standard in
 review must still judge technical accuracy, progression, and whether the
 examples actually teach the named topic.
 
-- Cataloged lessons passing: **180/180**
+- Cataloged lessons passing: **186/186**
 - Minimum guide words: **1050**
 - Minimum worked-example fences: **2**
 - Minimum explicitly defined terms: **3**
@@ -95,18 +95,18 @@ examples actually teach the named topic.
 | `python-data-02` | 1716 | 5 | 11 | 8/8 | 975 | notebook gate n/a | PASS |
 | `python-ml-02` | 1817 | 5 | 11 | 8/8 | 983 | notebook gate n/a | PASS |
 | `python-pro-03` | 1911 | 5 | 10 | 8/8 | 975 | notebook gate n/a | PASS |
-| `python-numpy-01` | 1569 | 5 | 7 | 6/6 | 1386 | notebook gate n/a | PASS |
-| `python-numpy-02` | 1612 | 5 | 7 | 6/6 | 1600 | notebook gate n/a | PASS |
-| `python-numpy-03` | 1577 | 5 | 7 | 6/6 | 1603 | notebook gate n/a | PASS |
-| `python-numpy-04` | 1623 | 5 | 7 | 6/6 | 1589 | notebook gate n/a | PASS |
-| `python-pandas-01` | 1656 | 5 | 7 | 6/6 | 1570 | notebook gate n/a | PASS |
-| `python-pandas-02` | 1656 | 5 | 7 | 6/6 | 1729 | notebook gate n/a | PASS |
-| `python-pandas-03` | 1684 | 5 | 7 | 6/6 | 1769 | notebook gate n/a | PASS |
-| `python-pandas-04` | 1703 | 5 | 7 | 6/6 | 1785 | notebook gate n/a | PASS |
-| `python-algo-01` | 1544 | 5 | 7 | 6/6 | 1264 | notebook gate n/a | PASS |
-| `python-algo-02` | 1620 | 5 | 7 | 6/6 | 1397 | notebook gate n/a | PASS |
-| `python-algo-03` | 1627 | 5 | 7 | 6/6 | 1673 | notebook gate n/a | PASS |
-| `python-algo-04` | 1698 | 5 | 7 | 6/6 | 1753 | notebook gate n/a | PASS |
+| `python-numpy-01` | 1568 | 5 | 7 | 6/6 | 1474 | notebook gate n/a | PASS |
+| `python-numpy-02` | 1627 | 5 | 7 | 6/6 | 1752 | notebook gate n/a | PASS |
+| `python-numpy-03` | 1575 | 5 | 7 | 6/6 | 1622 | notebook gate n/a | PASS |
+| `python-numpy-04` | 1626 | 5 | 7 | 6/6 | 1687 | notebook gate n/a | PASS |
+| `python-pandas-01` | 1641 | 5 | 7 | 6/6 | 1571 | notebook gate n/a | PASS |
+| `python-pandas-02` | 1642 | 5 | 7 | 6/6 | 1731 | notebook gate n/a | PASS |
+| `python-pandas-03` | 1680 | 5 | 7 | 6/6 | 1845 | notebook gate n/a | PASS |
+| `python-pandas-04` | 1674 | 5 | 7 | 6/6 | 1873 | notebook gate n/a | PASS |
+| `python-algo-01` | 1537 | 5 | 7 | 6/6 | 1277 | notebook gate n/a | PASS |
+| `python-algo-02` | 1611 | 5 | 7 | 6/6 | 1402 | notebook gate n/a | PASS |
+| `python-algo-03` | 1640 | 5 | 7 | 6/6 | 1693 | notebook gate n/a | PASS |
+| `python-algo-04` | 1690 | 5 | 7 | 6/6 | 1773 | notebook gate n/a | PASS |
 | `sql-start-01` | 2226 | 5 | 15 | 6/6 | 1567 | notebook gate n/a | PASS |
 | `sql-start-02` | 2232 | 5 | 14 | 6/6 | 1602 | notebook gate n/a | PASS |
 | `sql-start-03` | 2212 | 5 | 14 | 6/6 | 1584 | notebook gate n/a | PASS |
@@ -185,6 +185,12 @@ examples actually teach the named topic.
 | `sql-quality-01` | 2335 | 5 | 14 | 6/6 | 1806 | notebook gate n/a | PASS |
 | `sql-scale-01` | 2404 | 5 | 14 | 6/6 | 1854 | notebook gate n/a | PASS |
 | `sql-concurrency-01` | 2838 | 11 | 14 | 6/6 | 1736 | notebook gate n/a | PASS |
+| `sql-deep-01` | 2239 | 5 | 11 | 6/6 | 1738 | notebook gate n/a | PASS |
+| `sql-deep-02` | 2270 | 5 | 11 | 6/6 | 1713 | notebook gate n/a | PASS |
+| `sql-deep-03` | 2293 | 5 | 11 | 6/6 | 1765 | notebook gate n/a | PASS |
+| `sql-deep-04` | 2309 | 5 | 11 | 6/6 | 1991 | notebook gate n/a | PASS |
+| `sql-deep-05` | 2331 | 5 | 11 | 6/6 | 2031 | notebook gate n/a | PASS |
+| `sql-deep-06` | 2247 | 5 | 11 | 6/6 | 2004 | notebook gate n/a | PASS |
 | `bridge-01` | 2014 | 5 | 13 | 10/10 | 1365 | notebook gate n/a | PASS |
 | `bridge-02` | 2011 | 5 | 13 | 12/12 | 1466 | notebook gate n/a | PASS |
 | `bridge-03` | 1944 | 8 | 13 | 10/10 | 1292 | notebook gate n/a | PASS |

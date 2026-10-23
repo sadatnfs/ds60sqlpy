@@ -1,0 +1,38 @@
+{
+  "lesson_id": "k8s-028",
+  "provenance": "synthetic teaching cases, not runtime observations",
+  "capability": "exclusive storage/policy/stateful-change integration lease",
+  "browser_source": false,
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "List storage,CNI,renderer,image and owned-target requirements.",
+      "expected": "Each capability has a qualified host receipt or is marked unavailable."
+    },
+    {
+      "exercise": 2,
+      "task": "Record application response,marker hash and both client paths before change.",
+      "expected": "A source-identified baseline exists for every acceptance gate."
+    },
+    {
+      "exercise": 3,
+      "task": "Compare the full chart/overlay output with the approved object set.",
+      "expected": "No unexpected kind,namespace,image,hook or security change."
+    },
+    {
+      "exercise": 4,
+      "task": "Use the approved wrong-probe or equivalent bounded candidate fault.",
+      "expected": "The intended gate fails with a discriminating condition/client result and no unrelated mutation."
+    },
+    {
+      "exercise": 5,
+      "task": "Restore reviewed intent,then read the marker and retest policy/client behavior.",
+      "expected": "Application recovers,hash remains h1,and allowed/denied paths retain their intended outcomes."
+    },
+    {
+      "exercise": 6,
+      "task": "Record whether the synthetic PVC remains and which exact resources were removed.",
+      "expected": "UID-aware cleanup and explicit data-retention/reclaim boundaries are reviewable."
+    }
+  ]
+}

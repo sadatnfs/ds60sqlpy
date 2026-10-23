@@ -125,7 +125,7 @@
 <li><strong>object file:</strong> compiled code that still needs linking</li>
 <li><strong>executable:</strong> a linked program file</li>
 <li><strong>stdout/stderr:</strong> separate normal-output and diagnostic streams</li>
-<li><strong>exit status:</strong> the process result code, with0 normally signaling success</li>
+<li><strong>exit status:</strong> the process result code, with 0 normally signaling success</li>
 </ul>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-follow-one-successful-request">Worked example 1: Follow one successful request<a class="heading-anchor" href="#worked-example-1-follow-one-successful-request" aria-label="Link to this section">#</a></h4>
@@ -145,12 +145,12 @@ process: not run</code></pre>
 <p><strong>Expected:</strong> This is a compile failure, with no runtime exit evidence.</p>
 <h3 id="exercises-and-explanatory-solutions">Exercises and explanatory solutions<a class="heading-anchor" href="#exercises-and-explanatory-solutions" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-name-each-artifact">Exercise 1: Name each artifact<a class="heading-anchor" href="#exercise-1-name-each-artifact" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For cpp-001 Exercise 1, hello.cpp,hello.o,hello and hello, learner.</p>
+<p><strong>Inputs/evidence:</strong> For cpp-001 Exercise 1, hello.cpp, hello.o, hello and hello, learner.</p>
 <p><strong>Expected result/shape:</strong> For cpp-001 Exercise 1, source/object/executable/output in that order.</p>
 <p><strong>Verify:</strong> For cpp-001 Exercise 1, label all four without treating the executable as source.</p>
 <p>The suffixes are conventional clues, but the build transcript establishes provenance. A printed greeting is data from a process, not the executable file itself.</p>
 <h4 id="exercise-2-read-a-relative-path">Exercise 2: Read a relative path<a class="heading-anchor" href="#exercise-2-read-a-relative-path" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For cpp-001 Exercise 2, working directory course;relative path lessons/hello.cpp.</p>
+<p><strong>Inputs/evidence:</strong> For cpp-001 Exercise 2, working directory course; relative path lessons/hello.cpp.</p>
 <p><strong>Expected result/shape:</strong> For cpp-001 Exercise 2, the intended file is course/lessons/hello.cpp.</p>
 <p><strong>Verify:</strong> For cpp-001 Exercise 2, draw the joined path and explain why changing the working directory changes a relative path.</p>
 <p>A relative path is interpreted against a base. Quoting protects spaces but does not change which base directory a tool uses.</p>

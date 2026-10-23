@@ -1,0 +1,38 @@
+{
+  "lesson_id": "k8s-021",
+  "provenance": "synthetic teaching cases, not runtime observations",
+  "capability": "exclusive policy-capable CNI lease with paired clients",
+  "browser_source": false,
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Read the selected Pod label and policy direction.",
+      "expected": "app=hello destinations,Ingress only."
+    },
+    {
+      "exercise": 2,
+      "task": "Combine the deny-ingress and allow-client policies.",
+      "expected": "The explicit matching allow remains effective;there is no ordered deny override."
+    },
+    {
+      "exercise": 3,
+      "task": "Compare one peer containing namespace+Pod selectors with two separate peers.",
+      "expected": "One peer means conjunction;separate entries mean alternatives."
+    },
+    {
+      "exercise": 4,
+      "task": "Observe both approved clients against a healthy backend before enforcement.",
+      "expected": "Both paths succeed with the expected payload and target receipt."
+    },
+    {
+      "exercise": 5,
+      "task": "Repeat both paths after the reviewed policies in a qualified CNI lease.",
+      "expected": "Permitted path succeeds;other path fails within its deadline."
+    },
+    {
+      "exercise": 6,
+      "task": "Record exact policy/client UIDs and the scope of the isolation claim.",
+      "expected": "Only owned policy resources are cleaned;protocols,hosts and capabilities outside the test remain unclaimed."
+    }
+  ]
+}

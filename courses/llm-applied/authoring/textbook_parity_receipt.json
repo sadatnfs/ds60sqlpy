@@ -1,0 +1,28 @@
+{
+  "status": "passed",
+  "checked_at_utc": "2026-10-23T14:22:44.063118+00:00",
+  "scope": "Applied textbook prose edition; no runtime-program changes",
+  "chapters": 24,
+  "protected_files": 73,
+  "learner_files": 24,
+  "executable_references": 23,
+  "explanatory_references": 24,
+  "course_manifests": 2,
+  "preserved_fences": 97,
+  "preserved_python_fences": 70,
+  "all_file_hashes_match": true,
+  "all_fence_hashes_match": true,
+  "source_snapshot_sha256": "cab4e0557214f4085fd8893579ba47a12bfe5f1ebaa56e137162ef945ee26df0",
+  "textbook_source_sha256": "a0dac40299a03b31fcd01e64e6d7864e4f0e8f610168dcbaa6cdbfb0285583bb",
+  "broken_local_guide_links": [],
+  "largest_guide_bytes": 29208,
+  "mcp_document_byte_bound_checked": 96000,
+  "no_em_dashes": true,
+  "independent_case_arithmetic": "passed",
+  "focused_tests": {
+    "passed": 38,
+    "skipped": 6,
+    "skip_scope": "Host lacks the separately prepared PyTorch runtime; no worker rerun required for unchanged bytes"
+  },
+  "quality_checks": "Ruff, format and strict MyPy passed for the focused test and new textbook source; authored paragraphs exempt from E501"
+}

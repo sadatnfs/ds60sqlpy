@@ -116,71 +116,165 @@
       <p class="source-path">Generated from <code>courses/deep-learning-tensorflow/guides/tf-018.md</code></p>
     </header>
     <article class="document"><h2 id="tf-018-normalization-state-and-batch-dependence">tf-018: Normalization state and batch dependence<a class="heading-anchor" href="#tf-018-normalization-state-and-batch-dependence" aria-label="Link to this section">#</a></h2>
-<p>Status: authored beta content. The manifest inventories complete teaching files; runtime readiness remains a separate, measured property.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Intermediate; approximately 120 minutes. Direct prerequisites: <code>tf-017</code>. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <p>Distinguish BatchNorm moving statistics from per-example LayerNorm. The central investigation is concrete: Use momentum 0.5 and a fixed batch mean [2,4]; inspect the first BatchNorm moving-mean update and compare per-row normalization. The finish condition is Starting from zeros, moving mean becomes [1,2]. Evaluation does not update it. Adding an unrelated batch row cannot alter another row under LayerNorm. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
 <h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
-<p>Normalization can introduce state and dependencies between observations. Batch normalization estimates statistics over a training batch and updates moving statistics for later inference. Layer normalization computes statistics across each example&#x27;s features, so an unrelated example should not alter a row&#x27;s output. These are different mechanisms even when both produce centered values. Batch normalization&#x27;s moving mean starts at zero here. With momentum.5 and batch mean[2,4], one update produces[1,2]. Evaluation uses the stored state and should not update it. In sequence models, normalization across time can leak future information; tokenwise feature normalization avoids that particular dependency.</p>
+<p>Normalization has three distinct contracts: which values share statistics, which state changes during training, and which affine parameters are learned. BatchNorm and LayerNorm can use similar arithmetic while differing on all three. A layer name or an axis number is not enough to infer the dependency structure.</p>
+<p>For BatchNormalization(axis=-1) on input [N,C], the final axis identifies separate channels whose statistics are retained. The reduction happens over the other axis N. On channels-last images [N,H,W,C], separate channel statistics reduce over N,H,W. In contrast, LayerNormalization(axis=-1) reduces the final feature axis itself. On [N,T,D] it computes a distinct mean and variance for every [N,T] token, reducing D and preserving the token positions. These opposite roles for the axis argument are a common source of plausible-looking but incorrect comparisons.</p>
+<p>BatchNorm uses current-batch statistics during a training call and updates moving statistics for later inference. Its scale gamma and offset beta are trainable parameters, while moving mean and variance are nontrainable state updated by the layer. Inference uses the stored state and should not update it. LayerNorm uses the current row&#x27;s feature statistics in both ordinary training and inference, without maintaining running batch statistics. Its learned affine parameters still matter.</p>
+<p>The main fixture keeps the familiar Keras momentum 0.5 example, then adds momentum 0.8 so the update convention becomes visible. Keras momentum is the retention weight of the old statistic. PyTorch BatchNorm momentum is the weight of the new statistic. Equal numerical arguments usually describe different updates; the value 0.5 happens to hide that distinction. Matching moving means alone also does not establish full cross-framework parity, because epsilon, variance-state conventions, layout and mode behavior must be matched explicitly.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
-<p><strong>Moving statistic:</strong> Stored estimate updated during training.</p>
-<p><strong>Batch coupling:</strong> One observation affecting another through shared batch statistics.</p>
-<p><strong>Feature axis:</strong> The dimension reduced independently within each row.</p>
+<p><strong>Channel axis:</strong> For BatchNorm, the dimension whose distinct channel statistics are retained while other axes are reduced.</p>
+<p><strong>Reduction axis:</strong> A dimension whose values are combined to compute a statistic; LayerNorm axis=-1 reduces the feature dimension.</p>
+<p><strong>Moving statistics:</strong> Nontrainable state accumulated across training calls and used during BatchNorm inference.</p>
+<p><strong>Affine parameters:</strong> Learned scale gamma and offset beta applied after normalization.</p>
+<p><strong>Momentum convention:</strong> The meaning of the coefficient in a moving-statistic update, which differs between Keras and PyTorch.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Use a prepared <code>tensorflow-cpu</code> environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored <code>.learning/expansion/tf-018/</code> before editing, or use the application&#x27;s saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: <code>&amp; $CoursePython courses/deep-learning-tensorflow/lessons/tf-018.py</code>. For macOS/Linux use <code>.venv/bin/python courses/deep-learning-tensorflow/lessons/tf-018.py</code> from the repository root.</p>
+<p>Open the Docker classroom, choose <strong>Journeys</strong>, and select <code>tf-018</code>. Start its <code>tensorflow-cpu</code> worker using the <a href="../../../docs/docker-classroom.md.html">Docker classroom instructions</a>, then edit the saved coding pad and choose <strong>Run</strong>. The worker supplies the declared packages and runs a fresh Python process; you do not need Python or a framework installed on the host. Save your current attempt before replacing the pad with a complete worked example. These examples use literal local data and bounded operations, with no downloads or online model calls. For optional native study, use the repository&#x27;s <a href="../../../docs/setup/first-success.md.html">native setup guide</a> and the same declared dependencies. Keep editable copies under ignored <code>.learning/expansion/tf-018/</code> so the checked-in worksheet remains available.</p>
 <p>Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Example B changes an assumption that matters to this mechanism. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.</p>
 <h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
-<p>BatchNormalization(momentum=.5) keeps nontrainable moving variables as well as scale and offset parameters. training=True updates the moving mean using momentum<em>old+(1-momentum)</em>batch. LayerNormalization(axis=-1) reduces only the trailing feature axis. Its epsilon prevents division by zero and means the normalized variance is approximately, rather than exactly, one.</p>
+<h4 id="reduction-axes-and-statistic-shapes">Reduction axes and statistic shapes<a class="heading-anchor" href="#reduction-axes-and-statistic-shapes" aria-label="Link to this section">#</a></h4>
+<div class="table-wrap"><table><thead><tr>
+<th>Layer and input</th>
+<th>Axis argument means</th>
+<th>Reduction axes</th>
+<th>Statistic shape before broadcasting</th>
+</tr></thead><tbody>
+<tr>
+<td>BatchNorm on [N,C]</td>
+<td>retain C distinct channels</td>
+<td>N</td>
+<td>[C]</td>
+</tr>
+<tr>
+<td>BatchNorm on [N,H,W,C]</td>
+<td>retain C distinct channels</td>
+<td>N,H,W</td>
+<td>[C]</td>
+</tr>
+<tr>
+<td>LayerNorm on [N,T,D]</td>
+<td>reduce D features</td>
+<td>D</td>
+<td>[N,T,1]</td>
+</tr>
+<tr>
+<td>LayerNorm on [N,H,W,C] with axis=-1</td>
+<td>reduce channels at each location</td>
+<td>C</td>
+<td>[N,H,W,1]</td>
+</tr>
+</tbody></table></div>
+<p>The last row is not whole-image normalization. Likewise, PyTorch&#x27;s common channels-first convolution layout requires its own axis reasoning. Translate tensor layout before comparing framework calls. A statistical reduction can preserve the final output shape while changing which observations influence one another.</p>
+<h4 id="calculate-current-and-moving-statistics">Calculate current and moving statistics<a class="heading-anchor" href="#calculate-current-and-moving-statistics" aria-label="Link to this section">#</a></h4>
+<p>For batch [[1,3],[3,5]], the per-channel mean is [2,4]. Each channel has centered values [-1,1] and population variance 1. With initial moving mean [0,0] and Keras momentum m=0.5, the update m<em>old+(1-m)</em>batch gives [1,2]. A second identical batch gives [1.5,3]. With a constant batch mean and zero initial mean, the value after t updates is (1-m^t) times that batch mean. Early inference statistics still reflect their initialization.</p>
+<p>The initial moving variance is one. The main batch&#x27;s variance is also one, so that state would not visibly change. A separate probe [[0,0],[4,4]] has population variance four per channel. The Keras update with m=0.5 gives 0.5<em>1+0.5</em>4=2.5. PyTorch&#x27;s documented running-variance update uses the unbiased batch estimate, which is eight for those two observations, so matching its new-batch weight to 0.5 gives 4.5 instead. The TensorFlow fixture executes the Keras result; the paired PyTorch chapter separately exercises that framework&#x27;s state convention.</p>
+<h4 id="training-output-is-not-inference-output">Training output is not inference output<a class="heading-anchor" href="#training-output-is-not-inference-output" aria-label="Link to this section">#</a></h4>
+<p>With gamma=1, beta=0 and explicit epsilon=0.001, the training output of the main batch is [[-1,-1],[1,1]]/sqrt(1.001). After one moving-state update, inference instead subtracts [1,2] and divides by sqrt(1.001), giving [[0,1],[2,3]]/sqrt(1.001). It need not be centered on the new inference batch. Using inference mode on unrepresentative or barely initialized state can therefore produce a different result even when no trainable weight changed.</p>
+<p>LayerNorm on row [1,3] uses row mean 2 and variance 1. Appending [100,200] as another row does not change those statistics. Learned gamma/beta are omitted from this hand arithmetic by using their default initial values. After affine parameters are learned, the final output need not retain zero mean even though the normalized internal values are centered.</p>
+<h3 id="comparing-frameworks-and-choosing-the-normalization-contract">Comparing frameworks and choosing the normalization contract<a class="heading-anchor" href="#comparing-frameworks-and-choosing-the-normalization-contract" aria-label="Link to this section">#</a></h3>
+<p>For the same moving-mean update, translate Keras retention momentum m to PyTorch new-statistic momentum 1-m. Do not stop there: PyTorch documents a population variance for its training normalization but an unbiased estimate for its running-variance update. The Keras fixture above checks its moving-variance rule directly. Epsilon and affine parameters also affect outputs. The paired <a href="../../deep-learning-pytorch/guides/torch-018.md.html">PyTorch chapter</a> gives that framework&#x27;s actual state checks; matching one printed mean is not a complete equivalence argument.</p>
+<p>BatchNorm can be useful when its batch/statistical assumptions fit the task and data pipeline, but small, unusual or changing batches can make training and inference behavior diverge. Evaluation must avoid accidentally updating state using held-out examples. For sequence models, a reduction that includes future time positions can violate an autoregressive boundary even if attention is masked. Tokenwise LayerNorm avoids that particular cross-token dependency, although it does not prevent unrelated leakage elsewhere in a model.</p>
+<p>Keras BatchNorm&#x27;s trainable=False behavior is special: a direct call uses moving statistics even if training=True is supplied. For a compiled Keras training workflow, changing trainable after compilation requires recompilation for the changed setting to take effect as documented. These exercises use direct layer calls, so they do not claim a compiled-fit reconfiguration was tested. PyTorch separates parameter gradient flags from module mode, and its track_running_stats option introduces another distinct policy. Always name the state and mode contract being compared.</p>
+<p>Primary API references: <a href="https://www.tensorflow.org/api_docs/python/tf/keras/layers/BatchNormalization">Keras BatchNormalization</a>, <a href="https://www.tensorflow.org/api_docs/python/tf/keras/layers/LayerNormalization">Keras LayerNormalization</a>, and <a href="https://docs.pytorch.org/docs/2.9/generated/torch.nn.BatchNorm1d.html">PyTorch2.9 BatchNorm1d</a>. The formulas and fixtures here use small literal CPU arrays; they do not establish distributed synchronization or deployment behavior.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
-<h4 id="example-a-update-moving-state">Example A: Update moving state<a class="heading-anchor" href="#example-a-update-moving-state" aria-label="Link to this section">#</a></h4>
-<p>The batch mean is[2,4], so blending it equally with the initial zero state gives[1,2]. It is not yet the full batch mean.</p>
+<h4 id="example-a-update-and-inspect-moving-state">Example A: Update and inspect moving state<a class="heading-anchor" href="#example-a-update-and-inspect-moving-state" aria-label="Link to this section">#</a></h4>
+<p>The mean update reveals old-versus-new weighting. The separate variance probe is necessary because a batch variance equal to the initial moving variance would hide whether an update occurred. The output expectation uses current-batch statistics, not the newly updated moving mean.</p>
 <pre><code class="language-python">import numpy as np
 import tensorflow as tf
 
-bn=tf.keras.layers.BatchNormalization(momentum=.5); x=tf.constant([[1.,3.],[3.,5.]])
-bn(x,training=True)
-np.testing.assert_allclose(bn.moving_mean.numpy(),[1,2],atol=1e-6,rtol=0)</code></pre>
-<p><strong>Expected:</strong> moving mean[1,2].</p>
-<h4 id="example-b-freeze-evaluation-state">Example B: Freeze evaluation state<a class="heading-anchor" href="#example-b-freeze-evaluation-state" aria-label="Link to this section">#</a></h4>
-<p>The inference call uses learned state rather than adapting to the new observation. Accidental training=True would make predictions depend on evaluation batch composition and mutate the model.</p>
+epsilon = 1e-3
+values = tf.constant([[1., 3.], [3., 5.]])
+bn = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.5, epsilon=epsilon)
+training_output = bn(values, training=True)
+np.testing.assert_allclose(bn.moving_mean.numpy(), [1, 2], atol=1e-6, rtol=0)
+np.testing.assert_allclose(bn.moving_variance.numpy(), [1, 1], atol=1e-6, rtol=0)
+expected = np.array([[-1., -1.], [1., 1.]]) / np.sqrt(1 + epsilon)
+np.testing.assert_allclose(training_output.numpy(), expected, atol=1e-6, rtol=0)
+probe = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.5, epsilon=epsilon)
+probe(tf.constant([[0., 0.], [4., 4.]]), training=True)
+np.testing.assert_allclose(probe.moving_variance.numpy(), [2.5, 2.5], atol=1e-6, rtol=0)</code></pre>
+<p><strong>Expected:</strong> moving mean [1,2]; main variance stays [1,1]; variance-four probe updates moving variance to [2.5,2.5].</p>
+<h4 id="example-b-repeat-updates-and-translate-asymmetric-momentum">Example B: Repeat updates and translate asymmetric momentum<a class="heading-anchor" href="#example-b-repeat-updates-and-translate-asymmetric-momentum" aria-label="Link to this section">#</a></h4>
+<p>At 0.5 the coefficients are equal, hiding the convention difference. The asymmetric example identifies which coefficient belongs to the new batch. The Torch values here are an arithmetic comparison from its documented formula, not a claim that a Torch layer ran inside the TensorFlow profile.</p>
 <pre><code class="language-python">import numpy as np
 import tensorflow as tf
 
-before=bn.moving_mean.numpy().copy(); bn(tf.constant([[100.,200.]]),training=False)
-np.testing.assert_array_equal(before,bn.moving_mean.numpy())</code></pre>
-<p><strong>Expected:</strong> state remains[1,2].</p>
+values = tf.constant([[1., 3.], [3., 5.]])
+bn = tf.keras.layers.BatchNormalization(momentum=0.5)
+bn(values, training=True)
+bn(values, training=True)
+np.testing.assert_allclose(bn.moving_mean.numpy(), [1.5, 3], atol=1e-6, rtol=0)
+asymmetric = tf.keras.layers.BatchNormalization(momentum=0.8)
+asymmetric(values, training=True)
+np.testing.assert_allclose(asymmetric.moving_mean.numpy(), [0.4, 0.8], atol=1e-6, rtol=0)
+asymmetric(values, training=True)
+np.testing.assert_allclose(asymmetric.moving_mean.numpy(), [0.72, 1.44], atol=1e-6, rtol=0)
+batch_mean = np.array([2., 4.])
+keras_first = (1 - 0.8) * batch_mean
+torch_same_number_formula = 0.8 * batch_mean
+torch_matched_formula = 0.2 * batch_mean
+assert not np.allclose(keras_first, torch_same_number_formula)
+np.testing.assert_allclose(keras_first, torch_matched_formula, atol=1e-12, rtol=0)</code></pre>
+<p><strong>Expected:</strong> 0.5 repeat gives [1.5,3]; Keras0.8 first/second means are [0.4,0.8] and [0.72,1.44]; matching Torch new-batch weight is 0.2.</p>
+<h4 id="example-c-compare-channel-retention-with-feature-reduction">Example C: Compare channel retention with feature reduction<a class="heading-anchor" href="#example-c-compare-channel-retention-with-feature-reduction" aria-label="Link to this section">#</a></h4>
+<p>Both calls specify axis=-1 and return the same shape, but they reduce different axes. The independent NumPy formulas identify the distinction directly. This protects against a misleading axis label or a shape-only comparison.</p>
+<pre><code class="language-python">import numpy as np
+import tensorflow as tf
+
+values = np.arange(8, dtype=np.float32).reshape(1, 2, 2, 2)
+epsilon = 1e-3
+bn = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.8, epsilon=epsilon)
+bn_output = bn(tf.constant(values), training=True).numpy()
+channel_mean = values.mean(axis=(0, 1, 2), keepdims=True)
+channel_variance = values.var(axis=(0, 1, 2), keepdims=True)
+np.testing.assert_array_equal(channel_mean.reshape(-1), [3, 4])
+np.testing.assert_array_equal(channel_variance.reshape(-1), [5, 5])
+np.testing.assert_allclose(bn_output, (values - channel_mean) / np.sqrt(channel_variance + epsilon), atol=1e-6, rtol=0)
+np.testing.assert_allclose(bn.moving_mean.numpy(), [0.6, 0.8], atol=1e-6, rtol=0)
+np.testing.assert_allclose(bn.moving_variance.numpy(), [1.8, 1.8], atol=1e-6, rtol=0)
+ln = tf.keras.layers.LayerNormalization(axis=-1, epsilon=epsilon)
+ln_output = ln(tf.constant(values)).numpy()
+local_mean = values.mean(axis=-1, keepdims=True)
+local_variance = values.var(axis=-1, keepdims=True)
+np.testing.assert_allclose(ln_output, (values - local_mean) / np.sqrt(local_variance + epsilon), atol=1e-6, rtol=0)
+assert not np.allclose(bn_output, ln_output)</code></pre>
+<p><strong>Expected:</strong> BN uses channel means [3,4] and variances [5,5]; LN reduces each location&#x27;s two features.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
 <p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: Starting from zeros, moving mean becomes [1,2]. Evaluation does not update it. Adding an unrelated batch row cannot alter another row under LayerNorm. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
-<li><strong>Update moving state.</strong> Apply BatchNorm with momentum.5 to rows[1,3],[3,5]. <strong>Expected:</strong> moving mean[1,2]. <strong>Verify:</strong> Save the assertion results for exercise 1, including moving mean[1,2].</li>
+<li><strong>Update and inspect moving state.</strong> Apply Keras BatchNorm with momentum 0.5 to [[1,3],[3,5]], then use a separate variance-four probe. <strong>Expected:</strong> moving mean [1,2]; main variance stays [1,1]; variance-four probe updates moving variance to [2.5,2.5]. <strong>Verify:</strong> Save the assertion results for exercise 1, including moving mean [1,2]; main variance stays [1,1]; variance-four probe updates moving variance to [2.5,2.5].</li>
 </ol>
 <ol>
-<li><strong>Freeze evaluation state.</strong> Call BatchNorm in evaluation with a very different batch and compare moving means. <strong>Expected:</strong> state remains[1,2]. <strong>Verify:</strong> Save the assertion results for exercise 2, including state remains[1,2].</li>
+<li><strong>Freeze evaluation state.</strong> After one training call, evaluate the same batch and compare with the stored-statistic formula. <strong>Expected:</strong> moving state stays unchanged; inference output uses mean [1,2] and differs from training output. <strong>Verify:</strong> Save the assertion results for exercise 2, including moving state stays unchanged; inference output uses mean [1,2] and differs from training output.</li>
 </ol>
 <ol>
-<li><strong>Test row independence.</strong> Apply LayerNorm to one row and to the same row beside[100,200]. <strong>Expected:</strong> first row matches within1e-6. <strong>Verify:</strong> Save the assertion results for exercise 3, including first row matches within1e-6.</li>
+<li><strong>Test LayerNorm row independence.</strong> Normalize [1,3] alone and as the first row beside [100,200]. <strong>Expected:</strong> the first output is unchanged; LayerNorm has no running-statistic variables. <strong>Verify:</strong> Save the assertion results for exercise 3, including the first output is unchanged; LayerNorm has no running-statistic variables.</li>
 </ol>
 <ol>
-<li><strong>Expose batch dependence.</strong> Compare raw batch-centered first rows before and after adding an extreme row. <strong>Expected:</strong> first row changes from[-1,-1] to[-33,-66]. <strong>Verify:</strong> Save the assertion results for exercise 4, including first row changes from[-1,-1] to[-33,-66].</li>
+<li><strong>Expose actual BatchNorm batch dependence.</strong> Compare the first row of training normalization with and without the added row [98,199]. <strong>Expected:</strong> the output changes and matches independent per-channel NumPy mean/variance calculations. <strong>Verify:</strong> Save the assertion results for exercise 4, including the output changes and matches independent per-channel NumPy mean/variance calculations.</li>
 </ol>
 <ol>
-<li><strong>Repeat the state update.</strong> Apply the original batch a second time in training mode. <strong>Expected:</strong> moving mean[1.5,3]. <strong>Verify:</strong> Save the assertion results for exercise 5, including moving mean[1.5,3].</li>
+<li><strong>Repeat updates and translate asymmetric momentum.</strong> Repeat the 0.5 update, then run a fresh Keras layer with momentum 0.8 and compare old/new-weight arithmetic. <strong>Expected:</strong> 0.5 repeat gives [1.5,3]; Keras0.8 first/second means are [0.4,0.8] and [0.72,1.44]; matching Torch new-batch weight is 0.2. <strong>Verify:</strong> Save the assertion results for exercise 5, including 0.5 repeat gives [1.5,3]; Keras0.8 first/second means are [0.4,0.8] and [0.72,1.44]; matching Torch new-batch weight is 0.2.</li>
 </ol>
 <ol>
-<li><strong>Handle a constant feature row.</strong> Normalize a row[5,5] with LayerNorm and default zero offset. <strong>Expected:</strong> finite output[0,0]. <strong>Verify:</strong> Save the assertion results for exercise 6, including finite output[0,0].</li>
+<li><strong>Handle constant rows and frozen BatchNorm.</strong> Normalize a constant row, then freeze a trained Keras BatchNorm layer and call it with training=True. <strong>Expected:</strong> LayerNorm returns finite zeros; frozen Keras BatchNorm preserves moving state and uses its inference statistics. <strong>Verify:</strong> Save the assertion results for exercise 6, including LayerNorm returns finite zeros; frozen Keras BatchNorm preserves moving state and uses its inference statistics.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>When a result disagrees, locate the first intermediate value that violates this explanation. Inspect shapes and identities before aggregates, and inspect counts before averages. Preserve the original fixture and introduce only one controlled change at a time. If an arithmetic identity passes but a data-boundary condition fails, the experiment is still invalid. If a runtime is unavailable, record the unexecuted code as unverified rather than replacing its output with the expected text. The separate explanation discusses why the tempting alternative in each case changes the result.</p>
+<p>If changing another record changes an output, first ask which layer and mode are being tested. It is expected for training BatchNorm and unexpected for feature-only LayerNorm under fixed affine parameters. Write the reduced axes and statistic shapes explicitly. BatchNorm axis=-1 retains channel identities; LayerNorm axis=-1 reduces those feature values within each record.</p>
+<p>If moving state does not match, expand one update numerically and check which coefficient weights the old statistic. The value 0.5 can hide reversed conventions. A variance probe equal to its initializer can also hide whether the state updated, so use the separate variance-four fixture. If inference output is not centered on a new batch, inspect the stored statistics rather than assuming the inference implementation is broken.</p>
+<p>If state changes during evaluation, check the training argument, layer mode and any unexpected calls from preprocessing or validation. If freezing behaves differently across frameworks, separate affine-gradient control from moving-statistic updates and inference mode. Finally, keep epsilon and variance-estimator choices explicit before adjusting numerical tolerances; an API-convention mismatch is not floating-point noise.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise&#x27;s expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.</p>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
-<p>Close both worked examples. Explain Moving statistic, Batch coupling, Feature axis using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.</p>
+<p>Close both worked examples. Explain Channel axis, Reduction axis, Moving statistics using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Revisit the direct prerequisite <code>tf-017</code> if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.</p>
 <h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
-<p>API and mechanism reference: <a href="https://www.tensorflow.org/guide">TensorFlow guide</a>, reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. Current execution receipts are recorded in <code>docs/implementation/ml-content-status.md</code>; authored content does not imply that a heavy runtime was executed.</p>
+<p>API and mechanism reference: <a href="https://www.tensorflow.org/api_docs/python/tf/keras/layers/BatchNormalization">Keras BatchNormalization</a>, reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. Current execution receipts are recorded in <code>docs/implementation/ml-content-status.md</code>; authored content does not imply that a heavy runtime was executed.</p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for tf-018, Normalization state and batch dependence.
 Read courses/deep-learning-tensorflow/guides/tf-018.md and courses/deep-learning-tensorflow/lessons/tf-018.py. Direct prerequisites: `tf-017`.

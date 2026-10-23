@@ -106,7 +106,7 @@ std::vector<int> nonnegative_copy(const std::vector<int>& readings) {
 
 The source is borrowed read-only during the call. The result owns new elements and preserves encounter order. Returning this vector value transfers the result to the caller through normal value semantics; no manual pointer ownership is introduced.
 
-**Expected:** `{3,-1,0,5}` becomes `{3,0,5}`. Empty/all-negative inputs produce an empty vector. Changing the result's first value to99 leaves the source's first value3.
+**Expected:** `{3,-1,0,5}` becomes `{3,0,5}`. Empty/all-negative inputs produce an empty vector. Changing the result's first value to 99 leaves the source's first value 3.
 
 **Verify:** all three filtering checks pass, including input immutability and independence after result mutation. Reusing the input as output would fail those checks. This lesson does not claim that reserving capacity or changing syntax necessarily improves performance; that requires a later measured comparison.
 

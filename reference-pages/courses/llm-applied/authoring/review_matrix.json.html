@@ -1,0 +1,527 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Review Matrix · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course artifact</p>
+      <h1>Review Matrix</h1>
+      <p class="source-path">Generated from <code>courses/llm-applied/authoring/review_matrix.json</code></p>
+    </header>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-json"><code><span>{</span>
+<span>  &quot;review_date&quot;: &quot;2026-10-23&quot;,</span>
+<span>  &quot;chapters&quot;: [</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-001&quot;,</span>
+<span>      &quot;title&quot;: &quot;The subject assistant decision: prompts, retrieval or fine-tuning&quot;,</span>
+<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
+<span>      &quot;findings&quot;: [</span>
+<span>        &quot;The routing fixture needed a stage-by-stage capability and evidence ledger.&quot;,</span>
+<span>        &quot;The prose incorrectly called120 the admission threshold while the helper uses100.&quot;,</span>
+<span>        &quot;A model-quality comparison needed conditional failure accounting and controlled alternatives.&quot;</span>
+<span>      ],</span>
+<span>      &quot;executable_change&quot;: false,</span>
+<span>      &quot;worked_code_change&quot;: false,</span>
+<span>      &quot;review_owner&quot;: &quot;depth_reviews_applied.py&quot;,</span>
+<span>      &quot;review_runtime_evidence&quot;: []</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-002&quot;,</span>
+<span>      &quot;title&quot;: &quot;Data-science task contracts and structured extraction&quot;,</span>
+<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
+<span>      &quot;findings&quot;: [</span>
+<span>        &quot;Decoded-object validation, source parsing and numerical eligibility were conflated.&quot;,</span>
+<span>        &quot;The count ratio needed an explicit unit and aggregation counterexample.&quot;,</span>
+<span>        &quot;Unsupported fields and rejected records needed separate evaluation denominators.&quot;</span>
+<span>      ],</span>
+<span>      &quot;executable_change&quot;: false,</span>
+<span>      &quot;worked_code_change&quot;: false,</span>
+<span>      &quot;review_owner&quot;: &quot;depth_reviews_applied.py&quot;,</span>
+<span>      &quot;review_runtime_evidence&quot;: []</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-003&quot;,</span>
+<span>      &quot;title&quot;: &quot;Prompt and context engineering with measurable boundaries&quot;,</span>
+<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
+<span>      &quot;findings&quot;: [</span>
+<span>        &quot;The whole-item allocator needed exact scope and a greedy-selection counterexample.&quot;,</span>
+<span>        &quot;Prompt serialization was not separated enough from model behavior and authorization.&quot;,</span>
+<span>        &quot;Prompt tuning needed a controlled evaluation and truncation ledger.&quot;</span>
+<span>      ],</span>
+<span>      &quot;executable_change&quot;: false,</span>
+<span>      &quot;worked_code_change&quot;: false,</span>
+<span>      &quot;review_owner&quot;: &quot;depth_reviews_applied.py&quot;,</span>
+<span>      &quot;review_runtime_evidence&quot;: []</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-004&quot;,</span>
+<span>      &quot;title&quot;: &quot;Corpus provenance, versions and evaluation isolation&quot;,</span>
+<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
+<span>      &quot;findings&quot;: [</span>
+<span>        &quot;Integrity metadata needed separation from authenticity, access and applicability.&quot;,</span>
+<span>        &quot;Current-only version selection lacked an explicit historical-time counterexample.&quot;,</span>
+<span>        &quot;Corpus, chunk, index and answer identities needed a dependency trace.&quot;</span>
+<span>      ],</span>
+<span>      &quot;executable_change&quot;: false,</span>
+<span>      &quot;worked_code_change&quot;: false,</span>
+<span>      &quot;review_owner&quot;: &quot;depth_reviews_applied.py&quot;,</span>
+<span>      &quot;review_runtime_evidence&quot;: []</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-005&quot;,</span>
+<span>      &quot;title&quot;: &quot;Chunking, overlap, offsets and context budgets&quot;,</span>
+<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
+<span>      &quot;findings&quot;: [</span>
+<span>        &quot;Chunk-count and duplication formulas needed derivation and exact boundary arithmetic.&quot;,</span>
+<span>        &quot;Character offsets were not distinguished from bytes or model tokens.&quot;,</span>
+<span>        &quot;Overlap needed an evidence-dependence and multi-passage sufficiency counterexample.&quot;</span>
+<span>      ],</span>
+<span>      &quot;executable_change&quot;: false,</span>
+<span>      &quot;worked_code_change&quot;: false,</span>
+<span>      &quot;review_owner&quot;: &quot;depth_reviews_applied.py&quot;,</span>
+<span>      &quot;review_runtime_evidence&quot;: []</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-006&quot;,</span>
+<span>      &quot;title&quot;: &quot;Lexical retrieval and BM25 from first principles&quot;,</span>
+<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
+<span>      &quot;findings&quot;: [</span>
+<span>        &quot;BM25 needed a full numeric score trace and parameter-limit interpretation.&quot;,</span>
+<span>        &quot;Document-frequency and chunk-policy changes needed a corpus-dependence example.&quot;,</span>
+<span>        &quot;The tokenizer and default-only parameter contract needed honest boundaries.&quot;</span>
+<span>      ],</span>
+<span>      &quot;executable_change&quot;: false,</span>
+<span>      &quot;worked_code_change&quot;: false,</span>
+<span>      &quot;review_owner&quot;: &quot;depth_reviews_applied.py&quot;,</span>
+<span>      &quot;review_runtime_evidence&quot;: []</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-007&quot;,</span>
+<span>      &quot;title&quot;: &quot;Embedding retrieval, similarity and representation limits&quot;,</span>
+<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
+<span>      &quot;findings&quot;: [</span>
+<span>        &quot;Cosine retrieval needed an exact geometric calculation and a coordinate-system counterexample.&quot;,</span>
+<span>        &quot;The metadata exercise only compares dictionaries; it does not enforce an integrated retrieval gate.&quot;,</span>
+<span>        &quot;Encoder quality, normalization range and approximate search needed separate evidence.&quot;</span>
+<span>      ],</span>
+<span>      &quot;executable_change&quot;: false,</span>
+<span>      &quot;worked_code_change&quot;: false,</span>
+<span>      &quot;review_owner&quot;: &quot;depth_reviews_applied.py&quot;,</span>
+<span>      &quot;review_runtime_evidence&quot;: []</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-008&quot;,</span>
+<span>      &quot;title&quot;: &quot;Hybrid retrieval, reciprocal-rank fusion and reranking&quot;,</span>
+<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
+<span>      &quot;findings&quot;: [</span>
+<span>        &quot;Fusion needed exact score gaps and a constant-dependent tradeoff.&quot;,</span>
+<span>        &quot;Duplicate handling within a list was not distinguished from correlated list evidence.&quot;,</span>
+<span>        &quot;Reranker quality needed candidate and context ceilings with controlled budgets.&quot;</span>
+<span>      ],</span>
+<span>      &quot;executable_change&quot;: false,</span>
+<span>      &quot;worked_code_change&quot;: false,</span>
+<span>      &quot;review_owner&quot;: &quot;depth_reviews_applied.py&quot;,</span>
+<span>      &quot;review_runtime_evidence&quot;: []</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-009&quot;,</span>
+<span>      &quot;title&quot;: &quot;Metadata filtering and access-controlled retrieval&quot;,</span>
+<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
+<span>      &quot;findings&quot;: [</span>
+<span>        &quot;The access fixture needed an explicit trusted-input and enforcement boundary.&quot;,</span>
+<span>        &quot;Filtering after top-k required a concrete result and leakage counterexample.&quot;,</span>
+<span>        &quot;Cache policy identity, revocation and equivalence classes needed precise scope.&quot;</span>
+<span>      ],</span>
+<span>      &quot;executable_change&quot;: false,</span>
+<span>      &quot;worked_code_change&quot;: false,</span>
+<span>      &quot;review_owner&quot;: &quot;depth_reviews_applied.py&quot;,</span>
+<span>      &quot;review_runtime_evidence&quot;: []</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-010&quot;,</span>
+<span>      &quot;title&quot;: &quot;Query rewriting and bounded multi-hop retrieval&quot;,</span>
+<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
+<span>      &quot;findings&quot;: [</span>
+<span>        &quot;The graph walk&#x27;s hop definition needed queue-state and complexity traces.&quot;,</span>
+<span>        &quot;Fractional and Boolean hop budgets were accepted despite violating the intended integer boundary.&quot;,</span>
+<span>        &quot;Query expansion and graph reachability were not distinguished from evidence entailment.&quot;</span>
+<span>      ],</span>
+<span>      &quot;executable_change&quot;: true,</span>
+<span>      &quot;worked_code_change&quot;: true,</span>
+<span>      &quot;review_owner&quot;: &quot;depth_reviews_applied.py&quot;,</span>
+<span>      &quot;review_runtime_evidence&quot;: [</span>
+<span>        {</span>
+<span>          &quot;source_path&quot;: &quot;courses/llm-applied/solutions/llm-applied-010_solution.py&quot;,</span>
+<span>          &quot;source_sha256&quot;: &quot;2df24c0a62b78d09451ef3dd50b7d686dfdf11bdfd29d46c56ad56fe6770c86c&quot;,</span>
+<span>          &quot;worker_sha256&quot;: &quot;234a42be384dbf955aaff6e7ea3e5c0a063aa50f4ed9f7274fe04ea8439d2f3f&quot;,</span>
+<span>          &quot;image_id&quot;: &quot;sha256:eab1bc531be09ed3aeab7e0290fe348239d7b372ea9b014e242af9018ec2b523&quot;,</span>
+<span>          &quot;status&quot;: &quot;succeeded&quot;,</span>
+<span>          &quot;elapsed&quot;: 0.041,</span>
+<span>          &quot;lesson_id&quot;: &quot;llm-applied-010&quot;,</span>
+<span>          &quot;kind&quot;: &quot;reference&quot;,</span>
+<span>          &quot;runtime_profile&quot;: &quot;python-core&quot;,</span>
+<span>          &quot;receipt_path&quot;: &quot;work/applied010-depth-repaired-acceptance.jsonl&quot;</span>
+<span>        },</span>
+<span>        {</span>
+<span>          &quot;source_path&quot;: &quot;work/applied-depth-worked/llm-applied-010-abc.py&quot;,</span>
+<span>          &quot;source_sha256&quot;: &quot;cba86bf45cab6c3bafe040971a0465d3efcc0157ebafbadcf33227db79bdb650&quot;,</span>
+<span>          &quot;guide_path&quot;: &quot;courses/llm-applied/guides/llm-applied-010.md&quot;,</span>
+<span>          &quot;guide_sha256&quot;: &quot;989ca930983f29c76b918c6674fca30e962f7087954782e152259bc886ba2889&quot;,</span>
+<span>          &quot;image_id&quot;: &quot;sha256:eab1bc531be09ed3aeab7e0290fe348239d7b372ea9b014e242af9018ec2b523&quot;,</span>
+<span>          &quot;status&quot;: &quot;succeeded&quot;,</span>
+<span>          &quot;elapsed&quot;: 0.041,</span>
+<span>          &quot;execution_contract&quot;: &quot;sequential_examples_A_B_C_in_one_fresh_process&quot;,</span>
+<span>          &quot;lesson_id&quot;: &quot;llm-applied-010&quot;,</span>
+<span>          &quot;kind&quot;: &quot;worked_sequence&quot;,</span>
+<span>          &quot;runtime_profile&quot;: &quot;python-core&quot;,</span>
+<span>          &quot;receipt_path&quot;: &quot;work/ml-worked-applied010-depth-repaired-acceptance.jsonl&quot;</span>
+<span>        }</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-011&quot;,</span>
+<span>      &quot;title&quot;: &quot;Grounded claims, citations and evidence-based abstention&quot;,</span>
+<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
+<span>      &quot;findings&quot;: [</span>
+<span>        &quot;Citation integrity, claim support and world truth needed separate tests.&quot;,</span>
+<span>        &quot;The extractive helper was described too broadly as validating a support map.&quot;,</span>
+<span>        &quot;Abstention required a concrete coverage/utility tradeoff and computed-claim lineage.&quot;</span>
+<span>      ],</span>
+<span>      &quot;executable_change&quot;: false,</span>
+<span>      &quot;worked_code_change&quot;: false,</span>
+<span>      &quot;review_owner&quot;: &quot;depth_reviews_applied.py&quot;,</span>
+<span>      &quot;review_runtime_evidence&quot;: []</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-012&quot;,</span>
+<span>      &quot;title&quot;: &quot;Evaluating retrieval and answers with oracle controls&quot;,</span>
+<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
+<span>      &quot;findings&quot;: [</span>
+<span>        &quot;Retrieval recall and first-hit rank needed cutoff and multi-evidence interpretations.&quot;,</span>
+<span>        &quot;Saved labels were not distinguished sufficiently from observed model execution.&quot;,</span>
+<span>        &quot;Oracle context and aggregate scores needed paired controls and clear denominators.&quot;</span>
+<span>      ],</span>
+<span>      &quot;executable_change&quot;: false,</span>
+<span>      &quot;worked_code_change&quot;: false,</span>
+<span>      &quot;review_owner&quot;: &quot;depth_reviews_applied.py&quot;,</span>
+<span>      &quot;review_runtime_evidence&quot;: []</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-013&quot;,</span>
+<span>      &quot;title&quot;: &quot;Paired reliability studies and family-aware uncertainty&quot;,</span>
+<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
+<span>      &quot;findings&quot;: [</span>
+<span>        &quot;The family bootstrap needed its exact discrete distribution and estimand.&quot;,</span>
+<span>        &quot;Paired identity, selective accuracy and severe-error gates needed different denominators.&quot;,</span>
+<span>        &quot;The finite saved-label fixture required a clearer population and causal boundary.&quot;</span>
+<span>      ],</span>
+<span>      &quot;executable_change&quot;: false,</span>
+<span>      &quot;worked_code_change&quot;: false,</span>
+<span>      &quot;review_owner&quot;: &quot;depth_reviews_applied.py&quot;,</span>
+<span>      &quot;review_runtime_evidence&quot;: []</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-014&quot;,</span>
+<span>      &quot;title&quot;: &quot;Supervised fine-tuning data and answer-target masks&quot;,</span>
+<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
+<span>      &quot;findings&quot;: [</span>
+<span>        &quot;Answer-only masking needed an indexed next-token table and explicit denominator.&quot;,</span>
+<span>        &quot;Truncation preserving any target was not distinguished from preserving complete answers.&quot;,</span>
+<span>        &quot;Masking loss terms was not separated from conditioning paths or packing boundaries.&quot;</span>
+<span>      ],</span>
+<span>      &quot;executable_change&quot;: false,</span>
+<span>      &quot;worked_code_change&quot;: false,</span>
+<span>      &quot;review_owner&quot;: &quot;depth_reviews_applied.py&quot;,</span>
+<span>      &quot;review_runtime_evidence&quot;: []</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-015&quot;,</span>
+<span>      &quot;title&quot;: &quot;Full supervised fine-tuning of a tiny causal decoder&quot;,</span>
+<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
+<span>      &quot;findings&quot;: [</span>
+<span>        &quot;The tiny decoder needed an exact parameter/shape ledger and active-logit derivative.&quot;,</span>
+<span>        &quot;The held-out prefix could be solved through a shared token shortcut rather than broad transfer.&quot;,</span>
+<span>        &quot;The final training receipt used a pre-update loss while held-out loss used the post-update model.&quot;</span>
+<span>      ],</span>
+<span>      &quot;executable_change&quot;: true,</span>
+<span>      &quot;worked_code_change&quot;: false,</span>
+<span>      &quot;review_owner&quot;: &quot;depth_reviews_applied.py&quot;,</span>
+<span>      &quot;review_runtime_evidence&quot;: [</span>
+<span>        {</span>
+<span>          &quot;source_path&quot;: &quot;courses/llm-applied/solutions/llm-applied-015_solution.py&quot;,</span>
+<span>          &quot;source_sha256&quot;: &quot;cf4f7ada6283bd5994c99539fbfe72be9cfd9bdcdd257006ce9f1e78a1c637c1&quot;,</span>
+<span>          &quot;worker_sha256&quot;: &quot;234a42be384dbf955aaff6e7ea3e5c0a063aa50f4ed9f7274fe04ea8439d2f3f&quot;,</span>
+<span>          &quot;image_id&quot;: &quot;sha256:b93cf9f556f8108b9456e259fd148b6d85eb04421a2961316f6926515259e2b5&quot;,</span>
+<span>          &quot;status&quot;: &quot;succeeded&quot;,</span>
+<span>          &quot;elapsed&quot;: 1.12,</span>
+<span>          &quot;lesson_id&quot;: &quot;llm-applied-015&quot;,</span>
+<span>          &quot;kind&quot;: &quot;reference&quot;,</span>
+<span>          &quot;runtime_profile&quot;: &quot;llm-torch-cpu&quot;,</span>
+<span>          &quot;receipt_path&quot;: &quot;work/applied015-final-state-repaired-acceptance.jsonl&quot;</span>
+<span>        }</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-016&quot;,</span>
+<span>      &quot;title&quot;: &quot;Low-rank adaptation: dimensions, gradients and a real update&quot;,</span>
+<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
+<span>      &quot;findings&quot;: [</span>
+<span>        &quot;Independent LoRA orientation, exact gradient/update and rank review completed in lora_depth.py.&quot;</span>
+<span>      ],</span>
+<span>      &quot;executable_change&quot;: false,</span>
+<span>      &quot;worked_code_change&quot;: false,</span>
+<span>      &quot;review_owner&quot;: &quot;lora_depth.py&quot;,</span>
+<span>      &quot;review_runtime_evidence&quot;: []</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-017&quot;,</span>
+<span>      &quot;title&quot;: &quot;Quantized frozen bases, adapter gradients and QLoRA limits&quot;,</span>
+<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
+<span>      &quot;findings&quot;: [</span>
+<span>        &quot;The quantization example needed exact reconstructed outputs and an error bound.&quot;,</span>
+<span>        &quot;Packed-byte accounting needed separation from Python objects and compute buffers.&quot;,</span>
+<span>        &quot;Adapter improvement toward zero was not the same as recovering the original model.&quot;</span>
+<span>      ],</span>
+<span>      &quot;executable_change&quot;: false,</span>
+<span>      &quot;worked_code_change&quot;: false,</span>
+<span>      &quot;review_owner&quot;: &quot;depth_reviews_applied.py&quot;,</span>
+<span>      &quot;review_runtime_evidence&quot;: []</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-018&quot;,</span>
+<span>      &quot;title&quot;: &quot;Compare full and adapter fine-tuning on frozen tasks&quot;,</span>
+<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
+<span>      &quot;findings&quot;: [</span>
+<span>        &quot;The full-versus-adapter comparison needed a complete trainable-state and hypothesis-space ledger.&quot;,</span>
+<span>        &quot;Equal steps were not separated from equal compute or identical optimization policy.&quot;,</span>
+<span>        &quot;Held-out teacher-forced loss and output-head placement needed narrower interpretation.&quot;</span>
+<span>      ],</span>
+<span>      &quot;executable_change&quot;: false,</span>
+<span>      &quot;worked_code_change&quot;: false,</span>
+<span>      &quot;review_owner&quot;: &quot;depth_reviews_applied.py&quot;,</span>
+<span>      &quot;review_runtime_evidence&quot;: []</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-019&quot;,</span>
+<span>      &quot;title&quot;: &quot;Preference optimization, DPO and the RLHF distinction&quot;,</span>
+<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
+<span>      &quot;findings&quot;: [</span>
+<span>        &quot;The preference loss needed its derivative, curvature and exact first update.&quot;,</span>
+<span>        &quot;A free scalar margin was not a complete normalized language-model policy.&quot;,</span>
+<span>        &quot;Sequence scoring, reference state and factual support required separate contracts.&quot;</span>
+<span>      ],</span>
+<span>      &quot;executable_change&quot;: false,</span>
+<span>      &quot;worked_code_change&quot;: false,</span>
+<span>      &quot;review_owner&quot;: &quot;depth_reviews_applied.py&quot;,</span>
+<span>      &quot;review_runtime_evidence&quot;: []</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-020&quot;,</span>
+<span>      &quot;title&quot;: &quot;Fine-tuning embeddings and a small reranker&quot;,</span>
+<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
+<span>      &quot;findings&quot;: [</span>
+<span>        &quot;The trainable retrieval fixture needed its first gradient and analytic decision boundary.&quot;,</span>
+<span>        &quot;The pairwise reranker needed an independent update trace.&quot;,</span>
+<span>        &quot;False-negative identity detection was not an integrated data-admission function.&quot;</span>
+<span>      ],</span>
+<span>      &quot;executable_change&quot;: false,</span>
+<span>      &quot;worked_code_change&quot;: false,</span>
+<span>      &quot;review_owner&quot;: &quot;depth_reviews_applied.py&quot;,</span>
+<span>      &quot;review_runtime_evidence&quot;: []</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-021&quot;,</span>
+<span>      &quot;title&quot;: &quot;Optional pretrained-model adaptation with pinned offline artifacts&quot;,</span>
+<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
+<span>      &quot;findings&quot;: [</span>
+<span>        &quot;The optional recipe needed a current evidence ladder separating execution from quality.&quot;,</span>
+<span>        &quot;Trainer-internal label shifting needed comparison with the earlier manual-shift fixture.&quot;,</span>
+<span>        &quot;Pinned artifacts, same-environment repeatability and platform scope needed precise interpretation.&quot;</span>
+<span>      ],</span>
+<span>      &quot;executable_change&quot;: false,</span>
+<span>      &quot;worked_code_change&quot;: false,</span>
+<span>      &quot;review_owner&quot;: &quot;depth_reviews_applied.py&quot;,</span>
+<span>      &quot;review_runtime_evidence&quot;: []</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-022&quot;,</span>
+<span>      &quot;title&quot;: &quot;Structured tools for extraction, aggregation and data-science work&quot;,</span>
+<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
+<span>      &quot;findings&quot;: [</span>
+<span>        &quot;The grouped-mean tool needed grain, weighting and causal-boundary calculations.&quot;,</span>
+<span>        &quot;Finite inputs could overflow the naive sum and return an infinite mean.&quot;,</span>
+<span>        &quot;A typed proposal and output lookup were not a complete explanation validator or live database tool.&quot;</span>
+<span>      ],</span>
+<span>      &quot;executable_change&quot;: true,</span>
+<span>      &quot;worked_code_change&quot;: true,</span>
+<span>      &quot;review_owner&quot;: &quot;depth_reviews_applied.py&quot;,</span>
+<span>      &quot;review_runtime_evidence&quot;: [</span>
+<span>        {</span>
+<span>          &quot;source_path&quot;: &quot;courses/llm-applied/solutions/llm-applied-022_solution.py&quot;,</span>
+<span>          &quot;source_sha256&quot;: &quot;b2b2d41a7e86f8413252a5a2df8b02ef5ebb2777577852f2a6379ae8139dc0d4&quot;,</span>
+<span>          &quot;worker_sha256&quot;: &quot;234a42be384dbf955aaff6e7ea3e5c0a063aa50f4ed9f7274fe04ea8439d2f3f&quot;,</span>
+<span>          &quot;image_id&quot;: &quot;sha256:ee87f7a78cf13a2398ef080c2790428500e43acb65a3b20780aeaa2fe780a0b2&quot;,</span>
+<span>          &quot;status&quot;: &quot;succeeded&quot;,</span>
+<span>          &quot;elapsed&quot;: 0.041,</span>
+<span>          &quot;lesson_id&quot;: &quot;llm-applied-022&quot;,</span>
+<span>          &quot;kind&quot;: &quot;reference&quot;,</span>
+<span>          &quot;runtime_profile&quot;: &quot;python-core&quot;,</span>
+<span>          &quot;receipt_path&quot;: &quot;work/applied022-stable-mean-repaired-acceptance.jsonl&quot;</span>
+<span>        },</span>
+<span>        {</span>
+<span>          &quot;source_path&quot;: &quot;work/applied-depth-worked/llm-applied-022-abc.py&quot;,</span>
+<span>          &quot;source_sha256&quot;: &quot;b50ec686a57b36f3938b01b9694cd0be977f05a05b8b0ef5ceb1e26e1d8997b0&quot;,</span>
+<span>          &quot;guide_path&quot;: &quot;courses/llm-applied/guides/llm-applied-022.md&quot;,</span>
+<span>          &quot;guide_sha256&quot;: &quot;1511dd510985f49feb4359df3085690634a6b509f6d696e4e635fb5ba702fe70&quot;,</span>
+<span>          &quot;image_id&quot;: &quot;sha256:ee87f7a78cf13a2398ef080c2790428500e43acb65a3b20780aeaa2fe780a0b2&quot;,</span>
+<span>          &quot;status&quot;: &quot;succeeded&quot;,</span>
+<span>          &quot;elapsed&quot;: 0.041,</span>
+<span>          &quot;execution_contract&quot;: &quot;sequential_examples_A_B_C_in_one_fresh_process&quot;,</span>
+<span>          &quot;lesson_id&quot;: &quot;llm-applied-022&quot;,</span>
+<span>          &quot;kind&quot;: &quot;worked_sequence&quot;,</span>
+<span>          &quot;runtime_profile&quot;: &quot;python-core&quot;,</span>
+<span>          &quot;receipt_path&quot;: &quot;work/ml-worked-applied022-stable-mean-repaired-acceptance.jsonl&quot;</span>
+<span>        }</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-023&quot;,</span>
+<span>      &quot;title&quot;: &quot;Domain assistant boundaries: freshness, injection, budgets and traces&quot;,</span>
+<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
+<span>      &quot;findings&quot;: [</span>
+<span>        &quot;Freshness needed exact inclusive boundaries and a distinction between publication and knowledge time.&quot;,</span>
+<span>        &quot;The call counter needed attempt semantics and separation from elapsed-time limits.&quot;,</span>
+<span>        &quot;A field allowlist was not sufficient to guarantee safe trace values.&quot;</span>
+<span>      ],</span>
+<span>      &quot;executable_change&quot;: false,</span>
+<span>      &quot;worked_code_change&quot;: false,</span>
+<span>      &quot;review_owner&quot;: &quot;depth_reviews_applied.py&quot;,</span>
+<span>      &quot;review_runtime_evidence&quot;: []</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-024&quot;,</span>
+<span>      &quot;title&quot;: &quot;Capstone: a grounded and evaluated data-science subject assistant&quot;,</span>
+<span>      &quot;status&quot;: &quot;reviewed_and_deepened&quot;,</span>
+<span>      &quot;findings&quot;: [</span>
+<span>        &quot;The capstone needed an exact integration ledger identifying what was and was not connected.&quot;,</span>
+<span>        &quot;Three correct statuses were not distinguished from answer coverage and semantic quality.&quot;,</span>
+<span>        &quot;The optional trained model&#x27;s execution/failure evidence needed separation from this extractive baseline.&quot;</span>
+<span>      ],</span>
+<span>      &quot;executable_change&quot;: false,</span>
+<span>      &quot;worked_code_change&quot;: false,</span>
+<span>      &quot;review_owner&quot;: &quot;depth_reviews_applied.py&quot;,</span>
+<span>      &quot;review_runtime_evidence&quot;: []</span>
+<span>    }</span>
+<span>  ]</span>
+<span>}</span>
+<span> </span></code></pre></article>
+  </main>
+</body>
+</html>

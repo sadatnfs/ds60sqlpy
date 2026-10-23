@@ -512,9 +512,9 @@
 <span>        &quot;visibility&quot;,</span>
 <span>        &quot;join&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply threads and the memory model with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through Thread examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;Threads can execute concurrently while sharing memory.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Start a worker that writes42 into a shared holder,join it with a bound,and inspect the result.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;worker terminated;result42. interruption observed and worker terminated.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;java-022&quot;,</span>
@@ -531,9 +531,9 @@
 <span>        &quot;timeout&quot;,</span>
 <span>        &quot;cancellation&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply executors, futures and cancellation with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through ExecutorService examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;An ExecutorService owns task scheduling and worker lifetime.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Submit a callable returning42 and get it within2seconds.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;result42. third submission rejected;admitted tasks finish after release.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;java-023&quot;,</span>
@@ -550,9 +550,9 @@
 <span>        &quot;ConcurrentHashMap&quot;,</span>
 <span>        &quot;deadlock&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply locks, atomics and concurrent collections with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through synchronized examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;Synchronization protects a state transition,not merely a variable name.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Run two workers making1000 synchronized increments each.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;counter2000. 2000 increments and no blocked worker after bounded joins.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;java-024&quot;,</span>
@@ -569,9 +569,9 @@
 <span>        &quot;backpressure&quot;,</span>
 <span>        &quot;pinning&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply virtual threads and blocking work with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through virtual thread examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;Virtual threads are lightweight Java threads intended to make large numbers of blocking tasks easier to express.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Start a virtual thread that recordsisVirtual andjoin it.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;true and terminated. caller can acquire the monitor while the worker is waiting.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;java-025&quot;,</span>
@@ -589,9 +589,9 @@
 <span>        &quot;GC&quot;,</span>
 <span>        &quot;allocation&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply jvm memory, gc and allocation with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through heap examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;The JVM manages heap memory through reachability,not by immediately freeing an object when a local variable changes.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Store a small byte array in a list anddrop the local variable reference.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;list still exposes the same array contents. nonnegative counters;max at leasttotal;no claim of exact object size.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;java-026&quot;,</span>
@@ -609,9 +609,9 @@
 <span>        &quot;exports&quot;,</span>
 <span>        &quot;requires&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply packages, classpaths and modules with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through package examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;Packages organize class names andaccess boundaries.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;ReadString.class module andpackage names.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;modulejava.base;packagejava.lang. nonzero compiler exit andcaptured diagnostic.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;java-027&quot;,</span>
@@ -629,9 +629,9 @@
 <span>        &quot;Gradle&quot;,</span>
 <span>        &quot;locked dependencies&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply builds and dependency reproducibility with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through javac examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;A build turns source anddeclared dependencies into an artifact.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Build a Hello class whose main printsbuild-ok.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;compiler exit0;Hello.class exists. exactversionaccepted;LATESTnot treated as a pin.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;java-028&quot;,</span>
@@ -649,9 +649,9 @@
 <span>        &quot;timeout&quot;,</span>
 <span>        &quot;resource closure&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply http services and clients with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through HttpClient examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;HTTP is a request/response protocol with method,path,status,headers andbody.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Start the fixture andGET/health.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;status200 andbodyok. host127.0.0.1;portpositive;closedflagtrue.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;java-029&quot;,</span>
@@ -669,9 +669,9 @@
 <span>        &quot;rollback&quot;,</span>
 <span>        &quot;isolation&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply jdbc and transactions with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through prepared statement examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;JDBC is Java&#x27;s database-access API.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Open the fixture,inspect product metadata andcount the two account rows.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;database productH2;2 rows;auto-commit initiallytrue. second session sees100beforecommit and95aftercommit.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;java-030&quot;,</span>
@@ -688,9 +688,9 @@
 <span>        &quot;validation&quot;,</span>
 <span>        &quot;deserialization&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply serialization and schema evolution with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through data boundary examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;Serialization turns domain values into a representation that another process orversion can read.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Encode accounta1,balance125,noteCaf\u00e9 withversion2 anddecode.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;equal domain record andexact Unicode note. trailing payloadIOException;negative balanceIllegalArgumentException.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;java-031&quot;,</span>
@@ -707,9 +707,9 @@
 <span>        &quot;ServiceLoader&quot;,</span>
 <span>        &quot;encapsulation&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply reflection, annotations and service loading with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through reflection examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;Reflection inspects orinvokes program elements through metadata rather than ordinary compile-time calls.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;ReadVersion on the knownFriendly provider.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;version2. version2accepted;version3rejected.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;java-032&quot;,</span>
@@ -726,9 +726,9 @@
 <span>        &quot;JIT&quot;,</span>
 <span>        &quot;measurement bias&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply profiling and benchmark reasoning with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through JFR examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;Performance measurement starts with a correct,representative workload.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Sum1..1000 with a loop andcompare withn*(n+1)/2.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;500500. metadata names100warmups andprofilingfalse;universal claimfalse.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;java-033&quot;,</span>
@@ -745,9 +745,9 @@
 <span>        &quot;resource limits&quot;,</span>
 <span>        &quot;secrets&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply secure application boundaries with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through untrusted input examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;An application boundary converts untrusted input into a limited set of permitted operations.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Createinput.txt inside anownedroot andread atmost10bytes.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;contenthello. diagnostic excludes both sensitive fields.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;java-034&quot;,</span>
@@ -764,9 +764,9 @@
 <span>        &quot;adapters&quot;,</span>
 <span>        &quot;pure core&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply application design and dependency boundaries with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through dependency inversion examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;Application design separates domain decisions from the mechanisms that supply data,time orside effects.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Compute3items at125cents andcheckzero/negativequantity policy.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;375cents;nonpositivequantityrejected. ArithmeticException;auditsinkunused.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;java-035&quot;,</span>
@@ -783,9 +783,9 @@
 <span>        &quot;HTTP&quot;,</span>
 <span>        &quot;contract tests&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply build a tested local data service with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through domain model examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;A small data service combines domain rules,storage andtransport contracts.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;SummarizegroupAoveramounts10,20 andgroupBover5.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Acount2,total30;Bcount1,total5. 3unchangedrecords;closedflagtrue.&quot;</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;java-036&quot;,</span>
@@ -803,9 +803,9 @@
 <span>        &quot;compatibility&quot;,</span>
 <span>        &quot;release checklist&quot;</span>
 <span>      ],</span>
-<span>      &quot;outcome&quot;: &quot;Explain and apply package, diagnose and maintain a release with explicit assumptions and failure handling.&quot;,</span>
-<span>      &quot;lab&quot;: &quot;Work through jar examples and compare normal, boundary and invalid cases.&quot;,</span>
-<span>      &quot;verification&quot;: &quot;Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery.&quot;</span>
+<span>      &quot;outcome&quot;: &quot;A release is a reproducible artifact plus evidence about how it starts,what contracts it accepts andhow failures are diagnosed.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Compile thefixture with--release21 andinspect itsclassheader.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;magicCAFEBABE;majorversion65. previousartifactv1 retained;custom_runtime_builtFalse.&quot;</span>
 <span>    }</span>
 <span>  ],</span>
 <span>  &quot;sources&quot;: [</span>

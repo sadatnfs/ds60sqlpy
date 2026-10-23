@@ -118,45 +118,55 @@
     <article class="document"><h2 id="torch-005-explanatory-solutions">torch-005: explanatory solutions<a class="heading-anchor" href="#torch-005-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <p>Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
-<p>A derivative measures local sensitivity:how much a function changes for a small input change. It is not itself a new parameter value. Gradient descent combines the derivative with a learning rate and a subtraction rule. PyTorch tracks operations involving tensors with requires_grad=True and can calculate a derivative through autograd.grad. A central finite difference estimates the same slope by evaluating the function at nearby inputs, providing an independent numerical check.</p>
-<p>Finite differences involve a tradeoff:large steps measure a wider region, while extremely small steps lose precision through subtract iv e cancellation. Float64 is useful for this small diagnostic. At a nondifferentiable kink, a framework&#x27;s chosen subgradient convention need not equal a symmetric finite difference. This lesson uses a smooth quadratic so the expected derivative is exact and the comparison is interpretable.</p>
+<p>A derivative measures local sensitivity: how much a function changes for a small input change. It is not itself a new parameter value. Gradient descent combines the derivative with a learning rate and a subtraction rule. PyTorch tracks operations involving tensors with requires_grad=True and can calculate a derivative through autograd.grad. A central finite difference estimates the same slope by evaluating the function at nearby inputs, providing an independent numerical check.</p>
+<p>Finite differences involve a tradeoff: large steps measure a wider region, while extremely small steps lose precision through subtractive cancellation. Float64 is useful for this small diagnostic. At a nondifferentiable kink, a framework&#x27;s chosen subgradient convention need not equal a symmetric finite difference. This lesson uses a smooth quadratic so the expected derivative is exact and the comparison is interpretable.</p>
 <p><strong>Derivative:</strong> The local rate of change of a function.</p>
 <p><strong>Finite difference:</strong> A numerical slope estimate from nearby function evaluations.</p>
 <p><strong>Learning rate:</strong> A multiplier converting a gradient into an update magnitude.</p>
 <h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
-<p>Forf(w)=(w-2)^2, the analytic derivative is2(w-2). Construct a scalar float64tensor with requires_grad=True, calculate f, and request autograd.grad(f, w). The returned tensor does not automatically populate w.grad. A central difference uses(f(w+h)-f(w-h))/(2h). Validate positive finite h and finite function values before comparing.</p>
+<p>For f(w)=(w-2)^2, the analytic derivative is 2(w-2). Construct a scalar float64 tensor with requires_grad=True, calculate f, and request autograd.grad(f, w). The returned tensor does not automatically populate w.grad. A central difference uses(f(w+h)-f(w-h))/(2h). Validate positive finite h and finite function values before comparing.</p>
+<h3 id="derive-the-slope-before-using-it-as-an-update">Derive the slope before using it as an update<a class="heading-anchor" href="#derive-the-slope-before-using-it-as-an-update" aria-label="Link to this section">#</a></h3>
+<p>For f(w)=(w-2)², expand the derivative or apply the square rule to obtain f&#x27;(w)=2(w-2). At w=0 the loss is four and the derivative is -4. These are different quantities with different units: the derivative measures loss change per unit of w. A learning rate converts that sensitivity into a chosen parameter displacement. With rate 0.1, the update is 0-0.1(-4)=0.4 and the recomputed loss is(0.4-2)²=2.56.</p>
+<p>The central finite difference uses two probes separated by 2 h:</p>
+<p><code>D_h = [f(w+h)-f(w-h)]/(2h)</code>.</p>
+<p>Expanding this particular quadratic gives f(w+h)-f(w-h)=4h(w-2), so D_h=2(w-2) exactly in real arithmetic. This special cancellation explains why the three supplied h values agree unusually well. It does not establish that central differences are exact for arbitrary nonlinear functions. For a sufficiently smooth general function, the leading truncation error is proportional to h² and a third derivative near the probe point.</p>
+<p>A forward difference has a different error even on this quadratic. At zero, [f(h)-f(0)]/h=-4+h. Thus h=0.1 gives -3.9, h=0.01 gives -3.99, and h=0.001 gives -3.999. The visible offset is a property of the numerical approximation, not an autograd error. Deriving the approximation&#x27;s expected bias prevents a correct implementation from being rejected for the wrong reason.</p>
+<p>Floating-point cancellation pushes in the opposite direction from truncation error. As h shrinks, the two function values can become nearly equal compared with their magnitude. Their subtraction can lose meaningful digits, and a sufficiently small perturbation may not change the represented point at all. Scaling, dtype and the function&#x27;s local behavior all matter. Sweep several probe scales and inspect the error curve rather than applying a universal h or tolerance.</p>
+<p>The probe distance h is not the optimizer learning rate. A probe estimates local sensitivity without choosing a training trajectory; an update deliberately changes model state. A negative derivative identifies a locally descending direction, but a large finite update can still overshoot. For the supplied quadratic, a rate 1.1 update from zero moves to 4.4 and increases loss to 5.76, despite using the correct derivative.</p>
+<p>At abs(w) around zero, the left slope is -1 and the right slope is+1. A symmetric probe returns zero because the sides cancel, even though no unique ordinary derivative exists. ReLU gives a related counterexample: its symmetric slope at zero is 0.5 while PyTorch&#x27;s selected backward convention is zero. Use a smooth point when checking equality with a classical derivative; at a kink, explain the convention separately.</p>
+<p>Finally, <code>autograd.grad</code> returns the requested derivatives. It does not mean that the leaf&#x27;s <code>.grad</code> buffer was populated. The return tuple and the accumulation behavior of <code>backward</code> are separate interfaces. <a href="https://docs.pytorch.org/docs/2.9/generated/torch.autograd.grad.html">PyTorch 2.9 autograd.grad</a>. A returned -4 with w.grad stillNone is therefore expected here, while a genuinely disconnected path requires a different diagnosis.</p>
 <h3 id="exercise-1-derive-a-scalar-slope">Exercise 1: Derive a scalar slope<a class="heading-anchor" href="#exercise-1-derive-a-scalar-slope" aria-label="Link to this section">#</a></h3>
 <p>The question is: Differentiate (w-2)**2 at w=0 using autograd.grad.</p>
 <p>The analytic derivative provides an oracle independent of autograd. The negative sign means increasing w locally decreases the loss.</p>
 <pre><code class="language-python">w=torch.tensor(0.,dtype=torch.float64,requires_grad=True); loss=(w-2)**2
 gradient=torch.autograd.grad(loss,w)[0]
 assert gradient.item()==-4 and loss.item()==4</code></pre>
-<p><strong>Expected:</strong> derivative -4; loss4.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with derivative -4; loss4.</p>
+<p><strong>Expected:</strong> derivative -4; loss 4.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with derivative -4; loss 4.</p>
 <h3 id="exercise-2-check-three-finite-differences">Exercise 2: Check three finite differences<a class="heading-anchor" href="#exercise-2-check-three-finite-differences" aria-label="Link to this section">#</a></h3>
-<p>The question is: Useh.1, .01, .001 atw0 and compare each slope with-4.</p>
+<p>The question is: Use h=0.1, .01, .001 at w=0 and compare each slope with-4.</p>
 <p>The quadratic central difference is especially clean. This does not imply every function or every step size achieves the same tolerance.</p>
 <pre><code class="language-python">for h in [.1,.01,.001]:
     slope=central(lambda value:(value-2)**2,0.,h)
     np.testing.assert_allclose(slope,-4,atol=1e-10,rtol=0)</code></pre>
-<p><strong>Expected:</strong> all agree within1e-10.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with all agree within1e-10.</p>
+<p><strong>Expected:</strong> all agree within 1e-10.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with all agree within 1e-10.</p>
 <h3 id="exercise-3-separate-gradient-from-update">Exercise 3: Separate gradient from update<a class="heading-anchor" href="#exercise-3-separate-gradient-from-update" aria-label="Link to this section">#</a></h3>
 <p>The question is: Use learning rate.1 and gradient-4 from w0.</p>
 <p>The update includes direction, step size and old state. Treating the gradient as the parameter would implement a different algorithm.</p>
 <pre><code class="language-python">updated=0.-.1*gradient.item()
 np.testing.assert_allclose(updated,.4,atol=1e-12,rtol=0)
 assert updated!=gradient.item()</code></pre>
-<p><strong>Expected:</strong> neww.4, not-4.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with neww.4, not-4.</p>
+<p><strong>Expected:</strong> new w=0.4, not-4.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with new w=0.4, not-4.</p>
 <h3 id="exercise-4-inspect-a-stationary-point">Exercise 4: Inspect a stationary point<a class="heading-anchor" href="#exercise-4-inspect-a-stationary-point" aria-label="Link to this section">#</a></h3>
-<p>The question is: Differentiate the same objective atw2.</p>
+<p>The question is: Differentiate the same objective atw 2.</p>
 <p>A zero derivative is a numerical result on a connected graph. It must not be confused with a missing gradient path.</p>
 <pre><code class="language-python">optimum=torch.tensor(2.,dtype=torch.float64,requires_grad=True)
 value=(optimum-2)**2; derivative=torch.autograd.grad(value,optimum)[0]
 assert value.item()==0 and derivative.item()==0</code></pre>
-<p><strong>Expected:</strong> gradient0 and loss0.</p>
-<p><strong>Verify:</strong> Compare the computed values or written argument with gradient0 and loss0.</p>
+<p><strong>Expected:</strong> gradient 0 and loss 0.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with gradient 0 and loss 0.</p>
 <h3 id="exercise-5-observe-grad-return-behavior">Exercise 5: Observe grad-return behavior<a class="heading-anchor" href="#exercise-5-observe-grad-return-behavior" aria-label="Link to this section">#</a></h3>
 <p>The question is: Check that autograd.grad did not accumulate into the leaf.grad field.</p>
 <p>PyTorch offers both returned-gradient and accumulating-backward interfaces. Knowing which one is used prevents stale or missing update state.</p>
@@ -164,12 +174,15 @@ assert value.item()==0 and derivative.item()==0</code></pre>
 <p><strong>Expected:</strong> w.grad is None despite a returned derivative.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with w.grad is None despite a returned derivative.</p>
 <h3 id="exercise-6-reject-invalid-probes">Exercise 6: Reject invalid probes<a class="heading-anchor" href="#exercise-6-reject-invalid-probes" aria-label="Link to this section">#</a></h3>
-<p>The question is: Pass h0, negative h and a function returning infinity to the finite-difference helper.</p>
+<p>The question is: Pass h=0, negative h and a function returning infinity to the finite-difference helper.</p>
 <p>Validation distinguishes an unusable numerical check from a disagreement with the analytic derivative. Widening a tolerance cannot repair undefined input.</p>
 <pre><code class="language-python">for function,h in [(lambda x:x*x,0),(lambda x:x*x,-.1),(lambda x:float(&#x27;inf&#x27;),.1)]:
     try: central(function,0.,h)
     except ValueError: pass
-    else: raise AssertionError(&#x27;invalid derivative probe accepted&#x27;)</code></pre>
+    else: raise AssertionError(&#x27;invalid derivative probe accepted&#x27;)
+try: central(lambda value:0.0,float(&#x27;nan&#x27;),.1)
+except ValueError: pass
+else: raise AssertionError(&#x27;nonfinite probe point accepted&#x27;)</code></pre>
 <p><strong>Expected:</strong> all raise ValueError.</p>
 <p><strong>Verify:</strong> Compare the computed values or written argument with all raise ValueError.</p>
 <h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>

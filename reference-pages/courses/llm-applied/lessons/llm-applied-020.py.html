@@ -138,8 +138,9 @@
 <span># Expected: positive score exceeds negative and pairwise loss decreases.</span>
 <span> </span>
 <span># Exercise 5: Detect a false-negative identity</span>
-<span># Assign the same document ID to bothpositive andnegative roles and refuse the pair.</span>
-<span># Expected: identity collision detected beforetraining.</span>
+<span># Assign the same document ID to positive and negative roles and identify the collision as</span>
+<span># a prospective admission failure.</span>
+<span># Expected: identity collision detected; this check is separate from the earlier training loops.</span>
 <span> </span>
 <span># Exercise 6: Bound the model claim</span>
 <span># Record that fixed vectors were used and natural-language encoder quality was not</span>

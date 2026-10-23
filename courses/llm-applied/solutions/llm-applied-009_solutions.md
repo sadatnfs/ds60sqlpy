@@ -20,6 +20,30 @@ Metadata filters also express task scope such as document type, version or date.
 
 Filter documents by an explicit set of allowed scopes, then pass the resulting list to a pure ranking function. Use stable document IDs and retain only admitted IDs in traces. Build cache keys from question, principal policy fingerprint, corpus version and retriever version. A policy change should cause a cache miss. Never let a retrieved string modify the allowed-scope set.
 
+## Follow access policy through retrieval and reuse
+
+The six-document corpus contains five public records and one restricted record. admit returns shallow copies of records whose scope is in the supplied set. With{'public'}, the restricted item is removed before any downstream ranking. With{'public', 'restricted'}, all six are present. The function neither authenticates a principal nor validates the legitimacy of the caller's scope set. Those are deliberately external responsibilities in the fixture.
+
+Pre-filtering and filtering after top-k can return different public results. Imagine global scores restricted=100, publicA=90 and publicB=80 with k=2. Global top-two then removal returns only publicA. Ranking the authorized public subset first returns publicA and publicB. Post-filtering can therefore both expose a restricted candidate to an intermediate component and unnecessarily reduce useful coverage. The two procedures are not interchangeable.
+
+A policy must cover more than the final visible answer. Candidate IDs, score traces, reranker inputs, cached text and diagnostic excerpts can reveal information. An application that hides the restricted sentence but exposes its title in a debug panel has a different disclosure boundary from the one claimed. The local trace test checks only IDs from the already admitted set. It does not measure timing side channels or behavior of a remote vector service.
+
+The cache key hashes an ordered structure containing question, sorted scope list, corpus version and retriever version. Sorting makes different set iteration orders yield the same key. Changing effective scope or corpus version changes the input structure and therefore normally changes its digest. The hash identifies a cache partition; it does not authorize the request or encrypt the cached answer.
+
+The omitted fields are informative too. This fixture has no tenant, per-record grant, model/prompt version or personalized answer policy. A real system may need them when they affect either permitted evidence or the answer. Conversely, using a unique principal ID in every key can destroy safe sharing among principals with truly identical effective policy. The correct cache equivalence class follows the full answer/access contract.
+
+Revocation is a time-dependent case. A cached answer that was valid before a permission change may be invalid afterward. A short time-to-live limits stale duration but does not make immediate revocation correct. A policy version or fingerprint can force a miss, while the serving layer rechecks access before releasing stored content. Distributed invalidation and concurrent policy changes are not implemented by this local dictionary/hash demonstration.
+
+Instruction-like evidence remains ordinary text. attack-v1 can be admitted as public adversarial test data while its imperative sentence has no authority to add restricted scope. The test proves that the local code reads trusted metadata and leaves its explicit scope set unchanged. It does not run a language model and cannot establish that a generated response would resist every malicious instruction. Model-facing behavior and application authorization should be evaluated separately.
+
+### Interview reasoning with explanatory answers
+
+**Why can final-answer redaction be insufficient?** A prior stage may already have consumed restricted content, and traces or caches may retain it. Enforcement must match the full data path, not only the final rendered string.
+
+**Does hashing a policy make it trustworthy?** No. A hash identifies the supplied policy state. Trust comes from how that state was authenticated, computed and bound to the request.
+
+**What is the strongest local test in this fixture?** It checks that unauthorized records are absent from the scorer input and public trace, then verifies cache separation under changed scope and corpus identities. Real identity-provider and revocation integration remain separate evidence.
+
 ## Exercise 1: Filter before scoring
 
 The question is: Give a public-only request the six-document corpus and inspect admitted IDs.

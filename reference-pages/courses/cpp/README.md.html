@@ -8,7 +8,7 @@
     http-equiv="Content-Security-Policy"
     content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
   >
-  <title>C++ teaching content · DS60 reference</title>
+  <title>C++ from first compilation to complete projects · DS60 reference</title>
   <style>
     :root {
       --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
@@ -112,39 +112,234 @@
   <main class="shell">
     <header class="hero">
       <p class="eyebrow">Rendered course document</p>
-      <h1>C++ teaching content</h1>
+      <h1>C++ from first compilation to complete projects</h1>
       <p class="source-path">Generated from <code>courses/cpp/README.md</code></p>
     </header>
-    <article class="document"><h2 id="c-teaching-content">C++ teaching content<a class="heading-anchor" href="#c-teaching-content" aria-label="Link to this section">#</a></h2>
-<p>These are durable authored beta lessons, separate from the full <a href="../../docs/expansion/tracks/cpp.md.html">design plan</a>. The <a href="lessons.json.html">lessons.json</a> metadata lists actual files. An authored reference is not a published prerequisite or a runtime qualification receipt. Check the app capability notice and profile receipt before execution. Opening the guide never installs a compiler, JVM or cluster.</p>
+    <article class="document"><h2 id="c-from-first-compilation-to-complete-projects">C++ from first compilation to complete projects<a class="heading-anchor" href="#c-from-first-compilation-to-complete-projects" aria-label="Link to this section">#</a></h2>
+<p>This 42-lesson journey begins with source files, the compiler, the linker and a running process. It develops values and control flow into ownership, standard containers, generic programming, error handling, concurrency and maintainable projects. Every lesson has a guide, a learner worksheet and separate solutions.</p>
+<p>Start with <a href="guides/cpp-001.md.html">cpp-001</a>, then open the course&#x27;s <strong>Journeys</strong> page and select the next lesson. The <code>cpp20</code> Docker worker compiles one C++20 source file with GCC and returns compiler diagnostics, standard output and exit status to the browser. No host C++ installation is required. Use the <a href="../../docs/docker-classroom.md.html">Docker classroom guide</a> to build and start it.</p>
+<p>For multiple source files, headers, CMake, CTest and installed libraries, follow <a href="compile-and-run.md.html">Compile, run and organize a C++ project</a>. Those complete project fixtures use explicit Docker commands and explain which directory is the source, which is the build tree, and which files are generated. The browser pad remains a single-source-file environment.</p>
+<p>Read the guide, predict a result, attempt the exercises and request a hint when needed. Inspect compiler messages before changing code. The app saves your pad, notes and job history in its learning volume. Reference programs remain separate and are revealed for comparison; a passing example does not establish mastery.</p>
+<h3 id="lesson-sequence">Lesson sequence<a class="heading-anchor" href="#lesson-sequence" aria-label="Link to this section">#</a></h3>
 <div class="table-wrap"><table><thead><tr>
 <th>Lesson</th>
-<th>Profile</th>
-<th>Status</th>
+<th>Level</th>
+<th>Runtime</th>
 </tr></thead><tbody>
 <tr>
-<td><a href="guides/cpp-001.md.html">cpp-001</a></td>
-<td>reading</td>
-<td>Authored beta; qualification separate</td>
+<td><a href="guides/cpp-001.md.html">cpp-001: Files, terminals and the compile-to-run journey</a></td>
+<td>Beginner</td>
+<td><code>reading</code></td>
 </tr>
 <tr>
-<td><a href="guides/cpp-002.md.html">cpp-002</a></td>
-<td>cpp20</td>
-<td>Authored beta; qualification separate</td>
+<td><a href="guides/cpp-002.md.html">cpp-002: Your first C++20 target</a></td>
+<td>Beginner</td>
+<td><code>cpp20</code></td>
 </tr>
 <tr>
-<td><a href="guides/cpp-003.md.html">cpp-003</a></td>
-<td>cpp20</td>
-<td>Authored beta; qualification separate</td>
+<td><a href="guides/cpp-003.md.html">cpp-003: Values, types and conversions</a></td>
+<td>Beginner</td>
+<td><code>cpp20</code></td>
 </tr>
 <tr>
-<td><a href="guides/cpp-009.md.html">cpp-009</a></td>
-<td>cpp20</td>
-<td>Authored beta; qualification separate</td>
+<td><a href="guides/cpp-004.md.html">cpp-004: Branches, loops and state traces</a></td>
+<td>Beginner</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-005.md.html">cpp-005: Functions and parameter contracts</a></td>
+<td>Beginner</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-006.md.html">cpp-006: Strings and trustworthy integer input</a></td>
+<td>Beginner</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-007.md.html">cpp-007: Vectors and standard algorithms</a></td>
+<td>Beginner</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-008.md.html">cpp-008: Copies, const references and lifetimes</a></td>
+<td>Beginner</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-009.md.html">cpp-009: Vectors own; references borrow</a></td>
+<td>Beginner</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-010.md.html">cpp-010: Structs, enums and meaningful states</a></td>
+<td>Beginner</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-011.md.html">cpp-011: Files, streams and scoped resources</a></td>
+<td>Beginner</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-012.md.html">cpp-012: Headers, translation units and the linker</a></td>
+<td>Beginner</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-013.md.html">cpp-013: Warnings and CTest as feedback</a></td>
+<td>Beginner</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-014.md.html">cpp-014: Capstone 1: auditable readings CLI</a></td>
+<td>Beginner</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-015.md.html">cpp-015: RAII and unique ownership</a></td>
+<td>Intermediate</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-016.md.html">cpp-016: Move semantics and the rule of zero</a></td>
+<td>Intermediate</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-017.md.html">cpp-017: Errors as values and exceptions</a></td>
+<td>Intermediate</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-018.md.html">cpp-018: Views, iterators and invalidation</a></td>
+<td>Intermediate</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-019.md.html">cpp-019: Ranges and deliberate algorithms</a></td>
+<td>Intermediate</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-020.md.html">cpp-020: Templates and concepts</a></td>
+<td>Intermediate</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-021.md.html">cpp-021: Strong types and generic value APIs</a></td>
+<td>Intermediate</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-022.md.html">cpp-022: Portable files and serialization</a></td>
+<td>Intermediate</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-023.md.html">cpp-023: Library boundaries and ABI</a></td>
+<td>Intermediate</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-024.md.html">cpp-024: Property tests and bounded fuzzing</a></td>
+<td>Intermediate</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-025.md.html">cpp-025: Sanitizers and observable memory failures</a></td>
+<td>Intermediate</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-026.md.html">cpp-026: Debugging and measurement tools</a></td>
+<td>Intermediate</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-027.md.html">cpp-027: Reproducible dependencies and delivery</a></td>
+<td>Intermediate</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-028.md.html">cpp-028: Capstone 2: reusable record library</a></td>
+<td>Intermediate</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-029.md.html">cpp-029: Threads, joining and cancellation</a></td>
+<td>Advanced</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-030.md.html">cpp-030: Mutexes, conditions and producer-consumer flow</a></td>
+<td>Advanced</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-031.md.html">cpp-031: Atomics and the memory model</a></td>
+<td>Advanced</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-032.md.html">cpp-032: Bounded parallel work and failure propagation</a></td>
+<td>Advanced</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-033.md.html">cpp-033: Testing concurrent code</a></td>
+<td>Advanced</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-034.md.html">cpp-034: Data layout, allocation and locality</a></td>
+<td>Advanced</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-035.md.html">cpp-035: Algorithmic and representation choices</a></td>
+<td>Advanced</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-036.md.html">cpp-036: Compile-time computation with a budget</a></td>
+<td>Advanced</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-037.md.html">cpp-037: Composing generic interfaces</a></td>
+<td>Advanced</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-038.md.html">cpp-038: Numerical and integer correctness</a></td>
+<td>Advanced</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-039.md.html">cpp-039: C interfaces and loading boundaries</a></td>
+<td>Advanced</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-040.md.html">cpp-040: Hardening parsers and execution boundaries</a></td>
+<td>Advanced</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-041.md.html">cpp-041: Portable release and performance evidence</a></td>
+<td>Advanced</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-042.md.html">cpp-042: Capstone 3: bounded parallel analyzer</a></td>
+<td>Advanced</td>
+<td><code>cpp20</code></td>
 </tr>
 </tbody></table></div>
-<p>Follow guide, prediction, learner attempt, one hint at a time, inspection, explanation and changed-fixture retrieval. Official solutions stay separate until an attempt or explicit reveal. Source success, typed verification and understanding are different signals. Save learner edits beneath the app&#x27;s host-owned learning workspace; checked-in lessons are starter sources, not disposable learner work.</p>
-<p>Some pilot prerequisites are still planned. Review the named direct prerequisites and request the missing bridge rather than treating an absent ID as completed. The current implementation status is recorded in <a href="../../docs/implementation/systems-content-status.md.html">systems-content-status.md</a>. No default lesson requires an external dataset or paid service.</p></article>
+<h3 id="validation-and-limits">Validation and limits<a class="heading-anchor" href="#validation-and-limits" aria-label="Link to this section">#</a></h3>
+<p>All runnable reference programs have successful local Linux arm64 Docker receipts for their current source bytes. The <a href="../../docs/implementation/CHECKPOINT.md.html">implementation checkpoint</a> records runtime, test and platform acceptance separately. Reading lessons use reasoning and written evidence. Windows/WSL2 and amd64 configuration support does not by itself establish an observed run on those systems.</p>
+<p>Both complete CMake projects and all 76 added worked programs also compiled and ran in the prepared GCC image. New source changes or another toolchain require appropriate new checks. Course fixtures use local authored inputs and do not install dependencies while a lesson runs.</p></article>
   </main>
 </body>
 </html>

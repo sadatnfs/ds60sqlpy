@@ -1,24 +1,24 @@
 # torch-005: Derivatives, requires_grad and finite-difference checks
 
-Status: authored PyTorch course content. The manifest inventories complete teaching files; runtime readiness remains a separate, measured property.
-
 ## Level and prerequisites
 
 Beginner; approximately 120 minutes. Direct prerequisites: `torch-004`. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
 
 ## Learning objectives
 
-A derivative measures local sensitivity:how much a function changes for a small input change. The central investigation is concrete: Differentiate (w-2)**2 at w=0 using autograd.grad. The finish condition is derivative -4; loss4. all raise ValueError. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+A derivative measures local sensitivity: how much a function changes for a small input change. The central investigation is concrete: Differentiate (w-2)**2 at w=0 using autograd.grad. The finish condition is derivative -4; loss 4. all raise ValueError. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
-A derivative measures local sensitivity:how much a function changes for a small input change. It is not itself a new parameter value. Gradient descent combines the derivative with a learning rate and a subtraction rule. PyTorch tracks operations involving tensors with requires_grad=True and can calculate a derivative through autograd.grad. A central finite difference estimates the same slope by evaluating the function at nearby inputs, providing an independent numerical check.
+A derivative measures local sensitivity: how much a function changes for a small input change. It is not itself a new parameter value. Gradient descent combines the derivative with a learning rate and a subtraction rule. PyTorch tracks operations involving tensors with requires_grad=True and can calculate a derivative through autograd.grad. A central finite difference estimates the same slope by evaluating the function at nearby inputs, providing an independent numerical check.
 
-Finite differences involve a tradeoff:large steps measure a wider region, while extremely small steps lose precision through subtract iv e cancellation. Float64 is useful for this small diagnostic. At a nondifferentiable kink, a framework's chosen subgradient convention need not equal a symmetric finite difference. This lesson uses a smooth quadratic so the expected derivative is exact and the comparison is interpretable.
+Finite differences involve a tradeoff: large steps measure a wider region, while extremely small steps lose precision through subtractive cancellation. Float64 is useful for this small diagnostic. At a nondifferentiable kink, a framework's chosen subgradient convention need not equal a symmetric finite difference. This lesson uses a smooth quadratic so the expected derivative is exact and the comparison is interpretable.
 
 ## Design decisions and when to use this method
 
+Use finite differences as a small independent diagnostic for a smooth scalar function or a selected coordinate of a larger computation. Recompute the complete forward function at each probe and keep parameters, data, model mode and randomness fixed. A stochastic dropout sample or changed minibatch can overwhelm the small difference being measured.
 
+Prefer an analytic derivative when a tiny expression permits one, and compare several sensible probe sizes instead of declaring the smallest h best. Avoid interpreting a symmetric probe at a known kink as proof of an ordinary derivative. The helper is a bounded numerical check, not a certificate for every floating-point scale or a replacement for understanding the function's domain.
 
 ## Paired TensorFlow comparison
 
@@ -36,13 +36,33 @@ TensorFlow GradientTape.gradient returns gradients explicitly, while PyTorch aut
 
 ## How to run this lesson
 
-Use a prepared `llm-torch-cpu` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/torch-005/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: `& $CoursePython courses/deep-learning-pytorch/lessons/torch-005.py`. For macOS/Linux use `.venv/bin/python courses/deep-learning-pytorch/lessons/torch-005.py` from the repository root.
+Use a prepared `llm-torch-cpu` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/torch-005/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: `& $CoursePython courses/deep-learning-pytorch/lessons/torch-005.py`. For macOS/Linux, use the interpreter explicitly selected for a separately prepared native PyTorch environment, and invoke that interpreter on `courses/deep-learning-pytorch/lessons/torch-005.py` from the repository root. The repository's general `.venv` is not assumed to contain PyTorch; the prepared classroom profile is the default execution route.
 
-Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.
+Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the explicit tolerance in each assertion. Several analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone is not a universal numerical-error bound. Finite differences, reductions and conditioning can require different justified tolerances. Integer counts, identities and boolean decisions should be exact.
 
 ## Syntax anatomy and reasoning sequence
 
-Forf(w)=(w-2)^2, the analytic derivative is2(w-2). Construct a scalar float64 tensor with requires_grad=True, calculate f, and request autograd.grad(f, w). The returned tensor does not automatically populate w.grad. A central difference uses(f(w+h)-f(w-h))/(2 h). Validate positive finite h and finite function values before comparing.
+For f(w)=(w-2)^2, the analytic derivative is 2(w-2). Construct a scalar float64 tensor with requires_grad=True, calculate f, and request autograd.grad(f, w). The returned tensor does not automatically populate w.grad. A central difference uses(f(w+h)-f(w-h))/(2h). Validate positive finite h and finite function values before comparing.
+
+## Derive the slope before using it as an update
+
+For f(w)=(w-2)², expand the derivative or apply the square rule to obtain f'(w)=2(w-2). At w=0 the loss is four and the derivative is -4. These are different quantities with different units: the derivative measures loss change per unit of w. A learning rate converts that sensitivity into a chosen parameter displacement. With rate 0.1, the update is 0-0.1(-4)=0.4 and the recomputed loss is(0.4-2)²=2.56.
+
+The central finite difference uses two probes separated by 2 h:
+
+`D_h = [f(w+h)-f(w-h)]/(2h)`.
+
+Expanding this particular quadratic gives f(w+h)-f(w-h)=4h(w-2), so D_h=2(w-2) exactly in real arithmetic. This special cancellation explains why the three supplied h values agree unusually well. It does not establish that central differences are exact for arbitrary nonlinear functions. For a sufficiently smooth general function, the leading truncation error is proportional to h² and a third derivative near the probe point.
+
+A forward difference has a different error even on this quadratic. At zero, [f(h)-f(0)]/h=-4+h. Thus h=0.1 gives -3.9, h=0.01 gives -3.99, and h=0.001 gives -3.999. The visible offset is a property of the numerical approximation, not an autograd error. Deriving the approximation's expected bias prevents a correct implementation from being rejected for the wrong reason.
+
+Floating-point cancellation pushes in the opposite direction from truncation error. As h shrinks, the two function values can become nearly equal compared with their magnitude. Their subtraction can lose meaningful digits, and a sufficiently small perturbation may not change the represented point at all. Scaling, dtype and the function's local behavior all matter. Sweep several probe scales and inspect the error curve rather than applying a universal h or tolerance.
+
+The probe distance h is not the optimizer learning rate. A probe estimates local sensitivity without choosing a training trajectory; an update deliberately changes model state. A negative derivative identifies a locally descending direction, but a large finite update can still overshoot. For the supplied quadratic, a rate 1.1 update from zero moves to 4.4 and increases loss to 5.76, despite using the correct derivative.
+
+At abs(w) around zero, the left slope is -1 and the right slope is+1. A symmetric probe returns zero because the sides cancel, even though no unique ordinary derivative exists. ReLU gives a related counterexample: its symmetric slope at zero is 0.5 while PyTorch's selected backward convention is zero. Use a smooth point when checking equality with a classical derivative; at a kink, explain the convention separately.
+
+Finally, `autograd.grad` returns the requested derivatives. It does not mean that the leaf's `.grad` buffer was populated. The return tuple and the accumulation behavior of `backward` are separate interfaces. [PyTorch 2.9 autograd.grad](https://docs.pytorch.org/docs/2.9/generated/torch.autograd.grad.html). A returned -4 with w.grad stillNone is therefore expected here, while a genuinely disconnected path requires a different diagnosis.
 
 ## Worked example / walkthrough
 
@@ -56,6 +76,7 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 def central(function,value,h):
+    if not np.isfinite(value): raise ValueError('finite probe point required')
     if not np.isfinite(h) or h<=0: raise ValueError('positive finite step required')
     left,right=function(value-h),function(value+h)
     if not np.isfinite([left,right]).all(): raise ValueError('finite probe values required')
@@ -65,7 +86,7 @@ gradient=torch.autograd.grad(loss,w)[0]
 assert gradient.item()==-4 and loss.item()==4
 ```
 
-**Expected:** derivative -4; loss4.
+**Expected:** derivative -4; loss 4.
 
 ### Example B: Check three finite differences
 
@@ -77,7 +98,7 @@ for h in [.1,.01,.001]:
     np.testing.assert_allclose(slope,-4,atol=1e-10,rtol=0)
 ```
 
-**Expected:** all agree within1e-10.
+**Expected:** all agree within 1e-10.
 
 ### Example C: Separate gradient from update
 
@@ -89,41 +110,43 @@ np.testing.assert_allclose(updated,.4,atol=1e-12,rtol=0)
 assert updated!=gradient.item()
 ```
 
-**Expected:** neww.4, not-4.
+**Expected:** new w=0.4, not-4.
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: derivative -4; loss4. all raise ValueError. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: derivative -4; loss 4. all raise ValueError. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
 1. **Derive a scalar slope.** Differentiate (w-2)**2 at w=0 using autograd.grad.
-   **Expected:** derivative -4; loss4.
-   **Verify:** Save the assertion results for exercise 1, including derivative -4; loss4.
+   **Expected:** derivative -4; loss 4.
+   **Verify:** Save the assertion results for exercise 1, including derivative -4; loss 4.
 
-2. **Check three finite differences.** Useh.1, .01, .001 atw0 and compare each slope with-4.
-   **Expected:** all agree within1e-10.
-   **Verify:** Save the assertion results for exercise 2, including all agree within1e-10.
+2. **Check three finite differences.** Use h=0.1, .01, .001 at w=0 and compare each slope with-4.
+   **Expected:** all agree within 1e-10.
+   **Verify:** Save the assertion results for exercise 2, including all agree within 1e-10.
 
 3. **Separate gradient from update.** Use learning rate.1 and gradient-4 from w0.
-   **Expected:** neww.4, not-4.
-   **Verify:** Save the assertion results for exercise 3, including neww.4, not-4.
+   **Expected:** new w=0.4, not-4.
+   **Verify:** Save the assertion results for exercise 3, including new w=0.4, not-4.
 
-4. **Inspect a stationary point.** Differentiate the same objective atw2.
-   **Expected:** gradient0 and loss0.
-   **Verify:** Save the assertion results for exercise 4, including gradient0 and loss0.
+4. **Inspect a stationary point.** Differentiate the same objective atw 2.
+   **Expected:** gradient 0 and loss 0.
+   **Verify:** Save the assertion results for exercise 4, including gradient 0 and loss 0.
 
 5. **Observe grad-return behavior.** Check that autograd.grad did not accumulate into the leaf.grad field.
    **Expected:** w.grad is None despite a returned derivative.
    **Verify:** Save the assertion results for exercise 5, including w.grad is None despite a returned derivative.
 
-6. **Reject invalid probes.** Pass h0, negative h and a function returning infinity to the finite-difference helper.
+6. **Reject invalid probes.** Pass h=0, negative h and a function returning infinity to the finite-difference helper.
    **Expected:** all raise ValueError.
    **Verify:** Save the assertion results for exercise 6, including all raise ValueError.
 
 ## Common pitfalls and diagnosis
 
-When a result disagrees, locate the first intermediate value that violates this explanation. Inspect shapes and identities before aggregates, and inspect counts before averages. Preserve the original fixture and introduce only one controlled change at a time. If an arithmetic identity passes but a data-boundary condition fails, the experiment is still invalid. If a runtime is unavailable, record the unexecuted code as unverified rather than replacing its output with the expected text. The separate explanation discusses why the tempting alternative in each case changes the result.
+If the numerical slope changes erratically as h shrinks, inspect whether w+h and w-h remain distinct represented numbers and whether the function values are finite. If the result is a stable factor-of-two error, check the 2 h denominator. If the probe reports zero unexpectedly, verify that the callable recomputes the complete function rather than closing over a previously calculated activation.
+
+Reject a nonfinite probe point explicitly, even when a constant callable would return finite outputs and hide that invalid point. Keep a missing gradient path separate from a connected derivative of zero. If a correct negative derivative produces a higher updated loss, recompute the new objective and inspect the learning rate before altering the derivative. At a kink, record one-sided behavior and the framework convention instead of widening a tolerance until incompatible mathematical objects appear equal.
 
 ## Progressive hints
 

@@ -24,6 +24,6 @@ Read the guide, record a prediction, then answer the six cases without opening s
    **Expected:** mode and trainable-parameter count recorded; no automatic quality winner.
    **Verify:** Save the reasoning table for exercise 5, including mode and trainable-parameter count recorded; no automatic quality winner.
 
-6. **Refuse a false execution claim.** Write the status when scripts are authored and syntax-checked but weights were not acquired or training was not run.
+6. **Distinguish an unexecuted learner scenario.** For a hypothetical new learner who has only reviewed scripts, write the status without overwriting the separately qualified maintainer recipe.
    **Expected:** pretrained executionunverified; no generated success receipt.
    **Verify:** Save the reasoning table for exercise 6, including pretrained executionunverified; no generated success receipt.

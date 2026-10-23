@@ -20,6 +20,32 @@ This chapter deliberately implements a narrower mechanism: symmetric uniform sig
 
 Use scale=maxabs/7 and integer codes-7..7. Offset each code by 8 to fit a4-bit nibble, then pack low and high nibbles into oneuint8. Unpack with bit masks and shifts, subtract8, and multiply by the stored scale. The model uses the reconstructed frozen tensor plus a low-rank delta. Only adapterParameters enter the optimizer; packed bytes and scale are immutable fixture state.
 
+## Derive the codes, bytes and forward error
+
+The maximum absolute matrix entry is1.7, so the uniform scale is1.7/7=17/70, about0.242857. Dividing the entries by that scale and rounding gives codes[[0, -4], [7, -1]]. The allowed signed range contains15 values from-7 through7. Offsetting by eight produces unsigned nibbles[8, 4, 15, 7]; one of the16 possible nibble values is unused by this chosen symmetric scheme.
+
+The first packed byte is8+(4 shifted left by 4)=8+64=72. The second is15+(7 shifted left by 4)=15+112=127. Unpacking the low four bits and then the high four bits restores those integer codes exactly. This is a lossless representation change of the already quantized integers. The information loss happened earlier when the original floating weights were rounded.
+
+Using ideal decimal arithmetic, the reconstructed matrix is[[0, -34/35], [17/10, -17/70]]. Multiplying by x=[1, -2] gives[68/35, 153/70], about[1.942857, 2.185714]. The original output is[1.9, 2.1], so the errors are[3/70, 6/70], about[0.042857, 0.085714]. Actual float32 operations can differ slightly from these ideal-decimal values, which is why the executable comparison uses explicit tolerances.
+
+Without clipping, nearest-grid rounding has per-weight absolute error at most scale/2. For a fixed output row, the triangle inequality gives an output error bound of(scale/2)*sum(abs(x)). Here that is(17/140)*3=51/140, about0.364286. The observed errors are smaller. This is a worst-case arithmetic bound for the declared uniform quantizer and input, not a bound on classification quality or generated-answer support.
+
+The adapter code uses the stored output-by-input matrix convention: Y=X(W+AB)^T. A has shape[2, 1] and B[1, 2]. At B=0, the A gradient is zero, while B can receive a gradient through nonzero A. With the initial one-row output above and mean squared loss against zero, the upstream output gradient equals Y because there are two output elements. Since A entries are0.1, the first B gradient is0.1*sum(Y)*X, approximately[0.412857, -0.825714]. The packed codes stay fixed while that differentiable branch changes.
+
+The adapter's target is zero output on one input, not the original full-precision output. A falling loss therefore demonstrates optimization of the stated task; it does not prove recovery of the original weight matrix or correction of quantization on other inputs. A rank-one update fitting one vector leaves many unconstrained directions.
+
+Two packed bytes plus a chosen float32 scale field would occupy six payload bytes in that logical serialized layout. The fixture's scale variable is a Python float and is not itself a four-byte on-disk record; the counter explicitly excludes object overhead. Computation also materializes a16-byte float32 matrix. Calling six bytes the process's peak memory would combine incompatible accounting levels.
+
+The original QLoRA method includes NF4, double quantization and paged-optimizer machinery. This lesson implements uniform codes and ordinary CPU adapter gradients instead. Those names identify different mechanisms; the local result does not inherit the paper's GPU measurements. [QLoRA](https://arxiv.org/abs/2305.14314).
+
+### Interview reasoning with explanatory answers
+
+**Is nibble round-trip equality evidence of lossless model quantization?** No. It proves that integer codes survive packing. Compare reconstructed weights and outputs with the original floating model to measure quantization error.
+
+**Can a frozen quantized base still participate in gradient computation?** Yes. Its reconstructed values act as constants while derivatives flow into adapters and potentially earlier trainable operations. Freezing updates is different from disabling the whole graph.
+
+**Why is the byte ratio insufficient for a memory claim?** The runtime also holds metadata, reconstructed or transient weights, activations, adapter parameters and optimizer/gradient state. The backend determines their actual lifetime and representation.
+
 ## Exercise 1: Quantize a fixed matrix
 
 The question is: QuantizeW[[.1, -.9], [1.7, -.2]] withscale1.7/7 andnearest-even rounding.

@@ -1,4 +1,4 @@
-from render import add,ex
+from render import add,ex,SPECS
 ATTN=('Attention Is All You Need','https://arxiv.org/abs/1706.03762')
 PT=('PyTorch documentation','https://docs.pytorch.org/docs/stable/index.html')
 NP=('NumPy reference','https://numpy.org/doc/stable/reference/')
@@ -31,41 +31,10 @@ DECODER='''class TinyDecoder(nn.Module):
         x=x+self.projection(mixed); x=x+self.feed(self.norm2(x))
         return self.output(x),{'k':k.detach(),'v':v.detach()}
 '''
-add('llm-010',
-'''Attention without positions or a causal boundary is equivariant to a joint permutation of tokens: changing input order simply changes output order. A decoder needs information about order, supplied by positional representations and by the causal mask. Those mechanisms have different roles. Position embeddings attach vectors to locations, while a causal mask restricts accessible locations. Normalization can accidentally defeat causality if it computes statistics across the whole sequence. Tokenwise LayerNorm reduces feature values within each position, so future tokens cannot alter an earlier token through that reduction. The fixture separates these effects instead of attributing every order dependency to position embeddings.''',
-'''A joint permutation must be applied to Q,K,V together. Compare the permuted output with the same permutation of the original result. Tokenwise normalization uses axis=-1 with keepdims=True; sequence-wide normalization uses axis=0 and couples token rows. Add a fixed position table to content vectors before attention to break pure content permutation equivariance.''',
-[('Equivariance','A transformation of inputs produces the corresponding transformation of outputs.'),('Position embedding','A vector associated with a token location.'),('Tokenwise normalization','Statistics calculated across features of one position.')],[
-ex('Permute content-only attention','Use Q=K[[1,0],[0,1],[1,1]],V[[1,2],[3,4],[5,6]]; jointly permute rows2,0,1.','permuted output equals original output rows2,0,1.', '''q=np.array([[1.,0.],[0.,1.],[1.,1.]]); v=np.array([[1.,2.],[3.,4.],[5.,6.]]); order=[2,0,1]
-out=attention(q,q,v); changed=attention(q[order],q[order],v[order])
-np.testing.assert_allclose(changed,out[order],atol=1e-12,rtol=0)''','The scores and value mixtures move with the token identities. This comparison uses unmasked attention; a causal mask itself introduces an order boundary.'),
-ex('Normalize each token','Normalize rows[1,3] and[10,20] independently, then alter only the second row.','first normalized row unchanged.', '''x=np.array([[1.,3.],[10.,20.]]); changed=x.copy(); changed[1]=[1000,2000]
-np.testing.assert_allclose(layer_norm(x)[0],layer_norm(changed)[0],atol=1e-12,rtol=0)''','The first row uses only its own feature mean and variance. A future token has no opportunity to influence those quantities.'),
-ex('Expose sequence-wide leakage','Center each feature across both token rows, then repeat after changing the future row.','first centered row changes.', '''assert not np.allclose((x-x.mean(0))[0],(changed-changed.mean(0))[0])''','Reducing across time mixes future values into the statistics used by an earlier position. A correct attention mask cannot repair information already leaked by another component.'),
-ex('Attach fixed positions','Add position vectors[[0,0],[1,0],[0,2]]; permute content but keep positions fixed.','outputs no longer follow a pure token permutation.', '''pos=np.array([[0.,0.],[1.,0.],[0.,2.]])
-a=attention(q+pos,q+pos,v); b=attention(q[order]+pos,q[order]+pos,v[order])
-assert not np.allclose(b,a[order])''','Moving content to a new location changes its positional representation. Permuting both content and position vectors together would instead move the whole annotated token and test a different condition.'),
-ex('Check feature centering','Inspect tokenwise normalized row means for the original fixture.','each row mean approximately0.', '''np.testing.assert_allclose(layer_norm(x).mean(-1),[0,0],atol=1e-12,rtol=0)''','The per-row mean is the relevant invariant. A global mean of zero could also be produced by a leaking sequence-wide operation, so it is too weak by itself.'),
-ex('Handle constant tokens','Normalize[5,5] with epsilon1e-5.','finite vector[0,0].', '''np.testing.assert_array_equal(layer_norm(np.array([[5.,5.]])),[[0,0]])''','Epsilon handles a zero variance without introducing future-token information. The constant row becomes zero before any learned scale or offset is applied.')],ATTN,helper='''def attention(q,k,v):
-    scores=q@k.T/np.sqrt(q.shape[-1]); mass=np.exp(scores-scores.max(-1,keepdims=True)); return mass/mass.sum(-1,keepdims=True)@v
-def layer_norm(x):
-    return (x-x.mean(-1,keepdims=True))/np.sqrt(x.var(-1,keepdims=True)+1e-5)
-''')
-add('llm-011',
-'''Multiple attention heads divide a representation into separate feature subspaces. Splitting and joining are layout transformations; they must preserve every value before any learning is considered. A width-four representation divided into two heads gives head width two. Each head can use a different attention distribution, after which the outputs are concatenated and projected. Residual additions require the original width. A feed-forward block transforms each token independently, usually expanding its feature width and then projecting back. Tokenwise operations preserve a causal prefix only if no other operation mixes future positions. Layout correctness and information-boundary correctness are separate checks.''',
-'''reshape changes the interpretation of contiguous dimensions, while transpose moves the head axis beside the batch axis. Rejoining needs the inverse transpose before reshape. A residual x+branch requires equal shapes. An elementwise activation followed by a matrix product operates independently on token rows; reductions across time do not. Use small integer-valued arrays to inspect layout before introducing random projection matrices.''',
-[('Head','A separate feature subspace used by an attention computation.'),('Residual connection','Addition of a same-shaped branch to its input.'),('Feed-forward block','A shared tokenwise feature transformation.')],[
-ex('Split and rejoin','Reshape two width4 rows into2 heads of width2, then invert the layout change.','exact round trip and head width2.', '''x=np.arange(8).reshape(2,4); heads=x.reshape(2,2,2).transpose(1,0,2)
-restored=heads.transpose(1,0,2).reshape(2,4)
-np.testing.assert_array_equal(restored,x); assert heads.shape==(2,2,2)''','The axes here are heads,time,features after transposition. A reshape alone cannot exchange semantic axes, which is why the inverse transpose matters.'),
-ex('Calculate a residual','Apply a branch2*x and add the original input.','result3*x with unchanged shape.', '''branch=2*x; residual=x+branch
-np.testing.assert_array_equal(residual,3*x); assert residual.shape==x.shape''','Residual addition does not concatenate features. Concatenation would double the width and change every following projection contract.'),
-ex('Use a tokenwise nonlinear block','Apply max(x-2,0) independently and project with identity.','first row[0,0,0,1].', '''feed=np.maximum(x-2,0)@np.eye(4)
-np.testing.assert_array_equal(feed[0],[0,0,0,1])''','The shared computation treats token rows independently while applying the same feature rule. Changing another row cannot affect the first row.'),
-ex('Test a prefix','Recompute the feed-forward branch on only the first row and compare with the full result.','first-row output unchanged.', '''np.testing.assert_array_equal(np.maximum(x[:1]-2,0)@np.eye(4),feed[:1])''','This check is simple because the branch is tokenwise. The attention part of a full decoder still needs a separate causal mask test.'),
-ex('Reject an indivisible width','Check width5 with2 heads before reshaping.','divisibility check fails.', '''width,head_count=5,2
-assert width%head_count!=0''','A head layout requires an integer number of features per head. Silently dropping a feature or padding it without a policy would change the model representation.'),
-ex('Detect a wrong rejoin','Flatten the transposed heads without first reversing the transpose.','wrong result differs from the original rows.', '''wrong=heads.reshape(2,4)
-assert not np.array_equal(wrong,x)''','The element count still matches, so a shape-only test would pass. Exact value placement catches the semantic axis error.')],ATTN)
+import llm010
+
+import llm011
+
 add('llm-012',
 '''Decoding converts a next-token probability distribution into a selected token. Greedy decoding chooses the maximum score with a declared tie rule. Sampling uses a random draw and cumulative probability intervals, so its result depends on the seed or supplied draw. Temperature divides logits before softmax: positive temperatures change concentration while preserving ranking. Top-k removes all but a fixed number of candidate tokens and renormalizes the remaining mass. These are inference policies, not changes to learned model weights. The tiny three-token vocabulary makes every interval visible and separates stochastic choice from a model's probability calculation.''',
 '''Subtract the maximum before exponentiation. Require positive temperature for stochastic sampling; handle zero-temperature greedy mode separately. np.argmax returns the first maximum, which implements the declared smallest-index tie rule. np.searchsorted(cumulative,draw,side='right') selects the interval containing a draw in[0,1). Filter candidates before the final normalization.''',
@@ -339,7 +308,7 @@ except ValueError: pass
 else: raise AssertionError('stale cache accepted')''','Keys and values were computed using specific weights and tokenization. Reusing them after either changes can produce inconsistent inference even if the dimensions remain compatible.')],ATTN,TORCH_IMPORT,DECODER)
 add('llm-025',
 '''Memory estimates begin with tensor shapes and dtype sizes. An attention score matrix has a query and key axis, so its element count grows quadratically with context length. A key/value cache stores one key and one value per past position per layer, so its raw storage grows linearly with context when model width stays fixed. Heads split the width but do not multiply total width unless a different architecture explicitly does so. These counts omit parameters, activations, gradients, allocator overhead and temporary kernels. A small arithmetic estimate is useful for planning, but it is not a measured peak-memory receipt or a guarantee that a runtime fits.''',
-'''For batchB,headsH,timeT,head widthD and bytesS, scores contain B*H*T*T elements. Full multi-head K/V storage contains2*layers*B*H*T*D*S bytes. Express width=H*D explicitly. Convert bytes to KiB by dividing1024, not1000, when using that unit. Change one dimension at a time to expose scaling.''',
+'''For batch B, heads H, sequence length T, head width d and s bytes per element, scores contain B*H*T*T elements. Full multi-head K/V storage contains 2*L*B*H*T*d*s bytes across L layers. Model width is D=H*d; using D in place of d would count the heads twice. Convert bytes to KiB by dividing by 1024, not 1000. Change one dimension at a time to expose scaling.''',
 [('Quadratic growth','Doubling a dimension multiplies a quantity by four.'),('KV bytes','Raw storage of keys and values under declared shapes and dtype.'),('Peak memory','Maximum observed runtime memory, including more than raw tensor sizes.')],[
 ex('Count attention scores','Use batch1,heads2 and contexts16,32.','512 and2048 score elements.', '''b,h=1,2; counts=[b*h*t*t for t in [16,32]]
 assert counts==[512,2048]''','Both the query and key axes double, producing four times as many scores. The number of heads remains fixed.'),
@@ -703,3 +672,14 @@ decision='go' if all(value is True for value in gates.values()) else 'no-go'
 assert decision=='no-go' ''','Unknown evidence and an explicit failure both block a required gate. A favorable toy score cannot turn either into a pass.'),
 ex('Write the reviewer decision','Record one failure example,missing evidence and next action beside theno-go.','report namesq3 unsupportedanswer and new independent families needed.', '''report={'decision':decision,'failure':'q3: tiny candidate answered without evidence','missing':'independent held-out families','next':'repair abstention and collect a new frozen evaluation','limits':'authored local teaching fixture'}
 assert report['decision']=='no-go' and 'q3' in report['failure'] and 'families' in report['missing']''','The decision should be actionable without overstating the result. A no-go with a concrete failure and next evidence requirement is a complete capstone outcome.')],ATTN,TORCH_IMPORT,DECODER)
+
+from llm016_depth import deepen as deepen_decoder
+deepen_decoder(SPECS['llm-016'])
+
+from depth_reviews_llm import DEPTH_NOTES, DIAGNOSIS_NOTES, apply_prose_review
+for identity, notes in DEPTH_NOTES.items():
+    SPECS[identity]['mechanism_notes'] = notes
+for identity, notes in DIAGNOSIS_NOTES.items():
+    SPECS[identity]['diagnosis'] = notes
+
+apply_prose_review(SPECS)

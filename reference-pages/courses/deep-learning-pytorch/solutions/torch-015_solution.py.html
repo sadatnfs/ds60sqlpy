@@ -124,7 +124,8 @@
 <span> </span>
 <span>def collate(sequences):</span>
 <span>    if not sequences or any(len(sequence)==0 for sequence in sequences): raise ValueError(&#x27;nonempty sequences required&#x27;)</span>
-<span>    lengths=torch.tensor([len(sequence) for sequence in sequences]); batch=torch.zeros((len(sequences),int(lengths.max())),dtype=torch.long)</span>
+<span>    if any(isinstance(token,(bool,np.bool_)) or not isinstance(token,(int,np.integer)) or not 0&lt;=int(token)&lt;2**63 for sequence in sequences for token in sequence): raise ValueError(&#x27;nonnegative int64 token IDs required&#x27;)</span>
+<span>    lengths=torch.tensor([len(sequence) for sequence in sequences],dtype=torch.long); batch=torch.zeros((len(sequences),int(lengths.max())),dtype=torch.long)</span>
 <span>    for row,sequence in enumerate(sequences): batch[row,:len(sequence)]=torch.tensor(sequence)</span>
 <span>    return batch,lengths</span>
 <span> </span>
@@ -148,7 +149,7 @@
 <span>        return torch.cat([ids for ids,values in batches]).tolist()</span>
 <span>    assert order(7)==order(7) and sorted(order(7))==list(range(5))</span>
 <span> </span>
-<span>    # Exercise 4: Col late variable-length sequences</span>
+<span>    # Exercise 4: Collate variable-length sequences</span>
 <span>    padded,lengths=collate([[2,3],[4]])</span>
 <span>    assert padded.tolist()==[[2,3],[4,0]] and lengths.tolist()==[2,1]</span>
 <span> </span>
@@ -157,10 +158,14 @@
 <span>    for ids,targets in torch.utils.data.DataLoader(paired,batch_size=2,shuffle=True,generator=torch.Generator().manual_seed(9),num_workers=0):</span>
 <span>        assert torch.equal(targets,2*ids)</span>
 <span> </span>
-<span>    # Exercise 6: Reject an empty sequence in this collator</span>
+<span>    # Exercise 6: Reject invalid sequence records</span>
 <span>    try: collate([[],[1]])</span>
 <span>    except ValueError: pass</span>
 <span>    else: raise AssertionError(&#x27;empty sequence accepted&#x27;)</span>
+<span>    for invalid in [[[2.7]],[[True]],[[-1]],[[2**63]]]:</span>
+<span>        try: collate(invalid)</span>
+<span>        except ValueError: pass</span>
+<span>        else: raise AssertionError(&#x27;invalid token ID accepted&#x27;)</span>
 <span>    return {&quot;checks&quot;: 6, &quot;status&quot;: &quot;passed&quot;}</span>
 <span> </span>
 <span> </span>

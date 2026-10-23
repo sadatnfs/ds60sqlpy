@@ -25,7 +25,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Exercise 5: Reject incompatible spaces
 # Compare query metadata modelA with an index encoded by modelB, even when both have
 # width3.
-# Expected: space identity mismatch blocks retrieval.
+# Expected: metadata identity mismatch is detected; the caller must enforce the retrieval gate.
 
 # Exercise 6: Measure a domain failure
 # Give an irrelevant document a high-scoring vector and record that geometric rank does

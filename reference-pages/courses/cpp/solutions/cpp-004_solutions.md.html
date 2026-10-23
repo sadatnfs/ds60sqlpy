@@ -120,7 +120,15 @@
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>A branch chooses one path using a Boolean condition. A loop repeats a body while its condition holds. An invariant is a fact that remains true before and after each iteration. A boundary is an input where a decision changes, such as zero for a nonnegative reading. Tracing the index, current value and running total makes hidden state visible.</p>
 <h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>
-<p>Trace [4,-2,0,6] as four transitions. Starting total 0 becomes 4 after the first item, stays 4 for the rejected -2, stays 4 for the accepted zero and becomes 10 for 6. The zero step explains why comparing totals alone cannot detect &gt;0 versus &gt;=0: acceptance counts expose the difference. An index loop should state a half-open interval such as [0,size), so an empty input naturally executes zero iterations.</p>
+<p>Trace [4, -2, 0, 6] as four transitions. Starting total 0 becomes 4 after the first item, stays 4 for the rejected -2, stays 4 for the accepted zero and becomes 10 for 6. The zero step explains why comparing totals alone cannot detect &gt;0 versus &gt;=0: acceptance counts expose the difference. An index loop should state a half-open interval such as [0, size), so an empty input naturally executes zero iterations.</p>
+<h3 id="state-boundaries-and-loop-progress">State, boundaries and loop progress<a class="heading-anchor" href="#state-boundaries-and-loop-progress" aria-label="Link to this section">#</a></h3>
+<p>A loop has three questions: what state is carried, which element is visited next, and why does the process terminate? In nonnegative_sum, the carried state is total. Immediately before each iteration, total equals the sum of the nonnegative values in the already visited prefix. Initially that prefix is empty, so zero is the correct state. After processing4 the prefix sum is 4; after -2 it stays4; after 0 it stays4; after 6 it becomes10. This is an invariant, not merely a description of one lucky output.</p>
+<p>The range-for declaration <code>int x : xs</code> copies the current integer into x. Changing x would not change the vector element. The body executes once per element and never for an empty vector. No special empty-case index is needed because the traversal contract already handles zero elements. An index loop requires more care: for a vector of size n, valid indices are0 through n-1, while n is the past-the-end position. Using &lt;=size instead of &lt;size creates an invalid access on the final iteration.</p>
+<p>A boundary bug can be hidden by an aggregate. Replacing &gt;=0 with &gt;0 changes whether zero is retained, but adding zero does not change the total. Therefore a total-only test cannot distinguish those predicates. Track both accepted count and sum when the policy cares about membership. The empty, all-negative and mixed fixtures exercise different paths; none substitutes for the exact zero boundary.</p>
+<p>Loop initialization belongs outside the repeated body when it represents accumulated history. If total is reset to zero at each iteration, the program forgets every prior contribution and may return only the last accepted value. A trace table exposes that defect immediately. The same principle applies to counters, maximum-so-far values and parser state: choose an initial identity and explain the transition before writing the loop.</p>
+<p>Termination also has an input-budget dimension. The vector example is finite and bounded, while a stream loop can continue as long as data arrives. A production reader therefore needs a declared row or byte budget as well as a correct loop condition. These small values fit in int; a later lesson addresses overflow. Correct traversal alone does not make unbounded arithmetic safe.</p>
+<h3 id="debugging-the-contract">Debugging the contract<a class="heading-anchor" href="#debugging-the-contract" aria-label="Link to this section">#</a></h3>
+<p>When the sum is wrong, inspect the first iteration where the invariant fails. Keep columns for index, current value, predicate result and total before/after. If the total is correct but the accepted count is wrong, test zero specifically. If a loop crashes only on empty input, look for an unconditional first-element access or unsigned size-1 calculation. Do not repair a boundary failure by discarding the failing row without defining that input policy.</p>
 <h3 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-cpp">assert(nonnegative_sum({4,-2,0,6})==10);</code></pre>
 <p>Expected: The running total is 4, 4, 4, 10.</p>
@@ -128,12 +136,12 @@
 <pre><code class="language-cpp">assert(nonnegative_sum({})==0);</code></pre>
 <p>Expected: The body runs zero times; the initial total is the result.</p>
 <h3 id="exercise-1-trace-state">Exercise 1: Trace state<a class="heading-anchor" href="#exercise-1-trace-state" aria-label="Link to this section">#</a></h3>
-<p>Trace [4,-2,0,6] with a row for each input.</p>
-<p><strong>Expected:</strong> Totals [4,4,4,10], four visits.</p>
+<p>Trace [4, -2, 0, 6] with a row for each input.</p>
+<p><strong>Expected:</strong> Totals [4, 4, 4, 10], four visits.</p>
 <p><strong>Reasoning:</strong> Only the negative value is excluded.</p>
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
 <h3 id="exercise-2-change-the-threshold">Exercise 2: Change the threshold<a class="heading-anchor" href="#exercise-2-change-the-threshold" aria-label="Link to this section">#</a></h3>
-<p>Count retained values for &gt;=0 and &gt;0 on [4,-2,0,6].</p>
+<p>Count retained values for &gt;=0 and &gt;0 on [4, -2, 0, 6].</p>
 <p><strong>Expected:</strong> Counts 3 and 2; both sums 10.</p>
 <p><strong>Reasoning:</strong> A sum can hide a zero-boundary error.</p>
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
@@ -153,8 +161,8 @@
 <p><strong>Reasoning:</strong> The invariant starts valid before any iteration.</p>
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
 <h3 id="exercise-6-transfer-the-predicate">Exercise 6: Transfer the predicate<a class="heading-anchor" href="#exercise-6-transfer-the-predicate" aria-label="Link to this section">#</a></h3>
-<p>Keep readings in [0,5] from [-1,0,4,5,6].</p>
-<p><strong>Expected:</strong> Values [0,4,5], total 9.</p>
+<p>Keep readings in [0, 5] from [-1, 0, 4, 5, 6].</p>
+<p><strong>Expected:</strong> Values [0, 4, 5], total 9.</p>
 <p><strong>Reasoning:</strong> Use conjunction with both inclusive boundaries.</p>
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p></article>
   </main>

@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>k8s-023: Gateway, Ingress and the external route · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>k8s-023: Gateway, Ingress and the external route</h1>
+      <p class="source-path">Generated from <code>courses/kubernetes/guides/k8s-023.md</code></p>
+    </header>
+    <article class="document"><h2 id="k8s-023-gateway-ingress-and-the-external-route">k8s-023: Gateway, Ingress and the external route<a class="heading-anchor" href="#k8s-023-gateway-ingress-and-the-external-route" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Intermediate; about 120 minutes plus review. Direct prerequisites: <code>k8s-013</code>, <code>k8s-017</code>, <code>k8s-020</code>. The chapter separates desired configuration, API acceptance, controller observation and application evidence.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Distinguish an internal Service from a host-facing HTTP route and the controller that implements it.</p>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<p>A Service provides an internal backend abstraction; an ingress or gateway controller can expose selected routes through a managed listener. Gateway API separates infrastructure ownership, listener configuration and application route attachment. Creating an HTTPRoute object does not install a controller or create a working external address.</p>
+<p>This host lab requires a preinstalled qualified Gateway controller, a host-owned Gateway named lesson-gateway, an owned Service backend and a loopback-only listener. A synthetic TLS case also needs a verified local trust chain and hostname. The normal browser adapter provides none of those cluster/controller operations and does not accept Gateway or Ingress resources.</p>
+<p>The real HTTPRoute example matches host lesson.local and path prefix /version, then forwards to hello:8080. It leaves other paths unmatched. The Ingress comparison is a separate fixture with its own ingressClassName; do not assume the two APIs are interpreted by the same controller or apply both to an unreviewed listener.</p>
+<h3 id="follow-gateway-ownership-and-route-status">Follow Gateway ownership and route status<a class="heading-anchor" href="#follow-gateway-ownership-and-route-status" aria-label="Link to this section">#</a></h3>
+<p>GatewayClass identifies a controller/infrastructure class and is cluster-scoped. A Gateway selects that class and defines listeners. HTTPRoute attaches through parentRefs and describes request matches and backends. The parent&#x27;s allowedRoutes policy can restrict which namespaces may attach.</p>
+<p>Inspect the route&#x27;s parent-specific Accepted and ResolvedRefs conditions and their observed generation. A syntactically valid backend reference can still be unresolved or unauthorized. Cross-namespace references may require an explicit ReferenceGrant rather than being permitted by a matching name. The host must provide that capability deliberately; the learner should not widen it during diagnosis.</p>
+<p>A positive status is necessary controller evidence, but a bounded client request must still prove routing and payload. A controller can accept a configuration before the data plane is ready, or a backend can be unready.</p>
+<h3 id="test-path-host-and-tls-independently">Test path, host and TLS independently<a class="heading-anchor" href="#test-path-host-and-tls-independently" aria-label="Link to this section">#</a></h3>
+<p>For the positive case, connect through the loopback listener using the intended host and /version path. Verify the synthetic certificate against the provided CA and hostname when TLS is enabled. A successful TCP connection or HTTP response obtained by disabling certificate checks does not establish the TLS contract.</p>
+<p>An unmatched path should produce the controller&#x27;s expected no-route behavior, while a matching route should return the fixture&#x27;s exact version body. A wrong hostname can select another listener/route or fail TLS verification. Record which layer failed rather than calling every negative result an application error.</p>
+<p>The ordinary fixture client is HTTP-only and targets hello internally. It cannot prove the external TLS path. A separately qualified host client is required, with its CA file and loopback address from the owned receipt. No public load balancer or external IP is assumed.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="worked-example-1-read-the-httproute">Worked example 1: Read the HTTPRoute<a class="heading-anchor" href="#worked-example-1-read-the-httproute" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-yaml">apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: hello-route
+spec:
+  parentRefs:
+  - name: lesson-gateway
+  hostnames:
+  - lesson.local
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /version
+    backendRefs:
+    - name: hello
+      port: 8080</code></pre>
+<p><strong>Expected:</strong> The route attaches to lesson-gateway for lesson.local and forwards /version to hello:8080.</p>
+<h4 id="worked-example-2-compare-accepted-and-delivered">Worked example 2: Compare accepted and delivered<a class="heading-anchor" href="#worked-example-2-compare-accepted-and-delivered" aria-label="Link to this section">#</a></h4>
+<p>Synthetic status:Accepted=True, ResolvedRefs=True for the current generation. A matching client still receives503 because the backend has no ready endpoints.</p>
+<p><strong>Expected:</strong> Route acceptance and reference resolution do not establish backend application readiness.</p>
+<h3 id="inspect-the-specific-owned-object">Inspect the specific owned object<a class="heading-anchor" href="#inspect-the-specific-owned-object" aria-label="Link to this section">#</a></h3>
+<p>Only after the chapter&#x27;s host capability is provisioned and its resources remain present, use the explicit receipt fields described in <a href="../host-labs.md.html">host-labs.md</a>. A completed one-shot browser Run has already cleaned its objects. The following read does not provision the missing capability and does not justify changing credentials after a Forbidden result.</p>
+<p>POSIX:</p>
+<pre><code class="language-sh">: &quot;${LAB_KUBECONFIG:?Use the owned receipt path}&quot;
+: &quot;${LAB_CONTEXT:?Use the owned receipt context}&quot;
+: &quot;${LAB_NAMESPACE:?Use the owned receipt namespace}&quot;
+kubectl --kubeconfig &quot;$LAB_KUBECONFIG&quot; --context &quot;$LAB_CONTEXT&quot; --namespace &quot;$LAB_NAMESPACE&quot; get httproute hello-route -o json</code></pre>
+<p>PowerShell:</p>
+<pre><code class="language-powershell">if (-not $env:LAB_KUBECONFIG -or -not $env:LAB_CONTEXT -or -not $env:LAB_NAMESPACE) { throw &#x27;Owned receipt fields are required.&#x27; }
+&amp; kubectl --kubeconfig $env:LAB_KUBECONFIG --context $env:LAB_CONTEXT --namespace $env:LAB_NAMESPACE get httproute hello-route -o json
+if ($LASTEXITCODE -ne 0) { throw &#x27;The scoped observation failed.&#x27; }</code></pre>
+<p>Retain only the fields needed by this chapter&#x27;s prediction. A NotFound result may be expected after one-shot cleanup; a Forbidden result may identify a deliberately absent advanced capability. Neither result authorizes an ambient-context fallback.</p>
+<h3 id="run-and-bounded-evidence">Run and bounded evidence<a class="heading-anchor" href="#run-and-bounded-evidence" aria-label="Link to this section">#</a></h3>
+<p>The app artifact is a reading worksheet, <code>courses/kubernetes/lessons/k8s-023.md</code>. The current browser adapter does not provide the full <strong>host-provisioned Gateway/Ingress controller and loopback TLS listener</strong> operation. Use the synthetic fixture and offline check first. Live work follows <a href="../host-labs.md.html">the scoped host-lab guide</a> only when the named capability and owned target have been provisioned. A worksheet or static check is never a cluster execution receipt.</p>
+<p>The <a href="../solutions/k8s-023_solution.json.html">manifest example</a> is separate from the learner artifact. The <a href="../solutions/k8s-023_checks.py.html">offline reference check</a> evaluates explicitly synthetic facts and makes no API calls. Run it locally with <code>python courses/kubernetes/solutions/k8s-023_checks.py</code> after comparing your attempt. The <a href="../fixtures/k8s-023-cases.json.html">case ledger</a> is immutable teaching input.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<h4 id="exercise-1-draw-the-ownership-layers">Exercise 1: Draw the ownership layers<a class="heading-anchor" href="#exercise-1-draw-the-ownership-layers" aria-label="Link to this section">#</a></h4>
+<p>Connect GatewayClass, Gateway, HTTPRoute, Service and Pods.</p>
+<p><strong>Expected result/shape:</strong> Controller/listener ownership is separated from the application route and backend.</p>
+<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Controller/listener ownership is separated from the application route and backend.</p>
+<p><strong>Progressive hints:</strong> Identify cluster-scoped versus namespaced objects.</p>
+<h4 id="exercise-2-read-matches-and-references">Exercise 2: Read matches and references<a class="heading-anchor" href="#exercise-2-read-matches-and-references" aria-label="Link to this section">#</a></h4>
+<p>Inspect host, path prefix, parent and backend port.</p>
+<p><strong>Expected result/shape:</strong> lesson.local, /version, lesson-gateway, hello8080 are the declared contract.</p>
+<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: lesson.local, /version, lesson-gateway, hello8080 are the declared contract.</p>
+<p><strong>Progressive hints:</strong> A reference name is interpreted within its API/namespace rules.</p>
+<h4 id="exercise-3-inspect-current-conditions">Exercise 3: Inspect current conditions<a class="heading-anchor" href="#exercise-3-inspect-current-conditions" aria-label="Link to this section">#</a></h4>
+<p>Compare Accepted/ResolvedRefs with observed generation.</p>
+<p><strong>Expected result/shape:</strong> Current parent-specific conditions support configuration acceptance, not final delivery alone.</p>
+<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Current parent-specific conditions support configuration acceptance, not final delivery alone.</p>
+<p><strong>Progressive hints:</strong> Check which parent/controller produced the status.</p>
+<h4 id="exercise-4-verify-matching-and-unmatched-requests">Exercise 4: Verify matching and unmatched requests<a class="heading-anchor" href="#exercise-4-verify-matching-and-unmatched-requests" aria-label="Link to this section">#</a></h4>
+<p>Use the qualified loopback client for /version and an unmatched path.</p>
+<p><strong>Expected result/shape:</strong> Expected version response on the match; documented no-route result on the negative path.</p>
+<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Expected version response on the match; documented no-route result on the negative path.</p>
+<p><strong>Progressive hints:</strong> Keep host header/hostname and path explicit.</p>
+<h4 id="exercise-5-verify-synthetic-tls-correctly">Exercise 5: Verify synthetic TLS correctly<a class="heading-anchor" href="#exercise-5-verify-synthetic-tls-correctly" aria-label="Link to this section">#</a></h4>
+<p>Use the host-provided CA/hostname and test a mismatched identity.</p>
+<p><strong>Expected result/shape:</strong> Valid chain/hostname succeeds; wrong identity fails without an insecure bypass.</p>
+<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Valid chain/hostname succeeds; wrong identity fails without an insecure bypass.</p>
+<p><strong>Progressive hints:</strong> Transport encryption and certificate identity are both part of the claim.</p>
+<h4 id="exercise-6-compare-ingress-and-cleanup-scope">Exercise 6: Compare Ingress and cleanup scope<a class="heading-anchor" href="#exercise-6-compare-ingress-and-cleanup-scope" aria-label="Link to this section">#</a></h4>
+<p>Review the separate Ingress fixture and name what is independently required.</p>
+<p><strong>Expected result/shape:</strong> Qualified ingressClass/controller plus exact route cleanup; no assumption of API interchangeability.</p>
+<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Qualified ingressClass/controller plus exact route cleanup; no assumption of API interchangeability.</p>
+<p><strong>Progressive hints:</strong> An API kind does not identify every implementation behavior.</p>
+<h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
+<p>Explain the mechanism behind the first example, then distinguish it from this boundary case: Route acceptance and reference resolution do not establish backend application readiness. State which observations are synthetic and which, if any, were read from your owned runtime.</p>
+<h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
+<p>A Kubernetes API object is not a running controller. An Ingress class or GatewayClass name must correspond to an installed, qualified implementation. A Service of type ClusterIP does not expose a host port by itself.</p>
+<p>Keep listener ownership and cleanup separate from the namespaced route. The learner should remove only its recorded route UID unless the host capability explicitly owns the Gateway/controller lifecycle. Never disable TLS verification or install a remote controller automatically to make the example pass.</p>
+<h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Close the answer and reconstruct the reasoning for Exercise6, Compare Ingress and cleanup scope. Name the exact source and observed identity you would require before claiming the changed case succeeded.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>Continue to <code>k8s-024</code> after preserving the six evidence records.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://gateway-api.sigs.k8s.io/guides/user-guides/http-routing/">Gateway API HTTP routing</a></li>
+</ul>
+<ul>
+<li><a href="https://kubernetes.io/docs/concepts/services-networking/ingress/">Kubernetes Ingress</a></li>
+</ul>
+<h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning for k8s-023.
+Read courses/kubernetes/guides/k8s-023.md and courses/kubernetes/lessons/k8s-023.md. Direct prerequisites: `k8s-013`, `k8s-017`, `k8s-020`.
+Explain the mechanism, ask me to predict, let me attempt, give one hint, inspect evidence, then ask for retrieval.
+Keep courses/kubernetes/solutions/ closed until I attempt or explicitly ask for comparison.
+Distinguish source, synthetic fixtures, API acceptance, observed controllers, application/data results and cleanup.
+Use only an explicit owned lease and the stated capability; never select an ambient cluster or install a controller for me.</code></pre></article>
+  </main>
+</body>
+</html>

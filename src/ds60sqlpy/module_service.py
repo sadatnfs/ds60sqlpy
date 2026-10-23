@@ -12,6 +12,13 @@ from ds60sqlpy.modules import ModuleCatalog, ModuleState
 from ds60sqlpy.worker_operations import PROFILES
 
 RUNTIME_GUIDANCE = {
+    "k8s-kind": (
+        "This pad submits only the supported curated manifests to your explicitly "
+        "prepared owned kind namespace. It checks real Kubernetes state and removes "
+        "only the attempt's owned objects. Cluster-wide and other unsupported labs "
+        "use the separate scoped host instructions in their guide. See the optional "
+        "Kubernetes overlay in the Docker classroom guide."
+    ),
     "cpp20": (
         "The pad is saved as main.cpp in a fresh job folder. The worker "
         "compiles with g++ -std=c++20 -pthread -O0 -g -Wall -Wextra "
@@ -43,6 +50,30 @@ RUNTIME_GUIDANCE = {
         "source lines."
     ),
 }
+
+
+def runtime_guidance(profile: str, verification_id: str | None) -> str:
+    """Describe the actual execution path selected for this lesson."""
+    if profile == "reading":
+        return (
+            "This lesson uses reading, written reasoning and saved notes. "
+            "There is no code execution for this worksheet. Follow any separate "
+            "browser or teacher-led activity described in its guide."
+        )
+    if profile == "cpp20" and verification_id == "cpp-ownership-v1":
+        return (
+            "The pad is saved as main.cpp. GCC compiles it as C++20 with "
+            "-Dmain=ds60_learner_main into learner.o, then links it with the "
+            "fixed ownership verifier in verifier.o. The verifier's main "
+            "calls your required functions and reports its checks; your "
+            "main is not the executed entry point. A compile or link error "
+            "stops before execution. Ordinary C++ lessons run your main directly."
+        )
+    return RUNTIME_GUIDANCE.get(
+        profile,
+        "Run a complete example in a fresh job folder. Save your draft to "
+        "retain it; temporary runtime files are discarded after execution.",
+    )
 
 
 class ModuleService:
@@ -83,22 +114,12 @@ class ModuleService:
                 if lesson.runtime_profile in PROFILES
                 else "notes.md",
                 "setup_commands": (
-                    [
-                        "docker compose --progress plain -f compose.classroom.yaml "
-                        f"--profile {lesson.runtime_profile} --parallel 1 build",
-                        "docker compose -f compose.classroom.yaml "
-                        f"--profile {lesson.runtime_profile} up -d --no-build "
-                        f"--pull never --wait {SERVICES[lesson.runtime_profile]}",
-                    ]
+                    [f"./classroom --profile {lesson.runtime_profile}"]
                     if lesson.runtime_profile in SERVICES and lesson.runtime_profile != "k8s-kind"
                     else []
                 ),
-                "runtime_guidance": RUNTIME_GUIDANCE.get(
-                    lesson.runtime_profile,
-                    (
-                        "Run a complete example in a fresh job folder. Save your draft to "
-                        "retain it; temporary runtime files are discarded after execution."
-                    ),
+                "runtime_guidance": runtime_guidance(
+                    lesson.runtime_profile, lesson.verification_id
                 ),
                 "runtime_profile": lesson.runtime_profile,
                 "verification_id": lesson.verification_id,

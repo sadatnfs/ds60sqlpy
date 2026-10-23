@@ -126,6 +126,47 @@
 <p><strong>Task contract:</strong> Accepted inputs, output schema, metric and failure behavior.</p>
 <h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
 <p>Represent a task as named fields rather than one free-form paragraph. A route decision should expose its reason and required evidence. Check exact-computation needs before choosing a text-generation strategy. Check freshness and citation needs before considering weight updates. Fine-tuning requires a stable behavioral target, sufficient governed examples and a held-out evaluation. A missing prerequisite produces a “measure baseline first” decision, not an automatic training job.</p>
+<h3 id="trace-a-subject-assistant-request-through-its-evidence-requirements">Trace a subject-assistant request through its evidence requirements<a class="heading-anchor" href="#trace-a-subject-assistant-request-through-its-evidence-requirements" aria-label="Link to this section">#</a></h3>
+<p>Consider: “What is our current account conversion rate, and did the new checkout cause it to improve?” This contains several distinct claims. The word current requires the correct effective definition and data period. Account requires a denominator and grouping unit. Conversion rate requires validated counts and arithmetic. Cause requires treatment assignment or defensible identification assumptions. One well-formed generated sentence cannot establish all four.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Subtask</th>
+<th>Required input</th>
+<th>Inspectable output</th>
+<th>Failure that belongs here</th>
+</tr></thead><tbody>
+<tr>
+<td>Find the definition</td>
+<td>Authorized, effective source version</td>
+<td>Source ID and supported formula</td>
+<td>Wrong version or missing source</td>
+</tr>
+<tr>
+<td>Extract fields</td>
+<td>Source text or structured observations</td>
+<td>Typed fields with provenance</td>
+<td>Unsupported count or wrong unit</td>
+</tr>
+<tr>
+<td>Calculate</td>
+<td>Accepted inputs and declared formula</td>
+<td>Reproducible numeric artifact</td>
+<td>Wrong denominator or arithmetic</td>
+</tr>
+<tr>
+<td>Interpret</td>
+<td>Population and study design</td>
+<td>Bounded claim with assumptions</td>
+<td>Unsupported causal conclusion</td>
+</tr>
+</tbody></table></div>
+<p>A trained model can participate in the first two interfaces or explain the last two, but its fluency does not replace their evidence. The routing helper returns one primary route, while the composed architecture may contain several stages. In particular, exact_computation takes precedence in the helper. That priority is a teaching decision about one requested operation; it does not mean a numerical tool can discover an unknown business definition on its own.</p>
+<p>A simple probability decomposition explains why adding components is not automatically an improvement. Let R mean sufficient admissible evidence reached the answer stage, A mean the answer is correct and supported given that evidence, and V mean the result meets the required validation contract. The success probability for this complete path is P(R) times P(A given R) times P(V given A and R). These conditional factors do not require an independence assumption. In an illustrative calculation, 0.9 times0.8 times0.95 is0.684. Those values are invented for arithmetic explanation, not measured model performance. Improving the last factor alone cannot recover all failures from missing evidence.</p>
+<p>Use controlled comparisons to choose an intervention. A prompt baseline can reveal whether the task is already expressible without training. An oracle-context control can show whether answer behavior improves when relevant evidence is supplied directly. A retrieval intervention holds the answering configuration fixed while changing evidence selection. An adaptation comparison holds evaluation families and access conditions fixed while changing learned behavior. If all of those change together, an improved score does not identify the useful component.</p>
+<p>Retrieval changes the inference evidence available to a model; adaptation changes the model&#x27;s parameterized behavior. The original RAG work combined parametric generation with explicit retrieved memory, but this course&#x27;s first route selector performs neither learned retrieval nor generation. Its role is to make decisions and prerequisites inspectable. <a href="https://arxiv.org/abs/2005.11401">Retrieval-Augmented Generation</a>.</p>
+<h4 id="interview-reasoning-with-explanatory-answers">Interview reasoning with explanatory answers<a class="heading-anchor" href="#interview-reasoning-with-explanatory-answers" aria-label="Link to this section">#</a></h4>
+<p><strong>Why not fine-tune current policy documents directly into the model?</strong> Updates, source attribution and per-request access remain separate problems. A memorized fact does not expose which version supports it or whether the current principal may see it. Adaptation may still improve a stable response behavior, while retrieved evidence supplies current facts.</p>
+<p><strong>When is a deterministic tool the right answer?</strong> When the task requires an exact operation over validated inputs and a declared formula. The tool&#x27;s correctness does not establish that the extracted inputs or chosen denominator were appropriate; retain those upstream contracts too.</p>
+<p><strong>What makes an adaptation experiment informative?</strong> A measured behavior gap, governed examples, a frozen comparison policy, independent evaluation families and real outputs from both candidates. A training loss by itself measures fit to training targets, not domain-assistant utility.</p>
 <h3 id="exercise-1-route-a-changing-definition">Exercise 1: Route a changing definition<a class="heading-anchor" href="#exercise-1-route-a-changing-definition" aria-label="Link to this section">#</a></h3>
 <p>The question is: Describe a request for the current conversion-rate definition requiring a citation.</p>
 <p>A definition can change after training, so its identity and version should remain inspectable outside model weights. Retrieval is a way to supply that evidence, not a guarantee the answer will use it faithfully.</p>
@@ -142,7 +183,7 @@ assert choose(task)==(&#x27;deterministic_tool&#x27;,&#x27;exact computation&#x2
 <p><strong>Verify:</strong> Compare the computed values or written argument with route deterministic_tool; reason exact computation.</p>
 <h3 id="exercise-3-require-evidence-before-fine-tuning">Exercise 3: Require evidence before fine-tuning<a class="heading-anchor" href="#exercise-3-require-evidence-before-fine-tuning" aria-label="Link to this section">#</a></h3>
 <p>The question is: Describe a stable schema-formatting gap with zero governed examples, then with 120 reviewed examples.</p>
-<p>The threshold120 is a teaching admission rule, not a universal sample-size recommendation. A real decision needs learning curves, label quality and held-out task evidence.</p>
+<p>The example count 120 exceeds the helper&#x27;s teaching admission threshold100; neither number is a universal sample-size recommendation. A real decision needs learning curves, label quality and held-out task evidence.</p>
 <pre><code class="language-python">task={&#x27;exact_computation&#x27;:False,&#x27;fresh_evidence&#x27;:False,&#x27;citation_required&#x27;:False,&#x27;stable_behavior_gap&#x27;:True,&#x27;governed_examples&#x27;:0}
 assert choose(task)[0]==&#x27;measure_baseline&#x27;
 task[&#x27;governed_examples&#x27;]=120; assert choose(task)[0]==&#x27;adaptation_candidate&#x27;</code></pre>

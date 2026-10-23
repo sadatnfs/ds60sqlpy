@@ -1,0 +1,38 @@
+{
+  "lesson_id": "k8s-033",
+  "provenance": "synthetic teaching cases, not runtime observations",
+  "capability": "qualified metrics API, HPA operations and fixed bounded load fixture",
+  "browser_source": false,
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Compare usage50m with requests100m and200m.",
+      "expected": "50percent and25percent respectively."
+    },
+    {
+      "exercise": 2,
+      "task": "Evaluate current1,observed80,target50 and current2,observed20,target50.",
+      "expected": "Unclipped recommendations2 and1."
+    },
+    {
+      "exercise": 3,
+      "task": "Compute the ideal count at current1 and utilization200percent.",
+      "expected": "Ideal4, configured maximum2; capacity adequacy remains unproven."
+    },
+    {
+      "exercise": 4,
+      "task": "Interpret an unavailable CPU metric and failed HPA metric condition.",
+      "expected": "Unknown load, with a qualified metrics-path investigation."
+    },
+    {
+      "exercise": 5,
+      "task": "Use the fixed host load and compare sample, desired replicas, ready replicas and application results.",
+      "expected": "Timestamped transitions within declared ranges and deadline, not an exact scaling second."
+    },
+    {
+      "exercise": 6,
+      "task": "Interpret delayed scale-down and end the load at its budget.",
+      "expected": "Reasoned delay explanation and confirmed load termination; no production sizing claim."
+    }
+  ]
+}

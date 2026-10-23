@@ -1,0 +1,89 @@
+{
+  "lesson_id": "spark-038",
+  "scope": "Tiny paired local contracts;root-owned runtime qualification is separate.",
+  "cases": [
+    {
+      "exercise": 1,
+      "title": "Capture actual finite streaming progress",
+      "input_contract": "Run the supplied three-occurrence stream with ID deduplication and return a bounded observation record.",
+      "expected": "Input count 3, state rows 2 and exact committed bag 1:100,2:200.",
+      "verification": "Join the progress record with actual readback and inactive-query evidence."
+    },
+    {
+      "exercise": 2,
+      "title": "Interpret state and sink metrics with units",
+      "input_contract": "Require a state operator and a nonnegative memory-used measurement;preserve unknown or negative sink-row sentinel values as unavailable.",
+      "expected": "State memory is reported in bytes. A missing or negative sink output count is not converted into zero.",
+      "verification": "Check the real state record and explicit None/-1 normalization controls."
+    },
+    {
+      "exercise": 3,
+      "title": "Observe bounded state growth across restart",
+      "input_contract": "Add a new ID 3:300 and restart the same compatible checkpoint.",
+      "expected": "One new input row, state rows grow 2 to 3, and output gains 3:300.",
+      "verification": "Compare actual state totals, query identity and exact committed rows."
+    },
+    {
+      "exercise": 4,
+      "title": "Distinguish empty input from a stuck query",
+      "input_contract": "Run a separate AvailableNow query over an empty owned input directory.",
+      "expected": "Zero admitted rows and a terminated query;state/sink metrics may be absent.",
+      "verification": "Assert zero input and termination without fabricating an output Parquet schema."
+    },
+    {
+      "exercise": 5,
+      "title": "Diagnose three seeded incident records",
+      "input_contract": "For the explicitly synthetic incident fixtures, choose one reversible check for skew, growing state and zero admitted input.",
+      "expected": "Inspect key/partition distribution;inspect watermark/key-retention policy;inspect source discovery respectively.",
+      "verification": "Compare the three exact recommendations and state one success observation for each."
+    },
+    {
+      "exercise": 6,
+      "title": "Sanitize evidence with an allowlist",
+      "input_contract": "Keep only stage_id, task_id, run_ms and input_records from a supplied task-event dictionary containing fake credential fields.",
+      "expected": "Exact four-field record, with fake token/password absent.",
+      "verification": "Assert field set and values;do not print the unfiltered input."
+    }
+  ],
+  "golden": {
+    "actual_expected": {
+      "input_rows": 3,
+      "initial_state_rows": 2,
+      "after_new_key_state_rows": 3,
+      "empty_input_rows": 0
+    },
+    "synthetic_incidents": [
+      {
+        "kind": "skew",
+        "task_runtime_ms": [
+          100,
+          100,
+          10000
+        ],
+        "provenance": "synthetic"
+      },
+      {
+        "kind": "state",
+        "retained_rows": [
+          10,
+          100,
+          1000
+        ],
+        "watermark": [
+          "unchanged",
+          "unchanged",
+          "unchanged"
+        ],
+        "provenance": "synthetic"
+      },
+      {
+        "kind": "input",
+        "active": true,
+        "input_rows": 0,
+        "offset_advanced": false,
+        "provenance": "synthetic"
+      }
+    ],
+    "unknown_metric": "None or negative sentinel is unavailable,not zero"
+  }
+}

@@ -164,10 +164,10 @@ int main() { std::cerr &lt;&lt; &quot;fixture rejected\n&quot;; return 2; }</cod
 <p><strong>Verify:</strong> For cpp-002 Exercise 4, retain the compiler category, repair the semicolon and confirm a fresh build.</p>
 <p>The compiler may point at the following token because that is where the grammar becomes impossible. Read nearby source rather than matching a vendor-specific full message.</p>
 <h4 id="exercise-5-inspect-an-intentional-nonzero-exit">Exercise 5: Inspect an intentional nonzero exit<a class="heading-anchor" href="#exercise-5-inspect-an-intentional-nonzero-exit" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> For cpp-002 Exercise 5, stderr fixture rejected;return2.</p>
+<p><strong>Inputs/evidence:</strong> For cpp-002 Exercise 5, stderr fixture rejected; return2.</p>
 <p><strong>Expected result/shape:</strong> For cpp-002 Exercise 5, nonzero runtime result2 and the diagnostic; this is expected failure evidence.</p>
 <p><strong>Verify:</strong> For cpp-002 Exercise 5, distinguish the successful build from failed execution.</p>
-<p>The compiler accepts valid code that deliberately returns2. That demonstrates why build success and program success must remain separate phases.</p>
+<p>The compiler accepts valid code that deliberately returns 2. That demonstrates why build success and program success must remain separate phases.</p>
 <h4 id="exercise-6-verify-the-named-cmake-target">Exercise 6: Verify the named CMake target<a class="heading-anchor" href="#exercise-6-verify-the-named-cmake-target" aria-label="Link to this section">#</a></h4>
 <p><strong>Inputs/evidence:</strong> For cpp-002 Exercise 6, main.cpp and the supplied CMakeLists.txt.</p>
 <p><strong>Expected result/shape:</strong> For cpp-002 Exercise 6, configure/build succeed and CTest executes one test named greeting.</p>

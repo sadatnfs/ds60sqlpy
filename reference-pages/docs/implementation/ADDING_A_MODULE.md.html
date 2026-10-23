@@ -160,6 +160,10 @@
 <td><code>docker/workers/</code>, an explicit Compose profile and private network</td>
 </tr>
 <tr>
+<td>One-command setup</td>
+<td>Add a new ordinary runtime to the fixed profile/service mapping in <code>scripts/classroom.sh</code> and its startup-order tests; new subjects reusing a runtime need no launcher change</td>
+</tr>
+<tr>
 <td>Host preparation</td>
 <td>Both module launchers, local engine checks and private session handling</td>
 </tr>
@@ -176,7 +180,7 @@
 <p>Prepare dependencies explicitly, pin the relevant toolchain and platform locks, and keep small default fixtures offline. Document which additional tasks need network access, GPUs, larger data or optional downloads. Never start those tasks as a side effect of opening a lesson. Keep container image publication separate from local build and test.</p>
 <h3 id="publication-and-honest-status">Publication and honest status<a class="heading-anchor" href="#publication-and-honest-status" aria-label="Link to this section">#</a></h3>
 <p>A lesson can be authored while a profile is unavailable. A working arm64 Docker image does not establish Linux amd64 or Windows host acceptance. Record exact image IDs, architecture, reference results, rejected misconceptions, timeout, cancellation, saved-work recovery and the platform actually tested.</p>
-<p>Keep beta modules separate from the 168-lesson published catalog until their prerequisite chains and publication gates pass. Update the checkpoint and owner status after each coherent batch. Future agents should resume from those files and actual receipts, rather than infer completion from the number of plan entries.</p>
+<p>Keep module manifests separate from the numbered legacy catalog and preserve existing IDs and progress namespaces. Check prerequisite chains and publication gates before presenting a complete route. Update the checkpoint and owner status after each coherent batch. Future agents should resume from those files and actual receipts, rather than infer completion from the number of plan entries.</p>
 <p>Run the grouped four-worker suite after integration. Add platform-specific CI or execution rows deliberately; leave untested rows unqualified. Preserve the historical baseline, ignored learner work and unrelated services throughout.</p></article>
   </main>
 </body>

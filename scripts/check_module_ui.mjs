@@ -299,4 +299,76 @@ await test('journey progression respects canonical variants and planned boundari
   assert.equal(e.element('authored').hidden,true);assert.equal(e.element('planned').hidden,false);
   assert.equal(e.requests.some(r=>r.body.action==='module-run'),false);
 });
+await test('All stages preserves the selected variant and unsaved draft',async()=>{
+  const e=environment();const rows=[{id:'spark-013',title:'Rows',level:'beginner',status:'authored',variants:[{id:'spark-013@pyspark',title:'Python'}]},{id:'spark-014',title:'Joins',level:'intermediate',status:'authored'}];
+  e.context.plan={tracks:[{id:'scala-spark',lessons:rows}]};e.current('spark-013@pyspark');
+  e.run("index=plan;trackId='scala-spark';");e.element('source').value='my unsaved code';
+  e.element('stage').value='all';await e.event('stage','change');
+  assert.equal(e.run('lessonId'),'spark-013@pyspark');assert.equal(e.element('source').value,'my unsaved code');
+  assert.equal(e.element('lessons').children.length,2);assert.equal(e.requests.filter(r=>r.body.action!=='module-index').length,0);
+});
+await test('empty stage or search filters keep the current lesson without a request',async()=>{
+  const e=environment();e.context.plan={tracks:[{id:'cpp',lessons:[{id:'cpp-002',title:'Values',level:'beginner',status:'authored'}]}]};
+  e.current('cpp-002','cpp');e.run("index=plan;trackId='cpp';");e.element('source').value='retained';
+  e.element('stage').value='advanced';await e.event('stage','change');
+  assert.equal(e.element('lessons').children.length,0);assert.match(e.element('status').textContent,/No lessons match/);
+  e.element('stage').value='beginner';e.element('lesson-query').value='no-such-topic';await e.event('stage','change');
+  assert.equal(e.run('lessonId'),'cpp-002');assert.equal(e.element('source').value,'retained');
+  assert.equal(e.requests.filter(r=>r.body.action!=='module-index').length,0);
+});
+await test('a nonempty new stage selects its first matching lesson',async()=>{
+  const e=environment();const one={id:'cpp-002',title:'Values',level:'beginner',status:'authored',prerequisites:[],outcome:'Values'};
+  const two={...one,id:'cpp-020',title:'Ownership',level:'advanced'};
+  e.context.plan={tracks:[{id:'cpp',lessons:[one,two]}]};e.run("index=plan;trackId='cpp';lessonId='cpp-002';current=null;");
+  e.element('stage').value='advanced';await e.event('stage','change');await settle();
+  assert.equal(e.next('module-lesson').body.lesson_id,'cpp-020');assert.equal(e.run('lessonId'),'cpp-020');
+  assert.equal(e.requests.some(r=>r.body.action==='module-run'),false);
+});
+await test('the latest filter supersedes a stage navigation still waiting for save',async()=>{
+  for(const latest of ['all','empty','search']){
+    const e=environment();const one={id:'cpp-002',title:'Values',level:'beginner',status:'authored',prerequisites:[],outcome:'Values'};
+    const two={...one,id:'cpp-020',title:'Ownership',level:'advanced'};
+    e.context.plan={tracks:[{id:'cpp',lessons:[one,two]}]};e.current('cpp-002','cpp');e.run("index=plan;trackId='cpp';");
+    e.element('source').value='my unsaved source';await e.event('source','input');
+    e.element('stage').value='advanced';await e.event('stage','change');await settle();
+    const save=e.next('module-save');assert.ok(save);
+    if(latest==='search'){e.element('lesson-query').value='ownership';await e.event('lesson-query','input');}
+    else{e.element('stage').value=latest==='empty'?'missing-level':'all';await e.event('stage','change');}
+    e.resolve(save,{session:{}});await settle();
+    assert.equal(e.run('lessonId'),'cpp-002');assert.equal(e.run('current.id'),'cpp-002');
+    assert.equal(e.element('source').value,'my unsaved source');
+    assert.equal(e.element('stage').value,latest==='empty'?'missing-level':'all');
+    assert.equal(e.requests.filter(r=>r.body.action==='module-lesson').length,0);
+  }
+});
+await test('All stages keeps an already loading lesson usable when its response arrives',async()=>{
+  const e=environment();const one={id:'cpp-002',title:'Values',level:'beginner',status:'authored',prerequisites:[],outcome:'Values'};
+  const two={...one,id:'cpp-020',title:'Ownership',level:'advanced'};
+  e.context.plan={tracks:[{id:'cpp',lessons:[one,two]}]};e.run("index=plan;trackId='cpp';lessonId='cpp-002';current=null;");
+  e.element('stage').value='advanced';await e.event('stage','change');await settle();
+  const loading=e.next('module-lesson');assert.equal(loading.body.lesson_id,'cpp-020');
+  e.element('stage').value='all';await e.event('stage','change');
+  e.resolve(loading,{...two,language:'cpp',runtime_profile:'cpp20',source:'loaded source',guide_html:'guide',session:{},history:[],capability:{profile:'cpp20',ready:true,detail:'Fixture'}});
+  await settle();assert.equal(e.run('current.id'),'cpp-020');assert.equal(e.element('authored').hidden,false);
+  assert.equal(e.element('stage').value,'all');assert.equal(e.element('source').value,'loaded source');
+});
+await test('LLM journeys default to textbook width without removing practice contracts',async()=>{
+  const e=environment();const row={id:'llm-002',title:'Tokens',level:'beginner',status:'authored',prerequisites:[],outcome:'Read token probabilities'};
+  e.context.plan={tracks:[{id:'llm-theory',lessons:[row]}]};e.run("index=plan;trackId='llm-theory';current=null;");
+  const opened=e.run("openLesson('llm-002',false)");await settle();
+  e.resolve(e.next('module-lesson'),{...row,language:'python',runtime_profile:'python-core',learning_mode:'practice',source:'original code',guide_html:'chapter',session:{},history:[],capability:{profile:'python-core',ready:true,detail:'Fixture'}});
+  await opened;assert.match(e.element('authored').className,/reading-focus/);
+  assert.equal(e.element('prediction').hidden,false);assert.equal(e.element('solution-section').hidden,false);
+  await e.event('reading-toggle');assert.equal(e.element('authored').className,'panes');
+  assert.equal(e.element('source').value,'original code');
+  assert.equal(e.storage.get('ds60.module.reading-view.llm-theory'),'practice');
+});
+await test('reading preferences stay specific to a journey and survive chapter navigation',async()=>{
+  const e=environment();e.run("trackId='llm-theory'");assert.equal(e.run('preferredReadingView(false)'),true);
+  e.storage.set('ds60.module.reading-view.llm-theory','practice');assert.equal(e.run('preferredReadingView(false)'),false);
+  e.run("trackId='llm-applied'");assert.equal(e.run('preferredReadingView(false)'),true);
+  e.run("trackId='cpp'");assert.equal(e.run('preferredReadingView(false)'),false);
+  e.storage.set('ds60.module.reading-view.cpp','reading');assert.equal(e.run('preferredReadingView(false)'),true);
+  e.run("trackId='statistics-ml'");assert.equal(e.run('preferredReadingView(true)'),true);
+});
 console.log(JSON.stringify({checks,passed:true,final:true}));

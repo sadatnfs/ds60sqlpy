@@ -2,12 +2,13 @@ from pathlib import Path
 import json, textwrap, re
 ROOT = Path(__file__).resolve().parents[3]
 SPECS = {}
+DEFAULT_DIAGNOSIS = 'When a result disagrees, locate the first intermediate value that violates this explanation. Inspect shapes and identities before aggregates, and inspect counts before averages. Preserve the original fixture and introduce only one controlled change at a time. If an arithmetic identity passes but a data-boundary condition fails, the experiment is still invalid. If a runtime is unavailable, record the unexecuted code as unverified rather than replacing its output with the expected text. The separate explanation discusses why the tempting alternative in each case changes the result.'
 def ex(title,prompt,expected,code,why):
     return dict(title=title,prompt=prompt,expected=expected,code=textwrap.dedent(code).strip(),why=why)
 def add(id,mental,anatomy,terms,exercises,source,imports='import numpy as np',helper=''):
     assert len(exercises)==6, id
     SPECS[id]=dict(mental=mental,anatomy=anatomy,terms=terms,exercises=exercises,source=source,imports=imports,helper=textwrap.dedent(helper).strip())
-def write_all(only=None):
+def write_all(only=None, guides_only=False):
  for track in ['deep-learning-tensorflow','llm-theory']:
   base=ROOT/'courses'/track
   plan=json.loads((ROOT/'docs/expansion/plans'/f'{track}.json').read_text())
@@ -23,8 +24,9 @@ def write_all(only=None):
    prereq=', '.join(f'`{q}`' for q in p['prerequisites'])
    terms='\n\n'.join(f'**{k}:** {v}' for k,v in s['terms'])
    exercise_text='\n\n'.join(f"{n}. **{e['title']}.** {e['prompt']}\n   **Expected:** {e['expected']}\n   **Verify:** Save the {('reasoning table' if reading else 'assertion results')} for exercise {n}, including {e['expected']}" for n,e in enumerate(s['exercises'],1))
-   examples='\n\n'.join(f"### Example {chr(65+n)}: {e['title']}\n\n{e['why']}\n\n```{'text' if reading else 'python'}\n{(s['imports']+chr(10)+s['helper']+chr(10)) if not reading else ''}{e['code']}\n```\n\n**Expected:** {e['expected']}" for n,e in enumerate(s['exercises'][:2]))
-   runtime = ('Use the reading worksheet. Write a reasoned response for each case; no execution or model download is required.' if reading else f"Use a prepared `{p['runtime']}` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/{id}/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: `& $CoursePython {learner}`. For macOS/Linux use `.venv/bin/python {learner}` from the repository root.")
+   examples='\n\n'.join(f"### Example {chr(65+n)}: {e['title']}\n\n{e['why']}\n\n```{'text' if reading else 'python'}\n{(e.get('preamble', s['imports']+chr(10)+s['helper'])+chr(10)) if not reading else ''}{e['code'] if reading or 'worked_examples' in s else chr(10).join(item['code'] for item in s['exercises'][:n+1])}\n```\n\n**Expected:** {e['expected']}" for n,e in enumerate(s.get('worked_examples', s['exercises'][:2])))
+   runtime = ('Use the reading worksheet. Write a reasoned response for each case; no execution or model download is required.' if reading else f"Open the Docker classroom, choose **Journeys**, and select `{id}`. Start its `{p['runtime']}` worker using the [Docker classroom instructions](../../../docs/docker-classroom.md), then edit the saved coding pad and choose **Run**. The worker supplies the declared packages and runs a fresh Python process; you do not need Python or a framework installed on the host. Save your current attempt before replacing the pad with a complete worked example. These examples use literal local data and bounded operations, with no downloads or online model calls. For optional native study, use the repository's [native setup guide](../../../docs/setup/first-success.md) and the same declared dependencies. Keep editable copies under ignored `.learning/expansion/{id}/` so the checked-in worksheet remains available.")
+   study_method = ('Read both worked reasoning cases. Derive the intermediate quantities and units on paper, then compare the assumptions and conclusions. Text blocks here are evidence tables or written arguments, not programs. Keep unknown evidence distinct from a failed condition and explain what observation would settle it.' if reading else 'Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Example B changes an assumption that matters to this mechanism. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.')
    code_anatomy=s['anatomy']
    prompt=f'''Use the checked-in $guide-ds60sqlpy-learning skill for {id}, {p['title']}.
 Read {guide} and {learner}. Direct prerequisites: {prereq}.
@@ -34,8 +36,6 @@ Keep {prefix}/solutions/ closed until I request comparison or show an attempt.
 Use only the declared local fixtures. Distinguish arithmetic checks, code execution,
 and evidence about generalization. Done when I can derive the worked values, pass all six exercise checks, explain a failed counterexample, and solve one fresh transfer case without solutions.'''
    document=f'''# {id}: {p['title']}
-
-Status: authored beta content. The manifest inventories complete teaching files; runtime readiness remains a separate, measured property.
 
 ## Level and prerequisites
 
@@ -57,11 +57,13 @@ Status: authored beta content. The manifest inventories complete teaching files;
 
 {runtime}
 
-Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Example B changes an assumption that matters to this mechanism. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.
+{study_method}
 
 ## Syntax anatomy and reasoning sequence
 
 {code_anatomy}
+
+{s.get('mechanism_notes', '')}
 
 ## Worked example / walkthrough
 
@@ -77,7 +79,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Common pitfalls and diagnosis
 
-When a result disagrees, locate the first intermediate value that violates this explanation. Inspect shapes and identities before aggregates, and inspect counts before averages. Preserve the original fixture and introduce only one controlled change at a time. If an arithmetic identity passes but a data-boundary condition fails, the experiment is still invalid. If a runtime is unavailable, record the unexecuted code as unverified rather than replacing its output with the expected text. The separate explanation discusses why the tempting alternative in each case changes the result.
+{s.get('diagnosis', DEFAULT_DIAGNOSIS)}
 
 ## Progressive hints
 
@@ -136,6 +138,8 @@ The question is: {e['prompt']}
     blocks.append(f"    # Exercise {n}: {e['title']}\n"+textwrap.indent(e['code'],'    '))
    explanation_doc+='## Review after comparison\n\nRepeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.\n'
    (ROOT/guide).write_text(document)
+   if guides_only:
+    continue
    (ROOT/explanation).write_text(explanation_doc)
    if reading:
     (ROOT/learner).write_text(f'# {id}: {p["title"]}\n\nRead the guide, record a prediction, then answer the six cases without opening solutions.\n\n## Exercises\n\n'+exercise_text+'\n')

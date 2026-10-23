@@ -1,12 +1,17 @@
 # Optional worker implementation checkpoint
 
-Updated: 22 October 2026.
+Updated: 23 October 2026. The current classroom has ten ordinary worker profiles,
+including CPU PyTorch, Java, JavaScript and TypeScript, plus the separately
+prepared Kubernetes adapter. Actual Linux arm64 Docker execution has qualified
+the ordinary worker profiles; ongoing per-lesson checks are recorded
+in the [current checkpoint](CHECKPOINT.md) and per-subject status files.
 
-Implemented source: `module_worker.py`, `worker_operations.py`, seven optional
-profile services in `compose.modules.yaml`, five worker Dockerfiles and six
-architecture-specific framework/toolchain hash locks. No worker image was built,
-downloaded or started by this agent. The root integration agent owns image
-qualification and its separate runtime ledger.
+The source checks below describe the first implementation phase and explain
+its process, identity and resource contracts. They are historical evidence,
+not the latest test count. Current integration includes a 1,943-test parallel
+suite pass, subsequent focused checks, real browser compilation, and actual
+framework/reference execution. Native Windows and Linux amd64 remain separate
+qualification rows.
 
 ## Observed source acceptance
 
@@ -115,10 +120,13 @@ aarch64 workers. These are separate from the macOS source-test results above.
 The integration owner refreshes image source layers and records the exact image
 IDs and latest runtime results in those receipts. A passing result does not
 qualify every code path or erase the regression repairs described above.
-No runtime receipt currently qualifies the optional `llm-torch-cpu` image.
-Its dependency hashes and two-architecture wheel metadata are available; a
-built/started CPU Torch worker and executed tensor checks remain pending.
-The authored NumPy attention lesson does not require that optional image.
+The later expansion qualified `llm-torch-cpu` using the complete executable
+PyTorch route, LLM theory tensor references and applied fine-tuning examples.
+Java, JavaScript and TypeScript also have actual compile/run/failure receipts.
+The optional pretrained image separately completed pinned acquisition, full
+fine-tuning, LoRA, repeatability checks and offline adapter reload. See the
+current checkpoint and `work/pretrained-seeded-training-acceptance.json`.
+The original NumPy attention foundation still needs only `python-core`.
 
 Windows WSL 2/file-sharing behavior, Intel macOS host use, Linux amd64 execution,
 arm64 hosts beyond this tested engine, rootless-engine mappings and emulation

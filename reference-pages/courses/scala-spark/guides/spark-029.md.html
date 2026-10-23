@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>spark-029: Restartable batch writes and data-quality contracts · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>spark-029: Restartable batch writes and data-quality contracts</h1>
+      <p class="source-path">Generated from <code>courses/scala-spark/guides/spark-029.md</code></p>
+    </header>
+    <article class="document"><h2 id="spark-029-restartable-batch-writes-and-data-quality-contracts">spark-029: Restartable batch writes and data-quality contracts<a class="heading-anchor" href="#spark-029-restartable-batch-writes-and-data-quality-contracts" aria-label="Link to this section">#</a></h2>
+<p>Authored paired Scala/PySpark teaching content. The default fixtures are tiny,local and deterministic. Runtime acceptance,logical correctness and learner understanding remain separate evidence.</p>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Advanced; approximately 120 minutes. Direct design prerequisites: <code>spark-028</code>. The prepared baseline is Spark 4.0.1,Scala binary2.13,JDK 17 and Python 3.12. Read the <a href="../execution-baseline.md.html">execution baseline</a>; a proposed future tuple is not a runtime receipt.</p>
+<h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
+<p>Open <code>spark-029</code> in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed <code>spark-local-scala</code> or <code>spark-local-python</code> profile,save your pad and run the complete source. Scala stages as <code>Main.scala</code> with <code>object Main</code>; Python stages as <code>main.py</code> with a main guard. Each program creates its own local[2] session,disables the UI,binds the driver to loopback and stops the session in finally. No external dataset,package download,JDBC connection or cloud service is requested.</p>
+<p>The <a href="../lessons/spark-029.scala.html">Scala learner</a> and <a href="../lessons/spark-029.py.html">PySpark learner</a> run two complete demonstrations and retain six explicit task stubs. Use the <a href="../solutions/spark-029_solutions.md.html">explained solutions</a> only after an attempt or an explicit worked comparison; the <a href="../solutions/spark-029_solution.scala.html">Scala reference</a> and <a href="../solutions/spark-029_solution.py.html">PySpark reference</a> contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Make a bounded batch product repeatable without confusing overwrite, append and transactional publication.</li>
+<li>State the input and output grain,schema,NULL policy and ordering before executing a transformation.</li>
+<li>Compare each language implementation with independent literal expectations,not only with the other implementation.</li>
+</ul>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Staging product:</strong> A run-specific output written and validated before readers are told to use it.</li>
+</ul>
+<ul>
+<li><strong>Publication manifest:</strong> A small record naming the selected data path, run identity, schema, row count and content digest.</li>
+</ul>
+<ul>
+<li><strong>Publication point:</strong> The operation changing which validated product a reader considers current; here it is a local atomic manifest replacement.</li>
+</ul>
+<ul>
+<li><strong>Idempotent retry:</strong> Repeating the same logical operation without appending duplicate data or changing the intended published result.</li>
+</ul>
+<ul>
+<li><strong>Orphan staging data:</strong> A complete or partial run directory that is not referenced by the current publication manifest.</li>
+</ul>
+<ul>
+<li><strong>Content digest:</strong> A hash of a declared canonical representation; it identifies bytes under that convention rather than proving business correctness on its own.</li>
+</ul>
+<p>Writing a dataset and publishing a dataset are separate operations. A reader should not discover a half-written product merely because a staging directory exists. This lesson writes 30 deterministic rows into a run-specific directory, validates their schema and content, then publishes a small current.json manifest. Readers consult that manifest rather than scanning every directory under runs.</p>
+<p>The product contract is intentionally concrete: id and value are bigints, IDs 0 through 29 appear exactly once, value equals twice id, and the value total is 870. The canonical digest sorts the 30 rows by id, serializes each row through Spark&#x27;s JSON representation, joins lines with a newline and no trailing newline, then hashes UTF-8 bytes with SHA-256. Both languages follow the same convention. The small full collection is explicitly bounded by the validated 30-row contract.</p>
+<p>A digest is not a substitute for validation. A file full of incorrect rows still has a perfectly validSHA-256. The validator therefore checks schema, population, identity range, uniqueness, missingness and the value rule before producing the digest. The staged Parquet product is read back and validated again, so the receipt describes actual persisted data rather than only an in-memory input that was intended to be written.</p>
+<p>Each run ID is a restricted relative identifier such asrun-a. Paths are constructed inside the fresh owned root; manifest metadata cannot choose an arbitrary external file. The receipt records runs/run-a/data, row count 30, the declared schema and the content digest. Validation requires the stored run identity and relative path to match the expected values before opening that fixed owned path. This makes the manifest a governed pointer rather than a general filesystem command.</p>
+<p>Publication writes the validated receipt text to a fresh temporary manifest in the same directory as current.json, then replaces the current manifest atomically. On the prepared local filesystem, the rename is the visibility boundary. The code does not claim a distributed transaction, object-store rename guarantee, concurrent multi-writer conflict protocol or power-loss durability. Those need storage-specific semantics and often a transactional catalog or conditional compare-and-swap operation.</p>
+<p>The failure scenario starts from a successfully publishedrun-a. Run-b is staged and validated, but an injected error occurs after the temporary manifest is written and before replacement. The temporary manifest is cleaned in finally. The old current.json bytes must remain unchanged, and the reader must still returnrun-a&#x27;s30 rows. The unreferencedrun-b directory is an orphan staging product, not another 30 rows in the published logical dataset.</p>
+<p>A retry ofrun-a checks the existing staged receipt and data against the new input&#x27;s canonical digest. It reuses that validated product rather than appending more files. Repartitioning the same input changes its physical order but not the canonical digest. Replacing current.json with the same deterministic receipt leaves the same logical publication and identical manifest bytes. A source violating the 30-row/value contract is rejected before staging or publication can modify the current pointer.</p>
+<p>The reader validates the selected staged receipt against the published manifest before returning the DataFrame. This detects a manifest/receipt inconsistency and keeps the schema/count/digest boundary explicit. It does not make the local data directory immutable against arbitrary concurrent writers. The demonstration has one writer and a fresh namespace, so no other process is authorized to mutate its product during the run.</p>
+<p>All run directories and manifests belong to one newly created scratch root under the worker&#x27;s current directory. Cleanup removes only that root after the scenarios finish. The lesson never resets an existing checkpoint or deletes a user-selected dataset. Retaining prior products for rollback and collecting abandoned staging directories would be operational policies in a persistent service; here their lifecycle is bounded by the standalone demonstration.</p>
+<p>This design is more precise than treating overwrite as atomic publication or treating append as an idempotent retry. It gives each phase an observable contract: input validation, staging readback, receipt validation, publication replacement, reader selection and replay. The injected failure demonstrates exactly one process-level boundary rather than claiming every crash or storage failure has been tested.</p>
+<h3 id="supplied-local-fixture">Supplied local fixture<a class="heading-anchor" href="#supplied-local-fixture" aria-label="Link to this section">#</a></h3>
+<p>The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.</p>
+<pre><code class="language-scala">import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types._
+import java.nio.file.{Files,Path,Paths,StandardOpenOption,StandardCopyOption}
+import java.nio.charset.StandardCharsets
+import java.security.MessageDigest
+import java.util.UUID
+import scala.jdk.CollectionConverters._
+import com.fasterxml.jackson.databind.ObjectMapper
+
+ownedRoot = Files.createTempDirectory(Paths.get(&quot;.&quot;).toAbsolutePath.normalize(),&quot;.ds60-spark-029-&quot;)
+Files.createDirectory(ownedRoot.resolve(&quot;runs&quot;))
+val source = spark.range(0L,30L,1L,2).withColumn(&quot;value&quot;,col(&quot;id&quot;)*2L)</code></pre>
+<pre><code class="language-python">from pyspark.sql import SparkSession, functions as F
+from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pathlib import Path
+import tempfile
+import shutil
+import json
+import hashlib
+import re
+import os
+import uuid
+
+owned_root = Path(tempfile.mkdtemp(prefix=&quot;.ds60-spark-029-&quot;,dir=&quot;.&quot;)).resolve()
+(owned_root/&quot;runs&quot;).mkdir()
+source = spark.range(0,30,1,2).withColumn(&quot;value&quot;,F.col(&quot;id&quot;)*2)</code></pre>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-scala">val ids = 0L until 30L
+assert(ids.map(_*2L).sum == 870L)
+println(&quot;Declared30-row product total=870&quot;)</code></pre>
+<pre><code class="language-python">ids = range(30)
+assert sum(i*2 for i in ids) == 870
+print(&quot;Declared30-row product total=870&quot;)</code></pre>
+<p>The arithmetic oracle describes the product before any writer runs. A successful write command or content hash is insufficient if the rows violate this expected identity and value contract.</p>
+<h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-scala">val a = receiptText(&quot;run-a&quot;,&quot;0&quot;*64);val b = receiptText(&quot;run-b&quot;,&quot;0&quot;*64)
+assert(mapper.readTree(a).get(&quot;data_path&quot;).asText() == &quot;runs/run-a/data&quot;)
+assert(a != b)
+println(&quot;A publication points to one run-specific product&quot;)</code></pre>
+<pre><code class="language-python">a = receipt_text(&quot;run-a&quot;,&quot;0&quot;*64);b = receipt_text(&quot;run-b&quot;,&quot;0&quot;*64)
+assert json.loads(a)[&quot;data_path&quot;] == &quot;runs/run-a/data&quot; and a != b
+print(&quot;A publication points to one run-specific product&quot;)</code></pre>
+<p>These synthetic receipt strings illustrate run identity without publishing anything. The zero digest is not accepted as data evidence; real receipts are created only after actual product validation. Distinct run paths prevent a partially written replacement from modifying the old product in place.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<h4 id="exercise-1-validate-the-product-before-computing-its-digest">Exercise 1: Validate the product before computing its digest<a class="heading-anchor" href="#exercise-1-validate-the-product-before-computing-its-digest" aria-label="Link to this section">#</a></h4>
+<p>Require ordered fieldsid, value with bigint types, exactly 30 known unique IDs 0..29, known values equal to 2*id and total 870. ReturnSHA-256 of sorted SparkJSON lines joined by newline without a trailing newline.</p>
+<p><strong>Expected result/shape:</strong> A64-character lowercase digest for the valid product. Wrong values, counts, types or identities are rejected before hashing.</p>
+<p><strong>Verify:</strong> Assert a64-hex digest and equal digest after repartitioning; reject a31-row source.</p>
+<p><strong>Progressive hint:</strong> Schema/count/domain checks precede the bounded 30-row canonical collection.</p>
+<h4 id="exercise-2-stage-a-run-and-validate-the-persisted-readback">Exercise 2: Stage a run and validate the persisted readback<a class="heading-anchor" href="#exercise-2-stage-a-run-and-validate-the-persisted-readback" aria-label="Link to this section">#</a></h4>
+<p>Restrict run IDs to 1..32 lowercase letters, digits or hyphens. Validate input, write a fresh run-specific Parquet product, validate readback and save its receipt. If that run already exists, require its validated digest to match instead of appending.</p>
+<p><strong>Expected result/shape:</strong> run-a has one 30-row data product and a receipt with the declared schema/count/path/digest. Reusing it never appends another product.</p>
+<p><strong>Verify:</strong> Assert staged receipt existence and digest equality; all paths remain within the fresh owned root.</p>
+<p><strong>Progressive hint:</strong> Validate first; use error-if-exists for a new data path and a readback check before creating its receipt.</p>
+<h4 id="exercise-3-validate-a-receipt-against-a-fixed-owned-data-path">Exercise 3: Validate a receipt against a fixed owned data path<a class="heading-anchor" href="#exercise-3-validate-a-receipt-against-a-fixed-owned-data-path" aria-label="Link to this section">#</a></h4>
+<p>Read a run receipt and require its run_id, data_path, row_count, schema and digest to match the declared contract and actual Parquet readback. Construct the read path from validated runId rather than trusting arbitrary receipt text.</p>
+<p><strong>Expected result/shape:</strong> Validrun-a receipt returns unchanged. A traversal-style run ID is rejected before path access.</p>
+<p><strong>Verify:</strong> Assert receipt equality and explicit rejection of../outside.</p>
+<p><strong>Progressive hint:</strong> Metadata is evidence to validate, not authority to read any path it names.</p>
+<h4 id="exercise-4-publish-only-a-validated-run-at-one-explicit-visibility-point">Exercise 4: Publish only a validated run at one explicit visibility point<a class="heading-anchor" href="#exercise-4-publish-only-a-validated-run-at-one-explicit-visibility-point" aria-label="Link to this section">#</a></h4>
+<p>Validate the staged receipt, write it to a fresh temporary manifest beside current.json, and atomically replace current.json. Support an injected failure before replacement and clean any unpublished temporary manifest in finally.</p>
+<p><strong>Expected result/shape:</strong> Publishingrun-a creates current.json selecting its 30-row product. No data is appended or rewritten during publication.</p>
+<p><strong>Verify:</strong> Assert the current manifest equals the validated receipt and points torun-a.</p>
+<p><strong>Progressive hint:</strong> The same-filesystem manifest replacement is the local visibility boundary; it is not a generic object-store transaction.</p>
+<h4 id="exercise-5-keep-the-previous-publication-readable-after-an-interrupted-replacement">Exercise 5: Keep the previous publication readable after an interrupted replacement<a class="heading-anchor" href="#exercise-5-keep-the-previous-publication-readable-after-an-interrupted-replacement" aria-label="Link to this section">#</a></h4>
+<p>Read the current manifest, validate its selected run and return that product. Stage run-b, inject failure before its manifest replacement, and confirm the reader still seesrun-a.</p>
+<p><strong>Expected result/shape:</strong> The injected error occurs, current.json bytes remain identical torun-a, and the published product still has 30 rows with the original digest.</p>
+<p><strong>Verify:</strong> Assert the named exception, unchanged manifest and exact published product digest; run-b staging must not enter the reader population.</p>
+<p><strong>Progressive hint:</strong> Read through the manifest, not by globbing every runs/*/data directory.</p>
+<h4 id="exercise-6-replay-the-same-input-without-appending-another-product">Exercise 6: Replay the same input without appending another product<a class="heading-anchor" href="#exercise-6-replay-the-same-input-without-appending-another-product" aria-label="Link to this section">#</a></h4>
+<p>Compose stage, validate/publish and readback for a repeated run ID. Retryrun-a with a different execution partition layout, then attempt an invalid 31-row product and confirm publication stays intact.</p>
+<p><strong>Expected result/shape:</strong> Manifest bytes and data-file count are unchanged by validrun-a replay; published count remains 30. Invalid input fails before changing current.json.</p>
+<p><strong>Verify:</strong> Assert digest, manifest bytes, file-count equality and negative-control rejection.</p>
+<p><strong>Progressive hint:</strong> A retry is content-aware reuse of a validated run, not append or blind overwrite.</p>
+<h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
+<p>Do not call append an idempotent retry or assume overwrite is atomic publication. A digest cannot certify business correctness without schema and row validation. Never trust an arbitrary path in metadata or reset an unrelated checkpoint. Local atomic rename is not a portable distributed-store transaction or a power-loss durability proof. Treat unreferenced staging runs as orphans requiring an ownership-aware retention policy; do not make readers discover them through a broad directory glob.</p>
+<h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
+<p>Explain the contract of <code>productDigest</code> / <code>product_digest</code> without reading its solution. Trace the specified boundary case,then explain the final exercise&#x27;s evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>Use the <a href="../README.md.html">course route</a> to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. Keep runtime/profile receipts separate from any cluster-performance or production-recovery claim.</p>
+<h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://spark.apache.org/docs/4.0.1/sql-data-sources-load-save-functions.html">Spark 4.0.1 save modes and file writes</a></li>
+</ul>
+<ul>
+<li><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/Files.html#move(java.nio.file.Path,java.nio.file.Path,java.nio.file.CopyOption...">Java17 Files.move atomic-move contract</a>)</li>
+</ul>
+<ul>
+<li><a href="https://docs.python.org/3/library/os.html#os.replace">Python os.replace</a></li>
+</ul>
+<h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through spark-029: Restartable batch writes and data-quality contracts.
+Read courses/scala-spark/guides/spark-029.md and courses/scala-spark/lessons/spark-029.py;the paired sources are courses/scala-spark/lessons/spark-029.scala and courses/scala-spark/lessons/spark-029.py.
+Direct prerequisites: spark-028. Explain the schema,row grain and new Scala/Python/Spark syntax,ask me to predict a concrete result,then inspect my attempt. Give one hint at a time,review exact result and boundary evidence,and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
+Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies,start a remote service,reset existing checkpoints or alter unrelated learner work.
+Done when all six contracts have inspected evidence and I can explain the stated assumptions and a meaningful failure case.</code></pre></article>
+  </main>
+</body>
+</html>

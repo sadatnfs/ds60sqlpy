@@ -1,0 +1,61 @@
+# Add only after explicit owned kind preparation. No engine socket is mounted.
+# docker compose -f compose.classroom.yaml -f compose.classroom.kubernetes.yaml --profile k8s-kind ...
+services:
+  lab:
+    environment:
+      DS60_MODULE_ENDPOINTS: '{"python-core":"http://python-core-worker:8081","cpp20":"http://cpp-worker:8081","tensorflow-cpu":"http://tensorflow-worker:8081","scala-jvm":"http://scala-worker:8081","spark-local-scala":"http://spark-scala-worker:8081","spark-local-python":"http://spark-python-worker:8081","llm-torch-cpu":"http://llm-worker:8081","java21":"http://java-worker:8081","javascript-node":"http://javascript-worker:8081","typescript-node":"http://typescript-worker:8081","k8s-kind":"http://kubernetes-worker:8081"}'
+
+  kubernetes-worker:
+    image: ds60sqlpy-worker-k8s-kind:0.3.0
+    pull_policy: never
+    profiles: [k8s-kind]
+    build:
+      context: .
+      dockerfile: docker/kubernetes/Dockerfile.worker
+      args:
+        DS60_PYTHON_IMAGE: ${DS60_PYTHON_IMAGE:-python:3.12.12-slim-bookworm}
+    depends_on:
+      classroom-init: {condition: service_completed_successfully}
+    init: true
+    stop_grace_period: 30s
+    read_only: true
+    user: "0:0"
+    cap_drop: [ALL]
+    cap_add: [CHOWN, SETUID, SETGID, DAC_OVERRIDE, KILL]
+    security_opt: ["no-new-privileges:true"]
+    pids_limit: 128
+    cpus: 1
+    mem_limit: 512m
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    networks: [module-private, kind-owned]
+    environment:
+      DS60_WORKER_TOKEN_FILE: /run/ds60/worker-token/token
+      DS60_K8S_LEASE_FILE: /run/ds60/k8s-lease.json
+    volumes:
+      - type: volume
+        source: classroom-runtime
+        target: /run/ds60/worker-token
+        read_only: true
+        volume: {nocopy: true}
+      - type: bind
+        source: ${DS60_K8S_SESSION_DIR:?Prepare an owned kind session first}/lease.json
+        target: /run/ds60/k8s-lease.json
+        read_only: true
+        bind: {create_host_path: false}
+      - type: bind
+        source: ${DS60_K8S_SESSION_DIR:?Prepare an owned kind session first}/worker.kubeconfig.json
+        target: /run/ds60/worker.kubeconfig.json
+        read_only: true
+        bind: {create_host_path: false}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import json,os,urllib.request; t=open(os.environ['DS60_WORKER_TOKEN_FILE']).read().strip(); r=urllib.request.urlopen(urllib.request.Request('http://127.0.0.1:8081/health',headers={'X-DS60-Worker-Token':t}),timeout=3); assert json.load(r)['ready']"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+networks:
+  kind-owned:
+    external: true
+    name: kind

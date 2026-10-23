@@ -135,7 +135,7 @@ process listens on8080</code></pre>
 <h4 id="exercise-1-count-images-and-containers">Exercise 1: Count images and containers<a class="heading-anchor" href="#exercise-1-count-images-and-containers" aria-label="Link to this section">#</a></h4>
 <p>Classify the two-instance fixture.</p>
 <p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 1, C1 andC2 both useI1.</p>
-<p><strong>Expected result/shape:</strong> For k8s-002 Exercise 1, 1 image,2 containers,independent running/exited states.</p>
+<p><strong>Expected result/shape:</strong> For k8s-002 Exercise 1, 1 image, 2 containers, independent running/exited states.</p>
 <p><strong>Verify:</strong> For k8s-002 Exercise 1, count image identities and instance identities separately.</p>
 <p><strong>Progressive hints:</strong></p>
 <ol>
@@ -156,7 +156,7 @@ process listens on8080</code></pre>
 </ol>
 <h4 id="exercise-3-separate-declaration-and-listener">Exercise 3: Separate declaration and listener<a class="heading-anchor" href="#exercise-3-separate-declaration-and-listener" aria-label="Link to this section">#</a></h4>
 <p>Review YAML declaring containerPort8080 with a process that exited.</p>
-<p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 3, declared8080;process not running.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 3, declared8080; process not running.</p>
 <p><strong>Expected result/shape:</strong> For k8s-002 Exercise 3, no working listener established by the declaration.</p>
 <p><strong>Verify:</strong> For k8s-002 Exercise 3, name the missing running application evidence.</p>
 <p><strong>Progressive hints:</strong></p>
@@ -167,7 +167,7 @@ process listens on8080</code></pre>
 </ol>
 <h4 id="exercise-4-interpret-replacement">Exercise 4: Interpret replacement<a class="heading-anchor" href="#exercise-4-interpret-replacement" aria-label="Link to this section">#</a></h4>
 <p>Replace C1 with C3 from the same prepared image.</p>
-<p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 4, oldC1,newC3,contentI1.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 4, oldC1, newC3, contentI1.</p>
 <p><strong>Expected result/shape:</strong> For k8s-002 Exercise 4, container identity changes; image identity staysI1.</p>
 <p><strong>Verify:</strong> For k8s-002 Exercise 4, record both instance IDs and the same digest receipt.</p>
 <p><strong>Progressive hints:</strong></p>
@@ -189,7 +189,7 @@ process listens on8080</code></pre>
 </ol>
 <h4 id="exercise-6-transfer-the-client-path">Exercise 6: Transfer the client path<a class="heading-anchor" href="#exercise-6-transfer-the-client-path" aria-label="Link to this section">#</a></h4>
 <p>Choose the endpoint from a client Job inside the owned namespace.</p>
-<p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 6, Service hello on8080;client has its own loopback.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 6, Service hello on8080; client has its own loopback.</p>
 <p><strong>Expected result/shape:</strong> For k8s-002 Exercise 6, http://hello:8080/version, not host127.0.0.1:8765.</p>
 <p><strong>Verify:</strong> For k8s-002 Exercise 6, explain both network namespaces and the Service DNS name.</p>
 <p><strong>Progressive hints:</strong></p>

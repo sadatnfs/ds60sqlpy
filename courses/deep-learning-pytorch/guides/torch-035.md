@@ -1,14 +1,12 @@
 # torch-035: Paired model comparisons and uncertainty
 
-Status: authored PyTorch course content. The manifest inventories complete teaching files; runtime readiness remains a separate, measured property.
-
 ## Level and prerequisites
 
 Advanced; approximately 135 minutes. Direct prerequisites: `torch-034`. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
 
 ## Learning objectives
 
-Model comparisons should preserve the pairing between predictions on the same held-out identities. The central investigation is concrete: Use truth a0, b1, c2 with A0, 2, 2 andB1, 2, 3 in different dictionary order. The finish condition is paired squared-loss differences-1, 0, -1. test selection violates the declared boundary. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Model comparisons should preserve the pairing between predictions on the same held-out identities. The central investigation is concrete: Use truth a0, b1, c2 with A0, 2, 2 and B 1, 2, 3 in different dictionary order. The finish condition is paired squared-loss differences-1, 0, -1. test selection violates the declared boundary. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -18,7 +16,9 @@ PyTorch generators provide a local reproducible random stream for this calculati
 
 ## Design decisions and when to use this method
 
+Compare models on the same identified assessment units using a predeclared loss and subtraction order. Preserve the pairing before any resampling. Choose row, family or temporal-block resampling according to the unit whose variability the inference is meant to represent.
 
+Treat a bootstrap over saved predictions as conditional on those fitted models and observed data. More resampling draws can reduce Monte Carlo approximation error, but cannot increase the number of independent assessment units or undo model selection on the final test. Combine uncertainty with practical effect size and other release gates rather than treating one interval as automatic approval.
 
 ## Paired TensorFlow comparison
 
@@ -38,13 +38,50 @@ The paired TensorFlow route uses NumPy resampling over the same paired loss cont
 
 ## How to run this lesson
 
-Use a prepared `llm-torch-cpu` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/torch-035/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: `& $CoursePython courses/deep-learning-pytorch/lessons/torch-035.py`. For macOS/Linux use `.venv/bin/python courses/deep-learning-pytorch/lessons/torch-035.py` from the repository root.
+Use a prepared `llm-torch-cpu` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/torch-035/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: `& $CoursePython courses/deep-learning-pytorch/lessons/torch-035.py`. For macOS/Linux, use the interpreter explicitly selected for a separately prepared native PyTorch environment, and invoke that interpreter on `courses/deep-learning-pytorch/lessons/torch-035.py` from the repository root. The repository's general `.venv` is not assumed to contain PyTorch; the prepared classroom profile is the default execution route.
 
-Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.
+Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the explicit tolerance in each assertion. Several analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone is not a universal numerical-error bound. Finite differences, reductions and conditioning can require different justified tolerances. Integer counts, identities and boolean decisions should be exact.
 
 ## Syntax anatomy and reasoning sequence
 
 Align prediction dictionaries by stable IDs and check equal keysets. Calculate squared-error A minus squared-errorB for each ID. Sample indices with torch.rand int and an explicit Generator, then index the paired difference vector. Use the same resampling unit for both systems by resampling the already-paired values. Report independent count and selection history beside the estimate.
+
+## Derive the paired contrast and the finite bootstrap law
+
+Align by stable ID before calculating losses. The fixture's dictionary insertion orders differ, so zipping values would compare unrelated targets and predictions. The correct table is:
+
+| ID | Truth | A prediction | B prediction | A squared loss | B squared loss | A minus B |
+| --- | --- | --- | --- | --- | --- | --- |
+| a | 0 | 0 | 1 | 0 | 1 | -1 |
+| b | 1 | 2 | 2 | 1 | 1 | 0 |
+| c | 2 | 2 | 3 | 0 | 1 | -1 |
+
+The mean contrast is-2/3 in squared-target units. Its sign favors A for this loss and these three cases. It does not mean A wins on every possible metric, group or deployment condition. Equal key sets are required before indexing; silently dropping missing predictions can select an easier assessment subset.
+
+Pairing preserves shared case difficulty. In general, Var(lossA-lossB)=Var(lossA)+Var(lossB)-2Cov(lossA, lossB). Independently resampling the two models discards that covariance and answers a different question. The particular fixture has B losses all equal to one, so its covariance term is zero; it is not by itself a strong counterexample for every unpaired bootstrap mistake.
+
+A separate analytic example makes the dependence visible. Suppose two cases have losses A=[1, 11] and B=[0, 10]. Every paired difference is one, so every paired resampled mean is one. Independent resampling can pair the easy A loss with the hard B loss or vice versa and create variation that was absent from the paired contrast. This explains the method without claiming that the original three-case code exercised that different fixture.
+
+For the actual differences[-1, 0, -1], an empirical draw has probability 2/3 of-1 and 1/3 of zero. Each bootstrap estimate averages three independent draws from that empirical distribution. Let K count the selected-1 values; then K has a Binomial(3, 2/3) law and the estimate is-K/3:
+
+| Resampled mean | Exact empirical probability |
+| --- | --- |
+| -1 | 8/27 |
+| -2/3 | 12/27 |
+| -1/3 | 6/27 |
+| 0 | 1/27 |
+
+The expected bootstrap mean is-2/3 and its variance is 2/27 under this empirical resampling model. These are properties of resampling the three observed values, not a proof that the unknown population has this four-point distribution. The thousand generated estimates approximate these probabilities with random frequency variation. The reference checks shape, finiteness and the exact allowed range, not a guaranteed count for each value.
+
+More draws refine the numerical approximation to that empirical distribution. They do not turn three cases into a thousand independent assessment observations. Even the ideal empirical percentile interval can be uninformative here: the lower tail includes-1 and the upper tail reaches zero. The code does not calculate or certify a particular confidence interval, and any interval method would still need its sampling assumptions and quantile convention stated.
+
+If several rows come from one source family, resample families together when the intended independence is at that level. Define the estimand as well: equal family means and row-weighted population means differ when families have different sizes. Time dependence may require blocks or another design rather than an ordinary independent-row bootstrap. Stable row IDs alone do not resolve those dependencies.
+
+The local torch.Generator makes this calculation reproducible without depending on unrelated global draws. A fresh generator seeded identically reproduces the index matrix in the tested environment. NumPy's generator in the paired TensorFlow route is a different random implementation; identical seed numbers do not require identical index matrices across the two libraries. Compare the statistical contract, allowed values and within-implementation replay rather than treating cross-library random bits as a shared oracle.
+
+This resampling holds the fitted prediction vectors fixed. It does not include variation from retraining with a different initialization, batch order or training sample. If the decision concerns the whole fitting procedure, that uncertainty needs a broader experimental design. If test results are used to select another architecture, threshold or stopping rule, the test has become selection information. An unchanged filename cannot restore an untouched assessment boundary.
+
+Finally, a negative point estimate is not a complete release decision. Record effect size, uncertainty, assessment coverage, severe failures and operating costs under their own evidence. The tiny fixture teaches pairing and resampling mechanics while making its limited independent sample size explicit.
 
 ## Worked example / walkthrough
 
@@ -84,7 +121,7 @@ generator=torch.Generator().manual_seed(7); indices=torch.randint(0,3,(1000,3),g
 assert tuple(estimates.shape)==(1000,) and torch.isfinite(estimates).all() and estimates.min()>=-1 and estimates.max()<=0
 ```
 
-**Expected:** 1000 finite estimates within-1..0.
+**Expected:** 1000finite estimates within-1..0.
 
 ## Prediction before your attempt
 
@@ -92,7 +129,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Exercises
 
-1. **Align predictions by ID.** Use truth a0, b1, c2 with A0, 2, 2 andB1, 2, 3 in different dictionary order.
+1. **Align predictions by ID.** Use truth a0, b1, c2 with A0, 2, 2 and B 1, 2, 3 in different dictionary order.
    **Expected:** paired squared-loss differences-1, 0, -1.
    **Verify:** Save the assertion results for exercise 1, including paired squared-loss differences-1, 0, -1.
 
@@ -100,9 +137,9 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** mean-2/3, favoring A on this loss fixture.
    **Verify:** Save the assertion results for exercise 2, including mean-2/3, favoring A on this loss fixture.
 
-3. **Resample pairs reproducibly.** Draw1000 three-index bootstrap samples with local Generator seed 7.
-   **Expected:** 1000 finite estimates within-1..0.
-   **Verify:** Save the assertion results for exercise 3, including 1000 finite estimates within-1..0.
+3. **Resample pairs reproducibly.** Draw 1000 three-index bootstrap samples with local Generator seed 7.
+   **Expected:** 1000finite estimates within-1..0.
+   **Verify:** Save the assertion results for exercise 3, including 1000finite estimates within-1..0.
 
 4. **Replay the local random stream.** Create a new Generator with seed 7 and compare the index matrix.
    **Expected:** exact match.
@@ -118,7 +155,9 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Common pitfalls and diagnosis
 
-When a result disagrees, locate the first intermediate value that violates this explanation. Inspect shapes and identities before aggregates, and inspect counts before averages. Preserve the original fixture and introduce only one controlled change at a time. If an arithmetic identity passes but a data-boundary condition fails, the experiment is still invalid. If a runtime is unavailable, record the unexecuted code as unverified rather than replacing its output with the expected text. The separate explanation discusses why the tempting alternative in each case changes the result.
+If the contrast changes when dictionary order changes, repair the identity join. If a model lacks an assessment ID, stop instead of comparing a convenient intersection. If bootstrap draws exceed[-1, 0] here, inspect index bounds, axis reduction and whether the paired difference vector was actually sampled.
+
+If an unpaired method gives different uncertainty, inspect the covariance and resampling unit rather than choosing the narrower result. If repeated seeds disagree, check generator ownership and preceding draws. If a thousand draws are presented as a thousand new test cases, restore the distinction between Monte Carlo approximation and independent evidence. If final-test feedback changed a configuration, record the selection history before interpreting the reported interval.
 
 ## Progressive hints
 

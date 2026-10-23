@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>spark-017: Explained paired reference solutions · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>spark-017: Explained paired reference solutions</h1>
+      <p class="source-path">Generated from <code>courses/scala-spark/solutions/spark-017_solutions.md</code></p>
+    </header>
+    <article class="document"><h2 id="spark-017-explained-paired-reference-solutions">spark-017: Explained paired reference solutions<a class="heading-anchor" href="#spark-017-explained-paired-reference-solutions" aria-label="Link to this section">#</a></h2>
+<p>Read the <a href="../guides/spark-017.md.html">guide</a> and attempt one language first. The <a href="spark-017_solution.scala.html">Scala reference</a> and <a href="spark-017_solution.py.html">PySpark reference</a> are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.</p>
+<h3 id="exercises-and-reasoning">Exercises and reasoning<a class="heading-anchor" href="#exercises-and-reasoning" aria-label="Link to this section">#</a></h3>
+<h4 id="exercise-1-parse-once-and-retain-rejection-evidence">Exercise 1: Parse once and retain rejection evidence<a class="heading-anchor" href="#exercise-1-parse-once-and-retain-rejection-evidence" aria-label="Link to this section">#</a></h4>
+<p>Parse raw with the explicit payload schema and PERMISSIVE mode, then add reason using precedence missing_payload, malformed_json, missing_parent, accepted. Preserve source_id and raw.</p>
+<p><strong>Expected:</strong> Sources 1-4 accepted;5 malformed_json;6 missing_parent;7 missing_payload. No source disappears and accepted count is 4.</p>
+<pre><code class="language-scala">def parseRecords(raw: DataFrame): DataFrame = {
+  raw.withColumn(&quot;doc&quot;,from_json(col(&quot;raw&quot;),payloadSchema,Map(&quot;mode&quot;-&gt;&quot;PERMISSIVE&quot;,&quot;columnNameOfCorruptRecord&quot;-&gt;&quot;_corrupt_record&quot;)))
+  .withColumn(&quot;reason&quot;,when(col(&quot;raw&quot;).isNull,lit(&quot;missing_payload&quot;)).when(col(&quot;doc._corrupt_record&quot;).isNotNull,lit(&quot;malformed_json&quot;)).when(col(&quot;doc.parent_id&quot;).isNull,lit(&quot;missing_parent&quot;)).otherwise(lit(&quot;accepted&quot;)))
+}</code></pre>
+<pre><code class="language-python">def parse_records(raw):
+    return raw.withColumn(&quot;doc&quot;,F.from_json(&quot;raw&quot;,payload_schema,{&quot;mode&quot;:&quot;PERMISSIVE&quot;,&quot;columnNameOfCorruptRecord&quot;:&quot;_corrupt_record&quot;})).withColumn(&quot;reason&quot;,F.when(F.col(&quot;raw&quot;).isNull(),&quot;missing_payload&quot;).when(F.col(&quot;doc._corrupt_record&quot;).isNotNull(),&quot;malformed_json&quot;).when(F.col(&quot;doc.parent_id&quot;).isNull(),&quot;missing_parent&quot;).otherwise(&quot;accepted&quot;))</code></pre>
+<p>The original source identity and payload remain available for diagnosis. PERMISSIVE parsing is not treated as an acceptance decision: the domain check is separate and ordered after malformed-input evidence. This prevents a malformed record from being mislabeled merely as a missing business key and prevents a missing payload from disappearing into an ordinary null field.</p>
+<p><strong>Verification evidence:</strong> Assert all seven ordered source/reason rows and reconcile accepted 4 plus rejected 3 with input 7.</p>
+<h4 id="exercise-2-record-collection-state-before-changing-grain">Exercise 2: Record collection state before changing grain<a class="heading-anchor" href="#exercise-2-record-collection-state-before-changing-grain" aria-label="Link to this section">#</a></h4>
+<p>For accepted records return source_id, parent_id, items, array_state, with array_state unknown, empty or populated. Keep arrays typed and preserve the two repeated SKU occurrences.</p>
+<p><strong>Expected:</strong> Parent 10 populated,20 empty,30 unknown,40 populated. Parent 10 has size 2; parent 40 size 1.</p>
+<pre><code class="language-scala">def parentLedger(parsed: DataFrame): DataFrame = {
+  parsed.filter(col(&quot;reason&quot;) === &quot;accepted&quot;).select(col(&quot;source_id&quot;),col(&quot;doc.parent_id&quot;).as(&quot;parent_id&quot;),col(&quot;doc.items&quot;).as(&quot;items&quot;)).withColumn(&quot;array_state&quot;,when(col(&quot;items&quot;).isNull,&quot;unknown&quot;).when(size(col(&quot;items&quot;)) === 0,&quot;empty&quot;).otherwise(&quot;populated&quot;))
+}</code></pre>
+<pre><code class="language-python">def parent_ledger(parsed):
+    return parsed.filter(F.col(&quot;reason&quot;)==&quot;accepted&quot;).select(&quot;source_id&quot;,F.col(&quot;doc.parent_id&quot;).alias(&quot;parent_id&quot;),F.col(&quot;doc.items&quot;).alias(&quot;items&quot;)).withColumn(&quot;array_state&quot;,F.when(F.col(&quot;items&quot;).isNull(),&quot;unknown&quot;).when(F.size(&quot;items&quot;)==0,&quot;empty&quot;).otherwise(&quot;populated&quot;))</code></pre>
+<p>The ledger is still one row per accepted parent record. Capturing array_state here preserves information that the outer placeholder would otherwise obscure. The array itself remains a typed value, so later generators can retain positions and nested fields without reparsing the JSON or guessing a child schema from a sample.</p>
+<p><strong>Verification evidence:</strong> Assert the four parent/state rows and item lengths independently of any later explode output.</p>
+<h4 id="exercise-3-flatten-observed-child-occurrences">Exercise 3: Flatten observed child occurrences<a class="heading-anchor" href="#exercise-3-flatten-observed-child-occurrences" aria-label="Link to this section">#</a></h4>
+<p>Use posexplode to return parent_id, position, sku, qty for actual items. Order by parent_id and position, and retain repeated SKU a.</p>
+<p><strong>Expected:</strong> Rows(10,0, a,2),(10,1, a,3),(40,0, b, NULL). Exactly 3 children; parents 20 and 30 produce none.</p>
+<pre><code class="language-scala">def children(parents: DataFrame): DataFrame = {
+  parents.select(col(&quot;parent_id&quot;),posexplode(col(&quot;items&quot;)).as(Seq(&quot;position&quot;,&quot;item&quot;))).select(col(&quot;parent_id&quot;),col(&quot;position&quot;),col(&quot;item.sku&quot;).as(&quot;sku&quot;),col(&quot;item.qty&quot;).as(&quot;qty&quot;))
+}</code></pre>
+<pre><code class="language-python">def children(parents):
+    return parents.select(&quot;parent_id&quot;,F.posexplode(&quot;items&quot;).alias(&quot;position&quot;,&quot;item&quot;)).select(&quot;parent_id&quot;,&quot;position&quot;,F.col(&quot;item.sku&quot;).alias(&quot;sku&quot;),F.col(&quot;item.qty&quot;).alias(&quot;qty&quot;))</code></pre>
+<p>The three rows represent actual array elements. Parent 40 remains an observed child even though qty is unknown. Duplicate values for parent 10 are preserved because their positions differ. The bounded literal comparison checks identities and values together; a count-only test would miss an accidental DISTINCT that later happened to be compensated by another duplicated row.</p>
+<p><strong>Verification evidence:</strong> Assert the entire three-row occurrence list and unique(parent_id, position) count 3.</p>
+<h4 id="exercise-4-preserve-parents-without-inventing-observed-children">Exercise 4: Preserve parents without inventing observed children<a class="heading-anchor" href="#exercise-4-preserve-parents-without-inventing-observed-children" aria-label="Link to this section">#</a></h4>
+<p>Use posexplode_outer, preserving parent_id and array_state along with position, sku, qty. Keep null placeholders for empty and unknown arrays.</p>
+<p><strong>Expected:</strong> Five rows: the three observed children plus(20, empty, NULL, NULL, NULL) and (30, unknown, NULL, NULL, NULL).</p>
+<pre><code class="language-scala">def outerChildren(parents: DataFrame): DataFrame = {
+  parents.select(col(&quot;parent_id&quot;),col(&quot;array_state&quot;),posexplode_outer(col(&quot;items&quot;)).as(Seq(&quot;position&quot;,&quot;item&quot;))).select(col(&quot;parent_id&quot;),col(&quot;array_state&quot;),col(&quot;position&quot;),col(&quot;item.sku&quot;).as(&quot;sku&quot;),col(&quot;item.qty&quot;).as(&quot;qty&quot;))
+}</code></pre>
+<pre><code class="language-python">def outer_children(parents):
+    return parents.select(&quot;parent_id&quot;,&quot;array_state&quot;,F.posexplode_outer(&quot;items&quot;).alias(&quot;position&quot;,&quot;item&quot;)).select(&quot;parent_id&quot;,&quot;array_state&quot;,&quot;position&quot;,F.col(&quot;item.sku&quot;).alias(&quot;sku&quot;),F.col(&quot;item.qty&quot;).alias(&quot;qty&quot;))</code></pre>
+<p>Outer generation preserves the reporting population but changes the meaning of a raw row count. The position distinguishes synthetic placeholders from actual elements; checking qty alone would incorrectly discard parent 40. Preserved array_state distinguishes known emptiness from unknown membership, allowing a downstream policy to report them separately.</p>
+<p><strong>Verification evidence:</strong> Assert five rows, four distinct parents and exactly three nonnull generated positions.</p>
+<h4 id="exercise-5-reconcile-child-counts-and-nullable-measures">Exercise 5: Reconcile child counts and nullable measures<a class="heading-anchor" href="#exercise-5-reconcile-child-counts-and-nullable-measures" aria-label="Link to this section">#</a></h4>
+<p>Aggregate the outer relation to parent_id, array_state, child_count, known_qty_count, total_qty. Count positions for children and preserve SUM NULL when there are no known quantities.</p>
+<p><strong>Expected:</strong> Parent 10:(2,2,5);20:(0,0, NULL);30:(0,0, NULL);40:(1,0, NULL). Empty and unknown collection states remain visible.</p>
+<pre><code class="language-scala">def summarizeChildren(outer: DataFrame): DataFrame = {
+  outer.groupBy(&quot;parent_id&quot;,&quot;array_state&quot;).agg(count(&quot;position&quot;).as(&quot;child_count&quot;),count(&quot;qty&quot;).as(&quot;known_qty_count&quot;),sum(&quot;qty&quot;).as(&quot;total_qty&quot;))
+}</code></pre>
+<pre><code class="language-python">def summarize_children(outer):
+    return outer.groupBy(&quot;parent_id&quot;,&quot;array_state&quot;).agg(F.count(&quot;position&quot;).alias(&quot;child_count&quot;),F.count(&quot;qty&quot;).alias(&quot;known_qty_count&quot;),F.sum(&quot;qty&quot;).alias(&quot;total_qty&quot;))</code></pre>
+<p>These measures answer separate questions: how many children were observed, how many quantities were known, and what their known sum is. A null total is retained when no quantity is known. An application could deliberately define an empty collection total as zero, but that rule would use array_state and must not also turn an unknown collection or all-missing quantity list into an observed zero.</p>
+<p><strong>Verification evidence:</strong> Assert each parent count tuple and that summed child_count is 3 while known_qty_count is 2.</p>
+<h4 id="exercise-6-choose-cartesian-or-positional-array-semantics">Exercise 6: Choose Cartesian or positional array semantics<a class="heading-anchor" href="#exercise-6-choose-cartesian-or-positional-array-semantics" aria-label="Link to this section">#</a></h4>
+<p>For one parent with SKUs[a, b] and channels[web, shop, api], return both independent exploded pairs and arrays_zip positional rows. Explain the relationship required for each interpretation.</p>
+<p><strong>Expected:</strong> Independent generators produce 6 pairs; zip produces(a, web),(b, shop),(NULL, api), three rows.</p>
+<pre><code class="language-scala">def arrayRelationships(spark: SparkSession): (DataFrame,DataFrame) = {
+  val source = spark.sql(&quot;SELECT array(&#x27;a&#x27;,&#x27;b&#x27;) AS skus, array(&#x27;web&#x27;,&#x27;shop&#x27;,&#x27;api&#x27;) AS channels&quot;)
+  val cross = source.select(explode(col(&quot;skus&quot;)).as(&quot;sku&quot;),col(&quot;channels&quot;)).select(col(&quot;sku&quot;),explode(col(&quot;channels&quot;)).as(&quot;channel&quot;))
+  val zipped = source.select(posexplode(arrays_zip(col(&quot;skus&quot;),col(&quot;channels&quot;))).as(Seq(&quot;position&quot;,&quot;pair&quot;))).select(col(&quot;position&quot;),col(&quot;pair.skus&quot;).as(&quot;sku&quot;),col(&quot;pair.channels&quot;).as(&quot;channel&quot;))
+  (cross,zipped)
+}</code></pre>
+<pre><code class="language-python">def array_relationships(spark):
+    source = spark.sql(&quot;SELECT array(&#x27;a&#x27;,&#x27;b&#x27;) AS skus, array(&#x27;web&#x27;,&#x27;shop&#x27;,&#x27;api&#x27;) AS channels&quot;)
+    cross = source.select(F.explode(&quot;skus&quot;).alias(&quot;sku&quot;),&quot;channels&quot;).select(&quot;sku&quot;,F.explode(&quot;channels&quot;).alias(&quot;channel&quot;))
+    zipped = source.select(F.posexplode(F.arrays_zip(&quot;skus&quot;,&quot;channels&quot;)).alias(&quot;position&quot;,&quot;pair&quot;)).select(&quot;position&quot;,F.col(&quot;pair.skus&quot;).alias(&quot;sku&quot;),F.col(&quot;pair.channels&quot;).alias(&quot;channel&quot;))
+    return cross,zipped</code></pre>
+<p>The six-row relation models every independent pairing, while the three-row relation models aligned positions. Padding preserves the third channel without inventing a SKU. Zipping is not a generic cure for explosion and multiplying arrays is not automatically a bug. The data contract must state whether positions correspond before either implementation can be called correct.</p>
+<p><strong>Verification evidence:</strong> Assert the complete Cartesian pair set and all three ordered zipped rows including the paddedNULL.</p>
+<h3 id="execution-and-interpretation">Execution and interpretation<a class="heading-anchor" href="#execution-and-interpretation" aria-label="Link to this section">#</a></h3>
+<p>Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program,so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations,partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit,and any additional owned file/query lifecycle is described in the lesson.</p></article>
+  </main>
+</body>
+</html>

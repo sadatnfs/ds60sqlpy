@@ -64,12 +64,15 @@ def verify():
 
     # Exercise 5: Evaluate the frozen held-out prompt
     model.eval(); saved=model.output.weight.detach().clone()
-    with torch.no_grad(): final_held=objective(model,held[:,:-1],held_labels).item()
+    with torch.no_grad():
+        final_held=objective(model,held[:,:-1],held_labels).item()
+        final_train=objective(model,inputs,labels).item()
     assert np.isfinite(final_held) and torch.equal(saved,model.output.weight.detach())
 
     # Exercise 6: Write an honest adaptation receipt
-    receipt={'updates':20,'active_training_targets':4,'initial_train':initial_train,'final_train':curve[-1],'initial_held':initial_held,'final_held':final_held,'scope':'literal token task, not a pretrained subject assistant'}
+    receipt={'updates':20,'active_training_targets':4,'initial_train':initial_train,'final_train':final_train,'initial_held':initial_held,'final_held':final_held,'scope':'literal token task, not a pretrained subject assistant'}
     assert receipt['updates']==20 and receipt['active_training_targets']==4 and 'not a pretrained' in receipt['scope']
+    with torch.no_grad(): np.testing.assert_allclose(receipt['final_train'],objective(model,inputs,labels).item(),atol=1e-12,rtol=0)
     return {"checks": 6, "status": "passed"}
 
 

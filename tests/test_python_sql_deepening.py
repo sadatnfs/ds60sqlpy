@@ -1,11 +1,12 @@
 """Finite authoring, offline execution and independent algorithm checks."""
+
 from __future__ import annotations
 
 import itertools
 import json
-from pathlib import Path
 import runpy
 import socket
+from pathlib import Path
 
 import pytest
 
@@ -21,7 +22,7 @@ LESSONS = [Lesson.from_mapping(record) for record in RECORDS]
 CANDIDATE = Catalog(ROOT, LESSONS)
 
 
-def test_additions_have_unique_ids_orders_and_resolvable_prerequisites():
+def test_additions_have_unique_ids_orders_and_resolvable_prerequisites() -> None:
     existing = json.loads((ROOT / "curriculum/catalog.json").read_text())["lessons"]
     own = {record["id"] for record in RECORDS}
     combined = [record for record in existing if record["id"] not in own] + RECORDS
@@ -33,7 +34,7 @@ def test_additions_have_unique_ids_orders_and_resolvable_prerequisites():
 
 
 @pytest.mark.parametrize("lesson", LESSONS, ids=lambda lesson: lesson.id)
-def test_each_authored_surface_meets_depth_and_six_distinct_contracts(lesson):
+def test_each_authored_surface_meets_depth_and_six_distinct_contracts(lesson: Lesson) -> None:
     assert not measure_lesson(CANDIDATE, lesson).issues
     for relative in [lesson.lesson_path, lesson.guide_path, *lesson.solution_paths]:
         path = ROOT / relative
@@ -41,15 +42,24 @@ def test_each_authored_surface_meets_depth_and_six_distinct_contracts(lesson):
         assert "\u2014" not in path.read_text()
     assert lesson.network == "offline"
     if lesson.runner == "sql":
-        for relative in [lesson.lesson_path, *[p for p in lesson.solution_paths if p.endswith(".sql")]]:
+        for relative in [
+            lesson.lesson_path,
+            *[p for p in lesson.solution_paths if p.endswith(".sql")],
+        ]:
             source = (ROOT / relative).read_text()
             assert "current_database()" in source and "advanced_sql_training" in source
             assert "BEGIN;" in source and source.rstrip().endswith("ROLLBACK;")
 
 
-@pytest.mark.parametrize("lesson", [lesson for lesson in LESSONS if lesson.runner == "python"], ids=lambda lesson: lesson.id)
-def test_python_examples_and_reference_contracts_run_without_network(lesson, monkeypatch):
-    def no_network(*args, **kwargs):
+@pytest.mark.parametrize(
+    "lesson",
+    [lesson for lesson in LESSONS if lesson.runner == "python"],
+    ids=lambda lesson: lesson.id,
+)
+def test_python_examples_and_reference_contracts_run_without_network(
+    lesson: Lesson, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def no_network(*args: object, **kwargs: object) -> None:
         raise AssertionError("Offline deepening lesson attempted network access")
 
     monkeypatch.setattr(socket.socket, "connect", no_network)
@@ -59,28 +69,30 @@ def test_python_examples_and_reference_contracts_run_without_network(lesson, mon
     runpy.run_path(str(ROOT / reference), run_name="__main__")
 
 
-def test_dynamic_programs_match_exhaustive_small_oracles():
+def test_dynamic_programs_match_exhaustive_small_oracles() -> None:
     namespace = runpy.run_path(str(ROOT / "python/professional/solutions/py_algo_04_solution.py"))
     weights, values = [1, 2, 3, 4], [2, 2, 5, 6]
     for capacity in range(9):
         expected = max(
-            sum(value * take for value, take in zip(values, mask))
+            sum(value * take for value, take in zip(values, mask, strict=True))
             for mask in itertools.product([0, 1], repeat=len(weights))
-            if sum(weight * take for weight, take in zip(weights, mask)) <= capacity
+            if sum(weight * take for weight, take in zip(weights, mask, strict=True)) <= capacity
         )
         assert namespace["knapsack_value"](weights, values, capacity) == expected
     jobs = [(0, 2, 4, "a"), (2, 4, 4, "b"), (1, 4, 7, "c"), (4, 5, 1, "d")]
     feasible = []
     for mask in itertools.product([False, True], repeat=len(jobs)):
-        selected = sorted((job for job, take in zip(jobs, mask) if take), key=lambda job: job[0])
-        if all(left[1] <= right[0] for left, right in zip(selected, selected[1:])):
+        selected = sorted(
+            (job for job, take in zip(jobs, mask, strict=True) if take), key=lambda job: job[0]
+        )
+        if all(left[1] <= right[0] for left, right in zip(selected, selected[1:], strict=False)):
             feasible.append(sum(job[2] for job in selected))
     optimum, selected_ids = namespace["weighted_schedule"](jobs)
     assert optimum == max(feasible)
     assert sum(job[2] for job in jobs if job[3] in selected_ids) == optimum
 
 
-def test_indexed_join_matches_nested_occurrence_oracle():
+def test_indexed_join_matches_nested_occurrence_oracle() -> None:
     namespace = runpy.run_path(str(ROOT / "python/professional/solutions/py_algo_01_solution.py"))
     for left in [[], ["a"], ["a", "a", "b"], ["b", "a", "b"]]:
         for right in [[], ["b"], ["a", "b", "a"]]:

@@ -116,7 +116,6 @@
       <p class="source-path">Generated from <code>courses/cpp/guides/cpp-010.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-010-structs-enums-and-meaningful-states">cpp-010: Structs, enums and meaningful states<a class="heading-anchor" href="#cpp-010-structs-enums-and-meaningful-states" aria-label="Link to this section">#</a></h2>
-<p>Authored beta content. Content completion and runtime qualification are separate evidence.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Beginner; 90 minutes. Direct prerequisites: <code>cpp-005</code>, <code>cpp-009</code>.</p>
 <p>Learner artifact: <a href="../lessons/cpp-010.cpp.html">cpp-010.cpp</a>. Keep <a href="../solutions/cpp-010_solutions.md.html">official solutions</a> closed until an attempt. The immutable <a href="../fixtures/cpp-010-cases.json.html">case ledger</a> records exercise inputs and expected observations.</p>
@@ -128,55 +127,111 @@
 <p><code>enum class Status { pending, paid };</code> scopes enumerators under Status. <code>Payment{7,200,Status::paid}</code> uses aggregate initialization in field order. Check invariants before aggregating fields; a raw integer state 3 is not automatically meaningful.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Data fields are useful only together with their meaning. An ID answers which payment this is, cents answers how much, and Status answers its business state. Two distinct IDs with the same amount are not automatically duplicates. A pending payment contributes no settled revenue but still exists in an audit ledger. A negative amount violates this lesson&#x27;s model even if a branch would otherwise ignore it, so the invariant check happens before state-specific contribution.</p>
+<h3 id="records-named-states-and-domain-invariants">Records, named states and domain invariants<a class="heading-anchor" href="#records-named-states-and-domain-invariants" aria-label="Link to this section">#</a></h3>
+<p>A struct turns related fields into one value, but C++ does not automatically know their business meaning. Payment.id identifies an event, cents gives an amount and status determines contribution to the settled total. Two payments with the same amount are not duplicates merely because one field matches. Keeping identity and amount separate is a data-model decision that the aggregation must preserve.</p>
+<p>enum class gives named, scoped alternatives. Status::paid and Status::pending are easier to review than magic integers, and accidental implicit conversion to an integer is restricted. This still does not validate arbitrary external bytes: a parser must map permitted input names or numbers to the intended enum values and reject unsupported states. A type with named states is useful only when the boundary respects that vocabulary.</p>
+<p>Aggregate initialization follows field order in the shown definition. Payment{7, 200, Status::paid} binds7 to id and 200 to cents. If fields of the same type are accidentally swapped, the compiler may accept the program while its meaning changes. Named construction functions or stronger distinct types can help when that risk becomes important. For the small fixture, trace each field explicitly before aggregating.</p>
+<p>The amount invariant is checked before state filtering. A pending payment with negative cents should not evade validation merely because it currently contributes zero. Validation asks whether the record is meaningful; contribution asks how a meaningful record participates in the requested statistic. Combining those questions into a single conditional can hide invalid data in excluded categories.</p>
+<p>Zero paid cents is valid and contributes zero. Pending200 also contributes zero, but for a different reason. A total alone cannot distinguish those cases, so retain count and state evidence when diagnosing the calculation. When adding refunded, define its business contribution deliberately and test it. A default branch that silently returns zero for every future state can mask a missing policy decision.</p>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">Payment p{7,200,Status::paid}; assert(settled(p)==200);</code></pre>
-<p><strong>Expected:</strong> A paid record contributes 200 cents.</p>
+<p><a href="../examples/cpp-010-example-1.cpp.html">Complete program 1</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;iostream&gt;
+#include &lt;stdexcept&gt;
+
+enum class Status  {
+     pending, paid
+};
+
+struct Payment  {
+     int id;
+     int cents;
+     Status status;
+};
+
+int settled(const Payment&amp; p)  {
+     if(p.cents&lt;0) throw std::invalid_argument(&quot;negative cents&quot;);
+     return p.status==Status::paid?p.cents:0;
+}
+int main() {
+    Payment p{7,200,Status::paid}; assert(settled(p)==200);
+    std::cout &lt;&lt; &quot;cpp-010 example 1 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-010 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">Payment p{8,200,Status::pending}; assert(settled(p)==0);</code></pre>
-<p><strong>Expected:</strong> Pending contributes zero to settled revenue while retaining its original amount.</p>
+<p><a href="../examples/cpp-010-example-2.cpp.html">Complete program 2</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;iostream&gt;
+#include &lt;stdexcept&gt;
+
+enum class Status  {
+     pending, paid
+};
+
+struct Payment  {
+     int id;
+     int cents;
+     Status status;
+};
+
+int settled(const Payment&amp; p)  {
+     if(p.cents&lt;0) throw std::invalid_argument(&quot;negative cents&quot;);
+     return p.status==Status::paid?p.cents:0;
+}
+int main() {
+    Payment p{8,200,Status::pending}; assert(settled(p)==0);
+    std::cout &lt;&lt; &quot;cpp-010 example 2 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-010 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-read-the-record">Exercise 1: Read the record<a class="heading-anchor" href="#exercise-1-read-the-record" aria-label="Link to this section">#</a></h4>
-<p>Describe each field of Payment{7,200,paid}.</p>
+<p>Describe each field of Payment{7, 200, paid}.</p>
 <p><strong>Expected result/shape:</strong> Identity 7, integer cents 200, named state paid.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Identity 7, integer cents 200, named state paid.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Identity and amount serve different purposes.</p>
+<p><strong>Verify:</strong> Identity 7, integer cents 200, named state paid.</p>
+<p><strong>Progressive hints:</strong> Identity and amount serve different purposes.</p>
 <h4 id="exercise-2-filter-state">Exercise 2: Filter state<a class="heading-anchor" href="#exercise-2-filter-state" aria-label="Link to this section">#</a></h4>
 <p>Aggregate paid 200 and pending 200 records.</p>
 <p><strong>Expected result/shape:</strong> Settled total 200, input count 2.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Settled total 200, input count 2.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Filtering contribution does not delete input evidence.</p>
+<p><strong>Verify:</strong> Settled total 200, input count 2.</p>
+<p><strong>Progressive hints:</strong> Filtering contribution does not delete input evidence.</p>
 <h4 id="exercise-3-add-a-named-state">Exercise 3: Add a named state<a class="heading-anchor" href="#exercise-3-add-a-named-state" aria-label="Link to this section">#</a></h4>
 <p>Add refunded and specify a zero settled contribution policy.</p>
 <p><strong>Expected result/shape:</strong> paid 200 plus refunded 200 contributes 200.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: paid 200 plus refunded 200 contributes 200.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Define behavior for every named state.</p>
+<p><strong>Verify:</strong> paid 200 plus refunded 200 contributes 200.</p>
+<p><strong>Progressive hints:</strong> Define behavior for every named state.</p>
 <h4 id="exercise-4-reject-an-invalid-amount">Exercise 4: Reject an invalid amount<a class="heading-anchor" href="#exercise-4-reject-an-invalid-amount" aria-label="Link to this section">#</a></h4>
 <p>Construct paid amount -1 and call settled.</p>
 <p><strong>Expected result/shape:</strong> invalid_argument before returning revenue.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: invalid_argument before returning revenue.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Validate amounts independently of state filtering.</p>
+<p><strong>Verify:</strong> invalid_argument before returning revenue.</p>
+<p><strong>Progressive hints:</strong> Validate amounts independently of state filtering.</p>
 <h4 id="exercise-5-retain-zero-payments">Exercise 5: Retain zero payments<a class="heading-anchor" href="#exercise-5-retain-zero-payments" aria-label="Link to this section">#</a></h4>
 <p>Inspect paid 0.</p>
 <p><strong>Expected result/shape:</strong> Valid paid record contributing 0.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Valid paid record contributing 0.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Zero is a valid amount, not invalid data.</p>
+<p><strong>Verify:</strong> Valid paid record contributing 0.</p>
+<p><strong>Progressive hints:</strong> Zero is a valid amount, not invalid data.</p>
 <h4 id="exercise-6-transfer-identity">Exercise 6: Transfer identity<a class="heading-anchor" href="#exercise-6-transfer-identity" aria-label="Link to this section">#</a></h4>
 <p>Use two paid records with equal 200 amounts and distinct IDs.</p>
 <p><strong>Expected result/shape:</strong> Total 400 and two identities.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Total 400 and two identities.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Value equality does not imply duplicate business events.</p>
+<p><strong>Verify:</strong> Total 400 and two identities.</p>
+<p><strong>Progressive hints:</strong> Value equality does not imply duplicate business events.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: A paid record contributes 200 cents. Then explain the changed condition in example 2 without opening the answer.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
-<p><code>enum class Status { pending, paid };</code> scopes enumerators under Status. <code>Payment{7,200,Status::paid}</code> uses aggregate initialization in field order. Check invariants before aggregating fields; a raw integer state 3 is not automatically meaningful.</p>
-<p>If the result disagrees, preserve the original input and inspect the first differing value or condition. Validate amounts independently of state filtering.</p>
+<p>If the total is too low, inspect state filtering and record counts before discarding duplicate-looking amounts. If a negative pending record passes, check whether validation was placed after an early return. If aggregate initialization looks surprising, compare values with declaration order. Use named states and explicit test fixtures to make a new enum alternative visible rather than silently accepting an unknown external code.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
 <p>Close the source. Reconstruct the reasoning for Exercise 6: Transfer identity. Explain which assumptions would fail on a larger input or another runtime.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue with <a href="cpp-011.md.html">cpp-011</a> after saving the six observations.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines">C++ Core Guidelines</a></p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach cpp-010.
 Read courses/cpp/guides/cpp-010.md and courses/cpp/lessons/cpp-010.cpp.

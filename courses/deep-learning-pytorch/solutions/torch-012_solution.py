@@ -25,11 +25,15 @@ def verify():
     for _ in range(100):
         optimizer.zero_grad(set_to_none=True); loss=((model(x[train])-y[train])**2).mean(); curve.append(loss.item()); loss.backward(); optimizer.step()
     assert len(curve)==100 and np.isfinite(curve).all() and curve[-1]<initial
+    expected_weight=torch.tensor([[2.,-1.,1.]],dtype=torch.float64)*(1-.95**100)
+    torch.testing.assert_close(model.weight,expected_weight,atol=1e-12,rtol=0)
+    np.testing.assert_allclose([curve[0],curve[-1]],[1.5,1.5*.95**198],atol=1e-12,rtol=0)
 
     # Exercise 4: Open the holdout after fitting
     model.eval()
     with torch.no_grad(): train_error=((model(x[train])-y[train])**2).mean().item(); test_error=((model(x[test])-y[test])**2).mean().item()
     assert np.isfinite([train_error,test_error]).all() and test_error<baseline.item()
+    np.testing.assert_allclose([train_error,test_error],[1.5*.95**200,10*.95**200],atol=1e-12,rtol=0)
 
     # Exercise 5: Retain an independent pilot oracle
     pilot=np.array([1.,2.,3.]); gradient=2*np.mean((-2*pilot)*pilot); updated=-.1*gradient

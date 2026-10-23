@@ -20,9 +20,40 @@ This lesson saves a small linear model, Adam state, CPU RNG state and an explici
 
 Save a dictionary of model.state_dict, optimizer.state_dict, torch.get_rng_state and simple metadata. Reconstruct fresh objects before load_state_dict, and restore RNG after object construction so initialization draws do not advance the restored stream. torch.load uses weights_only=True for this trusted tensor-and-primitive checkpoint. The child program is dedented, compiled before launch, bounded by a timeout, and includes stderr in a failure.
 
+## Reconstruct the next state transition, not just the current prediction
+
+Training state is the input to a transition. A useful inventory separates components by how they influence the next step:
+
+| Component | Role in this fixture | What weights alone omit |
+| --- | --- | --- |
+| model tensors | current scalar predictor | current value if absent |
+| Adam moments and step | update direction/normalization | history-dependent next update |
+| optimizer group options | rate and optimizer configuration | the intended update policy |
+| CPU RNG state | next probe and target-noise draws | position in the random stream |
+| data_position=2 | declared completed-update marker | progress metadata |
+| literal x and target rule | fixed next-batch construction | a reproducible input contract |
+
+Adam maintains m_t=beta 1*m_(t-1)+(1-beta 1)*g_t and v_t=beta 2*v_(t-1)+(1-beta 2)*g_t^2, then uses step-dependent bias correction and an epsilon-stabilized normalized update. Two models with identical weights but different m, v, t need not take the same next step. Saving after two real updates makes those histories nontrivial; checkpointing before any update would leave a much weaker test.
+
+The weights-only negative control is deliberately given the same next noise tensor as the uninterrupted run. Its different result therefore isolates missing optimizer history rather than simultaneously changing the batch and the optimizer. It is a stronger experiment than comparing two restarted jobs whose data order and RNG streams are also unknown. The paired TensorFlow chapter tests the same reconstruction principle, although its scalar objective and optimizer rate differ from this PyTorch fixture; their literal weights are not a cross-framework equality oracle.
+
+The RNG timeline has an easily missed construction step. torch.manual_seed(7) sets an initial stream. Creating nn.Linear consumes initialization randomness even though the code subsequently overwrites its weight with zero. The two initial updates use zero noise and no further random draws. The saved RNG state therefore represents a particular position after construction, not simply the number 7. The uninterrupted path next draws a three-value probe, then a2×1 noise tensor, and then updates.
+
+The child reconstructs the model and optimizer, loads their saved state, and only then restores torch RNG state. Restoring before constructing Linear would let initialization consume a draw from the restored stream. Setting the seed again would return to the stream's beginning instead of its saved position. Matching the three-value probe checks this ordering directly before the weight comparison tests the next noisy update. [PyTorch 2.9 reproducibility guidance](https://docs.pytorch.org/docs/2.9/notes/randomness.html).
+
+Other randomness is absent from this particular continuation. Python random, NumPy Generator objects, DataLoader generators, worker processes and accelerator generators would need their own explicit treatment if used. A global torch seed does not automatically serialize every library's current generator state. Likewise, a data_position integer does not restore a real iterator here: the next batch is always constructed from literal x=[1, 2]. Incrementing the marker to three proves the stated bookkeeping, not worker-prefetch or distributed-sampler recovery.
+
+State dictionaries also have ownership semantics. model.state_dict() provides references to model state tensors; holding that mapping in memory is not an immutable copy while later updates mutate the model. The example immediately serializes the mapping before continuation, so the file preserves that point. For an in-memory before/after comparison, clone the values; for a restore comparison, reload the completed saved file rather than assuming a still-live dictionary remained unchanged.
+
+Reconstruct the same architecture and optimizer parameter-group structure before loading. Optimizer state is associated with the supplied parameter groups and their ordering; similar tensor shapes do not prove the state was attached to the intended semantic parameter after an architecture edit. A scheduler, gradient scaler, EMA model or accumulated-but-not-yet-stepped gradients would add more continuation state when present. None is silently claimed restored by this small Adam example.
+
+weights_only=True restricts the object forms used by the local tensor-and-primitive checkpoint loader. It is not a publisher-authentication mechanism or a complete resource/shape validation policy for arbitrary outside files. map_location='cpu' establishes the intended device boundary. The child process uses the existing interpreter, has a timeout and exposes stderr on failure, so a failed reconstruction is not replaced by expected output text.
+
+Finally, the tested boundary is a completed torch.save followed by a fresh-process load. It does not inject a crash halfway through writing or prove power-loss durability. A persistent production checkpoint needs its own staged-publication, integrity and retention procedure. The local directory is owned and disposable, and the successful test removes it. Next-step parity is valuable evidence for this exact transition and environment, not a promise of bitwise agreement across versions, hardware or nondeterministic pipelines.
+
 ## Exercise 1: Create nontrivial training state
 
-The question is: Take two Adam updates of a zero-weight linear model onx1, 2 andy2 x.
+The question is: Take two Adam updates of a zero-weight linear model onx 1, 2 and y 2 x.
 
 Saving before any updates would not test nonzero optimizer moments. Two steps create history that a fresh optimizer lacks.
 
@@ -32,9 +63,9 @@ for _ in range(2): step(model,optimizer,torch.zeros((2,1)))
 parameter=next(model.parameters()); assert optimizer.state[parameter]['step'].item()==2 and parameter.item()>0
 ```
 
-**Expected:** optimizer step2 and positive weight.
+**Expected:** optimizer step 2 and positive weight.
 
-**Verify:** Compare the computed values or written argument with optimizer step2 and positive weight.
+**Verify:** Compare the computed values or written argument with optimizer step 2 and positive weight.
 
 ## Exercise 2: Save the complete local contract
 
@@ -48,9 +79,9 @@ checkpoint={'model':model.state_dict(),'optimizer':optimizer.state_dict(),'rng':
 torch.save(checkpoint,path); assert path.is_file() and checkpoint['data_position']==2
 ```
 
-**Expected:** file exists and metadata position2.
+**Expected:** file exists and metadata position 2.
 
-**Verify:** Compare the computed values or written argument with file exists and metadata position2.
+**Verify:** Compare the computed values or written argument with file exists and metadata position 2.
 
 ## Exercise 3: Record uninterrupted continuation
 
@@ -63,9 +94,9 @@ probe=torch.rand(3); noise=torch.rand((2,1))*.01; step(model,optimizer,noise); e
 assert torch.isfinite(probe).all() and optimizer.state[parameter]['step'].item()==3 and np.isfinite(expected)
 ```
 
-**Expected:** finite weight, step3, and saved three-value random probe.
+**Expected:** finite weight, step 3, and saved three-value random probe.
 
-**Verify:** Compare the computed values or written argument with finite weight, step3, and saved three-value random probe.
+**Verify:** Compare the computed values or written argument with finite weight, step 3, and saved three-value random probe.
 
 ## Exercise 4: Restore in a fresh interpreter
 
@@ -92,9 +123,9 @@ np.testing.assert_allclose(restored['probe'],probe.tolist(),atol=0,rtol=0)
 np.testing.assert_allclose(restored['weight'],expected,atol=1e-6,rtol=0); assert restored['position']==3
 ```
 
-**Expected:** probe matches and next weight agrees within1e-6; position3.
+**Expected:** probe matches and next weight agrees within 1e-6; position 3.
 
-**Verify:** Compare the computed values or written argument with probe matches and next weight agrees within1e-6; position3.
+**Verify:** Compare the computed values or written argument with probe matches and next weight agrees within 1e-6; position 3.
 
 ## Exercise 5: Expose a weights-only restart
 

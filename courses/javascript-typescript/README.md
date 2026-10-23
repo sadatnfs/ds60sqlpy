@@ -1,16 +1,24 @@
-# JavaScript and TypeScript: language, browser and Node applications
+# JavaScript and TypeScript
 
-This journey is being authored. The complete route is in [track.json](track.json).
-Only entries in [lessons.json](lessons.json) have completed lesson artifacts;
-a planned title is not a completed tutorial. The classroom shows this distinction.
+All **42 lessons** are authored, with standalone guides, two worked examples, six practice tasks, answer-free learner files and separate explained solutions. The route connects language fundamentals, Node programs, strict TypeScript, browser interaction and application engineering. [The local manifest](lessons.json) registers complete bundles; [the route plan](track.json) preserves their stable IDs and prerequisites.
 
-Use the Docker classroom from the repository root. Choose the relevant profile,
-then open the **Journeys** page. The runtime panel explains the exact filename and
-compile/run path, and lets you download your current source. Progress and drafts
-remain in the local classroom-learning volume across container replacements.
+Start with [JavaScript, Node and the browser](guides/js-001.md). Predict the worked result, implement the tasks in a saved learner copy, then compare with the separate solution after an attempt.
 
-Node24 runs JavaScript ES modules. TypeScript5.9 checks types before execution. Browser DOM examples have a separate browser workflow because Node is a different host.
+- 001-009: values, coercion, loops, closures, arrays, objects, Map/Set, Unicode and validation.
+- 010-018: real modules, generators, Promise scheduling, cancellation, algorithms, testing, files, HTTP and a bounded CLI.
+- 019-028: strict TypeScript, unions, readonly aliasing, generics, type operators, runtime schemas, actual NodeNext projects, classes, async results and typed algorithms.
+- 029-031: actual browser starter/reference files for events and focus, forms and scoped storage, safe DOM/URL construction and CSP.
+- 032-037: streams and backpressure, workers and transfer, measurement, dates and timezones, package interfaces and retry/concurrency policies.
+- 038-042: typed API contracts, state machines, a real local HTTP service, incremental analytics and verified release bundles.
 
-See [Docker classroom instructions](../../docs/docker-classroom.md) for builds,
-profile selection, logs, stopping and backups. A successful program is evidence
-about that run; use the guide to interpret it and explore boundary cases.
+## Execution contracts
+
+The route contains 26 JavaScript references, 13 TypeScript references and three browser reading lessons. JavaScript uses prepared Node 24.22.1. TypeScript uses 5.9.3 with strict NodeNext checking and noEmitOnError, then runs emitted JavaScript on Node. Type annotations are erased and do not replace runtime validation.
+
+Browser chapters use separate real HTML files. Their READMEs make Docker-only static serving the main route: a prepared image, new learner-owned copy, read-only mount and a dedicated loopback origin outside the authenticated classroom. Node does not execute their DOM interactions. No default lesson installs packages, calls a paid API or downloads assets.
+
+Save learner work in a classroom pad or ignored `.learning/expansion/<lesson-id>/`. References own only their temporary directories and tiny local services. See [the implementation checkpoint](../../docs/implementation/javascript-content-status.md) for exact prepared-container and browser evidence. Authored content, passing fixture execution and learner mastery are distinct observations.
+
+## Reproducible authoring
+
+[Portable specifications](authoring/README.md) reproduce all source bundles. Root coordinates shared catalog, runtime and browser integration. Keep lesson IDs, direct prerequisites, code/error contracts and manual browser boundaries aligned when changing a chapter.

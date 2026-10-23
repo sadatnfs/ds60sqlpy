@@ -121,6 +121,14 @@
 <p>Algorithmic complexity describes how work grows as input grows. A representation can change that work: repeated linear search differs from building an index once. A benchmark compares defined workloads under measured conditions. For tiny collections, index setup may outweigh faster lookup, so asymptotic reasoning and actual budgets both matter.</p>
 <h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Index building has an upfront cost that can be repaid across repeated queries. A map count preserves both occurrences of key 2; a set would answer a different question. The seemingly read-like counts[9] inserts a missing key with zero, whereas find does not change the map. That behavioral difference can contaminate an experiment and the data contract. Report index construction separately from lookup work and keep the queried answers identical.</p>
+<h3 id="algorithmic-work-and-index-side-effects">Algorithmic work and index side effects<a class="heading-anchor" href="#algorithmic-work-and-index-side-effects" aria-label="Link to this section">#</a></h3>
+<p>Complexity describes how work grows with input size under a stated model. A linear scan visits elements to answer a query. An index spends work and memory building a reusable structure so later queries can be cheaper. The right choice depends on the number of queries, update frequency, key distribution and required semantics, not only a big-O label.</p>
+<p>The map fixture counts occurrences of 2, 3, 2, 4. The count for2 is 2, which preserves multiplicity. A set would retain only membership and answer a different question. The index construction traverses every input and updates counts. That upfront work must be included when comparing one query with a direct scan, and can be amortized only when the index is actually reused.</p>
+<p>map::find is an observation that does not insert a missing key. operator[] can insert a value-initialized mapped value when the key is absent. The second complete program demonstrates this difference:find(9) leaves size unchanged, while counts[9] creates a new zero entry. A read-like expression can therefore mutate the data and distort later measurements or reports.</p>
+<p>Ordering is also part of the container contract. std::map maintains an ordering by its comparator, whereas unordered alternatives have different iteration and performance properties. Do not rely on unspecified order when emitting a deterministic report. If output order matters, choose or impose it deliberately rather than inheriting it accidentally from one implementation run.</p>
+<p>A useful performance comparison checks identical answers first, then records index build cost, lookup count and memory tradeoffs. It includes missing keys and repeated keys because they exercise different paths. A faster method that drops duplicate events or inserts new data during lookup does not satisfy the original contract.</p>
+<h3 id="debugging-the-contract">Debugging the contract<a class="heading-anchor" href="#debugging-the-contract" aria-label="Link to this section">#</a></h3>
+<p>If a map grows during a supposedly read-only report, search for operator[] on missing keys. If duplicates disappear, check whether a set replaced a count map. If two approaches give different answers, resolve semantics before timing. If an index helps only after many queries, report the build cost and reuse threshold instead of presenting lookup-only timing as the total task cost.</p>
 <h3 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-cpp">for(int x:std::vector&lt;int&gt;{2,3,2,4}) ++counts[x];</code></pre>
 <p>Expected: The index holds 2-&gt;2, 3-&gt;1, 4-&gt;1.</p>
@@ -133,8 +141,8 @@
 <p><strong>Reasoning:</strong> A scan inspects every element for a complete count.</p>
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
 <h3 id="exercise-2-build-an-index">Exercise 2: Build an index<a class="heading-anchor" href="#exercise-2-build-an-index" aria-label="Link to this section">#</a></h3>
-<p>Build frequency map for [2,3,2,4].</p>
-<p><strong>Expected:</strong> Three keys with counts 2,1,1.</p>
+<p>Build frequency map for [2, 3, 2, 4].</p>
+<p><strong>Expected:</strong> Three keys with counts 2, 1, 1.</p>
 <p><strong>Reasoning:</strong> The representation preserves duplicate multiplicity.</p>
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
 <h3 id="exercise-3-compare-repeated-queries">Exercise 3: Compare repeated queries<a class="heading-anchor" href="#exercise-3-compare-repeated-queries" aria-label="Link to this section">#</a></h3>

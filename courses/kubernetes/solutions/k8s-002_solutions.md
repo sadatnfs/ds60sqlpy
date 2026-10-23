@@ -6,7 +6,7 @@ Compare after an attempt or an explicit reveal. The [guide](../guides/k8s-002.md
 
 An image is a packaged filesystem/configuration template. A container is an instance created from image content; it normally runs one main application process and can exit or restart. Two container instances can use the same image. A tag is a mutable human-readable reference, while a digest identifies content. The course will preload one exact fixture image and record its digest; reading a tag in YAML is not proof of cached content.
 
-A port is an endpoint number within a network namespace. A container listening on8080 is different from a host forwarding127.0.0.1:8765 to it. Inside another container,127.0.0.1 refers to that container itself. Inside a Kubernetes namespace, a Service name selects a cluster routing path. Declaring containerPort does not create a listening server or a host port. This lesson traces supplied evidence and performs no engine or network action.
+A port is an endpoint number within a network namespace. A container listening on8080 is different from a host forwarding127.0.0.1:8765 to it. Inside another container, 127.0.0.1 refers to that container itself. Inside a Kubernetes namespace, a Service name selects a cluster routing path. Declaring containerPort does not create a listening server or a host port. This lesson traces supplied evidence and performs no engine or network action.
 
 - **image:** the packaged content used to create containers
 - **container:** a running or stopped instance, separate from its image
@@ -46,7 +46,7 @@ process listens on8080
 
 **Inputs/evidence:** For k8s-002 Exercise 1, C1 andC2 both useI1.
 
-**Expected result/shape:** For k8s-002 Exercise 1, 1 image,2 containers,independent running/exited states.
+**Expected result/shape:** For k8s-002 Exercise 1, 1 image, 2 containers, independent running/exited states.
 
 **Verify:** For k8s-002 Exercise 1, count image identities and instance identities separately.
 
@@ -64,7 +64,7 @@ The forwarding rule translates the destination. Using host8080 is unsupported un
 
 ### Exercise 3: Separate declaration and listener
 
-**Inputs/evidence:** For k8s-002 Exercise 3, declared8080;process not running.
+**Inputs/evidence:** For k8s-002 Exercise 3, declared8080; process not running.
 
 **Expected result/shape:** For k8s-002 Exercise 3, no working listener established by the declaration.
 
@@ -74,7 +74,7 @@ Metadata documents an intended port for tools/controllers. It does not start a p
 
 ### Exercise 4: Interpret replacement
 
-**Inputs/evidence:** For k8s-002 Exercise 4, oldC1,newC3,contentI1.
+**Inputs/evidence:** For k8s-002 Exercise 4, oldC1, newC3, contentI1.
 
 **Expected result/shape:** For k8s-002 Exercise 4, container identity changes; image identity staysI1.
 
@@ -94,7 +94,7 @@ Offline mode depends on preparation. A correct manifest cannot manufacture missi
 
 ### Exercise 6: Transfer the client path
 
-**Inputs/evidence:** For k8s-002 Exercise 6, Service hello on8080;client has its own loopback.
+**Inputs/evidence:** For k8s-002 Exercise 6, Service hello on8080; client has its own loopback.
 
 **Expected result/shape:** For k8s-002 Exercise 6, http://hello:8080/version, not host127.0.0.1:8765.
 

@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>spark-027: Persistence lifecycle and cross-language golden tests · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>spark-027: Persistence lifecycle and cross-language golden tests</h1>
+      <p class="source-path">Generated from <code>courses/scala-spark/guides/spark-027.md</code></p>
+    </header>
+    <article class="document"><h2 id="spark-027-persistence-lifecycle-and-cross-language-golden-tests">spark-027: Persistence lifecycle and cross-language golden tests<a class="heading-anchor" href="#spark-027-persistence-lifecycle-and-cross-language-golden-tests" aria-label="Link to this section">#</a></h2>
+<p>Authored paired Scala/PySpark teaching content. The default fixtures are tiny,local and deterministic. Runtime acceptance,logical correctness and learner understanding remain separate evidence.</p>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Intermediate; approximately 120 minutes. Direct design prerequisites: <code>spark-026</code>. The prepared baseline is Spark 4.0.1,Scala binary2.13,JDK 17 and Python 3.12. Read the <a href="../execution-baseline.md.html">execution baseline</a>; a proposed future tuple is not a runtime receipt.</p>
+<h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
+<p>Open <code>spark-027</code> in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed <code>spark-local-scala</code> or <code>spark-local-python</code> profile,save your pad and run the complete source. Scala stages as <code>Main.scala</code> with <code>object Main</code>; Python stages as <code>main.py</code> with a main guard. Each program creates its own local[2] session,disables the UI,binds the driver to loopback and stops the session in finally. No external dataset,package download,JDBC connection or cloud service is requested.</p>
+<p>The <a href="../lessons/spark-027.scala.html">Scala learner</a> and <a href="../lessons/spark-027.py.html">PySpark learner</a> run two complete demonstrations and retain six explicit task stubs. Use the <a href="../solutions/spark-027_solutions.md.html">explained solutions</a> only after an attempt or an explicit worked comparison; the <a href="../solutions/spark-027_solution.scala.html">Scala reference</a> and <a href="../solutions/spark-027_solution.py.html">PySpark reference</a> contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Cache only reusable work and test Scala/PySpark results with schema and bag-aware comparisons.</li>
+<li>State the input and output grain,schema,NULL policy and ordering before executing a transformation.</li>
+<li>Compare each language implementation with independent literal expectations,not only with the other implementation.</li>
+</ul>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Persistence registration:</strong> Marking a reusable relation for caching under a selected storage policy; this alone does not show its partitions have been computed.</li>
+</ul>
+<ul>
+<li><strong>Materialization:</strong> An action that actually computes data; for a registered cache, it can populate stored partitions.</li>
+</ul>
+<ul>
+<li><strong>Cache reuse evidence:</strong> A subsequent physical plan using an in-memory relation or scan, recorded separately from any timing claim.</li>
+</ul>
+<ul>
+<li><strong>Unpersist:</strong> Releasing a registered cached relation and its stored blocks; blocking cleanup waits for block removal at that boundary.</li>
+</ul>
+<ul>
+<li><strong>Schema-aware oracle:</strong> A comparison that checks field names and data types before comparing values, preventing coercion from hiding a type regression.</li>
+</ul>
+<ul>
+<li><strong>Bag-aware oracle:</strong> A comparison preserving duplicate occurrence counts and NULL values rather than reducing a relation to a set.</li>
+</ul>
+<p>The input deliberately contains repeated records. Entity 1/segmenta/amount 10 appears twice, and entity 4/segmentb/amount 20 appears twice. They are separate occurrences in this lesson, not accidental duplicates to remove. One amount is unknown, one is zero, one segment is unknown, and one amount is negative. The transformation keeps nonnegative or unknown amounts and doubles known amounts. Its golden result has seven rows and known doubled total 130.</p>
+<p>Persistence is useful when several actions reuse expensive work and recomputation costs outweigh storage and management overhead. It is not automatically beneficial for every relation. The eight-row source makes no meaningful speed benchmark, but it supports exact observations of cache registration, materialization, reuse and cleanup. The reference runs two consumers and records a cache scan while keeping the logical result fixed.</p>
+<p>Calling persist records a storage policy and makes the relation eligible for reuse. It does not by itself execute the full computation. A count action then materializes this tiny cached relation. A second aggregate reads its values, and a filtered consumer plan exposes InMemoryTableScan. Those observations are different evidence: registration is configuration, materialization is an action, and a cache-scan plan shows the selected reuse mechanism. None alone proves a production speedup or that every partition will remain resident forever.</p>
+<p>The storage policy permits memory and disk in the owned local worker. Available memory, eviction and competing queries influence whether cached blocks remain in memory. Persistence also consumes resources that could have been used by another stage. An application should select a useful boundary, materialize only when reuse justifies it, and release it when its consumers are finished. Caching an already cheap result or a relation used once may add overhead rather than remove it.</p>
+<p>Cleanup belongs in finally. The successful helper unpersists after its two consumers, and the failure helper injects an error after materialization to prove the same cleanup occurs on an exceptional path. The caller checks that no memory/disk storage policy remains registered afterward. Blocking unpersist is used to make this lifecycle observation explicit in the bounded demonstration. It does not constitute a durable checkpoint or survive application restart.</p>
+<p>The cross-language oracle checks ordered field names and simple data types before duplicate-sensitive value comparison. A long entity_id column cast to string can display the same digits, but it violates the contract. Comparing only rendered CSV text or allowing implicit type coercion in a set operation could hide that regression. The schema check deliberately precedes exceptAll.</p>
+<p>Value comparison treats the output as a bag. It accepts different row arrival orders and execution partitions, while preserving duplicate counts and NULL positions. A distinct result loses one entity 1 occurrence and one entity 4 occurrence. Its total and population change, but the bag difference explains the exact direction: zero unexpected distinct rows and two missing expected occurrences. A set-based comparator would incorrectly call these relations equal.</p>
+<p>The same literal golden schema and seven rows are embedded in both standalone language programs and retained in the shared fixture ledger. Each implementation compares with that oracle independently. Agreement between Scala and Python would be insufficient if both applied an accidental DISTINCT or turned unknown amounts into zero. The negative controls prove that the validator catches both the type and multiplicity mistakes it claims to protect against.</p>
+<p>The lesson&#x27;s cache boundary is limited to one owned SparkSession and no external state. A checkpoint, an idempotent sink or a restartable publication manifest solves different problems. Persist/unpersist manages reusable computation inside the application; it does not promise recovery after process loss or exactly-once external delivery. Later chapters build those contracts separately.</p>
+<h3 id="supplied-local-fixture">Supplied local fixture<a class="heading-anchor" href="#supplied-local-fixture" aria-label="Link to this section">#</a></h3>
+<p>The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.</p>
+<pre><code class="language-scala">import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types._
+import org.apache.spark.storage.StorageLevel
+
+val schema = StructType(Seq(StructField(&quot;entity_id&quot;,LongType,false),StructField(&quot;segment&quot;,StringType,true),StructField(&quot;amount&quot;,LongType,true)))
+val source = spark.createDataFrame(spark.sparkContext.parallelize(Seq(Row(1L,&quot;a&quot;,10L),Row(1L,&quot;a&quot;,10L),Row(2L,&quot;a&quot;,null),Row(3L,&quot;b&quot;,0L),Row(4L,&quot;b&quot;,20L),Row(4L,&quot;b&quot;,20L),Row(5L,null,5L),Row(6L,&quot;c&quot;,-5L)),2),schema)
+val goldenSchema = StructType(Seq(StructField(&quot;entity_id&quot;,LongType,false),StructField(&quot;segment&quot;,StringType,true),StructField(&quot;doubled&quot;,LongType,true)))
+val golden = spark.createDataFrame(spark.sparkContext.parallelize(Seq(Row(1L,&quot;a&quot;,20L),Row(1L,&quot;a&quot;,20L),Row(2L,&quot;a&quot;,null),Row(3L,&quot;b&quot;,0L),Row(4L,&quot;b&quot;,40L),Row(4L,&quot;b&quot;,40L),Row(5L,null,10L)),2),goldenSchema)</code></pre>
+<pre><code class="language-python">from pyspark.sql import SparkSession, functions as F
+from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark import StorageLevel
+
+schema = StructType([StructField(&quot;entity_id&quot;,LongType(),False),StructField(&quot;segment&quot;,StringType(),True),StructField(&quot;amount&quot;,LongType(),True)])
+source = spark.createDataFrame([(1,&quot;a&quot;,10),(1,&quot;a&quot;,10),(2,&quot;a&quot;,None),(3,&quot;b&quot;,0),(4,&quot;b&quot;,20),(4,&quot;b&quot;,20),(5,None,5),(6,&quot;c&quot;,-5)],schema=schema)
+golden_schema = StructType([StructField(&quot;entity_id&quot;,LongType(),False),StructField(&quot;segment&quot;,StringType(),True),StructField(&quot;doubled&quot;,LongType(),True)])
+golden = spark.createDataFrame([(1,&quot;a&quot;,20),(1,&quot;a&quot;,20),(2,&quot;a&quot;,None),(3,&quot;b&quot;,0),(4,&quot;b&quot;,40),(4,&quot;b&quot;,40),(5,None,10)],schema=golden_schema)</code></pre>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-scala">assert(source.count() == 8L &amp;&amp; source.select(&quot;entity_id&quot;,&quot;segment&quot;,&quot;amount&quot;).distinct().count() == 6L)
+assert(golden.count() == 7L &amp;&amp; golden.agg(sum(&quot;doubled&quot;)).first().getLong(0) == 130L)
+println(&quot;Golden bag contains duplicates and unknown values deliberately&quot;)</code></pre>
+<pre><code class="language-python">assert source.count() == 8 and source.select(&quot;entity_id&quot;,&quot;segment&quot;,&quot;amount&quot;).distinct().count() == 6
+assert golden.count() == 7 and golden.agg(F.sum(&quot;doubled&quot;)).first()[0] == 130
+print(&quot;Golden bag contains duplicates and unknown values deliberately&quot;)</code></pre>
+<p>The row count and distinct count differ because the fixture treats repeated records as meaningful occurrences. Any testing strategy that converts the data to a set before comparison would lose information needed to validate this contract.</p>
+<h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-scala">val numeric = spark.sql(&quot;SELECT CAST(1 AS BIGINT) AS entity_id&quot;)
+val textual = spark.sql(&quot;SELECT CAST(&#x27;1&#x27; AS STRING) AS entity_id&quot;)
+assert(numeric.schema(&quot;entity_id&quot;).dataType != textual.schema(&quot;entity_id&quot;).dataType)
+println(&quot;Identical displayed digits can have different field types&quot;)</code></pre>
+<pre><code class="language-python">numeric = spark.sql(&quot;SELECT CAST(1 AS BIGINT) AS entity_id&quot;)
+textual = spark.sql(&quot;SELECT CAST(&#x27;1&#x27; AS STRING) AS entity_id&quot;)
+assert numeric.schema[&quot;entity_id&quot;].dataType != textual.schema[&quot;entity_id&quot;].dataType
+print(&quot;Identical displayed digits can have different field types&quot;)</code></pre>
+<p>Schema is part of the product contract. A display representation can hide a type change that affects ordering, arithmetic and joins. The validator therefore checks types before a comparison operation has a chance to coerce values.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<h4 id="exercise-1-transform-without-collapsing-occurrences-or-unknowns">Exercise 1: Transform without collapsing occurrences or unknowns<a class="heading-anchor" href="#exercise-1-transform-without-collapsing-occurrences-or-unknowns" aria-label="Link to this section">#</a></h4>
+<p>Keep rows whose amount is nonnegative or NULL, then return entity_id, segment, doubled=amount*2. Preserve duplicate occurrences and unknown values.</p>
+<p><strong>Expected result/shape:</strong> Seven rows, known total 130 and oneNULL doubled value. The negative entity 6 row is excluded.</p>
+<p><strong>Verify:</strong> Assert population, total and unknown count, then compare with the literal golden relation in later tasks.</p>
+<p><strong>Progressive hint:</strong> Ordinary amount&gt;=0 would filter unknowns unless the missingness branch is explicit.</p>
+<h4 id="exercise-2-define-an-ordered-field-type-contract">Exercise 2: Define an ordered field/type contract<a class="heading-anchor" href="#exercise-2-define-an-ordered-field-type-contract" aria-label="Link to this section">#</a></h4>
+<p>Return ordered(name, simple_type) pairs from the result schema. Compare with entity_id bigint, segment string, doubled bigint.</p>
+<p><strong>Expected result/shape:</strong> Exactly those three fields in that order. Casting entity_id to string changes the contract even when printed values look alike.</p>
+<p><strong>Verify:</strong> Assert the correct type list and a different list after the deliberate cast.</p>
+<p><strong>Progressive hint:</strong> Use schema metadata rather than inferring types from formatted output or the first nonNULL row.</p>
+<h4 id="exercise-3-compare-schemas-before-duplicate-sensitive-values">Exercise 3: Compare schemas before duplicate-sensitive values<a class="heading-anchor" href="#exercise-3-compare-schemas-before-duplicate-sensitive-values" aria-label="Link to this section">#</a></h4>
+<p>Reject a schema mismatch first, then require both exceptAll differences to be empty. Accept a repartitioned correct result and reject the deliberate string-ID result.</p>
+<p><strong>Expected result/shape:</strong> Correct result passes in different physical layouts; string-ID candidate fails with a named schema contract error.</p>
+<p><strong>Verify:</strong> Assert acceptance for golden/repartitioned values and explicit schema rejection before a coercing bag comparison.</p>
+<p><strong>Progressive hint:</strong> exceptAll resolves columns by position; check the ordered schema contract before calling it.</p>
+<h4 id="exercise-4-register-materialize-reuse-and-release-one-cached-relation">Exercise 4: Register, materialize, reuse and release one cached relation<a class="heading-anchor" href="#exercise-4-register-materialize-reuse-and-release-one-cached-relation" aria-label="Link to this section">#</a></h4>
+<p>Persist the supplied transformed relation with MEMORY_AND_DISK, materialize via count, reuse for a total and inspect a filtered consumer plan. Unpersist with blocking cleanup in finally.</p>
+<p><strong>Expected result/shape:</strong> Count 7, total 130, an InMemoryTableScan reuse marker, and no registered storage level after return.</p>
+<p><strong>Verify:</strong> Assert result values, cache-scan evidence and post-returnStorageLevel.NONE. Do not use a timing threshold.</p>
+<p><strong>Progressive hint:</strong> Registration precedes materialization; capture the reuse plan while the cache is still registered.</p>
+<h4 id="exercise-5-release-persistence-when-a-consumer-fails">Exercise 5: Release persistence when a consumer fails<a class="heading-anchor" href="#exercise-5-release-persistence-when-a-consumer-fails" aria-label="Link to this section">#</a></h4>
+<p>Persist and materialize the relation, then raise an injected failure before a later consumer. Unpersist in finally and verify the original error reaches the caller.</p>
+<p><strong>Expected result/shape:</strong> The injected_after_materialize error is observed and storage level isNONE afterward. Correct uncached output still passes the golden oracle.</p>
+<p><strong>Verify:</strong> Assert the named failure, post-failure release and full golden equality on a subsequent computation.</p>
+<p><strong>Progressive hint:</strong> Cleanup must run on exceptions as well as the successful return path.</p>
+<h4 id="exercise-6-demonstrate-why-set-equality-misses-duplicate-loss">Exercise 6: Demonstrate why set equality misses duplicate loss<a class="heading-anchor" href="#exercise-6-demonstrate-why-set-equality-misses-duplicate-loss" aria-label="Link to this section">#</a></h4>
+<p>Return directional exceptAll row counts after schema validation. Compare transformed.distinct with golden and require the golden validator to reject it.</p>
+<p><strong>Expected result/shape:</strong> Distinct has 5 rows; unexpected occurrences 0 and missing expected occurrences 2. The bag validator raises a named bag contract mismatch.</p>
+<p><strong>Verify:</strong> Assert(0,2), count 5 and the explicit negative-control rejection.</p>
+<p><strong>Progressive hint:</strong> Both duplicate groups lose one occurrence even though every distinct value still appears.</p>
+<h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
+<p>Do not interpret persist registration as completed materialization or a cache scan as a measured speedup. Unpersist in finally on both success and failure. Do not use cache as a replacement for a checkpoint or publication protocol. Compare ordered schema fields before values, and preserve duplicate occurrence counts. Both languages agreeing is weaker than both languages matching the same independent golden contract and rejecting deliberate type/multiplicity mutations.</p>
+<h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
+<p>Explain the contract of <code>transform</code> / <code>transform</code> without reading its solution. Trace the specified boundary case,then explain the final exercise&#x27;s evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>Use the <a href="../README.md.html">course route</a> to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. Keep runtime/profile receipts separate from any cluster-performance or production-recovery claim.</p>
+<h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://spark.apache.org/docs/4.0.1/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrame.persist.html">Spark 4.0.1 DataFrame persistence</a></li>
+</ul>
+<ul>
+<li><a href="https://spark.apache.org/docs/4.0.1/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrame.unpersist.html">Spark 4.0.1 unpersist lifecycle</a></li>
+</ul>
+<ul>
+<li><a href="https://spark.apache.org/docs/4.0.1/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrame.exceptAll.html">Spark 4.0.1 exceptAll preserves duplicates</a></li>
+</ul>
+<h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through spark-027: Persistence lifecycle and cross-language golden tests.
+Read courses/scala-spark/guides/spark-027.md and courses/scala-spark/lessons/spark-027.scala;the paired sources are courses/scala-spark/lessons/spark-027.scala and courses/scala-spark/lessons/spark-027.py.
+Direct prerequisites: spark-026. Explain the schema,row grain and new Scala/Python/Spark syntax,ask me to predict a concrete result,then inspect my attempt. Give one hint at a time,review exact result and boundary evidence,and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
+Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies,start a remote service,reset existing checkpoints or alter unrelated learner work.
+Done when all six contracts have inspected evidence and I can explain the stated assumptions and a meaningful failure case.</code></pre></article>
+  </main>
+</body>
+</html>

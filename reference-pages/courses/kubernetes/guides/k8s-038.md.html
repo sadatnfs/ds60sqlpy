@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>k8s-038: Image provenance and offline verification · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>k8s-038: Image provenance and offline verification</h1>
+      <p class="source-path">Generated from <code>courses/kubernetes/guides/k8s-038.md</code></p>
+    </header>
+    <article class="document"><h2 id="k8s-038-image-provenance-and-offline-verification">k8s-038: Image provenance and offline verification<a class="heading-anchor" href="#k8s-038-image-provenance-and-offline-verification" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Advanced; about 135 minutes plus review. Direct prerequisites: <code>k8s-017</code>, <code>k8s-025</code>, <code>k8s-031</code>. The chapter separates desired configuration, API acceptance, controller observation and application evidence.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Distinguish content integrity from publisher provenance and policy enforcement.</p>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<p>A digest identifies bytes under a hash algorithm. It can detect a change when compared with an independently trusted expected digest, but it does not tell you who published the bytes. A signature adds a claim verifiable under a public key. That still leaves a trust question: why is this key authorized to speak for the publisher or artifact you care about?</p>
+<p>The local fixture contains a real RSA/SHA256 signature, a public key, an attestation and a tampered copy. The signing private key was used only in memory during authoring and is not included. This demonstrates actual offline cryptographic verification of a synthetic statement. It is not an OCI image signature, a Sigstore bundle, a certificate chain or evidence that a real organization published an image.</p>
+<p>The attestation states a digest for synthetic fixture bytes. Verification has two joins: the signature must validate the attestation under the chosen public key, and the attested content digest must match the actual artifact being evaluated. A valid signature over an unrelated artifact is not authorization to run the current image. Admission enforcement is another boundary: successfully verifying a file offline does not mean the cluster will require that verification.</p>
+<h3 id="inspect-the-signed-statement-and-trust-input">Inspect the signed statement and trust input<a class="heading-anchor" href="#inspect-the-signed-statement-and-trust-input" aria-label="Link to this section">#</a></h3>
+<p><a href="../fixtures/provenance/README.md.html">The fixture directory</a> contains attestation.json, attestation.sig, publisher-public.txt, attestation-tampered.json and receipt.json. JSON formatting is part of the signed byte sequence here. Changing whitespace can invalidate this signature because the scheme signs the exact file bytes rather than a canonicalized semantic object.</p>
+<p>The public-key SHA256 in the receipt identifies the exact trusted verification input for this exercise. A malicious actor who can replace both an artifact and the trusted public key can produce a self-consistent new pair. Trust roots therefore must come from a reviewed channel independent of the untrusted artifact. A checksum stored next to an untrusted file has the same limitation if both can be replaced.</p>
+<p>The synthetic attestation includes a publisher label for teaching. The label is not independently authenticated by a real organization or transparency service. Treat the key as a local course trust root only. Production provenance may include signer identity, build process, source revision and policy constraints, all requiring their own validation.</p>
+<h3 id="run-actual-offline-signature-verification">Run actual offline signature verification<a class="heading-anchor" href="#run-actual-offline-signature-verification" aria-label="Link to this section">#</a></h3>
+<p>If an OpenSSL-compatible CLI has already been qualified on your host, run the following command from the repository root. It is identical in POSIX and PowerShell because it contains no shell-specific expansion. Do not install a tool during an offline lesson.</p>
+<pre><code class="language-text">openssl dgst -sha256 -verify courses/kubernetes/fixtures/provenance/publisher-public.txt -signature courses/kubernetes/fixtures/provenance/attestation.sig courses/kubernetes/fixtures/provenance/attestation.json</code></pre>
+<p>Expected: verification succeeds and the process exit code is0. Run the same command with attestation-tampered.json as the final argument. Expected: verification fails and the exit code is nonzero. In POSIX inspect <code>$?</code> immediately after the command; in PowerShell inspect <code>$LASTEXITCODE</code>. Do not judge success from a banner alone.</p>
+<p>The authoring receipt records both outcomes using LibreSSL3.3.6&#x27;s OpenSSL-compatible command. This is an actual local cryptographic test, distinct from the standard-library hash checker linked below. A different qualified verifier should repeat both controls before being used for live policy decisions.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="worked-example-1-compare-hashing-and-publisher-trust">Worked example 1: Compare hashing and publisher trust<a class="heading-anchor" href="#worked-example-1-compare-hashing-and-publisher-trust" aria-label="Link to this section">#</a></h4>
+<p>Compute SHA256 of b&#x27;fixture-bytes-v1&#x27;. A matching expected digest establishes byte equality under the algorithm. A second file can carry the same printed publisher label while having a different digest or an invalid signature.</p>
+<p><strong>Expected:</strong> Content integrity and publisher authorization are separate checks; a label or digest alone does not establish authorship.</p>
+<h4 id="worked-example-2-verify-original-and-tampered-signed-bytes">Worked example 2: Verify original and tampered signed bytes<a class="heading-anchor" href="#worked-example-2-verify-original-and-tampered-signed-bytes" aria-label="Link to this section">#</a></h4>
+<p>Use the two CLI invocations above with the same public key and signature. Only the input attestation changes from schema 1 to schema 2. The original succeeds and the modified file fails.</p>
+<p><strong>Expected:</strong> The tamper control demonstrates that verification depends on the signed bytes; this is a synthetic publisher test, not real image provenance certification.</p>
+<h3 id="inspect-the-specific-owned-object">Inspect the specific owned object<a class="heading-anchor" href="#inspect-the-specific-owned-object" aria-label="Link to this section">#</a></h3>
+<p>Only after the chapter&#x27;s host capability is provisioned and its resources remain present, use the explicit receipt fields described in <a href="../host-labs.md.html">host-labs.md</a>. A completed one-shot browser Run has already cleaned its objects. The following read does not provision the missing capability and does not justify changing credentials after a Forbidden result.</p>
+<p>POSIX:</p>
+<pre><code class="language-sh">: &quot;${LAB_KUBECONFIG:?Use the owned receipt path}&quot;
+: &quot;${LAB_CONTEXT:?Use the owned receipt context}&quot;
+: &quot;${LAB_NAMESPACE:?Use the owned receipt namespace}&quot;
+kubectl --kubeconfig &quot;$LAB_KUBECONFIG&quot; --context &quot;$LAB_CONTEXT&quot; --namespace &quot;$LAB_NAMESPACE&quot; get deployment hello -o json</code></pre>
+<p>PowerShell:</p>
+<pre><code class="language-powershell">if (-not $env:LAB_KUBECONFIG -or -not $env:LAB_CONTEXT -or -not $env:LAB_NAMESPACE) { throw &#x27;Owned receipt fields are required.&#x27; }
+&amp; kubectl --kubeconfig $env:LAB_KUBECONFIG --context $env:LAB_CONTEXT --namespace $env:LAB_NAMESPACE get deployment hello -o json
+if ($LASTEXITCODE -ne 0) { throw &#x27;The scoped observation failed.&#x27; }</code></pre>
+<p>Retain only the fields needed by this chapter&#x27;s prediction. A NotFound result may be expected after one-shot cleanup; a Forbidden result may identify a deliberately absent advanced capability. Neither result authorizes an ambient-context fallback.</p>
+<h3 id="run-and-bounded-evidence">Run and bounded evidence<a class="heading-anchor" href="#run-and-bounded-evidence" aria-label="Link to this section">#</a></h3>
+<p>The app artifact is a reading worksheet, <code>courses/kubernetes/lessons/k8s-038.md</code>. The current browser adapter does not provide the full <strong>qualified offline image-digest/signature verification and separate host admission enforcement</strong> operation. Use the synthetic fixture and offline check first. Live work follows <a href="../host-labs.md.html">the scoped host-lab guide</a> only when the named capability and owned target have been provisioned. A worksheet or static check is never a cluster execution receipt.</p>
+<p>The <a href="../solutions/k8s-038_solution.json.html">manifest example</a> is separate from the learner artifact. The <a href="../solutions/k8s-038_checks.py.html">offline reference check</a> evaluates explicitly synthetic facts and makes no API calls. Run it locally with <code>python courses/kubernetes/solutions/k8s-038_checks.py</code> after comparing your attempt. The <a href="../fixtures/k8s-038-cases.json.html">case ledger</a> is immutable teaching input.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<h4 id="exercise-1-identify-trust-inputs">Exercise 1: Identify trust inputs<a class="heading-anchor" href="#exercise-1-identify-trust-inputs" aria-label="Link to this section">#</a></h4>
+<p>List payload, signature, public key and expected content digest.</p>
+<p><strong>Expected result/shape:</strong> Four distinct roles with an independently chosen trust key.</p>
+<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Four distinct roles with an independently chosen trust key.</p>
+<p><strong>Progressive hints:</strong> Do not obtain the trusted key from the untrusted payload itself.</p>
+<h4 id="exercise-2-check-content-integrity">Exercise 2: Check content integrity<a class="heading-anchor" href="#exercise-2-check-content-integrity" aria-label="Link to this section">#</a></h4>
+<p>Compare the original synthetic content hash with a changed byte sequence.</p>
+<p><strong>Expected result/shape:</strong> Different content produces a different expected comparison result.</p>
+<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Different content produces a different expected comparison result.</p>
+<p><strong>Progressive hints:</strong> Hash the exact bytes with the declared algorithm.</p>
+<h4 id="exercise-3-verify-the-positive-signature">Exercise 3: Verify the positive signature<a class="heading-anchor" href="#exercise-3-verify-the-positive-signature" aria-label="Link to this section">#</a></h4>
+<p>Run the qualified CLI over attestation.json with the fixed key/signature.</p>
+<p><strong>Expected result/shape:</strong> Exit0 plus successful verification output, with tool identity recorded.</p>
+<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Exit0 plus successful verification output, with tool identity recorded.</p>
+<p><strong>Progressive hints:</strong> Use the exact signed file bytes.</p>
+<h4 id="exercise-4-verify-the-tamper-negative">Exercise 4: Verify the tamper negative<a class="heading-anchor" href="#exercise-4-verify-the-tamper-negative" aria-label="Link to this section">#</a></h4>
+<p>Repeat against attestation-tampered.json without changing key or signature.</p>
+<p><strong>Expected result/shape:</strong> Nonzero exit and verification failure.</p>
+<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Nonzero exit and verification failure.</p>
+<p><strong>Progressive hints:</strong> Hold trust inputs constant.</p>
+<h4 id="exercise-5-join-signature-subject-to-artifact">Exercise 5: Join signature subject to artifact<a class="heading-anchor" href="#exercise-5-join-signature-subject-to-artifact" aria-label="Link to this section">#</a></h4>
+<p>Explain why a valid signed statement about artifactA does not approve artifactB.</p>
+<p><strong>Expected result/shape:</strong> The signed subject digest must match the actual artifact under the correct format contract.</p>
+<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: The signed subject digest must match the actual artifact under the correct format contract.</p>
+<p><strong>Progressive hints:</strong> Verification is not transferable to arbitrary bytes.</p>
+<h4 id="exercise-6-state-enforcement-and-offline-limits">Exercise 6: State enforcement and offline limits<a class="heading-anchor" href="#exercise-6-state-enforcement-and-offline-limits" aria-label="Link to this section">#</a></h4>
+<p>Compare this local signature check with OCI/Sigstore provenance and admission enforcement.</p>
+<p><strong>Expected result/shape:</strong> Synthetic RSA fixture only; real image and cluster policy qualification remain separate.</p>
+<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Synthetic RSA fixture only; real image and cluster policy qualification remain separate.</p>
+<p><strong>Progressive hints:</strong> Local verification does not install an admission rule.</p>
+<h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
+<p>Explain the mechanism behind the first example, then distinguish it from this boundary case: The tamper control demonstrates that verification depends on the signed bytes; this is a synthetic publisher test, not real image provenance certification. State which observations are synthetic and which, if any, were read from your owned runtime.</p>
+<h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
+<p>An OCI image digest identifies a registry manifest or index under the image-distribution contract, not the arbitrary synthetic string used here. Multi-platform indices and platform-specific manifests also need explicit interpretation. The current course image tag0.2.0 remains a runtime allowlist identity, not a signature-based admission policy.</p>
+<p>A full image-provenance lab requires prewarmed real image digest and signature/bundle material, an offline-qualified verification tool and a host policy that binds the verified subject to the submitted image. Those capabilities are not supplied by this synthetic signature exercise. Never fetch new trust data silently or replace a failed trusted key with one found in the rejected artifact.</p>
+<h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Close the answer and reconstruct the reasoning for Exercise6, State enforcement and offline limits. Name the exact source and observed identity you would require before claiming the changed case succeeded.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>Continue to <code>k8s-039</code> after preserving the six evidence records.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://docs.openssl.org/3.0/man1/openssl-dgst/">OpenSSL dgst verification</a></li>
+</ul>
+<ul>
+<li><a href="https://github.com/opencontainers/image-spec/blob/main/descriptor.md">OCI image descriptor digest</a></li>
+</ul>
+<ul>
+<li><a href="https://docs.sigstore.dev/cosign/verifying/verify/">Sigstore verification overview</a></li>
+</ul>
+<h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning for k8s-038.
+Read courses/kubernetes/guides/k8s-038.md and courses/kubernetes/lessons/k8s-038.md. Direct prerequisites: `k8s-017`, `k8s-025`, `k8s-031`.
+Explain the mechanism, ask me to predict, let me attempt, give one hint, inspect evidence, then ask for retrieval.
+Keep courses/kubernetes/solutions/ closed until I attempt or explicitly ask for comparison.
+Distinguish source, synthetic fixtures, API acceptance, observed controllers, application/data results and cleanup.
+Use only an explicit owned lease and the stated capability; never select an ambient cluster or install a controller for me.</code></pre></article>
+  </main>
+</body>
+</html>

@@ -116,7 +116,6 @@
       <p class="source-path">Generated from <code>courses/cpp/guides/cpp-036.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-036-compile-time-computation-with-a-budget">cpp-036: Compile-time computation with a budget<a class="heading-anchor" href="#cpp-036-compile-time-computation-with-a-budget" aria-label="Link to this section">#</a></h2>
-<p>Authored beta content. Content completion and runtime qualification are separate evidence.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Advanced; 120 minutes. Direct prerequisites: <code>cpp-020</code>, <code>cpp-026</code>.</p>
 <p>Learner artifact: <a href="../lessons/cpp-036.cpp.html">cpp-036.cpp</a>. Keep <a href="../solutions/cpp-036_solutions.md.html">official solutions</a> closed until an attempt. The immutable <a href="../fixtures/cpp-036-cases.json.html">case ledger</a> records exercise inputs and expected observations.</p>
@@ -128,55 +127,93 @@
 <p><code>constexpr int square(int x)</code> can run at compile time or runtime. <code>static_assert(square(4)==16)</code> requires a compile-time Boolean. A consteval function cannot accept an unknown runtime input. Keep table sizes and recursion depths explicit.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Constant evaluation moves computation to a different phase rather than making it free. A static_assert cannot wait for user input, while an ordinary call to a constexpr function can use a runtime variable. consteval deliberately forbids that runtime choice. Large generated tables may increase compilation work and binary size even if runtime lookups become simple. Keep both the mathematical input range and the build resource budget explicit.</p>
+<h3 id="constant-evaluation-is-a-different-computation-phase">Constant evaluation is a different computation phase<a class="heading-anchor" href="#constant-evaluation-is-a-different-computation-phase" aria-label="Link to this section">#</a></h3>
+<p>constexpr permits a function to participate in constant evaluation when the call satisfies the language rules. It does not require every call to run during compilation. A call using an ordinary runtime value can execute normally. consteval is stricter:an immediate function call must produce a constant-evaluated result under its contract.</p>
+<p>The first example uses static_assert(square(4)==16), so a wrong result prevents compilation. No runtime branch is needed to check that statement. The second uses runtime=5 and checks25 during program execution. The same constexpr function supports both uses. This distinction helps explain why compile-time and runtime tests can complement each other.</p>
+<p>Constant evaluation moves work into the build; it does not make work free. Large generated tables or complex compile-time recursion can increase compiler time, memory use and binary size. A lookup table may improve runtime behavior for a repeated operation, but the build and storage tradeoffs still need measurement. A tiny square example cannot establish a performance advantage.</p>
+<p>The value domain remains important. A constexpr arithmetic function can have invalid inputs or overflow just like related runtime arithmetic, although constant-expression requirements can reject some cases during compilation. State the supported range rather than assuming the keyword makes every integer safe. Use explicit boundary checks when the public interface needs them.</p>
+<p>Configuration values known at build time can be useful for array sizes or compile-time policy selection. Values read from files, arguments or clocks are runtime inputs and cannot be forced into consteval without changing the product interface. Choose the phase based on when the information genuinely exists, not as a decorative optimization label.</p>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">static_assert(square(4)==16);</code></pre>
-<p><strong>Expected:</strong> The compiler validates the expression before an executable exists.</p>
+<p><a href="../examples/cpp-036-example-1.cpp.html">Complete program 1</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;iostream&gt;
+
+constexpr int square(int x) {
+    return x*x;
+}
+consteval int fixed_limit() {
+    return 16;
+}
+int main() {
+    static_assert(square(4)==16);
+    std::cout &lt;&lt; &quot;cpp-036 example 1 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-036 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">int runtime=5; assert(square(runtime)==25);</code></pre>
-<p><strong>Expected:</strong> The same constexpr function may be evaluated during program execution.</p>
+<p><a href="../examples/cpp-036-example-2.cpp.html">Complete program 2</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;iostream&gt;
+
+constexpr int square(int x) {
+    return x*x;
+}
+consteval int fixed_limit() {
+    return 16;
+}
+int main() {
+    int runtime=5; assert(square(runtime)==25);
+    std::cout &lt;&lt; &quot;cpp-036 example 2 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-036 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-distinguish-phases">Exercise 1: Distinguish phases<a class="heading-anchor" href="#exercise-1-distinguish-phases" aria-label="Link to this section">#</a></h4>
 <p>Classify static_assert(square(4)==16) and square(runtime).</p>
 <p><strong>Expected result/shape:</strong> First compile-time requirement; second runtime-capable call.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: First compile-time requirement; second runtime-capable call.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: constexpr permits rather than universally forces compile time.</p>
+<p><strong>Verify:</strong> First compile-time requirement; second runtime-capable call.</p>
+<p><strong>Progressive hints:</strong> constexpr permits rather than universally forces compile time.</p>
 <h4 id="exercise-2-add-a-lookup-table">Exercise 2: Add a lookup table<a class="heading-anchor" href="#exercise-2-add-a-lookup-table" aria-label="Link to this section">#</a></h4>
 <p>Build squares for indices 0 through 4 with constexpr data.</p>
-<p><strong>Expected result/shape:</strong> [0,1,4,9,16].</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: [0,1,4,9,16].</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Small bounded tables can replace repeated work.</p>
+<p><strong>Expected result/shape:</strong> [0, 1, 4, 9, 16].</p>
+<p><strong>Verify:</strong> [0, 1, 4, 9, 16].</p>
+<p><strong>Progressive hints:</strong> Small bounded tables can replace repeated work.</p>
 <h4 id="exercise-3-force-constant-evaluation">Exercise 3: Force constant evaluation<a class="heading-anchor" href="#exercise-3-force-constant-evaluation" aria-label="Link to this section">#</a></h4>
 <p>Create a consteval limit function and call with constant input.</p>
 <p><strong>Expected result/shape:</strong> Build succeeds with a constant result.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Build succeeds with a constant result.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Immediate functions require compile-time evaluation.</p>
+<p><strong>Verify:</strong> Build succeeds with a constant result.</p>
+<p><strong>Progressive hints:</strong> Immediate functions require compile-time evaluation.</p>
 <h4 id="exercise-4-diagnose-runtime-argument">Exercise 4: Diagnose runtime argument<a class="heading-anchor" href="#exercise-4-diagnose-runtime-argument" aria-label="Link to this section">#</a></h4>
 <p>Pass an input read at runtime to a consteval function.</p>
 <p><strong>Expected result/shape:</strong> Compilation fails; use constexpr when runtime calls are needed.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Compilation fails; use constexpr when runtime calls are needed.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: The phase requirement is part of the interface.</p>
+<p><strong>Verify:</strong> Compilation fails; use constexpr when runtime calls are needed.</p>
+<p><strong>Progressive hints:</strong> The phase requirement is part of the interface.</p>
 <h4 id="exercise-5-check-a-numeric-boundary">Exercise 5: Check a numeric boundary<a class="heading-anchor" href="#exercise-5-check-a-numeric-boundary" aria-label="Link to this section">#</a></h4>
 <p>Limit table inputs so multiplication cannot overflow int.</p>
 <p><strong>Expected result/shape:</strong> Declared bound and safe result range documented.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Declared bound and safe result range documented.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Compile-time evaluation still obeys arithmetic rules.</p>
+<p><strong>Verify:</strong> Declared bound and safe result range documented.</p>
+<p><strong>Progressive hints:</strong> Compile-time evaluation still obeys arithmetic rules.</p>
 <h4 id="exercise-6-transfer-build-budget">Exercise 6: Transfer build budget<a class="heading-anchor" href="#exercise-6-transfer-build-budget" aria-label="Link to this section">#</a></h4>
 <p>Compare bounded table sizes 16 and 256 in an owned host build.</p>
 <p><strong>Expected result/shape:</strong> Record compile duration and artifact size without asserting a universal ratio.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Record compile duration and artifact size without asserting a universal ratio.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Build-time work is a resource that also needs a budget.</p>
+<p><strong>Verify:</strong> Record compile duration and artifact size without asserting a universal ratio.</p>
+<p><strong>Progressive hints:</strong> Build-time work is a resource that also needs a budget.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: The compiler validates the expression before an executable exists. Then explain the changed condition in example 2 without opening the answer.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
-<p><code>constexpr int square(int x)</code> can run at compile time or runtime. <code>static_assert(square(4)==16)</code> requires a compile-time Boolean. A consteval function cannot accept an unknown runtime input. Keep table sizes and recursion depths explicit.</p>
-<p>If the result disagrees, preserve the original input and inspect the first differing value or condition. The phase requirement is part of the interface.</p>
+<p>If a static_assert fails, inspect the compile-time expression and supported value range; running an old binary cannot repair it. If a consteval call receives runtime input, the compile error reflects the phase contract. If build time grows dramatically after adding generated data, measure compiler resource cost as well as runtime lookup speed. Do not describe constexpr as a guarantee that the compiler always precomputes a call.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
 <p>Close the source. Reconstruct the reasoning for Exercise 6: Transfer build budget. Explain which assumptions would fail on a larger input or another runtime.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue with <a href="cpp-037.md.html">cpp-037</a> after saving the six observations.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines">C++ Core Guidelines</a></p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach cpp-036.
 Read courses/cpp/guides/cpp-036.md and courses/cpp/lessons/cpp-036.cpp.

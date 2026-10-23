@@ -9,7 +9,7 @@ from torch.nn import functional as F
 
 
 def verify():
-    # Exercise 1: Weight unequal sha rd means
+    # Exercise 1: Weight unequal shard means
     means=torch.tensor([2.,6.]); counts=torch.tensor([1.,3.])
     assert (means*counts).sum().div(counts.sum()).item()==5 and means.mean().item()==4
 
@@ -33,7 +33,7 @@ def verify():
         optimizer.zero_grad(set_to_none=True); ((other*x[start:end]-y[start:end])**2).mean().backward(); optimizer.step()
     assert abs(other.item()-.3)>1e-6
 
-    # Exercise 6: Represent empty-sha rd contributions
+    # Exercise 6: Represent empty-shard contributions
     empty=torch.empty(0); numerator=empty.sum()+values.sum(); denominator=empty.numel()+values.numel()
     assert denominator==4 and numerator.div(denominator).item()==5
     return {"checks": 6, "status": "passed"}

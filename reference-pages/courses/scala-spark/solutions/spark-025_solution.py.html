@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Spark 025 Solution · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course artifact</p>
+      <h1>Spark 025 Solution</h1>
+      <p class="source-path">Generated from <code>courses/scala-spark/solutions/spark-025_solution.py</code></p>
+    </header>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>from pyspark.sql import SparkSession, functions as F</span>
+<span>from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType</span>
+<span>from pathlib import Path</span>
+<span>import tempfile</span>
+<span>import shutil</span>
+<span>from pyspark.errors import AnalysisException</span>
+<span> </span>
+<span>def same_bag(left, right):</span>
+<span>    columns = [&quot;id&quot;,&quot;day&quot;,&quot;amount&quot;,&quot;payload&quot;]</span>
+<span>    a = left.select(*columns); b = right.select(*columns)</span>
+<span>    return a.exceptAll(b).count() == 0 and b.exceptAll(a).count() == 0</span>
+<span> </span>
+<span>def write_compact(source, path):</span>
+<span>    source.repartition(2,&quot;day&quot;).write.mode(&quot;errorifexists&quot;).partitionBy(&quot;day&quot;).parquet(path)</span>
+<span>    return source.sparkSession.read.parquet(path)</span>
+<span> </span>
+<span>def filtered_product(frame):</span>
+<span>    return frame.filter((F.col(&quot;day&quot;)==&quot;even&quot;)&amp;(F.col(&quot;id&quot;)&gt;=1990)).select(&quot;id&quot;,&quot;amount&quot;)</span>
+<span> </span>
+<span>def scan_evidence(frame):</span>
+<span>    frame.createOrReplaceTempView(&quot;ds60_spark_025_read&quot;)</span>
+<span>    text = &quot;\n&quot;.join(r[0] for r in frame.sparkSession.sql(&quot;EXPLAIN FORMATTED SELECT id,amount FROM ds60_spark_025_read WHERE day=&#x27;even&#x27; AND id&gt;=1990&quot;).collect())</span>
+<span>    return {name:&quot;\n&quot;.join(line for line in text.splitlines() if name in line) for name in [&quot;ReadSchema&quot;,&quot;PartitionFilters&quot;,&quot;PushedFilters&quot;]}</span>
+<span> </span>
+<span>def file_inventory(path):</span>
+<span>    files = [p for p in Path(path).rglob(&quot;*.parquet&quot;) if p.is_file()]</span>
+<span>    return len(files),sum(p.stat().st_size for p in files)</span>
+<span> </span>
+<span>def layout_receipt(frame, path):</span>
+<span>    directories = sum(p.is_dir() and p.name.startswith(&quot;day=&quot;) for p in Path(path).iterdir())</span>
+<span>    return directories,file_inventory(path)[0],frame.rdd.getNumPartitions()</span>
+<span> </span>
+<span>def reject_existing(source, path):</span>
+<span>    try:</span>
+<span>        source.write.mode(&quot;errorifexists&quot;).parquet(path)</span>
+<span>    except AnalysisException:</span>
+<span>        return</span>
+<span>    raise AssertionError(&quot;Existing path unexpectedly accepted&quot;)</span>
+<span> </span>
+<span>def main():</span>
+<span>    owned_root = None</span>
+<span>    spark = (SparkSession.builder.appName(&quot;ds60-spark-025&quot;).master(&quot;local[2]&quot;)</span>
+<span>        .config(&quot;spark.ui.enabled&quot;, &quot;false&quot;)</span>
+<span>        .config(&quot;spark.driver.host&quot;, &quot;127.0.0.1&quot;)</span>
+<span>        .config(&quot;spark.driver.bindAddress&quot;, &quot;127.0.0.1&quot;)</span>
+<span>        .config(&quot;spark.sql.shuffle.partitions&quot;, &quot;2&quot;)</span>
+<span>        .config(&quot;spark.sql.adaptive.enabled&quot;, &quot;false&quot;)</span>
+<span>        .config(&quot;spark.sql.ansi.enabled&quot;, &quot;true&quot;)</span>
+<span>        .config(&quot;spark.sql.session.timeZone&quot;, &quot;UTC&quot;).getOrCreate())</span>
+<span>    try:</span>
+<span>        assert spark.sparkContext.master == &quot;local[2]&quot;</span>
+<span>        spark.sparkContext.setLogLevel(&quot;ERROR&quot;)</span>
+<span>        owned_root = Path(tempfile.mkdtemp(prefix=&quot;.ds60-spark-025-&quot;,dir=&quot;.&quot;)).resolve()</span>
+<span>        schema = StructType([StructField(&quot;id&quot;,LongType(),False),StructField(&quot;day&quot;,StringType(),False),StructField(&quot;amount&quot;,LongType(),False),StructField(&quot;payload&quot;,StringType(),False)])</span>
+<span>        source = spark.createDataFrame([(i,&quot;even&quot; if i%2==0 else &quot;odd&quot;,i*7,&quot;x&quot;*32) for i in range(2000)],schema=schema)</span>
+<span>        compact_path = str(owned_root/&quot;compact&quot;)</span>
+<span>        many_path = str(owned_root/&quot;many&quot;)</span>
+<span>        # Exercise 1: Write and validate a compact partitioned round trip</span>
+<span>        compact = write_compact(source,compact_path)</span>
+<span>        assert same_bag(source,compact) and compact.count() == 2000</span>
+<span>        assert {f.name:f.dataType.typeName() for f in compact.schema.fields} == {&quot;id&quot;:&quot;long&quot;,&quot;day&quot;:&quot;string&quot;,&quot;amount&quot;:&quot;long&quot;,&quot;payload&quot;:&quot;string&quot;}</span>
+<span>        assert compact.agg(F.sum(&quot;amount&quot;)).first()[0] == 13993000</span>
+<span>        # Exercise 2: Read a narrow filtered projection with an independent oracle</span>
+<span>        selected = filtered_product(compact)</span>
+<span>        assert selected.columns == [&quot;id&quot;,&quot;amount&quot;]</span>
+<span>        assert [tuple(r) for r in selected.orderBy(&quot;id&quot;).collect()] == [(i,i*7) for i in [1990,1992,1994,1996,1998]]</span>
+<span>        # Exercise 3: Locate partition, column and predicate evidence in the scan</span>
+<span>        evidence = scan_evidence(compact)</span>
+<span>        assert &quot;id:bigint&quot; in evidence[&quot;ReadSchema&quot;] and &quot;amount:bigint&quot; in evidence[&quot;ReadSchema&quot;] and &quot;payload&quot; not in evidence[&quot;ReadSchema&quot;]</span>
+<span>        assert &quot;day&quot; in evidence[&quot;PartitionFilters&quot;] and &quot;even&quot; in evidence[&quot;PartitionFilters&quot;]</span>
+<span>        assert &quot;GreaterThanOrEqual(id,1990)&quot; in evidence[&quot;PushedFilters&quot;]</span>
+<span>        print(evidence)</span>
+<span>        # Exercise 4: Compare a deliberately larger file count without changing data</span>
+<span>        source.repartition(12).write.mode(&quot;errorifexists&quot;).partitionBy(&quot;day&quot;).parquet(many_path)</span>
+<span>        many = spark.read.parquet(many_path)</span>
+<span>        assert same_bag(source,many)</span>
+<span>        compact_files = file_inventory(compact_path);many_files = file_inventory(many_path)</span>
+<span>        assert compact_files[0] &gt; 0 and many_files[0] &gt; compact_files[0]</span>
+<span>        assert compact_files[1] &gt; 0 and many_files[1] &gt; 0 and compact_files[1]+many_files[1] &lt; 32*1024*1024</span>
+<span>        print(&quot;compact_data_files_bytes=&quot;,compact_files,&quot;many_data_files_bytes=&quot;,many_files)</span>
+<span>        # Exercise 5: Report storage partitions, files and scan partitions separately</span>
+<span>        compact_receipt = layout_receipt(compact,compact_path);many_receipt = layout_receipt(many,many_path)</span>
+<span>        assert compact_receipt[0] == many_receipt[0] == 2 and compact_receipt[1] == compact_files[0] and many_receipt[1] == many_files[0]</span>
+<span>        assert compact_receipt[2] &gt; 0 and many_receipt[2] &gt; 0</span>
+<span>        print(&quot;layout_directory_file_scan_counts=&quot;,compact_receipt,many_receipt)</span>
+<span>        # Exercise 6: Reject an existing target and preserve its product</span>
+<span>        reject_existing(source,compact_path)</span>
+<span>        assert same_bag(source,spark.read.parquet(compact_path))</span>
+<span>        print(&quot;spark-025: six PySpark reference contracts passed; Spark=&quot; + spark.version)</span>
+<span>    finally:</span>
+<span>        try:</span>
+<span>            if owned_root is not None:</span>
+<span>                shutil.rmtree(owned_root)</span>
+<span>        finally:</span>
+<span>            spark.stop()</span>
+<span> </span>
+<span>if __name__ == &quot;__main__&quot;:</span>
+<span>    main()</span>
+<span> </span>
+<span># Exercise 1: Write and validate a compact partitioned round trip. Inputs/task: Repartition source by day into 2 execution partitions, write Parquet with error-if-exists and partitionBy(day), then read it back. Compare field types and the complete duplicate-sensitive bag. Expected: 2000 rows and total 13993000 survive. Types remain id/amount bigints and day/payload strings;read nullability may differ. Verify: Assert type mapping and exceptAll emptiness in both directions, plus row count and amount total.</span>
+<span># Exercise 2: Read a narrow filtered projection with an independent oracle. Inputs/task: Select only id and amount for day=even and id&gt;=1990. Return the five ordered tuples. Expected: (1990,13930),(1992,13944),(1994,13958),(1996,13972),(1998,13986). No payload column is requested. Verify: Assert every projected identity and amount and exact two-column output schema.</span>
+<span># Exercise 3: Locate partition, column and predicate evidence in the scan. Inputs/task: Capture a FORMATTED plan for the selected query on the owned Parquet view. Extract ReadSchema, PartitionFilters and PushedFilters lines and interpret each scope. Expected: ReadSchema has id and amount but not payload;PartitionFilters mentions day/even;PushedFilters includes the id lower bound. Verify: Assert the relevant field/predicate markers and retain the exact five-row output oracle;do not claim bytes skipped from the plan alone.</span>
+<span># Exercise 4: Compare a deliberately larger file count without changing data. Inputs/task: Write the same source after repartition 12 using the same day directory partitioning. Inventory only.parquet data files and their actual byte sizes for both layouts. Expected: Both round trips match the source bag. The many layout has more data files than compact;both byte totals are positive and below 32 MiB. Verify: Assert bag parity, file-count inequality and measured data-byte bounds. Ignore checksum and success-marker files in data counts.</span>
+<span># Exercise 5: Report storage partitions, files and scan partitions separately. Inputs/task: Return a receipt with the number of day= directories, the data-file count and the read DataFrame execution-partition count for each layout. Expected: Both layouts have 2 day directories. Data-file counts are the measured inventory values. Scan partitions are positive observed values and need not equal either other count. Verify: Assert two directory partitions and independent file-count consistency;print actual scan partition counts without imposing equality.</span>
+<span># Exercise 6: Reject an existing target and preserve its product. Inputs/task: Attempt a second error-if-exists write to the already owned compact path. Require the expected analysis error, then read the original product and reconcile its bag. Expected: The second write fails with an existing-path analysis exception;the original 2000-row product remains unchanged. Verify: Assert the exception and full original bag after the failed write. Do not delete or overwrite the target to make the retry succeed.</span>
+<span> </span></code></pre></article>
+  </main>
+</body>
+</html>

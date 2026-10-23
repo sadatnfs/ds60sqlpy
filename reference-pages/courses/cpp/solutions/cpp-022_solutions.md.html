@@ -120,7 +120,15 @@
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>Portable serialization converts a value into a documented byte or text format. A filesystem path describes a location in the current platform, not a portable file format. Endianness is byte ordering in multi-byte values. A version marker lets a reader reject incompatible representations instead of silently misinterpreting them.</p>
 <h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>
-<p>A serializer chooses a representation that survives a different compiler or machine. The text v1,7,125 has a version, field order and unit interpretation; a raw struct dump has unspecified padding and platform-specific layout. A decoder must validate the version, exact field count, complete integer syntax and value ranges separately. The executable reference separates a shape-only illustration from decode, which also checks both integer conversions, full consumption and nonnegative ranges. The malformed suffix case must fail the full decoder even though its field count looks correct.</p>
+<p>A serializer chooses a representation that survives a different compiler or machine. The text v1, 7, 125 has a version, field order and unit interpretation; a raw struct dump has unspecified padding and platform-specific layout. A decoder must validate the version, exact field count, complete integer syntax and value ranges separately. The executable reference separates a shape-only illustration from decode, which also checks both integer conversions, full consumption and nonnegative ranges. The malformed suffix case must fail the full decoder even though its field count looks correct.</p>
+<h3 id="paths-serialized-bytes-and-versioned-records">Paths, serialized bytes and versioned records<a class="heading-anchor" href="#paths-serialized-bytes-and-versioned-records" aria-label="Link to this section">#</a></h3>
+<p>A filesystem path describes a location; a serialized record describes data. Joining records and batch.csv with filesystem::path uses platform-aware path composition. It does not open the file, create directories or validate the record bytes. A .csv suffix is a naming convention, not a parser implementation or a guarantee about quoting and delimiters.</p>
+<p>The record format in this lesson is intentionally narrow: v1, id, cents with exactly three fields, decimal integer values and nonnegative domain constraints. The version tag is part of the data contract. A decoder should reject an unsupported version rather than guessing that a future format has the same meaning. A writer and reader can round-trip a value only when they agree on those details.</p>
+<p>Shape validation checks delimiters and field count; value validation checks each field&#x27;s full conversion and range. The reference contains both an introductory shape illustration and a strict decoder. A string such as v1, 7, 125x has the right number of fields but fails full numeric consumption. A negative amount can parse as an integer while failing the domain rule. Keep those reasons distinct when debugging.</p>
+<p>Text serialization avoids some machine-layout hazards but still needs explicit rules for encoding, line endings, whitespace and maximum size. Writing the raw bytes of a C++ struct is not a portable substitute: padding, endianness, integer width and ABI layout can differ. Even on the same machine, uninitialized padding is not a stable public format.</p>
+<p>Path safety is also separate from grammar. A correctly parsed record can be written to the wrong location if the working directory or user-controlled path is misunderstood. The examples only construct a relative path and inspect filename/parent components. Actual file creation belongs to an owned host directory with explicit failure handling. Later lessons restrict identifiers before mapping them into filenames.</p>
+<h3 id="debugging-the-contract">Debugging the contract<a class="heading-anchor" href="#debugging-the-contract" aria-label="Link to this section">#</a></h3>
+<p>If a round-trip passes only because both writer and reader share the same bug, add independent known-byte fixtures. If a suffix slips through, inspect conversion end pointers. If a file appears in an unexpected folder, record the process working directory and resolved input/output paths. If a version mismatch is silently accepted, restore an explicit version gate rather than treating every three-field string as v1.</p>
 <h3 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-cpp">assert(encode(7,125)==&quot;v1,7,125&quot;);</code></pre>
 <p>Expected: The exact wire text is independent of struct padding.</p>
@@ -128,18 +136,18 @@
 <pre><code class="language-cpp">auto p=std::filesystem::path(&quot;records&quot;)/&quot;batch.csv&quot;;</code></pre>
 <p>Expected: The path joins components using platform rules; filename is batch.csv.</p>
 <h3 id="exercise-1-specify-the-wire-format">Exercise 1: Specify the wire format<a class="heading-anchor" href="#exercise-1-specify-the-wire-format" aria-label="Link to this section">#</a></h3>
-<p>Document v1,7,125 field order and units.</p>
+<p>Document v1, 7, 125 field order and units.</p>
 <p><strong>Expected:</strong> Version v1, ID 7, cents 125, three fields.</p>
 <p><strong>Reasoning:</strong> Representation should be interpretable without the original struct.</p>
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
 <h3 id="exercise-2-check-zero-values">Exercise 2: Check zero values<a class="heading-anchor" href="#exercise-2-check-zero-values" aria-label="Link to this section">#</a></h3>
 <p>Encode ID 0 and cents 0.</p>
-<p><strong>Expected:</strong> v1,0,0.</p>
+<p><strong>Expected:</strong> v1, 0, 0.</p>
 <p><strong>Reasoning:</strong> Zero must survive round-trip as data.</p>
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
 <h3 id="exercise-3-build-a-strict-decoder">Exercise 3: Build a strict decoder<a class="heading-anchor" href="#exercise-3-build-a-strict-decoder" aria-label="Link to this section">#</a></h3>
 <p>Require v1 and exactly three comma-separated fields.</p>
-<p><strong>Expected:</strong> v2,7,125 and v1,7,125,junk rejected.</p>
+<p><strong>Expected:</strong> v2, 7, 125 and v1, 7, 125, junk rejected.</p>
 <p><strong>Reasoning:</strong> Version and full-field-count checks prevent ambiguity.</p>
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
 <h3 id="exercise-4-reject-raw-layout">Exercise 4: Reject raw layout<a class="heading-anchor" href="#exercise-4-reject-raw-layout" aria-label="Link to this section">#</a></h3>

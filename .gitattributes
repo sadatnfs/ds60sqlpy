@@ -17,3 +17,5 @@
 *.gif binary
 *.joblib binary
 *.parquet binary
+
+classroom text eol=lf

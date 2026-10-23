@@ -5,11 +5,11 @@ Copy to .learning before editing. Six independent attempts belong below.
 """
 
 # Exercise 1: Freeze a known base
-# Create a bias-free2-to-2 identity Linear base and disable its parameter gradients.
+# Create a bias-free 2-to-2identity Linear base and disable its parameter gradients.
 # Expected: base output equals input; all base parameters frozen.
 
 # Exercise 2: Train a new head
-# Attach a zero-initialized2-to-1 head and take one SGD.1 step toward targets1, 2, 3.
+# Attach a zero-initialized 2-to-1head and take one SGD.1step toward targets 1, 2, 3.
 # Expected: head changes; base remains exact identity.
 
 # Exercise 3: Inspect absent base gradients

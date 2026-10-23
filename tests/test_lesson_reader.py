@@ -186,7 +186,10 @@ def test_math_in_tables_keeps_conditional_probability_and_superscripts() -> None
     assert render_inline(r"`\(R^2\)`", resolver) == r"<code>\(R^2\)</code>"
 
 
-@pytest.mark.parametrize("suffix", [".cpp", ".scala", ".yaml", ".json", ".csv", ".txt", ".toml"])
+@pytest.mark.parametrize(
+    "suffix",
+    [".cpp", ".scala", ".java", ".mjs", ".mts", ".yaml", ".json", ".csv", ".txt", ".toml", ".lock"],
+)
 def test_authored_text_reference_is_escaped_and_rendered(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, suffix: str
 ) -> None:

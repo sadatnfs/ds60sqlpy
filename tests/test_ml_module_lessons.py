@@ -3,17 +3,21 @@
 from __future__ import annotations
 
 import ast
+import importlib
 import importlib.util
 import json
 import math
 import os
 import re
+import subprocess
+import sys
 from fractions import Fraction
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 import pytest
+from numpy.typing import NDArray
 
 ROOT = Path(__file__).resolve().parents[1]
 TRACKS = ("deep-learning-tensorflow", "llm-theory")
@@ -404,87 +408,89 @@ def test_embedding_rejects_wrap_and_returns_owned_rows() -> None:
 
 def test_complete_ml_plans_have_no_missing_or_extra_authored_ids() -> None:
     for track in TRACKS:
-        planned = json.loads((ROOT / 'docs/expansion/plans' / f'{track}.json').read_text())
+        planned = json.loads((ROOT / "docs/expansion/plans" / f"{track}.json").read_text())
         authored = [entry for name, entry in _entries() if name == track]
-        assert {entry['id'] for entry in authored} == {item['id'] for item in planned['lessons']}
-        assert len(authored) == (36 if track == 'deep-learning-tensorflow' else 42)
-        specifications = {item['id']: item for item in planned['lessons']}
+        assert {entry["id"] for entry in authored} == {item["id"] for item in planned["lessons"]}
+        assert len(authored) == (36 if track == "deep-learning-tensorflow" else 48)
+        specifications = {item["id"]: item for item in planned["lessons"]}
         for entry in authored:
-            assert entry['runtime_profile'] == specifications[entry['id']]['runtime']
+            assert entry["runtime_profile"] == specifications[entry["id"]]["runtime"]
 
 
 def _completed_reference_cases(profile: str) -> list[tuple[str, str]]:
     return [
-        (track, entry['id'])
+        (track, entry["id"])
         for track, entry in _entries()
-        if entry['runtime_profile'] == profile
-        and int(entry['id'].rsplit('-', 1)[1]) > (8 if track == TRACKS[0] else 9)
+        if entry["runtime_profile"] == profile
+        and int(entry["id"].rsplit("-", 1)[1]) > (8 if track == TRACKS[0] else 9)
     ]
 
 
-@pytest.mark.parametrize(('track', 'lesson_id'), _completed_reference_cases('python-core'))
+@pytest.mark.parametrize(("track", "lesson_id"), _completed_reference_cases("python-core"))
 def test_new_core_reference_exercises_execute(track: str, lesson_id: str) -> None:
-    assert _module(track, lesson_id).verify() == {'checks': 6, 'status': 'passed'}
+    assert _module(track, lesson_id).verify() == {"checks": 6, "status": "passed"}
 
 
 @pytest.mark.skipif(
-    os.environ.get('DS60_TEST_TENSORFLOW') != '1',
-    reason='TensorFlow reference execution requires an explicitly prepared CPU runtime',
+    os.environ.get("DS60_TEST_TENSORFLOW") != "1",
+    reason="TensorFlow reference execution requires an explicitly prepared CPU runtime",
 )
-@pytest.mark.parametrize(('track', 'lesson_id'), _completed_reference_cases('tensorflow-cpu'))
+@pytest.mark.parametrize(("track", "lesson_id"), _completed_reference_cases("tensorflow-cpu"))
 def test_completed_tensorflow_reference_exercises(track: str, lesson_id: str) -> None:
-    assert _module(track, lesson_id).verify() == {'checks': 6, 'status': 'passed'}
+    assert _module(track, lesson_id).verify() == {"checks": 6, "status": "passed"}
 
 
 @pytest.mark.skipif(
-    os.environ.get('DS60_TEST_TORCH') != '1',
-    reason='PyTorch reference execution requires an explicitly prepared CPU runtime',
+    os.environ.get("DS60_TEST_TORCH") != "1",
+    reason="PyTorch reference execution requires an explicitly prepared CPU runtime",
 )
-@pytest.mark.parametrize(('track', 'lesson_id'), _completed_reference_cases('llm-torch-cpu'))
+@pytest.mark.parametrize(("track", "lesson_id"), _completed_reference_cases("llm-torch-cpu"))
 def test_completed_torch_reference_exercises(track: str, lesson_id: str) -> None:
-    assert _module(track, lesson_id).verify() == {'checks': 6, 'status': 'passed'}
+    assert _module(track, lesson_id).verify() == {"checks": 6, "status": "passed"}
 
 
 def test_tool_proposal_validation_copies_only_an_allowed_shape() -> None:
-    module = _module('llm-theory', 'llm-038')
-    original = {'tool': 'read_fixture', 'document_id': 'd2'}
+    module = _module("llm-theory", "llm-038")
+    original = {"tool": "read_fixture", "document_id": "d2"}
     accepted = module.validate(original)
-    accepted['document_id'] = 'd1'
-    assert original['document_id'] == 'd2'
-    for value in [None, ['read_fixture', 'd1'], 1]:
+    accepted["document_id"] = "d1"
+    assert original["document_id"] == "d2"
+    for invalid_shape in [None, ["read_fixture", "d1"], 1]:
         with pytest.raises(TypeError):
-            module.validate(value)
+            module.validate(invalid_shape)
     for value in [
-        {'tool': 'read_fixture', 'document_id': '/etc/passwd'},
-        {'tool': 'read_fixture', 'document_id': 'd1', 'args': {}},
-        {'tool': 'write_fixture', 'document_id': 'd1'},
+        {"tool": "read_fixture", "document_id": "/etc/passwd"},
+        {"tool": "read_fixture", "document_id": "d1", "args": {}},
+        {"tool": "write_fixture", "document_id": "d1"},
     ]:
         with pytest.raises(ValueError):
             module.validate(value)
 
 
 def test_local_retrieval_ranking_uses_content_and_deterministic_ties() -> None:
-    module = _module('llm-theory', 'llm-036')
-    documents = {'z': 'red square', 'a': 'blue square', 'b': 'red circle'}
-    assert module.rank('red square', documents, 1) == ['z']
-    assert module.rank('square', documents, 2) == ['a', 'z']
-    assert module.rank('absent', documents, 2) == ['a', 'b']
-    assert module.rank('red', documents, 0) == []
+    module = _module("llm-theory", "llm-036")
+    documents = {"z": "red square", "a": "blue square", "b": "red circle"}
+    assert module.rank("red square", documents, 1) == ["z"]
+    assert module.rank("square", documents, 2) == ["a", "z"]
+    assert module.rank("absent", documents, 2) == ["a", "b"]
+    assert module.rank("red", documents, 0) == []
 
 
 def test_tokenwise_normalization_preserves_prefix_but_time_centering_does_not() -> None:
-    module = _module('llm-theory', 'llm-010')
-    values = np.array([[2., 6., 10.], [1., 3., 5.], [30., 40., 50.]])
+    module = _module("llm-theory", "llm-010")
+    values = np.array([[2.0, 6.0, 10.0], [1.0, 3.0, 5.0], [30.0, 40.0, 50.0]])
     full = module.layer_norm(values)
     np.testing.assert_allclose(module.layer_norm(values[:1]), full[:1], atol=1e-12, rtol=0)
     assert not np.allclose((values - values.mean(axis=0))[:1], values[:1] - values[:1].mean(axis=0))
 
 
-@pytest.mark.skipif(os.environ.get('DS60_TEST_TORCH') != '1', reason='Requires prepared PyTorch CPU runtime')
+@pytest.mark.skipif(
+    os.environ.get("DS60_TEST_TORCH") != "1", reason="Requires prepared PyTorch CPU runtime"
+)
 def test_decoder_cache_has_nonuniform_prefix_and_context_limit_controls() -> None:
-    import torch
+    torch = importlib.import_module("torch")
 
-    module = _module('llm-theory', 'llm-024')
+    module = _module("llm-theory", "llm-024")
     torch.manual_seed(19)
     model = module.TinyDecoder(vocab=12, width=8, heads=2, context=5).eval()
     ids = torch.tensor([[1, 4, 2, 7, 3]])
@@ -493,34 +499,308 @@ def test_decoder_cache_has_nonuniform_prefix_and_context_limit_controls() -> Non
         first, cache = model(ids[:, :2])
         rest, cache = model(ids[:, 2:], cache)
         torch.testing.assert_close(torch.cat([first, rest], 1), full, atol=1e-6, rtol=0)
-        with pytest.raises(ValueError, match='context'):
+        with pytest.raises(ValueError, match="context"):
             model(torch.tensor([[1]]), cache)
-        foreign_batch = {'k': cache['k'].repeat(2, 1, 1, 1), 'v': cache['v'].repeat(2, 1, 1, 1)}
-        # Use a shorter foreign cache so the ownership shape check is reached before the context limit.
+        foreign_batch = {"k": cache["k"].repeat(2, 1, 1, 1), "v": cache["v"].repeat(2, 1, 1, 1)}
+        # Shorten the foreign cache so the batch check runs before the context limit.
         foreign_batch = {name: value[:, :, :1] for name, value in foreign_batch.items()}
-        with pytest.raises(ValueError, match='batch'):
+        with pytest.raises(ValueError, match="batch"):
             model(torch.tensor([[1]]), foreign_batch)
 
 
 @pytest.mark.parametrize(
-    ('track','lesson_id'),
-    [('deep-learning-tensorflow','tf-028'),('deep-learning-tensorflow','tf-032'),('llm-theory','llm-022')],
+    ("track", "lesson_id"),
+    [
+        ("deep-learning-tensorflow", "tf-028"),
+        ("deep-learning-tensorflow", "tf-032"),
+        ("llm-theory", "llm-022"),
+    ],
 )
-def test_fresh_process_reference_programs_compile_without_heavy_imports(track: str, lesson_id: str) -> None:
+def test_fresh_process_reference_programs_compile_without_heavy_imports(
+    track: str, lesson_id: str
+) -> None:
     import textwrap
 
-    path=ROOT/'courses'/track/'solutions'/f'{lesson_id}_solution.py'
-    tree=ast.parse(path.read_text())
-    programs=[]
+    path = ROOT / "courses" / track / "solutions" / f"{lesson_id}_solution.py"
+    tree = ast.parse(path.read_text())
+    programs = []
     for node in ast.walk(tree):
-        if not isinstance(node,ast.Assign) or not any(isinstance(target,ast.Name) and target.id=='program' for target in node.targets):
+        if not isinstance(node, ast.Assign) or not any(
+            isinstance(target, ast.Name) and target.id == "program" for target in node.targets
+        ):
             continue
-        assert isinstance(node.value,ast.Call)
-        assert isinstance(node.value.func,ast.Attribute) and node.value.func.attr=='dedent'
-        assert len(node.value.args)==1 and isinstance(node.value.args[0],ast.Constant)
-        program=textwrap.dedent(node.value.args[0].value)
-        compile(program,f'{lesson_id}-child','exec')
+        assert isinstance(node.value, ast.Call)
+        assert isinstance(node.value.func, ast.Attribute) and node.value.func.attr == "dedent"
+        assert len(node.value.args) == 1 and isinstance(node.value.args[0], ast.Constant)
+        assert isinstance(node.value.args[0].value, str)
+        program = textwrap.dedent(node.value.args[0].value)
+        compile(program, f"{lesson_id}-child", "exec")
         programs.append(program)
-    assert len(programs)==1
-    source=path.read_text()
-    assert 'result.stderr' in source and 'check=False' in source
+    assert len(programs) == 1
+    source = path.read_text()
+    assert "result.stderr" in source and "check=False" in source
+
+
+def test_expert_rotary_positions_preserve_relative_dot_products_and_norms() -> None:
+    module = _module("llm-theory", "llm-044")
+    query = np.array([[1.0, 2.0, 3.0, 4.0]])
+    key = np.array([[-1.0, 0.0, 2.0, 1.0]])
+    first = float(module.rope(query, np.array([3]))[0] @ module.rope(key, np.array([8]))[0])
+    shifted = float(module.rope(query, np.array([103]))[0] @ module.rope(key, np.array([108]))[0])
+    relative = float(query[0] @ module.rope(key, np.array([5]))[0])
+    np.testing.assert_allclose([first, shifted], [relative, relative], atol=1e-12, rtol=0)
+    with pytest.raises(ValueError):
+        module.rope(np.ones((2, 3)), np.array([0, 1]))
+    with pytest.raises(ValueError):
+        module.rope(np.ones((2, 4)), np.array([0]))
+
+
+def test_online_softmax_rescales_both_numerator_and_denominator() -> None:
+    module = _module("llm-theory", "llm-046")
+    scores = np.array([0.0, 1000.0])
+    values = np.array([[1.0], [10.0]])
+    actual, peak = module.online_row(scores, values, 1)
+    np.testing.assert_allclose(actual, [10.0], atol=1e-12, rtol=0)
+    assert peak == 1
+    # A concrete mutant rescales the denominator but keeps the old numerator.
+    old_numerator = 1.0
+    new_mass = 1.0
+    wrong = (old_numerator + new_mass * 10) / (0.0 + new_mass)
+    assert wrong == 11 and not np.allclose(actual, wrong)
+    shifted, _ = module.online_row(scores + 5000, values, 1)
+    np.testing.assert_allclose(shifted, actual, atol=1e-12, rtol=0)
+    with pytest.raises(ValueError):
+        module.online_row([], np.empty((0, 1)), 1)
+
+
+def test_grouped_attention_uses_contiguous_query_groups_and_rejects_nan() -> None:
+    module = _module("llm-theory", "llm-046")
+    query = np.zeros((4, 2, 2))
+    keys = np.zeros((2, 2, 2))
+    values = np.array([[[1.0, 0.0], [3.0, 0.0]], [[0.0, 2.0], [0.0, 4.0]]])
+    actual = module.gqa(query, keys, values)
+    np.testing.assert_array_equal(actual[0], actual[1])
+    np.testing.assert_array_equal(actual[2], actual[3])
+    assert not np.array_equal(actual[1], actual[2])
+    bad = query.copy()
+    bad[0, 0, 0] = np.nan
+    with pytest.raises(ValueError):
+        module.gqa(bad, keys, values)
+
+
+def test_sparse_expert_capacity_keeps_overflow_tokens_on_residual_path() -> None:
+    module = _module("llm-theory", "llm-047")
+    values = np.array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
+    logits = np.array([[4.0, 0.0], [3.0, 0.0], [2.0, 0.0]])
+    experts = np.stack([np.eye(2), 2 * np.eye(2)])
+    output, dropped, assigned, accepted = module.capacity_route(values, logits, experts, 1)
+    assert assigned.tolist() == [3, 0] and accepted.tolist() == [1, 0]
+    assert dropped.tolist() == [False, True, True]
+    np.testing.assert_array_equal(output[1:], values[1:])
+    np.testing.assert_array_equal(output[0], 2 * values[0])
+
+
+def test_sparse_router_auxiliary_gradient_has_the_expected_direction() -> None:
+    module = _module("llm-theory", "llm-047")
+    probabilities = np.array([[0.9, 0.1], [0.9, 0.1], [0.1, 0.9], [0.9, 0.1]])
+    logits = np.log(probabilities)
+    fractions = np.array([0.75, 0.25])
+    coefficient = 0.01
+
+    def loss(value: NDArray[np.float64]) -> float:
+        return float(coefficient * 2 * np.dot(fractions, module.softmax_rows(value).mean(0)))
+
+    plus = logits.copy()
+    minus = logits.copy()
+    plus[0, 0] += 1e-6
+    minus[0, 0] -= 1e-6
+    numeric = (loss(plus) - loss(minus)) / (2e-6)
+    expected = coefficient * 2 / 4 * 0.9 * (0.75 - (0.9 * 0.75 + 0.1 * 0.25))
+    np.testing.assert_allclose(numeric, expected, atol=1e-10, rtol=0)
+    assert numeric > 0  # Gradient descent reduces this overused expert logit locally.
+
+
+def test_speculative_correction_preserves_many_exact_target_distributions() -> None:
+    module = _module("llm-theory", "llm-048")
+    cases = [
+        (np.array([0.5, 0.3, 0.2]), np.array([0.2, 0.5, 0.3])),
+        (np.array([0.0, 1.0]), np.array([1.0, 0.0])),
+        (np.array([0.2, 0.8]), np.array([0.2, 0.8])),
+    ]
+    rng = np.random.default_rng(19)
+    for _ in range(20):
+        p = rng.random(5)
+        q = rng.random(5)
+        cases.append((p / p.sum(), q / q.sum()))
+    for p, q in cases:
+        acceptance, residual, rejection = module.correction(p, q)
+        emitted = q * acceptance
+        if residual is not None:
+            emitted = emitted + rejection * residual
+        np.testing.assert_allclose(emitted, p, atol=1e-12, rtol=0)
+    p, q = cases[0]
+    acceptance, residual, rejection = module.correction(p, q)
+    wrong = q * acceptance + rejection * p
+    assert not np.allclose(wrong, p)
+
+
+def test_speculative_round_uses_the_correct_conditional_prefix_and_stops() -> None:
+    module = _module("llm-theory", "llm-048")
+    calls: list[tuple[int, ...]] = []
+
+    def target(prefix: list[int]) -> NDArray[np.float64]:
+        calls.append(tuple(prefix))
+        return np.array([0.5, 0.3, 0.2]) if not prefix else np.array([0.8, 0.1, 0.1])
+
+    def draft(prefix: list[int]) -> NDArray[np.float64]:
+        return np.array([0.2, 0.5, 0.3])
+
+    result = module.speculative_round([], target, draft, [0.1, 0.3], [0.2, 0.9], 0.4, budget=3)
+    assert calls == [(), (0,)] and result["tokens"] == [0, 0] and result["accepted_count"] == 1
+    with pytest.raises(ValueError):
+        module.one_step([0.5, 0.5], [1.0, 0.0], 1, 0.2, 0.3)
+    with pytest.raises(ValueError):
+        module.draw([0.5, 0.5], 1.0)
+    with pytest.raises(ValueError):
+        module.probabilities([0.8, 0.8])
+
+
+def test_speculative_cache_rollback_recomputes_the_same_positions() -> None:
+    module = _module("llm-theory", "llm-048")
+    cache = module.TinyCache([2, 0, 1])
+    result = {"tokens": [0, 0], "accepted_count": 1, "rejected": True, "proposals": [0, 1]}
+    module.apply_round(cache, 1, result)
+    fresh = module.TinyCache([2, 0, 0])
+    assert cache.tokens == fresh.tokens
+    np.testing.assert_array_equal(cache.keys, fresh.keys)
+    np.testing.assert_array_equal(cache.values, fresh.values)
+    np.testing.assert_allclose(cache.output(), fresh.output(), atol=1e-12, rtol=0)
+    with pytest.raises(ValueError):
+        cache.truncate(99)
+
+
+@pytest.mark.skipif(
+    os.environ.get("DS60_TEST_TORCH") != "1", reason="Requires prepared PyTorch CPU runtime"
+)
+def test_rmsnorm_gradcheck_and_noncentering_contract() -> None:
+    torch = importlib.import_module("torch")
+
+    module = _module("llm-theory", "llm-045")
+    value = torch.tensor([0.3, -0.7, 1.2], dtype=torch.float64, requires_grad=True)
+    assert torch.autograd.gradcheck(module.rms_norm, (value,))
+    assert not torch.allclose(module.rms_norm(value + 5), module.rms_norm(value))
+    torch.testing.assert_close(
+        module.layer_norm(value + 5), module.layer_norm(value), atol=1e-12, rtol=0
+    )
+
+
+def test_position_lesson_relabels_queries_and_key_value_pairs_independently() -> None:
+    module = _module("llm-theory", "llm-010")
+    query = np.array([[2.0, -1.0, 0.5], [-0.5, 1.0, 2.0]])
+    key = np.array([[1.0, 0.0, 2.0], [0.0, 1.0, -1.0], [2.0, 1.0, 0.0], [-1.0, 0.5, 1.0]])
+    value = np.array([[1.0, 2.0], [4.0, -1.0], [0.0, 3.0], [2.0, 5.0]])
+    query_order = [1, 0]
+    key_order = [2, 0, 3, 1]
+    original = module.attention(query, key, value)
+    changed = module.attention(query[query_order], key[key_order], value[key_order])
+    np.testing.assert_allclose(changed, original[query_order], atol=1e-12, rtol=0)
+    assert original.shape == (2, 2)
+
+
+def test_position_lesson_mask_relabelling_and_upstream_leakage_are_distinct() -> None:
+    module = _module("llm-theory", "llm-010")
+    values = np.array([[2.0, 5.0, -1.0], [7.0, -2.0, 4.0], [0.0, 3.0, 9.0]])
+    mask = np.tri(3, dtype=bool)
+    order = [2, 0, 1]
+    query = values / 10
+    output = module.attention(query, query, values, mask)
+    permuted_mask = mask[np.ix_(order, order)]
+    relabelled = module.attention(query[order], query[order], values[order], permuted_mask)
+    np.testing.assert_allclose(relabelled, output[order], atol=1e-12, rtol=0)
+    assert not np.allclose(
+        module.attention(query[order], query[order], values[order], mask), output[order]
+    )
+    centered = values - values.mean(axis=0, keepdims=True)
+    leaking = module.attention(centered, centered, centered, mask)
+    np.testing.assert_allclose(leaking[0], centered[0], atol=1e-12, rtol=0)
+    prefix_centered = values[:1] - values[:1].mean(axis=0, keepdims=True)
+    prefix = module.attention(prefix_centered, prefix_centered, prefix_centered)
+    assert not np.allclose(prefix, leaking[:1])
+
+
+def test_position_lesson_epsilon_variance_and_invalid_axes_are_explicit() -> None:
+    module = _module("llm-theory", "llm-010")
+    values = np.array([[1.0, 3.0]])
+    normalized = module.layer_norm(values, epsilon=0.25)
+    np.testing.assert_allclose(normalized.var(axis=-1), [1.0 / 1.25], atol=1e-12, rtol=0)
+    for bad in [np.empty((2, 0)), np.array([[np.nan, 1.0]])]:
+        with pytest.raises(ValueError):
+            module.layer_norm(bad)
+    with pytest.raises(ValueError):
+        module.layer_norm(values, epsilon=0)
+    with pytest.raises(ValueError):
+        module.attention(values, np.ones((1, 3)), values)
+    with pytest.raises(ValueError):
+        module.attention(values, values, values, np.ones((1, 1), dtype=int))
+    with pytest.raises(ValueError):
+        module.attention(values, values, values, np.zeros((1, 1), dtype=bool))
+
+
+def _standalone_worked_cases() -> list[tuple[str, str, int, str]]:
+    cases: list[tuple[str, str, int, str]] = []
+    for track, entry in _entries():
+        number = int(entry["id"].rsplit("-", 1)[1])
+        if not (
+            (track == "deep-learning-tensorflow" and number >= 9)
+            or (track == "llm-theory" and 10 <= number <= 42)
+        ):
+            continue
+        guide = (ROOT / entry["guide_path"]).read_text()
+        for index, source in enumerate(re.findall(r"```python\n(.*?)\n```", guide, re.DOTALL), 1):
+            cases.append((entry["id"], entry["runtime_profile"], index, source))
+    return cases
+
+
+@pytest.mark.parametrize(
+    ("lesson_id", "profile", "example", "source"),
+    _standalone_worked_cases(),
+    ids=[f"{lesson}-example-{index}" for lesson, _, index, _ in _standalone_worked_cases()],
+)
+def test_original_completion_worked_examples_are_fresh_process_programs(
+    lesson_id: str, profile: str, example: int, source: str, tmp_path: Path
+) -> None:
+    ast.parse(source, filename=f"{lesson_id}-example-{example}")
+    flag = {"tensorflow-cpu": "DS60_TEST_TENSORFLOW", "llm-torch-cpu": "DS60_TEST_TORCH"}.get(
+        profile
+    )
+    if flag and os.environ.get(flag) != "1":
+        pytest.skip(f"Fresh-process worked example requires prepared {profile}")
+    path = tmp_path / "example.py"
+    path.write_text(source)
+    result = subprocess.run(
+        [sys.executable, str(path)],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        timeout=90,
+        check=False,
+        env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1"),
+    )
+    assert result.returncode == 0, f"{lesson_id} example {example}: {result.stdout}{result.stderr}"
+
+
+def test_multiple_heads_keep_head_identity_and_causal_visibility() -> None:
+    module = _module("llm-theory", "llm-011")
+    values = np.array([[0.2, -0.4, 1.0, 0.0], [0.7, 0.1, -0.2, 0.3], [0.4, 0.8, -0.5, 0.2]])
+    output, weights = module.multihead(values, heads=2, causal=True)
+    columns = [2, 3, 0, 1]
+    swapped, swapped_weights = module.multihead(values[:, columns], heads=2, causal=True)
+    np.testing.assert_allclose(swapped, output[:, columns], atol=1e-12, rtol=0)
+    np.testing.assert_allclose(swapped_weights, weights[[1, 0]], atol=1e-12, rtol=0)
+    changed = values.copy()
+    changed[-1] = [9.0, -3.0, 4.0, 8.0]
+    causal_changed, _ = module.multihead(changed, heads=2, causal=True)
+    np.testing.assert_allclose(causal_changed[:2], output[:2], atol=1e-12, rtol=0)
+    unmasked, _ = module.multihead(values, heads=2, causal=False)
+    unmasked_changed, _ = module.multihead(changed, heads=2, causal=False)
+    assert not np.allclose(unmasked_changed[:2], unmasked[:2])

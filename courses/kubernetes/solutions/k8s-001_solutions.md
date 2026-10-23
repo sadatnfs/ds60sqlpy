@@ -58,7 +58,7 @@ A saved manifest can be reviewed before any cluster exists. A response to apply 
 
 ### Exercise 2: Check identity beyond names
 
-**Inputs/evidence:** For k8s-001 Exercise 2, context ds60-demo,cluster-77,lesson-a,ns-101.
+**Inputs/evidence:** For k8s-001 Exercise 2, context ds60-demo, cluster-77, lesson-a, ns-101.
 
 **Expected result/shape:** For k8s-001 Exercise 2, all four identity/selection values must match the host-issued receipt before a mutation.
 
@@ -68,7 +68,7 @@ Connection names can be reused or redirected. The host receipt and observed name
 
 ### Exercise 3: Reject expiry
 
-**Inputs/evidence:** For k8s-001 Exercise 3, expires12:30Z;inspection12:31Z on the same date.
+**Inputs/evidence:** For k8s-001 Exercise 3, expires12:30Z; inspection12:31Z on the same date.
 
 **Expected result/shape:** For k8s-001 Exercise 3, expired by1 minute; no mutation proceeds.
 
@@ -78,7 +78,7 @@ The fixture uses UTC instants to avoid local-time ambiguity. Re-running a comman
 
 ### Exercise 4: Reject replacement
 
-**Inputs/evidence:** For k8s-001 Exercise 4, expected ns-101,observed ns-202,both named lesson-a.
+**Inputs/evidence:** For k8s-001 Exercise 4, expected ns-101, observed ns-202, both named lesson-a.
 
 **Expected result/shape:** For k8s-001 Exercise 4, identity mismatch; refuse apply and cleanup under the old receipt.
 
@@ -88,7 +88,7 @@ The old lease does not own a newly created object merely because its name matche
 
 ### Exercise 5: Keep credentials out of notes
 
-**Inputs/evidence:** For k8s-001 Exercise 5, namespace UID,lease expiry,source hash,kubeconfig token.
+**Inputs/evidence:** For k8s-001 Exercise 5, namespace UID, lease expiry, source hash, kubeconfig token.
 
 **Expected result/shape:** For k8s-001 Exercise 5, export nonsecret receipts; exclude the credential/token.
 

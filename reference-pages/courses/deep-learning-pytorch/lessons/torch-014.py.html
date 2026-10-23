@@ -122,27 +122,27 @@
 <span>&quot;&quot;&quot;</span>
 <span> </span>
 <span># Exercise 1: Calculate uniform multiclass loss</span>
-<span># Use one row of three zero logits and target class1.</span>
-<span># Expected: cross entropy log3.</span>
+<span># Use one row of three zero logits and target class 1.</span>
+<span># Expected: cross entropy log 3.</span>
 <span> </span>
 <span># Exercise 2: Contrast independent binary outputs</span>
-<span># Apply sigmoid to the same three zero logits for a multi label task.</span>
-<span># Expected: probabilities.5, .5, .5 with sum1.5.</span>
+<span># Apply sigmoid to the same three zero logits for a multilabel task.</span>
+<span># Expected: probabilities.5, .5, .5 with sum 1.5.</span>
 <span> </span>
 <span># Exercise 3: Inspect target shapes and types</span>
-<span># Create class indices2, 0 and binary rows[1, 0, 1], [0, 1, 0].</span>
+<span># Create class indices 2, 0 and binary rows[1, 0, 1], [0, 1, 0].</span>
 <span># Expected: shapes(2, ) and(2, 3); long versus floating.</span>
 <span> </span>
 <span># Exercise 4: Check class-axis normalization</span>
-<span># Apply softmax(dim1) to a2x3matrix.</span>
-<span># Expected: each row sums1.</span>
+<span># Apply softmax(dim 1) to a2x3matrix.</span>
+<span># Expected: each row sums 1.</span>
 <span> </span>
-<span># Exercise 5: Name the multi label denominator</span>
-<span># Compute B C E over two rows and three labels of zero logits.</span>
-<span># Expected: sum6log2; mean log2.</span>
+<span># Exercise 5: Name the multilabel denominator</span>
+<span># Compute BCE over two rows and three labels of zero logits.</span>
+<span># Expected: sum 6 log2; mean log 2.</span>
 <span> </span>
 <span># Exercise 6: Reject an out-of-vocabulary class</span>
-<span># Use class index3 for a three-class row.</span>
+<span># Use class index 3 for a three-class row.</span>
 <span># Expected: IndexError or RuntimeError identifying an invalid target.</span>
 <span> </span>
 <span>if __name__ == &quot;__main__&quot;:</span>

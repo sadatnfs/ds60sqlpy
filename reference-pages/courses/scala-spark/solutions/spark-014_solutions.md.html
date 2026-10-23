@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>spark-014: Explained paired reference solutions · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>spark-014: Explained paired reference solutions</h1>
+      <p class="source-path">Generated from <code>courses/scala-spark/solutions/spark-014_solutions.md</code></p>
+    </header>
+    <article class="document"><h2 id="spark-014-explained-paired-reference-solutions">spark-014: Explained paired reference solutions<a class="heading-anchor" href="#spark-014-explained-paired-reference-solutions" aria-label="Link to this section">#</a></h2>
+<p>Read the <a href="../guides/spark-014.md.html">guide</a> and attempt one language first. The <a href="spark-014_solution.scala.html">Scala reference</a> and <a href="spark-014_solution.py.html">PySpark reference</a> are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.</p>
+<h3 id="exercises-and-reasoning">Exercises and reasoning<a class="heading-anchor" href="#exercises-and-reasoning" aria-label="Link to this section">#</a></h3>
+<h4 id="exercise-1-classify-defects-without-dropping-source-occurrences">Exercise 1: Classify defects without dropping source occurrences<a class="heading-anchor" href="#exercise-1-classify-defects-without-dropping-source-occurrences" aria-label="Link to this section">#</a></h4>
+<p>Add a nullable rejection_reason Column using the declared precedence: missing_id, invalid_id, unknown_status, negative_amount. Keep every source field and row. Unknown amounts are allowed; unknown statuses are not.</p>
+<p><strong>Expected:</strong> Source row 11 has unknown_status, row 12 has missing_id, and the other 10 reasons are NULL. All 12 source_row identities remain.</p>
+<pre><code class="language-scala">def classified(frame: DataFrame): DataFrame = {
+  val reason = when(col(&quot;event_id&quot;).isNull,lit(&quot;missing_id&quot;))
+    .when(col(&quot;event_id&quot;) &lt;= lit(0L),lit(&quot;invalid_id&quot;))
+    .when(col(&quot;status&quot;).isNull || !col(&quot;status&quot;).isin(&quot;paid&quot;,&quot;void&quot;),lit(&quot;unknown_status&quot;))
+    .when(col(&quot;amount_cents&quot;) &lt; lit(0L),lit(&quot;negative_amount&quot;))
+    .otherwise(lit(null).cast(StringType))
+  frame.withColumn(&quot;rejection_reason&quot;,reason)
+}</code></pre>
+<pre><code class="language-python">def classified(frame):
+    reason = (F.when(F.col(&quot;event_id&quot;).isNull(), F.lit(&quot;missing_id&quot;))
+        .when(F.col(&quot;event_id&quot;) &lt;= F.lit(0), F.lit(&quot;invalid_id&quot;))
+        .when(F.col(&quot;status&quot;).isNull() | ~F.col(&quot;status&quot;).isin(&quot;paid&quot;, &quot;void&quot;), F.lit(&quot;unknown_status&quot;))
+        .when(F.col(&quot;amount_cents&quot;) &lt; F.lit(0), F.lit(&quot;negative_amount&quot;))
+        .otherwise(F.lit(None).cast(&quot;string&quot;)))
+    return frame.withColumn(&quot;rejection_reason&quot;, reason)</code></pre>
+<p>Classification adds evidence while preserving the source relation. The explicit NULL-status test prevents three-valued logic from letting an unknown status fall through as valid. The chain defines one reproducible first reason when defects overlap. Unknown amount is not a negative amount and remains permitted, so the classifier does not invent a value merely to simplify aggregation.</p>
+<p><strong>Verification evidence:</strong> Assert the exact two(source_row, reason) pairs and the unchanged source count 12.</p>
+<h4 id="exercise-2-create-the-accepted-event-relation">Exercise 2: Create the accepted event relation<a class="heading-anchor" href="#exercise-2-create-the-accepted-event-relation" aria-label="Link to this section">#</a></h4>
+<p>Return source_row, event_id, team, amount_cents, status only for rows with no rejection reason. Preserve the valid void event and all accepted zero/NULL amounts.</p>
+<p><strong>Expected:</strong> Accepted event IDs are 1 through 10, with 10 rows. Event 5 remains accepted as void; IDs 2 and 7 remain accepted with unknown amounts.</p>
+<pre><code class="language-scala">def accepted(frame: DataFrame): DataFrame = {
+  classified(frame).filter(col(&quot;rejection_reason&quot;).isNull).select(&quot;source_row&quot;,&quot;event_id&quot;,&quot;team&quot;,&quot;amount_cents&quot;,&quot;status&quot;)
+}</code></pre>
+<pre><code class="language-python">def accepted(frame):
+    return classified(frame).filter(F.col(&quot;rejection_reason&quot;).isNull()).select(&quot;source_row&quot;, &quot;event_id&quot;, &quot;team&quot;, &quot;amount_cents&quot;, &quot;status&quot;)</code></pre>
+<p>The accepted relation represents source validity, not paid-revenue eligibility. Keeping the void event allows the later report to reconcile why one accepted event contributes no paid revenue. NULL and zero remain distinct observations. The exact IDs guard against a classifier that happens to produce ten rows after losing one valid event and admitting one invalid event.</p>
+<p><strong>Verification evidence:</strong> Assert the complete accepted ID list, count 10, one void row and two NULL-amount rows.</p>
+<h4 id="exercise-3-retain-a-complete-quarantine-row">Exercise 3: Retain a complete quarantine row<a class="heading-anchor" href="#exercise-3-retain-a-complete-quarantine-row" aria-label="Link to this section">#</a></h4>
+<p>Return source_row, event_id, team, amount_cents, status, rejection_reason for rejected records, ordered by source_row when inspected. Keep the original values, including the missing event ID.</p>
+<p><strong>Expected:</strong> Rows are(11,11, A,10, mystery, unknown_status) and (12, NULL, A,5, paid, missing_id). Accepted and quarantined counts sum to 12.</p>
+<pre><code class="language-scala">def quarantine(frame: DataFrame): DataFrame = {
+  classified(frame).filter(col(&quot;rejection_reason&quot;).isNotNull).select(&quot;source_row&quot;,&quot;event_id&quot;,&quot;team&quot;,&quot;amount_cents&quot;,&quot;status&quot;,&quot;rejection_reason&quot;)
+}</code></pre>
+<pre><code class="language-python">def quarantine(frame):
+    return classified(frame).filter(F.col(&quot;rejection_reason&quot;).isNotNull()).select(&quot;source_row&quot;, &quot;event_id&quot;, &quot;team&quot;, &quot;amount_cents&quot;, &quot;status&quot;, &quot;rejection_reason&quot;)</code></pre>
+<p>A reason without the original record is often insufficient for diagnosis. The quarantine preserves both source occurrence identity and all relevant raw fields, including the malformed status or missing business ID. Complementary filters over one classification support count conservation, while exact row comparisons verify that rejected content was not rewritten. No record is silently repaired or assigned a made-up ID.</p>
+<p><strong>Verification evidence:</strong> Compare every quarantined field with literal expected rows and check count conservation independently.</p>
+<h4 id="exercise-4-publish-a-null-aware-paid-summary">Exercise 4: Publish a NULL-aware paid summary<a class="heading-anchor" href="#exercise-4-publish-a-null-aware-paid-summary" aria-label="Link to this section">#</a></h4>
+<p>From accepted records, filter paid and group by team into team, rows, valued, total_cents. Count every event, only nonnull amounts, and the exact Long sum. Preserve a NULL team group and a NULL-only amount group.</p>
+<p><strong>Expected:</strong> Groups are A:(3,2,200), B:(2,2,25), C:(1,0, NULL), D:(1,1,200), E:(1,1,0), NULL:(1,1,50). Paid metrics are 9 rows,7 valued,475 cents.</p>
+<pre><code class="language-scala">def summarizePaid(frame: DataFrame): DataFrame = {
+  frame.filter(col(&quot;status&quot;) === lit(&quot;paid&quot;)).groupBy(&quot;team&quot;).agg(count(lit(1)).as(&quot;rows&quot;),count(col(&quot;amount_cents&quot;)).as(&quot;valued&quot;),sum(col(&quot;amount_cents&quot;)).as(&quot;total_cents&quot;))
+}</code></pre>
+<pre><code class="language-python">def summarize_paid(frame):
+    return frame.filter(F.col(&quot;status&quot;) == F.lit(&quot;paid&quot;)).groupBy(&quot;team&quot;).agg(F.count(F.lit(1)).alias(&quot;rows&quot;), F.count(&quot;amount_cents&quot;).alias(&quot;valued&quot;), F.sum(&quot;amount_cents&quot;).alias(&quot;total_cents&quot;))</code></pre>
+<p>The three measures answer different questions: event volume, observed-value volume and measured cents. Group C has no observed amounts and therefore no known sum, while E has a real measured zero. The NULL team remains a group instead of disappearing through a key filter. Typed canonical comparison verifies schema and values as well as counts.</p>
+<p><strong>Verification evidence:</strong> Assert the full typed canonical group list and the global paid metrics against independent literals.</p>
+<h4 id="exercise-5-expose-projection-plus-distinct-loss">Exercise 5: Expose projection-plus-distinct loss<a class="heading-anchor" href="#exercise-5-expose-projection-plus-distinct-loss" aria-label="Link to this section">#</a></h4>
+<p>Return a paid row-level projection retaining event_id, team, amount_cents. Compare it with the deliberately wrong team/amount distinct projection and explain the lost 100-cent event.</p>
+<p><strong>Expected:</strong> The correct projection has metrics(9,7,475); the wrong projection has(8,6,375). IDs 1 and 6 must both remain despite equal team/amount values.</p>
+<pre><code class="language-scala">def paidProjection(frame: DataFrame): DataFrame = {
+  frame.filter(col(&quot;status&quot;) === lit(&quot;paid&quot;)).select(&quot;event_id&quot;,&quot;team&quot;,&quot;amount_cents&quot;)
+}</code></pre>
+<pre><code class="language-python">def paid_projection(frame):
+    return frame.filter(F.col(&quot;status&quot;) == F.lit(&quot;paid&quot;)).select(&quot;event_id&quot;, &quot;team&quot;, &quot;amount_cents&quot;)</code></pre>
+<p>The wrong projection erases the field distinguishing two real events, then distinct collapses their equal remaining values. This is not duplicate-delivery handling; it is information loss created by the projection. The incorrect totals are explicitly computed and checked so the lesson proves its oracle detects a realistic mistake rather than only confirming a good implementation.</p>
+<p><strong>Verification evidence:</strong> Assert both metric tuples and verify that correct event IDs include 1 and 6 separately.</p>
+<h4 id="exercise-6-gate-the-sql-report-on-identity-and-conservation">Exercise 6: Gate the SQL report on identity and conservation<a class="heading-anchor" href="#exercise-6-gate-the-sql-report-on-identity-and-conservation" aria-label="Link to this section">#</a></h4>
+<p>Validate at most 100 unique nonmissing source_row occurrences, unique positive accepted event IDs, and accepted-plus-quarantine conservation before returning a SQL paid summary. Reject a duplicate accepted event ID. Compare SQL output to the same literal groups.</p>
+<p><strong>Expected:</strong> The base 12-row batch passes and matches all six golden groups. Appending source_row13 with a second event_id1 rejects publication instead of choosing a winner.</p>
+<pre><code class="language-scala">def auditedSqlReport(spark: SparkSession, frame: DataFrame): DataFrame = {
+  val source = frame.agg(count(lit(1)),countDistinct(col(&quot;source_row&quot;)),count(col(&quot;source_row&quot;))).first()
+  require(source.getLong(0) &lt;= 100L &amp;&amp; source.getLong(0) == source.getLong(1) &amp;&amp; source.getLong(0) == source.getLong(2), &quot;invalid or oversized source identity&quot;)
+  val valid = accepted(frame)
+  val keys = valid.agg(count(lit(1)),countDistinct(col(&quot;event_id&quot;)),min(col(&quot;event_id&quot;))).first()
+  require(keys.getLong(0) == keys.getLong(1) &amp;&amp; (keys.getLong(0) == 0L || keys.getLong(2) &gt; 0L), &quot;accepted event IDs must be positive and unique&quot;)
+  require(valid.count() + quarantine(frame).count() == source.getLong(0), &quot;source count does not reconcile&quot;)
+  valid.filter(col(&quot;status&quot;) === lit(&quot;paid&quot;)).createOrReplaceTempView(&quot;ds60_spark_014_paid&quot;)
+  spark.sql(&quot;SELECT team,COUNT(*) AS rows,COUNT(amount_cents) AS valued,SUM(amount_cents) AS total_cents FROM ds60_spark_014_paid GROUP BY team&quot;)
+}</code></pre>
+<pre><code class="language-python">def audited_sql_report(spark, frame):
+    source = frame.agg(F.count(F.lit(1)), F.countDistinct(&quot;source_row&quot;), F.count(&quot;source_row&quot;)).first()
+    if not (source[0] &lt;= 100 and source[0] == source[1] == source[2]):
+        raise ValueError(&quot;invalid or oversized source identity&quot;)
+    valid = accepted(frame)
+    keys = valid.agg(F.count(F.lit(1)), F.countDistinct(&quot;event_id&quot;), F.min(&quot;event_id&quot;)).first()
+    if not (keys[0] == keys[1] and (keys[0] == 0 or keys[2] &gt; 0)):
+        raise ValueError(&quot;accepted event IDs must be positive and unique&quot;)
+    if valid.count() + quarantine(frame).count() != source[0]:
+        raise ValueError(&quot;source count does not reconcile&quot;)
+    valid.filter(F.col(&quot;status&quot;) == F.lit(&quot;paid&quot;)).createOrReplaceTempView(&quot;ds60_spark_014_paid&quot;)
+    return spark.sql(&quot;SELECT team,COUNT(*) AS rows,COUNT(amount_cents) AS valued,SUM(amount_cents) AS total_cents FROM ds60_spark_014_paid GROUP BY team&quot;)</code></pre>
+<p>The final gate validates the occurrence and event grains before presenting a report. CountDistinct ignores NULL, so equality with total count also detects missing IDs; the positive minimum adds the domain restriction. A duplicate accepted event rejects the whole report rather than being arbitrarily resolved. SQL aggregation is then checked against independent literal groups, not merely a second implementation that could share the same mistake.</p>
+<p><strong>Verification evidence:</strong> Assert base SQL parity and a real failure for the duplicate-ID extension; retain the validation failure rather than publishing a partial report.</p>
+<h3 id="execution-and-interpretation">Execution and interpretation<a class="heading-anchor" href="#execution-and-interpretation" aria-label="Link to this section">#</a></h3>
+<p>Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program,so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations,partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit,and any additional owned file/query lifecycle is described in the lesson.</p></article>
+  </main>
+</body>
+</html>

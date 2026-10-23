@@ -17,8 +17,9 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Expected: visitedmetric, exclusions, test_accounts.
 
 # Exercise 4: Stop at the declared depth
-# Run the same graph with a one-hop bound.
-# Expected: test_accounts is absent.
+# Run the same graph with a one-hop bound, then reject fractional, Boolean, NaN and
+# negative budgets.
+# Expected: test_accounts is absent; invalid budgets raise ValueError before traversal.
 
 # Exercise 5: Break a retrieval cycle
 # Addtest_accounts->metric and traverse with a larger bound.

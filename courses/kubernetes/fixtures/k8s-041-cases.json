@@ -1,0 +1,38 @@
+{
+  "lesson_id": "k8s-041",
+  "provenance": "synthetic teaching cases, not runtime observations",
+  "capability": "qualified synthetic recovery drill with independent service/data acceptance and source timestamps",
+  "browser_source": false,
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Write the exact interruption start and required final gates.",
+      "expected": "A fixed start definition and application+data finish predicate."
+    },
+    {
+      "exercise": 2,
+      "task": "Subtract12:00:00Z from12:01:30Z in seconds.",
+      "expected": "90seconds,compared with target120seconds."
+    },
+    {
+      "exercise": 3,
+      "task": "Compare source11:59:50Z with restored11:59:30Z.",
+      "expected": "20seconds,compared with target30seconds."
+    },
+    {
+      "exercise": 4,
+      "task": "Evaluate service_ok true,data_ok false,Pod_ready true.",
+      "expected": "Recovery finish remains false."
+    },
+    {
+      "exercise": 5,
+      "task": "Identify timezone,clock source,backup reference,marker hash and host receipt for each milestone.",
+      "expected": "Every measurement is traceable without exporting sensitive backup contents."
+    },
+    {
+      "exercise": 6,
+      "task": "Report target,observed result,failed controls and untested conditions.",
+      "expected": "A bounded drill conclusion with no universal recovery guarantee."
+    }
+  ]
+}

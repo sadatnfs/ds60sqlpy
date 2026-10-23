@@ -8,36 +8,61 @@ import tensorflow as tf
 
 def verify():
     # Exercise 1: Check eager arithmetic
-    x=tf.constant([1.,2.],tf.float32); eager=x*x+1
-    np.testing.assert_array_equal(eager.numpy(),[2,5])
+    x = tf.constant([1., 2.], dtype=tf.float32)
+    eager = x * x + 1
+    np.testing.assert_array_equal(eager.numpy(), [2, 5])
 
-    # Exercise 2: Compile and compare
+    # Exercise 2: Trace a graph and compare
     @tf.function
-    def f(value): return value*value+1
-    np.testing.assert_array_equal(f(x).numpy(),eager.numpy()); first=f.experimental_get_tracing_count()
-    assert first>=1
+    def f(value):
+        return value * value + 1
+
+    np.testing.assert_array_equal(f(x).numpy(), eager.numpy())
+    first = f.experimental_get_tracing_count()
+    assert first >= 1
 
     # Exercise 3: Reuse an equal signature
-    np.testing.assert_array_equal(f(tf.constant([3.,4.],tf.float32)).numpy(),[10,17])
-    assert f.experimental_get_tracing_count()==first
+    same_signature = tf.constant([3., 4.], dtype=tf.float32)
+    np.testing.assert_array_equal(f(same_signature).numpy(), [10, 17])
+    assert f.experimental_get_tracing_count() == first
 
     # Exercise 4: Change dtype deliberately
-    out=f(tf.constant([1.,2.],tf.float64))
-    assert out.dtype==tf.float64 and f.experimental_get_tracing_count()>first
-    np.testing.assert_array_equal(out.numpy(),[2,5])
+    different_dtype = tf.constant([1., 2.], dtype=tf.float64)
+    output = f(different_dtype)
+    assert output.dtype == tf.float64
+    assert f.experimental_get_tracing_count() > first
+    np.testing.assert_array_equal(output.numpy(), [2, 5])
 
     # Exercise 5: Measure only warmed calls
     import time
-    f(x).numpy(); start=time.perf_counter()
-    for _ in range(10): result=f(x).numpy()
-    elapsed=time.perf_counter()-start
-    assert elapsed>=0 and np.isfinite(result).all()
+
+    f(x).numpy()
+    start = time.perf_counter()
+    observations = [f(x).numpy() for _ in range(10)]
+    elapsed = time.perf_counter() - start
+    assert len(observations) == 10
+    assert elapsed >= 0
+    for observed in observations:
+        assert np.isfinite(observed).all()
+        np.testing.assert_array_equal(observed, [2, 5])
 
     # Exercise 6: Separate shape contracts
-    @tf.function(input_signature=[tf.TensorSpec([None],tf.float32)])
-    def g(value): return value*value+1
-    g(tf.constant([1.,2.])); count=g.experimental_get_tracing_count()
-    assert tuple(g(tf.constant([1.,2.,3.])).shape)==(3,) and g.experimental_get_tracing_count()==count
+    @tf.function(input_signature=[tf.TensorSpec([None], tf.float32)])
+    def g(value):
+        return value * value + 1
+
+    g(tf.constant([1., 2.], dtype=tf.float32))
+    count = g.experimental_get_tracing_count()
+    output = g(tf.constant([1., 2., 3.], dtype=tf.float32))
+    assert tuple(output.shape) == (3,)
+    assert g.experimental_get_tracing_count() == count
+    for incompatible in [tf.constant([[1., 2.]], dtype=tf.float32), tf.constant([1., 2.], dtype=tf.float64)]:
+        try:
+            g(incompatible)
+        except (TypeError, ValueError):
+            pass
+        else:
+            raise AssertionError('incompatible signature accepted')
     return {"checks": 6, "status": "passed"}
 
 

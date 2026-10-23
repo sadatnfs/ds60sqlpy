@@ -349,7 +349,8 @@ def test_classroom_compose_has_named_only_state_and_private_workers() -> None:
 
     ComposeLoader: Any = type("ComposeLoader", (yaml.SafeLoader,), {})
 
-    ComposeLoader.add_constructor("!reset", lambda loader, node: loader.construct_sequence(node))
+    for tag in ("!reset", "!override"):
+        ComposeLoader.add_constructor(tag, lambda loader, node: loader.construct_sequence(node))
     config = yaml.load((ROOT / "compose.classroom.yaml").read_text(), Loader=ComposeLoader)
     services = config["services"]
     init = services["classroom-init"]
@@ -405,3 +406,23 @@ def test_classroom_compose_has_named_only_state_and_private_workers() -> None:
     assert worker["read_only"] is True and "KILL" in worker["cap_add"]
     all_text = (ROOT / "compose.classroom.yaml").read_text()
     assert "docker.sock" not in all_text and "DS60_MODULE_RUNTIME_DIR" not in all_text
+
+
+def test_kubernetes_overlay_reuses_classroom_state_and_never_mounts_engine() -> None:
+    yaml = pytest.importorskip("yaml")
+    overlay = yaml.safe_load((ROOT / "compose.classroom.kubernetes.yaml").read_text())
+    worker = overlay["services"]["kubernetes-worker"]
+    assert worker["profiles"] == ["k8s-kind"]
+    assert worker["networks"] == ["module-private", "kind-owned"]
+    assert worker["read_only"] is True and "ports" not in worker
+    assert worker["environment"]["DS60_WORKER_TOKEN_FILE"] == "/run/ds60/worker-token/token"
+    volumes = worker["volumes"]
+    assert volumes[0]["type"] == "volume" and volumes[0]["source"] == "classroom-runtime"
+    assert all(volume["read_only"] for volume in volumes)
+    assert all(volume["bind"]["create_host_path"] is False for volume in volumes[1:])
+    assert all("DS60_K8S_SESSION_DIR" in volume["source"] for volume in volumes[1:])
+    assert "docker.sock" not in json.dumps(overlay)
+    from ds60sqlpy.module_jobs import SERVICES
+
+    endpoints = json.loads(overlay["services"]["lab"]["environment"]["DS60_MODULE_ENDPOINTS"])
+    assert endpoints == {profile: f"http://{service}:8081" for profile, service in SERVICES.items()}

@@ -13,8 +13,9 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Expected: ValueError before any computation.
 
 # Exercise 3: Reject invalid numeric values
-# Replace onevalue withTrue, NaN orNone under the strict numeric policy.
-# Expected: each invalid row is rejected.
+# Replace one value with True, NaN or None, then check large finite values and
+# cancellation under the same numeric policy.
+# Expected: invalid rows are rejected; equal1e308 values have finite mean1e308 and opposite values have mean0.
 
 # Exercise 4: Enforce identity and work limits
 # Duplicatea1, then supply21 unique rows.

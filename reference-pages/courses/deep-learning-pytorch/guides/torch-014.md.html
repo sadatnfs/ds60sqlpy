@@ -116,27 +116,69 @@
       <p class="source-path">Generated from <code>courses/deep-learning-pytorch/guides/torch-014.md</code></p>
     </header>
     <article class="document"><h2 id="torch-014-crossentropyloss-multiclass-and-multilabel-contracts">torch-014: CrossEntropyLoss, multiclass and multilabel contracts<a class="heading-anchor" href="#torch-014-crossentropyloss-multiclass-and-multilabel-contracts" aria-label="Link to this section">#</a></h2>
-<p>Status: authored PyTorch course content. The manifest inventories complete teaching files; runtime readiness remains a separate, measured property.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Intermediate; approximately 120 minutes. Direct prerequisites: <code>torch-013</code>. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
-<p>Multiclass classification chooses exactly one outcome among mutually exclusive classes. The central investigation is concrete: Use one row of three zero logits and target class1. The finish condition is cross entropy log3. IndexError or RuntimeError identifying an invalid target. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
+<p>Multiclass classification chooses exactly one outcome among mutually exclusive classes. The central investigation is concrete: Use one row of three zero logits and target class 1. The finish condition is cross entropy log 3. IndexError or RuntimeError identifying an invalid target. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
 <h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
-<p>Multiclass classification chooses exactly one outcome among mutually exclusive classes. Multi label classification makes several independent binary decisions, so multiple labels can be present. A final layer with three outputs can serve either task; the target meaning determines the loss. PyTorch CrossEntropyLoss expects raw class logits and class-index targets by default. It includes log-softmax internally, so applying softmax first changes the intended calculation.</p>
-<p>The class axis convention matters. For ordinary batches, logits have shape(N, C) and targets(N). For spatial tasks, the class axis remains dimension1, unlike many channels-last examples in other frameworks. Multi label BCEWithLogitsLoss instead expects a target matrix matching the logits. Report which axes are averaged before comparing losses with different output widths.</p>
+<p>Multiclass classification chooses exactly one outcome among mutually exclusive classes. Multilabel classification makes several independent binary decisions, so multiple labels can be present. A final layer with three outputs can serve either task; the target meaning determines the loss. PyTorch CrossEntropyLoss expects raw class logits and class-index targets by default. It includes log-softmax internally, so applying softmax first changes the intended calculation.</p>
+<p>The class axis convention matters. For ordinary batches, logits have shape(N, C) and targets(N). For spatial tasks, the class axis remains dimension 1, unlike many channels-last examples in other frameworks. Multilabel BCEWithLogitsLoss instead expects a target matrix matching the logits. Report which axes are averaged before comparing losses with different output widths.</p>
 <h3 id="design-decisions-and-when-to-use-this-method">Design decisions and when to use this method<a class="heading-anchor" href="#design-decisions-and-when-to-use-this-method" aria-label="Link to this section">#</a></h3>
+<p>Choose the loss from the event being predicted. Use a categorical objective when exactly one ofC outcomes is the target for each unit. Use separate binary objectives when several labels can hold simultaneously. The final layer width alone cannot make that decision, and casting orreshaping labels cannot repair a wrong event definition.</p>
+<p>Keep class vocabulary, axis location, target representation and ignored-label policy explicit. For framework comparison, translate the class axis before comparing reductions. Treat probability targets, label smoothing and class weights as separate objective variants whose validity and denominator must be checked, rather than assuming they behave identically to integer class-index targets.</p>
 <h3 id="paired-tensorflow-comparison">Paired TensorFlow comparison<a class="heading-anchor" href="#paired-tensorflow-comparison" aria-label="Link to this section">#</a></h3>
 <p>Compare <a href="../../deep-learning-tensorflow/guides/tf-014.md.html">tf-014</a> after deriving the shared numerical contract.</p>
-<p>Keras sparse categorical loss commonly treats the last axis as classes, while PyTorch CrossEntropyLoss uses dimension1 for batched/spatial logits. Both need raw logits when configured as logits losses. Independent multi label targets use binary objectives rather than one class-index objective.</p>
+<p>Keras sparse categorical loss commonly treats the last axis as classes, while PyTorch CrossEntropyLoss uses dimension 1 for batched/spatial logits. Both need raw logits when configured as logits losses. Independent multilabel targets use binary objectives rather than one class-index objective.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p><strong>Multiclass target:</strong> One class identity among mutually exclusive alternatives.</p>
-<p><strong>Multi label target:</strong> A binary presence value for each independently meaningful label.</p>
+<p><strong>Multilabel target:</strong> A binary presence value for each independently meaningful label.</p>
 <p><strong>Class axis:</strong> The dimension indexing alternative categories in a logit tensor.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Use a prepared <code>llm-torch-cpu</code> environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored <code>.learning/expansion/torch-014/</code> before editing, or use the application&#x27;s saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: <code>&amp; $CoursePython courses/deep-learning-pytorch/lessons/torch-014.py</code>. For macOS/Linux use <code>.venv/bin/python courses/deep-learning-pytorch/lessons/torch-014.py</code> from the repository root.</p>
-<p>Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.</p>
+<p>Use a prepared <code>llm-torch-cpu</code> environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored <code>.learning/expansion/torch-014/</code> before editing, or use the application&#x27;s saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: <code>&amp; $CoursePython courses/deep-learning-pytorch/lessons/torch-014.py</code>. For macOS/Linux, use the interpreter explicitly selected for a separately prepared native PyTorch environment, and invoke that interpreter on <code>courses/deep-learning-pytorch/lessons/torch-014.py</code> from the repository root. The repository&#x27;s general <code>.venv</code> is not assumed to contain PyTorch; the prepared classroom profile is the default execution route.</p>
+<p>Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the explicit tolerance in each assertion. Several analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone is not a universal numerical-error bound. Finite differences, reductions and conditioning can require different justified tolerances. Integer counts, identities and boolean decisions should be exact.</p>
 <h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
-<p>UseF.cross_entropy with long integer class indices and floating logits. Sparse target indices must satisfy0&lt;=target&lt;C. For independent labels, use floating0/1targets with F.binary_cross_entropy_with_logits. softmax(dim=1) creates a class distribution for reporting. A uniform three-class logit vector gives loss log3, while three independent binary logits at zero each give probability.5.</p>
+<p>Use F.cross_entropy with long integer class indices and floating logits. Sparse target indices must satisfy 0&lt;=target&lt;C. For independent labels, use floating 0/1targets with F.binary_cross_entropy_with_logits. softmax(dim=1) creates a class distribution for reporting. A uniform three-class logit vector gives loss log 3, while three independent binary logits at zero each give probability.5.</p>
+<h3 id="derive-the-class-competition-and-its-tensor-contract">Derive the class competition and its tensor contract<a class="heading-anchor" href="#derive-the-class-competition-and-its-tensor-contract" aria-label="Link to this section">#</a></h3>
+<p>For a single multiclass record with logits z_0..z_(C-1), softmax assigns p_c=exp(z_c)/Σ_j exp(z_j). The indexed-target loss is<code>logsumexp(z)-z_y</code>. It compares the observed class with all alternatives through one shared normalization. Adding the same constant to every logit leaves the probabilities and loss unchanged, which is why a numerically stable implementation can subtract a row maximum.</p>
+<p>At three zero logits and target class 1, p=[1/3, 1/3, 1/3] and loss=log 3. The gradient with respect to the three logits is[1/3, -2/3, 1/3] before a batch reduction. The components sum to zero because raising every score equally cannot change class competition. This provides a derivative interpretation beyond the forward scalar.</p>
+<p>PyTorch&#x27;s indexed-target shapes are:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Task</th>
+<th>Logits</th>
+<th>Integer target</th>
+<th>Class axis</th>
+</tr></thead><tbody>
+<tr>
+<td>One record</td>
+<td>(C, )</td>
+<td>scalar</td>
+<td>The only logit axis</td>
+</tr>
+<tr>
+<td>Ordinary batch</td>
+<td>(N, C)</td>
+<td>(N, )</td>
+<td>Dimension 1</td>
+</tr>
+<tr>
+<td>Spatial labels</td>
+<td>(N, C, H, W)</td>
+<td>(N, H, W)</td>
+<td>Dimension 1</td>
+</tr>
+<tr>
+<td>Independent multilabel batch</td>
+<td>(N, C)</td>
+<td>Floating(N, C)</td>
+<td>Each label is a binary event</td>
+</tr>
+</tbody></table></div>
+<p>A sparse target index is a category identity, not a numeric value to regress. It must be a valid class index under the declared vocabulary. Probability-target forms instead match the logit shape and require a meaningful distribution across the class axis. The application should validate nonnegativity and normalization rather than assuming a floating tensor automatically supplies valid soft labels. The official API distinguishes these forms and their reductions. <a href="https://docs.pytorch.org/docs/2.9/generated/torch.nn.CrossEntropyLoss.html">PyTorch 2.9 CrossEntropyLoss</a>.</p>
+<p>Applying softmax before CrossEntropyLoss feeds probabilities into an API that interprets them as logits and normalizes again. Uniform scores are a poor detector of this bug because any equal-valued score vector still produces a uniform distribution and losslog 3. A nonuniform fixture such as[2, 0, -2] exposes the changed confidence and objective. This is another reason to retain asymmetric, nonuniform examples alongside exact symmetric reference points.</p>
+<p>Multilabel prediction has a different denominator and probability meaning. For two records and three binary labels, there are six binary events. Zero logits give each marginal probability 0.5, so the three probabilities in a row sum to 1.5 rather than one. That sum can represent an expected count of positive labels; it is not itself a probability of one mutually exclusive outcome. Shared features can still relate the labels, and independent binary losses do not automatically describe their full joint distribution.</p>
+<p>Each zero-logit binary entry contributeslog 2. Summing all six gives 6 log2; the element mean giveslog 2; the mean across records of a sum across three labels gives 3 log2. All three are possible reductions, but they imply different objective and gradient scales. State whether the denominator counts records, labels, valid pixels or another participation unit.</p>
+<p>Weights and ignored entries require another check. For class-index targets with class weights, PyTorch&#x27;s weighted mean uses the participating target-class weights in its denominator, and ignore_index excludes designated targets from that participation. Do not transfer that exact formula automatically to soft-target cross entropy orpositive-weighted binary loss. A padded spatial orsequence target can otherwise change training scale while the displayed output tensor shape remains plausible.</p>
+<p>For Keras comparisons, the default class-axis convention is often the last axis, whereas the PyTorch spatial categorical interface expects classes at dimension 1. Reorder axes and align target indexing explicitly; merely matching total element count can normalize across the wrong population orcouple unrelated observations.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-calculate-uniform-multiclass-loss">Example A: Calculate uniform multiclass loss<a class="heading-anchor" href="#example-a-calculate-uniform-multiclass-loss" aria-label="Link to this section">#</a></h4>
 <p>Every class has probability one-third. The target index identifies a category, not a numeric magnitude to regress.</p>
@@ -147,44 +189,45 @@ from torch.nn import functional as F
 
 logits=torch.zeros((1,3),dtype=torch.float64); target=torch.tensor([1],dtype=torch.long)
 np.testing.assert_allclose(F.cross_entropy(logits,target).item(),np.log(3),atol=1e-12,rtol=0)</code></pre>
-<p><strong>Expected:</strong> cross entropy log3.</p>
+<p><strong>Expected:</strong> cross entropy log 3.</p>
 <h4 id="example-b-contrast-independent-binary-outputs">Example B: Contrast independent binary outputs<a class="heading-anchor" href="#example-b-contrast-independent-binary-outputs" aria-label="Link to this section">#</a></h4>
 <p>Independent probabilities need not sum to one. A softmax would force labels to compete and change the task.</p>
 <pre><code class="language-python">independent=torch.sigmoid(logits)
 assert independent.tolist()==[[.5,.5,.5]] and independent.sum().item()==1.5</code></pre>
-<p><strong>Expected:</strong> probabilities.5, .5, .5 with sum1.5.</p>
+<p><strong>Expected:</strong> probabilities.5, .5, .5 with sum 1.5.</p>
 <h4 id="example-c-inspect-target-shapes-and-types">Example C: Inspect target shapes and types<a class="heading-anchor" href="#example-c-inspect-target-shapes-and-types" aria-label="Link to this section">#</a></h4>
 <p>The target contracts differ because the prediction events differ. Reshaping or casting without understanding those events can make a wrong task appear accepted.</p>
 <pre><code class="language-python">classes=torch.tensor([2,0],dtype=torch.long); labels=torch.tensor([[1.,0.,1.],[0.,1.,0.]])
 assert tuple(classes.shape)==(2,) and tuple(labels.shape)==(2,3) and classes.dtype==torch.long and labels.is_floating_point()</code></pre>
 <p><strong>Expected:</strong> shapes(2, ) and(2, 3); long versus floating.</p>
 <h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
-<p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: cross entropy log3. IndexError or RuntimeError identifying an invalid target. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
+<p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: cross entropy log 3. IndexError or RuntimeError identifying an invalid target. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
-<li><strong>Calculate uniform multiclass loss.</strong> Use one row of three zero logits and target class1. <strong>Expected:</strong> cross entropy log3. <strong>Verify:</strong> Save the assertion results for exercise 1, including cross entropy log3.</li>
+<li><strong>Calculate uniform multiclass loss.</strong> Use one row of three zero logits and target class 1. <strong>Expected:</strong> cross entropy log 3. <strong>Verify:</strong> Save the assertion results for exercise 1, including cross entropy log 3.</li>
 </ol>
 <ol>
-<li><strong>Contrast independent binary outputs.</strong> Apply sigmoid to the same three zero logits for a multi label task. <strong>Expected:</strong> probabilities.5, .5, .5 with sum1.5. <strong>Verify:</strong> Save the assertion results for exercise 2, including probabilities.5, .5, .5 with sum1.5.</li>
+<li><strong>Contrast independent binary outputs.</strong> Apply sigmoid to the same three zero logits for a multilabel task. <strong>Expected:</strong> probabilities.5, .5, .5 with sum 1.5. <strong>Verify:</strong> Save the assertion results for exercise 2, including probabilities.5, .5, .5 with sum 1.5.</li>
 </ol>
 <ol>
-<li><strong>Inspect target shapes and types.</strong> Create class indices2, 0 and binary rows[1, 0, 1], [0, 1, 0]. <strong>Expected:</strong> shapes(2, ) and(2, 3); long versus floating. <strong>Verify:</strong> Save the assertion results for exercise 3, including shapes(2, ) and(2, 3); long versus floating.</li>
+<li><strong>Inspect target shapes and types.</strong> Create class indices 2, 0 and binary rows[1, 0, 1], [0, 1, 0]. <strong>Expected:</strong> shapes(2, ) and(2, 3); long versus floating. <strong>Verify:</strong> Save the assertion results for exercise 3, including shapes(2, ) and(2, 3); long versus floating.</li>
 </ol>
 <ol>
-<li><strong>Check class-axis normalization.</strong> Apply softmax(dim1) to a2x3matrix. <strong>Expected:</strong> each row sums1. <strong>Verify:</strong> Save the assertion results for exercise 4, including each row sums1.</li>
+<li><strong>Check class-axis normalization.</strong> Apply softmax(dim 1) to a2x3matrix. <strong>Expected:</strong> each row sums 1. <strong>Verify:</strong> Save the assertion results for exercise 4, including each row sums 1.</li>
 </ol>
 <ol>
-<li><strong>Name the multi label denominator.</strong> Compute B C E over two rows and three labels of zero logits. <strong>Expected:</strong> sum6log2; mean log2. <strong>Verify:</strong> Save the assertion results for exercise 5, including sum6log2; mean log2.</li>
+<li><strong>Name the multilabel denominator.</strong> Compute BCE over two rows and three labels of zero logits. <strong>Expected:</strong> sum 6 log2; mean log 2. <strong>Verify:</strong> Save the assertion results for exercise 5, including sum 6 log2; mean log 2.</li>
 </ol>
 <ol>
-<li><strong>Reject an out-of-vocabulary class.</strong> Use class index3 for a three-class row. <strong>Expected:</strong> IndexError or RuntimeError identifying an invalid target. <strong>Verify:</strong> Save the assertion results for exercise 6, including IndexError or RuntimeError identifying an invalid target.</li>
+<li><strong>Reject an out-of-vocabulary class.</strong> Use class index 3 for a three-class row. <strong>Expected:</strong> IndexError or RuntimeError identifying an invalid target. <strong>Verify:</strong> Save the assertion results for exercise 6, including IndexError or RuntimeError identifying an invalid target.</li>
 </ol>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>When a result disagrees, locate the first intermediate value that violates this explanation. Inspect shapes and identities before aggregates, and inspect counts before averages. Preserve the original fixture and introduce only one controlled change at a time. If an arithmetic identity passes but a data-boundary condition fails, the experiment is still invalid. If a runtime is unavailable, record the unexecuted code as unverified rather than replacing its output with the expected text. The separate explanation discusses why the tempting alternative in each case changes the result.</p>
+<p>If probabilities sum along the batch axis instead of the class axis, inspect the softmax dimension and give each axis a semantic name. If a class-index target was converted to a floating matrix just to avoid an error, verify whether the task actually changed to a soft-target ormultilabel objective. A class index 3 isinvalid for three classes 0..2, regardless of how confidently a model predicts.</p>
+<p>If a double-softmax mistake passes the uniform-logit case, test a nonuniform row and compare the target probability and gradient. If padding orclass weighting changes the scalar unexpectedly, reconstruct the library&#x27;s exact participation denominator for that target form. Never compare a per-label mean with a per-record summed objective as though their matching function names implied the same training problem.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <p>First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise&#x27;s expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.</p>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
-<p>Close both worked examples. Explain Multiclass target, Multi label target, Class axis using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.</p>
+<p>Close both worked examples. Explain Multiclass target, Multilabel target, Class axis using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Revisit the direct prerequisite <code>torch-013</code> if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.</p>
 <h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>

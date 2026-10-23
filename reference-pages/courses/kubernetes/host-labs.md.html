@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Kubernetes: browser Runs, evidence worksheets and owned host labs · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>Kubernetes: browser Runs, evidence worksheets and owned host labs</h1>
+      <p class="source-path">Generated from <code>courses/kubernetes/host-labs.md</code></p>
+    </header>
+    <article class="document"><h2 id="kubernetes-browser-runs-evidence-worksheets-and-owned-host-labs">Kubernetes: browser Runs, evidence worksheets and owned host labs<a class="heading-anchor" href="#kubernetes-browser-runs-evidence-worksheets-and-owned-host-labs" aria-label="Link to this section">#</a></h2>
+<p>The course teaches Kubernetes from object anatomy through controlled platform changes. Each lesson says which activity the app can actually execute. A source manifest describes intent. An API response establishes acceptance and identity. Controller status describes reconciliation. A client response or data checksum establishes an application result. Cleanup has its own receipt. Keep these evidence levels separate when recording progress.</p>
+<h3 id="prepare-immediately-before-the-lab">Prepare immediately before the lab<a class="heading-anchor" href="#prepare-immediately-before-the-lab" aria-label="Link to this section">#</a></h3>
+<p>Build or download the explicitly approved images and tools before preparing the private Kubernetes session. The current lease lasts fifteen minutes, so prepare immediately before starting the broker and running the bounded cases. If it expires before Run, the readiness guard should refuse it. Preserve learner source, stop the expired broker, release only the exact owned session through the host helper, and prepare a fresh session. Do not bypass expiry with ambient credentials or change the runtime to ignore the cleanup reserve. See the <a href="../../docker/kubernetes/README.md.html">owned preparation guide</a>.</p>
+<h3 id="the-current-bounded-browser-operation">The current bounded browser operation<a class="heading-anchor" href="#the-current-bounded-browser-operation" aria-label="Link to this section">#</a></h3>
+<p>The prepared <code>k8s-kind</code> worker accepts one fixed hello Deployment, an optional hello Service, and an optional hello-config ConfigMap. Alternatively it accepts one standalone hello-task Job. It uses the approved image <code>ds60sqlpy-k8s-fixture:0.2.0</code>, preloaded by the host, and <code>imagePullPolicy: Never</code>. It does not pull an image during Run. Read the actual current qualification receipt before claiming a platform works; source and unit tests alone do not establish it.</p>
+<p>The ConfigMap has one synthetic message, either hello or reviewer. Its admitted consumers are a fixed environment reference and a read-only <code>/config/message</code> projection. The fixed server exposes <code>/message</code> from its environment and <code>/file-message</code> from the current file contents. Startup delay is zero or three seconds. Readiness, startup and liveness probes use the fixed local paths and bounded thresholds described by each source.</p>
+<p>The finite Job has one completion and one parallel Pod, at most one retry and a 5-30 second active deadline. The only learner-selected task outcomes are a fixed success or an injected failure. Success prints an exact synthetic ledger with three accepted rows, two rejected rows and total 35. The controller verifies Job and Pod ownership, container exit status and bounded output. It never accepts an arbitrary Python command, shell fragment, remote URL or image.</p>
+<p>Every browser operation uses a private lease that names one owned cluster and namespace identity. It creates only fixed resources, waits within a deadline and cleans its recorded UIDs using owner and per-Run nonce checks. A lost create response is reconciled only if the object proves the same nonce. A same-name replacement is preserved. The private cluster lease remains until the host&#x27;s explicit release operation.</p>
+<p>Because a Run cleans up afterward, it is not a persistent interactive cluster session. Reapplying a new pad starts another one-shot operation, not a rolling update of the previous Run&#x27;s object. Lessons about Pod deletion, live ConfigMap updates, revisions or state recovery explicitly identify their separate host-lab steps. A one-shot success cannot serve as evidence for those stateful transitions.</p>
+<h3 id="what-the-prepared-worker-does-not-provide">What the prepared worker does not provide<a class="heading-anchor" href="#what-the-prepared-worker-does-not-provide" aria-label="Link to this section">#</a></h3>
+<div class="table-wrap"><table><thead><tr>
+<th>Activity</th>
+<th>Required separate capability</th>
+</tr></thead><tbody>
+<tr>
+<td>Pod deletion or live update of an existing workload</td>
+<td>A stateful owned operation with recorded before/after UIDs and field ownership</td>
+</tr>
+<tr>
+<td>Secret inspection or synthetic Secret mounts</td>
+<td>A dedicated teacher-provided synthetic fixture and scoped access, absent from the normal worker</td>
+</tr>
+<tr>
+<td>NetworkPolicy enforcement</td>
+<td>A policy-capable CNI plus measured allowed/denied traffic paths</td>
+</tr>
+<tr>
+<td>PVC/StatefulSet persistence</td>
+<td>A qualified StorageClass and an explicit retention/reclaim policy</td>
+</tr>
+<tr>
+<td>Gateway/Ingress/TLS</td>
+<td>Preinstalled controller, Gateway/route permissions, loopback listener and verified synthetic trust material</td>
+</tr>
+<tr>
+<td>CRD/operator/admission policy</td>
+<td>Host-provisioned reviewed cluster-scoped definitions and namespaced exercise instances</td>
+</tr>
+<tr>
+<td>Node drain, disruption or autoscaling</td>
+<td>Exclusive qualified node/metrics topology and bounded host operations</td>
+</tr>
+<tr>
+<td>Control-plane snapshots or replacement clusters</td>
+<td>Separate owned cluster receipts and distinct application-data backup evidence</td>
+</tr>
+<tr>
+<td>Helm/Kustomize rendering</td>
+<td>Already prepared pinned local tools and vendored inputs, with no downloads during a lesson</td>
+</tr>
+</tbody></table></div>
+<p>These chapters remain complete reading and host-lab guides when their extra capability is absent. Their synthetic manifests and traces let you reason through the mechanism offline. Label those results synthetic, and leave the live acceptance row unavailable instead of inventing a success transcript.</p>
+<h3 id="start-from-an-owned-receipt">Start from an owned receipt<a class="heading-anchor" href="#start-from-an-owned-receipt" aria-label="Link to this section">#</a></h3>
+<p>Use the <a href="../../docker/kubernetes/README.md.html">preparation guide</a> and <a href="../../docs/modules-runtime.md.html#prepare-and-run-the-owned-kubernetes-lab">runtime walkthrough</a>. The host receipt identifies the cluster, namespace, namespace UID, owner nonce, expiry and approved capabilities. Credentials remain in the private runtime directory, outside learner progress, exports and source control. Never paste a token or kubeconfig content into a pad, screenshot or report.</p>
+<p>A namespace name is not enough: names can be deleted and reused. Compare the recorded namespace UID and ownership marker with a fresh readback before a mutation. The same rule applies to cleanup of objects. A failed identity check means the intended target has not been established; do not fall back to current-context or a default namespace.</p>
+<p>The ordinary worker Role has only its reviewed namespaced resource actions and readback. It cannot read Secrets, execute inside Pods, create arbitrary roles, install a controller, patch Nodes or create namespaces. A denied operation is sometimes the expected evidence of least privilege, not a reason to broaden credentials.</p>
+<h3 id="read-only-host-observations-with-explicit-targeting">Read-only host observations with explicit targeting<a class="heading-anchor" href="#read-only-host-observations-with-explicit-targeting" aria-label="Link to this section">#</a></h3>
+<p>The following examples assume an already provisioned capability and environment variables copied from its nonsecret path/context/namespace fields. They do not create a cluster or discover an ambient target. Run from the repository root. Substitute the exact lesson resource in later commands only when the chapter names it and the receipt permits it.</p>
+<p>POSIX shell:</p>
+<pre><code class="language-sh">: &quot;${LAB_KUBECONFIG:?Use the private path from the owned receipt}&quot;
+: &quot;${LAB_CONTEXT:?Use the exact context from the owned receipt}&quot;
+: &quot;${LAB_NAMESPACE:?Use the exact namespace from the owned receipt}&quot;
+kubectl --kubeconfig &quot;$LAB_KUBECONFIG&quot; --context &quot;$LAB_CONTEXT&quot; --namespace &quot;$LAB_NAMESPACE&quot; get deployment hello -o json</code></pre>
+<p>PowerShell:</p>
+<pre><code class="language-powershell">if (-not $env:LAB_KUBECONFIG -or -not $env:LAB_CONTEXT -or -not $env:LAB_NAMESPACE) {
+    throw &#x27;Use the private path, context and namespace from the owned receipt.&#x27;
+}
+&amp; kubectl --kubeconfig $env:LAB_KUBECONFIG --context $env:LAB_CONTEXT --namespace $env:LAB_NAMESPACE get deployment hello -o json
+if ($LASTEXITCODE -ne 0) { throw &#x27;The explicit owned-target read failed.&#x27; }</code></pre>
+<p>Keep the explicit arguments on every call. The examples intentionally fail when a targeting variable is absent. Do not use <code>kubectl config use-context</code>, overwrite a default kubeconfig or select a production/shared context to make a lesson work.</p>
+<p>For a readback, retain only relevant nonsecret fields: name, namespace, UID, owner references, generation, observedGeneration, conditions and bounded diagnostic excerpts. Events and logs can contain application data, so inspect synthetic fixtures and avoid copying real credentials or unrelated tenant information. A log line describes a process event; it does not replace an API identity or client correctness check.</p>
+<h3 id="apply-and-cleanup-are-separate-controlled-operations">Apply and cleanup are separate controlled operations<a class="heading-anchor" href="#apply-and-cleanup-are-separate-controlled-operations" aria-label="Link to this section">#</a></h3>
+<p>Browser-source YAML omits namespace because the reviewed operation binds it from the lease. Host-lab JSON examples also avoid pretending that a hard-coded namespace is your actual target. A host capability must bind the target, inject ownership markers, record returned UIDs and enforce its resource allowlist before applying them. A static JSON <code>List</code> is an inspectable manifest collection, not authorization to apply every listed resource to any cluster.</p>
+<p>Do not substitute a broad <code>kubectl apply -f</code> or <code>delete namespace</code> for a missing capability. For advanced host practice, the teacher/operator prepares the reviewed resource set in an exclusive disposable scope and supplies the exact operation and cleanup contract. Cluster-scoped prerequisites such as a CRD or controller belong to that host preparation, not the learner&#x27;s namespaced credentials.</p>
+<p>Cleanup compares namespace identity, object name, owner marker, Run nonce and UID. The API deletion includes a UID precondition so a same-name replacement cannot be removed between read and delete. The worker reserves fresh cleanup time after work timeout or cancellation. If cleanup cannot be established, retain the private recovery receipt and report the remaining resource identity; do not erase unrelated objects or prune the engine.</p>
+<p>Stateful lessons also need a data-retention decision. Deleting a Pod, PVC, PV and underlying storage are different actions. A reclaim policy is not a backup. Record whether synthetic data should survive the exercise and verify a checksum after any recovery before declaring it successful.</p>
+<h3 id="make-a-useful-evidence-packet">Make a useful evidence packet<a class="heading-anchor" href="#make-a-useful-evidence-packet" aria-label="Link to this section">#</a></h3>
+<p>For each exercise record the expected mechanism, exact input or source change, target receipt identity without credentials, observed object UIDs/conditions, application or data result, and cleanup outcome. Include a negative case that distinguishes the intended mechanism from a plausible shortcut. For example, a Running Pod can be unready; a Service can exist without eligible backends; a Job count can be inconsistent with an unrelated Pod; and a Ready restored application can still contain the wrong data.</p>
+<p>The offline <code>*_checks.py</code> programs use only authored synthetic data and standard-library calculations. They make no Kubernetes API calls. Their passing result proves that the teaching calculation matches its fixture, not that a controller, CNI, storage driver or host platform was exercised. The learner worksheet preserves predictions and explanations separately from official solution files.</p></article>
+  </main>
+</body>
+</html>

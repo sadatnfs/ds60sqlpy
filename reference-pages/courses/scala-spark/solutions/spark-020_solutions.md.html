@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>spark-020: Explained paired reference solutions · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>spark-020: Explained paired reference solutions</h1>
+      <p class="source-path">Generated from <code>courses/scala-spark/solutions/spark-020_solutions.md</code></p>
+    </header>
+    <article class="document"><h2 id="spark-020-explained-paired-reference-solutions">spark-020: Explained paired reference solutions<a class="heading-anchor" href="#spark-020-explained-paired-reference-solutions" aria-label="Link to this section">#</a></h2>
+<p>Read the <a href="../guides/spark-020.md.html">guide</a> and attempt one language first. The <a href="spark-020_solution.scala.html">Scala reference</a> and <a href="spark-020_solution.py.html">PySpark reference</a> are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.</p>
+<h3 id="exercises-and-reasoning">Exercises and reasoning<a class="heading-anchor" href="#exercises-and-reasoning" aria-label="Link to this section">#</a></h3>
+<h4 id="exercise-1-establish-logical-content-independently-of-layout">Exercise 1: Establish logical content independently of layout<a class="heading-anchor" href="#exercise-1-establish-logical-content-independently-of-layout" aria-label="Link to this section">#</a></h4>
+<p>Return the ordered list of(id, key, value) tuples for the declared 24-row fixture. Compare its full bag with the literal arithmetic rule and compute count, distinct IDs, sum(id), sum(value).</p>
+<p><strong>Expected:</strong> IDs 0..23 appear once, key=id%4, value=10*id. Metrics are 24,24,276,2760.</p>
+<pre><code class="language-scala">def canonical(frame: DataFrame): Seq[(Long,Long,Long)] = {
+  frame.select(&quot;id&quot;,&quot;key&quot;,&quot;value&quot;).orderBy(&quot;id&quot;).collect().toSeq.map(r =&gt; (r.getLong(0),r.getLong(1),r.getLong(2)))
+}</code></pre>
+<pre><code class="language-python">def canonical(frame):
+    return [tuple(r) for r in frame.select(&quot;id&quot;,&quot;key&quot;,&quot;value&quot;).orderBy(&quot;id&quot;).collect()]</code></pre>
+<p>The sorted tuple list is a representation for comparison, not a claim that the underlying relation is intrinsically ordered. It retains every declared field and occurrence. The aggregate checks provide readable diagnostics if a future implementation drops or repeats data, but the full bag comparison is what prevents compensating errors from passing accidentally.</p>
+<p><strong>Verification evidence:</strong> Assert every canonical tuple and all four aggregate values.</p>
+<h4 id="exercise-2-request-keyed-redistribution-and-test-colocation">Exercise 2: Request keyed redistribution and test colocation<a class="heading-anchor" href="#exercise-2-request-keyed-redistribution-and-test-colocation" aria-label="Link to this section">#</a></h4>
+<p>Return facts repartitioned to 6 partitions by key. Record its partition count and check that each logical key is observed in exactly one execution partition.</p>
+<p><strong>Expected:</strong> Six partitions requested; all 24 rows unchanged. Each of four keys has one observed partition ID; different keys may share one.</p>
+<pre><code class="language-scala">def keyedLayout(facts: DataFrame): DataFrame = {
+  facts.repartition(6,col(&quot;key&quot;))
+}</code></pre>
+<pre><code class="language-python">def keyed_layout(facts):
+    return facts.repartition(6,&quot;key&quot;)</code></pre>
+<p>Hash repartitioning expresses equal-key colocation, not one partition per key. The assertion tolerates collisions between distinct keys and does not attach meaning to a numeric partition index. Logical equality is checked independently so a distribution experiment cannot be judged successful merely because the requested partition count was achieved.</p>
+<p><strong>Verification evidence:</strong> Assert partition metadata 6, canonical equality and per-key countDistinct(partition_id)=1.</p>
+<h4 id="exercise-3-reduce-partitions-without-assuming-balanced-redistribution">Exercise 3: Reduce partitions without assuming balanced redistribution<a class="heading-anchor" href="#exercise-3-reduce-partitions-without-assuming-balanced-redistribution" aria-label="Link to this section">#</a></h4>
+<p>Coalesce a six-partition input to 2 and return it. Separately request coalesce 10 on the original four-partition relation. Preserve canonical content in both cases.</p>
+<p><strong>Expected:</strong> The first has 2 partitions; the attempted increase remains 4. Both retain the 24-row bag and sum 2760.</p>
+<pre><code class="language-scala">def reduceLayout(frame: DataFrame): DataFrame = {
+  frame.coalesce(2)
+}</code></pre>
+<pre><code class="language-python">def reduce_layout(frame):
+    return frame.coalesce(2)</code></pre>
+<p>The result demonstrates reduction and the absence of expansion for this classic Spark transformation. It does not prove equal partition sizes or a performance improvement. A skewed source can remain skewed after coalescing, and reducing too far can remove useful parallel work. The reference keeps AQE disabled so adaptive partition changes do not confuse this isolated observation.</p>
+<p><strong>Verification evidence:</strong> Assert both partition counts and complete canonical equality.</p>
+<h4 id="exercise-4-reconcile-an-occupied-partition-ledger">Exercise 4: Reconcile an occupied-partition ledger<a class="heading-anchor" href="#exercise-4-reconcile-an-occupied-partition-ledger" aria-label="Link to this section">#</a></h4>
+<p>Return partition_id, row_count, id_total for occupied partitions of the supplied relation. Record total partition metadata separately and do not manufacture empty-partition rows.</p>
+<p><strong>Expected:</strong> Ledger row_count sums 24 and id_total sums 276; each recorded partition ID lies in[0, total_partitions). Occupied count may be lower than total.</p>
+<pre><code class="language-scala">def partitionLedger(frame: DataFrame): DataFrame = {
+  frame.select(col(&quot;id&quot;),spark_partition_id().as(&quot;partition_id&quot;)).groupBy(&quot;partition_id&quot;).agg(count(lit(1)).as(&quot;row_count&quot;),sum(&quot;id&quot;).as(&quot;id_total&quot;))
+}</code></pre>
+<pre><code class="language-python">def partition_ledger(frame):
+    return frame.select(&quot;id&quot;,F.spark_partition_id().alias(&quot;partition_id&quot;)).groupBy(&quot;partition_id&quot;).agg(F.count(F.lit(1)).alias(&quot;row_count&quot;),F.sum(&quot;id&quot;).alias(&quot;id_total&quot;))</code></pre>
+<p>The ledger turns a physical layout into inspectable run evidence while reconciling it to the logical population. Empty partitions lack rows and are absent from the grouped result, so metadata is needed to report the total. Persisting partition IDs as business identities would be a mistake because a later shuffle or different plan can change them.</p>
+<p><strong>Verification evidence:</strong> Assert reconciliation and partition-ID bounds for both keyed 6 and coalesced 2 layouts.</p>
+<h4 id="exercise-5-verify-ordering-only-within-its-promised-scope">Exercise 5: Verify ordering only within its promised scope<a class="heading-anchor" href="#exercise-5-verify-ordering-only-within-its-promised-scope" aria-label="Link to this section">#</a></h4>
+<p>Return a relation sorted within each partition by key ascending, id ascending. Inspect the sequence of(key, id) pairs within each recorded partition and preserve the logical bag.</p>
+<p><strong>Expected:</strong> Every occupied partition sequence is sorted; the complete canonical relation is unchanged. No raw global collect sequence is required.</p>
+<pre><code class="language-scala">def localOrder(frame: DataFrame): DataFrame = {
+  frame.sortWithinPartitions(col(&quot;key&quot;),col(&quot;id&quot;))
+}</code></pre>
+<pre><code class="language-python">def local_order(frame):
+    return frame.sortWithinPartitions(&quot;key&quot;,&quot;id&quot;)</code></pre>
+<p>The operator promises order inside a partition and the test checks exactly that scope. It avoids the common but fragile test that an inadequately specified global order must visibly change or be unsorted. Coincidental global ordering on a tiny fixture is compatible with a weaker contract. Consumers needing a stable global presentation must request it explicitly.</p>
+<p><strong>Verification evidence:</strong> Assert per-partition sorted sequences and canonical equality without asserting that raw concatenation must be sorted or unsorted.</p>
+<h4 id="exercise-6-create-a-globally-ordered-bounded-preview">Exercise 6: Create a globally ordered bounded preview<a class="heading-anchor" href="#exercise-6-create-a-globally-ordered-bounded-preview" aria-label="Link to this section">#</a></h4>
+<p>Order key descending then event identity id ascending and return the first 5 rows. Repeat after several input layouts.</p>
+<p><strong>Expected:</strong> IDs[3,7,11,15,19], allkey 3 and values[30,70,110,150,190]. The final sixthkey 3 row is outside the limit.</p>
+<pre><code class="language-scala">def preview(frame: DataFrame): Seq[(Long,Long,Long)] = {
+  frame.orderBy(col(&quot;key&quot;).desc,col(&quot;id&quot;).asc).limit(5).select(&quot;id&quot;,&quot;key&quot;,&quot;value&quot;).collect().toSeq.map(r =&gt; (r.getLong(0),r.getLong(1),r.getLong(2)))
+}</code></pre>
+<pre><code class="language-python">def preview(frame):
+    return [tuple(r) for r in frame.orderBy(F.col(&quot;key&quot;).desc(),F.col(&quot;id&quot;).asc()).limit(5).select(&quot;id&quot;,&quot;key&quot;,&quot;value&quot;).collect()]</code></pre>
+<p>The complete ordering converts a relation into a specified display sequence before selecting a bounded prefix. A key-only sort leaves same-key peers unresolved; an unordered limit chooses an arbitrary subset. The reference compares every displayed identity and value across layouts, providing a reusable pattern for deterministic small previews without implying that a full production result should be collected on the driver.</p>
+<p><strong>Verification evidence:</strong> Assert all five ordered tuples from original, keyed and coalesced inputs.</p>
+<h3 id="execution-and-interpretation">Execution and interpretation<a class="heading-anchor" href="#execution-and-interpretation" aria-label="Link to this section">#</a></h3>
+<p>Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program,so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations,partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit,and any additional owned file/query lifecycle is described in the lesson.</p></article>
+  </main>
+</body>
+</html>

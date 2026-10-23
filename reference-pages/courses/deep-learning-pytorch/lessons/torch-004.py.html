@@ -123,27 +123,27 @@
 <span> </span>
 <span># Exercise 1: Compute residual reductions</span>
 <span># Use residuals[1, -1, 2] against zero targets.</span>
-<span># Expected: squared entries1, 1, 4; sum6; mean2.</span>
+<span># Expected: squared entries 1, 1, 4; sum 6; mean 2.</span>
 <span> </span>
 <span># Exercise 2: Duplicate the batch</span>
 <span># Repeat every residual twice and compare reductions.</span>
-<span># Expected: sum12; mean2.</span>
+<span># Expected: sum 12; mean 2.</span>
 <span> </span>
 <span># Exercise 3: Compare derivative scale</span>
-<span># Differentiate sum and mean squared loss for a fresh3-entry tensor.</span>
-<span># Expected: sum gradient equals3 times mean gradient.</span>
+<span># Differentiate sum and mean squared loss for a fresh 3-entry tensor.</span>
+<span># Expected: sum gradient equals 3 times mean gradient.</span>
 <span> </span>
 <span># Exercise 4: Inspect a feature denominator</span>
 <span># Use a2x2 residual matrix of ones and mean reduction.</span>
-<span># Expected: loss1 and4 participating elements.</span>
+<span># Expected: loss 1 and 4 participating elements.</span>
 <span> </span>
 <span># Exercise 5: Mask numerator and denominator together</span>
 <span># Use losses[1, 4, 100] with mask True, True, False.</span>
-<span># Expected: valid mean2.5, not5/3.</span>
+<span># Expected: valid mean 2.5, not 5/3.</span>
 <span> </span>
 <span># Exercise 6: Separate a metric from the objective</span>
 <span># Compare mean absolute residual and mean squared residual for[1, -1, 2].</span>
-<span># Expected: MAE4/3; MSE2.</span>
+<span># Expected: MAE 4/3; MSE 2.</span>
 <span> </span>
 <span>if __name__ == &quot;__main__&quot;:</span>
 <span>    print(&quot;Read the guide and implement the six exercises in your saved copy.&quot;)</span>

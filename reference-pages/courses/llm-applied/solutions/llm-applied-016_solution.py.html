@@ -127,29 +127,52 @@
 <span> </span>
 <span>def verify():</span>
 <span>    # Exercise 1: Count and orient parameters</span>
-<span>    w=torch.eye(8); a=nn.Parameter(torch.ones((8,2))/8); b=nn.Parameter(torch.zeros((2,8))); rank=2; alpha=4; scale=alpha/rank; x=torch.ones((1,8))</span>
-<span>    assert w.numel()==64 and a.numel()+b.numel()==32 and scale==2</span>
+<span>    w = torch.eye(8)</span>
+<span>    a = nn.Parameter(torch.ones((8, 2)) / 8)</span>
+<span>    b = nn.Parameter(torch.zeros((2, 8)))</span>
+<span>    rank = 2</span>
+<span>    alpha = 4</span>
+<span>    scale = alpha / rank</span>
+<span>    x = torch.ones((1, 8))</span>
+<span>    assert w.numel() == 64</span>
+<span>    assert a.numel() + b.numel() == 32</span>
+<span>    assert scale == 2</span>
 <span> </span>
 <span>    # Exercise 2: Prove zero-delta initialization</span>
-<span>    initial=x@(w+scale*(a@b)); saved=w.clone()</span>
-<span>    assert torch.equal(initial,x@w) and torch.equal(a@b,torch.zeros((8,8)))</span>
+<span>    initial = x @ (w + scale * (a @ b))</span>
+<span>    saved = w.clone()</span>
+<span>    assert torch.equal(initial, x @ w)</span>
+<span>    assert torch.equal(a @ b, torch.zeros((8, 8)))</span>
 <span> </span>
 <span>    # Exercise 3: Inspect the first gradients</span>
-<span>    loss=initial.square().mean(); loss.backward()</span>
-<span>    assert torch.count_nonzero(a.grad).item()==0 and torch.count_nonzero(b.grad).item()&gt;0 and w.grad is None</span>
+<span>    loss = initial.square().mean()</span>
+<span>    loss.backward()</span>
+<span>    assert a.grad is not None and b.grad is not None</span>
+<span>    assert torch.count_nonzero(a.grad).item() == 0</span>
+<span>    torch.testing.assert_close(b.grad, torch.full((2, 8), 0.5), atol=1e-6, rtol=0)</span>
+<span>    assert w.grad is None</span>
 <span> </span>
 <span>    # Exercise 4: Take an adapter-only step</span>
-<span>    before_b=b.detach().clone(); opt=torch.optim.SGD([a,b],lr=.1); opt.step(); after=x@(w+scale*(a@b))</span>
-<span>    assert not torch.equal(before_b,b) and after.square().mean()&lt;loss and torch.equal(w,saved)</span>
+<span>    before_b = b.detach().clone()</span>
+<span>    optimizer = torch.optim.SGD([a, b], lr=0.1)</span>
+<span>    optimizer.step()</span>
+<span>    after = x @ (w + scale * (a @ b))</span>
+<span>    assert not torch.equal(before_b, b)</span>
+<span>    torch.testing.assert_close(b, torch.full((2, 8), -0.05), atol=1e-6, rtol=0)</span>
+<span>    torch.testing.assert_close(after, torch.full((1, 8), 0.8), atol=1e-6, rtol=0)</span>
+<span>    torch.testing.assert_close(after.square().mean(), torch.tensor(0.64), atol=1e-6, rtol=0)</span>
+<span>    assert torch.equal(w, saved)</span>
 <span> </span>
 <span>    # Exercise 5: Merge without changing the base</span>
-<span>    merged=w.detach().clone()+scale*(a@b).detach()</span>
-<span>    torch.testing.assert_close(x@merged,after.detach(),atol=1e-6,rtol=0)</span>
-<span>    assert torch.equal(w,saved)</span>
+<span>    merged = w.detach().clone() + scale * (a @ b).detach()</span>
+<span>    torch.testing.assert_close(x @ merged, after.detach(), atol=1e-6, rtol=0)</span>
+<span>    assert torch.equal(w, saved)</span>
 <span> </span>
 <span>    # Exercise 6: Inspect rank and scaling consequences</span>
-<span>    delta=(a@b).detach(); assert int(torch.linalg.matrix_rank(delta))&lt;=2</span>
-<span>    torch.testing.assert_close((4/rank)*delta,2*((2/rank)*delta),atol=1e-6,rtol=0)</span>
+<span>    delta = (a @ b).detach()</span>
+<span>    assert int(torch.linalg.matrix_rank(delta)) == 1</span>
+<span>    assert int(torch.linalg.matrix_rank(delta)) &lt;= rank</span>
+<span>    torch.testing.assert_close((4 / rank) * delta, 2 * ((2 / rank) * delta), atol=1e-6, rtol=0)</span>
 <span>    return {&quot;checks&quot;: 6, &quot;status&quot;: &quot;passed&quot;}</span>
 <span> </span>
 <span> </span>

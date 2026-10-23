@@ -126,6 +126,49 @@
 <p><strong>Subject-assistant artifact:</strong> The corpus,policies,code,evaluation and model identities needed for review.</p>
 <h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
 <p>The Assistant class stores versioned documents and an allowed-scope set. It filters before matching an authored question-to-evidence map, returns a cited source span for supported definitions, and abstains otherwise. A separate conversion tool validates integer counts and a positive denominator. Each answer trace names the corpus version and admitted document ID. Evaluation uses fixed question IDs and expected statuses, not a self-reported confidence score. The final decision requires all boundary checks and reports unexecuted production surfaces explicitly.</p>
+<h3 id="audit-the-complete-local-path-without-inventing-missing-integration">Audit the complete local path without inventing missing integration<a class="heading-anchor" href="#audit-the-complete-local-path-without-inventing-missing-integration" aria-label="Link to this section">#</a></h3>
+<p>At construction, the Assistant copies only documents whose scope appears in the supplied set. A public instance therefore lacks private-v1 in its internal document dictionary. answer then maps a fixed question key to a document ID, retrieves that admitted document and returns its first sentence with versioned character offsets. An unsupported or excluded target returns unknown with no restricted document identity in the response.</p>
+<p>This is an explicit lookup-and-extraction baseline. It does not embed a natural-language question, execute BM25, learn a retrieval policy or generate a new paraphrase. The controlled map makes identity and disclosure behavior transparent. A broader natural-language interface would need its own intent mapping and retrieval evaluation rather than inheriting success from these exact keys.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Capability</th>
+<th>Local capstone evidence</th>
+<th>Separate evidence still needed for a larger assistant</th>
+</tr></thead><tbody>
+<tr>
+<td>Scope filtering</td>
+<td>Restricted target absent from public instance</td>
+<td>Authenticated dynamic policy integration</td>
+</tr>
+<tr>
+<td>Source extraction</td>
+<td>Exact first-sentence slice and version</td>
+<td>General claim support and conflict handling</td>
+</tr>
+<tr>
+<td>Numerical calculation</td>
+<td>Validated3/10=0.3 and invalid-count rejection</td>
+<td>Real input provenance and analysis design</td>
+</tr>
+<tr>
+<td>Task statuses</td>
+<td>Three fixed expected statuses match</td>
+<td>Independent question families and utility</td>
+</tr>
+<tr>
+<td>Model generation</td>
+<td>Not invoked by this baseline</td>
+<td>Actual candidate outputs and grounding evaluation</td>
+</tr>
+</tbody></table></div>
+<p>The three status cases include one answered definition and two correct unknowns: missing comet evidence and a restricted threshold under public scope. Status accuracy is3/3, but answer coverage is1/3. That is appropriate for these authored cases; it is not evidence that every future question is answered correctly. A high status score can coexist with low usefulness if the evaluation contains too many easy refusals.</p>
+<p>Citation integrity is checked separately by slicing the original document. This catches a corrupted span even if status remains answered. It does not prove that the first sentence contains every caveat needed by a future question. The metric document&#x27;s second sentence excludes test accounts, while the returned first sentence gives the formula. A question requiring eligibility details would need the additional span; the current fixed key is not a general policy-synthesis test.</p>
+<p>The conversion helper accepts integer purchases and visits with 0&lt;=purchases&lt;=visits and a positive denominator. Its0.3 output is descriptive arithmetic under the stated counting rule. Source evidence defines eligible visits, but actual eligible counts still need validated observations. Neither this ratio nor the assistant&#x27;s explanation establishes sampling uncertainty or a causal effect.</p>
+<p>The instance captures its permitted documents at construction. It does not dynamically reevaluate revocations, implement the previous chapter&#x27;s freshness gate or connect to a real identity provider. Those earlier components illustrate contracts that a larger service should integrate and test. Their separate existence in the course does not mean this small class already exercises them end to end.</p>
+<p>The optional pretrained recipe supplies another real but separate result: training, reload and generation executed, while the formula in its generated answer was incorrect despite supplied evidence. The capstone&#x27;s local receipt correctly says pretrained_generation_executed=False for this particular run. It must not be read as a global denial that the separate recipe ran, or as a reason to discard its quality failure. A release report should reference both artifacts and retain their distinct scopes.</p>
+<h4 id="interview-reasoning-with-explanatory-answers">Interview reasoning with explanatory answers<a class="heading-anchor" href="#interview-reasoning-with-explanatory-answers" aria-label="Link to this section">#</a></h4>
+<p><strong>Why can a successful capstone still conclude no-go?</strong> Its local contracts pass while required operational and domain-quality evidence remains absent or has failed. A bounded success is useful without satisfying every release criterion.</p>
+<p><strong>What would justify replacing the extractive stage with generation?</strong> Measured utility on cases requiring synthesis or explanation, with access, supported claims, citations, deterministic calculations and appropriate abstention preserved. Fluency alone does not establish that improvement.</p>
+<p><strong>How do you know whether all previous components are integrated?</strong> Trace the actual call path and execution artifacts. A list of available modules or completed lessons is not an end-to-end runtime receipt.</p>
 <h3 id="exercise-1-answer-a-supported-domain-definition">Exercise 1: Answer a supported domain definition<a class="heading-anchor" href="#exercise-1-answer-a-supported-domain-definition" aria-label="Link to this section">#</a></h3>
 <p>The question is: Ask the public assistant forconversion_definition.</p>
 <p>The baseline uses an explicit authored mapping so its evidence contract is transparent. A generative proposal stage would need separate support validation before returning the same answer shape.</p>

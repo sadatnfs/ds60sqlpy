@@ -96,3 +96,35 @@ def test_module_api_has_its_own_bounded_body_and_retains_authentication(
         server.shutdown()
         server.server_close()
         thread.join(timeout=5)
+
+
+def test_lesson_guidance_distinguishes_reading_direct_cpp_and_fixed_verifier(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from ds60sqlpy.module_service import ModuleService
+
+    monkeypatch.setattr("ds60sqlpy.module_service.rendered_targets", lambda catalog: {})
+    service = ModuleService(Catalog.load(), tmp_path / "module-state")
+    monkeypatch.setattr(
+        service.jobs.client,
+        "readiness",
+        lambda profile: {"profile": profile, "ready": False, "detail": "Test fixture"},
+    )
+    try:
+        reading = service.action({"action": "module-lesson", "lesson_id": "llm-001"})
+        assert reading["runtime_profile"] == "reading"
+        assert reading["setup_commands"] == []
+        assert "no code execution" in reading["runtime_guidance"]
+        assert "Run a complete example" not in reading["runtime_guidance"]
+        direct = service.action({"action": "module-lesson", "lesson_id": "cpp-002"})
+        assert direct["setup_commands"] == ["./classroom --profile cpp20"]
+        assert direct["verification_id"] is None
+        assert "then runs ./program" in direct["runtime_guidance"]
+        assert "verifier.o" not in direct["runtime_guidance"]
+        verified = service.action({"action": "module-lesson", "lesson_id": "cpp-009"})
+        assert verified["verification_id"] == "cpp-ownership-v1"
+        assert "-Dmain=ds60_learner_main" in verified["runtime_guidance"]
+        assert "verifier.o" in verified["runtime_guidance"]
+        assert "main is not the executed entry point" in verified["runtime_guidance"]
+    finally:
+        service.close()

@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>spark-016: Join cardinality, fanout, semi joins and NULL-safe keys · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>spark-016: Join cardinality, fanout, semi joins and NULL-safe keys</h1>
+      <p class="source-path">Generated from <code>courses/scala-spark/guides/spark-016.md</code></p>
+    </header>
+    <article class="document"><h2 id="spark-016-join-cardinality-fanout-semi-joins-and-null-safe-keys">spark-016: Join cardinality, fanout, semi joins and NULL-safe keys<a class="heading-anchor" href="#spark-016-join-cardinality-fanout-semi-joins-and-null-safe-keys" aria-label="Link to this section">#</a></h2>
+<p>Authored paired Scala/PySpark teaching content. The default fixtures are tiny,local and deterministic. Runtime acceptance,logical correctness and learner understanding remain separate evidence.</p>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Intermediate; approximately 120 minutes. Direct design prerequisites: <code>spark-015</code>. The prepared baseline is Spark 4.0.1,Scala binary2.13,JDK 17 and Python 3.12. Read the <a href="../execution-baseline.md.html">execution baseline</a>; a proposed future tuple is not a runtime receipt.</p>
+<h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
+<p>Open <code>spark-016</code> in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed <code>spark-local-scala</code> or <code>spark-local-python</code> profile,save your pad and run the complete source. Scala stages as <code>Main.scala</code> with <code>object Main</code>; Python stages as <code>main.py</code> with a main guard. Each program creates its own local[2] session,disables the UI,binds the driver to loopback and stops the session in finally. No external dataset,package download,JDBC connection or cloud service is requested.</p>
+<p>The <a href="../lessons/spark-016.scala.html">Scala learner</a> and <a href="../lessons/spark-016.py.html">PySpark learner</a> run two complete demonstrations and retain six explicit task stubs. Use the <a href="../solutions/spark-016_solutions.md.html">explained solutions</a> only after an attempt or an explicit worked comparison; the <a href="../solutions/spark-016_solution.scala.html">Scala reference</a> and <a href="../solutions/spark-016_solution.py.html">PySpark reference</a> contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Predict join output counts from key multiplicities before running a join.</li>
+<li>State the input and output grain,schema,NULL policy and ordering before executing a transformation.</li>
+<li>Compare each language implementation with independent literal expectations,not only with the other implementation.</li>
+</ul>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Join grain:</strong> The meaning of one output row, such as one matched fact/dimension pair or one original fact retained by membership.</li>
+</ul>
+<ul>
+<li><strong>Key multiplicity:</strong> The number of rows carrying a key on each side; an equality join emits their product for a matching nonnull key.</li>
+</ul>
+<ul>
+<li><strong>Semi join:</strong> A membership join returning left rows that have at least one right match without multiplying them by right-side matches.</li>
+</ul>
+<ul>
+<li><strong>Anti join:</strong> A membership join returning left rows with no right match under the chosen equality rule.</li>
+</ul>
+<ul>
+<li><strong>NULL-safe equality:</strong> An explicit comparison treating two NULL values as equal; it is a value rule, not proof that unknown entity IDs refer to the same entity.</li>
+</ul>
+<p>Before running a join, predict the output grain and row count. Key A appears in two facts and three dimension rows, so an ordinary inner equality join emits six A pairs. Key B contributes one more pair. Keys C and D have no dimension match, and the NULL fact key does not equal the NULL dimension key under ordinary SQL equality. The expected inner count is therefore seven.</p>
+<p>The fact amount belongs to a fact, not automatically to every joined pair as an independently additive measure. Joining A to three dimension versions repeats each A amount three times. The joined-pair sum becomes 120 cents even though the matched facts originally total 60. This is not an arithmetic error in SUM; it is a grain error if the result is presented as unduplicated fact revenue.</p>
+<p>A left join retains unmatched facts through one NULL-extended row each. Its count is ten: seven matched pairs plus C, D and the NULL-key fact. COUNT(*) counts all ten output rows, while COUNT(dimension_row) counts only seven actual matches. Inspect the nonnull right identity rather than assuming the left-join placeholder represents a dimension record.</p>
+<p>Semi and anti joins answer membership questions at fact grain. The semi result is IDs 1,2,3 and the anti result is 4,5,6. The three A dimension rows do not triple the semi result. Their complementary ID sets reconcile to all six facts under the same equality rule. Adding NULL-safe equality changes that membership policy, not merely an optimization detail.</p>
+<p>The diagnostic multiplicity ledger deliberately merges the NULL buckets with NULL-safe equality so their counts can be shown on one row, then predicts zero ordinary-equality matches for that bucket. This use of NULL-safe comparison in a diagnostic is separate from changing the actual fact join. In a real identity relationship, unknown keys are usually quarantined rather than assumed to refer to one common entity.</p>
+<p>The final enrichment gate requires a nonnull unique dimension key. The original dimension is rejected because A repeats and a NULL key exists. A supplied reviewed subset of rows 103,104,106 is then accepted. Selecting those rows is an explicit fixture decision, not a general instruction to choose the largest ingestion ID or dropDuplicates arbitrarily. The resulting left enrichment preserves all six facts and their 210-cent total.</p>
+<p>Both DataFrame and SQL forms are checked against literal pair identities. Matching aggregate counts alone would not reveal swapped dimension labels or a wrong NULL policy. The lesson is about relational correctness; broadcasting or repartitioning cannot repair an ambiguous dimension contract.</p>
+<h3 id="supplied-local-fixture">Supplied local fixture<a class="heading-anchor" href="#supplied-local-fixture" aria-label="Link to this section">#</a></h3>
+<p>The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.</p>
+<pre><code class="language-scala">import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types._
+
+val factSchema = StructType(Seq(StructField(&quot;fact_id&quot;,LongType,false),StructField(&quot;key&quot;,StringType,true),StructField(&quot;amount_cents&quot;,LongType,false)))
+val dimensionSchema = StructType(Seq(StructField(&quot;dimension_row&quot;,LongType,false),StructField(&quot;key&quot;,StringType,true),StructField(&quot;label&quot;,StringType,false)))
+val facts = spark.createDataFrame(spark.sparkContext.parallelize(Seq(Row(1L,&quot;A&quot;,10L),Row(2L,&quot;A&quot;,20L),Row(3L,&quot;B&quot;,30L),Row(4L,&quot;C&quot;,40L),Row(5L,null,50L),Row(6L,&quot;D&quot;,60L)),2),factSchema)
+val dimension = spark.createDataFrame(spark.sparkContext.parallelize(Seq(Row(101L,&quot;A&quot;,&quot;alpha1&quot;),Row(102L,&quot;A&quot;,&quot;alpha2&quot;),Row(103L,&quot;A&quot;,&quot;alpha3&quot;),Row(104L,&quot;B&quot;,&quot;beta&quot;),Row(105L,null,&quot;unknown&quot;),Row(106L,&quot;E&quot;,&quot;epsilon&quot;)),2),dimensionSchema)</code></pre>
+<pre><code class="language-python">from pyspark.sql import SparkSession, functions as F
+from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+
+fact_schema = StructType([StructField(&quot;fact_id&quot;,LongType(),False),StructField(&quot;key&quot;,StringType(),True),StructField(&quot;amount_cents&quot;,LongType(),False)])
+dimension_schema = StructType([StructField(&quot;dimension_row&quot;,LongType(),False),StructField(&quot;key&quot;,StringType(),True),StructField(&quot;label&quot;,StringType(),False)])
+facts = spark.createDataFrame([(1,&quot;A&quot;,10),(2,&quot;A&quot;,20),(3,&quot;B&quot;,30),(4,&quot;C&quot;,40),(5,None,50),(6,&quot;D&quot;,60)],schema=fact_schema)
+dimension = spark.createDataFrame([(101,&quot;A&quot;,&quot;alpha1&quot;),(102,&quot;A&quot;,&quot;alpha2&quot;),(103,&quot;A&quot;,&quot;alpha3&quot;),(104,&quot;B&quot;,&quot;beta&quot;),(105,None,&quot;unknown&quot;),(106,&quot;E&quot;,&quot;epsilon&quot;)],schema=dimension_schema)</code></pre>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-scala">val aFacts = facts.filter(col(&quot;key&quot;) === lit(&quot;A&quot;)).count()
+val aDimensions = dimension.filter(col(&quot;key&quot;) === lit(&quot;A&quot;)).count()
+assert(aFacts == 2L &amp;&amp; aDimensions == 3L &amp;&amp; aFacts * aDimensions == 6L)
+println(s&quot;A predicts ${aFacts * aDimensions} joined pairs&quot;)</code></pre>
+<pre><code class="language-python">a_facts = facts.filter(F.col(&quot;key&quot;) == F.lit(&quot;A&quot;)).count()
+a_dimensions = dimension.filter(F.col(&quot;key&quot;) == F.lit(&quot;A&quot;)).count()
+assert (a_facts, a_dimensions, a_facts*a_dimensions) == (2,3,6)
+print(&quot;A predicts&quot;, a_facts*a_dimensions, &quot;joined pairs&quot;)</code></pre>
+<p>The multiplication follows from every matching left occurrence pairing with every matching right occurrence. It predicts the six A rows before the join executes. A right-side duplicate is therefore a correctness consideration even if a physical join strategy handles it quickly.</p>
+<h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-scala">val comparison = spark.sql(&quot;SELECT CAST(NULL AS STRING) = CAST(NULL AS STRING) AS ordinary, CAST(NULL AS STRING) &lt;=&gt; CAST(NULL AS STRING) AS null_safe&quot;).first()
+assert(comparison.isNullAt(0) &amp;&amp; comparison.getBoolean(1))
+println(&quot;Ordinary equality is unknown;explicit NULL-safe equality is true&quot;)</code></pre>
+<pre><code class="language-python">comparison = spark.sql(&quot;SELECT CAST(NULL AS STRING) = CAST(NULL AS STRING) AS ordinary, CAST(NULL AS STRING) &lt;=&gt; CAST(NULL AS STRING) AS null_safe&quot;).first()
+assert tuple(comparison) == (None, True)
+print(&quot;Ordinary equality is unknown;explicit NULL-safe equality is true&quot;)</code></pre>
+<p>The comparison rules are visibly different. Choosing NULL-safe equality can intentionally match missing-value buckets, but it does not establish that two missing customer IDs denote the same customer. That semantic decision must precede the join implementation.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<h4 id="exercise-1-build-a-multiplicity-ledger-before-joining-facts">Exercise 1: Build a multiplicity ledger before joining facts<a class="heading-anchor" href="#exercise-1-build-a-multiplicity-ledger-before-joining-facts" aria-label="Link to this section">#</a></h4>
+<p>Return key, fact_rows, dimension_rows, predicted_inner for the union of key buckets. Merge NULL diagnostic buckets explicitly, but predict zero ordinary-equality pairs for NULL. Order keys with NULL last.</p>
+<p><strong>Expected result/shape:</strong> A:(2,3,6), B:(1,1,1), C:(1,0,0), D:(1,0,0), E:(0,1,0), NULL:(1,1,0). Predicted inner rows sum to 7.</p>
+<p><strong>Verify:</strong> Assert the full ledger and its summed predicted count, including unmatched right-only E and the NULL bucket.</p>
+<p><strong>Progressive hint:</strong> Aggregate each side first, full-join the small count tables with NULL-safe equality, and apply the ordinary-match rule separately.</p>
+<h4 id="exercise-2-verify-equality-pairs-and-quantify-fanout">Exercise 2: Verify equality pairs and quantify fanout<a class="heading-anchor" href="#exercise-2-verify-equality-pairs-and-quantify-fanout" aria-label="Link to this section">#</a></h4>
+<p>Return fact_id, dimension_row, amount_cents from an ordinary inner equality join. Compare both DataFrame and SQL pair identities with the seven literal expected pairs.</p>
+<p><strong>Expected result/shape:</strong> Facts 1 and 2 each match dimension rows 101,102,103; fact 3 matches 104. There are 7 pairs and the repeated joined amount totals 120, while matched fact amounts total 60.</p>
+<p><strong>Verify:</strong> Assert every pair, count 7 and pair-grain sum 120; compare a SQL join to the same pair list.</p>
+<p><strong>Progressive hint:</strong> Alias both sides to make the equality and projected identities unambiguous.</p>
+<h4 id="exercise-3-count-actual-matches-in-a-left-join">Exercise 3: Count actual matches in a left join<a class="heading-anchor" href="#exercise-3-count-actual-matches-in-a-left-join" aria-label="Link to this section">#</a></h4>
+<p>Return fact_id, dimension_row from an ordinary left equality join. Preserve unmatched facts with a NULL right identity and inspect rows ordered by fact_id, dimension_row.</p>
+<p><strong>Expected result/shape:</strong> There are 10 output rows but 7 nonnull dimension_row values. Facts 4,5,6 each have one NULL-extended row; all six fact IDs remain represented.</p>
+<p><strong>Verify:</strong> Assert the complete ordered pair/NULL list and distinguish COUNT(*)10 from COUNT(dimension_row)7.</p>
+<p><strong>Progressive hint:</strong> Use the right-side identity to count real matches instead of counting the left-join placeholder.</p>
+<h4 id="exercise-4-use-semi-and-anti-joins-for-membership">Exercise 4: Use semi and anti joins for membership<a class="heading-anchor" href="#exercise-4-use-semi-and-anti-joins-for-membership" aria-label="Link to this section">#</a></h4>
+<p>Return a pair of DataFrames containing matched and unmatched facts under ordinary equality, using left_semi and left_anti. Preserve fact rows without right-side fanout.</p>
+<p><strong>Expected result/shape:</strong> Semi IDs are[1,2,3], anti IDs[4,5,6]. Key A contributes two semi rows despite three dimension matches. Their bags reconcile to all six facts.</p>
+<p><strong>Verify:</strong> Assert both exact ID lists and their combined count 6; do not use distinct to repair an inner join.</p>
+<p><strong>Progressive hint:</strong> Membership operators retain left grain directly.</p>
+<h4 id="exercise-5-make-null-safe-matching-an-explicit-alternative">Exercise 5: Make NULL-safe matching an explicit alternative<a class="heading-anchor" href="#exercise-5-make-null-safe-matching-an-explicit-alternative" aria-label="Link to this section">#</a></h4>
+<p>Return fact_id, dimension_row from an inner join using NULL-safe key equality. Compare with ordinary equality and explain why the extra pair is a policy change.</p>
+<p><strong>Expected result/shape:</strong> The ordinary seven pairs plus(5,105) produce eight pairs. No C or D match is invented.</p>
+<p><strong>Verify:</strong> Assert all eight ordered pairs and isolate the extra NULL-key pair.</p>
+<p><strong>Progressive hint:</strong> Scala uses &lt;=&gt; and PySpark uses eqNullSafe for the explicit comparison.</p>
+<h4 id="exercise-6-gate-enrichment-on-a-reviewed-unique-dimension">Exercise 6: Gate enrichment on a reviewed unique dimension<a class="heading-anchor" href="#exercise-6-gate-enrichment-on-a-reviewed-unique-dimension" aria-label="Link to this section">#</a></h4>
+<p>Reject a dimension unless key is nonnull and unique, then left-enrich facts with label while retaining fact_id and amount_cents. The supplied reviewed dimension rows 103,104,106 are the explicit accepted fixture; do not invent an arbitrary duplicate winner.</p>
+<p><strong>Expected result/shape:</strong> The raw dimension fails. The reviewed subset yields six facts, total 210, and labels alpha 3, alpha 3, beta, NULL, NULL, NULL for IDs 1..6.</p>
+<p><strong>Verify:</strong> Catch raw-dimension rejection, assert every enriched row and reconcile count 6, total 210.</p>
+<p><strong>Progressive hint:</strong> Compare total dimension count with countDistinct(key) before the join; NULL keys also break equality.</p>
+<h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
+<p>If a joined amount doubles, calculate key multiplicities before adding distinct. If COUNT(*) suggests a right match for every left row, inspect the right identity and NULL-extended placeholders. If semi/anti results disagree with an inner-join-derived membership set, check the NULL equality policy. If a NULL-safe join merges unknown entities, review whether NULL denotes a category or missing identity. If a duplicate dimension has conflicting labels, obtain a valid business/version rule or reject it; broadcasting the ambiguity only makes the wrong join faster.</p>
+<h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
+<p>Explain the contract of <code>multiplicity</code> / <code>multiplicity</code> without reading its solution. Trace the specified boundary case,then explain the final exercise&#x27;s evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>Use the <a href="../README.md.html">course route</a> to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. Keep runtime/profile receipts separate from any cluster-performance or production-recovery claim.</p>
+<h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://spark.apache.org/docs/4.0.1/sql-ref-syntax-qry-select-join.html">Spark 4.0.1 join types</a>.</li>
+</ul>
+<ul>
+<li><a href="https://spark.apache.org/docs/4.0.1/sql-ref-null-semantics.html">Spark 4.0.1 NULL semantics</a>.</li>
+</ul>
+<h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through spark-016: Join cardinality, fanout, semi joins and NULL-safe keys.
+Read courses/scala-spark/guides/spark-016.md and courses/scala-spark/lessons/spark-016.scala;the paired sources are courses/scala-spark/lessons/spark-016.scala and courses/scala-spark/lessons/spark-016.py.
+Direct prerequisites: spark-015. Explain the schema,row grain and new Scala/Python/Spark syntax,ask me to predict a concrete result,then inspect my attempt. Give one hint at a time,review exact result and boundary evidence,and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
+Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies,start a remote service,reset existing checkpoints or alter unrelated learner work.
+Done when all six contracts have inspected evidence and I can explain the stated assumptions and a meaningful failure case.</code></pre></article>
+  </main>
+</body>
+</html>

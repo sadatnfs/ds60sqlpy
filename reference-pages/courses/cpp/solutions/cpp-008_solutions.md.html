@@ -121,25 +121,33 @@
 <p>A value copy has its own state. A reference is another name for an existing object and does not own its lifetime. <code>const</code> blocks mutation through that access path. A const reference can avoid copying a large vector, but it does not keep the vector alive after its owner is destroyed.</p>
 <h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>
 <p>The copy operation duplicates values into another owning vector. The const reference parameter creates no second vector and must not escape the call beyond its owner. The returned vector is different: it owns the doubled elements, so the caller may keep it after a temporary argument is destroyed. Const describes permitted access through an expression, while lifetime describes whether the object still exists. Neither concept substitutes for the other.</p>
+<h3 id="copies-aliases-and-lifetime-responsibility">Copies, aliases and lifetime responsibility<a class="heading-anchor" href="#copies-aliases-and-lifetime-responsibility" aria-label="Link to this section">#</a></h3>
+<p>Ownership answers who is responsible for keeping an object alive. A vector owns its element storage. A reference names an existing object without becoming another owner. A const reference prevents mutation through that particular access path, but it does not freeze every alias to the object or extend every lifetime automatically. Keeping those questions separate prevents many plausible but unsafe interfaces.</p>
+<p>In doubled, the const vector reference borrows the caller input for the call. <code>auto out=xs</code> then creates an independent vector copy. The loop uses int&amp; so each assignment changes an element of out rather than a temporary integer copy. Returning out by value produces an owning result. Copy elision or movement can make that return efficient without changing the basic correctness argument: the caller receives a value that owns its elements.</p>
+<p>The first complete program passes a temporary vector. That temporary remains alive through the function call, so the borrowed parameter is valid while doubled reads it. The returned vector owns different storage and survives after the temporary argument is destroyed. A function returning a reference to its local out would instead leave the caller with a reference to an object whose lifetime ended at return.</p>
+<p>The second program copies a const input and edits the copy. Constness of the source does not make the copied vector const. The two objects have separate state, so changing ys[0] does not change xs[0]. This is different from <code>const auto&amp; ys=xs</code>, which would create another read-only alias to the same vector and prohibit the assignment through ys.</p>
+<p>Choose parameter passing based on the interface. Small integers are commonly copied. A read-only large vector can be borrowed by const reference. A function that needs to retain an owned copy may accept by value and move into its storage. A mutation function can take a nonconst reference, but then the caller must understand the side effect. Avoid using references simply because they look faster: lifetime and aliasing are part of the cost.</p>
+<h3 id="debugging-the-contract">Debugging the contract<a class="heading-anchor" href="#debugging-the-contract" aria-label="Link to this section">#</a></h3>
+<p>A compiler error assigning through const is useful evidence of the access contract. A dangling reference may compile and fail unpredictably later, so successful compilation cannot prove lifetime safety. Draw the owner scope and the last use of each borrow. If a helper returns a reference or view, identify the surviving owner explicitly. If no owner survives, return an owning value instead of adding const or relying on an observed address.</p>
 <h3 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-cpp">auto out=doubled(std::vector&lt;int&gt;{2,4});</code></pre>
-<p>Expected: An owned result [4,8] survives the temporary argument.</p>
+<p>Expected: An owned result [4, 8] survives the temporary argument.</p>
 <h3 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-cpp">const std::vector&lt;int&gt; xs{2,4}; auto ys=xs; ys[0]=99;</code></pre>
-<p>Expected: xs stays [2,4]; ys becomes [99,4].</p>
+<p>Expected: xs stays [2, 4]; ys becomes [99, 4].</p>
 <h3 id="exercise-1-draw-owners">Exercise 1: Draw owners<a class="heading-anchor" href="#exercise-1-draw-owners" aria-label="Link to this section">#</a></h3>
 <p>Draw input, copied output and borrowed parameter.</p>
 <p><strong>Expected:</strong> Two owners and one temporary borrow, no extra owner for the reference.</p>
 <p><strong>Reasoning:</strong> References alias; vectors own storage.</p>
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
 <h3 id="exercise-2-predict-mutation">Exercise 2: Predict mutation<a class="heading-anchor" href="#exercise-2-predict-mutation" aria-label="Link to this section">#</a></h3>
-<p>Change output[0] to 99 after doubled([2,4]).</p>
+<p>Change output[0] to 99 after doubled([2, 4]).</p>
 <p><strong>Expected:</strong> Input first value 2; output first value 99.</p>
 <p><strong>Reasoning:</strong> The result owns independent elements.</p>
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
 <h3 id="exercise-3-write-a-const-observer">Exercise 3: Write a const observer<a class="heading-anchor" href="#exercise-3-write-a-const-observer" aria-label="Link to this section">#</a></h3>
 <p>Write size_of(const vector&lt;int&gt;&amp;) without mutation.</p>
-<p><strong>Expected:</strong> [2,4] gives 2; empty gives 0.</p>
+<p><strong>Expected:</strong> [2, 4] gives 2; empty gives 0.</p>
 <p><strong>Reasoning:</strong> A read-only observer does not need a value copy.</p>
 <p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
 <h3 id="exercise-4-diagnose-const-assignment">Exercise 4: Diagnose const assignment<a class="heading-anchor" href="#exercise-4-diagnose-const-assignment" aria-label="Link to this section">#</a></h3>

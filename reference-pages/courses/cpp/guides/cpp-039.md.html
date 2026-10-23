@@ -116,7 +116,6 @@
       <p class="source-path">Generated from <code>courses/cpp/guides/cpp-039.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-039-c-interfaces-and-loading-boundaries">cpp-039: C interfaces and loading boundaries<a class="heading-anchor" href="#cpp-039-c-interfaces-and-loading-boundaries" aria-label="Link to this section">#</a></h2>
-<p>Authored beta content. Content completion and runtime qualification are separate evidence.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Advanced; 120 minutes. Direct prerequisites: <code>cpp-017</code>, <code>cpp-023</code>, <code>cpp-027</code>.</p>
 <p>Learner artifact: <a href="../lessons/cpp-039.cpp.html">cpp-039.cpp</a>. Keep <a href="../solutions/cpp-039_solutions.md.html">official solutions</a> closed until an attempt. The immutable <a href="../fixtures/cpp-039-cases.json.html">case ledger</a> records exercise inputs and expected observations.</p>
@@ -128,55 +127,128 @@
 <p>Create returns a handle or failure; destroy releases it exactly once; getters validate pointers and report status. extern C controls linkage but the host still needs compatible architecture and calling conventions. Dynamic loading requires a separate platform-specific host test, not the single-file browser example.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>The opaque handle keeps C++ layout private, but its lifetime is still a public responsibility. A successful create must pair with the provider&#x27;s destroy function, which can be wrapped by a unique_ptr custom deleter in a C++ client. A pointer that has already been destroyed is not made safe by a null check. The lesson checks null arguments and proper ownership; dynamic symbol loading, ABI version negotiation and foreign-language use require separate host receipts.</p>
+<h3 id="opaque-handles-and-ownership-across-an-abi">Opaque handles and ownership across an ABI<a class="heading-anchor" href="#opaque-handles-and-ownership-across-an-abi" aria-label="Link to this section">#</a></h3>
+<p>An opaque handle hides a C++ implementation behind a pointer-shaped public interface. A consumer can pass the handle back to the provider without knowing the class layout. This reduces coupling to implementation details, but the handle still has a lifecycle:creation succeeds or fails, use requires a live valid handle, and destruction ends that lifetime.</p>
+<p>The create function catches allocation failure and returns null under its no-throw boundary. The caller checks that result before use. The read function returns a status code and writes through an output pointer only on success. The destroy function belongs to the provider, which keeps allocation and release responsibilities paired. A foreign consumer should not guess that its own delete or allocator is interchangeable.</p>
+<p>The C++ consumer wraps the raw handle in a unique_ptr with the provider destroy function as custom deleter. That makes cleanup follow scope while preserving the ABI&#x27;s release rule. The wrapper is a convenience on the C++ side; it is not part of the C-compatible signature. Other languages need their own lifetime wrapper or explicit finally/dispose discipline.</p>
+<p>The null-handle negative checks a defined rejection path. It cannot make an arbitrary dangling nonnull pointer safe. Calling read after destroy is a use-after-lifetime error even if the old address still looks plausible. If the interface needs protection against stale external identifiers, it requires a different validated handle table or generation design, not only a null test.</p>
+<p>extern &quot;C&quot; linkage and opaque layout are only part of ABI compatibility. Calling conventions, type widths, compiler settings, library loading and version negotiation can still matter. The single-file program demonstrates ownership and error semantics within one executable. A real shared-library consumer on each supported platform needs a separate build/load/run receipt.</p>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">Analyzer* p=analyzer_create(); int value=0; analyzer_read(p,&amp;value); analyzer_destroy(p);</code></pre>
-<p><strong>Expected:</strong> One successful create has exactly one matching destroy; initial value is 0.</p>
+<p><a href="../examples/cpp-039-example-1.cpp.html">Complete program 1</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;iostream&gt;
+#include &lt;memory&gt;
+
+struct Analyzer  {
+     int total=0;
+};
+
+extern &quot;C&quot; Analyzer* analyzer_create() noexcept  {
+     try {
+        return new Analyzer {
+        };
+    }catch(...) {
+        return nullptr;
+    }
+}
+extern &quot;C&quot; void analyzer_destroy(Analyzer* p) noexcept  {
+     delete p;
+}
+extern &quot;C&quot; int analyzer_read(const Analyzer* p,int* out) noexcept  {
+    if(!p||!out)return 1;
+    *out=p-&gt;total;
+    return 0;
+}
+int main() {
+    Analyzer* raw=analyzer_create();
+    if(!raw) return 1;
+    std::unique_ptr&lt;Analyzer,void(*)(Analyzer*)&gt; owner(raw,analyzer_destroy);
+    int value=-1;
+    assert(analyzer_read(owner.get(),&amp;value)==0 &amp;&amp; value==0);
+    std::cout &lt;&lt; &quot;cpp-039 example 1 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-039 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">assert(analyzer_read(nullptr,&amp;out)==1);</code></pre>
-<p><strong>Expected:</strong> Null handle is rejected without dereferencing it.</p>
+<p><a href="../examples/cpp-039-example-2.cpp.html">Complete program 2</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;iostream&gt;
+
+struct Analyzer  {
+     int total=0;
+};
+
+extern &quot;C&quot; Analyzer* analyzer_create() noexcept  {
+     try {
+        return new Analyzer {
+        };
+    }catch(...) {
+        return nullptr;
+    }
+}
+extern &quot;C&quot; void analyzer_destroy(Analyzer* p) noexcept  {
+     delete p;
+}
+extern &quot;C&quot; int analyzer_read(const Analyzer* p,int* out) noexcept  {
+    if(!p||!out)return 1;
+    *out=p-&gt;total;
+    return 0;
+}
+int main() {
+    int out=-1;
+    assert(analyzer_read(nullptr,&amp;out)==1);
+    assert(out==-1);
+    std::cout &lt;&lt; &quot;cpp-039 example 2 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-039 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-document-ownership">Exercise 1: Document ownership<a class="heading-anchor" href="#exercise-1-document-ownership" aria-label="Link to this section">#</a></h4>
 <p>Name who destroys a successfully created handle.</p>
 <p><strong>Expected result/shape:</strong> Caller invokes analyzer_destroy exactly once.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Caller invokes analyzer_destroy exactly once.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: The provider controls allocation and deallocation pairing.</p>
+<p><strong>Verify:</strong> Caller invokes analyzer_destroy exactly once.</p>
+<p><strong>Progressive hints:</strong> The provider controls allocation and deallocation pairing.</p>
 <h4 id="exercise-2-wrap-safely">Exercise 2: Wrap safely<a class="heading-anchor" href="#exercise-2-wrap-safely" aria-label="Link to this section">#</a></h4>
 <p>Use unique_ptr with analyzer_destroy as deleter.</p>
 <p><strong>Expected result/shape:</strong> Scope exit calls the provider destructor once.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Scope exit calls the provider destructor once.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: RAII can manage a C boundary through a custom deleter.</p>
+<p><strong>Verify:</strong> Scope exit calls the provider destructor once.</p>
+<p><strong>Progressive hints:</strong> RAII can manage a C boundary through a custom deleter.</p>
 <h4 id="exercise-3-reject-null-arguments">Exercise 3: Reject null arguments<a class="heading-anchor" href="#exercise-3-reject-null-arguments" aria-label="Link to this section">#</a></h4>
 <p>Test null handle and null output independently.</p>
 <p><strong>Expected result/shape:</strong> Status 1 for either, no pointer dereference.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Status 1 for either, no pointer dereference.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Both borrowed pointers require validation.</p>
+<p><strong>Verify:</strong> Status 1 for either, no pointer dereference.</p>
+<p><strong>Progressive hints:</strong> Both borrowed pointers require validation.</p>
 <h4 id="exercise-4-repair-cross-boundary-throw">Exercise 4: Repair cross-boundary throw<a class="heading-anchor" href="#exercise-4-repair-cross-boundary-throw" aria-label="Link to this section">#</a></h4>
 <p>Review a create function that throws bad_alloc across C.</p>
 <p><strong>Expected result/shape:</strong> Catch inside and return null or a documented status.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Catch inside and return null or a documented status.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: The foreign caller may not support C++ unwinding.</p>
+<p><strong>Verify:</strong> Catch inside and return null or a documented status.</p>
+<p><strong>Progressive hints:</strong> The foreign caller may not support C++ unwinding.</p>
 <h4 id="exercise-5-version-the-interface">Exercise 5: Version the interface<a class="heading-anchor" href="#exercise-5-version-the-interface" aria-label="Link to this section">#</a></h4>
 <p>Add a provider ABI-version query returning 1.</p>
 <p><strong>Expected result/shape:</strong> Caller rejects unsupported version before using handles.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Caller rejects unsupported version before using handles.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: A version check supplements, rather than proves, actual binary compatibility.</p>
+<p><strong>Verify:</strong> Caller rejects unsupported version before using handles.</p>
+<p><strong>Progressive hints:</strong> A version check supplements, rather than proves, actual binary compatibility.</p>
 <h4 id="exercise-6-transfer-real-loading">Exercise 6: Transfer real loading<a class="heading-anchor" href="#exercise-6-transfer-real-loading" aria-label="Link to this section">#</a></h4>
 <p>Build and load a shared provider in a separate owned host project.</p>
 <p><strong>Expected result/shape:</strong> Record exported symbols, architecture, compiler and create/destroy test.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Record exported symbols, architecture, compiler and create/destroy test.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: The browser source is not a dynamic-loader acceptance receipt.</p>
+<p><strong>Verify:</strong> Record exported symbols, architecture, compiler and create/destroy test.</p>
+<p><strong>Progressive hints:</strong> The browser source is not a dynamic-loader acceptance receipt.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: One successful create has exactly one matching destroy; initial value is 0. Then explain the changed condition in example 2 without opening the answer.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
-<p>Create returns a handle or failure; destroy releases it exactly once; getters validate pointers and report status. extern C controls linkage but the host still needs compatible architecture and calling conventions. Dynamic loading requires a separate platform-specific host test, not the single-file browser example.</p>
-<p>If the result disagrees, preserve the original input and inspect the first differing value or condition. The foreign caller may not support C++ unwinding.</p>
+<p>If a handle leaks on an exception path, wrap it immediately after successful creation. If a consumer frees it with the wrong allocator, restore the provider-owned destroy rule. If a null rejection passes but a stale pointer crashes, do not expand the test into undefined behavior; fix lifetime management. If dynamic loading fails, inspect exported symbols, architecture and ABI version separately from the function&#x27;s internal logic.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
 <p>Close the source. Reconstruct the reasoning for Exercise 6: Transfer real loading. Explain which assumptions would fail on a larger input or another runtime.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue with <a href="cpp-040.md.html">cpp-040</a> after saving the six observations.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines">C++ Core Guidelines</a></p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach cpp-039.
 Read courses/cpp/guides/cpp-039.md and courses/cpp/lessons/cpp-039.cpp.

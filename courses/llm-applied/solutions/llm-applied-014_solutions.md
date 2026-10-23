@@ -20,6 +20,37 @@ Formatting is part of the model interface. A pretrained chat tokenizer may inser
 
 Concatenate prompt IDs and answer IDs, then createinputs=sequence[:-1] andtargets=sequence[1:]. A target is an answer target when its original sequence position is at least the prompt length. Replace excluded targets with-100 for PyTorch-style cross entropy, and count active labels explicitly. Truncation must preserve at least one answer target or reject the record. Split by task/document family before selecting demonstrations or tuning format.
 
+## Enumerate the target positions before training
+
+Let the prompt length be P and the concatenated sequence length be L. A causal next-token example at input index i predicts original sequence position i+1. It belongs to the answer when i+1>=P, or equivalently i>=P-1. The first answer token is therefore supervised from the final prompt position, not from the first answer input position.
+
+For prompt[1, 2] and answer[5, 6, 3], the complete sequence is[1, 2, 5, 6, 3]:
+
+| Input index | Input token | Next-token target | Participates in answer loss |
+| --- | --- | --- | --- |
+| 0 | 1 | 2 | No, prompt continuation |
+| 1 | 2 | 5 | Yes, first answer token |
+| 2 | 5 | 6 | Yes |
+| 3 | 6 | 3 | Yes, final answer token |
+
+Inputs are[1, 2, 5, 6] and labels[-100, 5, 6, 3], with three active targets. The mean cross-entropy denominator is three for this record. Dividing the summed active loss by four would dilute the objective with the excluded prompt event. The sentinel-100 is a loss API convention, not a token the model should generate or embed.
+
+Masking a prompt target removes that position's direct loss term. It does not remove the prompt from the forward computation. Later answer positions can attend to prompt representations, so the answer loss can backpropagate through prompt embeddings and attention paths. Confusing those two boundaries can lead to detaching useful context or incorrectly claiming prompt tokens receive no training signal.
+
+Truncation must be inspected after alignment. A maximum concatenated length of two retains[1, 2] and no answer target, so the helper rejects it. A limit of four retains[1, 2, 5, 6], giving labels[-100, 5, 6]. That passes the helper's at-least-one-answer-target rule but loses the final token3. If3 is an end marker, the truncated example no longer teaches the complete stopping behavior. Acceptance of some supervised content is weaker than preservation of the full answer.
+
+The helper treats max_length as a sequence-length bound for this literal-token fixture. The actual model context, chat-template overhead, role tokens and generation markers must be counted under the intended tokenizer. A character boundary in raw text is not necessarily a token boundary. TRL's versioned SFT documentation distinguishes training formats and loss-mask behavior; the optional pretrained recipe checks the concrete template used there. [TRL0.24.0 SFTTrainer](https://huggingface.co/docs/trl/v0.24.0/en/sft_trainer).
+
+Packing introduces another independence boundary. Two examples in separate batch rows have separate attention contexts. Concatenating them into one longer row can let tokens from the second example attend to the first unless the packing/attention policy prevents it. An answer-only loss mask by itself does not define that attention boundary. State whether cross-example context is allowed and test the resulting positions rather than assuming that a label sentinel blocks attention.
+
+### Interview reasoning with explanatory answers
+
+**Why is the first answer target easy to lose?** Its prediction is emitted at the last prompt input position. Masking by whether the input token is inside the answer creates an off-by-one error.
+
+**Does valid training loss imply trustworthy targets?** No. Cross entropy will reward matching any accepted target, including an invented or policy-violating answer. Source support and annotation review must happen before optimization.
+
+**Why report active-token counts?** They define the denominator and reveal empty or destructively truncated examples. They also make comparisons between variable-length batches interpretable.
+
 ## Exercise 1: Align an answer-only record
 
 The question is: Use promptIDs[1, 2] andanswerIDs[5, 6, 3].

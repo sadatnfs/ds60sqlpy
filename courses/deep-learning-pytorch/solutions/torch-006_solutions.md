@@ -4,7 +4,7 @@ Compare these answers only after an attempt or an explicit solution reveal. They
 
 ## Mechanism review
 
-Autograd follows the chain of tensor operations from a scalar objective back to its inputs. Forz=2 w, a=z², loss=(a-1)², the derivative multiplies the local sensitivities along that chain. PyTorch builds the graph dynamically during the forward pass and saves values needed for backward. An in-place mutation can invalidate those saved values, so the framework uses version checks and restricts some mutations. A failure is a signal to understand ownership and graph lifetime, not a reason to bypass checks with.data.
+Autograd follows the chain of tensor operations from a scalar objective back to its inputs. Forz=2w, a=z², loss=(a-1)², the derivative multiplies the local sensitivities along that chain. PyTorch builds the graph dynamically during the forward pass and saves values needed for backward. An in-place mutation can invalidate those saved values, so the framework uses version checks and restricts some mutations. A failure is a signal to understand ownership and graph lifetime, not a reason to bypass checks with.data.
 
 Graph state is also temporary. After a normal backward pass, the saved intermediates are released; reusing the same graph for another backward usually requires an explicit retention policy or a fresh forward computation. Most training loops should recompute the forward graph per batch. Nonlinearities such as ReLU introduce points where a derivative convention matters.
 
@@ -18,11 +18,35 @@ Graph state is also temporary. After a normal backward pass, the saved intermedi
 
 Build every intermediate from a requires_grad leaf. autograd.grad(loss, w) composes the chain rule. A direct in-place add on a leaf requiring gradients raises RuntimeError unless performed under a deliberate no_grad update context. Mutating a saved input under no_grad can still make a later backward fail its version check. Use clone when a separate mutable value is needed and recompute the graph after optimizer updates.
 
+## Trace the graph and its saved values
+
+The chain is w→z→a→L, with z=2w, a=z² and L=(a-1)². At w=1, the full trace is:
+
+| Operation | Forward value | Immediate derivative |
+| --- | --- | --- |
+| z=2w | z=2 | dz/dw=2 |
+| a=z² | a=4 | da/dz=2z=4 |
+| L=(a-1)² | L=9 | dL/da=2(a-1)=6 |
+
+Backward composes sensitivities in reverse dependency order: dL/dw=6×4×2=48. Omitting the inner scale gives 24, even though every forward value remains correct. Changing the inner scale to three gives z=3, a=9, L=64 and derivative 16×6×3=288. A learning-rate adjustment that hides the missing factor for scale 2 would not repair the algorithm for scale 3.
+
+The scalar expression can also be expanded to L=16w⁴-8w²+1. Its derivative 64 w³-16w equals 48 at one, providing a symbolic check independent of the local-factor table. The finite-difference check recomputes the complete expression at 1+h and 1-h. Holding a=4 fixed while perturbing w would instead probe a constant function with slope zero. Equal forward values at one point do not establish equal dependencies.
+
+For larger tensors, reverse-mode differentiation propagates vector-Jacobian products rather than materializing every possible derivative matrix. A scalar loss supplies the initial sensitivity one; each operation transforms the incoming sensitivity using its saved forward values. This explains why the graph must retain information from the actual forward pass and why asking for derivatives of a nonscalar result requires an explicit upstream-gradient convention.
+
+Consider `objective = value.square()` when value is two. Backward needs the original value to produce derivative four. If code then changes that storage to three before calling backward, the old objective still represents the forward value four, but the saved input has changed. Computing derivative six from the new storage would mix two different states. PyTorch's saved-tensor version checks reject such an invalid sequence rather than silently returning that mixed-state result. [PyTorch 2.9 autograd mechanics](https://docs.pytorch.org/docs/2.9/notes/autograd.html).
+
+Using no_grad around the mutation prevents recording that new operation. It does not restore the saved value or make the earlier graph consistent. A safe ordinary update sequence completes the current derivative computation, updates parameter state at a deliberate boundary, then recomputes the next forward graph. Clone can provide separate mutable storage, but a clone is not a substitute for knowing which value each graph depends on.
+
+After a normal derivative computation, saved intermediates can be released. Keeping a reference to loss does not promise another backward pass can reconstruct those released values. Repeated training usually needs a new forward pass, whereas an algorithm intentionally querying multiple derivatives can request graph retention and accept its memory cost. Do not confuse retaining a graph with accumulating gradients across distinct fresh graphs.
+
+ReLU adds a separate mathematical boundary. At a negative input the derivative is zero; at a positive input it is one. At zero there is no unique classical derivative, and PyTorch chooses zero for backward. The numerical convention is not a graph-disconnection error. It should be recorded explicitly when designing derivative tests rather than judged against a symmetric probe's0.5 as if both were the same object.
+
 ## Exercise 1: Trace the chain rule
 
 The question is: Use w=1, z=2*w, a=z*z and loss=(a-1)**2.
 
-The factors are2(loss inner), 2 z and2 from the affine input, with the outer residual included. Multiplying them gives48 at the supplied point.
+The factors are dL/da=2(a-1)=6, da/dz=2z=4 and dz/dw=2. Multiplying 6*4*2 gives 48 at the supplied point.
 
 ```python
 w=torch.tensor(1.,dtype=torch.float64,requires_grad=True); z=2*w; a=z*z; loss=(a-1)**2
@@ -30,15 +54,15 @@ gradient=torch.autograd.grad(loss,w)[0]
 assert (z.item(),a.item(),loss.item(),gradient.item())==(2.,4.,9.,48.)
 ```
 
-**Expected:** z2, a4, loss9, gradient48.
+**Expected:** z2, a4, loss 9, gradient 48.
 
-**Verify:** Compare the computed values or written argument with z2, a4, loss9, gradient48.
+**Verify:** Compare the computed values or written argument with z2, a4, loss 9, gradient 48.
 
 ## Exercise 2: Check an independent slope
 
 The question is: Compare the chain derivative with a central difference of the complete scalar expression.
 
-The finite difference treats the entire function as a black box. It can expose an incorrect manual chain factor without reading the graph internal s.
+The finite difference treats the entire function as a black box. It can expose an incorrect manual chain factor without reading the graph internals.
 
 ```python
 h=1e-5; f=lambda value:((2*value)**2-1)**2
@@ -46,9 +70,9 @@ numeric=(f(1+h)-f(1-h))/(2*h)
 np.testing.assert_allclose(numeric,48,atol=1e-5,rtol=0)
 ```
 
-**Expected:** approximately48 within1e-5.
+**Expected:** approximately 48 within 1e-5.
 
-**Verify:** Compare the computed values or written argument with approximately48 within1e-5.
+**Verify:** Compare the computed values or written argument with approximately 48 within 1e-5.
 
 ## Exercise 3: Observe a leaf mutation guard
 
@@ -96,9 +120,9 @@ points=torch.tensor([-1.,0.,1.],requires_grad=True); torch.relu(points).sum().ba
 torch.testing.assert_close(points.grad,torch.tensor([0.,0.,1.]))
 ```
 
-**Expected:** gradients0, 0, 1.
+**Expected:** gradients 0, 0, 1.
 
-**Verify:** Compare the computed values or written argument with gradients0, 0, 1.
+**Verify:** Compare the computed values or written argument with gradients 0, 0, 1.
 
 ## Exercise 6: Recompute after an update
 

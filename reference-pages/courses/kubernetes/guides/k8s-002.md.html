@@ -118,7 +118,7 @@
     <article class="document"><h2 id="k8s-002-processes-containers-images-and-ports">k8s-002: Processes, containers, images and ports<a class="heading-anchor" href="#k8s-002-processes-containers-images-and-ports" aria-label="Link to this section">#</a></h2>
 <p>Authored beta teaching content. Publication and runtime qualification are separate gates. Read the current capability notice before running. No opening or saving this lesson installs tools, starts a cluster or proves mastery.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Beginner; 90 minutes. Direct design prerequisites: <code>k8s-001</code>. An ID in this prerequisite list may still be unpublished. Use its concept diagnostic or wait for the authored bridge; do not infer an executable prerequisite from a planning ID.</p>
+<p>Beginner; 90 minutes. Direct design prerequisites: <code>k8s-001</code>. All 42 planned guides now have authored bodies. Follow the direct prerequisites and each lesson&#x27;s explicit runtime or host-lab boundary.</p>
 <p>Learner artifact: <a href="../lessons/k8s-002.md.html">k8s-002.md</a>. Keep <a href="../solutions/k8s-002_solutions.md.html">solutions</a> closed until an attempt or explicit reveal.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -127,7 +127,7 @@
 </ul>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>An image is a packaged filesystem/configuration template. A container is an instance created from image content; it normally runs one main application process and can exit or restart. Two container instances can use the same image. A tag is a mutable human-readable reference, while a digest identifies content. The course will preload one exact fixture image and record its digest; reading a tag in YAML is not proof of cached content.</p>
-<p>A port is an endpoint number within a network namespace. A container listening on8080 is different from a host forwarding127.0.0.1:8765 to it. Inside another container,127.0.0.1 refers to that container itself. Inside a Kubernetes namespace, a Service name selects a cluster routing path. Declaring containerPort does not create a listening server or a host port. This lesson traces supplied evidence and performs no engine or network action.</p>
+<p>A port is an endpoint number within a network namespace. A container listening on8080 is different from a host forwarding127.0.0.1:8765 to it. Inside another container, 127.0.0.1 refers to that container itself. Inside a Kubernetes namespace, a Service name selects a cluster routing path. Declaring containerPort does not create a listening server or a host port. This lesson traces supplied evidence and performs no engine or network action.</p>
 <ul>
 <li><strong>image:</strong> the packaged content used to create containers</li>
 <li><strong>container:</strong> a running or stopped instance, separate from its image</li>
@@ -135,6 +135,8 @@
 <li><strong>port mapping:</strong> an explicit forwarding relation between network endpoints</li>
 <li><strong>loopback:</strong> an address referring to the current network namespace, not every machine</li>
 </ul>
+<h3 id="preparation-timing-and-expiry">Preparation timing and expiry<a class="heading-anchor" href="#preparation-timing-and-expiry" aria-label="Link to this section">#</a></h3>
+<p>Prepare the private fifteen-minute session immediately before running the lab, after image/tool preparation. An expired lease is correctly refused. Stop the broker, release the exact owned session and prepare a fresh one while preserving learner source. The <a href="../host-labs.md.html">host-lab guide</a> explains the expiry and UID-aware release workflow; no ambient credential fallback is used.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-one-image-two-instances">Worked example 1: One image, two instances<a class="heading-anchor" href="#worked-example-1-one-image-two-instances" aria-label="Link to this section">#</a></h4>
 <p>Restarting or replacing one instance need not rebuild its immutable image content.</p>
@@ -152,7 +154,7 @@ process listens on8080</code></pre>
 <h4 id="exercise-1-count-images-and-containers">Exercise 1: Count images and containers<a class="heading-anchor" href="#exercise-1-count-images-and-containers" aria-label="Link to this section">#</a></h4>
 <p>Classify the two-instance fixture.</p>
 <p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 1, C1 andC2 both useI1.</p>
-<p><strong>Expected result/shape:</strong> For k8s-002 Exercise 1, 1 image,2 containers,independent running/exited states.</p>
+<p><strong>Expected result/shape:</strong> For k8s-002 Exercise 1, 1 image, 2 containers, independent running/exited states.</p>
 <p><strong>Verify:</strong> For k8s-002 Exercise 1, count image identities and instance identities separately.</p>
 <p><strong>Progressive hints:</strong></p>
 <ol>
@@ -173,7 +175,7 @@ process listens on8080</code></pre>
 </ol>
 <h4 id="exercise-3-separate-declaration-and-listener">Exercise 3: Separate declaration and listener<a class="heading-anchor" href="#exercise-3-separate-declaration-and-listener" aria-label="Link to this section">#</a></h4>
 <p>Review YAML declaring containerPort8080 with a process that exited.</p>
-<p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 3, declared8080;process not running.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 3, declared8080; process not running.</p>
 <p><strong>Expected result/shape:</strong> For k8s-002 Exercise 3, no working listener established by the declaration.</p>
 <p><strong>Verify:</strong> For k8s-002 Exercise 3, name the missing running application evidence.</p>
 <p><strong>Progressive hints:</strong></p>
@@ -184,7 +186,7 @@ process listens on8080</code></pre>
 </ol>
 <h4 id="exercise-4-interpret-replacement">Exercise 4: Interpret replacement<a class="heading-anchor" href="#exercise-4-interpret-replacement" aria-label="Link to this section">#</a></h4>
 <p>Replace C1 with C3 from the same prepared image.</p>
-<p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 4, oldC1,newC3,contentI1.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 4, oldC1, newC3, contentI1.</p>
 <p><strong>Expected result/shape:</strong> For k8s-002 Exercise 4, container identity changes; image identity staysI1.</p>
 <p><strong>Verify:</strong> For k8s-002 Exercise 4, record both instance IDs and the same digest receipt.</p>
 <p><strong>Progressive hints:</strong></p>
@@ -206,7 +208,7 @@ process listens on8080</code></pre>
 </ol>
 <h4 id="exercise-6-transfer-the-client-path">Exercise 6: Transfer the client path<a class="heading-anchor" href="#exercise-6-transfer-the-client-path" aria-label="Link to this section">#</a></h4>
 <p>Choose the endpoint from a client Job inside the owned namespace.</p>
-<p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 6, Service hello on8080;client has its own loopback.</p>
+<p><strong>Inputs/evidence:</strong> For k8s-002 Exercise 6, Service hello on8080; client has its own loopback.</p>
 <p><strong>Expected result/shape:</strong> For k8s-002 Exercise 6, http://hello:8080/version, not host127.0.0.1:8765.</p>
 <p><strong>Verify:</strong> For k8s-002 Exercise 6, explain both network namespaces and the Service DNS name.</p>
 <p><strong>Progressive hints:</strong></p>
@@ -229,7 +231,7 @@ process listens on8080</code></pre>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach k8s-002.
 Read courses/kubernetes/guides/k8s-002.md and courses/kubernetes/lessons/k8s-002.md.
-Direct design prerequisites: `k8s-001`. This is authored beta content; check actual runtime capability and unpublished prerequisites.
+Direct design prerequisites: `k8s-001`. This is authored beta content; check actual runtime capability and direct prerequisites.
 Explain one mechanism, ask me to predict, let me attempt one exercise, then give one hint at a time.
 Do not read courses/kubernetes/solutions/ until I make an honest attempt or explicitly ask for a reveal.
 Review my exact values, diagnostics or written evidence; distinguish source inspection, process success and verified understanding.

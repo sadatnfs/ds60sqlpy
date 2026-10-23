@@ -43,9 +43,12 @@ def main() -> None:
     import torch
     from datasets import Dataset
     from peft import LoraConfig
-    from transformers import AutoModelForCausalLM, AutoTokenizer
+    from transformers import AutoModelForCausalLM, AutoTokenizer, set_seed
     from trl import SFTConfig, SFTTrainer
 
+    # Seed before SFTTrainer creates the randomly initialized LoRA matrices.
+    # TrainingArguments.seed alone is applied too late for that construction.
+    set_seed(7)
     folder = Path(__file__).parent
     training = read_records(folder / 'train.jsonl')
     evaluation = read_records(folder / 'eval.jsonl')

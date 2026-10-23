@@ -20,6 +20,30 @@ The default splitter uses whitespace tokens only as a transparent fixture. Actua
 
 re.finditer over non-whitespace spans records exact start/end offsets in the original text. A window ofsize tokens advances bysize-overlap. The chunk text is sliced from the first token start to the last token end, preserving internal whitespace. Each output recordsdocument_id, version, start, end, text. Validate0<=overlap<size before looping so a zero or negative step cannot hang the process.
 
+## Derive windows, duplication and citation coordinates
+
+Let a nonempty document have n whitespace-token spans, window size s and overlap o, with 0<=o<s. The advance is d=s-o. The first chunk covers up to s spans; further chunks begin at d, 2d and so on until one reaches the end. For this helper, the number of chunks is one when n<=s and otherwise1+ceil((n-s)/d). Empty input produces zero chunks under the declared policy.
+
+For n=7, s=3, o=1, d=2 and the chunk count is1+ceil(4/2)=3. The span-index groups are[0, 1, 2], [2, 3, 4], [4, 5, 6]. Stored token occurrences total nine while unique source positions total seven. Positions2 and4 are repeated once. The redundancy ratio for this finite fixture is9/7, about1.286; it is not nine independent observations supporting the answer.
+
+For a long uniform document with full windows, stored token occurrences per newly covered position approach s/(s-o). Overlap near the window size can therefore create a large storage and retrieval cost. At s=100, o=90, the advance is ten and the interior duplication factor approaches ten. That arithmetic does not prove an optimal overlap policy; it identifies a cost to measure beside evidence recall.
+
+The loop stops when a chunk reaches the end. Without that break, the range of starts could produce another tail containing only already-covered final tokens. For the seven-token example, continuing after the window beginning at four would add a window beginning at six containing only seven. Preventing that duplicate tail is a policy decision visible in the helper, not an automatic property of overlapping windows.
+
+Citation coordinates have units. Python string offsets count Unicode code points, while a UTF-8 byte stream and a model tokenizer can have different lengths. For example, the character β occupies one Python-string position but two UTF-8 bytes. Combining marks can make a visually single character contain multiple code points. The fixture's offsets belong to the original Python string, and its tests correctly slice that same string. Calling them byte offsets would be inaccurate.
+
+Internal whitespace remains intact because chunk text is sliced from the first selected token's start to the last token's end. In a source containing alpha, two spaces, beta, a newline and gamma, the first two-token chunk retains two spaces between alpha and beta. Joining selected token strings with one space would produce different text and break the source-slice equality. The splitter excludes leading/trailing whitespace outside the selected token endpoints, which should also be understood when comparing full-document reconstruction.
+
+Overlap can improve boundary coverage without making each chunk self-sufficient. If a formula appears in one section and its eligibility rule appears several sections earlier, a one-token overlap does not recover that dependency. A retrieved passage saying “divide by the eligible population” may be insufficient without the definition of eligibility. Evaluate whether the selected context jointly covers all required facts, not only whether one answer phrase appears in any chunk.
+
+### Interview reasoning with explanatory answers
+
+**Why not increase overlap until recall is perfect?** Duplication consumes storage and context, can return several copies of the same evidence and can displace a complementary source. Recall and useful context sufficiency are different measurements.
+
+**What should identify a chunk?** The source/version and boundaries plus the splitter representation policy. An ordinal such as chunk3 can refer to different content after an earlier section changes.
+
+**Can a whitespace chunk count predict model-token use?** Only under an explicitly verified mapping, which this fixture does not supply. The intended tokenizer and rendered chat format must measure the actual model budget.
+
 ## Exercise 1: Split a fixed document
 
 The question is: Chunk one two three four five six seven with size 3 and overlap 1.

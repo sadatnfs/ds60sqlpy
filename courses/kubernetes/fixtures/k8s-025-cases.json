@@ -1,0 +1,38 @@
+{
+  "lesson_id": "k8s-025",
+  "provenance": "synthetic teaching cases, not runtime observations",
+  "capability": "qualified offline Helm rendering; no release installation in normal worker",
+  "browser_source": false,
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "List metadata,values,schema,template and expected output.",
+      "expected": "One local template,no dependencies/plugins/hooks/CRDs."
+    },
+    {
+      "exercise": 2,
+      "task": "Use already prepared pinned Helm and compare output with expected-default.json.",
+      "expected": "One Deployment with replicas1 and approved image;record actual renderer receipt or unavailable status."
+    },
+    {
+      "exercise": 3,
+      "task": "Render replicas2 and diff the full object.",
+      "expected": "Only spec.replicas changes."
+    },
+    {
+      "exercise": 4,
+      "task": "Try replicas3,an unapproved image or an extra unknown key in a scratch values file.",
+      "expected": "Schema/review rejection before any cluster operation."
+    },
+    {
+      "exercise": 5,
+      "task": "Review a supplied hook annotation or cluster-scoped kind.",
+      "expected": "The output is outside the normal worker contract and is not installed."
+    },
+    {
+      "exercise": 6,
+      "task": "Record chart/values hashes,renderer version,full diff and separate apply/application acceptance.",
+      "expected": "A reviewer can reproduce the local render and identify the exact owned runtime boundary."
+    }
+  ]
+}

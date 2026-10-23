@@ -116,7 +116,6 @@
       <p class="source-path">Generated from <code>courses/cpp/guides/cpp-015.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-015-raii-and-unique-ownership">cpp-015: RAII and unique ownership<a class="heading-anchor" href="#cpp-015-raii-and-unique-ownership" aria-label="Link to this section">#</a></h2>
-<p>Authored beta content. Content completion and runtime qualification are separate evidence.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Intermediate; 105 minutes. Direct prerequisites: <code>cpp-014</code>.</p>
 <p>Learner artifact: <a href="../lessons/cpp-015.cpp.html">cpp-015.cpp</a>. Keep <a href="../solutions/cpp-015_solutions.md.html">official solutions</a> closed until an attempt. The immutable <a href="../fixtures/cpp-015-cases.json.html">case ledger</a> records exercise inputs and expected observations.</p>
@@ -128,55 +127,106 @@
 <p><code>std::make_unique&lt;Record&gt;(...)</code> constructs an owner without a separate raw new. <code>std::move(owner)</code> transfers ownership; it does not clone the resource. A destructor should release resources without throwing during stack unwinding.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>At scope entry the unique_ptr becomes responsible for one allocation. Moving it hands that responsibility to another owner; the moved-from pointer no longer releases the object. During exception unwinding the current owner still runs its destructor, which reduces the live count. Count resources at scope boundaries rather than depending on an informal promise to call delete later. Resource lifetime and the lifetime of a borrowed pointer must be drawn separately.</p>
+<h3 id="exclusive-ownership-and-deterministic-destruction">Exclusive ownership and deterministic destruction<a class="heading-anchor" href="#exclusive-ownership-and-deterministic-destruction" aria-label="Link to this section">#</a></h3>
+<p>A unique_ptr represents one owning responsibility for a dynamically allocated object. The pointee can be borrowed through a raw pointer or reference, but those borrows do not become additional owners. When the unique_ptr is destroyed, its deleter releases the resource. The useful property is not that delete disappeared syntactically; it is that cleanup follows the lifetime of a visible owner on every ordinary scope-exit path.</p>
+<p>make_unique&lt;int&gt;(7) constructs an int and returns its owner. Moving p into q transfers that owning responsibility, leaving p empty for unique_ptr&#x27;s specified move behavior. It does not move the integer 7 to a different allocation in this example. The address can stay the same while the object responsible for cleanup changes. Dereferencing the moved-from p would be invalid because it no longer owns or points to the integer.</p>
+<p>The Tracked fixture uses a counter to make lifetime observable. Construction increments live and destruction decrements it. Inside the owner scope, live is 1; after the scope, it is 0. The counter itself must outlive Tracked because Tracked borrows its address. A resource wrapper can still contain an unsafe borrow if that dependency is ignored. RAII solves cleanup ownership, not every possible lifetime relationship automatically.</p>
+<p>Exception unwinding destroys fully constructed local owners. If a later operation throws, a unique_ptr already in scope still releases its pointee. By contrast, a raw new followed by a throwing operation before a matching delete can leak. The correct fix is to establish ownership immediately, not to add a delete to one guessed error branch. For non-memory resources, the same structure can use an appropriate custom deleter.</p>
+<p>Exclusive ownership is not appropriate for every graph. shared_ptr introduces shared lifetime responsibility and additional costs, while raw pointers can express non-owning access. Choose based on who must keep the object alive, not on which pointer syntax seems easiest. The examples deliberately avoid shared ownership so the transfer and destruction points are inspectable.</p>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">auto p=std::make_unique&lt;int&gt;(7); auto q=std::move(p);</code></pre>
-<p><strong>Expected:</strong> p is empty, q owns the integer 7.</p>
+<p><a href="../examples/cpp-015-example-1.cpp.html">Complete program 1</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;iostream&gt;
+#include &lt;memory&gt;
+#include &lt;utility&gt;
+
+struct Tracked  {
+     int* live;
+     explicit Tracked(int&amp; count):live(&amp;count) {
+        ++*live;
+    } ~Tracked() {
+        --*live;
+    } Tracked(const Tracked&amp;)=delete;
+     Tracked&amp; operator=(const Tracked&amp;)=delete;
+};
+int main() {
+    auto p=std::make_unique&lt;int&gt;(7);
+    auto q=std::move(p);
+    assert(!p &amp;&amp; q &amp;&amp; *q==7);
+    std::cout &lt;&lt; &quot;cpp-015 example 1 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-015 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">{ auto p=std::make_unique&lt;Tracked&gt;(live); }</code></pre>
-<p><strong>Expected:</strong> live rises to 1 in scope and returns to 0 at destruction.</p>
+<p><a href="../examples/cpp-015-example-2.cpp.html">Complete program 2</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;iostream&gt;
+#include &lt;memory&gt;
+
+struct Tracked  {
+     int* live;
+     explicit Tracked(int&amp; count):live(&amp;count) {
+        ++*live;
+    } ~Tracked() {
+        --*live;
+    } Tracked(const Tracked&amp;)=delete;
+     Tracked&amp; operator=(const Tracked&amp;)=delete;
+};
+int main() {
+    int live=0;
+    { auto owner=std::make_unique&lt;Tracked&gt;(live); assert(live==1); }
+    assert(live==0);
+    std::cout &lt;&lt; &quot;cpp-015 example 2 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-015 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-trace-ownership">Exercise 1: Trace ownership<a class="heading-anchor" href="#exercise-1-trace-ownership" aria-label="Link to this section">#</a></h4>
 <p>Draw p and q before and after moving unique_ptr&lt;int&gt;(7).</p>
 <p><strong>Expected result/shape:</strong> One live allocation; exactly one owner at each point.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: One live allocation; exactly one owner at each point.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Moving transfers the pointer ownership.</p>
+<p><strong>Verify:</strong> One live allocation; exactly one owner at each point.</p>
+<p><strong>Progressive hints:</strong> Moving transfers the pointer ownership.</p>
 <h4 id="exercise-2-check-normal-cleanup">Exercise 2: Check normal cleanup<a class="heading-anchor" href="#exercise-2-check-normal-cleanup" aria-label="Link to this section">#</a></h4>
 <p>Run the Tracked scoped case.</p>
 <p><strong>Expected result/shape:</strong> live=1 inside and 0 afterward.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: live=1 inside and 0 afterward.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Destructor cleanup is tied to scope.</p>
+<p><strong>Verify:</strong> live=1 inside and 0 afterward.</p>
+<p><strong>Progressive hints:</strong> Destructor cleanup is tied to scope.</p>
 <h4 id="exercise-3-check-exceptional-cleanup">Exercise 3: Check exceptional cleanup<a class="heading-anchor" href="#exercise-3-check-exceptional-cleanup" aria-label="Link to this section">#</a></h4>
 <p>Throw after constructing Tracked and catch outside.</p>
 <p><strong>Expected result/shape:</strong> live=0 after catch.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: live=0 after catch.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Stack unwinding destroys the owner.</p>
+<p><strong>Verify:</strong> live=0 after catch.</p>
+<p><strong>Progressive hints:</strong> Stack unwinding destroys the owner.</p>
 <h4 id="exercise-4-reject-accidental-copy">Exercise 4: Reject accidental copy<a class="heading-anchor" href="#exercise-4-reject-accidental-copy" aria-label="Link to this section">#</a></h4>
 <p>Try auto q=p with unique_ptr.</p>
 <p><strong>Expected result/shape:</strong> Compile failure; move only when ownership should change.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Compile failure; move only when ownership should change.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: unique_ptr disables copying by design.</p>
+<p><strong>Verify:</strong> Compile failure; move only when ownership should change.</p>
+<p><strong>Progressive hints:</strong> unique_ptr disables copying by design.</p>
 <h4 id="exercise-5-handle-empty-owner">Exercise 5: Handle empty owner<a class="heading-anchor" href="#exercise-5-handle-empty-owner" aria-label="Link to this section">#</a></h4>
 <p>Default-construct unique_ptr&lt;int&gt; and inspect Boolean state.</p>
 <p><strong>Expected result/shape:</strong> false, with no dereference.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: false, with no dereference.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: An empty owner has nothing to destroy.</p>
+<p><strong>Verify:</strong> false, with no dereference.</p>
+<p><strong>Progressive hints:</strong> An empty owner has nothing to destroy.</p>
 <h4 id="exercise-6-transfer-to-a-collection">Exercise 6: Transfer to a collection<a class="heading-anchor" href="#exercise-6-transfer-to-a-collection" aria-label="Link to this section">#</a></h4>
 <p>Own three unique_ptr&lt;int&gt; values in a vector then leave scope.</p>
 <p><strong>Expected result/shape:</strong> All three allocations released; no manual delete loop.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: All three allocations released; no manual delete loop.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Composed RAII owners clean up recursively.</p>
+<p><strong>Verify:</strong> All three allocations released; no manual delete loop.</p>
+<p><strong>Progressive hints:</strong> Composed RAII owners clean up recursively.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: p is empty, q owns the integer 7. Then explain the changed condition in example 2 without opening the answer.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
-<p><code>std::make_unique&lt;Record&gt;(...)</code> constructs an owner without a separate raw new. <code>std::move(owner)</code> transfers ownership; it does not clone the resource. A destructor should release resources without throwing during stack unwinding.</p>
-<p>If the result disagrees, preserve the original input and inspect the first differing value or condition. unique_ptr disables copying by design.</p>
+<p>If live remains1 after the scope, inspect whether ownership escaped or was released without cleanup. If a moved-from unique_ptr is dereferenced, test its empty state and use the new owner instead. Do not construct two unique_ptr objects from the same raw pointer: that creates two deletion responsibilities for one allocation. A destructor counter proves the fixture lifecycle, not the safety of every borrowed pointer elsewhere in the program.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
 <p>Close the source. Reconstruct the reasoning for Exercise 6: Transfer to a collection. Explain which assumptions would fail on a larger input or another runtime.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue with <a href="cpp-016.md.html">cpp-016</a> after saving the six observations.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines">C++ Core Guidelines</a></p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach cpp-015.
 Read courses/cpp/guides/cpp-015.md and courses/cpp/lessons/cpp-015.cpp.

@@ -147,6 +147,18 @@
 <span>      &quot;targets&quot;: [</span>
 <span>        &quot;python-algo-04&quot;</span>
 <span>      ]</span>
+<span>    },</span>
+<span>    &quot;sql-semantic-depth&quot;: {</span>
+<span>      &quot;title&quot;: &quot;SQL semantics, temporal metrics and mutation evidence&quot;,</span>
+<span>      &quot;description&quot;: &quot;Reason through NULL quantification, metric grain, peer-aware windows, recursive graphs, conditional writes and mature cohort denominators.&quot;,</span>
+<span>      &quot;targets&quot;: [</span>
+<span>        &quot;sql-deep-01&quot;,</span>
+<span>        &quot;sql-deep-02&quot;,</span>
+<span>        &quot;sql-deep-03&quot;,</span>
+<span>        &quot;sql-deep-04&quot;,</span>
+<span>        &quot;sql-deep-05&quot;,</span>
+<span>        &quot;sql-deep-06&quot;</span>
+<span>      ]</span>
 <span>    }</span>
 <span>  },</span>
 <span>  &quot;lessons&quot;: [</span>
@@ -3790,6 +3802,194 @@
 <span>      &quot;dependency_group&quot;: &quot;postgres&quot;,</span>
 <span>      &quot;network&quot;: &quot;offline&quot;,</span>
 <span>      &quot;runner&quot;: &quot;sql&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;sql-deep-01&quot;,</span>
+<span>      &quot;track&quot;: &quot;sql&quot;,</span>
+<span>      &quot;day&quot;: 74,</span>
+<span>      &quot;title&quot;: &quot;NULL-Aware Quantification, Anti-Joins, and Relational Division&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;phase&quot;: &quot;SQL semantics, temporal metrics and correctness&quot;,</span>
+<span>      &quot;estimated_minutes&quot;: 150,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;sql-09&quot;,</span>
+<span>        &quot;sql-quality-01&quot;</span>
+<span>      ],</span>
+<span>      &quot;lesson_path&quot;: &quot;sql/professional/lessons/sql_deep_01.sql&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;sql/professional/companion-guides/sql_deep_01.md&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;sql/professional/solutions/sql_deep_01_solutions.md&quot;,</span>
+<span>        &quot;sql/professional/solutions/sql_deep_01_solutions.sql&quot;</span>
+<span>      ],</span>
+<span>      &quot;dependency_group&quot;: &quot;core&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;,</span>
+<span>      &quot;runner&quot;: &quot;sql&quot;,</span>
+<span>      &quot;topics&quot;: [</span>
+<span>        &quot;null-aware&quot;,</span>
+<span>        &quot;quantification&quot;,</span>
+<span>        &quot;anti-joins&quot;,</span>
+<span>        &quot;and&quot;,</span>
+<span>        &quot;relational&quot;,</span>
+<span>        &quot;division&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;sql-deep-02&quot;,</span>
+<span>      &quot;track&quot;: &quot;sql&quot;,</span>
+<span>      &quot;day&quot;: 75,</span>
+<span>      &quot;title&quot;: &quot;Metric Algebra Across Grains, Snapshots, and Weighted Bridges&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;phase&quot;: &quot;SQL semantics, temporal metrics and correctness&quot;,</span>
+<span>      &quot;estimated_minutes&quot;: 150,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;sql-quality-01&quot;,</span>
+<span>        &quot;sql-analytics-01&quot;</span>
+<span>      ],</span>
+<span>      &quot;lesson_path&quot;: &quot;sql/professional/lessons/sql_deep_02.sql&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;sql/professional/companion-guides/sql_deep_02.md&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;sql/professional/solutions/sql_deep_02_solutions.md&quot;,</span>
+<span>        &quot;sql/professional/solutions/sql_deep_02_solutions.sql&quot;</span>
+<span>      ],</span>
+<span>      &quot;dependency_group&quot;: &quot;core&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;,</span>
+<span>      &quot;runner&quot;: &quot;sql&quot;,</span>
+<span>      &quot;topics&quot;: [</span>
+<span>        &quot;metric&quot;,</span>
+<span>        &quot;algebra&quot;,</span>
+<span>        &quot;across&quot;,</span>
+<span>        &quot;grains&quot;,</span>
+<span>        &quot;snapshots&quot;,</span>
+<span>        &quot;and&quot;,</span>
+<span>        &quot;weighted&quot;,</span>
+<span>        &quot;bridges&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;sql-deep-03&quot;,</span>
+<span>      &quot;track&quot;: &quot;sql&quot;,</span>
+<span>      &quot;day&quot;: 76,</span>
+<span>      &quot;title&quot;: &quot;ROWS, RANGE, GROUPS, Exclusions, and Sessionization&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;phase&quot;: &quot;SQL semantics, temporal metrics and correctness&quot;,</span>
+<span>      &quot;estimated_minutes&quot;: 150,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;sql-22&quot;,</span>
+<span>        &quot;sql-analytics-01&quot;</span>
+<span>      ],</span>
+<span>      &quot;lesson_path&quot;: &quot;sql/professional/lessons/sql_deep_03.sql&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;sql/professional/companion-guides/sql_deep_03.md&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;sql/professional/solutions/sql_deep_03_solutions.md&quot;,</span>
+<span>        &quot;sql/professional/solutions/sql_deep_03_solutions.sql&quot;</span>
+<span>      ],</span>
+<span>      &quot;dependency_group&quot;: &quot;core&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;,</span>
+<span>      &quot;runner&quot;: &quot;sql&quot;,</span>
+<span>      &quot;topics&quot;: [</span>
+<span>        &quot;rows&quot;,</span>
+<span>        &quot;range&quot;,</span>
+<span>        &quot;groups&quot;,</span>
+<span>        &quot;exclusions&quot;,</span>
+<span>        &quot;and&quot;,</span>
+<span>        &quot;sessionization&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;sql-deep-04&quot;,</span>
+<span>      &quot;track&quot;: &quot;sql&quot;,</span>
+<span>      &quot;day&quot;: 77,</span>
+<span>      &quot;title&quot;: &quot;Recursive Graph Reachability, Paths, Cycles, and Dependency Order&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;phase&quot;: &quot;SQL semantics, temporal metrics and correctness&quot;,</span>
+<span>      &quot;estimated_minutes&quot;: 150,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;sql-24&quot;,</span>
+<span>        &quot;sql-25&quot;</span>
+<span>      ],</span>
+<span>      &quot;lesson_path&quot;: &quot;sql/professional/lessons/sql_deep_04.sql&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;sql/professional/companion-guides/sql_deep_04.md&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;sql/professional/solutions/sql_deep_04_solutions.md&quot;,</span>
+<span>        &quot;sql/professional/solutions/sql_deep_04_solutions.sql&quot;</span>
+<span>      ],</span>
+<span>      &quot;dependency_group&quot;: &quot;core&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;,</span>
+<span>      &quot;runner&quot;: &quot;sql&quot;,</span>
+<span>      &quot;topics&quot;: [</span>
+<span>        &quot;recursive&quot;,</span>
+<span>        &quot;graph&quot;,</span>
+<span>        &quot;reachability&quot;,</span>
+<span>        &quot;paths&quot;,</span>
+<span>        &quot;cycles&quot;,</span>
+<span>        &quot;and&quot;,</span>
+<span>        &quot;dependency&quot;,</span>
+<span>        &quot;order&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;sql-deep-05&quot;,</span>
+<span>      &quot;track&quot;: &quot;sql&quot;,</span>
+<span>      &quot;day&quot;: 78,</span>
+<span>      &quot;title&quot;: &quot;Predicate Proof, Partial Indexes, and Conditional Mutation Contracts&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;phase&quot;: &quot;SQL semantics, temporal metrics and correctness&quot;,</span>
+<span>      &quot;estimated_minutes&quot;: 150,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;sql-ops-01&quot;,</span>
+<span>        &quot;sql-concurrency-01&quot;</span>
+<span>      ],</span>
+<span>      &quot;lesson_path&quot;: &quot;sql/professional/lessons/sql_deep_05.sql&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;sql/professional/companion-guides/sql_deep_05.md&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;sql/professional/solutions/sql_deep_05_solutions.md&quot;,</span>
+<span>        &quot;sql/professional/solutions/sql_deep_05_solutions.sql&quot;</span>
+<span>      ],</span>
+<span>      &quot;dependency_group&quot;: &quot;core&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;,</span>
+<span>      &quot;runner&quot;: &quot;sql&quot;,</span>
+<span>      &quot;topics&quot;: [</span>
+<span>        &quot;predicate&quot;,</span>
+<span>        &quot;proof&quot;,</span>
+<span>        &quot;partial&quot;,</span>
+<span>        &quot;indexes&quot;,</span>
+<span>        &quot;and&quot;,</span>
+<span>        &quot;conditional&quot;,</span>
+<span>        &quot;mutation&quot;,</span>
+<span>        &quot;contracts&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;sql-deep-06&quot;,</span>
+<span>      &quot;track&quot;: &quot;sql&quot;,</span>
+<span>      &quot;day&quot;: 79,</span>
+<span>      &quot;title&quot;: &quot;Cohort Denominators, Follow-Up Maturity, and Point-in-Time Quality&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;phase&quot;: &quot;SQL semantics, temporal metrics and correctness&quot;,</span>
+<span>      &quot;estimated_minutes&quot;: 150,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;sql-analytics-01&quot;,</span>
+<span>        &quot;sql-quality-01&quot;,</span>
+<span>        &quot;sql-deep-03&quot;</span>
+<span>      ],</span>
+<span>      &quot;lesson_path&quot;: &quot;sql/professional/lessons/sql_deep_06.sql&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;sql/professional/companion-guides/sql_deep_06.md&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;sql/professional/solutions/sql_deep_06_solutions.md&quot;,</span>
+<span>        &quot;sql/professional/solutions/sql_deep_06_solutions.sql&quot;</span>
+<span>      ],</span>
+<span>      &quot;dependency_group&quot;: &quot;core&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;,</span>
+<span>      &quot;runner&quot;: &quot;sql&quot;,</span>
+<span>      &quot;topics&quot;: [</span>
+<span>        &quot;cohort&quot;,</span>
+<span>        &quot;denominators&quot;,</span>
+<span>        &quot;follow-up&quot;,</span>
+<span>        &quot;maturity&quot;,</span>
+<span>        &quot;and&quot;,</span>
+<span>        &quot;point-in-time&quot;,</span>
+<span>        &quot;quality&quot;</span>
+<span>      ]</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;bridge-01&quot;,</span>

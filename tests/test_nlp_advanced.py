@@ -1,4 +1,5 @@
 """Detailed NLP content and offline mechanism checks, independent of pretrained assets."""
+
 from __future__ import annotations
 
 import ast
@@ -15,8 +16,11 @@ from ds60sqlpy.checks import _markdown_link_text
 
 ROOT = Path(__file__).resolve().parents[1]
 BASE = ROOT / "courses/nlp"
-RECORDS = [record for record in json.loads((BASE / "lessons.json").read_text())["lessons"]
-           if 5 <= int(record["id"].split("-")[-1]) <= 24]
+RECORDS = [
+    record
+    for record in json.loads((BASE / "lessons.json").read_text())["lessons"]
+    if 5 <= int(record["id"].split("-")[-1]) <= 24
+]
 IDS = [f"nlp-{number:03d}" for number in range(5, 25)]
 
 
@@ -95,18 +99,27 @@ def test_all_guide_blocks_and_references_execute_without_network(
     assert capsys.readouterr().out.strip()
 
 
-@pytest.mark.parametrize("key,original,broken", [
-    ("nlp-006", "events=len(tokens)+1", "events=len(tokens)"),
-    ("nlp-010", "candidates=dp[:,None]+lt", "candidates=np.zeros_like(lt)+lt"),
-    ("nlp-011", "gold=set(gold);predicted=set(predicted)",
-     "gold={(x[0],x[1],x[2]) for x in gold};predicted={(x[0],x[1],x[2]) for x in predicted}"),
-    ("nlp-015", "scores=np.where(mask[None,:],scores,-np.inf)", "scores=scores"),
-    ("nlp-017", "sum(min(count,r[gram]) for gram,count in c.items())",
-     "sum(count for gram,count in c.items() if gram in r)"),
-    ("nlp-020", "np.where(negative>positive,0,-1)", "np.where(negative>positive,0,0)"),
-    ("nlp-023", "role in doc['roles'] and ", ""),
-    ("nlp-024", "(?![0-9])", ""),
-])
+@pytest.mark.parametrize(
+    "key,original,broken",
+    [
+        ("nlp-006", "events=len(tokens)+1", "events=len(tokens)"),
+        ("nlp-010", "candidates=dp[:,None]+lt", "candidates=np.zeros_like(lt)+lt"),
+        (
+            "nlp-011",
+            "gold=set(gold);predicted=set(predicted)",
+            "gold={(x[0],x[1],x[2]) for x in gold};predicted={(x[0],x[1],x[2]) for x in predicted}",
+        ),
+        ("nlp-015", "scores=np.where(mask[None,:],scores,-np.inf)", "scores=scores"),
+        (
+            "nlp-017",
+            "sum(min(count,r[gram]) for gram,count in c.items())",
+            "sum(count for gram,count in c.items() if gram in r)",
+        ),
+        ("nlp-020", "np.where(negative>positive,0,-1)", "np.where(negative>positive,0,0)"),
+        ("nlp-023", "role in doc['roles'] and ", ""),
+        ("nlp-024", "(?![0-9])", ""),
+    ],
+)
 def test_reference_checks_reject_plausible_shortcuts(
     key: str, original: str, broken: str, monkeypatch: pytest.MonkeyPatch
 ) -> None:

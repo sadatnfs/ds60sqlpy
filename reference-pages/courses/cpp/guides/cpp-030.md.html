@@ -116,7 +116,6 @@
       <p class="source-path">Generated from <code>courses/cpp/guides/cpp-030.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-030-mutexes-conditions-and-producer-consumer-flow">cpp-030: Mutexes, conditions and producer-consumer flow<a class="heading-anchor" href="#cpp-030-mutexes-conditions-and-producer-consumer-flow" aria-label="Link to this section">#</a></h2>
-<p>Authored beta content. Content completion and runtime qualification are separate evidence.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Advanced; 120 minutes. Direct prerequisites: <code>cpp-029</code>.</p>
 <p>Learner artifact: <a href="../lessons/cpp-030.cpp.html">cpp-030.cpp</a>. Keep <a href="../solutions/cpp-030_solutions.md.html">official solutions</a> closed until an attempt. The immutable <a href="../fixtures/cpp-030-cases.json.html">case ledger</a> records exercise inputs and expected observations.</p>
@@ -128,55 +127,98 @@
 <p><code>cv.wait(lock,predicate)</code> repeatedly tests the predicate under the mutex. The producer updates queue state under the same mutex before notifying. Consumers must distinguish an empty open queue from an empty closed queue so shutdown does not wait forever.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>The queue and closed flag describe one state machine. Empty/open means wait, nonempty means consume, and empty/closed means terminate. All three decisions use the same mutex so the predicate corresponds to the protected data. The predicate overload handles spurious wakes by rechecking rather than assuming a notification means an item exists. A capacity limit adds another state condition: the producer can accept work only when there is room.</p>
+<h3 id="condition-variables-coordinate-a-state-machine">Condition variables coordinate a state machine<a class="heading-anchor" href="#condition-variables-coordinate-a-state-machine" aria-label="Link to this section">#</a></h3>
+<p>A condition variable is a waiting mechanism, not the shared condition itself. The real condition is expressed in protected state. This queue has a sequence of pending integers and a closed flag. Empty/open means there is currently no work but more may arrive. Nonempty means the consumer can take an item. Empty/closed means no more work can arrive and the consumer should finish.</p>
+<p>The mutex protects both the queue and the closed flag. The consumer holds a unique_lock and calls the predicate overload of wait. Waiting releases the mutex so a producer can change the state, then reacquires it before the predicate is evaluated again. A wakeup alone does not guarantee an item exists: spurious wakeups and other consumers can change the situation. The predicate is the source of truth.</p>
+<p>The first program enqueues2 and 3, then closes the queue while holding the mutex. The consumer drains the existing items even though closed is true, because nonempty still means work exists. Only empty and closed together terminate the loop. Exiting immediately on closed would discard accepted work. Waiting only for nonempty would hang after the last item because closure would not satisfy the condition.</p>
+<p>The second program starts with an already empty, closed queue. The predicate is immediately true, so no notification is needed to make progress. This demonstrates why notifications should not be treated as stored messages. State persists; a notification may occur before another thread begins waiting. Rechecking the state under the same mutex avoids depending on an exact notification schedule.</p>
+<p>A bounded queue adds a capacity predicate for producers. When full, the interface must choose whether to wait, reject or cancel a submission. That policy belongs to the product contract and should be tested separately from consumer wakeup. The small reference has a fixed two-item input; it demonstrates correct draining and closure, not a production executor with backpressure and arbitrary task scheduling.</p>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">cv.wait(lock,[&amp;]{return !q.empty()||closed;});</code></pre>
-<p><strong>Expected:</strong> The consumer proceeds only when work exists or shutdown has been published.</p>
+<p><a href="../examples/cpp-030-example-1.cpp.html">Complete program 1</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;condition_variable&gt;
+#include &lt;iostream&gt;
+#include &lt;mutex&gt;
+#include &lt;queue&gt;
+#include &lt;thread&gt;
+
+
+int main() {
+    std::mutex m;std::condition_variable cv;std::queue&lt;int&gt; q;bool closed=false;int total=0;
+    std::thread consumer([&amp;]{std::unique_lock&lt;std::mutex&gt; lock(m);for(;;){cv.wait(lock,[&amp;]{return !q.empty()||closed;});if(q.empty()&amp;&amp;closed)break;total+=q.front();q.pop();}});
+    {std::lock_guard&lt;std::mutex&gt; lock(m);q.push(2);q.push(3);closed=true;}cv.notify_all();consumer.join();assert(total==5);
+    std::cout &lt;&lt; &quot;cpp-030 example 1 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-030 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">if(q.empty() &amp;&amp; closed) break;</code></pre>
-<p><strong>Expected:</strong> A closed empty queue ends consumption; closure does not discard queued work.</p>
+<p><a href="../examples/cpp-030-example-2.cpp.html">Complete program 2</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;condition_variable&gt;
+#include &lt;iostream&gt;
+#include &lt;mutex&gt;
+#include &lt;queue&gt;
+
+
+int main() {
+    std::mutex mutex;
+    std::condition_variable cv;
+    std::queue&lt;int&gt; queue;
+    bool closed=true;
+    std::unique_lock&lt;std::mutex&gt; lock(mutex);
+    cv.wait(lock,[&amp;]{return !queue.empty() || closed;});
+    assert(queue.empty() &amp;&amp; closed);
+    std::cout &lt;&lt; &quot;cpp-030 example 2 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-030 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-state-the-invariant">Exercise 1: State the invariant<a class="heading-anchor" href="#exercise-1-state-the-invariant" aria-label="Link to this section">#</a></h4>
 <p>List queue state protected by m.</p>
 <p><strong>Expected result/shape:</strong> Queue contents and closed flag share one mutex.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Queue contents and closed flag share one mutex.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Protecting related fields separately can violate their relationship.</p>
+<p><strong>Verify:</strong> Queue contents and closed flag share one mutex.</p>
+<p><strong>Progressive hints:</strong> Protecting related fields separately can violate their relationship.</p>
 <h4 id="exercise-2-drain-before-exit">Exercise 2: Drain before exit<a class="heading-anchor" href="#exercise-2-drain-before-exit" aria-label="Link to this section">#</a></h4>
 <p>Produce 2 and 3 then close.</p>
 <p><strong>Expected result/shape:</strong> Total 5 with both items consumed.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Total 5 with both items consumed.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Close means no future work, not erase pending work.</p>
+<p><strong>Verify:</strong> Total 5 with both items consumed.</p>
+<p><strong>Progressive hints:</strong> Close means no future work, not erase pending work.</p>
 <h4 id="exercise-3-bound-the-queue">Exercise 3: Bound the queue<a class="heading-anchor" href="#exercise-3-bound-the-queue" aria-label="Link to this section">#</a></h4>
 <p>Add capacity 2 and a producer wait predicate.</p>
 <p><strong>Expected result/shape:</strong> Observed size never exceeds 2.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Observed size never exceeds 2.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Producers wait for room while consumers notify after pop.</p>
+<p><strong>Verify:</strong> Observed size never exceeds 2.</p>
+<p><strong>Progressive hints:</strong> Producers wait for room while consumers notify after pop.</p>
 <h4 id="exercise-4-repair-naked-wait">Exercise 4: Repair naked wait<a class="heading-anchor" href="#exercise-4-repair-naked-wait" aria-label="Link to this section">#</a></h4>
 <p>Replace cv.wait(lock) with predicate waiting.</p>
 <p><strong>Expected result/shape:</strong> Spurious notifications cannot trigger front on empty queue.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Spurious notifications cannot trigger front on empty queue.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: A wake does not prove the condition is true.</p>
+<p><strong>Verify:</strong> Spurious notifications cannot trigger front on empty queue.</p>
+<p><strong>Progressive hints:</strong> A wake does not prove the condition is true.</p>
 <h4 id="exercise-5-test-empty-close">Exercise 5: Test empty close<a class="heading-anchor" href="#exercise-5-test-empty-close" aria-label="Link to this section">#</a></h4>
 <p>Close before enqueueing any items.</p>
 <p><strong>Expected result/shape:</strong> Consumer exits with total 0.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Consumer exits with total 0.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: The predicate includes closed to allow termination.</p>
+<p><strong>Verify:</strong> Consumer exits with total 0.</p>
+<p><strong>Progressive hints:</strong> The predicate includes closed to allow termination.</p>
 <h4 id="exercise-6-transfer-cancellation">Exercise 6: Transfer cancellation<a class="heading-anchor" href="#exercise-6-transfer-cancellation" aria-label="Link to this section">#</a></h4>
 <p>Define whether cancellation drains or discards pending work.</p>
 <p><strong>Expected result/shape:</strong> Chosen policy accounts for every accepted item and joins all workers.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Chosen policy accounts for every accepted item and joins all workers.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Shutdown semantics belong in the queue contract.</p>
+<p><strong>Verify:</strong> Chosen policy accounts for every accepted item and joins all workers.</p>
+<p><strong>Progressive hints:</strong> Shutdown semantics belong in the queue contract.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: The consumer proceeds only when work exists or shutdown has been published. Then explain the changed condition in example 2 without opening the answer.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
-<p><code>cv.wait(lock,predicate)</code> repeatedly tests the predicate under the mutex. The producer updates queue state under the same mutex before notifying. Consumers must distinguish an empty open queue from an empty closed queue so shutdown does not wait forever.</p>
-<p>If the result disagrees, preserve the original input and inspect the first differing value or condition. A wake does not prove the condition is true.</p>
+<p>If the consumer hangs after processing all items, inspect whether closed participates in the wait predicate. If items disappear during shutdown, check whether the loop exits before draining a nonempty closed queue. If state is read outside the mutex, a notification cannot repair the race. Keep every predicate variable under the same synchronization contract and test empty/open, nonempty and empty/closed separately.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
 <p>Close the source. Reconstruct the reasoning for Exercise 6: Transfer cancellation. Explain which assumptions would fail on a larger input or another runtime.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue with <a href="cpp-031.md.html">cpp-031</a> after saving the six observations.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines">C++ Core Guidelines</a></p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach cpp-030.
 Read courses/cpp/guides/cpp-030.md and courses/cpp/lessons/cpp-030.cpp.

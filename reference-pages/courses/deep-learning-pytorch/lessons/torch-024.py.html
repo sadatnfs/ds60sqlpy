@@ -122,28 +122,28 @@
 <span>&quot;&quot;&quot;</span>
 <span> </span>
 <span># Exercise 1: Freeze the geometric task</span>
-<span># Use training x-2, -1, 1, 2 with labels0, 0, 1, 1 and test x-3, 3.</span>
+<span># Use training x-2, -1, 1, 2 with labels 0, 0, 1, 1 and test x-3, 3.</span>
 <span># Expected: 4training records, 2test records.</span>
 <span> </span>
 <span># Exercise 2: Fit explicit normalization</span>
 <span># Calculate training mean and population standard deviation.</span>
-<span># Expected: mean0; scale sqrt2.5.</span>
+<span># Expected: mean 0; scale sqrt 2.5.</span>
 <span> </span>
 <span># Exercise 3: Train a fixed classifier</span>
-<span># Zero-initialize the weight and run40SGD.1 steps with binary logits loss.</span>
-<span># Expected: positive finite weight after40 updates.</span>
+<span># Zero-initialize the weight and run 40 SGD.1 steps with binary logits loss.</span>
+<span># Expected: positive finite weight after 40 updates.</span>
 <span> </span>
 <span># Exercise 4: Account for every test prediction</span>
-<span># Threshold test logits at0 and calculate confusion counts.</span>
-<span># Expected: TP1, TN1, FP0, FN0, total2.</span>
+<span># Threshold test logits at 0 and calculate confusion counts.</span>
+<span># Expected: TP 1, TN 1, FP 0, FN 0, total 2.</span>
 <span> </span>
 <span># Exercise 5: Compare a constant baseline</span>
-<span># Predict class0for both test rows and count mistakes.</span>
-<span># Expected: baseline1error; model0on this fixture.</span>
+<span># Predict class 0 for both test rows and count mistakes.</span>
+<span># Expected: baseline 1 error; model 0 on this fixture.</span>
 <span> </span>
 <span># Exercise 6: Reveal a group-specific failure</span>
 <span># Flip only the positive group decision and report group counts.</span>
-<span># Expected: negative0/1errors; positive1/1.</span>
+<span># Expected: negative 0/1errors; positive 1/1.</span>
 <span> </span>
 <span>if __name__ == &quot;__main__&quot;:</span>
 <span>    print(&quot;Read the guide and implement the six exercises in your saved copy.&quot;)</span>

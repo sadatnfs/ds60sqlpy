@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>spark-012: Explained paired reference solutions · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>spark-012: Explained paired reference solutions</h1>
+      <p class="source-path">Generated from <code>courses/scala-spark/solutions/spark-012_solutions.md</code></p>
+    </header>
+    <article class="document"><h2 id="spark-012-explained-paired-reference-solutions">spark-012: Explained paired reference solutions<a class="heading-anchor" href="#spark-012-explained-paired-reference-solutions" aria-label="Link to this section">#</a></h2>
+<p>Read the <a href="../guides/spark-012.md.html">guide</a> and attempt one language first. The <a href="spark-012_solution.scala.html">Scala reference</a> and <a href="spark-012_solution.py.html">PySpark reference</a> are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.</p>
+<h3 id="exercises-and-reasoning">Exercises and reasoning<a class="heading-anchor" href="#exercises-and-reasoning" aria-label="Link to this section">#</a></h3>
+<h4 id="exercise-1-inspect-the-complete-schema-contract">Exercise 1: Inspect the complete schema contract<a class="heading-anchor" href="#exercise-1-inspect-the-complete-schema-contract" aria-label="Link to this section">#</a></h4>
+<p>Return ordered field triples(name, simpleString, nullable) for a DataFrame. Check the fixture rather than inferring correctness from a printed schema alone.</p>
+<p><strong>Expected:</strong> The triples are(event_id, bigint, false),(team, string, true),(amount_cents, bigint, true).</p>
+<pre><code class="language-scala">def schemaFields(frame: DataFrame): Seq[(String,String,Boolean)] = {
+  frame.schema.fields.map(field =&gt; (field.name,field.dataType.simpleString,field.nullable)).toSeq
+}</code></pre>
+<pre><code class="language-python">def schema_fields(frame):
+    return [(field.name, field.dataType.simpleString(), field.nullable) for field in frame.schema.fields]</code></pre>
+<p>Field type and nullability are independent parts of the declared schema. A sample with only small integers does not justify inferring Int when the contract requires Long, and a missing amount must not force an approximate numeric representation. Comparing the complete field list also catches accidental column reordering or renamed fields before downstream positional Row access can misinterpret them.</p>
+<p><strong>Verification evidence:</strong> Compare the complete triples with literals in both languages, including all nullability flags.</p>
+<h4 id="exercise-2-keep-a-transformation-separate-from-its-action">Exercise 2: Keep a transformation separate from its action<a class="heading-anchor" href="#exercise-2-keep-a-transformation-separate-from-its-action" aria-label="Link to this section">#</a></h4>
+<p>Return a DataFrame plan selecting team A without collecting or counting inside the function. At the call site, request a count and verify IDs 1 and 3. Preserve raw.</p>
+<p><strong>Expected:</strong> The returned frame contains two rows when evaluated; raw still has four. The function body contains only a filter transformation.</p>
+<pre><code class="language-scala">def teamA(frame: DataFrame): DataFrame = {
+  frame.filter(col(&quot;team&quot;) === lit(&quot;A&quot;))
+}</code></pre>
+<pre><code class="language-python">def team_a(frame):
+    return frame.filter(F.col(&quot;team&quot;) == F.lit(&quot;A&quot;))</code></pre>
+<p>The source function describes the relation while the caller controls when results are requested. This makes evaluation boundaries visible and avoids a hidden collect inside a reusable transformation. The raw count check confirms immutable-plan behavior for the fixture. It is not a timing-based claim that every possible planning operation is free of metadata or engine work.</p>
+<p><strong>Verification evidence:</strong> Assert returned count 2, ordered IDs[1,3] and raw count 4 at explicit action sites.</p>
+<h4 id="exercise-3-bound-the-driver-result-and-detect-overflow-of-the-budget">Exercise 3: Bound the driver result and detect overflow of the budget<a class="heading-anchor" href="#exercise-3-bound-the-driver-result-and-detect-overflow-of-the-budget" aria-label="Link to this section">#</a></h4>
+<p>Return ordered event IDs while collecting at most limit+1 rows, with 0&lt;=limit&lt;=20. Reject a result larger than limit and invalid limits. Empty data with limit 0 is valid. Do not collect the full frame before checking length.</p>
+<p><strong>Expected:</strong> The four-row fixture passes limit 4 and rejects limit 3. An empty filter with limit 0 returns empty; limit 21 is rejected before collection.</p>
+<pre><code class="language-scala">def boundedIds(frame: DataFrame, limit: Int): Seq[Long] = {
+  require(limit &gt;= 0 &amp;&amp; limit &lt;= 20, &quot;driver ID budget outside 0..20&quot;)
+  val rows = frame.select(&quot;event_id&quot;).orderBy(&quot;event_id&quot;).limit(limit + 1).collect().map(_.getLong(0)).toSeq
+  require(rows.size &lt;= limit, &quot;driver ID result exceeds budget&quot;)
+  rows
+}</code></pre>
+<pre><code class="language-python">def bounded_ids(frame, limit):
+    if isinstance(limit, bool) or not isinstance(limit, int) or not 0 &lt;= limit &lt;= 20:
+        raise ValueError(&quot;driver ID budget outside 0..20&quot;)
+    rows = [row.event_id for row in frame.select(&quot;event_id&quot;).orderBy(&quot;event_id&quot;).limit(limit + 1).collect()]
+    if len(rows) &gt; limit:
+        raise ValueError(&quot;driver ID result exceeds budget&quot;)
+    return rows</code></pre>
+<p>Checking after an unbounded collect would be too late to protect driver memory. Limiting the action to one row beyond the budget supplies a concrete rejection witness. The operation bounds returned payload, not every byte of source scanning or sorting work. The explicit small fixture and fixed worker budget provide the broader execution bound for this lesson.</p>
+<p><strong>Verification evidence:</strong> Assert exact IDs, catch the oversize and invalid-budget errors, and inspect the bounded limit before the action.</p>
+<h4 id="exercise-4-retain-observed-zero-while-isolating-unknown-amounts">Exercise 4: Retain observed zero while isolating unknown amounts<a class="heading-anchor" href="#exercise-4-retain-observed-zero-while-isolating-unknown-amounts" aria-label="Link to this section">#</a></h4>
+<p>Return rows with nonnull amount_cents, keeping all columns and identities. Do not replace NULL with zero or filter out observed zero.</p>
+<p><strong>Expected:</strong> IDs 1,3,4 remain with amounts 0,25,40, total 65. Raw still has one NULL amount at ID 2.</p>
+<pre><code class="language-scala">def observedRows(frame: DataFrame): DataFrame = {
+  frame.filter(col(&quot;amount_cents&quot;).isNotNull)
+}</code></pre>
+<pre><code class="language-python">def observed_rows(frame):
+    return frame.filter(F.col(&quot;amount_cents&quot;).isNotNull())</code></pre>
+<p>The observation filter answers which amounts are known, not which are positive. Keeping zero preserves an event and its denominator contribution. The sum alone would not expose zero loss, so the exact ID list is also checked. Raw remains the full relation with its unknown value available for separate data-quality reporting.</p>
+<p><strong>Verification evidence:</strong> Assert exact IDs and sum 65, and independently count the unchanged raw NULL row.</p>
+<h4 id="exercise-5-canonicalize-content-across-physical-repartitioning">Exercise 5: Canonicalize content across physical repartitioning<a class="heading-anchor" href="#exercise-5-canonicalize-content-across-physical-repartitioning" aria-label="Link to this section">#</a></h4>
+<p>Return ordered triples(event_id, optional team, optional amount) for this bounded fixture. Compare raw, repartition(1) and repartition(3) against the same literal content, not raw collect order.</p>
+<p><strong>Expected:</strong> Every version yields (1, A,0),(2, B, NULL),(3, A,25),(4, B,40). Physical placement does not change identity, NULL state or value.</p>
+<pre><code class="language-scala">def canonical(frame: DataFrame): Seq[(Long,Option[String],Option[Long])] = {
+  frame.select(&quot;event_id&quot;,&quot;team&quot;,&quot;amount_cents&quot;).orderBy(&quot;event_id&quot;).collect().toSeq.map { row =&gt;
+    (row.getLong(0),if (row.isNullAt(1)) None else Some(row.getString(1)),if (row.isNullAt(2)) None else Some(row.getLong(2)))
+  }
+}</code></pre>
+<pre><code class="language-python">def canonical(frame):
+    return [tuple(row) for row in frame.select(&quot;event_id&quot;, &quot;team&quot;, &quot;amount_cents&quot;).orderBy(&quot;event_id&quot;).collect()]</code></pre>
+<p>Repartitioning changes physical organization and can change arrival order, so raw collection order is not the invariant. The unique event ID supplies a complete canonical order for this tiny result. Scala checks NULL before typed extraction; Python receives None through the Row interface. This establishes logical parity across the tested local partition changes without claiming any performance improvement.</p>
+<p><strong>Verification evidence:</strong> Assert all three canonical outputs and keep the final event_id ordering explicit.</p>
+<h4 id="exercise-6-read-back-the-actual-local-session-contract">Exercise 6: Read back the actual local session contract<a class="heading-anchor" href="#exercise-6-read-back-the-actual-local-session-contract" aria-label="Link to this section">#</a></h4>
+<p>Return master, timezone, shuffle-partition, ANSI, AQE, UI, driver-binding and Spark-version settings from the active session. Compare them with this prepared profile and rely on finally for owned stop. Do not substitute a hardcoded target string for version readback.</p>
+<p><strong>Expected:</strong> Master local[2], UTC, two shuffle partitions, ANSI true, AQE false, UI false, both driver addresses 127.0.0.1, and Spark version 4.0.1.</p>
+<pre><code class="language-scala">def settings(spark: SparkSession): Map[String,String] = {
+  Map(&quot;master&quot; -&gt; spark.sparkContext.master,
+   &quot;timezone&quot; -&gt; spark.conf.get(&quot;spark.sql.session.timeZone&quot;),
+   &quot;shuffle&quot; -&gt; spark.conf.get(&quot;spark.sql.shuffle.partitions&quot;),
+   &quot;ansi&quot; -&gt; spark.conf.get(&quot;spark.sql.ansi.enabled&quot;),
+   &quot;adaptive&quot; -&gt; spark.conf.get(&quot;spark.sql.adaptive.enabled&quot;),
+   &quot;ui&quot; -&gt; spark.sparkContext.getConf.get(&quot;spark.ui.enabled&quot;),
+   &quot;driver_host&quot; -&gt; spark.sparkContext.getConf.get(&quot;spark.driver.host&quot;),
+   &quot;driver_bind&quot; -&gt; spark.sparkContext.getConf.get(&quot;spark.driver.bindAddress&quot;),
+   &quot;spark_version&quot; -&gt; spark.version)
+}</code></pre>
+<pre><code class="language-python">def settings(spark):
+    context = spark.sparkContext.getConf()
+    return {&quot;master&quot;: spark.sparkContext.master, &quot;timezone&quot;: spark.conf.get(&quot;spark.sql.session.timeZone&quot;),
+            &quot;shuffle&quot;: spark.conf.get(&quot;spark.sql.shuffle.partitions&quot;), &quot;ansi&quot;: spark.conf.get(&quot;spark.sql.ansi.enabled&quot;),
+            &quot;adaptive&quot;: spark.conf.get(&quot;spark.sql.adaptive.enabled&quot;), &quot;ui&quot;: context.get(&quot;spark.ui.enabled&quot;),
+            &quot;driver_host&quot;: context.get(&quot;spark.driver.host&quot;), &quot;driver_bind&quot;: context.get(&quot;spark.driver.bindAddress&quot;),
+            &quot;spark_version&quot;: spark.version}</code></pre>
+<p>Actual readback can detect an unexpected reused or differently configured session, while source builder text only states intent. The version assertion deliberately targets the prepared worker rather than the older design proposal. The finally block stops this owned session after checks or failures; process and descendant cleanup remain separately observed worker responsibilities. Matching settings does not replace any of the row and schema assertions.</p>
+<p><strong>Verification evidence:</strong> Assert the complete settings map; record actual version output and distinguish it from worker cleanup evidence.</p>
+<h3 id="execution-and-interpretation">Execution and interpretation<a class="heading-anchor" href="#execution-and-interpretation" aria-label="Link to this section">#</a></h3>
+<p>Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program,so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations,partition evidence and resource measurements apply to the actual local configuration; they do not establish cluster-scale performance. Session cleanup is explicit,and any additional owned file/query lifecycle is described in the lesson.</p></article>
+  </main>
+</body>
+</html>

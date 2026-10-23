@@ -1,0 +1,38 @@
+{
+  "lesson_id": "k8s-004",
+  "provenance": "synthetic teaching cases, not runtime observations",
+  "capability": "effective-authorization and explicit-target host observation",
+  "browser_source": false,
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Write the caller,namespace,API group,resource,name and verb for an owned hello Deployment read.",
+      "expected": "A six-field request includes apps/deployments,hello,get and the explicit leased namespace."
+    },
+    {
+      "exercise": 2,
+      "task": "Compare get hello with list deployments and create namespaces under the example Role.",
+      "expected": "Only get hello is granted by this Role; list and namespace creation are absent."
+    },
+    {
+      "exercise": 3,
+      "task": "Compare the ns-1 receipt with the ns-2 readback.",
+      "expected": "Refuse despite the matching namespace name and owner label."
+    },
+    {
+      "exercise": 4,
+      "task": "With an explicitly provisioned lease, record an own-namespace permitted action and a denied cluster/Secret action.",
+      "expected": "Actual allow/deny results are recorded separately from source policy; no credentials enter the worksheet."
+    },
+    {
+      "exercise": 5,
+      "task": "Evaluate a synthetic lease expiring in30seconds for60seconds of work plus15seconds cleanup and5seconds margin.",
+      "expected": "Refuse because30<80."
+    },
+    {
+      "exercise": 6,
+      "task": "Describe why one narrow Role file cannot prove that no other privilege exists.",
+      "expected": "A written answer includes other RoleBindings/ClusterRoleBindings and actual effective authorization evidence."
+    }
+  ]
+}

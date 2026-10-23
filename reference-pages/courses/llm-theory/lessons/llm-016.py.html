@@ -122,28 +122,32 @@
 <span>&quot;&quot;&quot;</span>
 <span> </span>
 <span># Exercise 1: Build a bounded decoder</span>
-<span># Set seed7, construct the decoder and count trainable scalar parameters.</span>
-<span># Expected: parameter count below50000.</span>
+<span># Set seed 7, build the default decoder, count every trainable scalar and compare with the</span>
+<span># component ledger.</span>
+<span># Expected: Exactly 10,464 trainable scalars, below the 50,000 teaching bound.</span>
 <span> </span>
 <span># Exercise 2: Trace output axes</span>
-<span># Run input IDs[[2,5,7,3]] and inspect logits.</span>
-<span># Expected: shape(1,4,16), all finite.</span>
+<span># Run the integer IDs [[2,5,7,3]] and trace the output shape and dtype.</span>
+<span># Expected: Finite float32 logits with shape [1,4,16].</span>
 <span> </span>
 <span># Exercise 3: Recompute prefixes</span>
-<span># Run prefix lengths1..4 independently in evaluation mode.</span>
-<span># Expected: prefix logits match full early logits within1e-6.</span>
+<span># Recompute prefixes of lengths 1 through 4 independently with the same initialized</span>
+<span># weights.</span>
+<span># Expected: Every prefix matches the corresponding full-sequence early logits within 1e-6.</span>
 <span> </span>
 <span># Exercise 4: Perturb only future tokens</span>
-<span># Replace positions2,3 with8,9 and compare the first two outputs.</span>
-<span># Expected: first two logits unchanged within1e-6.</span>
+<span># Replace only positions 2 and 3 with IDs 8 and 9 and compare the first two logits.</span>
+<span># Expected: The first two score vectors remain unchanged within 1e-6.</span>
 <span> </span>
 <span># Exercise 5: Inspect head shapes</span>
-<span># Read the returned K/V state after four tokens.</span>
-<span># Expected: each cache tensor shape(1,2,4,16).</span>
+<span># Run without disabling autograd and inspect the returned K/V cache shapes, detachment and</span>
+<span># data-byte count.</span>
+<span># Expected: Logits remain connected; each cache is detached float32 [1,2,4,16]; combined cache data occupies 1,024 bytes.</span>
 <span> </span>
 <span># Exercise 6: Reject invalid token IDs</span>
-<span># Pass vocabulary ID16 and a33-token context.</span>
-<span># Expected: both raise ValueError.</span>
+<span># Reject out-of-range IDs, wrong dtype, empty/excessive context and invalid head/width</span>
+<span># configurations.</span>
+<span># Expected: Every invalid contract raises ValueError before a misleading reshape or embedding computation.</span>
 <span> </span>
 <span>if __name__ == &quot;__main__&quot;:</span>
 <span>    print(&quot;Read the guide and implement the six exercises in your saved copy.&quot;)</span>

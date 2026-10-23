@@ -116,7 +116,6 @@
       <p class="source-path">Generated from <code>courses/cpp/guides/cpp-021.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-021-strong-types-and-generic-value-apis">cpp-021: Strong types and generic value APIs<a class="heading-anchor" href="#cpp-021-strong-types-and-generic-value-apis" aria-label="Link to this section">#</a></h2>
-<p>Authored beta content. Content completion and runtime qualification are separate evidence.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Intermediate; 105 minutes. Direct prerequisites: <code>cpp-010</code>, <code>cpp-020</code>.</p>
 <p>Learner artifact: <a href="../lessons/cpp-021.cpp.html">cpp-021.cpp</a>. Keep <a href="../solutions/cpp-021_solutions.md.html">official solutions</a> closed until an attempt. The immutable <a href="../fixtures/cpp-021-cases.json.html">case ledger</a> records exercise inputs and expected observations.</p>
@@ -128,55 +127,101 @@
 <p><code>struct Cents { long long value; };</code> distinguishes money from a raw count. Define only meaningful operations. Cents+Cents can yield Cents, while adding a count should require a deliberate conversion. Avoid exposing unchecked arithmetic as a blanket promise for all long long values.</p>
 <h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>The wrapper&#x27;s job is to stop accidental unit mixing before runtime. A count and an amount may both use long long storage, but only the domain-approved operations should exist. Equality and addition laws give clients predictable behavior. Those laws apply only within the declared numeric domain: overflowing signed arithmetic is not an exotic counterexample to the law, it is an operation outside the program contract. A checked addition API should preserve that distinction.</p>
+<h3 id="strong-domain-types-and-operator-meaning">Strong domain types and operator meaning<a class="heading-anchor" href="#strong-domain-types-and-operator-meaning" aria-label="Link to this section">#</a></h3>
+<p>Two integers can have incompatible meanings even when their machine representation is identical. A Cents type makes a monetary unit visible at function boundaries. It can prevent a caller from accidentally passing a raw row count where a price is expected, provided its constructors and conversions preserve that separation. This is a domain-model benefit rather than a different arithmetic engine.</p>
+<p>An overloaded operator should preserve a familiar, documented meaning. Adding two Cents values produces a Cents result; comparing two values compares their amounts. The complete examples check125=25+100 and the zero identity. They do not establish currency conversion, rounding policy or overflow handling. Those requirements would need distinct types or explicit functions and tests.</p>
+<p>The zero value is useful because it supplies an identity for accumulation. If price+zero changes price, either the operator or the type invariant is wrong. Equality should compare the semantic value represented by the type, not an incidental address. In a richer money type, currency would also matter: equal numeric amounts in different currencies should not be casually added.</p>
+<p>Operator syntax can hide cost and failure. A small Cents addition is simple, while an overloaded plus that performs network I/O or mutates unrelated state would violate ordinary reader expectations. Prefer explicit named operations when behavior is surprising or requires a policy argument. The goal is clearer code, not making every business action look like arithmetic.</p>
+<p>Construction is the boundary where invalid states should be considered. If negative cents are forbidden in one domain but valid for a signed balance in another, one universal wrapper may be misleading. State the type&#x27;s invariant and choose names accordingly. The lesson uses a tiny representation so the learner can separate unit correctness from the later checked-arithmetic policy.</p>
 <h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
 <p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<p>Each example below is a complete independent program. Copy one into <code>main.cpp</code>, or compile its linked checked-in source using <a href="../compile-and-run.md.html">the compile and run tutorial</a>. Do not concatenate the two programs:each defines its own <code>main</code>. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.</p>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">Cents price{125}; Cents discount{25}; assert((discount+Cents{100})==price);</code></pre>
-<p><strong>Expected:</strong> The API retains cents units and produces 125 cents.</p>
+<p><a href="../examples/cpp-021-example-1.cpp.html">Complete program 1</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;iostream&gt;
+
+struct Cents  {
+     long long value;
+     bool operator==(const Cents&amp;)const=default;
+};
+
+Cents operator+(Cents a,Cents b) {
+    return Cents {
+        a.value+b.value
+    };
+}
+int main() {
+    Cents price{125}; Cents discount{25}; assert((discount+Cents{100})==price);
+    std::cout &lt;&lt; &quot;cpp-021 example 1 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-021 example 1 checks passed</code></pre>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
-<pre><code class="language-cpp">assert((Cents{125}+Cents{0})==Cents{125});</code></pre>
-<p><strong>Expected:</strong> Zero is the addition identity for this bounded domain.</p>
+<p><a href="../examples/cpp-021-example-2.cpp.html">Complete program 2</a></p>
+<pre><code class="language-cpp">#include &lt;cassert&gt;
+#include &lt;iostream&gt;
+
+struct Cents  {
+     long long value;
+     bool operator==(const Cents&amp;)const=default;
+};
+
+Cents operator+(Cents a,Cents b) {
+    return Cents {
+        a.value+b.value
+    };
+}
+int main() {
+    assert((Cents{125}+Cents{0})==Cents{125});
+    std::cout &lt;&lt; &quot;cpp-021 example 2 checks passed\n&quot;;
+    return 0;
+}</code></pre>
+<p><strong>Expected:</strong> With assertions enabled, the program exits0 and prints:</p>
+<pre><code class="language-text">cpp-021 example 2 checks passed</code></pre>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-name-the-units">Exercise 1: Name the units<a class="heading-anchor" href="#exercise-1-name-the-units" aria-label="Link to this section">#</a></h4>
 <p>Compare Cents{125} with item count 125.</p>
 <p><strong>Expected result/shape:</strong> Equal representation, different domain meaning.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Equal representation, different domain meaning.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Names prevent treating every integer as interchangeable.</p>
+<p><strong>Verify:</strong> Equal representation, different domain meaning.</p>
+<p><strong>Progressive hints:</strong> Names prevent treating every integer as interchangeable.</p>
 <h4 id="exercise-2-test-identity">Exercise 2: Test identity<a class="heading-anchor" href="#exercise-2-test-identity" aria-label="Link to this section">#</a></h4>
 <p>Add zero to Cents{125}.</p>
 <p><strong>Expected result/shape:</strong> Cents{125}.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Cents{125}.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: The operation should preserve the value at the identity.</p>
+<p><strong>Verify:</strong> Cents{125}.</p>
+<p><strong>Progressive hints:</strong> The operation should preserve the value at the identity.</p>
 <h4 id="exercise-3-construct-a-separate-type">Exercise 3: Construct a separate type<a class="heading-anchor" href="#exercise-3-construct-a-separate-type" aria-label="Link to this section">#</a></h4>
 <p>Add struct ItemCount and avoid mixed addition.</p>
 <p><strong>Expected result/shape:</strong> Cents+ItemCount has no valid overload.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Cents+ItemCount has no valid overload.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Omitting meaningless operations is an interface feature.</p>
+<p><strong>Verify:</strong> Cents+ItemCount has no valid overload.</p>
+<p><strong>Progressive hints:</strong> Omitting meaningless operations is an interface feature.</p>
 <h4 id="exercise-4-repair-implicit-conversion">Exercise 4: Repair implicit conversion<a class="heading-anchor" href="#exercise-4-repair-implicit-conversion" aria-label="Link to this section">#</a></h4>
 <p>Review a non-explicit raw integer constructor.</p>
 <p><strong>Expected result/shape:</strong> Use explicit construction at the domain boundary.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Use explicit construction at the domain boundary.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Implicit conversion can silently cross units.</p>
+<p><strong>Verify:</strong> Use explicit construction at the domain boundary.</p>
+<p><strong>Progressive hints:</strong> Implicit conversion can silently cross units.</p>
 <h4 id="exercise-5-check-equality-laws">Exercise 5: Check equality laws<a class="heading-anchor" href="#exercise-5-check-equality-laws" aria-label="Link to this section">#</a></h4>
-<p>Compare a=125,b=125,c=125.</p>
+<p>Compare a=125, b=125, c=125.</p>
 <p><strong>Expected result/shape:</strong> Reflexive, symmetric and transitive equality for these values.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Reflexive, symmetric and transitive equality for these values.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Default member equality implements the value contract.</p>
+<p><strong>Verify:</strong> Reflexive, symmetric and transitive equality for these values.</p>
+<p><strong>Progressive hints:</strong> Default member equality implements the value contract.</p>
 <h4 id="exercise-6-transfer-safety">Exercise 6: Transfer safety<a class="heading-anchor" href="#exercise-6-transfer-safety" aria-label="Link to this section">#</a></h4>
 <p>Specify checked addition when values approach LLONG_MAX.</p>
 <p><strong>Expected result/shape:</strong> Reject overflow before calculating a+b.</p>
-<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Reject overflow before calculating a+b.</p>
-<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Strong naming does not prevent representation overflow.</p>
+<p><strong>Verify:</strong> Reject overflow before calculating a+b.</p>
+<p><strong>Progressive hints:</strong> Strong naming does not prevent representation overflow.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <p>Explain why this observation follows from the mechanism: The API retains cents units and produces 125 cents. Then explain the changed condition in example 2 without opening the answer.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
-<p><code>struct Cents { long long value; };</code> distinguishes money from a raw count. Define only meaningful operations. Cents+Cents can yield Cents, while adding a count should require a deliberate conversion. Avoid exposing unchecked arithmetic as a blanket promise for all long long values.</p>
-<p>If the result disagrees, preserve the original input and inspect the first differing value or condition. Implicit conversion can silently cross units.</p>
+<p>If raw integers slip into a Cents API unexpectedly, inspect implicit constructors and conversion operators. If an operator mutates its left input when it is expected to return a new value, compare the intended value semantics with the implementation. If a large amount wraps or overflows, strong typing alone is not enough: add the numeric range policy. Keep unit tests distinct from arithmetic-boundary tests.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
 <p>Close the source. Reconstruct the reasoning for Exercise 6: Transfer safety. Explain which assumptions would fail on a larger input or another runtime.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue with <a href="cpp-022.md.html">cpp-022</a> after saving the six observations.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<p><a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines">C++ Core Guidelines</a></p>
 <h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach cpp-021.
 Read courses/cpp/guides/cpp-021.md and courses/cpp/lessons/cpp-021.cpp.

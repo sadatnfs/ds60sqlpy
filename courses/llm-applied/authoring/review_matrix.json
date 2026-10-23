@@ -1,0 +1,406 @@
+{
+  "review_date": "2026-10-23",
+  "chapters": [
+    {
+      "id": "llm-applied-001",
+      "title": "The subject assistant decision: prompts, retrieval or fine-tuning",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "The routing fixture needed a stage-by-stage capability and evidence ledger.",
+        "The prose incorrectly called120 the admission threshold while the helper uses100.",
+        "A model-quality comparison needed conditional failure accounting and controlled alternatives."
+      ],
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_owner": "depth_reviews_applied.py",
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "llm-applied-002",
+      "title": "Data-science task contracts and structured extraction",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "Decoded-object validation, source parsing and numerical eligibility were conflated.",
+        "The count ratio needed an explicit unit and aggregation counterexample.",
+        "Unsupported fields and rejected records needed separate evaluation denominators."
+      ],
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_owner": "depth_reviews_applied.py",
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "llm-applied-003",
+      "title": "Prompt and context engineering with measurable boundaries",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "The whole-item allocator needed exact scope and a greedy-selection counterexample.",
+        "Prompt serialization was not separated enough from model behavior and authorization.",
+        "Prompt tuning needed a controlled evaluation and truncation ledger."
+      ],
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_owner": "depth_reviews_applied.py",
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "llm-applied-004",
+      "title": "Corpus provenance, versions and evaluation isolation",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "Integrity metadata needed separation from authenticity, access and applicability.",
+        "Current-only version selection lacked an explicit historical-time counterexample.",
+        "Corpus, chunk, index and answer identities needed a dependency trace."
+      ],
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_owner": "depth_reviews_applied.py",
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "llm-applied-005",
+      "title": "Chunking, overlap, offsets and context budgets",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "Chunk-count and duplication formulas needed derivation and exact boundary arithmetic.",
+        "Character offsets were not distinguished from bytes or model tokens.",
+        "Overlap needed an evidence-dependence and multi-passage sufficiency counterexample."
+      ],
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_owner": "depth_reviews_applied.py",
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "llm-applied-006",
+      "title": "Lexical retrieval and BM25 from first principles",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "BM25 needed a full numeric score trace and parameter-limit interpretation.",
+        "Document-frequency and chunk-policy changes needed a corpus-dependence example.",
+        "The tokenizer and default-only parameter contract needed honest boundaries."
+      ],
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_owner": "depth_reviews_applied.py",
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "llm-applied-007",
+      "title": "Embedding retrieval, similarity and representation limits",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "Cosine retrieval needed an exact geometric calculation and a coordinate-system counterexample.",
+        "The metadata exercise only compares dictionaries; it does not enforce an integrated retrieval gate.",
+        "Encoder quality, normalization range and approximate search needed separate evidence."
+      ],
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_owner": "depth_reviews_applied.py",
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "llm-applied-008",
+      "title": "Hybrid retrieval, reciprocal-rank fusion and reranking",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "Fusion needed exact score gaps and a constant-dependent tradeoff.",
+        "Duplicate handling within a list was not distinguished from correlated list evidence.",
+        "Reranker quality needed candidate and context ceilings with controlled budgets."
+      ],
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_owner": "depth_reviews_applied.py",
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "llm-applied-009",
+      "title": "Metadata filtering and access-controlled retrieval",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "The access fixture needed an explicit trusted-input and enforcement boundary.",
+        "Filtering after top-k required a concrete result and leakage counterexample.",
+        "Cache policy identity, revocation and equivalence classes needed precise scope."
+      ],
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_owner": "depth_reviews_applied.py",
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "llm-applied-010",
+      "title": "Query rewriting and bounded multi-hop retrieval",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "The graph walk's hop definition needed queue-state and complexity traces.",
+        "Fractional and Boolean hop budgets were accepted despite violating the intended integer boundary.",
+        "Query expansion and graph reachability were not distinguished from evidence entailment."
+      ],
+      "executable_change": true,
+      "worked_code_change": true,
+      "review_owner": "depth_reviews_applied.py",
+      "review_runtime_evidence": [
+        {
+          "source_path": "courses/llm-applied/solutions/llm-applied-010_solution.py",
+          "source_sha256": "2df24c0a62b78d09451ef3dd50b7d686dfdf11bdfd29d46c56ad56fe6770c86c",
+          "worker_sha256": "234a42be384dbf955aaff6e7ea3e5c0a063aa50f4ed9f7274fe04ea8439d2f3f",
+          "image_id": "sha256:eab1bc531be09ed3aeab7e0290fe348239d7b372ea9b014e242af9018ec2b523",
+          "status": "succeeded",
+          "elapsed": 0.041,
+          "lesson_id": "llm-applied-010",
+          "kind": "reference",
+          "runtime_profile": "python-core",
+          "receipt_path": "work/applied010-depth-repaired-acceptance.jsonl"
+        },
+        {
+          "source_path": "work/applied-depth-worked/llm-applied-010-abc.py",
+          "source_sha256": "cba86bf45cab6c3bafe040971a0465d3efcc0157ebafbadcf33227db79bdb650",
+          "guide_path": "courses/llm-applied/guides/llm-applied-010.md",
+          "guide_sha256": "989ca930983f29c76b918c6674fca30e962f7087954782e152259bc886ba2889",
+          "image_id": "sha256:eab1bc531be09ed3aeab7e0290fe348239d7b372ea9b014e242af9018ec2b523",
+          "status": "succeeded",
+          "elapsed": 0.041,
+          "execution_contract": "sequential_examples_A_B_C_in_one_fresh_process",
+          "lesson_id": "llm-applied-010",
+          "kind": "worked_sequence",
+          "runtime_profile": "python-core",
+          "receipt_path": "work/ml-worked-applied010-depth-repaired-acceptance.jsonl"
+        }
+      ]
+    },
+    {
+      "id": "llm-applied-011",
+      "title": "Grounded claims, citations and evidence-based abstention",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "Citation integrity, claim support and world truth needed separate tests.",
+        "The extractive helper was described too broadly as validating a support map.",
+        "Abstention required a concrete coverage/utility tradeoff and computed-claim lineage."
+      ],
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_owner": "depth_reviews_applied.py",
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "llm-applied-012",
+      "title": "Evaluating retrieval and answers with oracle controls",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "Retrieval recall and first-hit rank needed cutoff and multi-evidence interpretations.",
+        "Saved labels were not distinguished sufficiently from observed model execution.",
+        "Oracle context and aggregate scores needed paired controls and clear denominators."
+      ],
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_owner": "depth_reviews_applied.py",
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "llm-applied-013",
+      "title": "Paired reliability studies and family-aware uncertainty",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "The family bootstrap needed its exact discrete distribution and estimand.",
+        "Paired identity, selective accuracy and severe-error gates needed different denominators.",
+        "The finite saved-label fixture required a clearer population and causal boundary."
+      ],
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_owner": "depth_reviews_applied.py",
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "llm-applied-014",
+      "title": "Supervised fine-tuning data and answer-target masks",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "Answer-only masking needed an indexed next-token table and explicit denominator.",
+        "Truncation preserving any target was not distinguished from preserving complete answers.",
+        "Masking loss terms was not separated from conditioning paths or packing boundaries."
+      ],
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_owner": "depth_reviews_applied.py",
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "llm-applied-015",
+      "title": "Full supervised fine-tuning of a tiny causal decoder",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "The tiny decoder needed an exact parameter/shape ledger and active-logit derivative.",
+        "The held-out prefix could be solved through a shared token shortcut rather than broad transfer.",
+        "The final training receipt used a pre-update loss while held-out loss used the post-update model."
+      ],
+      "executable_change": true,
+      "worked_code_change": false,
+      "review_owner": "depth_reviews_applied.py",
+      "review_runtime_evidence": [
+        {
+          "source_path": "courses/llm-applied/solutions/llm-applied-015_solution.py",
+          "source_sha256": "cf4f7ada6283bd5994c99539fbfe72be9cfd9bdcdd257006ce9f1e78a1c637c1",
+          "worker_sha256": "234a42be384dbf955aaff6e7ea3e5c0a063aa50f4ed9f7274fe04ea8439d2f3f",
+          "image_id": "sha256:b93cf9f556f8108b9456e259fd148b6d85eb04421a2961316f6926515259e2b5",
+          "status": "succeeded",
+          "elapsed": 1.12,
+          "lesson_id": "llm-applied-015",
+          "kind": "reference",
+          "runtime_profile": "llm-torch-cpu",
+          "receipt_path": "work/applied015-final-state-repaired-acceptance.jsonl"
+        }
+      ]
+    },
+    {
+      "id": "llm-applied-016",
+      "title": "Low-rank adaptation: dimensions, gradients and a real update",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "Independent LoRA orientation, exact gradient/update and rank review completed in lora_depth.py."
+      ],
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_owner": "lora_depth.py",
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "llm-applied-017",
+      "title": "Quantized frozen bases, adapter gradients and QLoRA limits",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "The quantization example needed exact reconstructed outputs and an error bound.",
+        "Packed-byte accounting needed separation from Python objects and compute buffers.",
+        "Adapter improvement toward zero was not the same as recovering the original model."
+      ],
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_owner": "depth_reviews_applied.py",
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "llm-applied-018",
+      "title": "Compare full and adapter fine-tuning on frozen tasks",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "The full-versus-adapter comparison needed a complete trainable-state and hypothesis-space ledger.",
+        "Equal steps were not separated from equal compute or identical optimization policy.",
+        "Held-out teacher-forced loss and output-head placement needed narrower interpretation."
+      ],
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_owner": "depth_reviews_applied.py",
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "llm-applied-019",
+      "title": "Preference optimization, DPO and the RLHF distinction",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "The preference loss needed its derivative, curvature and exact first update.",
+        "A free scalar margin was not a complete normalized language-model policy.",
+        "Sequence scoring, reference state and factual support required separate contracts."
+      ],
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_owner": "depth_reviews_applied.py",
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "llm-applied-020",
+      "title": "Fine-tuning embeddings and a small reranker",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "The trainable retrieval fixture needed its first gradient and analytic decision boundary.",
+        "The pairwise reranker needed an independent update trace.",
+        "False-negative identity detection was not an integrated data-admission function."
+      ],
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_owner": "depth_reviews_applied.py",
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "llm-applied-021",
+      "title": "Optional pretrained-model adaptation with pinned offline artifacts",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "The optional recipe needed a current evidence ladder separating execution from quality.",
+        "Trainer-internal label shifting needed comparison with the earlier manual-shift fixture.",
+        "Pinned artifacts, same-environment repeatability and platform scope needed precise interpretation."
+      ],
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_owner": "depth_reviews_applied.py",
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "llm-applied-022",
+      "title": "Structured tools for extraction, aggregation and data-science work",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "The grouped-mean tool needed grain, weighting and causal-boundary calculations.",
+        "Finite inputs could overflow the naive sum and return an infinite mean.",
+        "A typed proposal and output lookup were not a complete explanation validator or live database tool."
+      ],
+      "executable_change": true,
+      "worked_code_change": true,
+      "review_owner": "depth_reviews_applied.py",
+      "review_runtime_evidence": [
+        {
+          "source_path": "courses/llm-applied/solutions/llm-applied-022_solution.py",
+          "source_sha256": "b2b2d41a7e86f8413252a5a2df8b02ef5ebb2777577852f2a6379ae8139dc0d4",
+          "worker_sha256": "234a42be384dbf955aaff6e7ea3e5c0a063aa50f4ed9f7274fe04ea8439d2f3f",
+          "image_id": "sha256:ee87f7a78cf13a2398ef080c2790428500e43acb65a3b20780aeaa2fe780a0b2",
+          "status": "succeeded",
+          "elapsed": 0.041,
+          "lesson_id": "llm-applied-022",
+          "kind": "reference",
+          "runtime_profile": "python-core",
+          "receipt_path": "work/applied022-stable-mean-repaired-acceptance.jsonl"
+        },
+        {
+          "source_path": "work/applied-depth-worked/llm-applied-022-abc.py",
+          "source_sha256": "b50ec686a57b36f3938b01b9694cd0be977f05a05b8b0ef5ceb1e26e1d8997b0",
+          "guide_path": "courses/llm-applied/guides/llm-applied-022.md",
+          "guide_sha256": "1511dd510985f49feb4359df3085690634a6b509f6d696e4e635fb5ba702fe70",
+          "image_id": "sha256:ee87f7a78cf13a2398ef080c2790428500e43acb65a3b20780aeaa2fe780a0b2",
+          "status": "succeeded",
+          "elapsed": 0.041,
+          "execution_contract": "sequential_examples_A_B_C_in_one_fresh_process",
+          "lesson_id": "llm-applied-022",
+          "kind": "worked_sequence",
+          "runtime_profile": "python-core",
+          "receipt_path": "work/ml-worked-applied022-stable-mean-repaired-acceptance.jsonl"
+        }
+      ]
+    },
+    {
+      "id": "llm-applied-023",
+      "title": "Domain assistant boundaries: freshness, injection, budgets and traces",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "Freshness needed exact inclusive boundaries and a distinction between publication and knowledge time.",
+        "The call counter needed attempt semantics and separation from elapsed-time limits.",
+        "A field allowlist was not sufficient to guarantee safe trace values."
+      ],
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_owner": "depth_reviews_applied.py",
+      "review_runtime_evidence": []
+    },
+    {
+      "id": "llm-applied-024",
+      "title": "Capstone: a grounded and evaluated data-science subject assistant",
+      "status": "reviewed_and_deepened",
+      "findings": [
+        "The capstone needed an exact integration ledger identifying what was and was not connected.",
+        "Three correct statuses were not distinguished from answer coverage and semantic quality.",
+        "The optional trained model's execution/failure evidence needed separation from this extractive baseline."
+      ],
+      "executable_change": false,
+      "worked_code_change": false,
+      "review_owner": "depth_reviews_applied.py",
+      "review_runtime_evidence": []
+    }
+  ]
+}

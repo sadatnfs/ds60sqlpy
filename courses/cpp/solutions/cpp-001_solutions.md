@@ -12,7 +12,7 @@ The terminal is an interface for requesting a program and reading its streams; a
 - **object file:** compiled code that still needs linking
 - **executable:** a linked program file
 - **stdout/stderr:** separate normal-output and diagnostic streams
-- **exit status:** the process result code, with0 normally signaling success
+- **exit status:** the process result code, with 0 normally signaling success
 
 ## Worked example / walkthrough
 
@@ -47,7 +47,7 @@ process: not run
 
 ### Exercise 1: Name each artifact
 
-**Inputs/evidence:** For cpp-001 Exercise 1, hello.cpp,hello.o,hello and hello, learner.
+**Inputs/evidence:** For cpp-001 Exercise 1, hello.cpp, hello.o, hello and hello, learner.
 
 **Expected result/shape:** For cpp-001 Exercise 1, source/object/executable/output in that order.
 
@@ -57,7 +57,7 @@ The suffixes are conventional clues, but the build transcript establishes proven
 
 ### Exercise 2: Read a relative path
 
-**Inputs/evidence:** For cpp-001 Exercise 2, working directory course;relative path lessons/hello.cpp.
+**Inputs/evidence:** For cpp-001 Exercise 2, working directory course; relative path lessons/hello.cpp.
 
 **Expected result/shape:** For cpp-001 Exercise 2, the intended file is course/lessons/hello.cpp.
 

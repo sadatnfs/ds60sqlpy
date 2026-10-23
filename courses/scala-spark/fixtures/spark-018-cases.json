@@ -1,0 +1,66 @@
+{
+  "lesson_id": "spark-018",
+  "scope": "Tiny paired local contracts;root-owned runtime qualification is separate.",
+  "cases": [
+    {
+      "exercise": 1,
+      "title": "Parse offset evidence into comparable instants",
+      "input_contract": "Return event_id, text, event_time by parsing the declared offset pattern yyyy-MM-ddTHH:mm:ss with a literal T and XXX offset. The session timestamp type must be LTZ.",
+      "expected": "All 6 rows parse. Epoch(event 2)=epoch(event 5), and epoch(event 3)-epoch(event 2)=3600 seconds.",
+      "verification": "Assert TimestampType, zero null timestamps, exact same-instant equality and the 3600-second separation."
+    },
+    {
+      "exercise": 2,
+      "title": "Render a zone without changing the underlying instant",
+      "input_contract": "Return ordered(event_id, formatted_clock) pairs for a requested zone, formatting yyyy-MM-dd HH:mm:ss. Set the zone only during materialization and restore the previous setting in finally.",
+      "expected": "Events 2 and 3 render 08:30 and 09:30 underUTC but both 01:30 underAmerica/Los_Angeles. Session zone is UTC afterward.",
+      "verification": "Assert both full clock strings for IDs 2/3 and the restored session configuration."
+    },
+    {
+      "exercise": 3,
+      "title": "Filter a complete local day with instant boundaries",
+      "input_contract": "Select events in the half-open interval[2024-11-03T07:00:00Z,2024-11-04T08:00:00Z). Return all event columns.",
+      "expected": "Ordered event IDs[1,2,3,5]. Lower-bound ID 1 included, upper-bound ID 4 excluded and prior-second ID 6 excluded.",
+      "verification": "Assert the exact ID set and the 25-hour boundary duration; do not use an inclusive BETWEEN."
+    },
+    {
+      "exercise": 4,
+      "title": "Keep an unresolved local timestamp as local fields",
+      "input_contract": "Under bothUTC andAmerica/Los_Angeles, cast 2024-11-03 01:30:00 explicitly to TIMESTAMP_NTZ, inspect its schema and render it as a string. Restore the prior zone.",
+      "expected": "Both outputs are 2024-11-03 01:30:00 and the type is timestamp_ntz. No epoch or unique instant is claimed.",
+      "verification": "Assert identical local clock strings and explicit type under both zones, then confirm session restoration."
+    },
+    {
+      "exercise": 5,
+      "title": "Expose the information lost by a local clock key",
+      "input_contract": "For the two fold events 2 and 3, compare local formatted labels with their epoch values. Return(label_count, instant_count), retaining original event identity.",
+      "expected": "One distinct local label but two distinct instants. They must not be deduplicated by the displayed clock.",
+      "verification": "Assert(1,2) using separately materialized local labels and original epoch evidence."
+    },
+    {
+      "exercise": 6,
+      "title": "Quarantine invalid timestamps without confusing missingness",
+      "input_contract": "Build an inline source containing a valid offset timestamp, bad text andNULL. Use try_to_timestamp with the declared offset pattern and classify accepted, malformed_timestamp, missing_timestamp.",
+      "expected": "IDs 1,2,3 have those reasons respectively;only 1 is accepted while ANSI remains true.",
+      "verification": "Assert all reason rows, one known timestamp and unchanged ANSI setting."
+    }
+  ],
+  "golden": {
+    "local_day_ids": [
+      1,
+      2,
+      3,
+      5
+    ],
+    "same_instant_ids": [
+      2,
+      5
+    ],
+    "fold_ids": [
+      2,
+      3
+    ],
+    "fold_seconds": 3600,
+    "local_day_hours": 25
+  }
+}

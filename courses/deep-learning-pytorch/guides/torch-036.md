@@ -1,14 +1,12 @@
 # torch-036: Capstone: release a small reproducible PyTorch model
 
-Status: authored PyTorch course content. The manifest inventories complete teaching files; runtime readiness remains a separate, measured property.
-
 ## Level and prerequisites
 
 Advanced; approximately 240 minutes. Direct prerequisites: `torch-035`. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
 
 ## Learning objectives
 
-A reproducible model release is a bundle of state, schema, data identity, execution evidence and limitations. The central investigation is concrete: Use train x1, 2, 3 and holdout4, 5 with target2 x and disjoint IDs. The finish condition is 3 training and2 holdout records. local checks True; production no-go; directory absent. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+A reproducible model release is a bundle of state, schema, data identity, execution evidence and limitations. The central investigation is concrete: Use train x1, 2, 3 and holdout 4, 5 with target 2 x and disjoint IDs. The finish condition is 3training and 2 holdout records. local checks True; production no-go; directory absent. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -18,7 +16,9 @@ This capstone trains a small scalar regressor under a fixed budget, saves its st
 
 ## Design decisions and when to use this method
 
+Treat release as a conjunction of independently reviewable contracts rather than a filename or a score. Decide the predictor's schema, artifact identity, evaluation population and failure behavior before packaging. A required check that is missing is not equivalent to a pass, and an expected negative test passes only when the system rejects the invalid case as intended.
 
+Keep the local teaching acceptance separate from production readiness. The current bundle proves a small trained function can be reconstructed and rejects a mismatched weight digest. A two-row visible holdout, an unexercised rollback name and no operational deployment test support a production no-go, which is a valid capstone conclusion.
 
 ## Paired TensorFlow comparison
 
@@ -38,13 +38,47 @@ The paired TensorFlow release uses the same evidence categories but different ar
 
 ## How to run this lesson
 
-Use a prepared `llm-torch-cpu` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/torch-036/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: `& $CoursePython courses/deep-learning-pytorch/lessons/torch-036.py`. For macOS/Linux use `.venv/bin/python courses/deep-learning-pytorch/lessons/torch-036.py` from the repository root.
+Use a prepared `llm-torch-cpu` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/torch-036/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: `& $CoursePython courses/deep-learning-pytorch/lessons/torch-036.py`. For macOS/Linux, use the interpreter explicitly selected for a separately prepared native PyTorch environment, and invoke that interpreter on `courses/deep-learning-pytorch/lessons/torch-036.py` from the repository root. The repository's general `.venv` is not assumed to contain PyTorch; the prepared classroom profile is the default execution route.
 
-Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.
+Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the explicit tolerance in each assertion. Several analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone is not a universal numerical-error bound. Finite differences, reductions and conditioning can require different justified tolerances. Integer counts, identities and boolean decisions should be exact.
 
 ## Syntax anatomy and reasoning sequence
 
-Train ann.Linear(1, 1, bias=False) on literal float64 points using fixed SGD updates. Serialize state_dict, canonical JSON schema and split IDs into an owned Temporary Directory. Record SHA256 of the weight file. The child verifies the hash and schema before constructing the module and loading weights_only=True. Bound the subprocess, include stderr on unexpected failure, and remove only the owned temporary directory.
+Train an nn.Linear(1, 1, bias=False) on literal float64 points using fixed SGD updates. Serialize state_dict, canonical JSON schema and split IDs into an owned Temporary Directory. Record SHA256 of the weight file. The child verifies the hash and schema before constructing the module and loading weights_only=True. Bound the subprocess, include stderr on unexpected failure, and remove only the owned temporary directory.
+
+## Connect the trained function to the released bytes
+
+The training objective is L(w)=(14/3)(w-2)^2 on x=[1, 2, 3]. With learning rate 0.01, the error e_t=w_t-2 follows e_(t+1)=(68/75)e_t. Starting at zero gives w_t=2-2(68/75)^t. After the fixed thirty updates, the analytic weight is approximately 1.89420638. This derivation supplies an independent check on the training mechanism rather than relying only on the loop's finite-value assertion.
+
+The held-out inputs are 4 and 5, with targets 8 and 10. The training-mean target baseline predicts four, so its squared errors are 16 and 36 and MSE is 26. For the trained scalar model, the holdout MSE is((16+25)/2)(w_30-2)^2=82(68/75)^60, approximately 0.229442. The threshold below 26 is therefore interpretable for this visible fixture. It does not establish population quality: the rule y=2x is public, and both assessment inputs extrapolate beyond the training range.
+
+The predictor is more than its state tensor. Its architecture is bias-free Linear(1, 1), its dtype is float64, its feature list is['x'], and its output represents the same scalar target units. The manifest carries that schema, split IDs, step count and a digest of the serialized weight file. A future normalized or categorical model would also need its fitted preprocessing and label mapping. Reconstructing a tensor of the right shape cannot recover omitted semantic metadata.
+
+The digest binds the manifest's expected weight identity to the actual saved bytes. The child recomputes SHA256 before loading and rejects a mismatch. The deliberate all-zero expected digest exercises that rejection path. It is a successful negative test because the invalid bundle fails with the expected diagnostic; it does not mean the corrupted bundle is an accepted release.
+
+Integrity is narrower than authenticity or correctness. A digest does not identify a trusted publisher by itself, and a party able to replace both weights and the expected digest can create a different self-consistent pair. Correctly hashed bytes can also encode a poor model or dishonest split. The lesson's local artifacts are trusted teaching inputs, so it tests byte mismatch detection rather than a signed distribution or supply-chain system.
+
+The child separately checks the exact schema before constructing the model. That catches a changed feature/dtype/width contract even if the weight bytes are unchanged. The current child does not independently revalidate every possible lineage field or reproduce training. The parent established disjoint split IDs earlier, and the manifest records them; those facts should not be inflated into authenticated data lineage or are computed training receipt.
+
+Fresh-process prediction parity removes the possibility of satisfying the test by reusing the original model object. The child loads the saved state with weights_only=True on CPU, sets evaluation mode, and predicts the two fixed rows under inference_mode. The parent compares with its recorded outputs at 1e-12 for this float64 fixture. That is a local inference-reconstruction proof, not an optimizer/RNG continuation proof. The earlier checkpoint and export lessons are separate evidence items rather than booleans to assume here.
+
+A useful gate table keeps these distinctions explicit:
+
+| Gate | Evidence in this capstone | Limit |
+| --- | --- | --- |
+| training procedure | thirty actual updates and analytic fixture | no unseen-population claim |
+| weight integrity | recomputed digest and deliberate mismatch rejection | no publisher authentication |
+| schema | exact child-side dictionary comparison | no general semantic-schema validator |
+| reconstruction | fresh child predictions agree | not training continuation |
+| assessment | two visible held-out rows and baseline | very limited coverage |
+| rollback | previous identity v1 recorded | no previous artifact restored here |
+| operations | not exercised | production remains no-go |
+
+The previous-artifact string is a decision reference, not proof that a recoverable file exists or that it is compatible with current preprocessing. A real rollback rehearsal would load the identified previous artifact, verify its schema and predictions, and define the effect on any surrounding state. This exercise retains the reference without claiming that rehearsal occurred.
+
+Publication and cleanup also have boundaries. The files are created in one owned TemporaryDirectory and removed after the checks. No server, registry or deployment is started. A completed save/load test does not establish crash-safe publication, concurrent-reader behavior or long-term retention. Those require their own artifact lifecycle and operational tests.
+
+The final record can therefore say local_contracts_pass=True and production_go=False without contradiction. It acknowledges successful mechanics while preserving missing assessment and operational evidence. The paired TensorFlow release uses different formats and some different gates, but follows the same principle: each claim should be supported by the corresponding actual check, and a required unknown or failure must remain visible.
 
 ## Worked example / walkthrough
 
@@ -64,11 +98,11 @@ x=torch.tensor([[1.],[2.],[3.]],dtype=torch.float64); y=2*x; held=torch.tensor([
 split={'train':['a','b','c'],'test':['d','e']}; assert not set(split['train'])&set(split['test']) and len(split['test'])==2
 ```
 
-**Expected:** 3 training and2 holdout records.
+**Expected:** 3training and 2 holdout records.
 
 ### Example B: Train within a declared budget
 
-The budget is not extended after seeing the holdout. The baseline predicts training mean target4, so gives errors16 and36 on the two test rows.
+The budget is not extended after seeing the holdout. The baseline predicts training mean target 4, so gives errors 16 and 36on the two test rows.
 
 ```python
 model=nn.Linear(1,1,bias=False,dtype=torch.float64)
@@ -81,7 +115,7 @@ with torch.no_grad(): expected=model(held); error=(expected-2*held).square().mea
 assert torch.isfinite(model.weight).all() and error<26
 ```
 
-**Expected:** finite weights; holdout error below constant training-mean baseline26.
+**Expected:** finite weights; holdout error below constant training-mean baseline 26.
 
 ### Example C: Build the owned release bundle
 
@@ -94,29 +128,29 @@ manifest_path=folder/'manifest.json'; manifest_path.write_text(json.dumps(manife
 assert len(manifest['weight_sha256'])==64 and manifest['schema']['width']==1
 ```
 
-**Expected:** manifest has feature x, float64, width1 and matching hash.
+**Expected:** manifest has feature x, float64, width 1 and matching hash.
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: 3 training and2 holdout records. local checks True; production no-go; directory absent. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: 3training and 2 holdout records. local checks True; production no-go; directory absent. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
-1. **Freeze the scalar experiment.** Use train x1, 2, 3 and holdout4, 5 with target2 x and disjoint IDs.
-   **Expected:** 3 training and2 holdout records.
-   **Verify:** Save the assertion results for exercise 1, including 3 training and2 holdout records.
+1. **Freeze the scalar experiment.** Use train x1, 2, 3 and holdout 4, 5 with target 2 x and disjoint IDs.
+   **Expected:** 3training and 2 holdout records.
+   **Verify:** Save the assertion results for exercise 1, including 3training and 2 holdout records.
 
-2. **Train within a declared budget.** Zero-initialize float64 Linear and run30 SGD.01 updates.
-   **Expected:** finite weights; holdout error below constant training-mean baseline26.
-   **Verify:** Save the assertion results for exercise 2, including finite weights; holdout error below constant training-mean baseline26.
+2. **Train within a declared budget.** Zero-initialize float64 Linear and run 30 SGD.01 updates.
+   **Expected:** finite weights; holdout error below constant training-mean baseline 26.
+   **Verify:** Save the assertion results for exercise 2, including finite weights; holdout error below constant training-mean baseline 26.
 
 3. **Build the owned release bundle.** Save weights, schema and split manifest with a weight SHA256.
-   **Expected:** manifest has feature x, float64, width1 and matching hash.
-   **Verify:** Save the assertion results for exercise 3, including manifest has feature x, float64, width1 and matching hash.
+   **Expected:** manifest has feature x, float64, width 1 and matching hash.
+   **Verify:** Save the assertion results for exercise 3, including manifest has feature x, float64, width 1 and matching hash.
 
 4. **Verify fresh-process prediction parity.** Run the checked loader in a fresh interpreter and compare holdout predictions.
-   **Expected:** predictions match within1e-12.
-   **Verify:** Save the assertion results for exercise 4, including predictions match within1e-12.
+   **Expected:** predictions match within 1e-12.
+   **Verify:** Save the assertion results for exercise 4, including predictions match within 1e-12.
 
 5. **Make a corrupted artifact fail.** Replace the declared weight hash with 64 zeros and rerun the loader.
    **Expected:** nonzero child exit and weight hash mismatch diagnostic.
@@ -128,7 +162,9 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Common pitfalls and diagnosis
 
-When a result disagrees, locate the first intermediate value that violates this explanation. Inspect shapes and identities before aggregates, and inspect counts before averages. Preserve the original fixture and introduce only one controlled change at a time. If an arithmetic identity passes but a data-boundary condition fails, the experiment is still invalid. If a runtime is unavailable, record the unexecuted code as unverified rather than replacing its output with the expected text. The separate explanation discusses why the tempting alternative in each case changes the result.
+If the trained weight differs, compare the recurrence, step count, learning rate and reduction before investigating serialization. If the child loads but predictions differ, check architecture, dtype, feature semantics and the exact artifact path. If the corrupted digest is accepted, the integrity gate is disconnected from loading and the local acceptance must fail.
+
+If a release record marks an unexecuted checkpoint or rollback test true, replace that assumption with the actual unavailable state and required next evidence. If a hash matches but evaluation is leaky, do not treat integrity as a quality override. If cleanup would target an existing learner directory, stop and restore the owned-artifact boundary. Preserve the production no-go until the named missing gates have independent evidence.
 
 ## Progressive hints
 

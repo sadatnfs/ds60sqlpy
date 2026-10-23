@@ -60,14 +60,12 @@ The exercises distinguish inspection, independent extraction, transformation, ac
 ### Example 1
 
 ```python
-import numpy as np
-
-a=np.arange(6,dtype=np.int64)
-view=a[::2]
-view[1]=99
-assert a.tolist()==[0,1,99,3,4,5]
-assert np.shares_memory(a,view)
-print("Shared slice:",a.tolist(),view.strides)
+a = np.arange(6, dtype=np.int64)
+view = a[::2]
+view[1] = 99
+assert a.tolist() == [0, 1, 99, 3, 4, 5]
+assert np.shares_memory(a, view)
+print("Shared slice:", a.tolist(), view.strides)
 ```
 
 The slice selects indices zero, two, four. Its one-dimensional stride is 16 bytes because each int64 occupies eight bytes and the slice advances two elements. Assigning the second slice element changes source index two. This is a storage relationship, not a new collection of values.
@@ -75,14 +73,12 @@ The slice selects indices zero, two, four. Its one-dimensional stride is 16 byte
 ### Example 2
 
 ```python
-import numpy as np
-
-a=np.arange(6,dtype=np.int64).reshape(2,3)
-copy=a[:,1:].copy()
-copy[0,0]=-1
-assert a[0,1]==1 and not np.shares_memory(a,copy)
-assert a.T.strides==(8,24)
-print("Original preserved:",a.tolist(),"transpose strides:",a.T.strides)
+a = np.arange(6, dtype=np.int64).reshape(2, 3)
+copy = a[:, 1:].copy()
+copy[0, 0] = -1
+assert a[0, 1] == 1 and not np.shares_memory(a, copy)
+assert a.T.strides == (8, 24)
+print("Original preserved:", a.tolist(), "transpose strides:", a.T.strides)
 ```
 
 A copy detaches the selected values before mutation. The transpose changes strides from row/column movement to column/row movement without requiring a new mathematical value at each position. The assertions distinguish independence from a merely different shape.

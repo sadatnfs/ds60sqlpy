@@ -4,7 +4,7 @@ from collections import deque
 
 def rewrite(query,synonyms): return ' '.join(synonyms.get(token,token) for token in query.lower().split())
 def walk(start,graph,max_hops):
-    if max_hops<0: raise ValueError('nonnegative hop budget required')
+    if type(max_hops) is not int or max_hops<0: raise ValueError('nonnegative integer hop budget required')
     if start not in graph: return []
     queue=deque([(start,0)]); seen={start}; result=[]
     while queue:
@@ -30,6 +30,10 @@ def verify():
 
     # Exercise 4: Stop at the declared depth
     assert walk('metric',graph,1)==['metric','exclusions']
+    for bad_budget in [1.5,True,float('nan'),-1]:
+        try: walk('metric',graph,bad_budget)
+        except ValueError: pass
+        else: raise AssertionError('invalid hop budget accepted')
 
     # Exercise 5: Break a retrieval cycle
     cyclic={**graph,'test_accounts':['metric']}; result=walk('metric',cyclic,10)

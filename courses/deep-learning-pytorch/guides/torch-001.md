@@ -1,14 +1,12 @@
 # torch-001: A bounded PyTorch investigation and framework comparison
 
-Status: authored PyTorch course content. The manifest inventories complete teaching files; runtime readiness remains a separate, measured property.
-
 ## Level and prerequisites
 
 Beginner; approximately 120 minutes. Direct prerequisites: . The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
 
 ## Learning objectives
 
-A deep-learning investigation asks a model to predict a defined target from available inputs, then tests what evidence supports using that prediction. The central investigation is concrete: Use three training points(1, 2), (2, 4), (3, 6) and four untouched points(4, 8)..(7, 14); name one row as the prediction unit. The finish condition is 3 training rows, 4 holdout rows, one prediction per row. report says arithmetic/software checked; population reliability u n established. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+A deep-learning investigation asks a model to predict a defined target from available inputs, then tests what evidence supports using that prediction. The central investigation is concrete: Use three training points(1, 2), (2, 4), (3, 6) and four untouched points(4, 8)..(7, 14); name one row as the prediction unit. The finish condition is 3 training rows, 4 holdout rows, one prediction per row. report says arithmetic/software checked; population reliability unestablished. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -18,7 +16,9 @@ The paired TensorFlow route uses the same mathematical investigations where usef
 
 ## Design decisions and when to use this method
 
-Use this investigation card before any model experiment. It is especially useful when comparing frameworks, adding a new data source or interpreting an unexpectedly good score. Do not begin with a desired accuracy target while leaving the prediction unit and information boundaries undefined.
+Use an experiment card whenever a dataset, objective or framework changes. Decide first whether the intended prediction concerns new rows from familiar sources, new source families, or a later time period. Those claims require different splits. A more complex model cannot repair a split that gives training access to the answer's source identity.
+
+For the visible seven-point fixture, the useful decision is whether the implementation obeys its declared learning and evaluation procedure. The reader has already seen the relationship y=2x, so this fixture cannot serve as a blind test of scientific discovery. Treat a production decision as pending until a representative independent assessment and operational evidence exist.
 
 ## Paired TensorFlow comparison
 
@@ -40,17 +40,40 @@ The TensorFlow orientation uses the same evidence hierarchy. PyTorch and TensorF
 
 Use the reading worksheet. Write a reasoned response for each case; no execution or model download is required.
 
-Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.
+Read the three worked cases in order and write the assumptions, intermediate reasoning and conclusion for each one. These are text cases, not programs to execute. Compare your written interpretation with the stated expected observations, then answer the six exercises in your saved worksheet. A correct argument must state its evidence boundary; source presence does not establish a model run.
 
 ## Syntax anatomy and reasoning sequence
 
 Write an experiment card before executing code. Name the prediction unit, input availability, target, training/validation/holdout identities, baseline, metric and forbidden claims. Distinguish source inspection, an executed reference, an independent arithmetic check and held-out task evidence. Record an unexecuted runtime as unverified. The default course uses CPU tensors and local fixtures; no pretrained weights or external datasets are required.
 
+## Build an auditable experiment card
+
+An experiment needs a timeline as well as a table. First define the target and which inputs exist when a prediction is made. Next choose training and selection populations. Then fit parameters or preprocessing using only their allowed data. Freeze those decisions before examining the final assessment. If a later result changes the learning rate, feature set, threshold or stopping point, that result has become selection information even if the file is still named test.
+
+The training-only constant in this chapter is four. Its value comes from targets 2, 4 and 6. Keep it fixed when calculating the later errors:
+
+| Assessment input | Target | Fixed prediction | Prediction minus target | Squared error |
+| --- | --- | --- | --- | --- |
+| 4 | 8 | 4 | -4 | 16 |
+| 5 | 10 | 4 | -6 | 36 |
+| 6 | 12 | 4 | -8 | 64 |
+| 7 | 14 | 4 | -10 | 100 |
+
+The squared-error numerator is 216 and the denominator is four, giving MSE 54 in squared target units. Choosing the assessment mean 11 as the constant would lower the error, but it would be a different experiment because the prediction rule used assessment labels. A number cannot identify that information leak by itself; the decision history does.
+
+Notice a second assumption: all assessment inputs lie outside the training input range 1..3. The fixture therefore includes extrapolation. A larger error than on training does not uniquely diagnose overfitting; a different input range is also relevant. In a real application, report both the population relationship and the fitted rule. A random row split, a source-family split and a forward-time split answer different questions.
+
+The hand-written rule y=2x has zero error here. That establishes its arithmetic on the visible points. It does not establish that an optimizer learned the rule, that an unknown population follows it, or that another feature pipeline preserves the same units. A training claim additionally needs an initial parameter state, an actual update sequence and an observed resulting state. Later chapters provide those receipts one operation at a time.
+
+A framework comparison is another controlled experiment. Match record identities, feature order, dtype, parameter initialization, objective denominator, optimizer rule and model mode. Compare forward predictions before loss, loss before gradients, and gradients before updated parameters. If one implementation returns a matching scalar but a different gradient, the comparison has already failed even though the headline loss agrees.
+
+A defensible card ends with a bounded conclusion and the next evidence needed. For this fixture: arithmetic and procedure can be checked; population reliability remains unestablished. For a later deployment: define the independent unit, intended operating range, error costs and operational acceptance before treating a model score as permission to use it.
+
 ## Worked example / walkthrough
 
 ### Example A: Define a prediction unit
 
-The unit determines the denominator and split design. If several rows later belong to one person or account, the independence assumption must be re visited.
+The unit determines the denominator and split design. If several rows later belong to one person or account, the independence assumption must be revisited.
 
 ```text
 Training IDs: t1,t2,t3
@@ -73,7 +96,7 @@ Squared errors=16,36,64,100
 MSE=216/4=54
 ```
 
-**Expected:** mean4; holdout squared errors16, 36, 64, 100; MSE54.
+**Expected:** mean 4; holdout squared errors 16, 36, 64, 100; MSE 54.
 
 ### Example C: Separate an exact relation from learned evidence
 
@@ -90,7 +113,7 @@ Training execution evidence: absent unless an actual optimizer run is recorded
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: 3 training rows, 4 holdout rows, one prediction per row. report says arithmetic/software checked; population reliability u n established. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: 3 training rows, 4 holdout rows, one prediction per row. report says arithmetic/software checked; population reliability unestablished. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
@@ -98,15 +121,15 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** 3 training rows, 4 holdout rows, one prediction per row.
    **Verify:** Save the reasoning table for exercise 1, including 3 training rows, 4 holdout rows, one prediction per row.
 
-2. **Calculate a mean baseline.** Use training targets2, 4, 6 to predict the constant training mean on holdout8, 10, 12, 14.
-   **Expected:** mean4; holdout squared errors16, 36, 64, 100; MSE54.
-   **Verify:** Save the reasoning table for exercise 2, including mean4; holdout squared errors16, 36, 64, 100; MSE54.
+2. **Calculate a mean baseline.** Use training targets 2, 4, 6 to predict the constant training mean on holdout 8, 10, 12, 14.
+   **Expected:** mean 4; holdout squared errors 16, 36, 64, 100; MSE 54.
+   **Verify:** Save the reasoning table for exercise 2, including mean 4; holdout squared errors 16, 36, 64, 100; MSE 54.
 
-3. **Separate an exact relation from learned evidence.** Compare a hand-specified rule y=2 x with a model trained on the three points.
+3. **Separate an exact relation from learned evidence.** Compare a hand-specified rule y=2x with a model trained on the three points.
    **Expected:** the hand rule predicts the fixture exactly but was not learned by running an optimizer.
    **Verify:** Save the reasoning table for exercise 3, including the hand rule predicts the fixture exactly but was not learned by running an optimizer.
 
-4. **Audit selection leakage.** After looking at holdout errors, a research e r changes the learning rate and reports the better result as final.
+4. **Audit selection leakage.** After looking at holdout errors, a researcher changes the learning rate and reports the better result as final.
    **Expected:** holdout was used for selection; new untouched assessment needed.
    **Verify:** Save the reasoning table for exercise 4, including holdout was used for selection; new untouched assessment needed.
 
@@ -115,12 +138,14 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Verify:** Save the reasoning table for exercise 5, including same data pairing, dtype, initial weight, loss reduction, rate and optimizer rule.
 
 6. **Bound the conclusion.** Write a report for a successful tiny CPU reference that avoids a production-quality claim.
-   **Expected:** report says arithmetic/software checked; population reliability u n established.
-   **Verify:** Save the reasoning table for exercise 6, including report says arithmetic/software checked; population reliability u n established.
+   **Expected:** report says arithmetic/software checked; population reliability unestablished.
+   **Verify:** Save the reasoning table for exercise 6, including report says arithmetic/software checked; population reliability unestablished.
 
 ## Common pitfalls and diagnosis
 
-When a result disagrees, locate the first intermediate value that violates this explanation. Inspect shapes and identities before aggregates, and inspect counts before averages. Preserve the original fixture and introduce only one controlled change at a time. If an arithmetic identity passes but a data-boundary condition fails, the experiment is still invalid. If a runtime is unavailable, record the unexecuted code as unverified rather than replacing its output with the expected text. The separate explanation discusses why the tempting alternative in each case changes the result.
+If a result seems unexpectedly strong, reconstruct which labels influenced every decision. A changed preprocessing statistic or threshold can use assessment data without appearing in the optimizer loop. Check row identities and source-family identities separately; distinct row names do not prevent a shared account or duplicated document from leaking across a split.
+
+If the constant baseline differs from four, inspect which target population was averaged. If the MSE differs from 54, inspect the four residuals and denominator before changing a model. If a report calls y=2x trained, locate the actual initial state and updates. If no updates ran, label it an analytic oracle. Finally, distinguish the visible teaching holdout from an undisclosed assessment: preserving its programmatic split is valuable procedure evidence, but the learner already knows its answers.
 
 ## Progressive hints
 

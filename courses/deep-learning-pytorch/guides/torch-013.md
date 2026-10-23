@@ -1,30 +1,30 @@
 # torch-013: Binary logits, BCEWithLogitsLoss and thresholds
 
-Status: authored PyTorch course content. The manifest inventories complete teaching files; runtime readiness remains a separate, measured property.
-
 ## Level and prerequisites
 
 Intermediate; approximately 120 minutes. Direct prerequisites: `torch-012`. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
 
 ## Learning objectives
 
-A binary logit is an unrestricted score. The central investigation is concrete: Apply sigmoid to-2, 0, 2. The finish condition is middle probability.5 and strictly increasing values. 0 errors at.5 and1 at.8. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+A binary logit is an unrestricted score. The central investigation is concrete: Apply sigmoid to-2, 0, 2. The finish condition is middle probability.5 and strictly increasing values. 0 errors at.5 and 1 at.8. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
-A binary logit is an unrestricted score. Its sigmoid maps that score to a number between zero and one under the model's probability convention. BCEWithLogitsLoss combines the sigmoid and binary cross-entropy algebra in a numerically stable form, so its input should be logits rather than already-sigmoid e d probabilities. Applying sigmoid twice changes the objective while often producing finite values that look plausible.
+A binary logit is an unrestricted score. Its sigmoid maps that score to a number between zero and one under the model's probability convention. BCEWithLogitsLoss combines the sigmoid and binary cross-entropy algebra in a numerically stable form, so its input should be logits rather than already-sigmoid-transformed probabilities. Applying sigmoid twice changes the objective while often producing finite values that look plausible.
 
 A classification threshold is a separate decision policy. Changing it alters predicted labels without changing fitted logits. The threshold can reflect costs or coverage, but must be chosen on validation evidence rather than after viewing final-test results. The tiny scores-2, 0, 2 make the midpoint and boundary policy inspectable. Their probabilities are not automatically calibrated merely because sigmoid produced them.
 
 ## Design decisions and when to use this method
 
+Use one logit per binary event when the target represents a yes/no outcome. Keep the training objective in logit space and apply sigmoid for a probability-oriented report ordecision policy. Choose threshold, calibration and error costs using an appropriate validation protocol rather than tuning them on a final assessment.
 
+Before using class orpositive-label weights, write the weighted objective and its denominator. Weighting changes the fitting target and can change the meaning of the raw sigmoid output. It is not equivalent to changing a decision threshold after fitting, and it does not independently establish calibrated probabilities on a new population.
 
 ## Paired TensorFlow comparison
 
 Compare [tf-013](../../deep-learning-tensorflow/guides/tf-013.md) after deriving the shared numerical contract.
 
-TensorFlow's sigmoid-cross-entropy-with-logits operation and PyTorch BCEWithLogitsLoss share the logit convention. Keras Binary Cross entropy requires its from_logits setting to agree with the model output. Match dtype, shape and element reduction before comparing scalar values.
+TensorFlow's sigmoid-cross-entropy-with-logits operation and PyTorch BCEWithLogitsLoss share the logit convention. Keras BinaryCrossentropy requires its from_logits setting to agree with the model output. Match dtype, shape and element reduction before comparing scalar values.
 
 ## Vocabulary and concepts
 
@@ -36,13 +36,33 @@ TensorFlow's sigmoid-cross-entropy-with-logits operation and PyTorch BCEWithLogi
 
 ## How to run this lesson
 
-Use a prepared `llm-torch-cpu` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/torch-013/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: `& $CoursePython courses/deep-learning-pytorch/lessons/torch-013.py`. For macOS/Linux use `.venv/bin/python courses/deep-learning-pytorch/lessons/torch-013.py` from the repository root.
+Use a prepared `llm-torch-cpu` environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored `.learning/expansion/torch-013/` before editing, or use the application's saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: `& $CoursePython courses/deep-learning-pytorch/lessons/torch-013.py`. For macOS/Linux, use the interpreter explicitly selected for a separately prepared native PyTorch environment, and invoke that interpreter on `courses/deep-learning-pytorch/lessons/torch-013.py` from the repository root. The repository's general `.venv` is not assumed to contain PyTorch; the prepared classroom profile is the default execution route.
 
-Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.
+Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the explicit tolerance in each assertion. Several analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone is not a universal numerical-error bound. Finite differences, reductions and conditioning can require different justified tolerances. Integer counts, identities and boolean decisions should be exact.
 
 ## Syntax anatomy and reasoning sequence
 
-F.binary_cross_entropy_with_logits expects floating targets and logits of matching shape. torch.sigmoid is useful for reporting probabilities after the objective convention is fixed. Use probability>=threshold to declare a tie policy. Compare loss at zero logit with log2 and use extreme logits to check stable arithmetic. Do not infer label correctness from confidence alone.
+F.binary_cross_entropy_with_logits expects floating targets and logits of matching shape. torch.sigmoid is useful for reporting probabilities after the objective convention is fixed. Use probability>=threshold to declare a tie policy. Compare loss at zero logit with log 2 and use extreme logits to check stable arithmetic. Do not infer label correctness from confidence alone.
+
+## Separate score, probability, loss and decision
+
+The binary logit z is unrestricted. Its sigmoid is p=1/(1+exp(-z)), and the unweighted binary cross entropy is -y log p-(1-y)log(1-p). For the declared binary targets y∈{0, 1}, the stable logit-space form is:
+
+`loss = max(z,0) - z*y + log1p(exp(-abs(z)))`.
+
+The exponent is never applied to a large positive magnitude in the final term. This avoids first rounding a probability to zero or one and then taking its logarithm. The derivative with respect to z is p-y before any mean-reduction factor. At z=0, y=1, the loss is log 2 and the derivative is-0.5. A mean across N equally weighted binary entries divides that derivative contribution by N. [PyTorch 2.9 BCEWithLogitsLoss](https://docs.pytorch.org/docs/2.9/generated/torch.nn.BCEWithLogitsLoss.html).
+
+For logits[-2, 0, 2], the reported probabilities are approximately[0.1192, 0.5, 0.8808]. They preserve ranking. A threshold 0.5 with a greater-than-or-equal tie rule classifies the zero logit as positive. Threshold 0.8 corresponds to a logit boundary log(0.8/0.2)=log 4, about 1.3863. Moving that boundary changes decisions without changing any fitted parameter orscore.
+
+The double-sigmoid error changes more than a label convention. At original z=0, the first sigmoid gives 0.5. Passing that value as a logit asks the loss to interpret probability sigmoid(0.5), about 0.6225. The positive-label loss becomes log(1+exp(-0.5)), about 0.4741, instead of log 2. If the first sigmoid remains in the graph, the derivative with respect to the original z gains another factor p(1-p): at zero it is about-0.0944 rather than-0.5. Finite outputs therefore do not prove the intended objective orgradient.
+
+Stable arithmetic also does not imply a good prediction. A logit 1000 with label 1 has a loss near zero; the same logit with label 0 has loss near 1000. Both are valid finite outputs of the stable formulation. The extreme-score fixture checks numerical behavior, not whether the labels are correct or the model generalizes.
+
+Decision costs require an additional probability assumption. If p is a calibrated probability for the relevant population, correct decisions have zero cost, false positives cost C_FP and false negatives cost C_FN, then choosing positive has expected cost C_FP(1-p), while choosing negative costs C_FN p. The positive decision is favored when p≥C_FP/(C_FP+C_FN). This derivation does not apply unchanged when costs vary by record, abstention is allowed, capacity is constrained or the probabilities are miscalibrated.
+
+Positive-label weighting changes the loss itself. With positive-term multiplierα, the derivative for a positive target becomesα(p-1), while a negative target contributes p. The reduction convention still matters; do not silently replace the library's element-mean reduction with a sum-of-weights denominator. Such weighting can be useful for a declared fitting goal, but the resulting sigmoid should not be assumed to retain an unweighted population-probability interpretation without further calibration evidence.
+
+The data boundary should validate target range, shape, dtype and finiteness. A floating target tensor is required by this binary objective, but floating representationalone does not prove that its values lie in the intended range. Likewise, a sigmoid output lies between zero and one byconstruction; that mathematical range does not establish empirical reliability. Report ranking, probability loss, decision errors and calibration as related but distinct observations.
 
 ## Worked example / walkthrough
 
@@ -71,7 +91,7 @@ loss=F.binary_cross_entropy_with_logits(torch.tensor([0.],dtype=torch.float64),t
 np.testing.assert_allclose(loss.item(),np.log(2),atol=1e-12,rtol=0)
 ```
 
-**Expected:** loss log2 within1e-12.
+**Expected:** loss log 2 within 1e-12.
 
 ### Example C: Move the decision threshold
 
@@ -86,7 +106,7 @@ assert (probabilities>=.8).tolist()==[False,False,True]
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: middle probability.5 and strictly increasing values. 0 errors at.5 and1 at.8. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: middle probability.5 and strictly increasing values. 0 errors at.5 and 1 at.8. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
@@ -95,28 +115,30 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Verify:** Save the assertion results for exercise 1, including middle probability.5 and strictly increasing values.
 
 2. **Check the midpoint objective.** Compute positive-label BCE at zero logit.
-   **Expected:** loss log2 within1e-12.
-   **Verify:** Save the assertion results for exercise 2, including loss log2 within1e-12.
+   **Expected:** loss log 2 within 1e-12.
+   **Verify:** Save the assertion results for exercise 2, including loss log 2 within 1e-12.
 
 3. **Move the decision threshold.** Compare thresholds.5 and.8 with>=ties.
    **Expected:** labels False, True, True versus False, False, True.
    **Verify:** Save the assertion results for exercise 3, including labels False, True, True versus False, False, True.
 
-4. **Expose a double-sigmoid mistake.** Feed probability.5 as though it were a logit and compare with log2.
+4. **Expose a double-sigmoid mistake.** Feed probability.5 as though it were a logit and compare with log 2.
    **Expected:** incorrect loss differs by more than.1.
    **Verify:** Save the assertion results for exercise 4, including incorrect loss differs by more than.1.
 
-5. **Test extreme finite scores.** Use logits1000, -1000 with labels1, 0.
-   **Expected:** finite losses approximately0.
-   **Verify:** Save the assertion results for exercise 5, including finite losses approximately0.
+5. **Test extreme finite scores.** Use logits 1000, -1000 with labels 1, 0.
+   **Expected:** finite losses approximately 0.
+   **Verify:** Save the assertion results for exercise 5, including finite losses approximately 0.
 
-6. **Count threshold errors.** Use truth0, 1, 1 and compare the two decision policies.
-   **Expected:** 0 errors at.5 and1 at.8.
-   **Verify:** Save the assertion results for exercise 6, including 0 errors at.5 and1 at.8.
+6. **Count threshold errors.** Use truth 0, 1, 1 and compare the two decision policies.
+   **Expected:** 0 errors at.5 and 1 at.8.
+   **Verify:** Save the assertion results for exercise 6, including 0 errors at.5 and 1 at.8.
 
 ## Common pitfalls and diagnosis
 
-When a result disagrees, locate the first intermediate value that violates this explanation. Inspect shapes and identities before aggregates, and inspect counts before averages. Preserve the original fixture and introduce only one controlled change at a time. If an arithmetic identity passes but a data-boundary condition fails, the experiment is still invalid. If a runtime is unavailable, record the unexecuted code as unverified rather than replacing its output with the expected text. The separate explanation discusses why the tempting alternative in each case changes the result.
+If loss isfinite buttraining isunexpectedly weak, inspect whether sigmoid was applied before a logits-aware objective. Compare both the midpoint loss and the derivative, not only the predicted labels. If extreme scores produceNaN in a hand-written log(sigmoid()) path, use the combined objective rather than clipping until an assertion passes.
+
+If error counts change while logits stay fixed, inspect threshold and tie policy before blaming optimization. If a confidence score ispresented as an empirical success frequency, look for calibration evidence on the relevant population. If positive-label weights were introduced, record the changed objective and denominator. Validate target range and matching shape explicitly instead of treating a successful API call as a complete data contract.
 
 ## Progressive hints
 
@@ -140,7 +162,7 @@ API and mechanism reference: [PyTorch2.9 reference](https://docs.pytorch.org/doc
 
 The combined implementation can rearrange the algebra to avoid overflow and loss of precision at extreme scores. Manual probability conversion can round to zero or one first.
 
-**Does a probability.9 mean90percent of such predictions are correct?**
+**Does a probability.9 mean 90 percent of such predictions are correct?**
 
 Only if calibration evidence supports that interpretation for the relevant population. Sigmoid alone defines a model output, not an empirical reliability guarantee.
 
