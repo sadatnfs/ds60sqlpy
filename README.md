@@ -10,35 +10,108 @@ are lesson labels, not deadlines.
 
 ## Build, start and open the classroom
 
-With your local Docker engine running, open a terminal in the course folder:
+### 1. Prepare your machine
+
+Install and start a local Docker-compatible engine with **Linux containers**,
+**Docker Compose 2.28.0 or newer**, and a Bash terminal. Install Git if you want
+to clone the repository; a ZIP download works without Git.
+
+| Operating system | What to prepare | Where to run the commands below |
+| --- | --- | --- |
+| Windows | WSL 2 with Ubuntu, plus Docker Desktop or Rancher Desktop. Enable Linux containers and integration for your Ubuntu distribution. Rancher Desktop uses the Moby engine. | The Ubuntu/WSL terminal |
+| macOS | Docker Desktop or Rancher Desktop using Moby. Start the application and wait for its engine to be ready. Bash is included with macOS. | Terminal |
+| Linux | Docker Engine, its Compose plugin, Bash and permission for your normal user to access the local engine. | A terminal in your Linux session |
+
+Follow the [beginner setup guide](docs/one-command-classroom.md) for installation
+links, WSL integration and resource guidance. The course's Python, PostgreSQL,
+Java, C++, Node, TensorFlow, PyTorch and Spark tools run inside Docker, so you do
+not need to install those language toolchains on your machine.
+
+Check your engine from that terminal before continuing:
 
 ```sh
+docker info
+docker compose version
+bash --version
+```
+
+`docker info` must connect successfully to a Linux-container engine. The Compose
+version must be at least 2.28.0. If a command is unavailable or cannot connect,
+finish the engine installation or WSL integration before starting the course.
+
+### 2. Get the course and start it
+
+Clone the repository, enter its folder, check prerequisites and launch:
+
+```sh
+git clone https://github.com/sadatnfs/ds60sqlpy.git
+cd ds60sqlpy
+./classroom doctor
 ./classroom
 ```
 
-The command builds images locally with visible logs, starts PostgreSQL and all
-ten ordinary runtime workers, checks readiness, and opens the actual local
-browser address at **`/classroom`**. It works on macOS, Linux and Windows through
-WSL 2. No host Python, PostgreSQL, Java, C++ compiler or Node installation is
-required. Nothing is pushed to a registry.
+`doctor` checks the local engine and configuration without starting services.
+The final command builds images locally with **visible build logs**, starts
+PostgreSQL and all ten ordinary runtime workers, waits for readiness, and opens
+the browser. Keep the terminal open while it works. The first build needs
+internet access, several gigabytes of downloads and time to install the image
+dependencies. A log step marked `CACHED` was reused from an earlier build.
+Nothing is pushed to a registry.
 
-Read the [beginner one-command setup](docs/one-command-classroom.md) for engine
-installation, Windows WSL integration, storage, a smaller first build and
-recovery. Windows Explorer users can run **START_DOCKER_CLASSROOM.cmd** after
-WSL and engine integration are configured. Mac users can double-click
+**Using a ZIP instead:** download the repository ZIP or a complete starter ZIP,
+extract it fully, and open a terminal in the extracted folder containing
+`classroom`. Run `./classroom doctor`, then `./classroom` there. If extraction
+removed executable permissions, use `bash classroom doctor` and `bash classroom`.
+After the prerequisites above are ready, Windows users can also double-click
+**START_DOCKER_CLASSROOM.cmd**; Mac users can double-click
 **START_DOCKER_CLASSROOM.command**.
+
+For a smaller first build, replace the last command with:
+
+```sh
+./classroom --starter
+```
+
+This prepares the app, PostgreSQL and Python Core. The full library remains
+readable, while other languages need their runtime profiles. Run `./classroom`
+later to prepare the full ordinary set.
+
+### 3. Open the classroom and keep your work
+
+When startup finishes, the launcher prints the actual local address ending in
+**`/classroom`** and tries to open it. If no browser opens, copy that printed URL
+into your browser. Docker chooses an available local port, so use the printed
+address instead of assuming a fixed port. You can retrieve it with
+`./classroom status`.
+
+Choose a subject on the opening page and follow its first lesson. Source,
+notes, saved results and progress stay in named Docker volumes on your machine;
+PostgreSQL has its own volume. Stopping or replacing a container preserves
+those volumes.
 
 ```sh
 ./classroom status      # Containers and the current browser address
 ./classroom logs        # Recent app and database logs
-./classroom stop        # Stop while preserving saved work
-./classroom --no-build  # Resume using already built images
+./classroom stop        # Stop this classroom while preserving saved work
+./classroom            # Build current sources and resume the same workspace
 ```
 
-Initial preparation needs internet access. The normal classroom works offline
-once the chosen images and fixtures are prepared. Optional pretrained-model
-downloads, external services and Kubernetes cluster preparation are deliberate
-lesson workflows. See [offline use](docs/setup/offline.md).
+If all images for your selected profiles already exist, `./classroom --no-build`
+resumes them without rebuilding or preparing downloads. A starter-only setup
+uses `./classroom --starter --no-build`. After deleting images, use the normal
+build command again.
+
+Reuse the same Compose project to return to the same saved work. If you choose
+`--project NAME`, supply that same name on later start, status and stop commands.
+Keep the learning and database volumes when cleaning containers or images;
+removing volumes deletes the state they contain. See
+[backup and transfer](docs/one-command-classroom.md) before moving machines.
+
+The ordinary classroom works offline after its images and fixtures are
+prepared. Optional pretrained-model downloads, external services and Kubernetes
+cluster preparation are explicit lesson workflows. For errors, profiles and
+recovery, read the [one-command guide](docs/one-command-classroom.md) and
+[offline-use guide](docs/setup/offline.md).
 
 ## One home, every learning path
 
@@ -128,20 +201,7 @@ The [curriculum map](docs/curriculum-map.md) and generated catalog describe the
 Python, SQL and bridge inventory; authored module manifests retain the newer
 subjects' stable IDs.
 
-## Clone and contribute
-
-Install Git and clone the project, then start the classroom from its root:
-
-```sh
-git clone https://github.com/sadatnfs/ds60sqlpy.git
-cd ds60sqlpy
-./classroom
-```
-
-On Windows, run these commands in the WSL terminal after configuring your
-engine's WSL integration. The first build downloads dependencies and can take
-time. Keep its terminal open to follow the build logs. Use the printed address
-if your browser does not open automatically.
+## Develop and contribute
 
 Developers who modify Python application code or content generators should read
 [CONTRIBUTING.md](CONTRIBUTING.md). It explains the locked Python environment,
