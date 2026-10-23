@@ -90,7 +90,7 @@ def test_notebook_code_outputs_and_metadata_are_preserved(tmp_path: Path) -> Non
     path = tmp_path / "python/example.ipynb"
     path.write_text(json.dumps(notebook))
     report = MIGRATION.run(tmp_path, True)
-    saved = json.loads(path.read_text())
+    saved = json.loads(path.read_text(encoding="utf-8"))
     assert report["code_fences_and_notebook_code_unchanged"]
     assert saved["cells"][1] == code
     assert saved["metadata"] == notebook["metadata"]
@@ -99,7 +99,7 @@ def test_notebook_code_outputs_and_metadata_are_preserved(tmp_path: Path) -> Non
 
 
 def test_registry_has_unique_explicit_rules_and_valid_local_scopes() -> None:
-    rules = json.loads((ROOT / "curriculum/math-prose.json").read_text())["rules"]
+    rules = json.loads((ROOT / "curriculum/math-prose.json").read_text(encoding="utf-8"))["rules"]
     sources = [r["source"] for r in rules]
     assert len(sources) == len(set(sources))
     assert all(source and "```" not in source for source in sources)
@@ -151,7 +151,7 @@ def test_indented_programs_and_multiline_code_spans_remain_exact() -> None:
 def test_every_reviewed_latex_rule_is_supported_by_the_offline_renderer() -> None:
     from ds60sqlpy.reader_math import render_math
 
-    rules = json.loads((ROOT / "curriculum/math-prose.json").read_text())["rules"]
+    rules = json.loads((ROOT / "curriculum/math-prose.json").read_text(encoding="utf-8"))["rules"]
     unsupported = [
         rule["source"]
         for rule in rules

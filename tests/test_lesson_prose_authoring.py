@@ -72,7 +72,7 @@ def test_display_metadata_changes_do_not_mutate_identity_or_execution(tmp_path: 
     }
     path.write_text(json.dumps(original))
     report = PIPELINE.run(tmp_path, True)
-    updated = json.loads(path.read_text())
+    updated = json.loads(path.read_text(encoding="utf-8"))
     assert updated["id"] == original["id"]
     for key in ("id", "source_path", "runtime", "prerequisites"):
         assert updated["lessons"][0][key] == original_lesson[key]
@@ -82,7 +82,7 @@ def test_display_metadata_changes_do_not_mutate_identity_or_execution(tmp_path: 
 
 
 def test_reviewed_exceptions_are_not_repaired() -> None:
-    registry = json.loads((ROOT / "curriculum/prose-repairs.json").read_text())
+    registry = json.loads((ROOT / "curriculum/prose-repairs.json").read_text(encoding="utf-8"))
     for word in ("async", "overfitting", "isfinite", "isinstance", "noexcept", "toarray"):
         assert word in registry["reviewed_exceptions"]
         assert word not in registry["repairs"]

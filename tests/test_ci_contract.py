@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import os
+import shlex
+import subprocess
+import sys
 import tomllib
 from pathlib import Path
 
@@ -143,3 +147,44 @@ def test_workflows_pin_actions_and_install_node_explicitly() -> None:
     assert 'node-version: "24"' in core
     assert "pytest -n 4 --dist loadgroup" in core
     assert "--basetemp=work/test-tmp" in core
+
+
+def test_core_test_command_works_in_a_fresh_checkout_without_work_directory(
+    tmp_path: Path,
+) -> None:
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+    preparation = workflow.split("- name: Prepare test workspace", maxsplit=1)[1].split(
+        "- name:", maxsplit=1
+    )[0]
+    prepare_command = shlex.split(preparation.split("run:", maxsplit=1)[1].strip())
+    assert prepare_command[:2] == ["python", "-c"]
+    test_step = workflow.split("- name: Unit tests (four grouped workers)", maxsplit=1)[1].split(
+        "- name:", maxsplit=1
+    )[0]
+    command = shlex.split(" ".join(test_step.split("run: >-", maxsplit=1)[1].split()))
+    pytest_arguments = command[command.index("pytest") + 1 :]
+    checkout = tmp_path / "fresh-checkout"
+    checkout.mkdir()
+    assert not (checkout / "work").exists()
+    subprocess.run([sys.executable, *prepare_command[1:]], cwd=checkout, check=True, timeout=15)
+    assert (checkout / "work/test-results").is_dir()
+    (checkout / "test_workspace.py").write_text(
+        "from pathlib import Path\n"
+        "def test_worker_temp_directory(tmp_path):\n"
+        "    assert tmp_path.is_dir()\n"
+        "    assert tmp_path.is_relative_to(Path.cwd() / 'work' / 'test-tmp')\n",
+        encoding="utf-8",
+    )
+    result = subprocess.run(
+        [sys.executable, "-m", "pytest", *pytest_arguments, "test_workspace.py"],
+        cwd=checkout,
+        env={**os.environ, "PYTEST_ADDOPTS": ""},
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        timeout=60,
+        check=False,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert (checkout / "work/test-results/core.xml").is_file()
+    assert (checkout / "work/test-tmp").is_dir()

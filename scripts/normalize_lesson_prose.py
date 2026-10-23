@@ -54,7 +54,7 @@ JOINED_COUNT = re.compile(
 
 
 def replacements(root: Path) -> dict[str, str]:
-    payload = json.loads((root / "curriculum/prose-repairs.json").read_text())
+    payload = json.loads((root / "curriculum/prose-repairs.json").read_text(encoding="utf-8"))
     return {str(k): str(v) for k, v in payload["repairs"].items()}
 
 
@@ -189,7 +189,7 @@ def run(root: Path, write: bool) -> dict[str, Any]:
     for path in content_paths(root):
         scanned += 1
         rel = path.relative_to(root).as_posix()
-        source = path.read_text()
+        source = path.read_text(encoding="utf-8")
         hits: Counter[str] = Counter()
         if path.suffix == ".ipynb":
             notebook = json.loads(source)
@@ -215,7 +215,7 @@ def run(root: Path, write: bool) -> dict[str, Any]:
         if updated != source:
             changes.append({"path": rel, "replacements": sum(hits.values()), "rules": dict(hits)})
             if write:
-                path.write_text(updated)
+                path.write_text(updated, encoding="utf-8", newline="\n")
         for is_protected, part in prose_parts(prose):
             if not is_protected:
                 for match in JOINED_COUNT.finditer(part):
@@ -225,7 +225,7 @@ def run(root: Path, write: bool) -> dict[str, Any]:
     )
     for path in metadata:
         rel = path.relative_to(root).as_posix()
-        source = path.read_text()
+        source = path.read_text(encoding="utf-8")
         document = json.loads(source)
         original = json.loads(source)
         hits = Counter()
@@ -260,10 +260,14 @@ def run(root: Path, write: bool) -> dict[str, Any]:
                 }
             )
             if write:
-                path.write_text(json.dumps(document, indent=2, ensure_ascii=False) + "\n")
+                path.write_text(
+                    json.dumps(document, indent=2, ensure_ascii=False) + "\n",
+                    encoding="utf-8",
+                    newline="\n",
+                )
     authoring = sorted((root / "courses").glob("*/authoring/**/*.py"))
     for path in authoring:
-        source = path.read_text()
+        source = path.read_text(encoding="utf-8")
         cleaned, hits = repair_authoring(source, repairs)
         if hits:
             changes.append(
@@ -275,7 +279,7 @@ def run(root: Path, write: bool) -> dict[str, Any]:
                 }
             )
             if write:
-                path.write_text(cleaned)
+                path.write_text(cleaned, encoding="utf-8", newline="\n")
     return {
         "schema": 1,
         "prose_files_scanned": scanned,
@@ -300,7 +304,7 @@ def main() -> None:
     report = {"prose": run(root, args.write), "math": normalize_math(root, args.write)}
     if args.report:
         args.report.parent.mkdir(parents=True, exist_ok=True)
-        args.report.write_text(json.dumps(report, indent=2) + "\n")
+        args.report.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8", newline="\n")
     for name, section in report.items():
         print(f"{name}: {section['files_changed']} files; {section['replacements']} changes")
     if report["prose"]["remaining_count_candidates"]:

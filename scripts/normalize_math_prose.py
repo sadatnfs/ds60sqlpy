@@ -167,7 +167,7 @@ def digest(value: Any) -> str:
 
 
 def run(root: Path, write: bool) -> dict[str, Any]:
-    rules = json.loads((root / "curriculum/math-prose.json").read_text())["rules"]
+    rules = json.loads((root / "curriculum/math-prose.json").read_text(encoding="utf-8"))["rules"]
     changed: list[dict[str, Any]] = []
     remaining: list[dict[str, Any]] = []
     protected_before: dict[str, Any] = {}
@@ -177,7 +177,7 @@ def run(root: Path, write: bool) -> dict[str, Any]:
     for path in sources(root):
         inspected += 1
         rel = path.relative_to(root).as_posix()
-        original = path.read_text()
+        original = path.read_text(encoding="utf-8")
         if path.suffix == ".ipynb":
             notebook = json.loads(original)
             before = {k: v for k, v in notebook.items() if k != "cells"}
@@ -215,7 +215,7 @@ def run(root: Path, write: bool) -> dict[str, Any]:
                 {"path": rel, "replacements": sum(file_hits.values()), "rules": dict(file_hits)}
             )
             if write:
-                path.write_text(updated)
+                path.write_text(updated, encoding="utf-8", newline="\n")
         for text in texts:
             for protected, part in prose_parts(text):
                 if protected:
@@ -247,7 +247,7 @@ def main() -> None:
     report = run(args.root.resolve(), args.write)
     if args.report:
         args.report.parent.mkdir(parents=True, exist_ok=True)
-        args.report.write_text(json.dumps(report, indent=2) + "\n")
+        args.report.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8", newline="\n")
     print(
         f"Math prose: {report['sources_inspected']} sources; "
         f"{report['files_changed']} files needing normalization; "
