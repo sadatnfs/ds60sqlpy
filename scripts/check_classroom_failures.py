@@ -330,35 +330,44 @@ def qualify(
         raise QualificationError(
             "A requested runtime is unavailable; no unavailable profile is skipped."
         )
-    cases = [(profile, False) for profile in dict.fromkeys(profiles)]
-    if check_timeout:
-        cases.append(("python-core", True))
-    for position, (profile, timeout_case) in enumerate(cases):
-        record: dict[str, Any] = {
-            "profile": profile,
-            "case": "timeout-and-recovery" if timeout_case else "syntax",
-            "jobs": [],
-            "errors": [],
-            "passed": False,
-        }
-        report["cases"].append(record)
-        checkpoint()
-        exercise_case(client, profile, record, checkpoint, timeout_case=timeout_case)
-        print(f"{'PASS' if record['passed'] else 'FAIL'}: {profile}: {record['case']}", flush=True)
-        if not record.get("source_and_notes_restored") or any(
-            error.get("phase") == "cancel" for error in record["errors"]
-        ):
-            report["unattempted"] = [profile for profile, _ in cases[position + 1 :]]
-            report["errors"].append(
-                {
-                    "type": "CleanupUnconfirmed",
-                    "detail": "Further cases stopped because cleanup could not be confirmed.",
-                }
-            )
+    # Profile readiness retains ClassroomClient's ordinary 45-second API bound.
+    # Only submitted jobs and their cleanup use the stricter operation budget.
+    original_opener = client.opener
+    client.opener = BoundedOpener(original_opener)
+    try:
+        cases = [(profile, False) for profile in dict.fromkeys(profiles)]
+        if check_timeout:
+            cases.append(("python-core", True))
+        for position, (profile, timeout_case) in enumerate(cases):
+            record: dict[str, Any] = {
+                "profile": profile,
+                "case": "timeout-and-recovery" if timeout_case else "syntax",
+                "jobs": [],
+                "errors": [],
+                "passed": False,
+            }
+            report["cases"].append(record)
             checkpoint()
-            return
-    report["passed"] = bool(report["cases"]) and all(row["passed"] for row in report["cases"])
-    checkpoint()
+            exercise_case(client, profile, record, checkpoint, timeout_case=timeout_case)
+            print(
+                f"{'PASS' if record['passed'] else 'FAIL'}: {profile}: {record['case']}", flush=True
+            )
+            if not record.get("source_and_notes_restored") or any(
+                error.get("phase") == "cancel" for error in record["errors"]
+            ):
+                report["unattempted"] = [profile for profile, _ in cases[position + 1 :]]
+                report["errors"].append(
+                    {
+                        "type": "CleanupUnconfirmed",
+                        "detail": "Further cases stopped because cleanup could not be confirmed.",
+                    }
+                )
+                checkpoint()
+                return
+        report["passed"] = bool(report["cases"]) and all(row["passed"] for row in report["cases"])
+        checkpoint()
+    finally:
+        client.opener = original_opener
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -392,7 +401,6 @@ def main(argv: list[str] | None = None) -> int:
     checkpoint()
     try:
         client = ClassroomClient(args.url)
-        client.opener = BoundedOpener(client.opener)
         qualify(client, profiles, report, checkpoint, check_timeout=args.check_timeout)
     except Exception as exc:
         report["errors"].append(safe_error(exc))

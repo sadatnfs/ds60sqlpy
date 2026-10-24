@@ -7,6 +7,7 @@ import json
 import time
 from pathlib import Path
 from typing import Any
+from urllib.request import OpenerDirector
 
 import pytest
 
@@ -136,7 +137,7 @@ def test_probe_retains_partial_sanitized_report_after_failure(
 ) -> None:
     class ReadyClient(ClassroomClient):
         def __init__(self) -> None:
-            pass
+            self.opener = OpenerDirector()
 
         def call(self, action: str, **fields: Any) -> dict[str, Any]:
             assert action == "module-readiness"
@@ -172,6 +173,7 @@ def test_lost_submit_response_cancels_known_job_and_stops_further_cases(
 
     class LostSubmission(ClassroomClient):
         def __init__(self) -> None:
+            self.opener = OpenerDirector()
             self.actions: list[tuple[str, dict[str, Any]]] = []
             _, self.job = receipt(case)
 
@@ -226,3 +228,77 @@ def test_kubernetes_cancellation_requires_exact_submission_identity(field: str) 
 
     with pytest.raises(ValueError, match="different submission"):
         smoke.confirm_cancelled_submission(WrongIdentity(), case, source, expected_job_id)
+
+
+@pytest.mark.parametrize("readiness_failure", [None, "timeout", "unavailable"])
+def test_startup_readiness_keeps_api_budget_and_writes_report_before_request(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    readiness_failure: str | None,
+) -> None:
+    import io
+    from urllib.request import Request
+
+    from scripts.check_classroom_failures import BoundedOpener, budget
+
+    report = tmp_path / "receipts.json"
+    requests: list[tuple[str, float | None]] = []
+
+    class Transport(OpenerDirector):
+        def open(self, fullurl: Any, data: Any = None, timeout: float | None = None) -> Any:
+            assert isinstance(fullurl, Request)
+            request_data = fullurl.data
+            assert isinstance(request_data, bytes)
+            action = json.loads(request_data)["action"]
+            requests.append((action, timeout))
+            payload: dict[str, Any]
+            if action == "module-readiness":
+                initial = json.loads(report.read_text(encoding="utf-8"))
+                assert initial["complete"] is False and initial["failed_case"] == "readiness"
+                assert initial["receipts"] == []
+                # Model a valid aggregate response slower than a job poll. No
+                # real delay or cluster is required to reproduce the old cap.
+                if timeout is None or timeout < 6 or readiness_failure == "timeout":
+                    raise TimeoutError("Synthetic readiness deadline")
+                payload = {
+                    "profiles": [{"profile": "k8s-kind", "ready": readiness_failure is None}]
+                }
+            else:
+                assert action == "module-job" and timeout is not None and 0 < timeout <= 2
+                payload = {"status": "succeeded"}
+            return io.BytesIO(json.dumps(payload).encode("utf-8"))
+
+    class Client(ClassroomClient):
+        def __init__(self) -> None:
+            self.origin = "http://127.0.0.1:1234"
+            self.token = "fixture"
+            self.opener = Transport()
+
+    client = Client()
+    original_opener = client.opener
+    monkeypatch.setattr(smoke, "ClassroomClient", lambda _: client)
+    monkeypatch.setattr(smoke, "CASES", (smoke.CASES[0],))
+
+    def run_case(current: ClassroomClient, case: smoke.Case) -> dict[str, Any]:
+        assert isinstance(current.opener, BoundedOpener)
+        budget(current, 2)
+        current.call("module-job", job_id="a" * 32)
+        return {"case": case.name, "owned_cleanup_verified": True}
+
+    monkeypatch.setattr(smoke, "run_case", run_case)
+    arguments = ["--url", client.origin, "--report", str(report), "--confirm-disposable"]
+    if readiness_failure is None:
+        assert smoke.main(arguments) == 0
+        assert json.loads(report.read_text(encoding="utf-8"))["complete"] is True
+        assert requests[1][0] == "module-job"
+    else:
+        expected = TimeoutError if readiness_failure == "timeout" else ValueError
+        with pytest.raises(expected):
+            smoke.main(arguments)
+        saved = json.loads(report.read_text(encoding="utf-8"))
+        assert saved["complete"] is False and saved["receipts"] == []
+        assert saved["failed_case"] == "readiness"
+        assert saved["failure_type"] == expected.__name__
+        assert len(requests) == 1
+    assert requests[0] == ("module-readiness", 45)
+    assert client.opener is original_opener

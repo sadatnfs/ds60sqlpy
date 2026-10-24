@@ -11,6 +11,7 @@ import base64
 import contextlib
 import hashlib
 import json
+import ntpath
 import os
 import re
 import signal
@@ -427,6 +428,42 @@ def parse_manifests(source: str) -> list[dict[str, Any]]:
     return sorted(documents, key=lambda doc: order[doc["kind"]])
 
 
+def _windows_powershell_runtime() -> tuple[str, dict[str, str]]:
+    """Keep Windows startup directories without inheriting tools, hooks or secrets.
+
+    Windows temp discovery uses TMP/TEMP/USERPROFILE and PowerShell's startup
+    cache uses LOCALAPPDATA. Keep those OS-provided directories, while omitting
+    inherited PSModulePath so Windows PowerShell rebuilds its own module path.
+    https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-gettemppatha
+    https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_psmodulepath
+    """
+    root = os.environ.get("SYSTEMROOT") or os.environ.get("WINDIR")
+    if not root or not ntpath.isabs(root) or not ntpath.splitdrive(root)[0].endswith(":"):
+        raise OSError("A local Windows system directory is required for the ACL helper.")
+    root = ntpath.normpath(root)
+    system = ntpath.join(root, "System32")
+    shell = ntpath.join(system, "WindowsPowerShell", "v1.0")
+    keys = (
+        "TEMP",
+        "TMP",
+        "USERPROFILE",
+        "LOCALAPPDATA",
+        "APPDATA",
+        "PROGRAMFILES",
+        "PROGRAMFILES(X86)",
+        "PROGRAMW6432",
+        "PROGRAMDATA",
+    )
+    environment = {key: os.environ[key] for key in keys if key in os.environ}
+    environment.update(
+        SYSTEMROOT=root,
+        WINDIR=root,
+        SYSTEMDRIVE=ntpath.splitdrive(root)[0],
+        PATH=";".join((shell, system, root)),
+    )
+    return ntpath.join(shell, "powershell.exe"), environment
+
+
 def _windows_private_acl(path: Path, *, establish: bool = False) -> bool:
     # The path is data in one process-local environment variable, never interpolated
     # into PowerShell source. Only a newly created runtime directory is modified.
@@ -456,15 +493,13 @@ foreach($rule in $rules) {
 }
 exit 0
 """
-    environment = {
-        key: os.environ[key] for key in ("PATH", "SYSTEMROOT", "WINDIR") if key in os.environ
-    }
-    environment.update(
-        DS60_PRIVATE_PATH=str(path), DS60_PRIVATE_ESTABLISH="1" if establish else "0"
-    )
     try:
+        executable, environment = _windows_powershell_runtime()
+        environment.update(
+            DS60_PRIVATE_PATH=str(path), DS60_PRIVATE_ESTABLISH="1" if establish else "0"
+        )
         result = subprocess.run(
-            ["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", script],
+            [executable, "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", script],
             env=environment,
             stdin=subprocess.DEVNULL,
             stdout=subprocess.DEVNULL,

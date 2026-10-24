@@ -65,13 +65,16 @@ def instrument_script(source: str) -> str:
 
 def native_acl_smoke(report: dict[str, Any], directory: Path) -> None:
     original_run = subprocess.run
+    executable, startup_environment = kubernetes_module._windows_powershell_runtime()
+    prefix = [executable, "-NoLogo", "-NoProfile", "-NonInteractive", "-Command"]
 
     def observed_run(argv: Sequence[str], **kwargs: Any) -> subprocess.CompletedProcess[bytes]:
-        if list(argv[:4]) != ["powershell.exe", "-NoProfile", "-NonInteractive", "-Command"]:
+        if list(argv[:-1]) != prefix:
             raise ValueError("Unexpected native ACL command shape.")
+        operation = kwargs.pop("probe_operation", "acl")
         command = [*argv[:-1], instrument_script(argv[-1])]
         options = {**kwargs, "stdout": subprocess.PIPE, "stderr": subprocess.PIPE}
-        record: dict[str, Any] = {"timeout_seconds": kwargs["timeout"]}
+        record: dict[str, Any] = {"operation": operation, "timeout_seconds": kwargs["timeout"]}
         report["commands"].append(record)
         try:
             result = original_run(command, **options)
@@ -87,6 +90,18 @@ def native_acl_smoke(report: dict[str, Any], directory: Path) -> None:
             stderr_present=bool(result.stderr),
         )
         return result
+
+    startup = observed_run(
+        [*prefix, "exit 0"],
+        env=startup_environment,
+        stdin=subprocess.DEVNULL,
+        timeout=15,
+        check=False,
+        probe_operation="runtime-startup",
+    )
+    if startup.returncode != 0 or observed_phases(startup.stdout) != ["startup"]:
+        raise RuntimeError("powershell-runtime-startup")
+    report["checks"].append("Built-in Windows PowerShell runtime starts within its bounded budget")
 
     with patch("ds60sqlpy.kubernetes_module.subprocess.run", observed_run):
         if not kubernetes_module._windows_private_acl(directory, establish=True):
@@ -109,12 +124,9 @@ $rule=New-Object Security.AccessControl.FileSystemAccessRule -ArgumentList $valu
 $acl.AddAccessRule($rule)
 Set-Acl -LiteralPath $env:DS60_PRIVATE_PATH -AclObject $acl
 """
-        environment = {
-            key: os.environ[key] for key in ("PATH", "SYSTEMROOT", "WINDIR") if key in os.environ
-        }
-        environment["DS60_PRIVATE_PATH"] = str(fixture)
+        environment = {**startup_environment, "DS60_PRIVATE_PATH": str(fixture)}
         grant = observed_run(
-            ["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", script],
+            [*prefix, script],
             env=environment,
             stdin=subprocess.DEVNULL,
             timeout=15,

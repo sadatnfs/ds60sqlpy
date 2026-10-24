@@ -25,6 +25,7 @@ class Clock:
 
 class FakeClient(ClassroomClient):
     def __init__(self, clock: Clock) -> None:
+        self.opener = OpenerDirector()
         self.clock = clock
         self.actions: list[tuple[str, dict[str, Any]]] = []
         self.sources = {lesson: f"original {profile}" for profile, (_, lesson) in CASES.items()}
@@ -382,3 +383,80 @@ def test_cancellation_cannot_confirm_another_submission(field: str) -> None:
     client.jobs[key][field] = "another-submission"
     with pytest.raises(smoke.QualificationError, match="different submission"):
         smoke.confirm_cancellation(client, expected)
+
+
+@pytest.mark.parametrize("available", [True, False])
+def test_failure_probe_startup_uses_normal_readiness_budget_before_strict_job_budget(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    available: bool,
+) -> None:
+    import io
+    from urllib.request import Request
+
+    requests: list[tuple[str, float | None]] = []
+    report = tmp_path / "failures.json"
+
+    class Transport(OpenerDirector):
+        def open(self, fullurl: Any, data: Any = None, timeout: float | None = None) -> Any:
+            assert isinstance(fullurl, Request)
+            request_data = fullurl.data
+            assert isinstance(request_data, bytes)
+            action = json.loads(request_data)["action"]
+            requests.append((action, timeout))
+            payload: dict[str, Any]
+            if action == "module-readiness":
+                assert json.loads(report.read_text(encoding="utf-8"))["passed"] is False
+                if timeout is None or timeout < 6:
+                    raise TimeoutError("Aggregate readiness needs more than a job poll")
+                payload = {"profiles": [{"profile": "python-core", "ready": available}]}
+            else:
+                assert action == "module-job" and timeout is not None and 0 < timeout <= 2
+                payload = {"status": "failed"}
+            return io.BytesIO(json.dumps(payload).encode("utf-8"))
+
+    class Client(ClassroomClient):
+        def __init__(self) -> None:
+            self.origin = "http://127.0.0.1:1234"
+            self.token = "fixture"
+            self.opener = Transport()
+
+    client = Client()
+    original_opener = client.opener
+    monkeypatch.setattr(smoke, "ClassroomClient", lambda _: client)
+
+    def case(
+        current: ClassroomClient,
+        profile: str,
+        record: dict[str, Any],
+        checkpoint: Any,
+        *,
+        timeout_case: bool = False,
+    ) -> None:
+        assert isinstance(current.opener, smoke.BoundedOpener)
+        smoke.budget(current, 2)
+        current.call("module-job", job_id="b" * 32)
+        record.update(passed=True, source_and_notes_restored=True)
+        checkpoint()
+
+    monkeypatch.setattr(smoke, "exercise_case", case)
+    result = smoke.main(
+        [
+            "--url",
+            client.origin,
+            "--profiles",
+            "python-core",
+            "--report",
+            str(report),
+            "--confirm-disposable",
+        ]
+    )
+    saved = json.loads(report.read_text(encoding="utf-8"))
+    assert result == (0 if available else 1) and saved["passed"] is available
+    assert requests[0] == ("module-readiness", 45)
+    assert client.opener is original_opener
+    if available:
+        assert requests[1][0] == "module-job"
+    else:
+        assert len(requests) == 1 and saved["cases"] == []
+        assert saved["errors"][0]["type"] == "QualificationError"

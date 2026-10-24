@@ -243,27 +243,18 @@ def run_case(client: ClassroomClient, case: Case) -> dict[str, Any]:
 
 
 def qualify(client: ClassroomClient, report: Path) -> None:
-    readiness = client.call("module-readiness").get("profiles", [])
-    if not any(row.get("profile") == "k8s-kind" and row.get("ready") is True for row in readiness):
-        raise ValueError("The explicitly prepared owned Kubernetes worker is not ready.")
-    receipts = []
-    failed_case: str | None = None
+    receipts: list[dict[str, Any]] = []
+    failed_case: str | None = "readiness"
     failure_type: str | None = None
+    complete = False
     report.parent.mkdir(parents=True, exist_ok=True)
-    try:
-        for case in CASES:
-            failed_case = case.name
-            receipts.append(run_case(client, case))
-        failed_case = None
-    except BaseException as error:
-        failure_type = type(error).__name__
-        raise
-    finally:
+
+    def checkpoint() -> None:
         report.write_text(
             json.dumps(
                 {
                     "schema_version": 1,
-                    "complete": len(receipts) == len(CASES),
+                    "complete": complete,
                     "failed_case": failed_case,
                     "failure_type": failure_type,
                     "receipts": receipts,
@@ -273,6 +264,30 @@ def qualify(client: ClassroomClient, report: Path) -> None:
             + "\n",
             encoding="utf-8",
         )
+
+    checkpoint()
+    original_opener = client.opener
+    try:
+        # Readiness can probe several absent profiles. Preserve the ordinary
+        # bounded API request budget before applying the stricter job transport.
+        readiness = client.call("module-readiness").get("profiles", [])
+        if not any(
+            row.get("profile") == "k8s-kind" and row.get("ready") is True for row in readiness
+        ):
+            raise ValueError("The explicitly prepared owned Kubernetes worker is not ready.")
+        client.opener = BoundedOpener(original_opener)
+        for case in CASES:
+            failed_case = case.name
+            receipts.append(run_case(client, case))
+            checkpoint()
+        failed_case = None
+        complete = True
+    except BaseException as error:
+        failure_type = type(error).__name__
+        raise
+    finally:
+        client.opener = original_opener
+        checkpoint()
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -286,8 +301,6 @@ def main(argv: list[str] | None = None) -> int:
             "This creates owned test resources and saved jobs; use a disposable CI project."
         )
     client = ClassroomClient(args.url)
-    client.opener = BoundedOpener(client.opener)
-    budget(client, 30)
     qualify(client, args.report)
     return 0
 

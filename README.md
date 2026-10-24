@@ -41,6 +41,12 @@ finish the engine installation or WSL integration before starting the course.
 
 ### 2. Get the course and start it
 
+The repository currently requires access from its owner. Sign in to a GitHub
+account with repository access before cloning or downloading a ZIP. For HTTPS
+cloning, use a Git credential manager or authenticated GitHub CLI; do not paste
+a personal access token into the clone URL. The local classroom itself needs no
+GitHub login after you have downloaded it.
+
 Clone the repository, enter its folder, check prerequisites and launch:
 
 ```sh

@@ -1373,6 +1373,7 @@ def test_windows_acl_command_keeps_paths_as_data_and_refuses_failed_policy(
 ) -> None:
     from ds60sqlpy import kubernetes_module
 
+    monkeypatch.setenv("SYSTEMROOT", r"C:\Windows")
     path = tmp_path / "runtime with spaces ' and ; punctuation"
     calls: list[tuple[list[str], dict[str, Any]]] = []
     monkeypatch.setenv("DS60_WORKER_TOKEN", "synthetic-private-value")
@@ -1385,7 +1386,13 @@ def test_windows_acl_command_keeps_paths_as_data_and_refuses_failed_policy(
     monkeypatch.setattr("ds60sqlpy.kubernetes_module.subprocess.run", run)
     assert kubernetes_module._windows_private_acl(path, establish=True) is (returncode == 0)
     argv, options = calls[0]
-    assert argv[:4] == ["powershell.exe", "-NoProfile", "-NonInteractive", "-Command"]
+    assert argv[:5] == [
+        r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe",
+        "-NoLogo",
+        "-NoProfile",
+        "-NonInteractive",
+        "-Command",
+    ]
     assert str(path) not in argv[-1]
     assert options["env"]["DS60_PRIVATE_PATH"] == str(path)
     assert options["env"]["DS60_PRIVATE_ESTABLISH"] == "1"
@@ -1402,8 +1409,53 @@ def test_windows_acl_command_failure_never_establishes_trust(
 ) -> None:
     from ds60sqlpy import kubernetes_module
 
+    monkeypatch.setenv("SYSTEMROOT", r"C:\Windows")
+
     def failed(*args: Any, **kwargs: Any) -> Any:
         raise error
 
     monkeypatch.setattr("ds60sqlpy.kubernetes_module.subprocess.run", failed)
+    assert kubernetes_module._windows_private_acl(tmp_path) is False
+
+
+def test_windows_acl_runtime_preserves_startup_directories_but_not_hooks_or_secrets(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from ds60sqlpy.kubernetes_module import _windows_powershell_runtime
+
+    monkeypatch.setenv("SYSTEMROOT", r"C:\Windows")
+    for name in ("TMP", "TEMP", "USERPROFILE", "LOCALAPPDATA", "APPDATA", "PROGRAMFILES"):
+        monkeypatch.setenv(name, "synthetic-" + name)
+    for name in ("PSModulePath", "PSExecutionPolicyPreference", "KUBECONFIG", "HTTP_PROXY"):
+        monkeypatch.setenv(name, "must-not-be-inherited")
+    monkeypatch.setenv("PATH", r"C:\untrusted-tools")
+    executable, environment = _windows_powershell_runtime()
+    assert executable == r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
+    for name in ("TMP", "TEMP", "USERPROFILE", "LOCALAPPDATA", "APPDATA", "PROGRAMFILES"):
+        assert environment[name] == "synthetic-" + name
+    assert (
+        not {"PSModulePath", "PSExecutionPolicyPreference", "KUBECONFIG", "HTTP_PROXY"}
+        & environment.keys()
+    )
+    assert "untrusted-tools" not in environment["PATH"]
+    assert environment["PATH"].split(";") == [
+        r"C:\Windows\System32\WindowsPowerShell\v1.0",
+        r"C:\Windows\System32",
+        r"C:\Windows",
+    ]
+
+
+@pytest.mark.parametrize("root", ["", "relative", r"\\server\windows", r"C:Windows"])
+def test_windows_acl_runtime_refuses_missing_or_nonlocal_system_directory(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, root: str
+) -> None:
+    from ds60sqlpy import kubernetes_module
+
+    monkeypatch.delenv("WINDIR", raising=False)
+    monkeypatch.setenv("SYSTEMROOT", root)
+
+    def unexpected(*args: Any, **kwargs: Any) -> Any:
+        raise AssertionError("No PATH fallback may run without a trusted system directory")
+
+    monkeypatch.setattr("ds60sqlpy.kubernetes_module.subprocess.run", unexpected)
     assert kubernetes_module._windows_private_acl(tmp_path) is False

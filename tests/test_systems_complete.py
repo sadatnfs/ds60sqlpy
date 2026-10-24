@@ -150,14 +150,29 @@ def test_cpp_multifile_link_success_and_missing_definition(tmp_path: Path) -> No
     )
     assert run.returncode == 0
     assert run.stdout == "add=5 subtract=2\n"
+    # MSVC ignores repeated copies of the same object path. A second translation
+    # unit proves the actual one-definition-rule violation on every linker.
+    shutil.copyfile(tmp_path / "math.cpp", tmp_path / "math_duplicate.cpp")
+    duplicate_object = subprocess.run(
+        [compiler(), "-std=c++20", "-c", "math_duplicate.cpp", "-o", "math_duplicate.o"],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    assert duplicate_object.returncode == 0, duplicate_object.stdout + duplicate_object.stderr
     duplicate = subprocess.run(
-        [compiler(), "main.o", "math.o", "math.o", "-o", "duplicate"],
+        [compiler(), "main.o", "math.o", "math_duplicate.o", "-o", "duplicate"],
         cwd=tmp_path,
         capture_output=True,
         text=True,
         timeout=30,
     )
     assert duplicate.returncode != 0
+    assert (
+        "add" in duplicate.stdout + duplicate.stderr
+        or "subtract" in duplicate.stdout + duplicate.stderr
+    )
 
 
 def test_cpp_tutorial_names_actual_execution_boundaries() -> None:
