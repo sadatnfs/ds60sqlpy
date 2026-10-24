@@ -7,7 +7,7 @@ catalog contains 168 lessons: 77 Python, 78 PostgreSQL, and 13 bridge. Fourteen
 new modules close the beginner-confidence, exactness, evaluation, restart,
 query-correctness, and integrated-review gaps documented in
 [the repository tour](repository-tour.md). The course now also has a guided
-[coding application and native/Docker builds](offline-app.md),
+[coding application and Docker builds](offline-app.md),
 [goal-based routes](learning-paths.md), and an optional
 [MCP tutor](mcp-tutor.md).
 

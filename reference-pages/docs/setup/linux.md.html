@@ -162,12 +162,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>docs/setup/linux.md</code></p>
     </header>
     <article class="document"><h2 id="linux-setup">Linux setup<a class="heading-anchor" href="#linux-setup" aria-label="Link to this section">#</a></h2>
-<p>The primary course experience is the unified Docker classroom. Every subject, including Python and SQL, opens from the same <code>/classroom</code> page. You only need a local Docker-compatible engine, Linux containers, and the documented Compose version. The language runtimes live inside the images.</p>
+<p>The supported course experience is the unified Linux-container Docker classroom. Every subject, including Python and SQL, opens from the same <code>/classroom</code> page. You only need a local Docker-compatible engine, Linux containers, and the documented Compose version. The language runtimes live inside the images.</p>
 <p>From the extracted course folder or checkout, run:</p>
 <pre class="highlighted-code"><code class="language-bash">./classroom</code></pre>
 <p>The command builds locally, starts the services, checks readiness and opens the actual browser address. Follow the <a href="../one-command-classroom.md.html">one-command walkthrough</a> for first-time engine installation, WSL integration, stopping, backups and recovery. Saved work in the standard classroom uses persistent named Docker volumes. Use <code>./classroom status</code> to rediscover its address.</p>
 <h3 id="optional-native-environment">Optional native environment<a class="heading-anchor" href="#optional-native-environment" aria-label="Link to this section">#</a></h3>
-<p>The remainder of this page is for learners who also want host Python, Jupyter, VS Code or PostgreSQL. These installations are not classroom prerequisites. Keep a native environment&#x27;s <code>.learning</code> files separate from Docker-volume state.</p>
+<p>The remainder of this page is a historical host-setup reference, outside the supported Docker product and its release gates. Native Windows environments and native executable bundles are unsupported. Use Linux or WSL 2 for the validated contributor workflow in <a href="../../CONTRIBUTING.md.html">CONTRIBUTING</a>. Keep any retained native <code>.learning</code> files separate from Docker-volume state.</p>
 <h3 id="1-install-base-tools">1. Install base tools<a class="heading-anchor" href="#1-install-base-tools" aria-label="Link to this section">#</a></h3>
 <p>On a distribution that provides Python 3.12:</p>
 <pre class="highlighted-code"><code class="language-bash">sudo apt-get update

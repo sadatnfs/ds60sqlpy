@@ -1,5 +1,10 @@
 # Kubernetes content and runtime status
 
+> Support boundary: this file retains historical implementation evidence. The
+> supported product runs in Linux Docker containers, with Windows through WSL 2.
+> Native Windows ACLs/backends and native executable builds are not supported
+> targets or release gates. Current checks are defined in [validation](../validation.md).
+
 Updated2026-10-23. All42 planned IDs k8s-001 through k8s-042 have authored bodies in canonical courses/kubernetes/lessons.json. Direct prerequisites match docs/expansion/plans/kubernetes.json. The four original pilots remain,with current fixture and prerequisite notes. The38 added lessons have two worked cases,six distinct exercises,learner artifacts,separate manifest/explanatory solutions,case ledgers and executable offline reasoning checks. Current totals are 64,703 guide words and 25,050 explanatory-solution words.
 
 ## Content and capability boundary
@@ -8,7 +13,7 @@ There are 12 bounded YAML sources and 30 reading worksheets. A YAML source execu
 
 Advanced host requirements remain explicit: general Secret access beyond the fixed teacher observer below;policy-capable CNI;StorageClass/PVC/StatefulSet and finite marker Jobs;Gateway/Ingress/TLS controller;CRD/operator/admission definitions;exclusive Node maintenance;metrics/load/HPA;traffic editing;conditional updates/watches;control-plane/data backup;replacement stacks;and integrated release/recovery. These capabilities were not qualified by the contract-2 runtime run. Do not install controllers,widen credentials or select an ambient cluster from a learner artifact.
 
-The host-lab guide explains explicit POSIX/PowerShell targeting and the15-minute lease workflow. Prepare immediately before broker startup and Run,after tool/image preparation. An expired lease is refused;stop the broker,release only the exact owned session and prepare a fresh lease. Saved learner source is preserved. Old fixture0.1 pads receive an actionable version refusal until their owner deliberately reviews and changes the image field.
+The host-lab guide explains explicit POSIX/WSL targeting and the15-minute lease workflow. Prepare immediately before broker startup and Run,after tool/image preparation. An expired lease is refused;stop the broker,release only the exact owned session and prepare a fresh lease. Saved learner source is preserved. Old fixture0.1 pads receive an actionable version refusal until their owner deliberately reviews and changes the image field.
 
 ## Local evidence
 

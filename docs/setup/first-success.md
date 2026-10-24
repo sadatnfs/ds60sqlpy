@@ -1,5 +1,10 @@
 # Your first successful session
 
+> The supported first session uses [the Docker/WSL walkthrough](../one-command-classroom.md):
+> start `./classroom`, choose Python or PostgreSQL, and run a small example in
+> its browser pad. The host-notebook walkthrough below is historical
+> compatibility material, outside the supported product and release gates.
+
 > **One classroom:** the browser opens `/classroom`, where Python, PostgreSQL,
 > the engineering bridge and every module/book subject share one home and
 > individually themed workspaces. Choose any path and set your own pace.

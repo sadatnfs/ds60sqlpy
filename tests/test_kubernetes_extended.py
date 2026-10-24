@@ -357,9 +357,8 @@ def test_old_saved_image_has_actionable_refusal_without_rewrite() -> None:
 
 
 def test_host_role_adds_only_required_namespaced_configmap_permissions(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path,
 ) -> None:
-    SUPPORT["model_private_acl"](monkeypatch)
     host = SUPPORT["FakeHost"]()
     prepare_owned_session(
         tmp_path / "session",

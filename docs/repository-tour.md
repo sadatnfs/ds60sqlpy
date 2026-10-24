@@ -25,7 +25,7 @@ lesson guides + learner artifacts + separate solutions
        |             |             |
    PadRunner   evidence/progress    read-only by default
        |
-  native Python or local disposable PostgreSQL
+  Linux-container Python or local disposable PostgreSQL
 ```
 
 The catalog records stable identity, prerequisites, level, time estimate, dependency group, network behavior, and artifact paths. Named route definitions specify terminal goals and derive the route from that graph. The course guide and lesson readers are generated views. They are rebuilt from source rather than edited by hand.
@@ -43,11 +43,11 @@ The catalog records stable identity, prerequisites, level, time estimate, depend
 | `coaching.py`, `progress.py` | Learner evidence and progress operations shared by the application and MCP |
 | `lab.py`, `execution.py` | Explicit coding app, authenticated actions, bounded Python/SQL backend runs |
 | `portal.py`, `lesson_reader.py` | Existing safe reading/navigation portal, fixed editor launches, and generated HTML |
-| `desktop.py`, `scripts/build_app.py` | Frozen/native entry point, persistent workspace initialization, and allowlisted course packaging |
+| `desktop.py`, `scripts/build_app.py` | Shared allowlisted course packaging and retained unsupported native entry-point code |
 | `mcp_server.py` | Optional SDK-backed local tutoring tools, resources, prompts, and explicit write/reveal boundaries |
 | `scripts/audit_*.py` | Practice-count and teaching-depth gates; these supplement semantic review |
 | `docs/setup/` | Windows/macOS/Linux, PostgreSQL, notebook, and offline setup |
-| `.github/workflows/` | Core/platform/notebook/SQL checks and native/Docker application build definitions |
+| `.github/workflows/` | Linux core/contributor/notebook/SQL checks, Docker runtime/browser checks, owned Kubernetes and the portable ZIP |
 
 ## Learning gaps addressed
 
@@ -61,7 +61,11 @@ Every addition has a learner artifact, deep guide, executable reference, and exp
 
 The course now has three complementary delivery modes. Static HTML provides a complete offline reading library. The local coding application adds a guided route, code pads, transcripts, figures, saved evidence, and explicit solution comparison. The optional MCP server lets the AI tutor use those same lesson and prerequisite operations while retaining a read-only default and no arbitrary code execution.
 
-The native executable bundles the application runtime and course assets; its backend uses the learner's installed Python/PostgreSQL. Docker packages the backend environment and database for a consistent browser experience. Native build evidence is specific to the actual build platform. A Dockerfile or hosted workflow definition is not evidence that another operating system has been executed successfully.
+Docker packages the backend environments and database as the supported
+browser product. Windows uses WSL 2 and macOS uses its Docker engine's Linux
+environment. The historical native executable remains unsupported compatibility
+code and is not a release gate. A Dockerfile or workflow definition alone is
+not execution evidence for an engine configuration or architecture.
 
 The coding application is a personal trusted-code programming environment. It has authenticated local requests, bounded runs, exact course-database routing, and separate saved-work storage. It is not presented as a general security sandbox. The original reading portal keeps its smaller fixed launch allowlist. Live database examples remain distinct from fake-backed tests, and a saved completion remains distinct from automatically graded mastery.
 

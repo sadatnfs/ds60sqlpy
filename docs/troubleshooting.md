@@ -1,5 +1,10 @@
 # Troubleshooting
 
+> For the supported Docker classroom, begin with `./classroom doctor`,
+> `./classroom status` and `./classroom logs` from Linux, macOS or WSL 2. See
+> [the one-command guide](one-command-classroom.md). Native host diagnostics
+> below are retained compatibility references, outside product support.
+
 Start from the repository root and run:
 
 ```text

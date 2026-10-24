@@ -47,7 +47,11 @@ The shared `./classroom` launcher builds local images, starts the selected
 profiles, waits for readiness and opens the actual loopback address. Its default
 includes the ordinary CPU and language workers. Windows uses WSL 2 with an
 integrated Linux-container engine. Host compilers and databases are unnecessary
-for the ordinary classroom route.
+for the ordinary classroom route. Linux containers are the supported release
+target. Native Windows runtimes, private-ACL integration and executable bundles
+are retired from release qualification; retained helpers are compatibility
+material. Linux contributor checks and container/browser receipts govern the
+current release matrix, as described in [validation](../validation.md).
 
 The app preserves Python/SQL pads, coaching phases and immutable run receipts.
 Module lessons preserve source, notes, variants and job history through their

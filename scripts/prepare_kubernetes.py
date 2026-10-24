@@ -38,15 +38,18 @@ from ds60sqlpy.kubernetes_module import (  # noqa: E402
 
 def tool_targets(system: str | None = None, machine: str | None = None) -> tuple[str, str, str]:
     operating = (platform.system() if system is None else system).lower()
+    if operating == "windows":
+        raise KubernetesRefusal(
+            "Native Windows Kubernetes tools are unsupported. Use WSL 2 with "
+            "Docker Linux containers and run this companion inside the WSL Linux shell."
+        )
     cpu = (platform.machine() if machine is None else machine).lower()
     architecture = {"arm64": "arm64", "aarch64": "arm64", "x86_64": "amd64", "amd64": "amd64"}.get(
         cpu
     )
-    if operating not in ("linux", "darwin", "windows") or architecture is None:
+    if operating not in ("linux", "darwin") or architecture is None:
         raise KubernetesRefusal("This host OS/CPU needs a separate tool qualification row.")
-    if operating == "windows" and architecture != "amd64":
-        raise KubernetesRefusal("Use a qualified Linux/WSL route for this Windows architecture.")
-    return operating, architecture, ".exe" if operating == "windows" else ""
+    return operating, architecture, ""
 
 
 def download_tool(url: str, checksum_suffix: str, target: Path) -> None:
@@ -95,7 +98,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("action", choices=("doctor", "tools", "prepare", "release", "inspect"))
     parser.add_argument("--tools-dir", type=Path, default=ROOT / "work/kubernetes-tools")
     parser.add_argument("--session", type=Path)
-    parser.add_argument("--docker", default=shutil.which("docker"))
+    parser.add_argument("--docker")
     parser.add_argument("--docker-host")
     parser.add_argument("--allow-download", action="store_true")
     parser.add_argument("--allow-node-download", action="store_true")
@@ -104,6 +107,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--confirm-release", action="store_true")
     args = parser.parse_args(argv)
     try:
+        # Refuse unsupported hosts before PATH discovery, tool/file probes or downloads.
+        operating, architecture, suffix = tool_targets()
         if args.action == "inspect":
             if args.session is None or not args.docker_host:
                 raise KubernetesRefusal(
@@ -133,7 +138,7 @@ def main(argv: list[str] | None = None) -> int:
                 )
             )
             return 0
-        operating, architecture, suffix = tool_targets()
+        args.docker = args.docker or shutil.which("docker")
         kind = args.tools_dir / f"kind-{KIND_VERSION}{suffix}"
         kubectl = args.tools_dir / f"kubectl-{KUBECTL_VERSION}{suffix}"
         if args.action == "doctor":

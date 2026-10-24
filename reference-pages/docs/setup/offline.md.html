@@ -163,6 +163,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="offline-use">Offline use<a class="heading-anchor" href="#offline-use" aria-label="Link to this section">#</a></h2>
 <p>DS60 is designed for a one-time connected bootstrap followed by offline study. “Offline” describes lesson execution after tools, packages, and disclosed assets have been installed; it does not mean a brand-new computer can install Python, VS Code, PostgreSQL, container images, and packages without installation media.</p>
+<p>For the supported Docker product, prepare the images with <code>./classroom</code> while connected, rehearse the required lessons, then resume with <code>./classroom --no-build</code>. Windows uses those same commands inside WSL 2. Keep the project&#x27;s named learning and PostgreSQL volumes; see the <a href="../one-command-classroom.md.html">one-command guide</a>. The host-Python and PowerShell recipes later on this page are historical compatibility references, outside the supported release matrix.</p>
 <h3 id="what-works-offline-after-setup">What works offline after setup<a class="heading-anchor" href="#what-works-offline-after-setup" aria-label="Link to this section">#</a></h3>
 <ul>
 <li>Core Python and standard-library lessons</li>
@@ -220,6 +221,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tbody></table></div>
 <p>External “further reading” links are optional and do not form part of the offline execution contract.</p>
 <h3 id="prepare-while-connected">Prepare while connected<a class="heading-anchor" href="#prepare-while-connected" aria-label="Link to this section">#</a></h3>
+<p>The following steps describe retained host environments. Docker learners use the connected build and offline resume commands above; native Windows setup is not a supported product route.</p>
 <ol>
 <li>Run the OS setup script.</li>
 <li>Run the environment doctor.</li>

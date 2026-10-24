@@ -162,6 +162,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>docs/setup/jupyter-postgresql.md</code></p>
     </header>
     <article class="document"><h2 id="postgresql-in-jupyter">PostgreSQL in Jupyter<a class="heading-anchor" href="#postgresql-in-jupyter" aria-label="Link to this section">#</a></h2>
+<blockquote><p>This page retains host-notebook recipes. The supported classroom runs in Linux Docker containers, with Windows through WSL 2. Native Windows notebook setup is historical compatibility material and is not a release gate.</p></blockquote>
 <p>The professional bridge includes a notebook that runs PostgreSQL queries from the normal Python kernel with JupySQL. JupySQL supplies IPython line and cell magics such as <code>%sql</code> and <code>%%sql</code>; PostgreSQL still runs in the local <code>advanced_sql_training</code> database.</p>
 <p>For a normal SQL course lesson or solution, open its <a href="../guided-sql-notebooks.md.html">generated guided notebook</a> from the learning portal. Those notebooks run the complete cataloged script through <code>psql</code> because many course files use <code>psql</code> meta-commands that are not valid JupySQL cells. Use this page for the dedicated lesson about interactive SQL magics.</p>
 <p>This is an interactive learning workflow. Application code should continue to use explicit Psycopg or SQLAlchemy boundaries, tests, and transaction ownership.</p>

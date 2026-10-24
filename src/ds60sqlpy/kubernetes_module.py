@@ -11,7 +11,6 @@ import base64
 import contextlib
 import hashlib
 import json
-import ntpath
 import os
 import re
 import signal
@@ -428,99 +427,13 @@ def parse_manifests(source: str) -> list[dict[str, Any]]:
     return sorted(documents, key=lambda doc: order[doc["kind"]])
 
 
-def _windows_powershell_runtime() -> tuple[str, dict[str, str]]:
-    """Keep Windows startup directories without inheriting tools, hooks or secrets.
-
-    Windows temp discovery uses TMP/TEMP/USERPROFILE and PowerShell's startup
-    cache uses LOCALAPPDATA. Keep those OS-provided directories, while omitting
-    inherited PSModulePath so Windows PowerShell rebuilds its own module path.
-    https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-gettemppatha
-    https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_psmodulepath
-    """
-    root = os.environ.get("SYSTEMROOT") or os.environ.get("WINDIR")
-    if not root or not ntpath.isabs(root) or not ntpath.splitdrive(root)[0].endswith(":"):
-        raise OSError("A local Windows system directory is required for the ACL helper.")
-    root = ntpath.normpath(root)
-    system = ntpath.join(root, "System32")
-    shell = ntpath.join(system, "WindowsPowerShell", "v1.0")
-    keys = (
-        "TEMP",
-        "TMP",
-        "USERPROFILE",
-        "LOCALAPPDATA",
-        "APPDATA",
-        "PROGRAMFILES",
-        "PROGRAMFILES(X86)",
-        "PROGRAMW6432",
-        "PROGRAMDATA",
-    )
-    environment = {key: os.environ[key] for key in keys if key in os.environ}
-    environment.update(
-        SYSTEMROOT=root,
-        WINDIR=root,
-        SYSTEMDRIVE=ntpath.splitdrive(root)[0],
-        PATH=";".join((shell, system, root)),
-    )
-    return ntpath.join(shell, "powershell.exe"), environment
-
-
-def _windows_private_acl(path: Path, *, establish: bool = False) -> bool:
-    # The path is data in one process-local environment variable, never interpolated
-    # into PowerShell source. Only a newly created runtime directory is modified.
-    # Built-in Windows PowerShell uses .NET Framework. Direct ACL APIs avoid
-    # loading Utility and Security cmdlet modules inside this bounded operation.
-    script = r"""
-$ErrorActionPreference='Stop'
-$p=$env:DS60_PRIVATE_PATH
-$sid=[Security.Principal.WindowsIdentity]::GetCurrent().User
-$system=[Security.Principal.SecurityIdentifier]::new('S-1-5-18')
-if($env:DS60_PRIVATE_ESTABLISH -eq '1') {
-  $acl=[Security.AccessControl.DirectorySecurity]::new()
-  $acl.SetAccessRuleProtection($true,$false)
-  $acl.SetOwner($sid)
-  foreach($who in @($sid,$system)) {
-    $rule=[Security.AccessControl.FileSystemAccessRule]::new(
-      $who,
-      [Security.AccessControl.FileSystemRights]::FullControl,
-      [Security.AccessControl.InheritanceFlags]'ContainerInherit,ObjectInherit',
-      [Security.AccessControl.PropagationFlags]::None,
-      [Security.AccessControl.AccessControlType]::Allow
-    )
-    $acl.AddAccessRule($rule)
-  }
-  [System.IO.Directory]::SetAccessControl($p,$acl)
-}
-if([System.IO.Directory]::Exists($p)) {
-  $observed=[System.IO.Directory]::GetAccessControl($p)
-} else {
-  $observed=[System.IO.File]::GetAccessControl($p)
-}
-$rules=@($observed.GetAccessRules($true,$true,[Security.Principal.SecurityIdentifier]))
-$owner=$observed.GetOwner([Security.Principal.SecurityIdentifier]).Value
-if($owner -ne $sid.Value -or $rules.Count -eq 0){exit 2}
-foreach($rule in $rules) {
-  $other=($rule.IdentityReference.Value -notin @($sid.Value,$system.Value))
-  if($rule.AccessControlType -eq 'Allow' -and $other){exit 3}
-}
-exit 0
-"""
-    try:
-        executable, environment = _windows_powershell_runtime()
-        environment.update(
-            DS60_PRIVATE_PATH=str(path), DS60_PRIVATE_ESTABLISH="1" if establish else "0"
+def _require_posix_credential_host() -> None:
+    if os.name == "nt":
+        raise KubernetesRefusal(
+            "Native Windows Kubernetes credential management is unsupported. "
+            "Use WSL 2 with Docker Linux containers and run preparation inside "
+            "the WSL Linux shell. Linux and macOS hosts use the local Unix socket."
         )
-        result = subprocess.run(
-            [executable, "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", script],
-            env=environment,
-            stdin=subprocess.DEVNULL,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            timeout=15,
-            check=False,
-        )
-    except (OSError, subprocess.TimeoutExpired):
-        return False
-    return result.returncode == 0
 
 
 def _is_path_link(path: Path) -> bool:
@@ -536,6 +449,7 @@ def _is_path_link(path: Path) -> bool:
 
 
 def _private_file(path: Path, maximum: int) -> bytes:
+    _require_posix_credential_host()
     absolute = path.absolute()
     if any(
         part.casefold() == ".learning" for part in (*absolute.parts, *absolute.resolve().parts)
@@ -544,7 +458,6 @@ def _private_file(path: Path, maximum: int) -> bytes:
             "Credentials must be external private files without symlink components."
         )
     info = absolute.stat()
-    windows_private = os.name == "nt" and _windows_private_acl(absolute)
     protected_parent = (
         sys.platform == "linux"
         and os.geteuid() == 0
@@ -556,7 +469,7 @@ def _private_file(path: Path, maximum: int) -> bytes:
     if (
         not stat.S_ISREG(info.st_mode)
         or info.st_size > maximum
-        or (stat.S_IMODE(info.st_mode) & 0o077 and not protected_parent and not windows_private)
+        or (stat.S_IMODE(info.st_mode) & 0o077 and not protected_parent)
     ):
         raise KubernetesRefusal(
             "A bounded private runtime file or protected root-owned image directory is required."
@@ -1755,12 +1668,9 @@ class HostTools:
 def local_docker_endpoint(value: str) -> str:
     if value.startswith("unix:///") and "\n" not in value and "\r" not in value:
         return value
-    if value.startswith("npipe:////./pipe/") and re.fullmatch(
-        r"npipe:////\./pipe/[A-Za-z0-9_.-]+", value
-    ):
-        return value
     raise KubernetesRefusal(
-        "Choose an explicit local Unix socket or Windows named-pipe Docker endpoint."
+        "Choose an explicit local Unix socket Docker endpoint. "
+        "On Windows, use WSL 2 with Linux containers and its local Unix socket."
     )
 
 
@@ -1801,6 +1711,7 @@ def prepare_owned_session(
     No default kubeconfig path is ever read or written. Image/tool provisioning
     happens beforehand; missing bytes do not cause a silent download.
     """
+    _require_posix_credential_host()
     import secrets
     import uuid
 
@@ -1821,11 +1732,6 @@ def prepare_owned_session(
         raise KubernetesRefusal("Use a private runtime directory outside .learning.")
     directory = resolved
     directory.mkdir(mode=0o700, parents=False, exist_ok=False)
-    if os.name == "nt" and not _windows_private_acl(directory, establish=True):
-        raise KubernetesRefusal(
-            "Could not establish a private current-user/SYSTEM runtime ACL; no"
-            " credential was created."
-        )
     cluster = "ds60-" + owner[:12]
     namespace = "ds60-lesson-" + owner[:12]
     auth_namespace = "ds60-auth-" + owner[:12]
@@ -2308,6 +2214,7 @@ def _owned_node_present(
 def release_owned_session(
     directory: Path, tools: HostTools, *, runner: Callable[..., CommandResult] = host_command
 ) -> None:
+    _require_posix_credential_host()
     receipt = json.loads(_private_file(directory / "host-receipt.json", 16_384))
     owner = receipt.get("owner_id")
     if (

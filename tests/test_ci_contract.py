@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import re
 import shlex
 import subprocess
 import sys
@@ -12,9 +13,9 @@ WORKFLOW = REPO_ROOT / ".github" / "workflows" / "ci.yml"
 PYPROJECT = REPO_ROOT / "pyproject.toml"
 
 
-def test_core_matrix_overrides_learner_python_default_and_asserts_version() -> None:
+def test_core_matrix_overrides_project_python_default_and_asserts_version() -> None:
     workflow = WORKFLOW.read_text(encoding="utf-8")
-    core_job = workflow.split("  learner-bootstrap:", maxsplit=1)[0]
+    core_job = workflow.split("  developer-bootstrap:", maxsplit=1)[0]
 
     assert "UV_PYTHON: ${{ matrix.python-version }}" in workflow
     assert "DS60_EXPECTED_PYTHON: ${{ matrix.python-version }}" in workflow
@@ -43,7 +44,7 @@ def test_sql_notebook_profile_is_self_contained_for_dataframe_conversion() -> No
 
 def test_core_workflow_runs_every_generated_curriculum_gate() -> None:
     workflow = WORKFLOW.read_text(encoding="utf-8")
-    core_job = workflow.split("  learner-bootstrap:", maxsplit=1)[0]
+    core_job = workflow.split("  developer-bootstrap:", maxsplit=1)[0]
 
     required_commands = (
         "scripts/build_catalog.py",
@@ -66,21 +67,16 @@ def test_core_workflow_runs_every_generated_curriculum_gate() -> None:
         assert command in core_job
 
 
-def test_lock_portability_is_resolved_for_supported_binary_platforms() -> None:
+def test_lock_resolution_matches_the_linux_validation_platform() -> None:
     workflow = WORKFLOW.read_text(encoding="utf-8")
-    core_job = workflow.split("  learner-bootstrap:", maxsplit=1)[0]
+    core_job = workflow.split("  developer-bootstrap:", maxsplit=1)[0]
 
-    assert "- name: Verify all-extras lock portability" in core_job
-    for platform in (
-        "x86_64-pc-windows-msvc",
-        "x86_64-unknown-linux-gnu",
-        "aarch64-apple-darwin",
-        "x86_64-apple-darwin",
-    ):
-        assert f"--python-platform {platform}" in core_job
+    assert "- name: Verify Linux optional dependency resolution" in core_job
+    assert re.findall(r"--python-platform (\S+)", core_job) == ["x86_64-unknown-linux-gnu"]
+    assert "uv sync --quiet --frozen --all-extras --dry-run" in core_job
 
 
-def test_advanced_imports_are_manual_or_scheduled_and_cross_platform() -> None:
+def test_advanced_imports_are_manual_or_scheduled_on_linux() -> None:
     workflow = WORKFLOW.read_text(encoding="utf-8")
     advanced_job = workflow.split("  advanced-imports:", maxsplit=1)[1]
 
@@ -89,17 +85,35 @@ def test_advanced_imports_are_manual_or_scheduled_and_cross_platform() -> None:
     assert (
         "if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'"
     ) in advanced_job
-    for operating_system in (
-        "ubuntu-latest",
-        "windows-latest",
-        "macos-latest",
-    ):
-        assert f"- {operating_system}" in advanced_job
-    assert "- name: Install the macOS OpenMP runtime" in advanced_job
-    assert "if: runner.os == 'macOS'" in advanced_job
-    assert "run: brew install libomp" in advanced_job
+    assert "runs-on: ubuntu-latest" in advanced_job
+    assert 'python-version: "3.12"' in advanced_job
+    assert 'UV_PYTHON: "3.12"' in advanced_job
     assert "uv sync --frozen --all-extras" in advanced_job
     assert "scripts/check_advanced_imports.py" in advanced_job
+
+
+def test_release_jobs_target_linux_containers_and_contributor_tooling() -> None:
+    assert not (WORKFLOW.parent / "windows-runtime.yml").exists()
+    for path in WORKFLOW.parent.glob("*.yml"):
+        workflow = path.read_text(encoding="utf-8")
+        runners = re.findall(r"(?m)^    runs-on: (.+)$", workflow)
+        assert runners and set(runners) == {"ubuntu-latest"}, path.name
+        assert "windows-latest" not in workflow and "macos-latest" not in workflow
+        assert "scripts/build_app.py" not in workflow
+        assert "scripts/check_windows_private_acl.py" not in workflow
+        assert "scripts/check_windows_runtime_startup.py" not in workflow
+
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+    core = workflow.split("  developer-bootstrap:", maxsplit=1)[0]
+    assert 'python-version: ["3.11", "3.12"]' in core
+    bootstrap = workflow.split("  developer-bootstrap:", maxsplit=1)[1].split(
+        "  postgres:", maxsplit=1
+    )[0]
+    assert "Linux contributor bootstrap" in bootstrap
+    assert 'UV_PYTHON: "3.12"' in bootstrap
+    assert "bash scripts/setup.sh --dependency-mode locked" in bootstrap
+    assert ".venv/bin/python scripts/course.py doctor" in bootstrap
+    assert ".venv/bin/python scripts/validate_notebooks.py --smoke --smoke-days 1" in bootstrap
 
 
 def test_ci_installs_renderer_before_sql_or_starter_checks() -> None:
@@ -110,8 +124,11 @@ def test_ci_installs_renderer_before_sql_or_starter_checks() -> None:
     assert "DS60_SQL_EXPANSION_TEST_URL:" in postgres
     assert "tests/test_execution.py tests/test_sql_expansion_live.py" in postgres
     app = (WORKFLOW.parent / "app-build.yml").read_text(encoding="utf-8")
-    starter = app.split("  windows-starter:", maxsplit=1)[1].split("  native:")[0]
+    starter = app.split("  docker-starter:", maxsplit=1)[1].split("  docker:", maxsplit=1)[0]
     assert starter.index("uv sync --frozen") < starter.index("scripts/build_windows_starter.py")
+    assert "--output dist/DS60LearningLab-Docker-Starter.zip" in starter
+    assert "path: dist/DS60LearningLab-Docker-Starter.zip" in starter
+    assert "if-no-files-found: error" in starter
 
 
 def test_current_docker_entrypoint_covers_every_profile_and_recreation_receipts() -> None:
@@ -127,6 +144,18 @@ def test_current_docker_entrypoint_covers_every_profile_and_recreation_receipts(
     assert "compose.classroom.yaml" in docker
     assert "work/runtime-receipts.json" in docker and "--check-persistence" in docker
     assert "python-core $DS60_PROFILES" in docker
+    for command in (
+        "scripts/check_lab_http.py",
+        "scripts/check_classroom_profiles.py",
+        "scripts/check_classroom_failures.py",
+        "scripts/check_module_references.py",
+        "scripts/check_classroom_browser.py",
+    ):
+        assert command in docker
+    assert "--check-timeout" in docker
+    assert "scripts/course.py sql --quiet all --reset" in docker
+    assert "scripts/course.py sql --quiet solutions --reset" in docker
+    assert "max-parallel: 2" in matrix
     for profile in CASES.keys() - {"python-core"}:
         assert profile in matrix
     assert "--profile '*' down\n" in docker
@@ -135,8 +164,6 @@ def test_current_docker_entrypoint_covers_every_profile_and_recreation_receipts(
 
 
 def test_workflows_pin_actions_and_install_node_explicitly() -> None:
-    import re
-
     for path in WORKFLOW.parent.glob("*.yml"):
         workflow = path.read_text(encoding="utf-8")
         for action in re.findall(r"uses:\s+(\S+)", workflow):

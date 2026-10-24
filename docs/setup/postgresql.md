@@ -1,5 +1,10 @@
 # Local PostgreSQL, step by step
 
+> The supported classroom includes PostgreSQL and its clients inside Linux
+> containers. Start with [the Docker/WSL walkthrough](../one-command-classroom.md).
+> Native server instructions below are historical compatibility references,
+> not prerequisites or release gates.
+
 PostgreSQL runs as a server. `psql`, the course SQL runner, and a notebook are
 clients connecting to that server. Installing a Python driver does not install
 the server, and installing a server does not guarantee that `psql` is on PATH.

@@ -4,13 +4,16 @@ MODULE_PROFILES ?= python-core,cpp20
 
 .PHONY: help setup generate journey-preview check test test-serial testserial lab mcp app windows-starter docker docker-stop docker-status modules-build modules-start modules-stop modules-check classroom classroom-build classroom-start classroom-stop
 help:
-	@echo "setup: install learner environment; lab: open coding lab; app: build native executable"
-	@echo "generate: refresh catalog/readers/reports; check: validate; docker: build and start lab"
-	@echo "windows-starter: package the complete double-click Windows starter ZIP"
+	@echo "classroom: build, start and open the Docker classroom (or run ./classroom)"
+	@echo "Windows: run in the WSL 2 Ubuntu shell with Docker integration enabled"
+	@echo "classroom-build/start/stop: manage Linux containers and persistent local volumes"
+	@echo "windows-starter: package the portable Docker source ZIP (legacy target name)"
+	@echo "setup: install the Linux contributor environment; learners only need Docker"
+	@echo "generate: refresh catalog/readers/reports; check: validate source and tests"
 	@echo "test: grouped parallel suite (TEST_WORKERS=4); test-serial: serial debugging"
-	@echo "journey-preview: validate five planned tracks and rebuild their offline teaching preview"
-	@echo "modules-build/start/stop: optional host-folder labs (MODULE_PROFILES=python-core,cpp20)"
-	@echo "classroom-build/start/stop: Docker-only labs with persistent local volumes"
+	@echo "journey-preview: rebuild the historical design preview"
+	@echo "modules-build/start/stop: contributor host-folder labs (MODULE_PROFILES=python-core,cpp20)"
+	@echo "Historical targets outside Docker release support: lab (native server), app (native executable)"
 
 setup:
 	bash scripts/setup.sh

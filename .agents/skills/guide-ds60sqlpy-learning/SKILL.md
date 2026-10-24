@@ -18,7 +18,7 @@ only for missing information that changes the next step. Confirm which machine
 is being diagnosed; a tool result on the agent's host does not prove the state
 of someone else's computer.
 
-Prefer `./classroom` and the repository's
+Use the supported Linux-container product through `./classroom` and the repository's
 [one-command guide](../../../docs/one-command-classroom.md). Windows uses WSL 2
 with an integrated Linux-container engine. The ordinary Docker route needs no
 host Python, PostgreSQL, Java or Node installation. Use `./classroom status`
@@ -26,10 +26,13 @@ and the app's selected-profile readiness report to diagnose an existing
 workspace. Preserve its project name and volumes. Do not reinstall or
 reconfigure an engine merely because a worker is unavailable.
 
-For an explicitly chosen native route, use the documented repository interpreter
-and `scripts/course.py doctor`. Static `START_HERE.html` offers offline reading;
-it is not an executor. The optional native portal has a fixed action allowlist.
-Do not invent an arbitrary browser-to-shell launch.
+Native Windows setup, native backends and executable bundles are historical
+compatibility material, not current learner routes. Do not redirect a learner
+there to repair a Docker issue. The Windows Docker wrappers remain useful
+entrypoints into WSL 2. Static `START_HERE.html` offers offline reading; it is
+not an executor. Do not invent an arbitrary browser-to-shell launch. A Linux
+container test does not prove that the learner's WSL installation or host
+engine integration is ready; inspect those separately when needed.
 
 Choose from the current inventory:
 
@@ -92,7 +95,8 @@ install dependencies or fetch models.
   Browser DOM APIs are not available in Node.
 - Spark requires bounded local data and explicit session cleanup. Kubernetes
   requires an explicitly owned disposable target; never use ambient cluster
-  context or credentials.
+  context or credentials. Windows learners run its POSIX host companion inside
+  WSL 2; native Windows credential preparation is unsupported.
 - Reading-only lessons use reasoning and notes, with no invented execution
   action. Framework and pretrained work needs the declared runtime and local
   assets; tiny offline demonstrations do not establish production quality.
@@ -122,7 +126,8 @@ remediation and a stable lesson ID.
 
 Record progress only when the learner asks or approves that action. The browser
 owns module drafts, read markers and jobs. Module IDs are not legacy CLI
-progress IDs. For a legacy lesson, the prepared interpreter can run:
+progress IDs. For a legacy lesson, a deliberately prepared Linux or WSL
+contributor interpreter can run:
 
 ```sh
 python scripts/course.py progress show

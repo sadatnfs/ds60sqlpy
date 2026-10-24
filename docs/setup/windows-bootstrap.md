@@ -1,5 +1,9 @@
 # One-command Windows bootstrap
 
+> Historical native-Windows compatibility reference, outside the supported
+> product and release gates. Use the [Docker/WSL 2 setup](windows.md) and
+> `START_DOCKER_CLASSROOM.cmd` for the current classroom.
+
 Use this guide when Python or PostgreSQL is installed on Windows but `python`,
 `conda`, or `psql` is not available on `PATH`. It is particularly useful for a
 machine with Anaconda3 and the native PostgreSQL installer.

@@ -11,8 +11,7 @@ permissions:
   contents: read
 
 env:
-  # Repository text is UTF-8, including tests and their Python subprocesses.
-  # Windows Python 3.11/3.12 otherwise inherits the legacy system code page.
+  # Repository text and Python subprocesses use the same UTF-8 contract.
   PYTHONUTF8: "1"
 
 concurrency:
@@ -21,26 +20,18 @@ concurrency:
 
 jobs:
   core:
-    name: Core checks (${{ matrix.os }}, Python ${{ matrix.python-version }})
-    runs-on: ${{ matrix.os }}
+    name: Core checks (Linux, Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      # .python-version is the learner default. CI must instead exercise the
+      # .python-version is the project default. CI must instead exercise the
       # interpreter selected by each matrix leg.
       UV_PYTHON: ${{ matrix.python-version }}
       DS60_EXPECTED_PYTHON: ${{ matrix.python-version }}
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - os: ubuntu-latest
-            python-version: "3.11"
-          - os: ubuntu-latest
-            python-version: "3.12"
-          - os: windows-latest
-            python-version: "3.12"
-          - os: macos-latest
-            python-version: "3.12"
+        python-version: ["3.11", "3.12"]
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
@@ -55,7 +46,7 @@ jobs:
         with:
           node-version: "24"
       - name: Validate GitHub workflow syntax and embedded shell
-        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
+        if: matrix.python-version == '3.12'
         shell: bash
         run: |
           lint_dir="$RUNNER_TEMP/ds60-actionlint"
@@ -76,13 +67,9 @@ jobs:
           enable-cache: true
       - name: Verify locked dependencies
         run: uv lock --check
-      - name: Verify all-extras lock portability
-        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
-        run: |
-          uv sync --quiet --frozen --all-extras --dry-run --python-platform x86_64-pc-windows-msvc
-          uv sync --quiet --frozen --all-extras --dry-run --python-platform x86_64-unknown-linux-gnu
-          uv sync --quiet --frozen --all-extras --dry-run --python-platform aarch64-apple-darwin
-          uv sync --quiet --frozen --all-extras --dry-run --python-platform x86_64-apple-darwin
+      - name: Verify Linux optional dependency resolution
+        if: matrix.python-version == '3.12'
+        run: uv sync --quiet --frozen --all-extras --dry-run --python-platform x86_64-unknown-linux-gnu
       - name: Install the locked core environment
         run: >-
           uv sync --frozen --extra notebooks --extra data --extra bridge
@@ -140,19 +127,12 @@ jobs:
         run: >-
           uv run --no-sync python -m pytest -n 4 --dist loadgroup
           --basetemp=work/test-tmp --junitxml=work/test-results/core.xml --durations=15
-      - name: Exercise native Windows private runtime ACLs without parallel contention
-        if: (success() || failure()) && matrix.os == 'windows-latest'
-        run: >-
-          uv run --no-sync python scripts/check_windows_private_acl.py
-          --report work/test-results/windows-private-acl.json
       - name: Retain test results
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
-          name: core-tests-${{ matrix.os }}-py${{ matrix.python-version }}
-          path: |
-            work/test-results/core.xml
-            work/test-results/windows-private-acl.json
+          name: core-tests-linux-py${{ matrix.python-version }}
+          path: work/test-results/core.xml
           if-no-files-found: ignore
           retention-days: 14
       - name: Structural course validation
@@ -160,34 +140,20 @@ jobs:
       - name: Notebook validation
         run: uv run --no-sync python scripts/validate_notebooks.py
       - name: Register the course notebook kernel
-        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
+        if: matrix.python-version == '3.12'
         run: >-
           uv run --no-sync python -m ipykernel install --user
           --name ds60sqlpy --display-name "Python (ds60sqlpy)"
-      - name: Exercise guided Windows startup diagnostics
-        if: matrix.os == 'windows-latest' && matrix.python-version == '3.12'
-        shell: pwsh
-        run: |
-          uv run --no-sync python -m ipykernel install --user `
-            --name ds60sqlpy --display-name "Python (ds60sqlpy)"
-          powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass `
-            -File .\scripts\start_ds60.ps1 `
-            -DiagnosticsOnly -NonInteractive -SkipPostgreSql
       - name: Offline notebook smoke execution
-        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
+        if: matrix.python-version == '3.12'
         run: uv run --no-sync python scripts/validate_notebooks.py --smoke
 
-  learner-bootstrap:
-    name: Learner bootstrap (${{ matrix.os }}, Python 3.12)
-    runs-on: ${{ matrix.os }}
+  developer-bootstrap:
+    name: Linux contributor bootstrap (Python 3.12)
+    runs-on: ubuntu-latest
     timeout-minutes: 30
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - ubuntu-latest
-          - windows-latest
-          - macos-latest
+    env:
+      UV_PYTHON: "3.12"
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
@@ -195,66 +161,16 @@ jobs:
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: "3.12"
-      - name: Install uv for the locked learner setup
+      - name: Install uv for the locked contributor setup
         uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         with:
           version: "0.11.6"
           enable-cache: true
-      - name: Exercise the Windows discovery bootstrap
-        if: runner.os == 'Windows'
-        shell: powershell -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
-        run: |
-          try {
-            & .\scripts\bootstrap_windows.ps1 -SkipPostgreSql -WhatIf
-          } catch {
-            $Message = [string]$_.Exception.Message
-            $Message = $Message.Replace("%", "%25")
-            $Message = $Message.Replace("`r", "%0D").Replace("`n", "%0A")
-            Write-Output "::error title=Windows bootstrap preview failed::$Message"
-            throw
-          }
-      - name: Run the Windows learner setup
-        if: runner.os == 'Windows'
-        shell: powershell -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
-        run: |
-          try {
-            & .\scripts\bootstrap_windows.ps1 `
-              -SkipPostgreSql `
-              -DependencyMode Locked
-          } catch {
-            $Message = [string]$_.Exception.Message
-            $Message = $Message.Replace("%", "%25")
-            $Message = $Message.Replace("`r", "%0D").Replace("`n", "%0A")
-            Write-Output "::error title=Windows learner setup failed::$Message"
-            throw
-          }
-      - name: Run the macOS/Linux learner setup
-        if: runner.os != 'Windows'
+      - name: Exercise Linux and WSL contributor environment setup
         run: bash scripts/setup.sh --dependency-mode locked
-      - name: Re-run doctor with the Windows repository interpreter
-        if: runner.os == 'Windows'
-        shell: powershell
-        run: |
-          if (Test-Path .\.venv\Scripts\python.exe) {
-            $CoursePython = (Resolve-Path .\.venv\Scripts\python.exe).Path
-          } elseif (Test-Path .\.venv\python.exe) {
-            $CoursePython = (Resolve-Path .\.venv\python.exe).Path
-          } else {
-            throw "The Windows bootstrap did not create a supported .venv layout."
-          }
-          & $CoursePython scripts\course.py doctor
-          if ($LASTEXITCODE -ne 0) {
-            exit $LASTEXITCODE
-          }
-          & $CoursePython scripts\validate_notebooks.py --smoke --smoke-days 1
-          if ($LASTEXITCODE -ne 0) {
-            exit $LASTEXITCODE
-          }
-      - name: Re-run doctor with the POSIX repository interpreter
-        if: runner.os != 'Windows'
+      - name: Check the prepared contributor interpreter
         run: .venv/bin/python scripts/course.py doctor
-      - name: Execute the first learner notebook on macOS/Linux
-        if: runner.os != 'Windows'
+      - name: Execute the first notebook with the contributor interpreter
         run: .venv/bin/python scripts/validate_notebooks.py --smoke --smoke-days 1
       - name: Ensure setup generated no trackable files
         run: >-
@@ -331,17 +247,12 @@ jobs:
           bridge/professional/solutions/bridge_jupyter_01_postgresql_magics_solution.ipynb
 
   advanced-imports:
-    name: Advanced imports (${{ matrix.os }}, Python 3.12)
+    name: Advanced dependency imports (Linux, Python 3.12)
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     timeout-minutes: 60
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - ubuntu-latest
-          - windows-latest
-          - macos-latest
+    env:
+      UV_PYTHON: "3.12"
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
@@ -349,9 +260,6 @@ jobs:
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: "3.12"
-      - name: Install the macOS OpenMP runtime
-        if: runner.os == 'macOS'
-        run: brew install libomp
       - name: Install uv
         uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         with:

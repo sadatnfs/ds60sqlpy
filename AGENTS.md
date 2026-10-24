@@ -79,11 +79,14 @@ change executable reference behavior or manufacture new runtime evidence.
 
 ## Execution and learner state
 
-Docker with Linux containers and Compose is the primary learner route. Windows
-uses WSL 2; macOS and Linux use the same Bash launcher. No host language compiler
-is required for ordinary classroom profiles. Native tools are optional developer
-or compatibility routes. Supply OS-specific commands only when their syntax
-differs; never label Bash commands as PowerShell.
+Docker with Linux containers and Compose is the supported delivery route.
+Windows uses WSL 2; macOS and Linux use the same Bash launcher. No host language
+compiler is required for ordinary classroom profiles. Validate contributor
+setup on Linux, including WSL 2. Retained native setup scripts and executable
+builders are unsupported compatibility tooling, not release gates. Do not add
+native Windows backend, ACL or executable qualification requirements. Keep the
+Windows Docker wrappers that delegate to WSL. Supply OS-specific engine setup
+commands only when needed; never label Bash commands as PowerShell.
 
 The classroom executes trusted local learner code. It is not a hosted security
 sandbox for arbitrary users. Preserve exact Host, origin, token, request-size,
@@ -95,6 +98,10 @@ Use `http_server.py` for local and private-worker HTTP servers so startup does
 not depend on reverse DNS. Keep minimal worker Docker COPY lists aligned with
 shared imports. Repository text generators must write explicit UTF-8 and LF
 newlines so byte-level fixture and regeneration checks remain portable.
+
+Kubernetes host preparation and private credential handling require POSIX paths
+and permissions. Windows users run the companion inside WSL 2; native Windows
+credential APIs and named-pipe cluster endpoints are unsupported.
 
 A profile name, installed compiler, successful parse and executed lesson are
 different evidence. Report the actual capability and never enable Run based
@@ -149,8 +156,10 @@ sequential on constrained machines. Do not suppress failures, relax assertions
 or replace expected behavior to obtain a green run.
 
 Report source validation, unit tests, live runtime execution, browser delivery,
-and target-platform CI separately. A local pass does not prove hosted CI or a
-different architecture. Record skipped or unavailable surfaces. Never describe
+and Linux-container CI separately. The release matrix covers Ubuntu core and
+contributor checks, PostgreSQL, ordinary Docker workers, Chromium, owned Linux
+Kubernetes and the portable source ZIP. A local pass does not prove hosted CI,
+WSL installation, a different engine configuration or a different architecture. Record skipped or unavailable surfaces. Never describe
 a scan as proof that the repository is bug free. Keep machine-specific logs,
 image IDs, ports and temporary paths out of maintained onboarding documents.
 

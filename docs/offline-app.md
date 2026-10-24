@@ -13,15 +13,20 @@ DS60 now has a working local coding environment in addition to its static course
 
 | Route | What you install | What runs locally | Best fit |
 | --- | --- | --- | --- |
-| Docker Compose | Docker Engine with Compose, or Docker Desktop | Python environment, course app, and PostgreSQL | Consistent browser lab on Windows, macOS, and Linux |
-| Source checkout | Supported Python and the course Core profile; PostgreSQL for SQL | The same browser app using your repository environment | Learners who want to inspect the source and use notebooks too |
-| Native executable | A build for your operating system; a supported Python backend for pads; PostgreSQL for SQL | Bundled UI, catalog, lessons, and local server | A downloadable offline course with a separate native backend |
+| Docker Compose (supported) | A local Linux-container Docker engine with Compose; WSL 2 on Windows | All ordinary language/framework workers, course app and PostgreSQL | The supported browser product on Windows, macOS and Linux |
+| Source checkout (contributor tooling) | Linux or WSL 2 Python and the locked development environment | Source checks, content generation and debugging | Contributors; the Docker product remains the release target |
+| Native executable (historical, unsupported) | Separate host toolchains and an operating-system-specific build | Retained compatibility implementation | Outside supported delivery and release qualification |
 | Static library | A browser | Readable generated lessons and solutions | Reading without starting a server or running code |
 | MCP tutor | Compatible MCP client plus the optional MCP dependency | Catalog-bound tutoring tools over stdio | Coaching with your chosen AI client |
 
-The native executable contains its own application runtime. Its coding pads use an external Python environment so learners can install the dependencies their chosen lessons require. PostgreSQL is a separate backend. A basic pad does not replace an interactive Jupyter notebook, a database administration console, or a distributed compute service.
+The historical native executable contains its own application runtime. Its coding pads use an external Python environment so learners can install the dependencies their chosen lessons require. PostgreSQL is a separate backend. A basic pad does not replace an interactive Jupyter notebook, a database administration console, or a distributed compute service.
 
 ## Docker browser lab
+
+The supported startup is `./classroom` in Linux, macOS or the Windows WSL 2
+terminal, or the thin `START_DOCKER_CLASSROOM.cmd` Windows wrapper. See the
+[one-command guide](one-command-classroom.md). The older `docker_lab` commands
+and host-folder storage instructions below are retained compatibility material.
 
 Begin with the [Docker beginner walkthrough](docker-beginners.md) if installing
 an engine, WSL 2, terminals, or container persistence is new. It covers Windows,
@@ -175,6 +180,10 @@ fixture. Errors preserve the real exit status, traceback, or SQLSTATE.
 
 ## Build a native executable
 
+Historical developer reference only. Native bundles are unsupported and are
+not built, distributed or required by the release workflows. For a portable
+release, package the Docker source ZIP with `scripts/build_windows_starter.py`.
+
 Build on the operating system and CPU architecture you intend to distribute to. PyInstaller bundles are [specific to the build platform](https://pyinstaller.org/en/stable/operating-mode.html). Building a macOS executable does not produce a Windows executable or validate Windows behavior.
 
 Install only the optional builder in a separate environment if you want a small application bundle:
@@ -199,7 +208,10 @@ Run the executable. Its first launch copies the bundled course into `~/DS60 Lear
 
 Point `--python` or `DS60_PYTHON` at the backend environment's Python, then install required lesson extras there. The build itself does not install PostgreSQL or mutate the AI tutor settings. Native signing/notarization and public distribution remain release work; the development executable is unsigned.
 
-The manual **Application builds** GitHub Actions workflow defines Windows, macOS, and Linux builds, bundle self-checks, and uploaded artifacts. A configured workflow is not a completed platform test; consult its actual run before distributing that platform's executable.
+The **Application builds** workflow validates Linux Docker workers, real
+Chromium behavior and the portable Docker source ZIP. It does not produce or
+qualify native executables. Retained native build commands above do not change
+that support boundary.
 
 ## Troubleshooting
 
@@ -527,25 +539,24 @@ inside the image; it does not change the host's package sources or trust store.
 
 ## Package the Windows starter
 
-The Windows starter is a complete source ZIP with `START_DOCKER_LAB.cmd` at
-its entry point. A learner extracts it and double-clicks that file; Git and
-host Python are not required. The first-run Windows wizard checks the engine
-and prerequisites before handing over to the normal Docker launcher. Windows
-installation consent, UAC, or a required restart remain visible steps. See the
-[optional Windows installation wizard](docker-beginners.md#optional-legacy-windows-first-run-wizard).
+The packager keeps its historical `build_windows_starter.py` filename, but
+produces the portable Docker source ZIP for all supported host platforms.
+Extract the archive and run `./classroom` from Linux, macOS or WSL 2. Windows
+users can use `START_DOCKER_CLASSROOM.cmd` after the WSL/Docker prerequisites are
+ready. No host Python or Git is required for learning from the extracted ZIP.
 
-Maintainers can build the ZIP on any supported development OS:
+Maintainers build the supported archive in the Linux or WSL contributor environment:
 
 ```bash
-python scripts/build_windows_starter.py
+python scripts/build_windows_starter.py --output dist/DS60LearningLab-Docker-Starter.zip
 ```
 
-Or use `make windows-starter` on macOS/Linux. The archive is written to
-`dist/DS60LearningLab-0.3.0-Windows-Starter.zip`. Packaging checks the generated
-readers, includes the authored course and Docker build files, and excludes
-local progress, environments, authentication files, and symlinks. The
-application-build workflow also produces this starter as a downloadable CI
-artifact. It does not publish a release or push an image.
+The Application builds workflow produces that same Docker starter artifact on
+Ubuntu. Packaging checks generated readers, includes authored content and Docker
+build sources, and excludes learner progress, environments, authentication files
+and links. It does not publish a release or push an image. The retained
+`make windows-starter` alias uses the older default ZIP name; the payload serves
+the same Docker entrypoint.
 
 ## Watch a local image build
 

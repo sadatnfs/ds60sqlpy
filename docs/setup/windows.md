@@ -1,6 +1,6 @@
 # Windows setup
 
-The primary course experience is the unified Docker classroom. Every subject,
+The supported course experience is the unified Linux-container Docker classroom. Every subject,
 including Python and SQL, opens from the same `/classroom` page. You only need
 a local Docker-compatible engine, Linux containers, and the documented Compose
 version. The language runtimes live inside the images.
@@ -17,13 +17,18 @@ The command builds locally, starts the services, checks readiness and opens the
 actual browser address. Follow the [one-command walkthrough](../one-command-classroom.md)
 for first-time engine installation, WSL integration, stopping, backups and
 recovery. Saved work in the standard classroom uses persistent named Docker
-volumes. Use `./classroom status` to rediscover its address.
+volumes. Use `./classroom status` to rediscover its address. The supported
+Windows wrapper is `START_DOCKER_CLASSROOM.cmd` (or `classroom.cmd`), which
+delegates to this same WSL entrypoint. Native Python, PostgreSQL and PowerShell
+backends are not required.
 
 ## Optional native environment
 
-The remainder of this page is for learners who also want host Python, Jupyter,
-VS Code or PostgreSQL. These installations are not classroom prerequisites.
-Keep a native environment's `.learning` files separate from Docker-volume state.
+The remainder of this page is a historical host-setup reference, outside the
+supported Docker product and its release gates. Native Windows environments
+and native executable bundles are unsupported. Use Linux or WSL 2 for the
+validated contributor workflow in [CONTRIBUTING](../../CONTRIBUTING.md). Keep
+any retained native `.learning` files separate from Docker-volume state.
 
 ## Native notebook route: double-click the guided launcher
 

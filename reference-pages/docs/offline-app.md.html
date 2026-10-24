@@ -172,22 +172,22 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <th>Best fit</th>
 </tr></thead><tbody>
 <tr>
-<td>Docker Compose</td>
-<td>Docker Engine with Compose, or Docker Desktop</td>
-<td>Python environment, course app, and PostgreSQL</td>
-<td>Consistent browser lab on Windows, macOS, and Linux</td>
+<td>Docker Compose (supported)</td>
+<td>A local Linux-container Docker engine with Compose; WSL 2 on Windows</td>
+<td>All ordinary language/framework workers, course app and PostgreSQL</td>
+<td>The supported browser product on Windows, macOS and Linux</td>
 </tr>
 <tr>
-<td>Source checkout</td>
-<td>Supported Python and the course Core profile; PostgreSQL for SQL</td>
-<td>The same browser app using your repository environment</td>
-<td>Learners who want to inspect the source and use notebooks too</td>
+<td>Source checkout (contributor tooling)</td>
+<td>Linux or WSL 2 Python and the locked development environment</td>
+<td>Source checks, content generation and debugging</td>
+<td>Contributors; the Docker product remains the release target</td>
 </tr>
 <tr>
-<td>Native executable</td>
-<td>A build for your operating system; a supported Python backend for pads; PostgreSQL for SQL</td>
-<td>Bundled UI, catalog, lessons, and local server</td>
-<td>A downloadable offline course with a separate native backend</td>
+<td>Native executable (historical, unsupported)</td>
+<td>Separate host toolchains and an operating-system-specific build</td>
+<td>Retained compatibility implementation</td>
+<td>Outside supported delivery and release qualification</td>
 </tr>
 <tr>
 <td>Static library</td>
@@ -202,8 +202,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <td>Coaching with your chosen AI client</td>
 </tr>
 </tbody></table></div>
-<p>The native executable contains its own application runtime. Its coding pads use an external Python environment so learners can install the dependencies their chosen lessons require. PostgreSQL is a separate backend. A basic pad does not replace an interactive Jupyter notebook, a database administration console, or a distributed compute service.</p>
+<p>The historical native executable contains its own application runtime. Its coding pads use an external Python environment so learners can install the dependencies their chosen lessons require. PostgreSQL is a separate backend. A basic pad does not replace an interactive Jupyter notebook, a database administration console, or a distributed compute service.</p>
 <h3 id="docker-browser-lab">Docker browser lab<a class="heading-anchor" href="#docker-browser-lab" aria-label="Link to this section">#</a></h3>
+<p>The supported startup is <code>./classroom</code> in Linux, macOS or the Windows WSL 2 terminal, or the thin <code>START_DOCKER_CLASSROOM.cmd</code> Windows wrapper. See the <a href="one-command-classroom.md.html">one-command guide</a>. The older <code>docker_lab</code> commands and host-folder storage instructions below are retained compatibility material.</p>
 <p>Begin with the <a href="docker-beginners.md.html">Docker beginner walkthrough</a> if installing an engine, WSL 2, terminals, or container persistence is new. It covers Windows, macOS, Linux, and a Docker-compatible local Rancher Desktop Moby engine. The browser route requires no host Python, native PostgreSQL, or course package installation. With the engine running, Windows users can double-click <code>START_DOCKER_LAB.cmd</code>; Mac users can double-click <code>START_DOCKER_LAB.command</code>. Terminal alternatives from the repository root are:</p>
 <pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
 powershell -ExecutionPolicy Bypass <span class="syntax-operator">-File</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>scripts<span class="syntax-punctuation">\</span>docker_lab<span class="syntax-punctuation">.</span>ps1 start</code></pre>
@@ -246,6 +247,7 @@ bash scripts/docker_lab.sh start</code></pre>
 <p>Python and SQL snippets default to a 15-second run budget; whole SQL lessons default to 60 seconds. <strong>Run limit</strong> offers 15, 60, or 120 seconds. Source and printed output remain bounded at 60,000 and 128,000 UTF-8 bytes respectively; stopping at a limit is reported as a stop, not successful completion.</p>
 <p>SQL snippets use a fresh database connection, show at most 100 rows per result set, and commit their current transaction on success. An error rolls back the current transaction; explicit <code>COMMIT</code> or <code>ROLLBACK</code> statements establish their own boundaries. Whole SQL mode uses guarded <code>psql</code> execution and console tables; the script controls transaction boundaries, so earlier committed statements can remain after a later failure. Both modes retain the disposable database boundary and statement/lock limits. Use <code>BEGIN</code> and <code>ROLLBACK</code> for a temporary fixture. Errors preserve the real exit status, traceback, or SQLSTATE.</p>
 <h3 id="build-a-native-executable">Build a native executable<a class="heading-anchor" href="#build-a-native-executable" aria-label="Link to this section">#</a></h3>
+<p>Historical developer reference only. Native bundles are unsupported and are not built, distributed or required by the release workflows. For a portable release, package the Docker source ZIP with <code>scripts/build_windows_starter.py</code>.</p>
 <p>Build on the operating system and CPU architecture you intend to distribute to. PyInstaller bundles are <a href="https://pyinstaller.org/en/stable/operating-mode.html">specific to the build platform</a>. Building a macOS executable does not produce a Windows executable or validate Windows behavior.</p>
 <p>Install only the optional builder in a separate environment if you want a small application bundle:</p>
 <pre class="highlighted-code"><code class="language-powershell">py <span class="syntax-punctuation">-</span>3<span class="syntax-punctuation">.</span>12 -m venv <span class="syntax-punctuation">.</span>app-build
@@ -259,7 +261,7 @@ bash scripts/docker_lab.sh start</code></pre>
 <p>The equivalent Make target is <code>make app PYTHON=.app-build/bin/python</code>. Windows users do not need Make. Build output is ignored under <code>dist/</code>; intermediary payloads live under <code>build/</code>. The payload allowlist excludes Git history, credentials, package caches, notebooks&#x27; saved outputs, and learner state. Notebook source and separate solutions are included as course content.</p>
 <p>Run the executable. Its first launch copies the bundled course into <code>~/DS60 Learning Lab/0.3/</code>, then opens the browser lab. A valid existing workspace is reused without overwriting learner edits. A nonempty unrelated directory is rejected. Use <code>--workspace</code> to select an empty directory or an existing DS60 course, or <code>--repo</code> to use a checkout. For a new course release, use a new workspace and copy evidence deliberately instead of silently replacing edited artifacts.</p>
 <p>Point <code>--python</code> or <code>DS60_PYTHON</code> at the backend environment&#x27;s Python, then install required lesson extras there. The build itself does not install PostgreSQL or mutate the AI tutor settings. Native signing/notarization and public distribution remain release work; the development executable is unsigned.</p>
-<p>The manual <strong>Application builds</strong> GitHub Actions workflow defines Windows, macOS, and Linux builds, bundle self-checks, and uploaded artifacts. A configured workflow is not a completed platform test; consult its actual run before distributing that platform&#x27;s executable.</p>
+<p>The <strong>Application builds</strong> workflow validates Linux Docker workers, real Chromium behavior and the portable Docker source ZIP. It does not produce or qualify native executables. Retained native build commands above do not change that support boundary.</p>
 <h3 id="troubleshooting">Troubleshooting<a class="heading-anchor" href="#troubleshooting" aria-label="Link to this section">#</a></h3>
 <div class="table-wrap"><table><thead><tr>
 <th>Symptom</th>
@@ -396,10 +398,10 @@ docker compose --profile lab up --detach --no-build --pull never</code></pre>
 <p>The default Dockerfile base remains <code>python:3.12-slim-bookworm</code>. Dependency installation is cached separately from the course files, and the final source installation runs offline against the already installed build tooling. A curriculum or guide edit therefore does not require downloading all Core packages again.</p>
 <p>The image installs <code>postgresql-client-17</code> from the PostgreSQL project&#x27;s <a href="https://www.postgresql.org/download/linux/debian/">signed Debian package repository</a>, matching the PostgreSQL 17 course server. This repository/key setup exists inside the image; it does not change the host&#x27;s package sources or trust store.</p>
 <h3 id="package-the-windows-starter">Package the Windows starter<a class="heading-anchor" href="#package-the-windows-starter" aria-label="Link to this section">#</a></h3>
-<p>The Windows starter is a complete source ZIP with <code>START_DOCKER_LAB.cmd</code> at its entry point. A learner extracts it and double-clicks that file; Git and host Python are not required. The first-run Windows wizard checks the engine and prerequisites before handing over to the normal Docker launcher. Windows installation consent, UAC, or a required restart remain visible steps. See the <a href="docker-beginners.md.html#optional-legacy-windows-first-run-wizard">optional Windows installation wizard</a>.</p>
-<p>Maintainers can build the ZIP on any supported development OS:</p>
-<pre class="highlighted-code"><code class="language-bash">python scripts/build_windows_starter.py</code></pre>
-<p>Or use <code>make windows-starter</code> on macOS/Linux. The archive is written to <code>dist/DS60LearningLab-0.3.0-Windows-Starter.zip</code>. Packaging checks the generated readers, includes the authored course and Docker build files, and excludes local progress, environments, authentication files, and symlinks. The application-build workflow also produces this starter as a downloadable CI artifact. It does not publish a release or push an image.</p>
+<p>The packager keeps its historical <code>build_windows_starter.py</code> filename, but produces the portable Docker source ZIP for all supported host platforms. Extract the archive and run <code>./classroom</code> from Linux, macOS or WSL 2. Windows users can use <code>START_DOCKER_CLASSROOM.cmd</code> after the WSL/Docker prerequisites are ready. No host Python or Git is required for learning from the extracted ZIP.</p>
+<p>Maintainers build the supported archive in the Linux or WSL contributor environment:</p>
+<pre class="highlighted-code"><code class="language-bash">python scripts/build_windows_starter.py --output dist/DS60LearningLab-Docker-Starter.zip</code></pre>
+<p>The Application builds workflow produces that same Docker starter artifact on Ubuntu. Packaging checks generated readers, includes authored content and Docker build sources, and excludes learner progress, environments, authentication files and links. It does not publish a release or push an image. The retained <code>make windows-starter</code> alias uses the older default ZIP name; the payload serves the same Docker entrypoint.</p>
 <h3 id="watch-a-local-image-build">Watch a local image build<a class="heading-anchor" href="#watch-a-local-image-build" aria-label="Link to this section">#</a></h3>
 <p>Run a build in the foreground with plain progress output:</p>
 <pre class="highlighted-code"><code class="language-bash">BUILDKIT_PROGRESS<span class="syntax-operator">=</span>plain bash scripts/docker_lab.sh build</code></pre>

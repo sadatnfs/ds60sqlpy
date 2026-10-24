@@ -1,5 +1,10 @@
 # Systems teaching content status
 
+> Support boundary: this file retains historical implementation evidence. The
+> supported product runs in Linux Docker containers, with Windows through WSL 2.
+> Native Windows ACLs/backends and native executable builds are not supported
+> targets or release gates. Current checks are defined in [validation](../validation.md).
+
 ## Current checkpoint,23 October2026
 
 C++ and Kubernetes each have all42 planned IDs authored with exact direct prerequisites. C++ has38 added chapters plus the four preserved pilots. Kubernetes has38 added chapters plus its four preserved pilots. Canonical per-course lessons.json files remain the actual inventories. Scala/Spark completion remains coordinated separately by the integration owner.
@@ -70,7 +75,7 @@ Root runtime qualification subsequently confirmed actual Docker typed positive a
 
 ## Scoped Kubernetes implementation checkpoint
 
-The source now includes the strict one-shot handler, explicit pinned host preparation/release, separate fixed HTTP fixture and optional Compose companion. See the [preparation guide](../../docker/kubernetes/README.md). The final focused content/Kubernetes/link suite passed62 tests in4.10 seconds with zero skips; Ruff and the handler/host-companion type checks passed. An independent agent reproduced the repaired parent-alias, create-commit cancellation, create-commit timeout and foreign-nonce cases. No actual engine/cluster mutation occurred in these checks. Live node/worker qualification and native Windows ACL execution remain separate acceptance rows.
+The source now includes the strict one-shot handler, explicit pinned host preparation/release, separate fixed HTTP fixture and optional Compose companion. See the [preparation guide](../../docker/kubernetes/README.md). The final focused content/Kubernetes/link suite passed62 tests in4.10 seconds with zero skips; Ruff and the handler/host-companion type checks passed. An independent agent reproduced the repaired parent-alias, create-commit cancellation, create-commit timeout and foreign-nonce cases. No actual engine/cluster mutation occurred in these checks. Live Linux node/worker qualification remains required for the owned adapter; native Windows ACL execution is outside the support contract.
 
 ## First live Kubernetes boundary
 

@@ -168,8 +168,9 @@ source-bound reference execution, declared typed checks and readback after
 container replacement without rerunning. Generic references validate their
 assertions and expected output; specialized typed checks are an additional
 contract only where registered. A subject reusing an existing runtime needs its
-lesson tests, not another runtime image. Native OS checks and Linux-container
-execution remain separate evidence.
+lesson tests, not another runtime image. The supported implementation and
+release target is Linux containers, with Windows using WSL 2. Do not add native
+Windows runtime, private-ACL or executable-build gates for a new subject.
 
 Record what ran, on which revision and platform, and what remains unverified.
 A configured profile, container build or one architecture's success is not

@@ -165,12 +165,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Validate the exact revision being shipped. Configuration, structural checks, unit tests, real runtime execution and browser behavior answer different questions. A passing parser does not prove a lesson runs, and a configured workflow does not prove that its hosted jobs passed.</p>
 <p>Run commands from the repository root. Keep learner projects and their Docker volumes separate from disposable validation projects. Use the current workflow run and its artifacts as evidence for that revision, rather than copying old machine timings or test counts into documentation.</p>
 <h3 id="prepare-a-development-environment">Prepare a development environment<a class="heading-anchor" href="#prepare-a-development-environment" aria-label="Link to this section">#</a></h3>
-<p>Learners need the Docker classroom. Maintainers running host checks also need Python 3.12, the locked development dependencies and Node.js. The workflow uses Node 24 for the framework-free UI checks. Python 3.11 remains a supported core validation target; inspect <code>.github/workflows/ci.yml</code> for the exact matrix.</p>
+<p>The supported product is the Linux-container Docker classroom. Windows runs through WSL 2; macOS uses its engine&#x27;s Linux environment. Native Windows backends and native executable bundles are outside the release support matrix.</p>
+<p>Maintainers running contributor checks on Linux or WSL 2 also need Python 3.12, the locked development dependencies and Node.js. The workflow uses Node 24 for the framework-free UI checks. Python 3.11 remains a supported core validation target; inspect <code>.github/workflows/ci.yml</code> for the exact matrix.</p>
 <p>With <code>uv</code> installed:</p>
 <pre class="highlighted-code"><code class="language-text">uv lock --check
 uv sync --frozen --extra notebooks --extra data --extra bridge --extra quality --extra professional --extra sql-notebooks --extra mcp
 uv run --no-sync python scripts/course.py doctor</code></pre>
-<p>Prefix the Python commands below with <code>uv run --no-sync</code>, or use the interpreter inside this checkout&#x27;s <code>.venv</code>. On Windows, WSL 2 provides the same Bash and Docker workflow as Linux. Optional native PowerShell setup is documented separately and must not be confused with Windows Docker qualification.</p>
+<p>Prefix the Python commands below with <code>uv run --no-sync</code>, or use the interpreter inside this checkout&#x27;s <code>.venv</code>. On Windows, WSL 2 provides the same Bash, Linux Python environment and Docker workflow. Historical native setup recipes are unsupported compatibility references, not alternate release requirements.</p>
 <p>Core setup does not install every heavy learning dependency. A test that needs an optional compiler, framework, SQL service or model asset must either run in its prepared environment or report that boundary explicitly.</p>
 <h3 id="fast-checks-during-development">Fast checks during development<a class="heading-anchor" href="#fast-checks-during-development" aria-label="Link to this section">#</a></h3>
 <p>Run the narrow tests for the changed area first, then verify the maintained source and generated views:</p>
@@ -202,9 +203,9 @@ git diff --check</code></pre>
 make test TEST_WORKERS=2
 make test-serial</code></pre>
 <p>Keep <code>--dist loadgroup</code>. Tests that use the same disposable PostgreSQL fixtures belong to the <code>shared-postgres</code> group and run serially within that group. The suite rejects unsafe distribution when those shared fixtures are enabled. Changing the scheduler can cause destructive fixture races even if individual tests pass. Use <code>-n 0</code> for focused serial diagnosis, and reduce worker count on machines with little memory. More workers do not guarantee shorter runtimes.</p>
-<p>Record the passed, failed and skipped totals from the actual run. Explain skips by surface, such as native PowerShell, an optional framework or a live database. Do not describe a skipped platform as validated.</p>
+<p>Record the passed, failed and skipped totals from the actual run. Explain skips by surface, such as an optional framework, a live database or historical native-platform compatibility tests outside the supported matrix. Do not describe a skipped platform as validated.</p>
 <h3 id="what-hosted-workflows-check">What hosted workflows check<a class="heading-anchor" href="#what-hosted-workflows-check" aria-label="Link to this section">#</a></h3>
-<p>The workflow files are the executable source of truth. They use read-only repository permissions, pinned action revisions and local image builds. They do not publish Docker images. Core jobs explicitly use UTF-8 on every OS and create their test workspace before starting four grouped pytest workers. Windows then runs a separate native private-ACL smoke check outside the parallel suite. Its artifact records fixed phases and outcomes without account identifiers or credential material; a mocked unit-policy check cannot replace that evidence.</p>
+<p>The workflow files are the executable source of truth. They use read-only repository permissions, pinned action revisions and local image builds. They do not publish Docker images. Linux core jobs use UTF-8 and create their test workspace before starting four grouped pytest workers. Native Windows ACLs, PowerShell backend diagnostics and native executable bundles are not release gates. Windows Docker wrappers remain supported entrypoints into WSL 2.</p>
 <div class="table-wrap"><table><thead><tr>
 <th>Workflow and job</th>
 <th>Trigger and scope</th>
@@ -212,33 +213,28 @@ make test-serial</code></pre>
 </tr></thead><tbody>
 <tr>
 <td>Course validation: Core checks</td>
-<td>Push, pull request, manual dispatch and weekly schedule; Linux Python 3.11/3.12, Windows and macOS Python 3.12</td>
-<td>Lock, generated artifacts, content contracts, UI behavior, lint, typing, grouped tests and selected notebook execution on the named runner</td>
+<td>Push, pull request, manual dispatch and weekly schedule; Ubuntu Python 3.11/3.12</td>
+<td>Lock, generated artifacts, content contracts, UI behavior, lint, typing, grouped tests and selected notebook execution</td>
 </tr>
 <tr>
-<td>Course validation: Learner bootstrap</td>
-<td>Same triggers; Windows, macOS and Ubuntu</td>
-<td>Fresh native setup and diagnostics, without claiming every optional runtime works</td>
+<td>Course validation: Contributor bootstrap</td>
+<td>Same triggers; Ubuntu Python 3.12</td>
+<td>Fresh Linux contributor environment and diagnostics, also used by the WSL development route</td>
 </tr>
 <tr>
 <td>Course validation: PostgreSQL 17 end-to-end</td>
-<td>Same triggers; disposable PostgreSQL service</td>
+<td>Same triggers; disposable Linux PostgreSQL service</td>
 <td>All cataloged SQL learner/reference sequences, live database tests and the PostgreSQL magic notebook against the course database</td>
 </tr>
 <tr>
 <td>Course validation: Advanced imports</td>
-<td>Manual dispatch and weekly schedule; three OS families</td>
+<td>Manual dispatch and weekly schedule; Ubuntu Python 3.12</td>
 <td>Frozen all-extras installation and isolated imports, without downloading pretrained models or proving full model training</td>
 </tr>
 <tr>
 <td>Application builds: Portable Docker classroom starter</td>
-<td>Push, pull request and manual dispatch</td>
-<td>A complete source bundle assembled through the allowlisted packaging path</td>
-</tr>
-<tr>
-<td>Application builds: Optional native application</td>
-<td>Same triggers; Linux, Windows and macOS</td>
-<td>A native bundle builds and passes its bundled-asset self-check on that runner</td>
+<td>Push, pull request and manual dispatch; Ubuntu</td>
+<td>A complete source ZIP assembled through the allowlisted packaging path for Docker/WSL learners</td>
 </tr>
 <tr>
 <td>Application builds: Docker classroom</td>
@@ -248,29 +244,23 @@ make test-serial</code></pre>
 <tr>
 <td>Application builds: Chromium acceptance</td>
 <td>Python Core Docker group, after container replacement</td>
-<td>Real browser navigation, isolated pads/results, saved progress, output contrast, mathematical rendering and the three browser JavaScript references work</td>
+<td>Real browser navigation, isolated pads/results, saved progress, output and prose contrast, mathematical rendering and the three browser JavaScript references work</td>
 </tr>
 <tr>
 <td>Owned Kubernetes runtime</td>
 <td>Manual dispatch and weekly schedule; disposable Linux kind cluster</td>
 <td>Every admitted bounded Kubernetes reference and explicit failure/timeout/cancellation cases produce matching receipts and verified owned cleanup</td>
 </tr>
-<tr>
-<td>Windows runtime diagnostics</td>
-<td>Manual dispatch; native Windows Python 3.12</td>
-<td>Controlled PowerShell startup comparisons, real private-file ACL acceptance and focused portal/diagnostic contracts run separately</td>
-</tr>
 </tbody></table></div>
 <p>The Docker groups cover Python Core, C++, Java, JavaScript/TypeScript, Scala/Spark, TensorFlow and PyTorch. The Core group runs the statistics book, NLP and compatible LLM examples once; the framework groups execute their own TensorFlow, PyTorch and LLM references. PySpark and tutorial example variants are discovered from the same catalog used by the classroom. There is no second hand-maintained lesson list. Reading/manual lessons and owned-cluster operations appear as explicit exclusions from the ordinary corpus, never successful runs.</p>
 <p>Each group owns a disposable project. At most two Docker groups run together, and each worker executes one reference at a time. The corpus records failures, source hashes, actual exit status and typed checks where registered. An overall time budget leaves unexecuted cases visibly pending and fails the job. Artifact JSON distinguishes reference execution from independent typed verification. Negative probes restore the previous source and notes, and container replacement checks read the original successful receipts without replay.</p>
 <p>Chromium runs only in a separate CI browser environment with hash-locked packages. It is absent from the production image. Browser reports contain check results and screenshots, without session credentials or network traces. The separate Kubernetes workflow prepares checksum-verified host tools and a short-lived owned cluster, checks all supported reference manifests and cleanup behavior, then releases only its recorded resources. Optional pretrained-model downloads and external services remain outside these offline qualification paths.</p>
-<p>A Linux hosted Docker result does not establish Windows WSL installation, macOS engine setup, another CPU architecture, GPU support or every rootless engine configuration. A native executable self-check does not prove every lesson&#x27;s backend. Check the actual matrix architecture and receipt before making a release claim.</p>
-<p>To run the workflows manually, open the repository&#x27;s <strong>Actions</strong> tab, select <strong>Course validation</strong>, <strong>Application builds</strong>, <strong>Owned Kubernetes runtime</strong> or <strong>Windows runtime diagnostics</strong>, choose <strong>Run workflow</strong>, and select the revision to validate. With an authenticated GitHub CLI:</p>
+<p>A Linux hosted Docker result does not establish Windows WSL installation, macOS engine setup, another CPU architecture, GPU support or every rootless engine configuration. Check the actual matrix architecture and receipt before making a release claim. Historical native-platform results do not add supported product targets or create release requirements.</p>
+<p>To run the workflows manually, open the repository&#x27;s <strong>Actions</strong> tab, select <strong>Course validation</strong>, <strong>Application builds</strong> or <strong>Owned Kubernetes runtime</strong>, choose <strong>Run workflow</strong>, and select the revision to validate. With an authenticated GitHub CLI:</p>
 <pre class="highlighted-code"><code class="language-text">gh workflow run ci.yml --ref BRANCH_NAME
 gh workflow run app-build.yml --ref BRANCH_NAME
-gh workflow run kubernetes.yml --ref BRANCH_NAME
-gh workflow run windows-runtime.yml --ref BRANCH_NAME</code></pre>
-<p>The focused Windows workflow compares fixed startup conditions without changing machine policy or exposing account identities, environment values or raw native output. Completing those comparisons establishes diagnostic coverage only. The separate native ACL smoke must establish a private directory, accept its private file and reject an intentionally broad file ACL. A startup marker alone cannot satisfy that check. Later focused tests still run after a diagnostic failure, while the failed step keeps the workflow unsuccessful.</p>
+gh workflow run kubernetes.yml --ref BRANCH_NAME</code></pre>
+<p>The manual Course validation run includes the Linux advanced-imports job. Keep its evidence attached to the same revision as the Docker and source-ZIP checks. Repository settings can disable workflows for private fork pull requests; a <code>pull_request</code> trigger does not override that access policy.</p>
 <p>Read failed job logs and uploaded test results. A workflow syntax check is useful before pushing, but only a hosted run can establish hosted acceptance.</p>
 <h3 id="exercise-the-docker-product-on-disposable-data">Exercise the Docker product on disposable data<a class="heading-anchor" href="#exercise-the-docker-product-on-disposable-data" aria-label="Link to this section">#</a></h3>
 <p>Create a new project name that has never held learner work. For example, on macOS, Linux or Windows through WSL 2:</p>

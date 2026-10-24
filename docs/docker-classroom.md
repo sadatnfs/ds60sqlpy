@@ -21,7 +21,7 @@ setup, a smaller starter, persistence, fixed ports and recovery.
 
 The remainder of this page is the **manual Compose reference**. Direct Docker
 commands remain available without the Bash wrapper. Use a local Linux-container
-engine and Docker Compose 2.24.4 or newer. Its fixed default ports may differ
+engine and Docker Compose 2.28.0 or newer. Its fixed default ports may differ
 from the automatic host ports selected by `./classroom`; use the launcher's
 printed URL or `./classroom status` for its actual address.
 
@@ -368,7 +368,9 @@ not attach to an existing personal or company cluster. Follow
 [the Kubernetes runtime preparation guide](modules-runtime.md) for the pinned
 host tools, local fixture image and owned-session workflow. That explicit host
 preparation is separate from the Docker-only ordinary classroom and may need
-host Python, kind and kubectl; on Windows, use the documented WSL or host route.
+host Python, kind and kubectl. Windows users run this companion inside WSL 2
+with Linux paths and a Unix-socket Docker endpoint. Native Windows credential
+preparation and named-pipe endpoints are unsupported.
 The browser and worker never receive the Docker engine socket.
 
 Finish tool preparation and all image builds before creating the fresh session.
@@ -387,9 +389,8 @@ that lease before the first lesson. If it expires, release that exact session
 and prepare a new one. Do not edit its timestamps or reuse released credentials.
 
 After preparation, set `DS60_K8S_SESSION_DIR` to the exact private session path
-printed by the helper. In Bash use `export DS60_K8S_SESSION_DIR="printed-path"`;
-in PowerShell use `$env:DS60_K8S_SESSION_DIR = "printed-path"`;
-in Command Prompt use `set "DS60_K8S_SESSION_DIR=printed-path"`.
+printed by the helper. In the same Linux, WSL 2 or macOS Bash terminal, use
+`export DS60_K8S_SESSION_DIR="printed-path"`.
 Never copy credential contents into the learning folder or a message.
 
 Start the already built private broker in the same classroom and progress volume:

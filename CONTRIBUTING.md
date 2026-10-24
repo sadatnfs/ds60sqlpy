@@ -11,7 +11,9 @@ To learn or inspect the running product, install a Linux-container engine with
 Compose and run `./classroom`. Windows uses WSL 2. The
 [one-command guide](docs/one-command-classroom.md) covers installation, logs,
 profiles, storage and recovery. No host language toolchain is needed for the
-ordinary Docker route.
+ordinary Docker route. The supported delivery target is Linux containers.
+Native Windows runtimes and native executable builds are not release gates;
+Windows contributors use the WSL 2 Linux environment.
 
 For application development or content generation, use Python 3.12 and the
 checked-in dependency lock. From the repository root, with `uv` installed:
@@ -22,12 +24,12 @@ uv run --no-sync python scripts/course.py validate
 uv run --no-sync python scripts/check_modules.py
 ```
 
-These commands work in POSIX, WSL and PowerShell. `uv run --no-sync` uses the
-prepared environment without activating it. Node.js is needed for the UI
-behavior checker. Optional framework and compiler checks need their declared
-profiles; do not install every large dependency to make an unrelated docs edit.
-The setup scripts remain available for native learning and use compatible
-package ranges. See [dependency profiles](docs/dependency-profiles.md) and
+Run these commands in Linux or WSL 2. `uv run --no-sync` uses the prepared
+environment without activating it. Node.js is needed for the UI behavior
+checker. Optional framework and compiler checks use their declared container
+profiles; do not install every large dependency for an unrelated docs edit.
+Retained native setup scripts are unsupported compatibility conveniences.
+See [dependency profiles](docs/dependency-profiles.md) and
 [validation](docs/validation.md).
 
 ## Before editing
@@ -145,6 +147,10 @@ small screens, both appearances, code/output contrast, math rendering and
 saved-work restoration. A runtime change needs the actual prepared worker,
 compile or execution errors, cancellation, bounded output and retained drafts.
 Only use disposable project resources. Preserve learner volumes during cleanup.
+Release CI checks Ubuntu Python 3.11/3.12, Linux contributor setup, PostgreSQL,
+Linux-container runtimes and Chromium, the owned Linux Kubernetes adapter and
+the portable source ZIP. Scheduled/manual advanced imports also run on Linux.
+A native Windows ACL check or executable build is not part of this matrix.
 
 ## Database and dependency changes
 

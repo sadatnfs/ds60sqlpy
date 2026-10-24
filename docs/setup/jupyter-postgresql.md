@@ -1,5 +1,9 @@
 # PostgreSQL in Jupyter
 
+> This page retains host-notebook recipes. The supported classroom runs in
+> Linux Docker containers, with Windows through WSL 2. Native Windows notebook
+> setup is historical compatibility material and is not a release gate.
+
 The professional bridge includes a notebook that runs PostgreSQL queries from
 the normal Python kernel with JupySQL. JupySQL supplies IPython line and cell
 magics such as `%sql` and `%%sql`; PostgreSQL still runs in the local

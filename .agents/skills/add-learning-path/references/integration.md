@@ -46,6 +46,13 @@ that loader deliberately if a new tutorial subject is requested.
 
 ## Runtime and UI
 
+The supported runtime target is Linux Docker containers. Windows uses WSL 2;
+macOS uses its Docker engine's Linux environment. New subjects must join those
+workers and the Linux CI matrix. Retain Windows Docker wrappers, but do not add
+native Windows backend, ACL or executable-build qualification gates. Historical
+native setup documentation is outside the learner support contract. A Linux
+runtime pass does not validate a host's WSL installer or engine configuration.
+
 Inspect current definitions before declaring support:
 
 - `modules.py`: language/profile and verifier allowlists.

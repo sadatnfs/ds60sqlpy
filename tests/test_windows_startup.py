@@ -11,7 +11,6 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parents[1]
 CMD_LAUNCHER = REPO_ROOT / "START_DS60.cmd"
 POWERSHELL_LAUNCHER = REPO_ROOT / "scripts" / "start_ds60.ps1"
-CI_WORKFLOW = REPO_ROOT / ".github" / "workflows" / "ci.yml"
 README = REPO_ROOT / "README.md"
 OFFLINE_GUIDE = REPO_ROOT / "docs" / "setup" / "offline.md"
 WINDOWS_GUIDE = REPO_ROOT / "docs" / "setup" / "windows.md"
@@ -183,39 +182,6 @@ def test_startup_uses_only_windows_powershell_51_syntax_markers() -> None:
     assert "ConvertFrom-Json -AsHashtable" not in text
     assert "??" not in text
     assert "?." not in text
-
-
-def test_ci_executes_native_windows_startup_diagnostics() -> None:
-    text = CI_WORKFLOW.read_text(encoding="utf-8")
-    startup_step = text.split(
-        "- name: Exercise guided Windows startup diagnostics",
-        maxsplit=1,
-    )[1].split("- name: Offline notebook smoke execution", maxsplit=1)[0]
-    bootstrap_step = text.split(
-        "- name: Exercise the Windows discovery bootstrap",
-        maxsplit=1,
-    )[1].split("- name: Run the Windows learner setup", maxsplit=1)[0]
-
-    assert "Exercise guided Windows startup diagnostics" in text
-    assert "powershell.exe" in startup_step
-    assert r"-File .\scripts\start_ds60.ps1 `" in startup_step
-    assert "-DiagnosticsOnly -NonInteractive -SkipPostgreSql" in startup_step
-    assert "-NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass" in startup_step
-    native_shell = (
-        "shell: powershell -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}"
-    )
-    assert native_shell in bootstrap_step
-    assert r"& .\scripts\bootstrap_windows.ps1" in bootstrap_step
-    assert "-SkipPostgreSql -WhatIf" in bootstrap_step
-    learner_setup_step = text.split(
-        "- name: Run the Windows learner setup",
-        maxsplit=1,
-    )[1].split("- name: Run the macOS/Linux learner setup", maxsplit=1)[0]
-    assert native_shell in learner_setup_step
-    assert r"& .\scripts\bootstrap_windows.ps1 `" in learner_setup_step
-    assert "-SkipPostgreSql `" in learner_setup_step
-    assert "-DependencyMode Locked" in learner_setup_step
-    assert r"-File .\scripts\setup.ps1" not in learner_setup_step
 
 
 def test_windows_commands_document_both_repository_environment_layouts() -> None:

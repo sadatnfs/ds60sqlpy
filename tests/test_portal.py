@@ -59,7 +59,7 @@ def test_portal_serves_injected_guide_and_persists_progress(
 
     # This HTTP contract covers rendering, authentication and real progress I/O.
     # Host discovery has several independent four/five-second command budgets;
-    # test_doctor and learner-bootstrap CI exercise those machine dependencies.
+    # test_doctor and contributor bootstrap CI exercise those machine dependencies.
     monkeypatch.setattr("ds60sqlpy.portal.diagnose", local_diagnostics)
     progress_path = tmp_path / "progress.json"
     server = create_portal_server(

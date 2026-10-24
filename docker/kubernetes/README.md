@@ -25,10 +25,11 @@ images, restart the engine or change its settings as an automatic repair.
 Use the course's configured Python interpreter for the host companion. It never
 reads or rewrites the user's default kubeconfig. It creates a new private runtime
 directory, uses explicit kubeconfig/context arguments, binds the host API only
-to127.0.0.1 and refuses remote Docker endpoints. The Windows implementation sets
-and verifies a current-user/SYSTEM ACL on only that newly created directory;
-actual native Windows acceptance remains a separate required test. WSL uses its
-Linux tools and paths. Do not hand a Windows path to a Linux CLI.
+to127.0.0.1 and refuses remote Docker endpoints. The companion uses POSIX
+permissions on Linux, WSL 2 or macOS. Native Windows credential reads and host
+preparation are unsupported and refuse before mutation. Windows users run the
+companion inside WSL 2 with Linux paths and a local Unix-socket Docker endpoint;
+named-pipe endpoints are unsupported. Do not hand a Windows path to a Linux CLI.
 
 Read-only inventory, from the repository root:
 
@@ -63,12 +64,8 @@ python scripts/prepare_kubernetes.py prepare --confirm-create \
   --docker-host "unix://$HOME/.rd/docker.sock" --allow-node-download
 ```
 
-For a native Windows Docker-compatible named-pipe endpoint:
-
-```powershell
-python scripts/prepare_kubernetes.py prepare --confirm-create `
-  --docker-host 'npipe:////./pipe/docker_engine' --allow-node-download
-```
+On Windows, run the same Bash/Python preparation inside WSL 2 and use the
+Unix-socket endpoint reported by Docker in that Linux terminal.
 
 `--allow-node-download` is required only when the pinned node bytes are absent.
 The fixture must already exist locally and is explicitly loaded into the owned

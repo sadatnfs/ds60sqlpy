@@ -8,6 +8,11 @@ engineering bridge and every newer subject together**. Choose any path, review
 its prerequisites, and study at a pace that fits you. Historical day numbers
 are lesson labels, not deadlines.
 
+The supported product runs entirely in **Linux Docker containers**. Windows
+uses WSL 2, macOS uses its Docker engine's Linux environment, and Linux uses a
+local Docker engine. Native Windows backends and native executable bundles are
+retained historical tooling, outside the supported delivery and release gates.
+
 ## Build, start and open the classroom
 
 ### 1. Prepare your machine
@@ -191,8 +196,9 @@ an additional required classroom. See [persistence and transfer](docs/one-comman
 ## Optional tools and compatibility routes
 
 The static [START_HERE.html](START_HERE.html) remains an offline reading library.
-Native VS Code/Jupyter workflows remain available for learners who deliberately
-prepare those tools. Existing `/learn` and `/journeys` links are compatibility
+Host VS Code/Jupyter instructions remain as compatibility references for people
+who deliberately prepare them. They are outside the supported Docker product;
+native Windows environments and executable bundles are not release targets. Existing `/learn` and `/journeys` links are compatibility
 entrypoints into the unified classroom; new documentation uses `/classroom`.
 
 The optional [MCP tutor](docs/mcp-tutor.md) can search content and help plan
@@ -213,8 +219,9 @@ Developers who modify Python application code or content generators should read
 [CONTRIBUTING.md](CONTRIBUTING.md). It explains the locked Python environment,
 focused checks, grouped parallel tests, source ownership and generated readers.
 Running the classroom and developing its application are separate setup paths.
-Optional native notebook, SQL and editor workflows are documented under
-[setup](docs/setup/offline.md) and [dependency profiles](docs/dependency-profiles.md).
+Use Linux or WSL 2 for the validated contributor environment. Historical host
+notebook, SQL and editor recipes remain under [setup](docs/setup/offline.md) and
+[dependency profiles](docs/dependency-profiles.md), outside the product support contract.
 
 To add a lesson or subject, start with the
 [curriculum extension playbook](docs/curriculum-extension-playbook.md) and the

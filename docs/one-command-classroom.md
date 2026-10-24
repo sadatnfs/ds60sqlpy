@@ -61,8 +61,10 @@ second Windows implementation of the build workflow. On Mac, double-click
 A Docker Desktop WSL backend alone does not imply that a user Ubuntu shell and
 its Docker integration are ready. The distinction matters for the Windows
 wrapper. If Windows execution is blocked by installation policy, follow your
-organization's approved setup route. Native Windows/WSL execution cannot be
-established by a macOS run; the release report states the platforms observed.
+organization's approved setup route. WSL installation and engine integration
+cannot be established by a macOS run; the release report states what was
+observed. The product runs in Linux containers. Native Windows Python backends
+and executable bundles are outside the supported route and release gates.
 
 ## What the default command prepares
 

@@ -39,36 +39,6 @@ NAMESPACE = "ds60-lesson-" + OWNER[:12]
 SOURCE = ROOT / "courses/kubernetes/lessons/k8s-008.yaml"
 
 
-class PrivateAclModel:
-    """Model the external ACL boundary in fake-host tests, not native ACL proof."""
-
-    def __init__(self) -> None:
-        self.roots: set[Path] = set()
-        self.calls: list[tuple[Path, bool]] = []
-
-    def __call__(self, path: Path, *, establish: bool = False) -> bool:
-        resolved = path.resolve()
-        self.calls.append((resolved, establish))
-        if establish:
-            if not resolved.is_dir():
-                return False
-            self.roots.add(resolved)
-        return any(resolved == root or root in resolved.parents for root in self.roots)
-
-
-def model_private_acl(monkeypatch: pytest.MonkeyPatch) -> PrivateAclModel:
-    from ds60sqlpy import kubernetes_module
-
-    policy = PrivateAclModel()
-    monkeypatch.setattr(kubernetes_module, "_windows_private_acl", policy)
-    return policy
-
-
-@pytest.fixture
-def private_acl(monkeypatch: pytest.MonkeyPatch) -> PrivateAclModel:
-    return model_private_acl(monkeypatch)
-
-
 @pytest.fixture
 def lease() -> KubernetesLease:
     return KubernetesLease(
@@ -491,10 +461,7 @@ def test_expiry_and_cancellation_do_not_create_resources(
         )
 
 
-def test_private_lease_checks_ca_endpoint_and_expiry(
-    tmp_path: Path, private_acl: PrivateAclModel
-) -> None:
-    assert private_acl(tmp_path, establish=True)
+def test_private_lease_checks_ca_endpoint_and_expiry(tmp_path: Path) -> None:
     ca = base64.b64encode(b"fixture-ca").decode()
     config: dict[str, Any] = {
         "apiVersion": "v1",
@@ -702,7 +669,7 @@ class FakeHost:
 
 
 def test_host_preparation_never_uses_ambient_context_and_bounds_identity(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, private_acl: PrivateAclModel
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     from ds60sqlpy.kubernetes_module import HostTools, prepare_owned_session
 
@@ -722,10 +689,7 @@ def test_host_preparation_never_uses_ambient_context_and_bounds_identity(
     assert loaded.context == "ds60-owned"
     assert loaded.expires_at > time.time() + 125
     assert loaded.kubeconfig.find(b"client-key-data") == -1
-    if os.name == "nt":
-        assert session.resolve() in private_acl.roots and private_acl(path)
-    else:
-        assert path.stat().st_mode & 0o077 == 0
+    assert path.stat().st_mode & 0o077 == 0
     assert all(
         env["KUBECONFIG"] == str(session / "admin.kubeconfig.json") for _, env, _ in host.calls
     )
@@ -735,9 +699,7 @@ def test_host_preparation_never_uses_ambient_context_and_bounds_identity(
     assert token_requests and "--duration=15m" in token_requests[0]
 
 
-def test_host_node_download_requires_explicit_consent(
-    tmp_path: Path, private_acl: PrivateAclModel
-) -> None:
+def test_host_node_download_requires_explicit_consent(tmp_path: Path) -> None:
     from ds60sqlpy.kubernetes_module import HostTools, prepare_owned_session
 
     host = FakeHost()
@@ -754,7 +716,13 @@ def test_host_node_download_requires_explicit_consent(
 
 
 @pytest.mark.parametrize(
-    "endpoint", ["tcp://remote.example:2375", "ssh://remote", "http://127.0.0.1:2375"]
+    "endpoint",
+    [
+        "tcp://remote.example:2375",
+        "ssh://remote",
+        "http://127.0.0.1:2375",
+        "npipe:////./pipe/docker_engine",
+    ],
 )
 def test_host_refuses_nonlocal_engine_before_creating_any_state(
     tmp_path: Path, endpoint: str
@@ -770,9 +738,7 @@ def test_host_refuses_nonlocal_engine_before_creating_any_state(
     assert not session.exists() and not host.calls
 
 
-def test_host_release_preserves_replaced_namespace_and_other_clusters(
-    tmp_path: Path, private_acl: PrivateAclModel
-) -> None:
+def test_host_release_preserves_replaced_namespace_and_other_clusters(tmp_path: Path) -> None:
     from ds60sqlpy.kubernetes_module import HostTools, prepare_owned_session, release_owned_session
 
     host = FakeHost()
@@ -793,9 +759,7 @@ def test_host_release_preserves_replaced_namespace_and_other_clusters(
     assert not (session / "worker.kubeconfig.json").exists()
 
 
-def test_pinned_mirror_cannot_change_the_node_digest(
-    tmp_path: Path, private_acl: PrivateAclModel
-) -> None:
+def test_pinned_mirror_cannot_change_the_node_digest(tmp_path: Path) -> None:
     from ds60sqlpy.kubernetes_module import NODE_IMAGE, HostTools, prepare_owned_session
 
     host = FakeHost()
@@ -929,9 +893,7 @@ def test_uncertain_create_with_other_nonce_is_preserved_and_failed(
     assert any(c["name"] == "owned-cleanup" and c["passed"] is False for c in result.checks)
 
 
-def test_host_preparation_failure_cleans_only_recorded_node(
-    tmp_path: Path, private_acl: PrivateAclModel
-) -> None:
+def test_host_preparation_failure_cleans_only_recorded_node(tmp_path: Path) -> None:
     from ds60sqlpy.kubernetes_module import HostTools, prepare_owned_session
 
     host = FakeHost()
@@ -1070,7 +1032,7 @@ def test_worker_startup_failure_reports_child_stderr(tmp_path: Path) -> None:
             process.wait(timeout=5)
 
 
-@pytest.mark.skipif(os.name == "nt", reason="POSIX SIGTERM protocol; Windows has a separate row")
+@pytest.mark.skipif(os.name == "nt", reason="Requires POSIX signal semantics")
 def test_sigterm_waits_for_active_operation_cleanup(tmp_path: Path) -> None:
     child = tmp_path / "shutdown.py"
     started = tmp_path / "started"
@@ -1141,7 +1103,7 @@ assert state.get('b' * 32)['status'] == 'cancelled'
     "mode", ["lowercase-absent", "already-absent", "engine-failure", "replacement"]
 )
 def test_release_uses_successful_exact_listings_not_daemon_error_text(
-    tmp_path: Path, mode: str, private_acl: PrivateAclModel
+    tmp_path: Path, mode: str
 ) -> None:
     from ds60sqlpy.kubernetes_module import HostTools, prepare_owned_session, release_owned_session
 
@@ -1226,7 +1188,7 @@ def test_cleanup_failure_output_names_the_preserved_resource(
 
 @pytest.mark.parametrize("phase", ["release", "rollback"])
 def test_immutable_node_deletion_preserves_name_replacement_race(
-    tmp_path: Path, phase: str, private_acl: PrivateAclModel
+    tmp_path: Path, phase: str
 ) -> None:
     from ds60sqlpy.kubernetes_module import HostTools, prepare_owned_session, release_owned_session
 
@@ -1367,98 +1329,87 @@ def test_nullable_controller_status_stays_unhealthy(tmp_path: Path, lease: Kuber
     assert not healthy
 
 
-@pytest.mark.parametrize("returncode", [0, 1, 2, 3])
-def test_windows_acl_command_keeps_paths_as_data_and_refuses_failed_policy(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, returncode: int
+@pytest.mark.parametrize("operation", ["private-read", "lease", "prepare", "release"])
+def test_native_windows_credentials_refuse_before_filesystem_or_process_side_effects(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, operation: str
 ) -> None:
+    from types import SimpleNamespace
+
     from ds60sqlpy import kubernetes_module
 
-    monkeypatch.setenv("SYSTEMROOT", r"C:\Windows")
-    path = tmp_path / "runtime with spaces ' and ; punctuation"
-    calls: list[tuple[list[str], dict[str, Any]]] = []
-    monkeypatch.setenv("DS60_WORKER_TOKEN", "synthetic-private-value")
-    monkeypatch.setenv("KUBECONFIG", "synthetic-private-config")
+    target = tmp_path / "must-not-be-created"
+    tools = kubernetes_module.HostTools("not-invoked", "not-invoked", "not-invoked")
 
-    def run(argv: list[str], **kwargs: Any) -> subprocess.CompletedProcess[bytes]:
-        calls.append((argv, kwargs))
-        return subprocess.CompletedProcess(argv, returncode)
+    def forbidden(*args: Any, **kwargs: Any) -> Any:
+        raise AssertionError(
+            "Unsupported native Windows must refuse before filesystem or process use"
+        )
 
-    monkeypatch.setattr("ds60sqlpy.kubernetes_module.subprocess.run", run)
-    assert kubernetes_module._windows_private_acl(path, establish=True) is (returncode == 0)
-    argv, options = calls[0]
-    assert argv[:5] == [
-        r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe",
-        "-NoLogo",
-        "-NoProfile",
-        "-NonInteractive",
-        "-Command",
-    ]
-    assert str(path) not in argv[-1]
-    # The bounded helper must not reintroduce cmdlet module discovery before
-    # reaching the ACL policy. Real policy behavior is covered by the native smoke.
-    assert not any(cmdlet in argv[-1] for cmdlet in ("New-Object", "Get-Acl", "Set-Acl"))
-    assert options["env"]["DS60_PRIVATE_PATH"] == str(path)
-    assert options["env"]["DS60_PRIVATE_ESTABLISH"] == "1"
-    assert not {"DS60_WORKER_TOKEN", "KUBECONFIG"} & options["env"].keys()
-    assert options["timeout"] == 15
-    assert options["stdin"] == options["stdout"] == options["stderr"] == subprocess.DEVNULL
+    with monkeypatch.context() as context:
+        # Patch the module's OS view, not the global os module used by pathlib.
+        context.setattr(kubernetes_module, "os", SimpleNamespace(name="nt"))
+        context.setattr(subprocess, "run", forbidden)
+        for name in ("absolute", "resolve", "lstat", "stat", "mkdir", "read_bytes"):
+            context.setattr(Path, name, forbidden)
+        with pytest.raises(KubernetesRefusal, match="WSL 2"):
+            if operation == "private-read":
+                kubernetes_module._private_file(target, 100)
+            elif operation == "lease":
+                KubernetesLease.load(target)
+            elif operation == "prepare":
+                kubernetes_module.prepare_owned_session(
+                    target, tools, "unix:///unused.sock", runner=forbidden
+                )
+            else:
+                kubernetes_module.release_owned_session(target, tools, runner=forbidden)
+    assert not target.exists()
+
+
+@pytest.mark.parametrize("action", ["doctor", "tools", "prepare", "release", "inspect"])
+def test_native_windows_companion_refuses_before_tool_probe_or_download(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    action: str,
+) -> None:
+    from scripts import prepare_kubernetes as companion
+
+    def forbidden(*args: Any, **kwargs: Any) -> Any:
+        raise AssertionError("Unsupported native Windows must not probe, read or download tools")
+
+    monkeypatch.setattr("platform.system", lambda: "Windows")
+    monkeypatch.setattr("platform.machine", forbidden)
+    monkeypatch.setattr("shutil.which", forbidden)
+    monkeypatch.setattr(companion, "download_tool", forbidden)
+    monkeypatch.setattr(companion, "prepare_owned_session", forbidden)
+    monkeypatch.setattr(companion, "release_owned_session", forbidden)
+    monkeypatch.setattr(companion, "_private_file", forbidden)
+    monkeypatch.setattr(KubernetesLease, "load", forbidden)
+    with monkeypatch.context() as context:
+        context.setattr(Path, "is_file", forbidden)
+        assert (
+            companion.main(
+                [action, "--allow-download", "--tools-dir", str(tmp_path / "uncreated-tools")]
+            )
+            == 2
+        )
+    output = capsys.readouterr()
+    assert output.out == "" and "WSL 2" in output.err
+    assert not list(tmp_path.iterdir())
 
 
 @pytest.mark.parametrize(
-    "error", [OSError("unavailable"), subprocess.TimeoutExpired("fixture", 15)]
+    ("system", "machine", "expected"),
+    [
+        ("Linux", "x86_64", ("linux", "amd64", "")),
+        ("Linux", "aarch64", ("linux", "arm64", "")),
+        ("Darwin", "x86_64", ("darwin", "amd64", "")),
+        ("Darwin", "arm64", ("darwin", "arm64", "")),
+    ],
 )
-def test_windows_acl_command_failure_never_establishes_trust(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, error: Exception
+def test_supported_posix_host_tool_targets_remain_available(
+    system: str, machine: str, expected: tuple[str, str, str]
 ) -> None:
-    from ds60sqlpy import kubernetes_module
+    from scripts.prepare_kubernetes import tool_targets
 
-    monkeypatch.setenv("SYSTEMROOT", r"C:\Windows")
-
-    def failed(*args: Any, **kwargs: Any) -> Any:
-        raise error
-
-    monkeypatch.setattr("ds60sqlpy.kubernetes_module.subprocess.run", failed)
-    assert kubernetes_module._windows_private_acl(tmp_path) is False
-
-
-def test_windows_acl_runtime_preserves_startup_directories_but_not_hooks_or_secrets(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    from ds60sqlpy.kubernetes_module import _windows_powershell_runtime
-
-    monkeypatch.setenv("SYSTEMROOT", r"C:\Windows")
-    for name in ("TMP", "TEMP", "USERPROFILE", "LOCALAPPDATA", "APPDATA", "PROGRAMFILES"):
-        monkeypatch.setenv(name, "synthetic-" + name)
-    for name in ("PSModulePath", "PSExecutionPolicyPreference", "KUBECONFIG", "HTTP_PROXY"):
-        monkeypatch.setenv(name, "must-not-be-inherited")
-    monkeypatch.setenv("PATH", r"C:\untrusted-tools")
-    executable, environment = _windows_powershell_runtime()
-    assert executable == r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
-    for name in ("TMP", "TEMP", "USERPROFILE", "LOCALAPPDATA", "APPDATA", "PROGRAMFILES"):
-        assert environment[name] == "synthetic-" + name
-    assert (
-        not {"PSModulePath", "PSExecutionPolicyPreference", "KUBECONFIG", "HTTP_PROXY"}
-        & environment.keys()
-    )
-    assert "untrusted-tools" not in environment["PATH"]
-    assert environment["PATH"].split(";") == [
-        r"C:\Windows\System32\WindowsPowerShell\v1.0",
-        r"C:\Windows\System32",
-        r"C:\Windows",
-    ]
-
-
-@pytest.mark.parametrize("root", ["", "relative", r"\\server\windows", r"C:Windows"])
-def test_windows_acl_runtime_refuses_missing_or_nonlocal_system_directory(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, root: str
-) -> None:
-    from ds60sqlpy import kubernetes_module
-
-    monkeypatch.delenv("WINDIR", raising=False)
-    monkeypatch.setenv("SYSTEMROOT", root)
-
-    def unexpected(*args: Any, **kwargs: Any) -> Any:
-        raise AssertionError("No PATH fallback may run without a trusted system directory")
-
-    monkeypatch.setattr("ds60sqlpy.kubernetes_module.subprocess.run", unexpected)
-    assert kubernetes_module._windows_private_acl(tmp_path) is False
+    assert tool_targets(system, machine) == expected

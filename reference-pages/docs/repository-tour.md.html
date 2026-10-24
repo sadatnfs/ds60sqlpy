@@ -181,7 +181,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
        |             |             |
    PadRunner   evidence/progress    read-only by default
        |
-  native Python or local disposable PostgreSQL</code></pre>
+  Linux-container Python or local disposable PostgreSQL</code></pre>
 <p>The catalog records stable identity, prerequisites, level, time estimate, dependency group, network behavior, and artifact paths. Named route definitions specify terminal goals and derive the route from that graph. The course guide and lesson readers are generated views. They are rebuilt from source rather than edited by hand.</p>
 <h3 id="main-components">Main components<a class="heading-anchor" href="#main-components" aria-label="Link to this section">#</a></h3>
 <div class="table-wrap"><table><thead><tr>
@@ -226,7 +226,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tr>
 <tr>
 <td><code>desktop.py</code>, <code>scripts/build_app.py</code></td>
-<td>Frozen/native entry point, persistent workspace initialization, and allowlisted course packaging</td>
+<td>Shared allowlisted course packaging and retained unsupported native entry-point code</td>
 </tr>
 <tr>
 <td><code>mcp_server.py</code></td>
@@ -242,7 +242,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tr>
 <tr>
 <td><code>.github/workflows/</code></td>
-<td>Core/platform/notebook/SQL checks and native/Docker application build definitions</td>
+<td>Linux core/contributor/notebook/SQL checks, Docker runtime/browser checks, owned Kubernetes and the portable ZIP</td>
 </tr>
 </tbody></table></div>
 <h3 id="learning-gaps-addressed">Learning gaps addressed<a class="heading-anchor" href="#learning-gaps-addressed" aria-label="Link to this section">#</a></h3>
@@ -251,7 +251,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Every addition has a learner artifact, deep guide, executable reference, and explanatory solution. Practice moves from prediction through implementation and diagnosis to transfer. New lessons use a separate practice registry; the historical baseline remains unchanged. Structural headings, link checks, topic-specific verification contracts, and runnable behavior are all checked separately.</p>
 <h3 id="application-design-decisions">Application design decisions<a class="heading-anchor" href="#application-design-decisions" aria-label="Link to this section">#</a></h3>
 <p>The course now has three complementary delivery modes. Static HTML provides a complete offline reading library. The local coding application adds a guided route, code pads, transcripts, figures, saved evidence, and explicit solution comparison. The optional MCP server lets the AI tutor use those same lesson and prerequisite operations while retaining a read-only default and no arbitrary code execution.</p>
-<p>The native executable bundles the application runtime and course assets; its backend uses the learner&#x27;s installed Python/PostgreSQL. Docker packages the backend environment and database for a consistent browser experience. Native build evidence is specific to the actual build platform. A Dockerfile or hosted workflow definition is not evidence that another operating system has been executed successfully.</p>
+<p>Docker packages the backend environments and database as the supported browser product. Windows uses WSL 2 and macOS uses its Docker engine&#x27;s Linux environment. The historical native executable remains unsupported compatibility code and is not a release gate. A Dockerfile or workflow definition alone is not execution evidence for an engine configuration or architecture.</p>
 <p>The coding application is a personal trusted-code programming environment. It has authenticated local requests, bounded runs, exact course-database routing, and separate saved-work storage. It is not presented as a general security sandbox. The original reading portal keeps its smaller fixed launch allowlist. Live database examples remain distinct from fake-backed tests, and a saved completion remains distinct from automatically graded mastery.</p>
 <h3 id="review-scope-and-limits">Review scope and limits<a class="heading-anchor" href="#review-scope-and-limits" aria-label="Link to this section">#</a></h3>
 <p>Parallel agents inventoried and inspected all historical lesson artifacts, with notebook-aware extraction and targeted semantic reads of guides, exercises, references, and solutions. Shared runtime, bootstrap, catalog, security boundaries, tests, history, generated views, and packaging were reviewed by their responsible agents. Generated HTML was checked against its source rather than treated as an independent authored curriculum. Large repeated artifact families also received structural and behavioral gates.</p>

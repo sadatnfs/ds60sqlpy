@@ -1,6 +1,6 @@
 # Linux setup
 
-The primary course experience is the unified Docker classroom. Every subject,
+The supported course experience is the unified Linux-container Docker classroom. Every subject,
 including Python and SQL, opens from the same `/classroom` page. You only need
 a local Docker-compatible engine, Linux containers, and the documented Compose
 version. The language runtimes live inside the images.
@@ -20,9 +20,11 @@ volumes. Use `./classroom status` to rediscover its address.
 
 ## Optional native environment
 
-The remainder of this page is for learners who also want host Python, Jupyter,
-VS Code or PostgreSQL. These installations are not classroom prerequisites.
-Keep a native environment's `.learning` files separate from Docker-volume state.
+The remainder of this page is a historical host-setup reference, outside the
+supported Docker product and its release gates. Native Windows environments
+and native executable bundles are unsupported. Use Linux or WSL 2 for the
+validated contributor workflow in [CONTRIBUTING](../../CONTRIBUTING.md). Keep
+any retained native `.learning` files separate from Docker-volume state.
 
 ## 1. Install base tools
 

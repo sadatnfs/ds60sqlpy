@@ -1,5 +1,10 @@
 # Optional worker implementation checkpoint
 
+> Support boundary: this file retains historical implementation evidence. The
+> supported product runs in Linux Docker containers, with Windows through WSL 2.
+> Native Windows ACLs/backends and native executable builds are not supported
+> targets or release gates. Current checks are defined in [validation](../validation.md).
+
 Updated: 23 October 2026. The current classroom has ten ordinary worker profiles,
 including CPU PyTorch, Java, JavaScript and TypeScript, plus the separately
 prepared Kubernetes adapter. Actual Linux arm64 Docker execution has qualified

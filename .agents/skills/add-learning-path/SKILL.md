@@ -73,6 +73,14 @@ for exact schemas. Register authored content only after its real artifacts
 exist. Do not invent a scaffold CLI, verifier ID, runtime, command field or
 arbitrary endpoint. Inspect current allowlists and reuse a reviewed profile.
 
+Runtime admission targets Linux-container workers. Windows learners use WSL 2
+and its Docker integration; retain the thin Windows Docker launchers as host
+setup tools. Native Windows backends, ACL implementation and executable builds
+are not supported targets or release gates. Use the current Linux core,
+contributor, Docker/browser, owned-Kubernetes and portable-ZIP CI contracts.
+A Linux container pass does not establish WSL installation or another host's
+engine setup; report those boundaries separately.
+
 New subjects join the same `/classroom` directory. Add an accessible distinct
 theme and text label, then verify search and prerequisites. Preserve separate
 pads and result history for lesson, variant, language and SQL mode. Navigating

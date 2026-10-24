@@ -2,6 +2,13 @@
 
 DS60 is designed for a one-time connected bootstrap followed by offline study. “Offline” describes lesson execution after tools, packages, and disclosed assets have been installed; it does not mean a brand-new computer can install Python, VS Code, PostgreSQL, container images, and packages without installation media.
 
+For the supported Docker product, prepare the images with `./classroom` while
+connected, rehearse the required lessons, then resume with `./classroom --no-build`.
+Windows uses those same commands inside WSL 2. Keep the project's named learning
+and PostgreSQL volumes; see the [one-command guide](../one-command-classroom.md).
+The host-Python and PowerShell recipes later on this page are historical
+compatibility references, outside the supported release matrix.
+
 ## What works offline after setup
 
 - Core Python and standard-library lessons
@@ -33,6 +40,10 @@ Run these while connected before relying on the corresponding lessons offline:
 External “further reading” links are optional and do not form part of the offline execution contract.
 
 ## Prepare while connected
+
+The following steps describe retained host environments. Docker learners use
+the connected build and offline resume commands above; native Windows setup
+is not a supported product route.
 
 1. Run the OS setup script.
 2. Run the environment doctor.

@@ -11,7 +11,9 @@ The module application sends source to explicitly prepared private workers.
 The original Python/SQL pads and the reading path continue to work without
 these profiles. Preparing one subject does not install every framework.
 
-For the primary Docker-only route, start with the [classroom walkthrough](docker-classroom.md).
+For the supported Linux-container product, start with the [classroom walkthrough](docker-classroom.md).
+Windows runs through WSL 2. Retained native Windows launchers are compatibility
+material and are not part of release qualification.
 It uses named progress volumes and direct Compose commands. The launchers below
 are the optional host-folder route; do not mix their storage instructions.
 
@@ -21,19 +23,13 @@ Start the ordinary Docker lab first. From the extracted complete course folder,
 use the host launcher to build and start selected workers. The launcher owns
 engine access; the browser and worker receive no Docker socket.
 
-macOS or Linux:
+macOS, Linux or Windows through WSL 2:
 
 ```bash
 bash scripts/module_lab.sh build --profiles python-core,cpp20
 bash scripts/module_lab.sh start --profiles python-core,cpp20 --no-browser
 ```
 
-Windows PowerShell:
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\module_lab.ps1 build -Profiles python-core,cpp20
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\module_lab.ps1 start -Profiles python-core,cpp20 -NoBrowser
-```
 
 Open `http://127.0.0.1:8765/classroom` after readiness succeeds. Use the same
 profile list and project for later `status`, `start` or `stop` actions. Profile
@@ -195,10 +191,11 @@ install Kubernetes. Opening or saving a lesson never performs preparation.
 Use the same local Linux-container engine for the entire session. The helper
 requires host Python 3.12, but it does not require a host Kubernetes package or
 an existing kubeconfig. The main Docker lab continues to need no host Python.
-If your interpreter has another name, pass `--python /absolute/path/to/python`
-to Bash or `-Python C:\absolute\path\python.exe` to PowerShell. Use that same
-interpreter for `prepare_kubernetes.py` below. Keep paths in the terminal's own
-OS: Linux paths in WSL, Windows paths in PowerShell.
+Use the POSIX companion from Linux, WSL 2 or macOS. If your interpreter has
+another name, pass `--python /absolute/path/to/python` to the Bash launcher and
+use the same interpreter for `prepare_kubernetes.py` below. Native Windows
+credential handling and named-pipe endpoints are unsupported. Windows learners
+run these commands inside WSL 2 using Linux paths and its Unix-socket engine.
 
 1. From the extracted full course folder, build the fixture and dedicated
    worker while connected. This can take time and does not create a cluster.
@@ -206,11 +203,6 @@ OS: Linux paths in WSL, Windows paths in PowerShell.
    ```bash
    bash scripts/module_lab.sh build --profiles k8s-kind
    python3 scripts/prepare_kubernetes.py tools --allow-download
-   ```
-
-   ```powershell
-   powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\module_lab.ps1 build -Profiles k8s-kind
-   python .\scripts\prepare_kubernetes.py tools --allow-download
    ```
 
    The tool helper downloads pinned kind v0.33.0 and kubectl v1.37.0 from their
@@ -229,18 +221,6 @@ OS: Linux paths in WSL, Windows paths in PowerShell.
    python3 scripts/prepare_kubernetes.py prepare --confirm-create --docker-host "$ENGINE" --allow-node-download
    ```
 
-   In PowerShell:
-
-   ```powershell
-   $Engine = $env:DOCKER_HOST
-   if (-not $Engine) {
-       $Engine = docker context inspect --format '{{.Endpoints.docker.Host}}'
-       if ($LASTEXITCODE -ne 0) { throw 'Select a ready local Docker context first.' }
-   }
-   python .\scripts\prepare_kubernetes.py prepare --confirm-create --docker-host $Engine --allow-node-download
-   if ($LASTEXITCODE -ne 0) { throw 'Owned preparation failed. Review its private receipt.' }
-   ```
-
    The helper refuses remote endpoints. `--allow-node-download` explicitly
    allows the pinned node-image bootstrap if absent; omit it for a fully
    cached run. A reviewed TLS-preserving mirror can be selected with
@@ -257,15 +237,10 @@ OS: Linux paths in WSL, Windows paths in PowerShell.
    bash scripts/module_lab.sh start --profiles k8s-kind --k8s-session "$SESSION" --no-browser
    ```
 
-   ```powershell
-   $Session = 'C:\absolute\private\path\from\session_dir'
-   powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\module_lab.ps1 start -Profiles k8s-kind -K8sSession $Session -NoBrowser
-   ```
-
    Start checks the private lease, host receipt, matching local endpoint and
    remaining lifetime before creating a worker token or starting services.
    It uses `compose.kubernetes.yaml` and the selected `k8s-kind` profile only.
-   Remove `--no-browser` or `-NoBrowser` to open the local journey page.
+   Remove `--no-browser` to open the local classroom page.
    Choose `k8s-003` for Deployment-only practice or `k8s-008` for the pilot.
    An expired session is refused. Stop/release it, then prepare a new one;
    there is no silent renewal or switch to an ambient admin context.
@@ -278,13 +253,6 @@ OS: Linux paths in WSL, Windows paths in PowerShell.
    bash scripts/module_lab.sh status --profiles k8s-kind --k8s-session "$SESSION"
    bash scripts/module_lab.sh stop --profiles k8s-kind --k8s-session "$SESSION"
    python3 scripts/prepare_kubernetes.py release --session "$SESSION" --confirm-release
-   ```
-
-   ```powershell
-   powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\module_lab.ps1 status -Profiles k8s-kind -K8sSession $Session
-   powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\module_lab.ps1 stop -Profiles k8s-kind -K8sSession $Session
-   python .\scripts\prepare_kubernetes.py release --session $Session --confirm-release
-   if ($LASTEXITCODE -ne 0) { throw 'Release was not confirmed. Preserve the private receipt for recovery.' }
    ```
 
    Release validates the recorded full Docker container ID, kind owner label
@@ -317,8 +285,9 @@ Service EndpointSlice UID membership, an actual in-cluster `/version` client
 and exact owned cleanup. The foundation can omit the Service and receives no
 routing grade. The pilot's rolling update, Pod deletion, second-Service tasks
 and explanations remain manual scoped/teacher activities. This one-shot Run
-does not grade the complete six-task course. Native Windows ACLs/file sharing
-and other host/architecture rows require separate acceptance.
+does not grade the complete six-task course. Native Windows credential paths
+are outside the support contract. WSL/engine setup and other architecture rows
+require their own observed evidence.
 
 ## Recorded runtime boundary
 
