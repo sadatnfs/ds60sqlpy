@@ -5,11 +5,12 @@ from __future__ import annotations
 import json
 import subprocess
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
 import pytest
 
-from scripts.check_windows_private_acl import instrument_script, observed_phases
+from scripts.check_windows_private_acl import FAILURE_STAGES, instrument_script, observed_phases
 
 
 def test_native_diagnostics_extract_only_known_fixed_phases() -> None:
@@ -88,3 +89,36 @@ def test_runtime_startup_success_is_not_sufficient_for_acl_acceptance(
         probe.native_acl_smoke(report, tmp_path)
     assert len(report["checks"]) == 1
     assert "PowerShell runtime" in report["checks"][0]
+
+
+@pytest.mark.parametrize("stage", [*sorted(FAILURE_STAGES), "unexpected private runtime detail"])
+def test_public_report_allows_only_controlled_runtime_failure_stages(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    stage: str,
+) -> None:
+    from scripts import check_windows_private_acl as probe
+
+    # Simulate the probe's Windows eligibility without changing pathlib's host
+    # behavior or invoking any native ACL command.
+    monkeypatch.setattr(
+        probe, "os", SimpleNamespace(name="nt", environ={"RUNNER_TEMP": str(tmp_path)})
+    )
+
+    def fail(report: dict[str, Any], directory: Path) -> None:
+        raise RuntimeError(stage)
+
+    monkeypatch.setattr(probe, "native_acl_smoke", fail)
+    destination = tmp_path / "report.json"
+    assert probe.main(["--report", str(destination)]) == 1
+    text = destination.read_text(encoding="utf-8")
+    report = json.loads(text)
+    assert report["passed"] is False and report["failure_type"] == "RuntimeError"
+    assert report["checks"] == [] and report["commands"] == []
+    if stage in FAILURE_STAGES:
+        assert report["failure_stage"] == stage
+    else:
+        assert "failure_stage" not in report and stage not in text
+        captured = capsys.readouterr()
+        assert stage not in captured.out and stage not in captured.err

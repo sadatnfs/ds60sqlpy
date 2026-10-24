@@ -9,6 +9,7 @@ from urllib.request import Request, urlopen
 import pytest
 
 from ds60sqlpy.catalog import Catalog
+from ds60sqlpy.doctor import Diagnostic
 from ds60sqlpy.portal import PortalError, PortalLauncher, PortalRequestHandler, create_portal_server
 
 
@@ -46,8 +47,20 @@ def _request(
         return response.status, response.read().decode()
 
 
-def test_portal_serves_injected_guide_and_persists_progress(tmp_path: Path) -> None:
+def test_portal_serves_injected_guide_and_persists_progress(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     catalog = Catalog.load()
+    diagnosed: list[Catalog] = []
+
+    def local_diagnostics(value: Catalog) -> tuple[Diagnostic, ...]:
+        diagnosed.append(value)
+        return (Diagnostic("pass", "Python", "test interpreter"),)
+
+    # This HTTP contract covers rendering, authentication and real progress I/O.
+    # Host discovery has several independent four/five-second command budgets;
+    # test_doctor and learner-bootstrap CI exercise those machine dependencies.
+    monkeypatch.setattr("ds60sqlpy.portal.diagnose", local_diagnostics)
     progress_path = tmp_path / "progress.json"
     server = create_portal_server(
         catalog,
@@ -78,7 +91,10 @@ def test_portal_serves_injected_guide_and_persists_progress(tmp_path: Path) -> N
         assert status == 200
         status_payload = json.loads(raw)
         assert status_payload["completed"] == []
-        assert any(item["name"] == "Python" for item in status_payload["diagnostics"])
+        assert status_payload["diagnostics"] == [
+            {"status": "pass", "name": "Python", "detail": "test interpreter"}
+        ]
+        assert diagnosed == [catalog]
 
         status, raw = _request(
             f"{server.url}api/progress",

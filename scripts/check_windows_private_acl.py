@@ -35,6 +35,17 @@ PHASES = {
 }
 
 
+FAILURE_STAGES = frozenset(
+    {
+        "powershell-runtime-startup",
+        "establish-private-directory",
+        "private-file-readback",
+        "synthetic-broad-acl-setup",
+        "broad-file-acl-was-accepted",
+    }
+)
+
+
 def observed_phases(output: str | bytes | None) -> list[str]:
     text = output.decode("utf-8", errors="replace") if isinstance(output, bytes) else output or ""
     return [
@@ -159,8 +170,9 @@ def main(argv: list[str] | None = None) -> int:
         report["passed"] = True
     except Exception as error:
         report["failure_type"] = type(error).__name__
-        # Controlled stage names are useful; native exception values are never copied.
-        if type(error) is RuntimeError:
+        # Only fixed stage labels may enter the public artifact. RuntimeError
+        # alone does not establish that a native exception's text is controlled.
+        if type(error) is RuntimeError and str(error) in FAILURE_STAGES:
             report["failure_stage"] = str(error)
     finally:
         args.report.parent.mkdir(parents=True, exist_ok=True)

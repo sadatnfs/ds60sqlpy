@@ -126,6 +126,7 @@ or credential material; a mocked unit-policy check cannot replace that evidence.
 | Application builds: Docker classroom | Same triggers; isolated Linux groups covering all ordinary profiles | Every admitted ordinary module reference runs in its declared worker; real compiler failures, timeout recovery and saved receipts are checked |
 | Application builds: Chromium acceptance | Python Core Docker group, after container replacement | Real browser navigation, isolated pads/results, saved progress, output contrast, mathematical rendering and the three browser JavaScript references work |
 | Owned Kubernetes runtime | Manual dispatch and weekly schedule; disposable Linux kind cluster | Every admitted bounded Kubernetes reference and explicit failure/timeout/cancellation cases produce matching receipts and verified owned cleanup |
+| Windows runtime diagnostics | Manual dispatch; native Windows Python 3.12 | Controlled PowerShell startup comparisons, real private-file ACL acceptance and focused portal/diagnostic contracts run separately |
 
 The Docker groups cover Python Core, C++, Java, JavaScript/TypeScript,
 Scala/Spark, TensorFlow and PyTorch. The Core group runs the statistics book,
@@ -158,7 +159,8 @@ lesson's backend. Check the actual matrix architecture and receipt before
 making a release claim.
 
 To run the workflows manually, open the repository's **Actions** tab, select
-**Course validation**, **Application builds** or **Owned Kubernetes runtime**,
+**Course validation**, **Application builds**, **Owned Kubernetes runtime** or
+**Windows runtime diagnostics**,
 choose **Run workflow**, and
 select the revision to validate. With an authenticated GitHub CLI:
 
@@ -166,7 +168,16 @@ select the revision to validate. With an authenticated GitHub CLI:
 gh workflow run ci.yml --ref BRANCH_NAME
 gh workflow run app-build.yml --ref BRANCH_NAME
 gh workflow run kubernetes.yml --ref BRANCH_NAME
+gh workflow run windows-runtime.yml --ref BRANCH_NAME
 ```
+
+The focused Windows workflow compares fixed startup conditions without changing
+machine policy or exposing account identities, environment values or raw native
+output. Completing those comparisons establishes diagnostic coverage only. The
+separate native ACL smoke must establish a private directory, accept its private
+file and reject an intentionally broad file ACL. A startup marker alone cannot
+satisfy that check. Later focused tests still run after a diagnostic failure,
+while the failed step keeps the workflow unsuccessful.
 
 Read failed job logs and uploaded test results. A workflow syntax check is
 useful before pushing, but only a hosted run can establish hosted acceptance.
