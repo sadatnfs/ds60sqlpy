@@ -176,19 +176,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-tag">&quot;matchConstraints&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
 <span class="source-line">          <span class="syntax-tag">&quot;resourceRules&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
 <span class="source-line">            <span class="syntax-punctuation">{</span></span>
-<span class="source-line">              <span class="syntax-tag">&quot;apiGroups&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
-<span class="source-line">                <span class="syntax-string">&quot;apps&quot;</span></span>
-<span class="source-line">              <span class="syntax-punctuation">],</span></span>
-<span class="source-line">              <span class="syntax-tag">&quot;apiVersions&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
-<span class="source-line">                <span class="syntax-string">&quot;v1&quot;</span></span>
-<span class="source-line">              <span class="syntax-punctuation">],</span></span>
-<span class="source-line">              <span class="syntax-tag">&quot;operations&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
-<span class="source-line">                <span class="syntax-string">&quot;CREATE&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">                <span class="syntax-string">&quot;UPDATE&quot;</span></span>
-<span class="source-line">              <span class="syntax-punctuation">],</span></span>
-<span class="source-line">              <span class="syntax-tag">&quot;resources&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
-<span class="source-line">                <span class="syntax-string">&quot;deployments&quot;</span></span>
-<span class="source-line">              <span class="syntax-punctuation">]</span></span>
+<span class="source-line">              <span class="syntax-tag">&quot;apiGroups&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;apps&quot;</span><span class="syntax-punctuation">],</span></span>
+<span class="source-line">              <span class="syntax-tag">&quot;apiVersions&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;v1&quot;</span><span class="syntax-punctuation">],</span></span>
+<span class="source-line">              <span class="syntax-tag">&quot;operations&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;CREATE&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;UPDATE&quot;</span><span class="syntax-punctuation">],</span></span>
+<span class="source-line">              <span class="syntax-tag">&quot;resources&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;deployments&quot;</span><span class="syntax-punctuation">]</span></span>
 <span class="source-line">            <span class="syntax-punctuation">}</span></span>
 <span class="source-line">          <span class="syntax-punctuation">]</span></span>
 <span class="source-line">        <span class="syntax-punctuation">},</span></span>
@@ -208,9 +199,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">      <span class="syntax-punctuation">},</span></span>
 <span class="source-line">      <span class="syntax-tag">&quot;spec&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
 <span class="source-line">        <span class="syntax-tag">&quot;policyName&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;lesson-approved-image&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">        <span class="syntax-tag">&quot;validationActions&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
-<span class="source-line">          <span class="syntax-string">&quot;Deny&quot;</span></span>
-<span class="source-line">        <span class="syntax-punctuation">],</span></span>
+<span class="source-line">        <span class="syntax-tag">&quot;validationActions&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;Deny&quot;</span><span class="syntax-punctuation">],</span></span>
 <span class="source-line">        <span class="syntax-tag">&quot;matchResources&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
 <span class="source-line">          <span class="syntax-tag">&quot;namespaceSelector&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
 <span class="source-line">            <span class="syntax-tag">&quot;matchLabels&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>

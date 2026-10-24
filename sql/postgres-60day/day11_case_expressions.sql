@@ -18,35 +18,54 @@
 --
 BEGIN;
 SET search_path TO training, public;
-
 -- Study contract
 -- Focus: Use `CASE` to encode mutually exclusive business rules in deliberate order while preserving NULL as a distinct state when required.
 -- Assumptions: Searched `CASE` uses first-match wins. Status/category labels are illustrative course rules, not universal business definitions.
 -- Pitfall: Overlapping broad conditions placed first make later branches unreachable; an omitted `ELSE` produces NULL.
 -- Predict row grain and NULL/order behavior before executing each example.
-
 -- Label orders by size
-SELECT o.order_id, o.total_amount,
-  CASE
-    WHEN o.total_amount >= 1000 THEN 'XL'
-    WHEN o.total_amount >= 300 THEN 'L'
-    WHEN o.total_amount >= 100 THEN 'M'
-    ELSE 'S'
+SELECT
+  o.order_id,
+  o.total_amount,
+  CASE WHEN o.total_amount >= 1000 THEN
+    'XL'
+  WHEN o.total_amount >= 300 THEN
+    'L'
+  WHEN o.total_amount >= 100 THEN
+    'M'
+  ELSE
+    'S'
   END AS order_size
-FROM orders o
-ORDER BY o.total_amount DESC, o.order_id
+FROM
+  orders o
+ORDER BY
+  o.total_amount DESC,
+  o.order_id
 LIMIT 50;
-
 -- Conditional aggregation with CASE
-SELECT p.category,
-  SUM(CASE WHEN o.order_date >= now() - interval '30 days' THEN oi.quantity ELSE 0 END) AS qty_30d,
-  SUM(CASE WHEN o.order_date >= now() - interval '90 days' THEN oi.quantity ELSE 0 END) AS qty_90d
-FROM order_items oi
-JOIN orders o ON o.order_id = oi.order_id
-JOIN products p ON p.product_id = oi.product_id
-GROUP BY p.category
-ORDER BY qty_30d DESC, p.category;
-
+SELECT
+  p.category,
+  SUM(
+    CASE WHEN o.order_date >= now() - interval '30 days' THEN
+      oi.quantity
+    ELSE
+      0
+    END) AS qty_30d,
+  SUM(
+    CASE WHEN o.order_date >= now() - interval '90 days' THEN
+      oi.quantity
+    ELSE
+      0
+    END) AS qty_90d
+FROM
+  order_items oi
+  JOIN orders o ON o.order_id = oi.order_id
+  JOIN products p ON p.product_id = oi.product_id
+GROUP BY
+  p.category
+ORDER BY
+  qty_30d DESC,
+  p.category;
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.
@@ -86,5 +105,4 @@ ORDER BY qty_30d DESC, p.category;
 --    Expected result/shape: For sql-11 Exercise 6, expected output: One row per payment method and display label. The final columns are `method`, `method_label`, and `payment_count`. The final order is `p.method`.
 --    Verify: For sql-11 Exercise 6, evaluate each of `payment_count` in a separate control `SELECT` over `payments`; require one final row and compare every value. Add one row to an existing group and one row for a new group; recompute `payment_count` for the existing `method` tuple and verify the new tuple appears exactly once.
 --    Hint ladder, rung 1: For sql-11 Exercise 6, confirm the groups are `method`; then check `p.method` before applying the row cap.
-
 ROLLBACK;

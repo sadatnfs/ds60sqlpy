@@ -1,9 +1,10 @@
-import { strict as assert } from 'node:assert';
+import { strict as assert } from "node:assert";
 
 function parseFinite(text) {
-  if (typeof text !== 'string' || text.trim() === '') throw new TypeError('nonblank numeric text required');
+  if (typeof text !== "string" || text.trim() === "")
+    throw new TypeError("nonblank numeric text required");
   const value = Number(text);
-  if (!Number.isFinite(value)) throw new TypeError('finite number required');
+  if (!Number.isFinite(value)) throw new TypeError("finite number required");
   return value;
 }
 
@@ -11,16 +12,16 @@ export async function verify() {
   // Exercise 1: Trace plus versus numeric conversion
   {
     assert.equal(2 + 3, 5);
-    assert.equal(2 + '3', '23');
-    assert.equal(Number('3') + 2, 5);
+    assert.equal(2 + "3", "23");
+    assert.equal(Number("3") + 2, 5);
   }
 
   // Exercise 2: Inspect absence and NaN
   {
-    assert.equal(typeof null, 'object');
-    assert.equal(typeof undefined, 'undefined');
+    assert.equal(typeof null, "object");
+    assert.equal(typeof undefined, "undefined");
     assert.equal(Number.isNaN(NaN), true);
-    assert.equal(Number.isNaN('not a number'), false);
+    assert.equal(Number.isNaN("not a number"), false);
   }
 
   // Exercise 3: Compare equality contracts
@@ -48,9 +49,9 @@ export async function verify() {
 
   // Exercise 6: Reject ambiguous numeric input
   {
-    assert.equal(parseFinite('12'), 12);
-    assert.throws(() => parseFinite(' '), TypeError);
-    assert.throws(() => parseFinite('Infinity'), TypeError);
+    assert.equal(parseFinite("12"), 12);
+    assert.throws(() => parseFinite(" "), TypeError);
+    assert.throws(() => parseFinite("Infinity"), TypeError);
     assert.throws(() => 1n + 1, TypeError);
   }
 

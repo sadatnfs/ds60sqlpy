@@ -1,8 +1,8 @@
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
-        fn append_mark(text: &mut String) { text.push('!'); }
+        fn append_mark(text: &mut String) {
+            text.push('!');
+        }
         let mut text = String::from("ready");
         append_mark(&mut text);
         assert_eq!(text, "ready!");

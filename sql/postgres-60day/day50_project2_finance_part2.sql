@@ -19,59 +19,89 @@
 -- Expense categorization, variance analysis vs budget
 BEGIN;
 SET search_path TO training, public;
-
 -- Monthly actual expenses by category
 WITH monthly_exp AS (
-  SELECT date_trunc('month', expense_date)::date AS month,
-         category,
-         SUM(amount) AS actual
-  FROM expenses
-  GROUP BY 1,2
-), monthly_budget AS (
-  SELECT period AS month,
-         category,
-         SUM(amount) AS budget
-  FROM budgets
-  GROUP BY 1,2
+  SELECT
+    date_trunc('month', expense_date)::date AS month,
+    category,
+    SUM(amount) AS actual
+  FROM
+    expenses
+  GROUP BY
+    1,
+    2
+),
+monthly_budget AS (
+  SELECT
+    period AS month,
+    category,
+    SUM(amount) AS budget
+  FROM
+    budgets
+  GROUP BY
+    1,
+    2
 )
-SELECT coalesce(b.category, e.category) AS category,
-       coalesce(b.month, e.month) AS month,
-       COALESCE(b.budget, 0) AS budget,
-       COALESCE(e.actual, 0) AS actual,
-       ROUND(COALESCE(e.actual,0) - COALESCE(b.budget,0), 2) AS variance,
-       ROUND((COALESCE(e.actual,0) - COALESCE(b.budget,0)) / NULLIF(b.budget,0), 4) AS variance_pct
-FROM monthly_budget b
-FULL OUTER JOIN monthly_exp e
-  ON e.month = b.month AND e.category = b.category
-ORDER BY month DESC, category
+SELECT
+  coalesce(b.category, e.category) AS category,
+  coalesce(b.month, e.month) AS month,
+  COALESCE(b.budget, 0) AS budget,
+  COALESCE(e.actual, 0) AS actual,
+  ROUND(COALESCE(e.actual, 0) - COALESCE(b.budget, 0), 2) AS variance,
+  ROUND((COALESCE(e.actual, 0) - COALESCE(b.budget, 0)) / NULLIF (b.budget, 0), 4) AS variance_pct
+FROM
+  monthly_budget b
+  FULL OUTER JOIN monthly_exp e ON e.month = b.month
+  AND e.category = b.category
+ORDER BY
+  month DESC,
+  category
 LIMIT 100;
-
 -- Rolling 3-month actuals and budget
 WITH monthly AS (
-  SELECT date_trunc('month', expense_date)::date AS month,
-         category,
-         SUM(amount) AS actual
-  FROM expenses
-  GROUP BY 1,2
-), bud AS (
-  SELECT period AS month, category, SUM(amount) AS budget
-  FROM budgets
-  GROUP BY 1,2
-), joined AS (
-  SELECT coalesce(b.category, m.category) AS category,
-         coalesce(b.month, m.month) AS month,
-         COALESCE(b.budget, 0) AS budget,
-         COALESCE(m.actual, 0) AS actual
-  FROM bud b FULL JOIN monthly m ON m.month = b.month AND m.category = b.category
+  SELECT
+    date_trunc('month', expense_date)::date AS month,
+    category,
+    SUM(amount) AS actual
+  FROM
+    expenses
+  GROUP BY
+    1,
+    2
+),
+bud AS (
+  SELECT
+    period AS month,
+    category,
+    SUM(amount) AS budget
+  FROM
+    budgets
+  GROUP BY
+    1,
+    2
+),
+joined AS (
+  SELECT
+    coalesce(b.category, m.category) AS category,
+    coalesce(b.month, m.month) AS month,
+    COALESCE(b.budget, 0) AS budget,
+    COALESCE(m.actual, 0) AS actual
+  FROM
+    bud b
+    FULL JOIN monthly m ON m.month = b.month
+      AND m.category = b.category
 )
-SELECT category,
-       month,
-       SUM(actual) OVER (PARTITION BY category ORDER BY month ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS actual_ma3,
-       SUM(budget) OVER (PARTITION BY category ORDER BY month ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS budget_ma3
-FROM joined
-ORDER BY month DESC, category
-LIMIT 100;
-
+  SELECT
+    category,
+    month,
+    SUM(actual) OVER (PARTITION BY category ORDER BY month ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS actual_ma3,
+    SUM(budget) OVER (PARTITION BY category ORDER BY month ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS budget_ma3
+  FROM
+    joined
+  ORDER BY
+    month DESC,
+    category
+  LIMIT 100;
 -- Exercises
 -- 1. Compute YoY variance and highlight categories with >15% overspend.
 --    Inputs: For sql-50 Exercise 1, read from `expenses`, and `budgets`. Build the answer toward `month`, `category`, `actual`, `prior_year_actual`, `year_over_year_variance_pct`, `budget_variance_pct`, and `overspent_by_more_than_15_pct`; keep `month` visible whenever the result has row-level grain.
@@ -107,5 +137,4 @@ LIMIT 100;
 --    Expected result/shape: For sql-50 Exercise 6, expected output: one row per (`month`, `category`) found in either source, with `actual`, `budget`, and `status`.
 --    Verify: For sql-50 Exercise 6, reconcile joined actual and budget totals to independent source totals. Test actual-only, budget-only, and zero-budget keys; a budget must never be multiplied by expense-row fanout.
 --    Hint ladder, rung 1: Build unique `expense_monthly` and `budget_monthly` CTEs, then `FULL JOIN ... USING (month, category)`.
-
 ROLLBACK;

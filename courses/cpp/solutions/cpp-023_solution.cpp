@@ -30,15 +30,28 @@
 #include <variant>
 #include <vector>
 
-extern "C" int add_checked(int a,int b,int* out) noexcept { if(!out)return 1; if((b>0 && a>std::numeric_limits<int>::max()-b)||(b<0 && a<std::numeric_limits<int>::min()-b))return 2; *out=a+b;return 0; }
-int main() {
-    int out=0;assert(add_checked(2,3,&out)==0 && out==5);assert(add_checked(2,3,nullptr)==1);assert(add_checked(std::numeric_limits<int>::max(),1,&out)==2);
-    // Reference extension checks for the exercise changes.
-    int unchanged=91;assert(add_checked(std::numeric_limits<int>::max(),1,&unchanged)==2);assert(unchanged==91);assert(add_checked(std::numeric_limits<int>::min(),-1,&unchanged)==2);
-    std::cout << "cpp-023 examples passed\n";
-    return 0;
+extern "C" int add_checked(int a, int b, int *out) noexcept {
+  if (!out)
+    return 1;
+  if ((b > 0 && a > std::numeric_limits<int>::max() - b) ||
+      (b < 0 && a < std::numeric_limits<int>::min() - b))
+    return 2;
+  *out = a + b;
+  return 0;
 }
-
+int main() {
+  int out = 0;
+  assert(add_checked(2, 3, &out) == 0 && out == 5);
+  assert(add_checked(2, 3, nullptr) == 1);
+  assert(add_checked(std::numeric_limits<int>::max(), 1, &out) == 2);
+  // Reference extension checks for the exercise changes.
+  int unchanged = 91;
+  assert(add_checked(std::numeric_limits<int>::max(), 1, &unchanged) == 2);
+  assert(unchanged == 91);
+  assert(add_checked(std::numeric_limits<int>::min(), -1, &unchanged) == 2);
+  std::cout << "cpp-023 examples passed\n";
+  return 0;
+}
 
 // Exercise 1: Separate interfaces. List the add_checked source contract and binary assumptions. Expected: Names/types/statuses versus compiler/platform/linkage distinguished.
 // Exercise 2: Call a valid boundary. Pass 2,3 and a writable output integer. Expected: Status 0 and output 5.

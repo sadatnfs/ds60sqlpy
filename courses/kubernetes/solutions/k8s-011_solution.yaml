@@ -19,26 +19,26 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       containers:
-      - name: task
-        image: ds60sqlpy-k8s-fixture:0.2.0
-        imagePullPolicy: Never
-        command:
-        - python
-        - /fixture.py
-        - task
-        - --outcome
-        - success
-        resources:
-          requests:
-            cpu: 10m
-            memory: 16Mi
-          limits:
-            cpu: 100m
-            memory: 64Mi
-        securityContext:
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: true
-          capabilities:
-            drop:
-            - ALL
+        - name: task
+          image: ds60sqlpy-k8s-fixture:0.2.0
+          imagePullPolicy: Never
+          command:
+            - python
+            - /fixture.py
+            - task
+            - --outcome
+            - success
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
       restartPolicy: Never

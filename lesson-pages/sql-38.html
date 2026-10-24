@@ -615,37 +615,65 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line"><span class="syntax-comment">--</span></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Show current isolation level</span></span>
 <span class="source-line"><span class="syntax-keyword">SHOW</span> <span class="syntax-keyword">TRANSACTION</span> <span class="syntax-keyword">ISOLATION</span> <span class="syntax-keyword">LEVEL</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Set per-transaction isolation level (demo)</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">TRANSACTION</span> <span class="syntax-keyword">ISOLATION</span> <span class="syntax-keyword">LEVEL</span> <span class="syntax-keyword">REPEATABLE</span> <span class="syntax-keyword">READ</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Demo table</span></span>
-<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> txn_demo<span class="syntax-punctuation">(</span>id <span class="syntax-builtin">int</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span> qty <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> txn_demo <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> txn_demo <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  id <span class="syntax-builtin">int</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  qty <span class="syntax-builtin">int</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> txn_demo</span>
+<span class="source-line"><span class="syntax-keyword">VALUES</span></span>
+<span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Read snapshot under REPEATABLE READ</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> txn_demo <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> id<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-operator">*</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  txn_demo</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  id<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- In a second session (instruction):</span></span>
 <span class="source-line"><span class="syntax-comment">--   BEGIN; UPDATE txn_demo SET qty = qty + 5 WHERE id = 2; COMMIT;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Back here, under REPEATABLE READ snapshot, we still see old value</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> txn_demo <span class="syntax-keyword">WHERE</span> id <span class="syntax-operator">=</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-operator">*</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  txn_demo</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  id <span class="syntax-operator">=</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Now switch to READ COMMITTED to see new row versions on each statement</span></span>
 <span class="source-line"><span class="syntax-comment">-- Note: This affects only subsequent transactions; included here for demo</span></span>
 <span class="source-line"><span class="syntax-comment">-- COMMIT;  -- would end current tx; but we keep everything safe and roll back at end</span></span>
 <span class="source-line"><span class="syntax-comment">-- BEGIN; SET TRANSACTION ISOLATION LEVEL READ COMMITTED; SELECT * FROM txn_demo WHERE id=2;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Savepoint / rollback demo</span></span>
 <span class="source-line">SAVEPOINT sp1<span class="syntax-punctuation">;</span></span>
-<span class="source-line"><span class="syntax-keyword">UPDATE</span> txn_demo <span class="syntax-keyword">SET</span> qty <span class="syntax-operator">=</span> qty <span class="syntax-operator">+</span> <span class="syntax-number">100</span> <span class="syntax-keyword">WHERE</span> id <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> txn_demo <span class="syntax-keyword">WHERE</span> id <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span> <span class="syntax-comment">-- shows +100 within tx</span></span>
+<span class="source-line"><span class="syntax-keyword">UPDATE</span></span>
+<span class="source-line">  txn_demo</span>
+<span class="source-line"><span class="syntax-keyword">SET</span></span>
+<span class="source-line">  qty <span class="syntax-operator">=</span> qty <span class="syntax-operator">+</span> <span class="syntax-number">100</span></span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  id <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-operator">*</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  txn_demo</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  id <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-comment">-- shows +100 within tx</span></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT sp1<span class="syntax-punctuation">;</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> txn_demo <span class="syntax-keyword">WHERE</span> id <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span> <span class="syntax-comment">-- back to original in this tx</span></span>
 <span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-operator">*</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  txn_demo</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  id <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- back to original in this tx</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
 <span class="source-line"><span class="syntax-comment">-- 1. In two sessions, reproduce non-repeatable reads under READ COMMITTED.</span></span>
 <span class="source-line"><span class="syntax-comment">--    Inputs: For sql-38 Exercise 1, read from `isolation_lab`. Build the answer toward `qty`; keep `qty` visible whenever the result has row-level grain.</span></span>
@@ -686,7 +714,6 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-38 Exercise 7, expected output: a statement-by-statement Session A/Session B transcript followed by the committed fixture state and cleanup evidence. The final columns are `session`, `statement_number`, `outcome`, and `sqlstate`.</span></span>
 <span class="source-line"><span class="syntax-comment">--    Verify: For sql-38 Exercise 7, compare every observed value, wait, and SQLSTATE with the written schedule; query `txn_demo`, `isolation_solution`, and `transfer_accounts` after each commit/rollback and finish with both sessions idle and the fixture reset. Repeat the exact interleaving after cleanup and confirm the same wait, SQLSTATE, and committed final rows.</span></span>
 <span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-38 Exercise 7, compare every observed value, wait, and SQLSTATE with the written schedule; query `txn_demo`, `isolation_solution`, and `transfer_accounts` after each commit/rollback and finish with both sessions idle and the fixture reset.</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>
       </section>
@@ -955,23 +982,39 @@ COMMIT;</code></pre>
 <span class="source-line"><span class="syntax-comment">--</span></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Isolation anomalies require two concurrent database sessions; one .sql file</span></span>
 <span class="source-line"><span class="syntax-comment">-- cannot create genuine concurrency by itself. This runnable portion verifies</span></span>
 <span class="source-line"><span class="syntax-comment">-- the session and demonstrates a recoverable savepoint.</span></span>
 <span class="source-line"><span class="syntax-keyword">SHOW</span> transaction_isolation<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> isolation_solution <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  id <span class="syntax-builtin">int</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  quantity <span class="syntax-builtin">int</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> isolation_solution <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> isolation_solution</span>
+<span class="source-line"><span class="syntax-keyword">VALUES</span></span>
+<span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line">SAVEPOINT before_change<span class="syntax-punctuation">;</span></span>
-<span class="source-line"><span class="syntax-keyword">UPDATE</span> isolation_solution <span class="syntax-keyword">SET</span> quantity <span class="syntax-operator">=</span> quantity <span class="syntax-operator">+</span> <span class="syntax-number">5</span> <span class="syntax-keyword">WHERE</span> id <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> isolation_solution <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">UPDATE</span></span>
+<span class="source-line">  isolation_solution</span>
+<span class="source-line"><span class="syntax-keyword">SET</span></span>
+<span class="source-line">  quantity <span class="syntax-operator">=</span> quantity <span class="syntax-operator">+</span> <span class="syntax-number">5</span></span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  id <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-operator">*</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  isolation_solution</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  id<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT before_change<span class="syntax-punctuation">;</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> isolation_solution <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-operator">*</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  isolation_solution</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  id<span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Manual Exercise 1, two terminals. Prepare the shared table once in either</span></span>
 <span class="source-line"><span class="syntax-comment">-- terminal before opening the two transactions:</span></span>
@@ -994,14 +1037,27 @@ COMMIT;</code></pre>
 <span class="source-line"><span class="syntax-comment">--</span></span>
 <span class="source-line"><span class="syntax-comment">-- Clean up after the manual exercises:</span></span>
 <span class="source-line"><span class="syntax-comment">-- DROP TABLE training.isolation_solution_shared;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 4: ROLLBACK TO keeps the named savepoint available. RELEASE removes</span></span>
 <span class="source-line"><span class="syntax-comment">-- it after the partial recovery is complete.</span></span>
 <span class="source-line">SAVEPOINT reusable_point<span class="syntax-punctuation">;</span></span>
-<span class="source-line"><span class="syntax-keyword">UPDATE</span> isolation_solution <span class="syntax-keyword">SET</span> quantity <span class="syntax-operator">=</span> quantity <span class="syntax-operator">+</span> <span class="syntax-number">1</span> <span class="syntax-keyword">WHERE</span> id <span class="syntax-operator">=</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">UPDATE</span></span>
+<span class="source-line">  isolation_solution</span>
+<span class="source-line"><span class="syntax-keyword">SET</span></span>
+<span class="source-line">  quantity <span class="syntax-operator">=</span> quantity <span class="syntax-operator">+</span> <span class="syntax-number">1</span></span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  id <span class="syntax-operator">=</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT reusable_point<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line">RELEASE SAVEPOINT reusable_point<span class="syntax-punctuation">;</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> isolation_solution <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-operator">*</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  isolation_solution</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  id<span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 5: both balance changes are one atomic unit. The guarded DO block</span></span>
 <span class="source-line"><span class="syntax-comment">-- raises before either UPDATE if the debit account cannot cover the transfer.</span></span>
@@ -1009,7 +1065,12 @@ COMMIT;</code></pre>
 <span class="source-line">  account_id <span class="syntax-builtin">int</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  balance <span class="syntax-builtin">numeric</span><span class="syntax-punctuation">(</span><span class="syntax-number">12</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">CHECK</span> <span class="syntax-punctuation">(</span>balance <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> transfer_accounts <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">.</span><span class="syntax-number">00</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">40</span><span class="syntax-punctuation">.</span><span class="syntax-number">00</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> transfer_accounts</span>
+<span class="source-line"><span class="syntax-keyword">VALUES</span></span>
+<span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">.</span><span class="syntax-number">00</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">40</span><span class="syntax-punctuation">.</span><span class="syntax-number">00</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">DO</span> $transfer$</span>
 <span class="source-line"><span class="syntax-keyword">DECLARE</span></span>
 <span class="source-line">  transfer_amount <span class="syntax-builtin">numeric</span><span class="syntax-punctuation">(</span><span class="syntax-number">12</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">:</span><span class="syntax-operator">=</span> <span class="syntax-number">25</span><span class="syntax-punctuation">.</span><span class="syntax-number">00</span><span class="syntax-punctuation">;</span></span>
@@ -1028,7 +1089,11 @@ COMMIT;</code></pre>
 <span class="source-line">  <span class="syntax-keyword">SET</span> balance <span class="syntax-operator">=</span> balance <span class="syntax-operator">+</span> transfer_amount <span class="syntax-keyword">WHERE</span> account_id <span class="syntax-operator">=</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$transfer$<span class="syntax-punctuation">;</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>balance<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> conserved_total <span class="syntax-keyword">FROM</span> transfer_accounts<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>balance<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> conserved_total</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  transfer_accounts<span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 6: an EXCEPTION block is implemented with an internal savepoint.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Catching the expected unique violation leaves the outer transaction usable.</span></span>
@@ -1041,12 +1106,15 @@ COMMIT;</code></pre>
 <span class="source-line">  <span class="syntax-keyword">END</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$recover_unique$<span class="syntax-punctuation">;</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> still_usable <span class="syntax-keyword">FROM</span> isolation_solution<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> still_usable</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  isolation_solution<span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 7 is a design answer: use REPEATABLE READ for several SELECTs that</span></span>
 <span class="source-line"><span class="syntax-comment">-- must describe one snapshot; READ COMMITTED is fine when per-statement</span></span>
 <span class="source-line"><span class="syntax-comment">-- freshness is intended. Read-only does not mean snapshot choice is irrelevant.</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>
       </section>

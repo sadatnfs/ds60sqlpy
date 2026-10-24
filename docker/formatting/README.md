@@ -14,7 +14,7 @@ services or change learner volumes.
 | Sources | Tool and pinned release |
 | --- | --- |
 | Python and Python notebook cells | Ruff 0.16.0 |
-| JavaScript, TypeScript, JSON, CSS, HTML, Markdown and YAML | Prettier 3.6.2 |
+| JavaScript, TypeScript, JSON, CSS, HTML and YAML | Prettier 3.6.2 |
 | Java | prettier-plugin-java 2.7.7 |
 | XML, including C# project files | @prettier/plugin-xml 3.4.2 |
 | TOML | prettier-plugin-toml 2.0.6 |
@@ -27,6 +27,13 @@ services or change learner volumes.
 | Shell | shfmt 3.12.0 |
 | Dockerfiles | dockerfmt 0.5.4 |
 | CMake | cmakelang 0.6.13 |
+
+Markdown is deliberately outside Prettier formatting. Prose, bare technical
+identifiers, inline code and ordinary fences retain their authored text. The
+repository's reviewed prose and mathematical normalizers own permitted text
+repairs. The separate statistics-book synchronizer updates only manifest-linked
+complete Python fences after independently proving AST equivalence with the
+styled example files. Other subjects' frozen fences remain unchanged.
 
 JavaScript and TypeScript linting uses ESLint 9.39.1, typescript-eslint 8.47.0,
 TypeScript 5.9.3 and globals 16.5.0. ShellCheck is supplied by Ubuntu 24.04.
@@ -73,8 +80,8 @@ docker run --rm --network none --read-only --tmpfs /tmp \
   <your-formatting-image> python3 docker/formatting/smoke.py
 ```
 
-It exercises every formatter, checks that a second pass is unchanged, and
-checks protected math, fenced code, SQL literals and psql directives. The
-public root script manages the actual local image tag. Use the smoke command
-when changing the toolchain itself, rather than as a substitute for repository
-checks.
+It exercises the configured syntax formatters, checks that a second pass is
+unchanged, and checks SQL literal and psql directive boundaries. Prose rendering
+and owned-fence synchronization have separate repository gates. The public root
+script manages the actual local image tag. Use the smoke command when changing
+the toolchain itself, alongside the repository checks.

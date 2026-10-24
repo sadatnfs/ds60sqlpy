@@ -1,11 +1,8 @@
 -- Migration 003: migrate existing rows, then validate the new relationship.
 \set ON_ERROR_STOP on
 BEGIN;
-
-SELECT pg_catalog.pg_advisory_xact_lock(
-    pg_catalog.hashtextextended('ds60sqlpy:pro_migration_lab', 0)
-);
-
+SELECT
+  pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended('ds60sqlpy:pro_migration_lab', 0));
 DO $preflight$
 DECLARE
     id_exists boolean;
@@ -55,19 +52,20 @@ BEGIN
     );
 END
 $preflight$;
-
-SELECT pg_catalog.current_setting('ds60.migration_applied')::boolean
-    AS migration_applied
+SELECT
+  pg_catalog.current_setting('ds60.migration_applied')::boolean AS migration_applied
 \gset
-
 \if :migration_applied
-    \echo 'Migration 003 identity and schema contract verified; skipping body'
+\echo 'Migration 003 identity and schema contract verified; skipping body'
 \else
-    UPDATE pro_migration_lab.service_requests AS sr
-    SET priority_code = sr.urgency_label
-    WHERE sr.priority_code IS NULL;
+UPDATE
+  pro_migration_lab.service_requests AS sr
+SET
+  priority_code = sr.urgency_label
+WHERE
+  sr.priority_code IS NULL;
 
-    DO $migration$
+DO $migration$
     BEGIN
         IF EXISTS (
             SELECT 1
@@ -79,19 +77,10 @@ SELECT pg_catalog.current_setting('ds60.migration_applied')::boolean
     END
     $migration$;
 
-    ALTER TABLE pro_migration_lab.service_requests
-        VALIDATE CONSTRAINT service_requests_priority_fk;
+ALTER TABLE pro_migration_lab.service_requests VALIDATE CONSTRAINT service_requests_priority_fk;
 
-    INSERT INTO pro_migration_lab.schema_migrations (
-        migration_id,
-        migration_name,
-        content_tag
-    )
-    VALUES (
-        3,
-        'backfill_priority',
-        'course-fixture-003-v1'
-    );
+INSERT INTO pro_migration_lab.schema_migrations (migration_id, migration_name, content_tag)
+  VALUES (3, 'backfill_priority', 'course-fixture-003-v1');
+
 \endif
-
 COMMIT;

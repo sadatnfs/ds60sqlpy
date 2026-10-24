@@ -58,8 +58,7 @@ class Element {
     this.value = this.value.slice(0, start) + text + this.value.slice(end);
   }
   dispatchEvent(event) {
-    for (const fn of this.handlers[event.type] || [])
-      fn({ ...event, target: this });
+    for (const fn of this.handlers[event.type] || []) fn({ ...event, target: this });
   }
 }
 function deferred() {
@@ -184,13 +183,10 @@ function environment({ browserPreviewClass } = {}) {
   };
   const reject = (request, message = "fixture failure") =>
     request.pending.reject(new Error(message));
-  const next = (action) =>
-    requests.findLast((item) => item.body.action === action);
+  const next = (action) => requests.findLast((item) => item.body.action === action);
   const event = (id, name = "click") => {
     const handlers = element(id).handlers[name] || [];
-    return Promise.all(
-      handlers.map((fn) => fn({ target: element(id), preventDefault() {} })),
-    );
+    return Promise.all(handlers.map((fn) => fn({ target: element(id), preventDefault() {} })));
   };
   return {
     context,
@@ -205,7 +201,8 @@ function environment({ browserPreviewClass } = {}) {
     next,
     event,
     windowHandlers,
-    documentEvent: (name, fields = {}) => Promise.all((documentHandlers.get(name) || []).map((fn) => fn({type:name,...fields}))),
+    documentEvent: (name, fields = {}) =>
+      Promise.all((documentHandlers.get(name) || []).map((fn) => fn({ type: name, ...fields }))),
     locations,
     location,
   };
@@ -229,10 +226,7 @@ await test("old save acknowledgement cannot mark newer draft saved", async () =>
   e.resolve(request, { session: {} });
   await saving;
   assert.match(e.element("save-state").textContent, /Unsaved/);
-  assert.equal(
-    JSON.parse(e.storage.get("ds60.classroom.unsaved.llm-009")).source,
-    "newer",
-  );
+  assert.equal(JSON.parse(e.storage.get("ds60.classroom.unsaved.llm-009")).source, "newer");
 });
 await test("latest save acknowledges the matching draft and clears only its backup", async () => {
   const e = environment();
@@ -255,10 +249,7 @@ await test("navigation while saving invalidates an old Run intent", async () => 
   e.run("intentVersion++;");
   e.resolve(e.next("module-save"), { session: {} });
   await clicked;
-  assert.equal(
-    e.requests.filter((r) => r.body.action === "module-run").length,
-    0,
-  );
+  assert.equal(e.requests.filter((r) => r.body.action === "module-run").length, 0);
   assert.match(e.element("status").textContent, /changed while saving/);
 });
 await test("double Run cannot submit two requests while the save is pending", async () => {
@@ -268,16 +259,10 @@ await test("double Run cannot submit two requests while the save is pending", as
   const first = e.event("run"),
     second = e.event("run");
   await settle();
-  assert.equal(
-    e.requests.filter((r) => r.body.action === "module-save").length,
-    1,
-  );
+  assert.equal(e.requests.filter((r) => r.body.action === "module-save").length, 1);
   e.resolve(e.next("module-save"), { session: {} });
   await settle();
-  assert.equal(
-    e.requests.filter((r) => r.body.action === "module-run").length,
-    1,
-  );
+  assert.equal(e.requests.filter((r) => r.body.action === "module-run").length, 1);
   e.resolve(e.next("module-run"), {
     job_id: "a",
     lesson_id: "llm-009",
@@ -309,8 +294,7 @@ await test("diagnostic jumps require exact current source and submitted filename
     job_id: "a",
     lesson_id: "llm-009",
     source: "one\ntwo\nthree",
-    output:
-      'File "/job/verify.py", line 88\nFile "/job/main.py", line 2\nValueError',
+    output: 'File "/job/verify.py", line 88\nFile "/job/main.py", line 2\nValueError',
   };
   assert.equal(e.run("sourceErrorLine(job)"), 2);
   e.context.job.output = 'File "/job/verify.py", line 2';
@@ -362,10 +346,7 @@ await test("overlapping poll requests use one in-flight request and one timer", 
   const first = e.run("poll()"),
     second = e.run("poll()");
   await settle();
-  assert.equal(
-    e.requests.filter((r) => r.body.action === "module-job").length,
-    1,
-  );
+  assert.equal(e.requests.filter((r) => r.body.action === "module-job").length, 1);
   e.resolve(e.next("module-job"), e.context.job);
   await Promise.all([first, second]);
   assert.equal([...e.timers.values()].filter((t) => t.ms === 1000).length, 1);
@@ -531,7 +512,9 @@ await test("curated PySpark alias selects its own session and preserves base nav
     },
   });
   await opening;
-  assert.equal(e.run("lesson().id"), "spark-013");
+  assert.equal(e.run("locate(lessonId).record.id"), "spark-013");
+  assert.equal(e.run("lessonId"), "spark-013@pyspark");
+  assert.equal(e.run("contextOf().id"), "spark-013@pyspark");
   assert.equal(e.element("variant").hidden, false);
   assert.equal(e.element("variant").value, "spark-013@pyspark");
   assert.equal(e.run("current.language"), "python");
@@ -669,17 +652,12 @@ await test("recovery refresh survives an older in-flight interrupted poll using 
   await clicked;
   e.resolve(oldRequest, job);
   await old;
-  const immediate = [...e.timers.entries()].filter(
-    ([, timer]) => timer.ms === 0,
-  );
+  const immediate = [...e.timers.entries()].filter(([, timer]) => timer.ms === 0);
   assert.equal(immediate.length, 1);
   e.timers.delete(immediate[0][0]);
   immediate[0][1].fn();
   await settle();
-  assert.equal(
-    e.requests.filter((r) => r.body.action === "module-job").length,
-    2,
-  );
+  assert.equal(e.requests.filter((r) => r.body.action === "module-job").length, 2);
   const result = { ...job, status: "failed" };
   e.resolve(e.next("module-job"), result);
   await settle();
@@ -707,10 +685,7 @@ await test("recovery that reconnects a live job does not claim operator recovery
   e.resolve(e.next("module-job"), running);
   await clicked;
   assert.equal(e.run("activeJob"), job.job_id);
-  assert.match(
-    e.element("status").textContent,
-    /No manual recovery was recorded/,
-  );
+  assert.match(e.element("status").textContent, /No manual recovery was recorded/);
   assert.equal(
     e.requests.some((r) => r.body.action === "module-run"),
     false,
@@ -822,10 +797,7 @@ await test("topic search finds method names across stages within the chosen jour
   await e.event("lesson-query", "input");
   assert.equal(e.element("stage").value, "all");
   assert.equal(e.element("lessons").children.length, 1);
-  assert.match(
-    e.element("lessons").children[0].children[0].textContent,
-    /statistics-019/,
-  );
+  assert.match(e.element("lessons").children[0].children[0].textContent, /statistics-019/);
 });
 
 await test("reading view keeps source and notes intact while changing layout", async () => {
@@ -840,10 +812,7 @@ await test("reading view keeps source and notes intact while changing layout", a
   assert.equal(e.element("authored").className, "panes");
   assert.equal(e.element("source").value, "retained source");
   assert.equal(e.element("explanation").value, "retained notes");
-  assert.equal(
-    e.requests.filter((r) => r.body.action !== "classroom-index").length,
-    0,
-  );
+  assert.equal(e.requests.filter((r) => r.body.action !== "classroom-index").length, 0);
 });
 await test("section navigation includes nested rendered chapter headings", async () => {
   const e = environment();
@@ -867,10 +836,7 @@ await test("section navigation includes nested rendered chapter headings", async
   e.run("renderSections()");
   assert.equal(e.element("section-jump").children.length, 3);
   assert.equal(e.element("section-jump").children[1].textContent, "Mechanism");
-  assert.equal(
-    e.element("section-jump").children[2].value,
-    "module-guide--stat-01-01",
-  );
+  assert.equal(e.element("section-jump").children[2].value, "module-guide--stat-01-01");
 });
 await test("journey progression respects canonical variants and planned boundaries", async () => {
   const e = environment();
@@ -935,10 +901,7 @@ await test("All stages preserves the selected variant and unsaved draft", async 
   assert.equal(e.run("lessonId"), "spark-013@pyspark");
   assert.equal(e.element("source").value, "my unsaved code");
   assert.equal(e.element("lessons").children.length, 2);
-  assert.equal(
-    e.requests.filter((r) => r.body.action !== "classroom-index").length,
-    0,
-  );
+  assert.equal(e.requests.filter((r) => r.body.action !== "classroom-index").length, 0);
 });
 await test("empty stage or search filters keep the current lesson without a request", async () => {
   const e = environment();
@@ -963,19 +926,13 @@ await test("empty stage or search filters keep the current lesson without a requ
   e.element("stage").value = "advanced";
   await e.event("stage", "change");
   assert.equal(e.element("lessons").children.length, 1);
-  assert.match(
-    e.element("lessons").children[0].textContent,
-    /No lessons match/,
-  );
+  assert.match(e.element("lessons").children[0].textContent, /No lessons match/);
   e.element("stage").value = "beginner";
   e.element("lesson-query").value = "no-such-topic";
   await e.event("stage", "change");
   assert.equal(e.run("lessonId"), "cpp-002");
   assert.equal(e.element("source").value, "retained");
-  assert.equal(
-    e.requests.filter((r) => r.body.action !== "classroom-index").length,
-    0,
-  );
+  assert.equal(e.requests.filter((r) => r.body.action !== "classroom-index").length, 0);
 });
 await test("a new stage filters options without silently navigating or saving a draft", async () => {
   const e = environment();
@@ -1198,9 +1155,7 @@ await test("legacy saves capture their language mode source and all five evidenc
   e.element("source").value = "new Java source";
   await resolveLegacySave(e, saving);
   assert.deepEqual(
-    e.requests
-      .filter((r) => r.body.action === "save")
-      .map((r) => [r.body.phase, r.body.note]),
+    e.requests.filter((r) => r.body.action === "save").map((r) => [r.body.phase, r.body.note]),
     [
       ["read", "read note"],
       ["predict", "my prediction"],
@@ -1229,28 +1184,22 @@ await test("SQL snippet whole-lesson and alternate language drafts have distinct
   e.element("source").value = "print(1)";
   await e.event("source", "input");
   assert.equal(
-    JSON.parse(e.storage.get("ds60.classroom.unsaved.bridge-001:sql:snippet"))
-      .source,
+    JSON.parse(e.storage.get("ds60.classroom.unsaved.bridge-001:sql:snippet")).source,
     "SELECT 42;",
   );
   assert.equal(
-    JSON.parse(e.storage.get("ds60.classroom.unsaved.bridge-001:sql:lesson"))
-      .source,
+    JSON.parse(e.storage.get("ds60.classroom.unsaved.bridge-001:sql:lesson")).source,
     "\\i setup.sql\nSELECT 7;",
   );
   assert.equal(
-    JSON.parse(
-      e.storage.get("ds60.classroom.unsaved.bridge-001:python:snippet"),
-    ).source,
+    JSON.parse(e.storage.get("ds60.classroom.unsaved.bridge-001:python:snippet")).source,
     "print(1)",
   );
 });
 await test("whole-lesson selection reads its own working copy and preserves intentionally empty pads", async () => {
   const e = environment();
   e.context.subject = { id: "sql", engine: "legacy" };
-  const loading = e.run(
-    "fetchLesson('sql-001',subject,{language:'sql',mode:'lesson'})",
-  );
+  const loading = e.run("fetchLesson('sql-001',subject,{language:'sql',mode:'lesson'})");
   e.resolve(e.next("lesson"), legacyData());
   await settle();
   assert.deepEqual(e.next("read-pad").body, {
@@ -1288,10 +1237,7 @@ await test("failed cross-subject saves keep the visible source and stop lesson f
   assert.equal(e.next("module-lesson"), undefined);
   assert.equal(e.run("current.id"), "a");
   assert.equal(e.element("source").value, "important draft");
-  assert.equal(
-    JSON.parse(e.storage.get("ds60.classroom.unsaved.a")).source,
-    "important draft",
-  );
+  assert.equal(JSON.parse(e.storage.get("ds60.classroom.unsaved.a")).source, "important draft");
 });
 await test("typing during a lesson load preserves the newer source instead of replacing it", async () => {
   const e = environment();
@@ -1362,9 +1308,7 @@ await test("partial legacy save failures preserve complete browser evidence for 
   await settle();
   e.reject(e.next("save"), "evidence disk failure");
   await assert.rejects(saving, /disk failure/);
-  const backup = JSON.parse(
-    e.storage.get("ds60.classroom.unsaved.py-001:python:snippet"),
-  );
+  const backup = JSON.parse(e.storage.get("ds60.classroom.unsaved.py-001:python:snippet"));
   assert.equal(backup.source, "print(42)");
   assert.equal(backup.evidence.attempt, "attempt note");
   assert.match(e.element("save-state").textContent, /Server save failed/);
@@ -1418,10 +1362,7 @@ await test("late legacy output stays attached to its submitted lesson and pad", 
   };
   e.run("showLegacyResult(result,receiptContext,'SELECT 42;')");
   assert.equal(e.element("output").textContent, "Java workspace unchanged");
-  assert.equal(
-    e.run("legacyReceipts.get('sql-001:sql:snippet').source"),
-    "SELECT 42;",
-  );
+  assert.equal(e.run("legacyReceipts.get('sql-001:sql:snippet').source"), "SELECT 42;");
 });
 await test("browser back waits for saves and restores the current route on failure", async () => {
   const e = environment();
@@ -1539,11 +1480,31 @@ await test("editor Escape allows keyboard users to leave the Tab-indenting pad",
 await test("all registered subject accents meet text contrast in both appearances", async () => {
   const e = environment();
   const palette = e.run("themes");
-  assert.deepEqual(new Set(Object.keys(palette)), new Set([
-    "python", "sql", "bridge", "kubernetes", "cpp", "java", "c", "go", "csharp", "rust",
-    "swift", "docker", "javascript-typescript", "scala-spark", "deep-learning-tensorflow",
-    "deep-learning-pytorch", "llm-theory", "llm-applied", "nlp", "statistics-ml",
-  ]));
+  assert.deepEqual(
+    new Set(Object.keys(palette)),
+    new Set([
+      "python",
+      "sql",
+      "bridge",
+      "kubernetes",
+      "cpp",
+      "java",
+      "c",
+      "go",
+      "csharp",
+      "rust",
+      "swift",
+      "docker",
+      "javascript-typescript",
+      "scala-spark",
+      "deep-learning-tensorflow",
+      "deep-learning-pytorch",
+      "llm-theory",
+      "llm-applied",
+      "nlp",
+      "statistics-ml",
+    ]),
+  );
   const luminance = (hex) => {
     const rgb = hex
       .slice(1)
@@ -1593,10 +1554,7 @@ await test("console stdout and stderr explicitly use readable code colors in bot
   const css = fs.readFileSync(filename.replace(/\.js$/, ".css"), "utf8");
   const declarations = (text) =>
     Object.fromEntries(
-      [...text.matchAll(/(--[a-z-]+)\s*:\s*([^;]+);/g)].map((match) => [
-        match[1],
-        match[2].trim(),
-      ]),
+      [...text.matchAll(/(--[a-z-]+)\s*:\s*([^;]+);/g)].map((match) => [match[1], match[2].trim()]),
     );
   const light = declarations(css.match(/:root\s*\{([^}]+)\}/)[1]);
   const dark = {
@@ -1611,16 +1569,13 @@ await test("console stdout and stderr explicitly use readable code colors in bot
       .slice(1)
       .match(/../g)
       .map((value) => parseInt(value, 16) / 255)
-      .map((value) =>
-        value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4,
-      );
+      .map((value) => (value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4));
     return 0.2126 * values[0] + 0.7152 * values[1] + 0.0722 * values[2];
   };
   for (const [appearance, tokens] of Object.entries({ light, dark })) {
-    const values = [
-      luminance(tokens["--code-text"]),
-      luminance(tokens["--code-bg"]),
-    ].sort((a, b) => b - a);
+    const values = [luminance(tokens["--code-text"]), luminance(tokens["--code-bg"])].sort(
+      (a, b) => b - a,
+    );
     assert.ok(
       (values[0] + 0.05) / (values[1] + 0.05) >= 7,
       appearance + " console contrast meets 7:1",
@@ -1629,8 +1584,7 @@ await test("console stdout and stderr explicitly use readable code colors in bot
 });
 function guideLink(e, href, modifiers = {}) {
   const anchor = {
-    getAttribute: (name) =>
-      name === "href" ? href : (modifiers.attributes?.[name] ?? null),
+    getAttribute: (name) => (name === "href" ? href : (modifiers.attributes?.[name] ?? null)),
   };
   let prevented = false;
   const event = {
@@ -1680,12 +1634,8 @@ await test("mapped cross-lesson links wait for the current draft save and remain
   e.element("source").value = "retained draft";
   const heading = e.element("module-guide--attention");
   heading.id = "module-guide--attention";
-  e.element("guide").querySelectorAll = (selector) =>
-    selector === "[id]" ? [heading] : [];
-  const link = guideLink(
-    e,
-    "/reference-pages/courses/llm-theory/guides/002.md.html#attention",
-  );
+  e.element("guide").querySelectorAll = (selector) => (selector === "[id]" ? [heading] : []);
+  const link = guideLink(e, "/reference-pages/courses/llm-theory/guides/002.md.html#attention");
   const following = link.follow();
   await settle();
   assert.equal(link.prevented(), true);
@@ -1705,10 +1655,7 @@ await test("mapped links preserve the old lesson and URL when its save fails", a
   linkedPlan(e);
   e.current("llm-001");
   e.element("source").value = "important";
-  const link = guideLink(
-    e,
-    "/reference-pages/courses/llm-theory/guides/002.md.html",
-  );
+  const link = guideLink(e, "/reference-pages/courses/llm-theory/guides/002.md.html");
   const following = link.follow();
   await settle();
   e.reject(e.next("module-save"), "disk unavailable");
@@ -1720,35 +1667,17 @@ await test("mapped links preserve the old lesson and URL when its save fails", a
 });
 await test("external modified and new-tab guide clicks keep normal browser behavior", async () => {
   for (const [href, modifiers] of [
-    [
-      "https://example.org/reference-pages/courses/llm-theory/guides/002.md.html",
-      {},
-    ],
-    [
-      "/reference-pages/courses/llm-theory/guides/002.md.html",
-      { ctrlKey: true },
-    ],
-    [
-      "/reference-pages/courses/llm-theory/guides/002.md.html",
-      { metaKey: true },
-    ],
-    [
-      "/reference-pages/courses/llm-theory/guides/002.md.html",
-      { shiftKey: true },
-    ],
-    [
-      "/reference-pages/courses/llm-theory/guides/002.md.html",
-      { altKey: true },
-    ],
+    ["https://example.org/reference-pages/courses/llm-theory/guides/002.md.html", {}],
+    ["/reference-pages/courses/llm-theory/guides/002.md.html", { ctrlKey: true }],
+    ["/reference-pages/courses/llm-theory/guides/002.md.html", { metaKey: true }],
+    ["/reference-pages/courses/llm-theory/guides/002.md.html", { shiftKey: true }],
+    ["/reference-pages/courses/llm-theory/guides/002.md.html", { altKey: true }],
     ["/reference-pages/courses/llm-theory/guides/002.md.html", { button: 1 }],
     [
       "/reference-pages/courses/llm-theory/guides/002.md.html",
       { attributes: { target: "_blank" } },
     ],
-    [
-      "/reference-pages/courses/llm-theory/guides/002.md.html",
-      { attributes: { download: "" } },
-    ],
+    ["/reference-pages/courses/llm-theory/guides/002.md.html", { attributes: { download: "" } }],
   ]) {
     const e = environment();
     linkedPlan(e);
@@ -1778,17 +1707,13 @@ await test("a missing lesson link map leaves references safe while known reader 
   const e = environment(),
     { b } = linkedPlan(e);
   e.run("delete index.lesson_links;");
-  const reference = guideLink(
-    e,
-    "/reference-pages/courses/llm-theory/guides/002.md.html",
-  );
+  const reference = guideLink(e, "/reference-pages/courses/llm-theory/guides/002.md.html");
   await reference.follow();
   assert.equal(reference.prevented(), false);
   const reader = guideLink(e, "/lesson-pages/llm-002.html#guide--attention");
   const heading = e.element("module-guide--attention");
   heading.id = "module-guide--attention";
-  e.element("guide").querySelectorAll = (selector) =>
-    selector === "[id]" ? [heading] : [];
+  e.element("guide").querySelectorAll = (selector) => (selector === "[id]" ? [heading] : []);
   const following = reader.follow();
   await settle();
   e.resolve(e.next("module-lesson"), moduleData(b));
@@ -1801,12 +1726,8 @@ await test("late mapped-link results cannot scroll an unrelated newer lesson", a
     { b } = linkedPlan(e);
   const heading = e.element("module-guide--attention");
   heading.id = "module-guide--attention";
-  e.element("guide").querySelectorAll = (selector) =>
-    selector === "[id]" ? [heading] : [];
-  const link = guideLink(
-    e,
-    "/reference-pages/courses/llm-theory/guides/002.md.html#attention",
-  );
+  e.element("guide").querySelectorAll = (selector) => (selector === "[id]" ? [heading] : []);
+  const link = guideLink(e, "/reference-pages/courses/llm-theory/guides/002.md.html#attention");
   const following = link.follow();
   await settle();
   const pending = e.next("module-lesson");
@@ -1817,11 +1738,7 @@ await test("late mapped-link results cannot scroll an unrelated newer lesson", a
   assert.equal(e.run("current.id"), "java-001");
   assert.notEqual(heading.focused, true);
 });
-function receiptFixture(
-  context,
-  id = "saved-1",
-  source = 'print("earlier")\n',
-) {
+function receiptFixture(context, id = "saved-1", source = 'print("earlier")\n') {
   return {
     id,
     saved_at: "2026-10-23T21:10:00+00:00",
@@ -1880,9 +1797,7 @@ await test("saved run history restores the latest durable output without replayi
   assert.equal(e.element("error-line").hidden, true);
   assert.equal(
     e.requests.some((request) =>
-      ["run", "run-lesson", "module-run", "save-pad"].includes(
-        request.body.action,
-      ),
+      ["run", "run-lesson", "module-run", "save-pad"].includes(request.body.action),
     ),
     false,
   );
@@ -1941,8 +1856,7 @@ await test("choosing an earlier receipt shows its recorded source without replac
   );
   assert.equal(e.element("output").textContent, "earlier output");
   const sourceBlock = e.element("receipt-source").children[0];
-  const coloredSource =
-    '<span class="syntax-builtin">print</span>("old code")\n';
+  const coloredSource = '<span class="syntax-builtin">print</span>("old code")\n';
   e.resolve(e.next("classroom-highlight"), { html: coloredSource });
   await settle();
   assert.equal(e.element("receipt-source").children[0], sourceBlock);
@@ -1953,9 +1867,7 @@ await test("choosing an earlier receipt shows its recorded source without replac
   assert.equal(e.element("source").value, "newer code");
   assert.equal(
     e.requests.some((request) =>
-      ["run", "run-lesson", "module-run", "save-pad"].includes(
-        request.body.action,
-      ),
+      ["run", "run-lesson", "module-run", "save-pad"].includes(request.body.action),
     ),
     false,
   );
@@ -1974,19 +1886,11 @@ await test("receipt save failures preserve actual output and explicitly avoid cl
   };
   e.run("showLegacyResult(result,receiptContext,'print(42)')");
   assert.equal(e.element("output").textContent, "actual completed result");
-  assert.match(
-    e.element("run-storage-status").textContent,
-    /could not be saved/,
-  );
+  assert.match(e.element("run-storage-status").textContent, /could not be saved/);
   assert.match(e.element("run-storage-status").textContent, /Disk full/);
-  assert.match(
-    e.element("run-storage-status").textContent,
-    /No automatic retry/,
-  );
+  assert.match(e.element("run-storage-status").textContent, /No automatic retry/);
   assert.equal(
-    e.requests.some((request) =>
-      ["run", "run-lesson", "module-run"].includes(request.body.action),
-    ),
+    e.requests.some((request) => ["run", "run-lesson", "module-run"].includes(request.body.action)),
     false,
   );
 });
@@ -2059,7 +1963,7 @@ await test("expanded compiler diagnostics bind exact source names and reject hel
   for (const [language, output] of fixtures) {
     e.current("fixture-001", language);
     e.element("source").value = "one\ntwo\nthree";
-    e.context.job = {lesson_id:"fixture-001",language,source:"one\ntwo\nthree",output};
+    e.context.job = { lesson_id: "fixture-001", language, source: "one\ntwo\nthree", output };
     assert.equal(e.run("sourceErrorLine(job)"), 2, output);
     e.context.job.lesson_id = "older-001";
     assert.equal(e.run("sourceErrorLine(job)"), null, "old lesson cannot jump");
@@ -2084,20 +1988,34 @@ await test("expanded compiler diagnostics bind exact source names and reject hel
   ];
   for (const [language, output] of rejected) {
     e.current("fixture-001", language);
-    e.context.job = {lesson_id:"fixture-001",language,source:e.element("source").value,output};
+    e.context.job = {
+      lesson_id: "fixture-001",
+      language,
+      source: e.element("source").value,
+      output,
+    };
     assert.equal(e.run("sourceErrorLine(job)"), null, output);
   }
-  for (const [language, filename] of [["c","main.c"],["go","main.go"],["rust","main.rs"],["swift","main.swift"]]) {
+  for (const [language, filename] of [
+    ["c", "main.c"],
+    ["go", "main.go"],
+    ["rust", "main.rs"],
+    ["swift", "main.swift"],
+  ]) {
     e.current("fixture-001", language);
-    e.context.job = {lesson_id:"fixture-001",language,source:e.element("source").value};
+    e.context.job = { lesson_id: "fixture-001", language, source: e.element("source").value };
     for (const line of [0, 4, "9007199254740993"]) {
       e.context.job.output = `${filename}:${line}:2: error`;
       assert.equal(e.run("sourceErrorLine(job)"), null, `${language} invalid line ${line}`);
     }
   }
   e.current("fixture-001", "go");
-  e.context.job = {lesson_id:"fixture-001",language:"go",source:e.element("source").value,
-    output:"/usr/local/go/src/runtime/main.go:1\n/tmp/job/main.go:2 +0x123"};
+  e.context.job = {
+    lesson_id: "fixture-001",
+    language: "go",
+    source: e.element("source").value,
+    output: "/usr/local/go/src/runtime/main.go:1\n/tmp/job/main.go:2 +0x123",
+  };
   assert.equal(e.run("sourceErrorLine(job)"), 2);
 });
 
@@ -2109,22 +2027,34 @@ function fullscreenEnvironment() {
       this.active = true;
       this.starts = 0;
       this.stops = 0;
-      this.latest = {source:"submitted chart",output:"saved observation",status:"succeeded"};
+      this.latest = { source: "submitted chart", output: "saved observation", status: "succeeded" };
       container.replaceChildren(this.frame);
     }
-    start() { this.starts++; throw new Error("Fullscreen must never rerun source"); }
-    stop() { this.stops++; this.active=false;this.frame=null;this.container.replaceChildren(); }
-    snapshot() { return {...this.latest}; }
+    start() {
+      this.starts++;
+      throw new Error("Fullscreen must never rerun source");
+    }
+    stop() {
+      this.stops++;
+      this.active = false;
+      this.frame = null;
+      this.container.replaceChildren();
+    }
+    snapshot() {
+      return { ...this.latest };
+    }
   }
-  const e = environment({browserPreviewClass:Preview});
+  const e = environment({ browserPreviewClass: Preview });
   e.current("js-043", "javascript");
   e.element("source").value = "newer unsaved draft";
   e.storage.set("ds60.classroom.unsaved.js-043", "retained backup");
-  const panel = e.element("browser-preview-panel"), doc = e.context.document;
+  const panel = e.element("browser-preview-panel"),
+    doc = e.context.document;
   panel.hidden = false;
   doc.fullscreenEnabled = true;
   doc.fullscreenElement = null;
-  let enters = 0, exits = 0;
+  let enters = 0,
+    exits = 0;
   panel.requestFullscreen = async () => {
     enters++;
     doc.fullscreenElement = panel;
@@ -2136,11 +2066,13 @@ function fullscreenEnvironment() {
     await e.documentEvent("fullscreenchange");
   };
   e.run("updateBrowserFullscreenControls()");
-  return {...e,panel,doc,preview:e.run("browserPreview"),counts:()=>({enters,exits})};
+  return { ...e, panel, doc, preview: e.run("browserPreview"), counts: () => ({ enters, exits }) };
 }
 await test("fullscreen toggles the same iframe without saving or running learner source", async () => {
-  const e = fullscreenEnvironment(), frame = e.preview.frame,
-    before = e.preview.snapshot(), requests = e.requests.length;
+  const e = fullscreenEnvironment(),
+    frame = e.preview.frame,
+    before = e.preview.snapshot(),
+    requests = e.requests.length;
   assert.equal(e.element("browser-fullscreen").hidden, false);
   await e.event("browser-fullscreen");
   assert.equal(e.doc.fullscreenElement, e.panel);
@@ -2161,9 +2093,10 @@ await test("fullscreen toggles the same iframe without saving or running learner
   assert.equal(e.storage.get("ds60.classroom.unsaved.js-043"), "retained backup");
 });
 await test("Escape exits presentation while retaining the active visualization", async () => {
-  const e = fullscreenEnvironment(), frame = e.preview.frame;
+  const e = fullscreenEnvironment(),
+    frame = e.preview.frame;
   await e.event("browser-fullscreen");
-  await e.documentEvent("keydown", {key:"Escape"});
+  await e.documentEvent("keydown", { key: "Escape" });
   await settle();
   assert.equal(e.doc.fullscreenElement, null);
   // The browser can also end fullscreen without a parent keydown event.
@@ -2178,7 +2111,8 @@ await test("Escape exits presentation while retaining the active visualization",
   assert.equal(e.preview.stops, 0);
 });
 await test("unsupported or denied fullscreen preserves the chart and gives a readable result", async () => {
-  const e = fullscreenEnvironment(), frame = e.preview.frame;
+  const e = fullscreenEnvironment(),
+    frame = e.preview.frame;
   e.doc.fullscreenEnabled = false;
   e.run("updateBrowserFullscreenControls()");
   assert.equal(e.element("browser-fullscreen").hidden, true);
@@ -2194,9 +2128,13 @@ await test("unsupported or denied fullscreen preserves the chart and gives a rea
   assert.equal(e.element("source").value, "newer unsaved draft");
 });
 await test("navigation during pending fullscreen cannot leave a stopped preview fullscreen", async () => {
-  const e = fullscreenEnvironment(), entered = deferred();
+  const e = fullscreenEnvironment(),
+    entered = deferred();
   let requests = 0;
-  e.panel.requestFullscreen = () => { requests++; return entered.promise; };
+  e.panel.requestFullscreen = () => {
+    requests++;
+    return entered.promise;
+  };
   const entering = e.run("toggleBrowserFullscreen()");
   await e.run("toggleBrowserFullscreen()");
   assert.equal(requests, 1);

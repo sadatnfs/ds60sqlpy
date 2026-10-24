@@ -8,10 +8,9 @@
 // Task 6: Design durable atomic storage for an effect and its receipt and state remaining failure modes.
 using System;
 
-internal static class Program
-{
-    private static void Main()
-    {
-        throw new NotImplementedException("Implement your own lesson attempt before running.");
-    }
+internal static class Program {
+  private static void Main() {
+    throw new NotImplementedException(
+        "Implement your own lesson attempt before running.");
+  }
 }

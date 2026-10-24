@@ -18,43 +18,55 @@
 --
 -- Prerequisite: sql-start-03 (query construction and debugging on-ramp).
 -- Focus: Query execution order and basic filtering/sorting
-
 BEGIN;
 SET search_path TO training, public;
-
 -- Study contract
 -- Focus: Build a result deliberately from projection, filtering, deterministic ordering, and a bounded row count.
 -- Assumptions: Timestamps are `timestamptz`; relative-date exercises use the database clock. A result is stable only when its final sort key breaks ties.
 -- Pitfall: Never use `= NULL`, depend on implicit row order, or apply `LIMIT` without first defining which rows are first.
 -- Predict row grain and NULL/order behavior before executing each example.
-
 -- Example 1: Select specific columns with filtering and sorting
-SELECT customer_id, full_name, country, created_at
-FROM customers
-WHERE country IN ('US','CA')
--- `customer_id` makes ties on the timestamp deterministic before LIMIT.
-ORDER BY created_at DESC, customer_id DESC
+SELECT
+  customer_id,
+  full_name,
+  country,
+  created_at
+FROM
+  customers
+WHERE
+  country IN ('US', 'CA')
+  -- `customer_id` makes ties on the timestamp deterministic before LIMIT.
+ORDER BY
+  created_at DESC,
+  customer_id DESC
 LIMIT 10;
-
 -- Example 2: Derived column and alias
-SELECT 
+SELECT
   product_id,
   name,
   price,
   cost,
-  (price - cost) AS gross_margin
-FROM products
-WHERE price > 50
-ORDER BY gross_margin DESC, price DESC, product_id
+  (price -
+    cost) AS gross_margin
+FROM
+  products
+WHERE
+  price > 50
+ORDER BY
+  gross_margin DESC,
+  price DESC,
+  product_id
 LIMIT 15;
-
 -- Example 3: Basic filtering with patterns
-SELECT *
-FROM customers
-WHERE email LIKE '%@example.com'
+SELECT
+  *
+FROM
+  customers
+WHERE
+  email LIKE '%@example.com'
   AND full_name ILIKE 'customer %1_'
-ORDER BY customer_id;
-
+ORDER BY
+  customer_id;
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.
@@ -94,5 +106,4 @@ ORDER BY customer_id;
 --    Expected result/shape: For sql-01 Exercise 6, expected output: Up to 10 rows strictly after the first page with no overlap. The final columns are `order_id`, `customer_id`, `total_amount`, and `order_date`. The final order is `o.order_date DESC, o.order_id DESC`.
 --    Verify: For sql-01 Exercise 6, assert no more than 10 rows, no duplicate `order_id`, and no adjacent pair that violates `o.order_date DESC, o.order_id DESC`. Rejoin the returned keys to `orders` to confirm `order_id`, `customer_id`, `total_amount`, and `order_date` came from the same source rows. Give two rows the same `o.order_date DESC` value and different `o.order_id DESC` values; verify `o.order_date DESC, o.order_id DESC` produces the intended rank and display order.
 --    Hint ladder, rung 1: For sql-01 Exercise 6, run `first_page`, and `cursor_row` one at a time. Record each CTE's row count and `order_id` uniqueness before the next stage uses it.
-
 ROLLBACK;

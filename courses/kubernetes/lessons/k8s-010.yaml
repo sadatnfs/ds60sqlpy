@@ -21,36 +21,35 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       containers:
-      - name: hello
-        image: ds60sqlpy-k8s-fixture:0.2.0
-        imagePullPolicy: Never
-        command:
-        - python
-        - /fixture.py
-        - server
-        ports:
-        - name: http
-          containerPort: 8080
-        readinessProbe:
-          httpGet:
-            path: /ready
-            port: http
-          periodSeconds: 2
-          failureThreshold: 2
-        resources:
-          requests:
-            cpu: 10m
-            memory: 16Mi
-          limits:
-            cpu: 100m
-            memory: 64Mi
-        securityContext:
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: true
-          capabilities:
-            drop:
-            - ALL
-
+        - name: hello
+          image: ds60sqlpy-k8s-fixture:0.2.0
+          imagePullPolicy: Never
+          command:
+            - python
+            - /fixture.py
+            - server
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            periodSeconds: 2
+            failureThreshold: 2
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
 # Exercise 1: Read requests versus limits. Identify the source request/limit fields and explain their roles. Expected: 10m/16Mi requests and100m/64Mi limits in the baseline;requests influence placement,limits constrain runtime.
 # Exercise 2: Calculate the replica budget. Sum requests for two replicas and convert64Mi to bytes. Expected: 20m CPU,32Mi memory and67,108,864 bytes for64Mi.
 # Exercise 3: Reject invalid source budgets. Compare request200m with limit100m in a scratch source. Expected: Broker refuses requests greater than limits before creating resources.

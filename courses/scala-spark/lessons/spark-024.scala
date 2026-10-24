@@ -2,17 +2,27 @@ import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
-
 object Main {
-  def canonicalRows(frame: DataFrame): Seq[(Long,Long,Long,Long)] = {
-    frame.collect().toSeq.map(r => (r.getLong(0),r.getLong(1),r.getLong(2),r.getLong(3))).sortBy(_._1)
+  def canonicalRows(frame: DataFrame): Seq[(Long, Long, Long, Long)] = {
+    frame
+      .collect()
+      .toSeq
+      .map(r => (r.getLong(0), r.getLong(1), r.getLong(2), r.getLong(3)))
+      .sortBy(_._1)
   }
-  def partitionLoads(frame: DataFrame, keys: Seq[String]): Seq[(Int,Long)] = {
-    frame.repartition(8,keys.map(col):_*).select(spark_partition_id().as("pid"))
-      .groupBy("pid").count().collect().toSeq.map(r => (r.getInt(0),r.getLong(1))).sortBy(_._1)
+  def partitionLoads(frame: DataFrame, keys: Seq[String]): Seq[(Int, Long)] = {
+    frame
+      .repartition(8, keys.map(col): _*)
+      .select(spark_partition_id().as("pid"))
+      .groupBy("pid")
+      .count()
+      .collect()
+      .toSeq
+      .map(r => (r.getInt(0), r.getLong(1)))
+      .sortBy(_._1)
   }
 
-  def keyFrequencies(facts: DataFrame): Seq[(Long,Long)] =
+  def keyFrequencies(facts: DataFrame): Seq[(Long, Long)] =
     throw new UnsupportedOperationException("Complete keyFrequencies")
 
   def baselineJoin(facts: DataFrame, dimension: DataFrame): DataFrame =
@@ -32,27 +42,41 @@ object Main {
 
   def main(args: Array[String]): Unit = {
 
-    val spark = SparkSession.builder().appName("ds60-spark-024").master("local[2]")
-      .config("spark.ui.enabled","false")
-      .config("spark.driver.host","127.0.0.1")
-      .config("spark.driver.bindAddress","127.0.0.1")
-      .config("spark.sql.shuffle.partitions","2")
-      .config("spark.sql.adaptive.enabled","false")
-      .config("spark.sql.ansi.enabled","true")
-      .config("spark.sql.session.timeZone","UTC").getOrCreate()
+    val spark = SparkSession
+      .builder()
+      .appName("ds60-spark-024")
+      .master("local[2]")
+      .config("spark.ui.enabled", "false")
+      .config("spark.driver.host", "127.0.0.1")
+      .config("spark.driver.bindAddress", "127.0.0.1")
+      .config("spark.sql.shuffle.partitions", "2")
+      .config("spark.sql.adaptive.enabled", "false")
+      .config("spark.sql.ansi.enabled", "true")
+      .config("spark.sql.session.timeZone", "UTC")
+      .getOrCreate()
     try {
       require(spark.sparkContext.master == "local[2]", "local-only course session")
       spark.sparkContext.setLogLevel("ERROR")
-      spark.conf.set("spark.sql.autoBroadcastJoinThreshold","-1")
-      spark.conf.set("spark.sql.adaptive.autoBroadcastJoinThreshold","-1")
-      spark.conf.set("spark.sql.join.preferSortMergeJoin","true")
-      spark.conf.set("spark.sql.shuffle.partitions","4")
-      val facts = spark.range(0L,10000L,1L,4).withColumnRenamed("id","fact_id").withColumn("key",when(col("fact_id") < 9000L,0L).otherwise((col("fact_id") - 9000L) % 10L + 1L)).withColumn("amount",lit(1L))
-      val dimension = spark.range(0L,11L,1L,2).withColumnRenamed("id","key").withColumn("factor",col("key") + 1L)
+      spark.conf.set("spark.sql.autoBroadcastJoinThreshold", "-1")
+      spark.conf.set("spark.sql.adaptive.autoBroadcastJoinThreshold", "-1")
+      spark.conf.set("spark.sql.join.preferSortMergeJoin", "true")
+      spark.conf.set("spark.sql.shuffle.partitions", "4")
+      val facts = spark
+        .range(0L, 10000L, 1L, 4)
+        .withColumnRenamed("id", "fact_id")
+        .withColumn(
+          "key",
+          when(col("fact_id") < 9000L, 0L).otherwise((col("fact_id") - 9000L) % 10L + 1L)
+        )
+        .withColumn("amount", lit(1L))
+      val dimension = spark
+        .range(0L, 11L, 1L, 2)
+        .withColumnRenamed("id", "key")
+        .withColumn("factor", col("key") + 1L)
       locally {
         val hot = facts.filter(col("key") === 0L).count()
         assert(hot == 9000L && hot.toDouble / 10000.0 == 0.9)
-        println("Observed hot-key fraction=" + hot.toDouble/10000.0)
+        println("Observed hot-key fraction=" + hot.toDouble / 10000.0)
       }
       locally {
         val expectedWeighted = 9000L + 100L * (2L to 11L).sum
@@ -60,7 +84,10 @@ object Main {
         println("Weighted-total conservation oracle=" + expectedWeighted)
       }
       println("spark-024: worked examples passed; six task implementations remain")
-    } finally { try { () } finally { spark.stop() } }
+    } finally {
+      try { () }
+      finally { spark.stop() }
+    }
   }
 }
 

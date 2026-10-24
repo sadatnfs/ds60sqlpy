@@ -2,7 +2,6 @@ import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
-
 object Main {
   def ids(frame: DataFrame): Seq[Long] =
     frame.select("event_id").orderBy("event_id").collect().map(_.getLong(0)).toSeq
@@ -26,32 +25,54 @@ object Main {
     throw new UnsupportedOperationException("Complete sqlIds")
 
   def main(args: Array[String]): Unit = {
-    val spark = SparkSession.builder().appName("ds60-spark-011").master("local[2]")
-      .config("spark.ui.enabled","false")
-      .config("spark.driver.host","127.0.0.1")
-      .config("spark.driver.bindAddress","127.0.0.1")
-      .config("spark.sql.shuffle.partitions","2")
-      .config("spark.sql.adaptive.enabled","false")
-      .config("spark.sql.ansi.enabled","true")
-      .config("spark.sql.session.timeZone","UTC").getOrCreate()
+    val spark = SparkSession
+      .builder()
+      .appName("ds60-spark-011")
+      .master("local[2]")
+      .config("spark.ui.enabled", "false")
+      .config("spark.driver.host", "127.0.0.1")
+      .config("spark.driver.bindAddress", "127.0.0.1")
+      .config("spark.sql.shuffle.partitions", "2")
+      .config("spark.sql.adaptive.enabled", "false")
+      .config("spark.sql.ansi.enabled", "true")
+      .config("spark.sql.session.timeZone", "UTC")
+      .getOrCreate()
     try {
       require(spark.sparkContext.master == "local[2]", "local-only course session")
       spark.sparkContext.setLogLevel("ERROR")
-      val schema = StructType(Seq(
-        StructField("event_id",LongType,false),
-        StructField("amount_cents",LongType,true)))
-      val rows = Seq(Row(1L,0L),Row(2L,20L),Row(3L,null),Row(4L,20L))
-      val raw = spark.createDataFrame(spark.sparkContext.parallelize(rows,2),schema)
+      val schema = StructType(
+        Seq(StructField("event_id", LongType, false), StructField("amount_cents", LongType, true))
+      )
+      val rows = Seq(Row(1L, 0L), Row(2L, 20L), Row(3L, null), Row(4L, 20L))
+      val raw = spark.createDataFrame(spark.sparkContext.parallelize(rows, 2), schema)
       locally {
         val driverValue: Boolean = 3 > 1
         val predicate: Column = col("amount_cents") > lit(10L)
         assert(driverValue)
-        assert(raw.filter(predicate).select("event_id").orderBy("event_id").collect().map(_.getLong(0)).toSeq == Seq(2L,4L))
+        assert(
+          raw
+            .filter(predicate)
+            .select("event_id")
+            .orderBy("event_id")
+            .collect()
+            .map(_.getLong(0))
+            .toSeq == Seq(2L, 4L)
+        )
         println("A Column describes row-wise engine work")
       }
       locally {
-        val missing = raw.filter(col("amount_cents").isNull).select("event_id").collect().map(_.getLong(0)).toSeq
-        val zero = raw.filter(col("amount_cents") === lit(0L)).select("event_id").collect().map(_.getLong(0)).toSeq
+        val missing = raw
+          .filter(col("amount_cents").isNull)
+          .select("event_id")
+          .collect()
+          .map(_.getLong(0))
+          .toSeq
+        val zero = raw
+          .filter(col("amount_cents") === lit(0L))
+          .select("event_id")
+          .collect()
+          .map(_.getLong(0))
+          .toSeq
         assert(missing == Seq(3L) && zero == Seq(1L))
         println("Missing amount and observed zero are different rows")
       }

@@ -30,13 +30,16 @@
 #include <variant>
 #include <vector>
 
-constexpr int release_schema=1;
+constexpr int release_schema = 1;
 int main() {
-    static_assert(release_schema==1);std::vector<int> fixture{1,2,3};if(std::accumulate(fixture.begin(),fixture.end(),0)!=6)return 1;std::cout << "schema=1 rows=3 total=6\n";
-    std::cout << "cpp-041 examples passed\n";
-    return 0;
+  static_assert(release_schema == 1);
+  std::vector<int> fixture{1, 2, 3};
+  if (std::accumulate(fixture.begin(), fixture.end(), 0) != 6)
+    return 1;
+  std::cout << "schema=1 rows=3 total=6\n";
+  std::cout << "cpp-041 examples passed\n";
+  return 0;
 }
-
 
 // Exercise 1: Inventory the release. Record source revision or content hashes plus compiler/architecture. Expected: All identities present without machine-specific source paths.
 // Exercise 2: Compare build modes. Run always-active checks in Debug and Release host builds. Expected: Both report rows=3,total=6 and actual executed test count.

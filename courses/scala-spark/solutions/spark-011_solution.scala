@@ -2,7 +2,6 @@ import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
-
 object Main {
   def ids(frame: DataFrame): Seq[Long] =
     frame.select("event_id").orderBy("event_id").collect().map(_.getLong(0)).toSeq
@@ -20,52 +19,72 @@ object Main {
   }
 
   def combinedIds(frame: DataFrame): Seq[Long] = {
-    ids(frame.filter(col("amount_cents").isNotNull && (col("amount_cents") >= lit(10L)) && (col("event_id") < lit(4L))))
+    ids(
+      frame.filter(
+        col("amount_cents").isNotNull && (col("amount_cents") >= lit(10L)) && (col(
+          "event_id"
+        ) < lit(4L))
+      )
+    )
   }
 
   def projected(frame: DataFrame): DataFrame = {
-    frame.select(col("event_id"),(col("amount_cents") + lit(1L)).as("amount_plus_one"))
+    frame.select(col("event_id"), (col("amount_cents") + lit(1L)).as("amount_plus_one"))
   }
 
   def sqlIds(spark: SparkSession, frame: DataFrame): Seq[Long] = {
     frame.createOrReplaceTempView("ds60_spark_011_events")
-    ids(spark.sql("SELECT event_id FROM ds60_spark_011_events WHERE amount_cents > 10 ORDER BY event_id"))
+    ids(
+      spark.sql(
+        "SELECT event_id FROM ds60_spark_011_events WHERE amount_cents > 10 ORDER BY event_id"
+      )
+    )
   }
 
   def main(args: Array[String]): Unit = {
-    val spark = SparkSession.builder().appName("ds60-spark-011").master("local[2]")
-      .config("spark.ui.enabled","false")
-      .config("spark.driver.host","127.0.0.1")
-      .config("spark.driver.bindAddress","127.0.0.1")
-      .config("spark.sql.shuffle.partitions","2")
-      .config("spark.sql.adaptive.enabled","false")
-      .config("spark.sql.ansi.enabled","true")
-      .config("spark.sql.session.timeZone","UTC").getOrCreate()
+    val spark = SparkSession
+      .builder()
+      .appName("ds60-spark-011")
+      .master("local[2]")
+      .config("spark.ui.enabled", "false")
+      .config("spark.driver.host", "127.0.0.1")
+      .config("spark.driver.bindAddress", "127.0.0.1")
+      .config("spark.sql.shuffle.partitions", "2")
+      .config("spark.sql.adaptive.enabled", "false")
+      .config("spark.sql.ansi.enabled", "true")
+      .config("spark.sql.session.timeZone", "UTC")
+      .getOrCreate()
     try {
       require(spark.sparkContext.master == "local[2]", "local-only course session")
       spark.sparkContext.setLogLevel("ERROR")
-      val schema = StructType(Seq(
-        StructField("event_id",LongType,false),
-        StructField("amount_cents",LongType,true)))
-      val rows = Seq(Row(1L,0L),Row(2L,20L),Row(3L,null),Row(4L,20L))
-      val raw = spark.createDataFrame(spark.sparkContext.parallelize(rows,2),schema)
+      val schema = StructType(
+        Seq(StructField("event_id", LongType, false), StructField("amount_cents", LongType, true))
+      )
+      val rows = Seq(Row(1L, 0L), Row(2L, 20L), Row(3L, null), Row(4L, 20L))
+      val raw = spark.createDataFrame(spark.sparkContext.parallelize(rows, 2), schema)
       // Exercise 1: Construct a predicate without collapsing it to a driver Boolean
-      assert(ids(raw.filter(aboveTen())) == Seq(2L,4L))
+      assert(ids(raw.filter(aboveTen())) == Seq(2L, 4L))
       // Exercise 2: Apply the predicate and preserve event identity
-      assert(selectedIds(raw) == Seq(2L,4L))
-      assert(ids(raw) == Seq(1L,2L,3L,4L))
+      assert(selectedIds(raw) == Seq(2L, 4L))
+      assert(ids(raw) == Seq(1L, 2L, 3L, 4L))
       // Exercise 3: Select missingness explicitly
       assert(missingIds(raw) == Seq(3L))
       assert(ids(raw.filter(col("amount_cents") === lit(0L))) == Seq(1L))
       // Exercise 4: Combine conditions with engine operators
       assert(combinedIds(raw) == Seq(2L))
       // Exercise 5: Preserve NULL through a derived column
-      val projectedRows = projected(raw).orderBy("event_id").collect().toSeq.map(row => (row.getLong(0),if (row.isNullAt(1)) None else Some(row.getLong(1))))
-      assert(projectedRows == Seq((1L,Some(1L)),(2L,Some(21L)),(3L,None),(4L,Some(21L))))
+      val projectedRows = projected(raw)
+        .orderBy("event_id")
+        .collect()
+        .toSeq
+        .map(row => (row.getLong(0), if (row.isNullAt(1)) None else Some(row.getLong(1))))
+      assert(projectedRows == Seq((1L, Some(1L)), (2L, Some(21L)), (3L, None), (4L, Some(21L))))
       // Exercise 6: Compare SQL and Columns with an independent expectation
-      assert(sqlIds(spark,raw) == Seq(2L,4L))
-      assert(selectedIds(raw) == Seq(2L,4L))
-      println("spark-011: six Scala reference contracts passed; Spark=" + spark.version + "; Scala=" + scala.util.Properties.versionNumberString)
+      assert(sqlIds(spark, raw) == Seq(2L, 4L))
+      assert(selectedIds(raw) == Seq(2L, 4L))
+      println(
+        "spark-011: six Scala reference contracts passed; Spark=" + spark.version + "; Scala=" + scala.util.Properties.versionNumberString
+      )
     } finally { spark.stop() }
   }
 }

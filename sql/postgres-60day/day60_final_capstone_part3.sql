@@ -21,27 +21,60 @@
 --  - All critical queries complete < 10s on your dataset
 --  - DQ checks pass with documented exceptions
 --  - Clear documentation of choices and optimizations
-
 BEGIN;
 SET search_path TO training, public;
-
 -- 1. DQ Summary Views (re-usable) ------------------------------------------
 CREATE OR REPLACE VIEW v_dq_customers AS
-SELECT COUNT(*) AS total,
-       SUM(CASE WHEN email IS NULL OR email !~* '^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$' THEN 1 ELSE 0 END) AS invalid_email,
-       SUM(CASE WHEN country IS NULL OR country !~ '^[A-Z]{2}$' THEN 1 ELSE 0 END) AS invalid_country,
-       SUM(CASE WHEN full_name IS NULL OR btrim(full_name) = '' THEN 1 ELSE 0 END) AS invalid_name
-FROM customers;
-
+SELECT
+  COUNT(*) AS total,
+  SUM(
+    CASE WHEN email IS NULL
+      OR email !~* '^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$' THEN
+      1
+    ELSE
+      0
+    END) AS invalid_email,
+  SUM(
+    CASE WHEN country IS NULL
+      OR country !~ '^[A-Z]{2}$' THEN
+      1
+    ELSE
+      0
+    END) AS invalid_country,
+  SUM(
+    CASE WHEN full_name IS NULL
+      OR btrim(full_name) = '' THEN
+      1
+    ELSE
+      0
+    END) AS invalid_name
+FROM
+  customers;
 CREATE OR REPLACE VIEW v_dq_orders AS
-SELECT COUNT(*) AS total,
-       SUM(CASE WHEN total_amount < 0 THEN 1 ELSE 0 END) AS negative_amounts,
-       SUM(CASE WHEN customer_id IS NULL THEN 1 ELSE 0 END) AS missing_customer
-FROM orders;
-
-SELECT * FROM v_dq_customers;
-SELECT * FROM v_dq_orders;
-
+SELECT
+  COUNT(*) AS total,
+  SUM(
+    CASE WHEN total_amount < 0 THEN
+      1
+    ELSE
+      0
+    END) AS negative_amounts,
+  SUM(
+    CASE WHEN customer_id IS NULL THEN
+      1
+    ELSE
+      0
+    END) AS missing_customer
+FROM
+  orders;
+SELECT
+  *
+FROM
+  v_dq_customers;
+SELECT
+  *
+FROM
+  v_dq_orders;
 -- 2. Core Business Views ----------------------------------------------------
 -- Lifetime value per customer.
 --
@@ -50,62 +83,105 @@ SELECT * FROM v_dq_orders;
 -- capstone. Re-summing order lines here could silently change the definition
 -- by excluding header-only orders or omitting adjustments stored on the header.
 CREATE OR REPLACE VIEW v_customer_ltv AS
-SELECT c.customer_id,
-       c.full_name,
-       c.country,
-       c.segment,
-       COUNT(o.order_id) AS order_count,
-       COALESCE(SUM(o.total_amount), 0)::numeric(14,2) AS ltv
-FROM customers c
-LEFT JOIN orders o USING (customer_id)
-GROUP BY c.customer_id, c.full_name, c.country, c.segment;
-
+SELECT
+  c.customer_id,
+  c.full_name,
+  c.country,
+  c.segment,
+  COUNT(o.order_id) AS order_count,
+  COALESCE(SUM(o.total_amount), 0)::numeric(14, 2) AS ltv
+FROM
+  customers c
+  LEFT JOIN orders o USING (customer_id)
+GROUP BY
+  c.customer_id,
+  c.full_name,
+  c.country,
+  c.segment;
 -- Control 1: zero-order customers must still appear in the view.
-SELECT COUNT(*) AS customers_missing_from_ltv
-FROM customers c
-LEFT JOIN v_customer_ltv l USING (customer_id)
-WHERE l.customer_id IS NULL;
-
+SELECT
+  COUNT(*) AS customers_missing_from_ltv
+FROM
+  customers c
+  LEFT JOIN v_customer_ltv l USING (customer_id)
+WHERE
+  l.customer_id IS NULL;
 -- Control 2: customer-level LTV must reconcile to the authoritative order
 -- header total. Expected `difference` is 0.00 on the course seed.
-SELECT ROUND(COALESCE(SUM(ltv), 0), 2) AS ltv_total,
-       (SELECT ROUND(COALESCE(SUM(total_amount), 0), 2) FROM orders) AS order_total,
-       ROUND(COALESCE(SUM(ltv), 0), 2)
-         - (SELECT ROUND(COALESCE(SUM(total_amount), 0), 2) FROM orders) AS difference
-FROM v_customer_ltv;
-
+SELECT
+  ROUND(COALESCE(SUM(ltv), 0), 2) AS ltv_total,
+  (
+    SELECT
+      ROUND(COALESCE(SUM(total_amount), 0), 2)
+    FROM
+      orders) AS order_total,
+  ROUND(COALESCE(SUM(ltv), 0), 2) - (
+    SELECT
+      ROUND(COALESCE(SUM(total_amount), 0), 2)
+    FROM
+      orders) AS difference
+FROM
+  v_customer_ltv;
 -- Monthly revenue and MoM growth
 CREATE OR REPLACE VIEW v_monthly_revenue AS
 WITH m AS (
-  SELECT date_trunc('month', o.order_date)::date AS month,
-         SUM(o.total_amount) AS revenue
-  FROM orders o
-  GROUP BY 1
+  SELECT
+    date_trunc('month', o.order_date)::date AS month,
+    SUM(o.total_amount) AS revenue
+  FROM
+    orders o
+  GROUP BY
+    1
 )
-SELECT m.month,
-       m.revenue,
-       LAG(m.revenue) OVER (ORDER BY m.month) AS prev_month,
-       ROUND((m.revenue - COALESCE(LAG(m.revenue) OVER (ORDER BY m.month),0)) / NULLIF(LAG(m.revenue) OVER (ORDER BY m.month),0), 4) AS mom_growth
-FROM m;
-
+SELECT
+  m.month,
+  m.revenue,
+  LAG(m.revenue) OVER (ORDER BY m.month) AS prev_month,
+  ROUND((m.revenue - COALESCE(LAG(m.revenue) OVER (ORDER BY m.month), 0)) / NULLIF (LAG(m.revenue) OVER (ORDER BY m.month), 0), 4) AS mom_growth
+FROM
+  m;
 -- 3. Stakeholder-ready Queries ---------------------------------------------
 -- Finance: Budget vs Actual by month/category (YTD)
 WITH exp AS (
-  SELECT date_trunc('month', expense_date)::date AS month, category, SUM(amount) AS actual
-  FROM expenses WHERE expense_date >= date_trunc('year', now()) GROUP BY 1,2
-), bud AS (
-  SELECT date_trunc('month', period)::date AS month, category, SUM(amount) AS budget
-  FROM budgets WHERE period >= date_trunc('year', now()) GROUP BY 1,2
+  SELECT
+    date_trunc('month', expense_date)::date AS month,
+    category,
+    SUM(amount) AS actual
+  FROM
+    expenses
+  WHERE
+    expense_date >= date_trunc('year', now())
+  GROUP BY
+    1,
+    2
+),
+bud AS (
+  SELECT
+    date_trunc('month', period)::date AS month,
+    category,
+    SUM(amount) AS budget
+  FROM
+    budgets
+  WHERE
+    period >= date_trunc('year', now())
+  GROUP BY
+    1,
+    2
 )
-SELECT COALESCE(b.category, e.category) AS category,
-       COALESCE(b.month, e.month) AS month,
-       COALESCE(b.budget,0) AS budget,
-       COALESCE(e.actual,0) AS actual,
-       ROUND(COALESCE(e.actual,0) - COALESCE(b.budget,0),2) AS variance
-FROM bud b FULL OUTER JOIN exp e ON e.month=b.month AND e.category=b.category
-ORDER BY month DESC, category
+SELECT
+  COALESCE(b.category, e.category) AS category,
+  COALESCE(b.month, e.month) AS month,
+  COALESCE(b.budget, 0) AS budget,
+  COALESCE(e.actual, 0) AS actual,
+  ROUND(COALESCE(e.actual, 0) - COALESCE(b.budget, 0), 2) AS variance
+FROM
+  bud b
+  FULL OUTER JOIN exp e ON e.month = b.month
+  AND e.category = b.category
+ORDER BY
+  month DESC,
+  category
 LIMIT 120;
-
 -- Marketing: Cohort retention for the latest 6 signup cohorts.
 --
 -- A cohort is the customer's signup month. An active customer has at least one
@@ -114,85 +190,115 @@ LIMIT 120;
 -- would inflate the reported retention rate.
 WITH orders_m AS (
   SELECT DISTINCT
-         o.customer_id,
-         date_trunc('month', o.order_date)::date AS order_month
-  FROM orders o
-), cohorts AS (
-  SELECT c.customer_id,
-         date_trunc('month', c.created_at)::date AS cohort_month
-  FROM customers c
-), latest_six_cohorts AS (
-  SELECT cohort_month
-  FROM cohorts
-  GROUP BY cohort_month
-  ORDER BY cohort_month DESC
+    o.customer_id,
+    date_trunc('month', o.order_date)::date AS order_month
+  FROM
+    orders o
+),
+cohorts AS (
+  SELECT
+    c.customer_id,
+    date_trunc('month', c.created_at)::date AS cohort_month
+  FROM
+    customers c
+),
+latest_six_cohorts AS (
+  SELECT
+    cohort_month
+  FROM
+    cohorts
+  GROUP BY
+    cohort_month
+  ORDER BY
+    cohort_month DESC
   LIMIT 6
-), cohort_members AS (
-  SELECT c.customer_id, c.cohort_month
-  FROM cohorts c
-  JOIN latest_six_cohorts latest USING (cohort_month)
-), cohort_sizes AS (
-  SELECT cohort_month, COUNT(*)::numeric AS cohort_size
-  FROM cohort_members
-  GROUP BY cohort_month
-), month_offsets AS (
+),
+cohort_members AS (
+  SELECT
+    c.customer_id,
+    c.cohort_month
+  FROM
+    cohorts c
+    JOIN latest_six_cohorts latest USING (cohort_month)
+),
+cohort_sizes AS (
+  SELECT
+    cohort_month,
+    COUNT(*)::numeric AS cohort_size
+  FROM
+    cohort_members
+  GROUP BY
+    cohort_month
+),
+month_offsets AS (
   -- The seven requested lifecycle buckets are month 0 through month 6.
-  SELECT generate_series(0, 6)::int AS month_offset
-), retention AS (
-  SELECT cm.cohort_month,
-         offsets.month_offset,
-         sizes.cohort_size,
-         COUNT(DISTINCT om.customer_id) AS active_customers
-  FROM cohort_members cm
-  JOIN cohort_sizes sizes USING (cohort_month)
-  CROSS JOIN month_offsets offsets
-  LEFT JOIN orders_m om
-    ON om.customer_id = cm.customer_id
-   AND om.order_month = (
-         cm.cohort_month + make_interval(months => offsets.month_offset)
-       )::date
-  GROUP BY cm.cohort_month, offsets.month_offset, sizes.cohort_size
+  SELECT
+    generate_series(0, 6)::int AS month_offset
+),
+retention AS (
+  SELECT
+    cm.cohort_month,
+    offsets.month_offset,
+    sizes.cohort_size,
+    COUNT(DISTINCT om.customer_id) AS active_customers
+  FROM
+    cohort_members cm
+    JOIN cohort_sizes sizes USING (cohort_month)
+    CROSS JOIN month_offsets offsets
+    LEFT JOIN orders_m om ON om.customer_id = cm.customer_id
+      AND om.order_month = (cm.cohort_month + make_interval(months => offsets.month_offset))::date
+  GROUP BY
+    cm.cohort_month, offsets.month_offset, sizes.cohort_size
 )
-SELECT cohort_month,
-       month_offset,
-       cohort_size,
-       active_customers,
-       ROUND(
-         active_customers::numeric / NULLIF(cohort_size, 0),
-         4
-       ) AS retention_rate
-FROM retention
-ORDER BY cohort_month DESC, month_offset;
-
+SELECT
+  cohort_month,
+  month_offset,
+  cohort_size,
+  active_customers,
+  ROUND(active_customers::numeric / NULLIF (cohort_size, 0), 4) AS retention_rate
+FROM
+  retention
+ORDER BY
+  cohort_month DESC,
+  month_offset;
 -- Operations: Top slow queries to optimize (use EXPLAIN ANALYZE in-session)
 EXPLAIN
-SELECT p.category, SUM(oi.quantity) AS qty
-FROM order_items oi
-JOIN products p ON p.product_id = oi.product_id
-JOIN orders o   ON o.order_id = oi.order_id
-WHERE o.order_date >= now() - interval '180 days'
-GROUP BY p.category
-ORDER BY qty DESC;
-
+SELECT
+  p.category,
+  SUM(oi.quantity) AS qty
+FROM
+  order_items oi
+  JOIN products p ON p.product_id = oi.product_id
+  JOIN orders o ON o.order_id = oi.order_id
+WHERE
+  o.order_date >= now() - interval '180 days'
+GROUP BY
+  p.category
+ORDER BY
+  qty DESC;
 -- 4. Performance Checklist ---------------------------------------------------
 -- Indexes helpful for above queries (will be rolled back unless COMMIT)
-CREATE INDEX IF NOT EXISTS idx_orders_date ON orders(order_date);
-CREATE INDEX IF NOT EXISTS idx_orders_customer ON orders(customer_id);
-CREATE INDEX IF NOT EXISTS idx_oi_order ON order_items(order_id);
-CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
-CREATE INDEX IF NOT EXISTS idx_expenses_month ON expenses(expense_date);
-CREATE INDEX IF NOT EXISTS idx_budgets_period ON budgets(period);
-
+CREATE INDEX IF NOT EXISTS idx_orders_date ON orders (order_date);
+CREATE INDEX IF NOT EXISTS idx_orders_customer ON orders (customer_id);
+CREATE INDEX IF NOT EXISTS idx_oi_order ON order_items (order_id);
+CREATE INDEX IF NOT EXISTS idx_products_category ON products (category);
+CREATE INDEX IF NOT EXISTS idx_expenses_month ON expenses (expense_date);
+CREATE INDEX IF NOT EXISTS idx_budgets_period ON budgets (period);
 -- Validate plan improvements quickly
-EXPLAIN ANALYZE SELECT * FROM v_monthly_revenue ORDER BY month DESC LIMIT 12;
-
+EXPLAIN ANALYZE
+SELECT
+  *
+FROM
+  v_monthly_revenue
+ORDER BY
+  month DESC
+LIMIT 12;
 -- 5. Documentation Hints ----------------------------------------------------
 -- Include in your write-up:
 --  - Data quality findings (from v_dq_*) and remediation steps
 --  - Core model entities used and rationale (customers/orders/items/events/etc.)
 --  - Queries and indexes that moved the needle, with before/after EXPLAIN metrics
 --  - Any compromises (freshness vs speed, materialized views, partitioning)
-
 -- Exercises
 -- 1. Prediction: identify which views are snapshot-independent and which use
 --    CURRENT_DATE/now(), then explain the reproducibility consequence.
@@ -250,7 +356,6 @@ EXPLAIN ANALYZE SELECT * FROM v_monthly_revenue ORDER BY month DESC LIMIT 12;
 --    Hint ladder, rung 1: For sql-60 Exercise 9, inspect the source keys that survive `WHERE`.
 -- 10. Final sign-off: return PASS/FAIL/NOT_RUN for every acceptance criterion;
 --     prose alone must never turn an unexecuted check into PASS.
-
 -- When ready to persist created views/indexes, replace ROLLBACK with COMMIT.
 --    Inputs: For sql-60 Exercise 10, read from `v_dq_customers_solution`, `v_customer_ltv_solution`, and `orders`. Build the answer toward `criterion`, and `result`; keep `order_id` visible whenever the result has row-level grain.
 --    Expected result/shape: For sql-60 Exercise 10, expected output: one row per `order_id`. The final columns are `criterion`, and `result`. The final order is `criterion`.

@@ -5,92 +5,166 @@ import org.apache.spark.storage.StorageLevel
 
 object Main {
 
-
   def transform(source: DataFrame): DataFrame = {
-    source.filter(col("amount") >= 0L || col("amount").isNull).select(col("entity_id"),col("segment"),(col("amount") * 2L).as("doubled"))
+    source
+      .filter(col("amount") >= 0L || col("amount").isNull)
+      .select(col("entity_id"), col("segment"), (col("amount") * 2L).as("doubled"))
   }
 
-  def schemaContract(frame: DataFrame): Seq[(String,String)] = {
-    frame.schema.fields.toSeq.map(field => (field.name,field.dataType.simpleString))
+  def schemaContract(frame: DataFrame): Seq[(String, String)] = {
+    frame.schema.fields.toSeq.map(field => (field.name, field.dataType.simpleString))
   }
 
   def assertSameBag(actual: DataFrame, expected: DataFrame): Unit = {
-    require(schemaContract(actual) == schemaContract(expected),"schema contract mismatch")
-    require(actual.exceptAll(expected).count() == 0L && expected.exceptAll(actual).count() == 0L,"bag contract mismatch")
+    require(schemaContract(actual) == schemaContract(expected), "schema contract mismatch")
+    require(
+      actual.exceptAll(expected).count() == 0L && expected.exceptAll(actual).count() == 0L,
+      "bag contract mismatch"
+    )
   }
 
-  def cachedSummary(frame: DataFrame): (Long,Long,String) = {
+  def cachedSummary(frame: DataFrame): (Long, Long, String) = {
     frame.persist(StorageLevel.MEMORY_AND_DISK)
     try {
-     require(frame.storageLevel != StorageLevel.NONE,"cache not registered")
-     val rows = frame.count()
-     val total = frame.agg(sum("doubled")).first().getLong(0)
-     val plan = frame.filter(col("doubled") >= 0L).queryExecution.executedPlan.toString
-     (rows,total,plan)
-    } finally frame.unpersist(blocking=true)
+      require(frame.storageLevel != StorageLevel.NONE, "cache not registered")
+      val rows = frame.count()
+      val total = frame.agg(sum("doubled")).first().getLong(0)
+      val plan = frame.filter(col("doubled") >= 0L).queryExecution.executedPlan.toString
+      (rows, total, plan)
+    } finally frame.unpersist(blocking = true)
   }
 
   def failingReuse(frame: DataFrame): Unit = {
     frame.persist(StorageLevel.MEMORY_AND_DISK)
     try {
-     frame.count()
-     throw new IllegalStateException("injected_after_materialize")
-    } finally frame.unpersist(blocking=true)
+      frame.count()
+      throw new IllegalStateException("injected_after_materialize")
+    } finally frame.unpersist(blocking = true)
   }
 
-  def differenceCounts(actual: DataFrame, expected: DataFrame): (Long,Long) = {
-    require(schemaContract(actual) == schemaContract(expected),"schema contract mismatch")
-    (actual.exceptAll(expected).count(),expected.exceptAll(actual).count())
+  def differenceCounts(actual: DataFrame, expected: DataFrame): (Long, Long) = {
+    require(schemaContract(actual) == schemaContract(expected), "schema contract mismatch")
+    (actual.exceptAll(expected).count(), expected.exceptAll(actual).count())
   }
 
   def main(args: Array[String]): Unit = {
 
-    val spark = SparkSession.builder().appName("ds60-spark-027").master("local[2]")
-      .config("spark.ui.enabled","false")
-      .config("spark.driver.host","127.0.0.1")
-      .config("spark.driver.bindAddress","127.0.0.1")
-      .config("spark.sql.shuffle.partitions","2")
-      .config("spark.sql.adaptive.enabled","false")
-      .config("spark.sql.ansi.enabled","true")
-      .config("spark.sql.session.timeZone","UTC").getOrCreate()
+    val spark = SparkSession
+      .builder()
+      .appName("ds60-spark-027")
+      .master("local[2]")
+      .config("spark.ui.enabled", "false")
+      .config("spark.driver.host", "127.0.0.1")
+      .config("spark.driver.bindAddress", "127.0.0.1")
+      .config("spark.sql.shuffle.partitions", "2")
+      .config("spark.sql.adaptive.enabled", "false")
+      .config("spark.sql.ansi.enabled", "true")
+      .config("spark.sql.session.timeZone", "UTC")
+      .getOrCreate()
     try {
       require(spark.sparkContext.master == "local[2]", "local-only course session")
       spark.sparkContext.setLogLevel("ERROR")
-      val schema = StructType(Seq(StructField("entity_id",LongType,false),StructField("segment",StringType,true),StructField("amount",LongType,true)))
-      val source = spark.createDataFrame(spark.sparkContext.parallelize(Seq(Row(1L,"a",10L),Row(1L,"a",10L),Row(2L,"a",null),Row(3L,"b",0L),Row(4L,"b",20L),Row(4L,"b",20L),Row(5L,null,5L),Row(6L,"c",-5L)),2),schema)
-      val goldenSchema = StructType(Seq(StructField("entity_id",LongType,false),StructField("segment",StringType,true),StructField("doubled",LongType,true)))
-      val golden = spark.createDataFrame(spark.sparkContext.parallelize(Seq(Row(1L,"a",20L),Row(1L,"a",20L),Row(2L,"a",null),Row(3L,"b",0L),Row(4L,"b",40L),Row(4L,"b",40L),Row(5L,null,10L)),2),goldenSchema)
+      val schema = StructType(
+        Seq(
+          StructField("entity_id", LongType, false),
+          StructField("segment", StringType, true),
+          StructField("amount", LongType, true)
+        )
+      )
+      val source = spark.createDataFrame(
+        spark.sparkContext.parallelize(
+          Seq(
+            Row(1L, "a", 10L),
+            Row(1L, "a", 10L),
+            Row(2L, "a", null),
+            Row(3L, "b", 0L),
+            Row(4L, "b", 20L),
+            Row(4L, "b", 20L),
+            Row(5L, null, 5L),
+            Row(6L, "c", -5L)
+          ),
+          2
+        ),
+        schema
+      )
+      val goldenSchema = StructType(
+        Seq(
+          StructField("entity_id", LongType, false),
+          StructField("segment", StringType, true),
+          StructField("doubled", LongType, true)
+        )
+      )
+      val golden = spark.createDataFrame(
+        spark.sparkContext.parallelize(
+          Seq(
+            Row(1L, "a", 20L),
+            Row(1L, "a", 20L),
+            Row(2L, "a", null),
+            Row(3L, "b", 0L),
+            Row(4L, "b", 40L),
+            Row(4L, "b", 40L),
+            Row(5L, null, 10L)
+          ),
+          2
+        ),
+        goldenSchema
+      )
       // Exercise 1: Transform without collapsing occurrences or unknowns
       val transformed = transform(source)
-      val summary = transformed.agg(count(lit(1)),sum("doubled"),count("doubled")).first()
-      assert((summary.getLong(0),summary.getLong(1),summary.getLong(2)) == (7L,130L,6L))
+      val summary = transformed.agg(count(lit(1)), sum("doubled"), count("doubled")).first()
+      assert((summary.getLong(0), summary.getLong(1), summary.getLong(2)) == (7L, 130L, 6L))
       // Exercise 2: Define an ordered field/type contract
-      assert(schemaContract(transformed) == Seq(("entity_id","bigint"),("segment","string"),("doubled","bigint")))
-      val wrongType = transformed.withColumn("entity_id",col("entity_id").cast("string"))
+      assert(
+        schemaContract(transformed) == Seq(
+          ("entity_id", "bigint"),
+          ("segment", "string"),
+          ("doubled", "bigint")
+        )
+      )
+      val wrongType = transformed.withColumn("entity_id", col("entity_id").cast("string"))
       assert(schemaContract(wrongType) != schemaContract(golden))
       // Exercise 3: Compare schemas before duplicate-sensitive values
-      assertSameBag(transformed,golden);assertSameBag(transformed.repartition(3),golden)
+      assertSameBag(transformed, golden); assertSameBag(transformed.repartition(3), golden)
       var rejectedType = false
-      try assertSameBag(wrongType,golden) catch { case e: IllegalArgumentException if e.getMessage.contains("schema contract") => rejectedType = true }
+      try assertSameBag(wrongType, golden)
+      catch {
+        case e: IllegalArgumentException if e.getMessage.contains("schema contract") =>
+          rejectedType = true
+      }
       assert(rejectedType)
       // Exercise 4: Register, materialize, reuse and release one cached relation
       val cached = cachedSummary(transformed)
       assert(cached._1 == 7L && cached._2 == 130L && cached._3.contains("InMemoryTableScan"))
       assert(transformed.storageLevel == StorageLevel.NONE)
-      println("registered_then_materialized_rows=" + cached._1 + ";reuse_total=" + cached._2 + ";reuse_plan=" + cached._3 + ";released=true")
+      println(
+        "registered_then_materialized_rows=" + cached._1 + ";reuse_total=" + cached._2 + ";reuse_plan=" + cached._3 + ";released=true"
+      )
       // Exercise 5: Release persistence when a consumer fails
       var injected = false
-      try failingReuse(transformed) catch { case e: IllegalStateException if e.getMessage == "injected_after_materialize" => injected = true }
+      try failingReuse(transformed)
+      catch {
+        case e: IllegalStateException if e.getMessage == "injected_after_materialize" =>
+          injected = true
+      }
       assert(injected && transformed.storageLevel == StorageLevel.NONE)
-      assertSameBag(transform(source),golden)
+      assertSameBag(transform(source), golden)
       // Exercise 6: Demonstrate why set equality misses duplicate loss
       val dropped = transformed.distinct()
-      assert(dropped.count() == 5L && differenceCounts(dropped,golden) == (0L,2L))
+      assert(dropped.count() == 5L && differenceCounts(dropped, golden) == (0L, 2L))
       var rejectedBag = false
-      try assertSameBag(dropped,golden) catch { case e: IllegalArgumentException if e.getMessage.contains("bag contract") => rejectedBag = true }
+      try assertSameBag(dropped, golden)
+      catch {
+        case e: IllegalArgumentException if e.getMessage.contains("bag contract") =>
+          rejectedBag = true
+      }
       assert(rejectedBag)
-      println("spark-027: six Scala reference contracts passed; Spark=" + spark.version + "; Scala=" + scala.util.Properties.versionNumberString)
-    } finally { try { () } finally { spark.stop() } }
+      println(
+        "spark-027: six Scala reference contracts passed; Spark=" + spark.version + "; Scala=" + scala.util.Properties.versionNumberString
+      )
+    } finally {
+      try { () }
+      finally { spark.stop() }
+    }
   }
 }
 

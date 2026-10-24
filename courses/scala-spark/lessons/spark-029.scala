@@ -1,7 +1,7 @@
 import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
-import java.nio.file.{Files,Path,Paths,StandardOpenOption,StandardCopyOption}
+import java.nio.file.{Files, Path, Paths, StandardOpenOption, StandardCopyOption}
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.util.UUID
@@ -11,11 +11,12 @@ import com.fasterxml.jackson.databind.ObjectMapper
 object Main {
   val mapper = new ObjectMapper()
   val schemaText = "id:bigint,value:bigint"
-  def checkRunId(runId: String): Unit = require(runId.matches("[a-z0-9-]{1,32}"),"Invalid run ID")
+  def checkRunId(runId: String): Unit = require(runId.matches("[a-z0-9-]{1,32}"), "Invalid run ID")
   def receiptText(runId: String, digest: String): String = {
     val node = mapper.createObjectNode()
-    node.put("run_id",runId);node.put("data_path","runs/"+runId+"/data");node.put("row_count",30)
-    node.put("schema",schemaText);node.put("sha256",digest)
+    node.put("run_id", runId); node.put("data_path", "runs/" + runId + "/data");
+    node.put("row_count", 30)
+    node.put("schema", schemaText); node.put("sha256", digest)
     node.toString
   }
   def deleteOwned(root: Path): Unit = {
@@ -25,7 +26,11 @@ object Main {
   }
   def dataFileCount(root: Path): Int = {
     val paths = Files.walk(root)
-    try paths.iterator().asScala.count(p => Files.isRegularFile(p) && p.getFileName.toString.endsWith(".parquet"))
+    try
+      paths
+        .iterator()
+        .asScala
+        .count(p => Files.isRegularFile(p) && p.getFileName.toString.endsWith(".parquet"))
     finally paths.close()
   }
 
@@ -49,33 +54,41 @@ object Main {
 
   def main(args: Array[String]): Unit = {
     var ownedRoot: Path = null
-    val spark = SparkSession.builder().appName("ds60-spark-029").master("local[2]")
-      .config("spark.ui.enabled","false")
-      .config("spark.driver.host","127.0.0.1")
-      .config("spark.driver.bindAddress","127.0.0.1")
-      .config("spark.sql.shuffle.partitions","2")
-      .config("spark.sql.adaptive.enabled","false")
-      .config("spark.sql.ansi.enabled","true")
-      .config("spark.sql.session.timeZone","UTC").getOrCreate()
+    val spark = SparkSession
+      .builder()
+      .appName("ds60-spark-029")
+      .master("local[2]")
+      .config("spark.ui.enabled", "false")
+      .config("spark.driver.host", "127.0.0.1")
+      .config("spark.driver.bindAddress", "127.0.0.1")
+      .config("spark.sql.shuffle.partitions", "2")
+      .config("spark.sql.adaptive.enabled", "false")
+      .config("spark.sql.ansi.enabled", "true")
+      .config("spark.sql.session.timeZone", "UTC")
+      .getOrCreate()
     try {
       require(spark.sparkContext.master == "local[2]", "local-only course session")
       spark.sparkContext.setLogLevel("ERROR")
-      ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(),".ds60-spark-029-")
+      ownedRoot =
+        Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(), ".ds60-spark-029-")
       Files.createDirectory(ownedRoot.resolve("runs"))
-      val source = spark.range(0L,30L,1L,2).withColumn("value",col("id")*2L)
+      val source = spark.range(0L, 30L, 1L, 2).withColumn("value", col("id") * 2L)
       locally {
         val ids = 0L until 30L
-        assert(ids.map(_*2L).sum == 870L)
+        assert(ids.map(_ * 2L).sum == 870L)
         println("Declared30-row product total=870")
       }
       locally {
-        val a = receiptText("run-a","0"*64);val b = receiptText("run-b","0"*64)
+        val a = receiptText("run-a", "0" * 64); val b = receiptText("run-b", "0" * 64)
         assert(mapper.readTree(a).get("data_path").asText() == "runs/run-a/data")
         assert(a != b)
         println("A publication points to one run-specific product")
       }
       println("spark-029: worked examples passed; six task implementations remain")
-    } finally { try { if(ownedRoot != null) deleteOwned(ownedRoot) } finally { spark.stop() } }
+    } finally {
+      try { if (ownedRoot != null) deleteOwned(ownedRoot) }
+      finally { spark.stop() }
+    }
   }
 }
 

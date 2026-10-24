@@ -5,14 +5,8 @@
   "title": "Deep learning with TensorFlow and Keras",
   "summary": "36 lessons in TensorFlow and Keras, from tensor arithmetic and gradients to training, neural architectures, diagnosis and a reproducible model release. Compare mechanisms with the paired PyTorch lessons.",
   "north_star": "Explain a model computation, prove its training/inference contracts and make only the claims supported by its held-out evidence.",
-  "entry_prerequisites": [
-    "python-16"
-  ],
-  "runtime_profiles": [
-    "reading",
-    "python-core",
-    "tensorflow-cpu"
-  ],
+  "entry_prerequisites": ["python-16"],
+  "runtime_profiles": ["reading", "python-core", "tensorflow-cpu"],
   "stages": [
     {
       "id": "beginner",
@@ -36,125 +30,79 @@
       "title": "A bounded deep-learning investigation",
       "level": "beginner",
       "minutes": 75,
-      "prerequisites": [
-        "python-16"
-      ],
+      "prerequisites": ["python-16"],
       "runtime": "reading",
       "outcome": "Distinguish fitting a function from evidence that it generalizes.",
       "lab": "Inspect a three-point training set and a four-point holdout; write the prediction unit, intended use and forbidden claims before touching a framework.",
       "verification": "Record 3 training points, 4 untouched holdout points and one claim that the tiny exercise cannot establish.",
-      "concepts": [
-        "prediction unit",
-        "training",
-        "generalization",
-        "evidence"
-      ]
+      "concepts": ["prediction unit", "training", "generalization", "evidence"]
     },
     {
       "id": "tf-002",
       "title": "Tensors, axes, dtypes and units",
       "level": "beginner",
       "minutes": 90,
-      "prerequisites": [
-        "tf-001"
-      ],
+      "prerequisites": ["tf-001"],
       "runtime": "python-core",
       "outcome": "Trace each axis and unit through vector arithmetic without accidental broadcasting.",
       "lab": "Use NumPy arrays shaped (3,), (3,1) and (1,3); build a table of addition/multiplication result shapes and label the observation axis.",
       "verification": "The vector/column subtraction produces (3,3); a paired-record subtraction requires equal (3,) shapes. Integer-to-float conversion is explicit.",
-      "concepts": [
-        "tensor",
-        "axis",
-        "dtype",
-        "broadcasting",
-        "units"
-      ]
+      "concepts": ["tensor", "axis", "dtype", "broadcasting", "units"]
     },
     {
       "id": "tf-003",
       "title": "Linear neurons and matrix contracts",
       "level": "beginner",
       "minutes": 90,
-      "prerequisites": [
-        "tf-002"
-      ],
+      "prerequisites": ["tf-002"],
       "runtime": "python-core",
       "outcome": "Relate a scalar slope to a batched affine layer and verify dimensions.",
       "lab": "Multiply a fixed (2,3) input by a (3,1) weight and add a scalar bias; calculate the first output by hand.",
       "verification": "For X=[[1,2,3],[0,1,0]], W=[[1],[0],[-1]], b=2, outputs are [[0],[2]] with shape (2,1).",
-      "concepts": [
-        "affine map",
-        "batch axis",
-        "matrix product",
-        "bias"
-      ]
+      "concepts": ["affine map", "batch axis", "matrix product", "bias"]
     },
     {
       "id": "tf-004",
       "title": "Loss, reduction and what a number measures",
       "level": "beginner",
       "minutes": 90,
-      "prerequisites": [
-        "tf-003"
-      ],
+      "prerequisites": ["tf-003"],
       "runtime": "python-core",
       "outcome": "Compute loss with an explicit example denominator and distinguish it from a metric.",
       "lab": "Compare squared residual sums and means for residuals [1,-1,2], then duplicate the batch and compare both reductions.",
       "verification": "Sum=6 and mean=2; duplication doubles the sum but leaves the mean at 2. Report squared target units.",
-      "concepts": [
-        "residual",
-        "loss",
-        "mean reduction",
-        "metric",
-        "denominator"
-      ]
+      "concepts": ["residual", "loss", "mean reduction", "metric", "denominator"]
     },
     {
       "id": "tf-005",
       "title": "Derivatives as local sensitivity",
       "level": "beginner",
       "minutes": 105,
-      "prerequisites": [
-        "tf-004"
-      ],
+      "prerequisites": ["tf-004"],
       "runtime": "python-core",
       "outcome": "Check a scalar derivative against a finite difference away from a kink.",
       "lab": "Evaluate f(w)=(w-2)^2 at w=0 with central differences h=0.1,0.01,0.001; contrast absolute slope with a learning step.",
       "verification": "Analytic derivative=-4; all three central differences agree within 1e-10. A derivative is not itself the new parameter.",
-      "concepts": [
-        "derivative",
-        "finite difference",
-        "sensitivity",
-        "learning rate"
-      ]
+      "concepts": ["derivative", "finite difference", "sensitivity", "learning rate"]
     },
     {
       "id": "tf-006",
       "title": "The chain rule and activation boundaries",
       "level": "beginner",
       "minutes": 105,
-      "prerequisites": [
-        "tf-005"
-      ],
+      "prerequisites": ["tf-005"],
       "runtime": "python-core",
       "outcome": "Explain how local derivatives compose and where a derivative convention matters.",
       "lab": "Trace z=2w, a=z*z, loss=(a-1)^2 at w=1; compare with a ReLU example at a positive value and at zero.",
       "verification": "The polynomial derivative at w=1 is 48 within 1e-8. State that the ReLU kink needs an explicit convention; do not use a finite-difference equality there.",
-      "concepts": [
-        "chain rule",
-        "activation",
-        "Jacobian",
-        "nondifferentiability"
-      ]
+      "concepts": ["chain rule", "activation", "Jacobian", "nondifferentiability"]
     },
     {
       "id": "tf-007",
       "title": "Eager tensors, variables and a tape",
       "level": "beginner",
       "minutes": 105,
-      "prerequisites": [
-        "tf-006"
-      ],
+      "prerequisites": ["tf-006"],
       "runtime": "tensorflow-cpu",
       "outcome": "Identify which forward operations and variables are recorded for differentiation.",
       "lab": "Run scalar Variable examples inside and outside GradientTape; inspect a disconnected gradient and an actual zero gradient.",
@@ -172,339 +120,211 @@
       "title": "One gradient step you can audit",
       "level": "beginner",
       "minutes": 120,
-      "prerequisites": [
-        "tf-007"
-      ],
+      "prerequisites": ["tf-007"],
       "runtime": "tensorflow-cpu",
       "outcome": "Derive, execute and independently check one SGD update before using a training API.",
       "lab": "Use x=[1,2,3], y=[2,4,6], float64, w=0 and learning rate 0.1; compare an equal-shape target with a mistakenly broadcast column target.",
       "verification": "Correct loss=56/3, gradient=-56/3, updated w=28/15 and new loss=56/675 within 1e-12. The broadcast bug has gradient=-16 despite the same initial loss.",
-      "concepts": [
-        "SGD",
-        "autodiff",
-        "shape contract",
-        "independent oracle"
-      ]
+      "concepts": ["SGD", "autodiff", "shape contract", "independent oracle"]
     },
     {
       "id": "tf-009",
       "title": "Batches and repeated updates",
       "level": "beginner",
       "minutes": 105,
-      "prerequisites": [
-        "tf-008"
-      ],
+      "prerequisites": ["tf-008"],
       "runtime": "tensorflow-cpu",
       "outcome": "Distinguish examples, batches, epochs and optimizer steps.",
       "lab": "Use six fixed paired records x=[1,2,3,4,5,6], y=2*x and compare batch sizes 1, 2 and 3, logging example IDs and update numbers instead of assuming equal trajectories.",
       "verification": "Six examples with batch size 2 yield 3 updates per epoch; a final short batch is included unless drop_remainder is chosen and documented.",
-      "concepts": [
-        "batch",
-        "epoch",
-        "step",
-        "shuffle",
-        "short batch"
-      ]
+      "concepts": ["batch", "epoch", "step", "shuffle", "short batch"]
     },
     {
       "id": "tf-010",
       "title": "A split is part of the experiment",
       "level": "beginner",
       "minutes": 105,
-      "prerequisites": [
-        "tf-009"
-      ],
+      "prerequisites": ["tf-009"],
       "runtime": "python-core",
       "outcome": "Detect duplicate/group leakage before reporting held-out performance.",
       "lab": "Assign a fixed eight-record fixture with four account IDs to train/validation by account; fit a mean only on train.",
       "verification": "No account ID occurs in both sets. A validation-only extreme changes the all-data mean but not the recorded training normalization.",
-      "concepts": [
-        "split unit",
-        "leakage",
-        "training-only fit",
-        "holdout"
-      ]
+      "concepts": ["split unit", "leakage", "training-only fit", "holdout"]
     },
     {
       "id": "tf-011",
       "title": "Keras models and explicit training contracts",
       "level": "beginner",
       "minutes": 120,
-      "prerequisites": [
-        "tf-010"
-      ],
+      "prerequisites": ["tf-010"],
       "runtime": "tensorflow-cpu",
       "outcome": "Map compile/fit/evaluate to the explicit forward-loss-gradient-update sequence.",
       "lab": "Create a one-Dense-unit model with fixed zero initializer; perform exactly one full-batch SGD step on the pilot points with shuffling disabled.",
       "verification": "The zero-bias, no-intercept configuration matches tf-008 within 1e-6 in float32; report dtype and reduction before comparing values.",
-      "concepts": [
-        "tf.keras",
-        "Dense",
-        "compile",
-        "fit",
-        "optimizer",
-        "initializer"
-      ]
+      "concepts": ["tf.keras", "Dense", "compile", "fit", "optimizer", "initializer"]
     },
     {
       "id": "tf-012",
       "title": "Capstone: an auditable tiny regressor",
       "level": "beginner",
       "minutes": 180,
-      "prerequisites": [
-        "tf-011"
-      ],
+      "prerequisites": ["tf-011"],
       "runtime": "tensorflow-cpu",
       "outcome": "Present a reproducible training experiment with arithmetic and held-out evidence.",
       "lab": "Build a local three-feature synthetic regression investigation, compare a mean baseline, save the split and explain every update in a tiny diagnostic subset.",
       "verification": "Deliver a clean-run transcript, immutable split IDs, analytic pilot check and separate training/holdout errors; no holdout-driven tuning is allowed.",
-      "concepts": [
-        "capstone",
-        "baseline",
-        "split manifest",
-        "evidence report"
-      ]
+      "concepts": ["capstone", "baseline", "split manifest", "evidence report"]
     },
     {
       "id": "tf-013",
       "title": "Binary logits, probabilities and thresholds",
       "level": "intermediate",
       "minutes": 105,
-      "prerequisites": [
-        "tf-012"
-      ],
+      "prerequisites": ["tf-012"],
       "runtime": "tensorflow-cpu",
       "outcome": "Use a binary loss with the correct logit/probability convention.",
       "lab": "Compare logits [-2,0,2], sigmoid probabilities and thresholds 0.5 versus 0.8 on fixed labels; deliberately mismatch from_logits.",
       "verification": "At logit 0 the probability is 0.5 and positive-label BCE is log(2) within 1e-6. Threshold changes predictions, not the already fitted logits.",
-      "concepts": [
-        "logit",
-        "sigmoid",
-        "binary cross entropy",
-        "threshold"
-      ]
+      "concepts": ["logit", "sigmoid", "binary cross entropy", "threshold"]
     },
     {
       "id": "tf-014",
       "title": "Multiclass and multilabel are different tasks",
       "level": "intermediate",
       "minutes": 105,
-      "prerequisites": [
-        "tf-013"
-      ],
+      "prerequisites": ["tf-013"],
       "runtime": "tensorflow-cpu",
       "outcome": "Choose target shape and loss from the task rather than the final layer name.",
       "lab": "Contrast one-of-three integer targets with three independent binary labels; compute cross entropy for uniform three-class logits.",
       "verification": "Uniform three-class CE=log(3); sparse targets are class indices. Multilabel targets have one binary value per class and need independent decisions.",
-      "concepts": [
-        "softmax",
-        "sparse targets",
-        "multilabel",
-        "cross entropy"
-      ]
+      "concepts": ["softmax", "sparse targets", "multilabel", "cross entropy"]
     },
     {
       "id": "tf-015",
       "title": "A reproducible tf.data pipeline",
       "level": "intermediate",
       "minutes": 120,
-      "prerequisites": [
-        "tf-014"
-      ],
+      "prerequisites": ["tf-014"],
       "runtime": "tensorflow-cpu",
       "outcome": "Keep preprocessing, cardinality and order visible in a bounded dataset pipeline.",
       "lab": "Construct a Dataset from fixed arrays; normalize using only training statistics; batch with a remainder and prefetch 1.",
       "verification": "For five records batched by 2, batch sizes are [2,2,1]. Normalization statistics and IDs are identical after a fresh run; no download/map side effect occurs.",
-      "concepts": [
-        "tf.data",
-        "cardinality",
-        "adapt",
-        "prefetch",
-        "pipeline leakage"
-      ]
+      "concepts": ["tf.data", "cardinality", "adapt", "prefetch", "pipeline leakage"]
     },
     {
       "id": "tf-016",
       "title": "Nonlinearity and initialization",
       "level": "intermediate",
       "minutes": 120,
-      "prerequisites": [
-        "tf-015"
-      ],
+      "prerequisites": ["tf-015"],
       "runtime": "tensorflow-cpu",
       "outcome": "Explain why an affine-only network cannot express XOR and inspect a nonlinear construction.",
       "lab": "Use all four XOR inputs; compare an affine threshold with h1=ReLU(x1-x2), h2=ReLU(x2-x1), output=h1+h2 before optional fitting.",
       "verification": "The nonlinear construction produces labels [0,1,1,0] for [(0,0),(0,1),(1,0),(1,1)]; no affine separator can satisfy all four inequalities.",
-      "concepts": [
-        "capacity",
-        "ReLU",
-        "XOR",
-        "initialization",
-        "representation"
-      ]
+      "concepts": ["capacity", "ReLU", "XOR", "initialization", "representation"]
     },
     {
       "id": "tf-017",
       "title": "Regularization and training/evaluation behavior",
       "level": "intermediate",
       "minutes": 105,
-      "prerequisites": [
-        "tf-016"
-      ],
+      "prerequisites": ["tf-016"],
       "runtime": "tensorflow-cpu",
       "outcome": "Separate regularization penalties from data loss and switch stochastic layers correctly.",
       "lab": "Compare one fixed weight vector under L1/L2 penalties; call a dropout layer with training=False and training=True.",
       "verification": "For weights [1,-2], L1 sum=3 and L2 squared sum=5. Repeated evaluation calls match; training behavior is tested by invariants, not a cross-platform random bit pattern.",
-      "concepts": [
-        "regularization",
-        "dropout",
-        "training flag",
-        "data loss"
-      ]
+      "concepts": ["regularization", "dropout", "training flag", "data loss"]
     },
     {
       "id": "tf-018",
       "title": "Normalization state and batch dependence",
       "level": "intermediate",
       "minutes": 120,
-      "prerequisites": [
-        "tf-017"
-      ],
+      "prerequisites": ["tf-017"],
       "runtime": "tensorflow-cpu",
       "outcome": "Distinguish BatchNorm moving statistics from per-example LayerNorm.",
       "lab": "Use momentum 0.5 and a fixed batch mean [2,4]; inspect the first BatchNorm moving-mean update and compare per-row normalization.",
       "verification": "Starting from zeros, moving mean becomes [1,2]. Evaluation does not update it. Adding an unrelated batch row cannot alter another row under LayerNorm.",
-      "concepts": [
-        "BatchNorm",
-        "LayerNorm",
-        "moving statistics",
-        "batch coupling"
-      ]
+      "concepts": ["BatchNorm", "LayerNorm", "moving statistics", "batch coupling"]
     },
     {
       "id": "tf-019",
       "title": "Convolution as a local, shared computation",
       "level": "intermediate",
       "minutes": 120,
-      "prerequisites": [
-        "tf-018"
-      ],
+      "prerequisites": ["tf-018"],
       "runtime": "tensorflow-cpu",
       "outcome": "Trace a convolution kernel, channels and receptive field on a tiny array.",
       "lab": "Apply kernel [[1,0],[0,-1]] to the fixed 3x3 image containing 1 through 9 with VALID padding and no bias.",
       "verification": "The 2x2 output is all -4. TensorFlow uses cross-correlation convention; rotating the kernel would change this example to +4.",
-      "concepts": [
-        "Conv2D",
-        "kernel sharing",
-        "padding",
-        "stride",
-        "receptive field"
-      ]
+      "concepts": ["Conv2D", "kernel sharing", "padding", "stride", "receptive field"]
     },
     {
       "id": "tf-020",
       "title": "Pooling and augmentation without label leakage",
       "level": "intermediate",
       "minutes": 105,
-      "prerequisites": [
-        "tf-019"
-      ],
+      "prerequisites": ["tf-019"],
       "runtime": "tensorflow-cpu",
       "outcome": "Apply only label-preserving training transforms and keep evaluation deterministic.",
       "lab": "Pool a fixed 2x2 patch and horizontally flip a hand-authored image; explain a case where flipping would change the label.",
       "verification": "For [[1,3],[2,4]], max pooling yields 4 and average pooling 2.5. Evaluation receives the original image; unsafe semantic flips are rejected in the data contract.",
-      "concepts": [
-        "pooling",
-        "augmentation",
-        "label invariance",
-        "evaluation transform"
-      ]
+      "concepts": ["pooling", "augmentation", "label invariance", "evaluation transform"]
     },
     {
       "id": "tf-021",
       "title": "Sequences, embeddings and padding",
       "level": "intermediate",
       "minutes": 120,
-      "prerequisites": [
-        "tf-020"
-      ],
+      "prerequisites": ["tf-020"],
       "runtime": "tensorflow-cpu",
       "outcome": "Carry a padding mask through a small sequence model and loss denominator.",
       "lab": "Use token IDs [2,3,0], where 0 is padding; compare final valid state and masked loss before/after appending padding.",
       "verification": "The valid-token mask is [true,true,false]; two equal log(2) token losses average to log(2), not 2*log(2)/3.",
-      "concepts": [
-        "Embedding",
-        "padding mask",
-        "sequence state",
-        "valid-token denominator"
-      ]
+      "concepts": ["Embedding", "padding mask", "sequence state", "valid-token denominator"]
     },
     {
       "id": "tf-022",
       "title": "Attention with an explicit information boundary",
       "level": "intermediate",
       "minutes": 120,
-      "prerequisites": [
-        "tf-021"
-      ],
+      "prerequisites": ["tf-021"],
       "runtime": "tensorflow-cpu",
       "outcome": "Verify causal masking independently of apparent model accuracy.",
       "lab": "Implement one fixed attention head in TensorFlow and compare its equal-logit result with a NumPy oracle; change only future values.",
       "verification": "Outputs for V=[[2,0],[0,2],[6,6]] are [[2,0],[1,1],[8/3,8/3]] within 1e-6; future changes leave earlier rows unchanged.",
-      "concepts": [
-        "attention",
-        "causal mask",
-        "prefix invariance",
-        "oracle"
-      ]
+      "concepts": ["attention", "causal mask", "prefix invariance", "oracle"]
     },
     {
       "id": "tf-023",
       "title": "Debugging a custom training loop",
       "level": "intermediate",
       "minutes": 120,
-      "prerequisites": [
-        "tf-022"
-      ],
+      "prerequisites": ["tf-022"],
       "runtime": "tensorflow-cpu",
       "outcome": "Diagnose a silent missing update and distinguish graph tracing from tensor execution.",
       "lab": "Build a short custom loop with one intentionally disconnected forward value, then repair it and log weights before/after each step.",
       "verification": "The disconnected gradient is None, not zero. The repaired first two pilot updates end at w=448/225 within 1e-12; loss is recomputed after every assignment.",
-      "concepts": [
-        "custom loop",
-        "gradient diagnosis",
-        "state update",
-        "trace"
-      ]
+      "concepts": ["custom loop", "gradient diagnosis", "state update", "trace"]
     },
     {
       "id": "tf-024",
       "title": "Capstone: a small classifier with honest evaluation",
       "level": "intermediate",
       "minutes": 210,
-      "prerequisites": [
-        "tf-023"
-      ],
+      "prerequisites": ["tf-023"],
       "runtime": "tensorflow-cpu",
       "outcome": "Deliver a bounded classifier with a baseline, leakage checks and error analysis.",
       "lab": "Generate local geometric arrays with frozen seeds and group IDs; train at most two small hidden layers and compare a simple baseline on an untouched test split.",
       "verification": "Report confusion counts summing to the test cardinality, per-group errors, training-only preprocessing and the chosen validation decision. No promised accuracy threshold substitutes for these checks.",
-      "concepts": [
-        "capstone",
-        "classification",
-        "baseline",
-        "error analysis",
-        "test freeze"
-      ]
+      "concepts": ["capstone", "classification", "baseline", "error analysis", "test freeze"]
     },
     {
       "id": "tf-025",
       "title": "Embedding objectives and negative examples",
       "level": "advanced",
       "minutes": 120,
-      "prerequisites": [
-        "tf-024"
-      ],
+      "prerequisites": ["tf-024"],
       "runtime": "tensorflow-cpu",
       "outcome": "Connect embedding similarity to the objective and negative sampling policy.",
       "lab": "Use a=[1,0], positive=[1,1] and negative=[0,1]; calculate dot products and cosines, then replace the negative with a duplicate of the positive.",
@@ -521,214 +341,132 @@
       "title": "Custom layers, residuals and trainable state",
       "level": "advanced",
       "minutes": 120,
-      "prerequisites": [
-        "tf-025"
-      ],
+      "prerequisites": ["tf-025"],
       "runtime": "tensorflow-cpu",
       "outcome": "Create weights once and keep build/call responsibilities separate.",
       "lab": "Implement a tiny residual layer, call it twice with the same feature dimension and inspect its tracked variables.",
       "verification": "Variable count does not grow on the second call. A residual addition requires matching trailing dimensions; incompatible inputs produce a declared validation failure.",
-      "concepts": [
-        "Layer",
-        "build",
-        "call",
-        "residual",
-        "tracked state"
-      ]
+      "concepts": ["Layer", "build", "call", "residual", "tracked state"]
     },
     {
       "id": "tf-027",
       "title": "Transfer learning without a model download",
       "level": "advanced",
       "minutes": 120,
-      "prerequisites": [
-        "tf-026"
-      ],
+      "prerequisites": ["tf-026"],
       "runtime": "tensorflow-cpu",
       "outcome": "Freeze and adapt a locally trained feature extractor with an explicit gradient boundary.",
       "lab": "Reuse the small classifier from tf-024, freeze its base, train a new head for a relabeled local task and compare gradient/weight changes.",
       "verification": "Frozen-base weights remain byte-identical while at least one head weight changes; an unfreeze phase uses a new, declared optimizer policy.",
-      "concepts": [
-        "transfer learning",
-        "freezing",
-        "fine-tuning",
-        "optimizer state"
-      ]
+      "concepts": ["transfer learning", "freezing", "fine-tuning", "optimizer state"]
     },
     {
       "id": "tf-028",
       "title": "Restartable training and checkpoint evidence",
       "level": "advanced",
       "minutes": 135,
-      "prerequisites": [
-        "tf-027"
-      ],
+      "prerequisites": ["tf-027"],
       "runtime": "tensorflow-cpu",
       "outcome": "Prove a checkpoint restores the next update rather than only the current predictions.",
       "lab": "Train a tiny model for two Adam updates with dropout disabled; save model and optimizer state, restore in a fresh process and compare the next update on the identical batch.",
       "verification": "Uninterrupted and restored next-step weights agree within declared 1e-6 float32 tolerance. A weights-only restart intentionally exposes missing optimizer state.",
-      "concepts": [
-        "checkpoint",
-        "optimizer slots",
-        "random state",
-        "next-step equivalence"
-      ]
+      "concepts": ["checkpoint", "optimizer slots", "random state", "next-step equivalence"]
     },
     {
       "id": "tf-029",
       "title": "Precision, overflow and stable objectives",
       "level": "advanced",
       "minutes": 120,
-      "prerequisites": [
-        "tf-028"
-      ],
+      "prerequisites": ["tf-028"],
       "runtime": "tensorflow-cpu",
       "outcome": "Locate overflow before it becomes a misleading training conclusion.",
       "lab": "Compare naive exp/log cross entropy with a stable logits-based form at logits [1000,999]; inspect finite values and gradients.",
       "verification": "The naive exponential path overflows; the stable positive-first-class loss is log(1+exp(-1)) within 1e-6. Mixed precision is an optional hardware study, not a default speed claim.",
-      "concepts": [
-        "precision",
-        "overflow",
-        "log-sum-exp",
-        "loss scaling"
-      ]
+      "concepts": ["precision", "overflow", "log-sum-exp", "loss scaling"]
     },
     {
       "id": "tf-030",
       "title": "Distributed gradient semantics on one CPU",
       "level": "advanced",
       "minutes": 120,
-      "prerequisites": [
-        "tf-029"
-      ],
+      "prerequisites": ["tf-029"],
       "runtime": "tensorflow-cpu",
       "outcome": "Distinguish a mean over examples from an unweighted mean over unequal shards.",
       "lab": "Simulate shards of sizes 1 and 3 with fixed gradients; compare naive shard averaging with example-weighted aggregation and gradient accumulation.",
       "verification": "Shard means 2 and 6 combine to 5 when weighted 1:3, not 4. A microbatch accumulator matches the full-batch mean before any optional distributed runtime.",
-      "concepts": [
-        "replica",
-        "gradient aggregation",
-        "unequal shards",
-        "accumulation"
-      ]
+      "concepts": ["replica", "gradient aggregation", "unequal shards", "accumulation"]
     },
     {
       "id": "tf-031",
       "title": "Graphs, retracing and measurement",
       "level": "advanced",
       "minutes": 120,
-      "prerequisites": [
-        "tf-030"
-      ],
+      "prerequisites": ["tf-030"],
       "runtime": "tensorflow-cpu",
       "outcome": "Separate trace/setup cost from steady-state execution and preserve equivalent results.",
       "lab": "Wrap the stateless tensor function f(x)=x*x+1 with tf.function; record tracing counts for repeated float32 signatures and a float64 signature, then measure warmup separately.",
       "verification": "For x=[1,2], both eager and graph outputs are [2,5]. Repeated equal signatures reuse a trace; changed dtype is reported separately. No universal speedup is asserted.",
-      "concepts": [
-        "tf.function",
-        "signature",
-        "retracing",
-        "warmup",
-        "measurement"
-      ]
+      "concepts": ["tf.function", "signature", "retracing", "warmup", "measurement"]
     },
     {
       "id": "tf-032",
       "title": "Saving, export and inference parity",
       "level": "advanced",
       "minutes": 135,
-      "prerequisites": [
-        "tf-031"
-      ],
+      "prerequisites": ["tf-031"],
       "runtime": "tensorflow-cpu",
       "outcome": "Choose the correct Keras 3 save/export API and verify a restored prediction contract.",
       "lab": "Save a tiny model as .keras, export an inference artifact with model.export, and compare fixed inputs in a fresh process.",
       "verification": "Both restored paths match the reference predictions within 1e-6. Keras 3 model.save(directory) is not presented as a SavedModel export workflow.",
-      "concepts": [
-        "Keras 3",
-        ".keras",
-        "SavedModel",
-        "signature",
-        "parity"
-      ]
+      "concepts": ["Keras 3", ".keras", "SavedModel", "signature", "parity"]
     },
     {
       "id": "tf-033",
       "title": "Inference contracts and bounded batching",
       "level": "advanced",
       "minutes": 120,
-      "prerequisites": [
-        "tf-032"
-      ],
+      "prerequisites": ["tf-032"],
       "runtime": "tensorflow-cpu",
       "outcome": "Validate an inference request independently of training success.",
       "lab": "Implement a local predict function with shape, dtype, finite-value and maximum-batch checks; no web server or deployment is started.",
       "verification": "Batch 1 and batched predictions agree per record; empty, nonfinite and over-limit inputs produce named validation errors rather than silent coercion.",
-      "concepts": [
-        "inference contract",
-        "batch limit",
-        "schema",
-        "input validation"
-      ]
+      "concepts": ["inference contract", "batch limit", "schema", "input validation"]
     },
     {
       "id": "tf-034",
       "title": "Robustness, privacy and model evidence",
       "level": "advanced",
       "minutes": 120,
-      "prerequisites": [
-        "tf-033"
-      ],
+      "prerequisites": ["tf-033"],
       "runtime": "python-core",
       "outcome": "Bound a reliability or privacy claim to the observations actually collected.",
       "lab": "Build an error table over fixed perturbations, rare groups and a duplicate-data counterexample; draft a model card for the tiny classifier.",
       "verification": "The report names the evaluation unit, each tested group, sample count and untested conditions. It makes no differential-privacy or production-safety claim from a small red-team set.",
-      "concepts": [
-        "robustness",
-        "privacy",
-        "provenance",
-        "model card",
-        "claim boundary"
-      ]
+      "concepts": ["robustness", "privacy", "provenance", "model card", "claim boundary"]
     },
     {
       "id": "tf-035",
       "title": "Comparing models with uncertainty",
       "level": "advanced",
       "minutes": 135,
-      "prerequisites": [
-        "tf-034"
-      ],
+      "prerequisites": ["tf-034"],
       "runtime": "python-core",
       "outcome": "Use paired evidence and keep model selection separate from final assessment.",
       "lab": "Compare two saved prediction vectors on the same held-out IDs; use a seeded paired resampling calculation and trace which decisions consumed validation data.",
       "verification": "Paired differences are keyed by the same IDs, bootstrap samples preserve pairs, and no test result is used to choose a new configuration.",
-      "concepts": [
-        "paired comparison",
-        "bootstrap",
-        "selection bias",
-        "evaluation unit"
-      ]
+      "concepts": ["paired comparison", "bootstrap", "selection bias", "evaluation unit"]
     },
     {
       "id": "tf-036",
       "title": "Capstone: release a small, reproducible model",
       "level": "advanced",
       "minutes": 240,
-      "prerequisites": [
-        "tf-035"
-      ],
+      "prerequisites": ["tf-035"],
       "runtime": "tensorflow-cpu",
       "outcome": "Defend a local model release with reproducibility, inference and rollback evidence.",
       "lab": "Package the tiny trained model, preprocessing schema, split hashes and next-step checkpoint proof; run a fresh-process prediction contract and a deliberately failing release check.",
       "verification": "Acceptance requires all deterministic contract checks, frozen-test evidence, limitations and a rollback artifact. A failed schema or hash blocks the release recommendation.",
-      "concepts": [
-        "capstone",
-        "reproducibility",
-        "release gate",
-        "rollback",
-        "limitations"
-      ]
+      "concepts": ["capstone", "reproducibility", "release gate", "rollback", "limitations"]
     }
   ],
   "capstones": [

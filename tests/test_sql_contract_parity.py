@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib
 import json
 import re
 from dataclasses import dataclass
@@ -208,7 +209,7 @@ def _guide_contract(lesson_id: str, exercise_number: int) -> Contract:
     return contracts[exercise_number]
 
 
-def _executable_solution(lesson_id: str) -> str:
+def _executable_solution(lesson_id: str, *, preserve_case: bool = False) -> str:
     lesson = CATALOG.get(lesson_id)
     paths = [
         CATALOG.resolve(relative_path)
@@ -216,7 +217,32 @@ def _executable_solution(lesson_id: str) -> str:
         if Path(relative_path).suffix.lower() == ".sql"
     ]
     assert len(paths) == 1, f"{lesson_id} must catalog exactly one executable SQL solution"
-    return paths[0].read_text(encoding="utf-8").lower()
+    source = paths[0].read_text(encoding="utf-8")
+    return source if preserve_case else source.lower()
+
+
+def _sql_tokens(source: str) -> list[tuple[str, str]]:
+    """Ignore layout, retaining literal values, operators and quoted identities."""
+    scan = importlib.import_module("pglast.parser").scan
+    result: list[tuple[str, str]] = []
+    for token in scan(source):
+        if token.name in {"C_COMMENT", "SQL_COMMENT"}:
+            continue
+        text = source[token.start : token.end + 1]
+        if token.kind != "NO_KEYWORD" or (token.name == "IDENT" and not text.startswith('"')):
+            text = text.lower()
+        result.append((str(token.name), text))
+    return result
+
+
+def _count_sql_fragment(source: str, fragment: str) -> int:
+    tokens = _sql_tokens(source)
+    expected = _sql_tokens(fragment)
+    assert expected, "A SQL contract fragment must contain syntax"
+    return sum(
+        tokens[index : index + len(expected)] == expected
+        for index in range(len(tokens) - len(expected) + 1)
+    )
 
 
 def _contract_text(contract: Contract) -> str:
@@ -391,7 +417,7 @@ def test_sql_44_executable_solution_keeps_two_stable_statement_rankings() -> Non
     assert source.count("limit 10") == 2
     assert "'total_exec_time'" in source
     assert "'mean_exec_time'" in source
-    assert source.count("order by ranking, rank_position;") == 2
+    assert _count_sql_fragment(source, "ORDER BY ranking, rank_position;") == 2
     assert "pg_stat_statements_reset" not in source
 
 
@@ -420,13 +446,35 @@ def test_sql_57_forecast_comparisons_keep_model_grain() -> None:
 
 
 def test_sql_57_executable_solution_compares_models_at_model_grain() -> None:
-    source = _executable_solution("sql-57")
+    source = _executable_solution("sql-57", preserve_case=True)
 
-    assert "select 'ma(7)' as model" in source
-    assert "select 'seasonal naive (lag 7)'" in source
-    assert "union all" in source
-    assert "common_scoring_rows as (" in source
-    assert re.search(
-        r"from common_scoring_rows\s+group by model_name\s+order by model_name;",
-        source,
+    assert _count_sql_fragment(source, "SELECT 'MA(7)' AS model") == 1
+    assert _count_sql_fragment(source, "SELECT 'seasonal naive (lag 7)'") == 1
+    assert _count_sql_fragment(source, "UNION ALL") >= 1
+    assert _count_sql_fragment(source, "common_scoring_rows AS (") == 1
+    assert (
+        _count_sql_fragment(
+            source, "FROM common_scoring_rows GROUP BY model_name ORDER BY model_name;"
+        )
+        == 1
     )
+
+
+@pytest.mark.parametrize(
+    "source,fragment",
+    [
+        ("SELECT 'ma(7)' AS model", "SELECT 'MA(7)' AS model"),
+        ("SELECT amount >= 0", "SELECT amount > 0"),
+        ("SELECT 100", "SELECT 10"),
+        ('SELECT "ID"', 'SELECT "id"'),
+        ("SELECT user_id", "SELECT userid"),
+    ],
+)
+def test_sql_layout_comparison_does_not_relax_meaning(source: str, fragment: str) -> None:
+    assert _count_sql_fragment(source, fragment) == 0
+
+
+def test_sql_layout_comparison_accepts_spacing_but_not_a_comment_only_match() -> None:
+    fragment = "SELECT 'MA(7)' AS model"
+    assert _count_sql_fragment("select\n  'MA(7)' as\n model;", fragment) == 1
+    assert _count_sql_fragment("-- SELECT 'MA(7)' AS model\nSELECT 1;", fragment) == 0

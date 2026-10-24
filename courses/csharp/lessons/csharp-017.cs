@@ -8,10 +8,9 @@
 // Task 6: Choose one dependency worth injecting in the inventory importer and explain the testing benefit.
 using System;
 
-internal static class Program
-{
-    private static void Main()
-    {
-        throw new NotImplementedException("Implement your own lesson attempt before running.");
-    }
+internal static class Program {
+  private static void Main() {
+    throw new NotImplementedException(
+        "Implement your own lesson attempt before running.");
+  }
 }

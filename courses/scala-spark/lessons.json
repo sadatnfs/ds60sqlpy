@@ -9,9 +9,7 @@
       "runtime_profile": "reading",
       "guide_path": "courses/scala-spark/guides/spark-001.md",
       "source_path": "courses/scala-spark/lessons/spark-001.md",
-      "solution_paths": [
-        "courses/scala-spark/solutions/spark-001_solutions.md"
-      ],
+      "solution_paths": ["courses/scala-spark/solutions/spark-001_solutions.md"],
       "verification_id": null
     },
     {
@@ -651,9 +649,7 @@
       "runtime_profile": "reading",
       "guide_path": "courses/scala-spark/guides/spark-030.md",
       "source_path": "courses/scala-spark/lessons/spark-030.md",
-      "solution_paths": [
-        "courses/scala-spark/solutions/spark-030_solutions.md"
-      ],
+      "solution_paths": ["courses/scala-spark/solutions/spark-030_solutions.md"],
       "verification_id": null
     },
     {
@@ -906,9 +902,7 @@
       "runtime_profile": "reading",
       "guide_path": "courses/scala-spark/guides/spark-040.md",
       "source_path": "courses/scala-spark/lessons/spark-040.md",
-      "solution_paths": [
-        "courses/scala-spark/solutions/spark-040_solutions.md"
-      ],
+      "solution_paths": ["courses/scala-spark/solutions/spark-040_solutions.md"],
       "verification_id": null
     },
     {

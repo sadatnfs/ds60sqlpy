@@ -14,29 +14,32 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Buffers;
 
-internal static class Program
-{
-    private static void Check(bool condition, string reason)
+internal static class Program {
+  private static void Check(bool condition, string reason) {
+    if (!condition)
+      throw new InvalidOperationException(reason);
+  }
+
+  private static async Task Main() {
     {
-        if (!condition) throw new InvalidOperationException(reason);
+      int[] rented = ArrayPool<int>.Shared.Rent(3);
+      try {
+        rented[0] = 2;
+        rented[1] = 3;
+        rented[2] = 4;
+        Check(rented.AsSpan(0, 3).ToArray().Sum() == 9, "logical range");
+        Check(rented.Length >= 3, "minimum capacity");
+      } finally {
+        ArrayPool<int>.Shared.Return(rented, clearArray: true);
+      }
     }
-
-    private static async Task Main()
     {
-        {
-            int[] rented = ArrayPool<int>.Shared.Rent(3);
-            try { rented[0] = 2; rented[1] = 3; rented[2] = 4; Check(rented.AsSpan(0, 3).ToArray().Sum() == 9, "logical range"); Check(rented.Length >= 3, "minimum capacity"); }
-            finally { ArrayPool<int>.Shared.Return(rented, clearArray: true); }
-        }
-        {
-            var retained = new List<byte[]> { new byte[32], new byte[32] };
-            Check(retained.Count == 2, "references retained");
-            retained.Clear();
-            Check(retained.Count == 0, "application releases references");
-        }
-        Console.WriteLine("csharp-036: passed");
-        await Task.CompletedTask;
+      var retained = new List<byte[]> { new byte[32], new byte[32] };
+      Check(retained.Count == 2, "references retained");
+      retained.Clear();
+      Check(retained.Count == 0, "application releases references");
     }
-
-
+    Console.WriteLine("csharp-036: passed");
+    await Task.CompletedTask;
+  }
 }

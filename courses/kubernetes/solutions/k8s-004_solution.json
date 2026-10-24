@@ -10,18 +10,10 @@
       },
       "rules": [
         {
-          "apiGroups": [
-            "apps"
-          ],
-          "resources": [
-            "deployments"
-          ],
-          "resourceNames": [
-            "hello"
-          ],
-          "verbs": [
-            "get"
-          ]
+          "apiGroups": ["apps"],
+          "resources": ["deployments"],
+          "resourceNames": ["hello"],
+          "verbs": ["get"]
         }
       ]
     }

@@ -15,7 +15,7 @@ services:
       args:
         DS60_PYTHON_IMAGE: ${DS60_PYTHON_IMAGE:-python:3.12.12-slim-bookworm}
     depends_on:
-      classroom-init: {condition: service_completed_successfully}
+      classroom-init: { condition: service_completed_successfully }
     init: true
     stop_grace_period: 30s
     read_only: true
@@ -37,19 +37,25 @@ services:
         source: classroom-runtime
         target: /run/ds60/worker-token
         read_only: true
-        volume: {nocopy: true}
+        volume: { nocopy: true }
       - type: bind
         source: ${DS60_K8S_SESSION_DIR:?Prepare an owned kind session first}/lease.json
         target: /run/ds60/k8s-lease.json
         read_only: true
-        bind: {create_host_path: false}
+        bind: { create_host_path: false }
       - type: bind
         source: ${DS60_K8S_SESSION_DIR:?Prepare an owned kind session first}/worker.kubeconfig.json
         target: /run/ds60/worker.kubeconfig.json
         read_only: true
-        bind: {create_host_path: false}
+        bind: { create_host_path: false }
     healthcheck:
-      test: ["CMD", "python", "-c", "import json,os,urllib.request; t=open(os.environ['DS60_WORKER_TOKEN_FILE']).read().strip(); r=urllib.request.urlopen(urllib.request.Request('http://127.0.0.1:8081/health',headers={'X-DS60-Worker-Token':t}),timeout=3); assert json.load(r)['ready']"]
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import json,os,urllib.request; t=open(os.environ['DS60_WORKER_TOKEN_FILE']).read().strip(); r=urllib.request.urlopen(urllib.request.Request('http://127.0.0.1:8081/health',headers={'X-DS60-Worker-Token':t}),timeout=3); assert json.load(r)['ready']",
+        ]
       interval: 5s
       timeout: 5s
       retries: 12

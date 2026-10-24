@@ -30,15 +30,27 @@
 #include <variant>
 #include <vector>
 
-int checked_at(const std::vector<int>& xs,std::size_t i){return xs.at(i);}
+int checked_at(const std::vector<int> &xs, std::size_t i) { return xs.at(i); }
 int main() {
-    assert(checked_at({2,4},1)==4); bool rejected=false;try{checked_at({2,4},2);}catch(const std::out_of_range&){rejected=true;}assert(rejected);
-    // Reference extension checks for the exercise changes.
-    bool empty_rejected=false;try{checked_at({},0);}catch(const std::out_of_range&){empty_rejected=true;}assert(empty_rejected);
-    std::cout << "cpp-025 examples passed\n";
-    return 0;
+  assert(checked_at({2, 4}, 1) == 4);
+  bool rejected = false;
+  try {
+    checked_at({2, 4}, 2);
+  } catch (const std::out_of_range &) {
+    rejected = true;
+  }
+  assert(rejected);
+  // Reference extension checks for the exercise changes.
+  bool empty_rejected = false;
+  try {
+    checked_at({}, 0);
+  } catch (const std::out_of_range &) {
+    empty_rejected = true;
+  }
+  assert(empty_rejected);
+  std::cout << "cpp-025 examples passed\n";
+  return 0;
 }
-
 
 // Exercise 1: Classify the defect. Explain index 2 into vector size 2. Expected: Out of bounds; valid indices 0 and 1.
 // Exercise 2: Use checked access. Compare at(2) with the contract of operator[2]. Expected: at throws; unchecked invalid access is undefined behavior.

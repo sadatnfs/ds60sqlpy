@@ -30,13 +30,25 @@
 #include <variant>
 #include <vector>
 
-
 int main() {
-    for(int trial=0;trial<20;++trial){std::atomic<int> count{0};std::promise<void> ready;auto started=ready.get_future();std::thread t([&]{ready.set_value();for(int i=0;i<100;++i)++count;});started.get();for(int i=0;i<100;++i)++count;t.join();assert(count==200);}
-    std::cout << "cpp-033 examples passed\n";
-    return 0;
+  for (int trial = 0; trial < 20; ++trial) {
+    std::atomic<int> count{0};
+    std::promise<void> ready;
+    auto started = ready.get_future();
+    std::thread t([&] {
+      ready.set_value();
+      for (int i = 0; i < 100; ++i)
+        ++count;
+    });
+    started.get();
+    for (int i = 0; i < 100; ++i)
+      ++count;
+    t.join();
+    assert(count == 200);
+  }
+  std::cout << "cpp-033 examples passed\n";
+  return 0;
 }
-
 
 // Exercise 1: Identify the schedule point. Name the purpose of the ready handshake. Expected: It proves worker startup, not worker completion.
 // Exercise 2: Run bounded stress. Repeat the 200-count scenario 20 times. Expected: 20 exact invariant passes, no sleeps.

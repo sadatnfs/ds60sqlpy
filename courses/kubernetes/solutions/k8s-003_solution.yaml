@@ -18,7 +18,7 @@ spec:
       securityContext:
         runAsNonRoot: true
         runAsUser: 65532
-        seccompProfile: {type: RuntimeDefault}
+        seccompProfile: { type: RuntimeDefault }
       containers:
         - name: app
           image: ds60sqlpy-k8s-fixture:0.2.0
@@ -28,17 +28,16 @@ spec:
             - name: http
               containerPort: 8080
           readinessProbe:
-            httpGet: {path: /ready, port: http}
+            httpGet: { path: /ready, port: http }
             periodSeconds: 2
             failureThreshold: 2
           resources:
-            requests: {cpu: 10m, memory: 16Mi}
-            limits: {cpu: 100m, memory: 64Mi}
+            requests: { cpu: 10m, memory: 16Mi }
+            limits: { cpu: 100m, memory: 64Mi }
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
-            capabilities: {drop: ["ALL"]}
-
+            capabilities: { drop: ["ALL"] }
 # Exercise 1: Read the request envelope. Inputs: the complete hello Deployment learner source. Expected: apps/v1,Deployment,hello. Verify: read the three exact fields at their declared levels.
 # Exercise 2: Validate a numeric field. Inputs: one valid number and one invalid string. Expected: numeric1 is the intended request; the string is rejected by schema validation. Verify: retain the validation phase/result and do not claim a rejected object has a new UID.
 # Exercise 3: Trace selector and template labels. Inputs: selector app:hello and template label app:hello. Expected: the key/value pairs agree; app:wrong would violate the intended controller/template relation. Verify: compare the exact pair on both sides.

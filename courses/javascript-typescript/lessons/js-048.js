@@ -20,4 +20,6 @@
 // Exercise 6: Transfer the pipeline to a rate metric.
 // Expected: Validate numerator and denominator at a defined grain before division.
 
-throw new Error("Implement the six D3 practice tasks in your saved pad before claiming completion.");
+throw new Error(
+  "Implement the six D3 practice tasks in your saved pad before claiming completion.",
+);

@@ -19,30 +19,29 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       containers:
-      - name: task
-        image: ds60sqlpy-k8s-fixture:0.2.0
-        imagePullPolicy: Never
-        command:
-        - python
-        - /fixture.py
-        - task
-        - --outcome
-        - success
-        resources:
-          requests:
-            cpu: 10m
-            memory: 16Mi
-          limits:
-            cpu: 100m
-            memory: 64Mi
-        securityContext:
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: true
-          capabilities:
-            drop:
-            - ALL
+        - name: task
+          image: ds60sqlpy-k8s-fixture:0.2.0
+          imagePullPolicy: Never
+          command:
+            - python
+            - /fixture.py
+            - task
+            - --outcome
+            - success
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
       restartPolicy: Never
-
 # Exercise 1: Identify finite-work controls. Read completions,parallelism,restartPolicy,backoffLimit and activeDeadlineSeconds. Expected: 1,1,Never,0 and20seconds for the reference.
 # Exercise 2: Verify exact task output. Run the successful fixed task under a qualified lease. Expected: Owned Complete Job,controlled successful task Pod,exit0 and exact accepted3/rejected2/total35 output.
 # Exercise 3: Observe intentional failure. Change only the allowed outcome from success to failure. Expected: Job reaches Failed;operation reports failure and cleans its owned UID.

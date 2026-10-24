@@ -5,7 +5,6 @@ import org.apache.spark.sql.expressions.Window
 
 object Main {
 
-
   def validateCandidates(events: DataFrame): Unit =
     throw new UnsupportedOperationException("Complete validateCandidates")
 
@@ -25,19 +24,47 @@ object Main {
     throw new UnsupportedOperationException("Complete previousEvidence")
 
   def main(args: Array[String]): Unit = {
-    val spark = SparkSession.builder().appName("ds60-spark-019").master("local[2]")
-      .config("spark.ui.enabled","false")
-      .config("spark.driver.host","127.0.0.1")
-      .config("spark.driver.bindAddress","127.0.0.1")
-      .config("spark.sql.shuffle.partitions","2")
-      .config("spark.sql.adaptive.enabled","false")
-      .config("spark.sql.ansi.enabled","true")
-      .config("spark.sql.session.timeZone","UTC").getOrCreate()
+    val spark = SparkSession
+      .builder()
+      .appName("ds60-spark-019")
+      .master("local[2]")
+      .config("spark.ui.enabled", "false")
+      .config("spark.driver.host", "127.0.0.1")
+      .config("spark.driver.bindAddress", "127.0.0.1")
+      .config("spark.sql.shuffle.partitions", "2")
+      .config("spark.sql.adaptive.enabled", "false")
+      .config("spark.sql.ansi.enabled", "true")
+      .config("spark.sql.session.timeZone", "UTC")
+      .getOrCreate()
     try {
       require(spark.sparkContext.master == "local[2]", "local-only course session")
       spark.sparkContext.setLogLevel("ERROR")
-      val schema = StructType(Seq(StructField("event_id",LongType,false),StructField("entity",StringType,false),StructField("time_text",StringType,true),StructField("amount",LongType,false)))
-      val events = spark.createDataFrame(spark.sparkContext.parallelize(Seq(Row(1L,"A","2024-01-01 00:00:00",10L),Row(2L,"A","2024-01-01 00:01:00",20L),Row(3L,"A","2024-01-01 00:01:00",30L),Row(4L,"B","2024-01-01 00:00:00",40L),Row(5L,"B","2024-01-01 00:02:00",50L),Row(6L,"B","2024-01-01 00:02:00",60L),Row(7L,"C",null,70L),Row(8L,"C","2024-01-01 00:01:00",80L)),2),schema).withColumn("event_time",to_timestamp(col("time_text")))
+      val schema = StructType(
+        Seq(
+          StructField("event_id", LongType, false),
+          StructField("entity", StringType, false),
+          StructField("time_text", StringType, true),
+          StructField("amount", LongType, false)
+        )
+      )
+      val events = spark
+        .createDataFrame(
+          spark.sparkContext.parallelize(
+            Seq(
+              Row(1L, "A", "2024-01-01 00:00:00", 10L),
+              Row(2L, "A", "2024-01-01 00:01:00", 20L),
+              Row(3L, "A", "2024-01-01 00:01:00", 30L),
+              Row(4L, "B", "2024-01-01 00:00:00", 40L),
+              Row(5L, "B", "2024-01-01 00:02:00", 50L),
+              Row(6L, "B", "2024-01-01 00:02:00", 60L),
+              Row(7L, "C", null, 70L),
+              Row(8L, "C", "2024-01-01 00:01:00", 80L)
+            ),
+            2
+          ),
+          schema
+        )
+        .withColumn("event_time", to_timestamp(col("time_text")))
       locally {
         val group = events.filter(col("entity") === "A")
         assert(group.count() == 3L && group.select("event_time").distinct().count() == 2L)
@@ -46,7 +73,9 @@ object Main {
       locally {
         val counts = events.dropDuplicates("entity").count()
         assert(counts == 3L)
-        println("dropDuplicates guarantees entity cardinality here; it does not state a newest-row policy")
+        println(
+          "dropDuplicates guarantees entity cardinality here; it does not state a newest-row policy"
+        )
       }
       println("spark-019: worked examples passed; six task implementations remain")
     } finally { spark.stop() }

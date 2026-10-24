@@ -18,51 +18,62 @@
 --
 BEGIN;
 SET search_path TO training, public;
-
 -- Study contract
 -- Focus: Compose multiple CTEs so hierarchy traversal, employee grain, and management summaries remain individually testable.
 -- Assumptions: The employee graph can have multiple roots. Payroll uses exact salary numeric and each employee should contribute once per intended output grain.
 -- Pitfall: Joining ancestor-descendant pairs to employee facts can count one employee multiple times; state whether output is direct-team or full-subtree grain.
 -- Predict row grain and NULL/order behavior before executing each example.
-
 WITH RECURSIVE base_org AS (
-  SELECT e.employee_id,
-         e.manager_id,
-         e.department_id,
-         e.salary,
-         1 AS depth,
-         ARRAY[e.employee_id] AS path
-  FROM employees e
-  WHERE e.manager_id IS NULL
+  SELECT
+    e.employee_id,
+    e.manager_id,
+    e.department_id,
+    e.salary,
+    1 AS depth,
+    ARRAY[e.employee_id] AS path
+  FROM
+    employees e
+  WHERE
+    e.manager_id IS NULL
   UNION ALL
-  SELECT e.employee_id,
-         e.manager_id,
-         e.department_id,
-         e.salary,
-         b.depth + 1,
-         b.path || e.employee_id
-  FROM employees e
-  JOIN base_org b ON e.manager_id = b.employee_id
-  WHERE NOT e.employee_id = ANY(b.path)
-), dept_counts AS (
+  SELECT
+    e.employee_id,
+    e.manager_id,
+    e.department_id,
+    e.salary,
+    b.depth + 1,
+    b.path || e.employee_id
+  FROM
+    employees e
+    JOIN base_org b ON e.manager_id = b.employee_id
+  WHERE
+    NOT e.employee_id = ANY (b.path)
+),
+dept_counts AS (
   -- Aggregate the traversed employee relation so the hierarchy CTE is an
   -- observable, testable stage rather than an unused declaration.
-  SELECT department_id,
-         COUNT(*) AS reachable_headcount,
-         ROUND(AVG(salary), 2) AS avg_salary,
-         MAX(depth) AS deepest_level
-  FROM base_org
-  GROUP BY department_id
+  SELECT
+    department_id,
+    COUNT(*) AS reachable_headcount,
+    ROUND(AVG(salary), 2) AS avg_salary,
+    MAX(depth) AS deepest_level
+  FROM
+    base_org
+  GROUP BY
+    department_id
 )
-SELECT d.department_id,
-       d.name AS department,
-       COALESCE(dc.reachable_headcount, 0) AS reachable_headcount,
-       dc.avg_salary,
-       dc.deepest_level
-FROM departments d
-LEFT JOIN dept_counts dc ON dc.department_id = d.department_id
-ORDER BY reachable_headcount DESC, d.department_id;
-
+SELECT
+  d.department_id,
+  d.name AS department,
+  COALESCE(dc.reachable_headcount, 0) AS reachable_headcount,
+  dc.avg_salary,
+  dc.deepest_level
+FROM
+  departments d
+  LEFT JOIN dept_counts dc ON dc.department_id = d.department_id
+ORDER BY
+  reachable_headcount DESC,
+  d.department_id;
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.
@@ -102,5 +113,4 @@ ORDER BY reachable_headcount DESC, d.department_id;
 --    Expected result/shape: For sql-25 Exercise 6, expected output: One row per department. The final columns are `department_id`, `name`, `headcount`, `managers`, and `nonmanagers`. The final order is `d.department_id`.
 --    Verify: For sql-25 Exercise 6, independently aggregate `employees`, and `departments` by `department_id`, and `name`; require one output row for every distinct `department_id`, and `name` tuple and compare `headcount`, `managers`, and `nonmanagers` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `headcount`, `managers`, and `nonmanagers` for the existing `department_id`, and `name` tuple and verify the new tuple appears exactly once.
 --    Hint ladder, rung 1: For sql-25 Exercise 6, run `managers` one at a time. Record each CTE's row count and `department_id`, and `name` uniqueness before the next stage uses it.
-
 ROLLBACK;

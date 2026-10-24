@@ -1,29 +1,72 @@
 import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
-import org.apache.spark.sql.streaming.{StreamingQuery,StreamingQueryProgress,Trigger}
-import java.nio.file.{Files,Path,Paths,StandardOpenOption,StandardCopyOption}
+import org.apache.spark.sql.streaming.{StreamingQuery, StreamingQueryProgress, Trigger}
+import java.nio.file.{Files, Path, Paths, StandardOpenOption, StandardCopyOption}
 import java.nio.charset.StandardCharsets
 import java.time.Instant
 import scala.jdk.CollectionConverters._
 
 object Main {
-  val eventSchema = StructType(Seq(StructField("id",LongType,true),StructField("team",StringType,true),StructField("amount",LongType,true),StructField("event_time",TimestampType,true)))
-  val resultSchema = StructType(Seq(StructField("window",StructType(Seq(StructField("start",TimestampType,true),StructField("end",TimestampType,true))),true),StructField("team",StringType,true),StructField("records",LongType,true),StructField("total",LongType,true)))
+  val eventSchema = StructType(
+    Seq(
+      StructField("id", LongType, true),
+      StructField("team", StringType, true),
+      StructField("amount", LongType, true),
+      StructField("event_time", TimestampType, true)
+    )
+  )
+  val resultSchema = StructType(
+    Seq(
+      StructField(
+        "window",
+        StructType(
+          Seq(StructField("start", TimestampType, true), StructField("end", TimestampType, true))
+        ),
+        true
+      ),
+      StructField("team", StringType, true),
+      StructField("records", LongType, true),
+      StructField("total", LongType, true)
+    )
+  )
   def publish(root: Path, index: Int, lines: Seq[String]): Unit = {
     val target = root.resolve("input").resolve(s"batch-$index.json")
-    require(!Files.exists(target),"Input filename already published")
-    val staged = Files.createTempFile(root.resolve("staging"),"arrival-",".tmp")
-    try { Files.writeString(staged,lines.mkString("\n")+"\n",StandardCharsets.UTF_8,StandardOpenOption.TRUNCATE_EXISTING);Files.move(staged,target,StandardCopyOption.ATOMIC_MOVE) }
-    finally Files.deleteIfExists(staged)
+    require(!Files.exists(target), "Input filename already published")
+    val staged = Files.createTempFile(root.resolve("staging"), "arrival-", ".tmp")
+    try {
+      Files.writeString(
+        staged,
+        lines.mkString("\n") + "\n",
+        StandardCharsets.UTF_8,
+        StandardOpenOption.TRUNCATE_EXISTING
+      );
+      Files.move(staged, target, StandardCopyOption.ATOMIC_MOVE)
+    } finally Files.deleteIfExists(staged)
   }
-  def stream(spark: SparkSession, root: Path): DataFrame = spark.readStream.schema(eventSchema).option("maxFilesPerTrigger",1).option("mode","FAILFAST").json(root.resolve("input").toString)
+  def stream(spark: SparkSession, root: Path): DataFrame = spark.readStream
+    .schema(eventSchema)
+    .option("maxFilesPerTrigger", 1)
+    .option("mode", "FAILFAST")
+    .json(root.resolve("input").toString)
   def runPhase(spark: SparkSession, root: Path): Seq[StreamingQueryProgress] = {
-    val query = windowed(stream(spark,root)).writeStream.format("parquet").outputMode("append").option("checkpointLocation",root.resolve("checkpoint").toString).trigger(Trigger.AvailableNow()).start(root.resolve("output").toString)
-    try { require(query.awaitTermination(30000L),"Finite phase timed out");require(query.exception.isEmpty && !query.isActive,"Phase did not terminate cleanly");query.recentProgress.toSeq }
-    finally query.stop()
+    val query = windowed(stream(spark, root)).writeStream
+      .format("parquet")
+      .outputMode("append")
+      .option("checkpointLocation", root.resolve("checkpoint").toString)
+      .trigger(Trigger.AvailableNow())
+      .start(root.resolve("output").toString)
+    try {
+      require(query.awaitTermination(30000L), "Finite phase timed out");
+      require(query.exception.isEmpty && !query.isActive, "Phase did not terminate cleanly");
+      query.recentProgress.toSeq
+    } finally query.stop()
   }
-  def deleteOwned(root: Path): Unit = { val paths = Files.walk(root);try paths.iterator().asScala.toSeq.sortBy(_.getNameCount).reverse.foreach(p => Files.delete(p)) finally paths.close() }
+  def deleteOwned(root: Path): Unit = {
+    val paths = Files.walk(root);
+    try paths.iterator().asScala.toSeq.sortBy(_.getNameCount).reverse.foreach(p => Files.delete(p))
+    finally paths.close()
+  }
 
   def windowed(events: DataFrame): DataFrame =
     throw new UnsupportedOperationException("Complete windowed")
@@ -31,13 +74,16 @@ object Main {
   def watermarks(progress: Seq[StreamingQueryProgress]): Seq[String] =
     throw new UnsupportedOperationException("Complete watermarks")
 
-  def finalRows(spark: SparkSession, root: Path): Seq[(String,String,Long,Long)] =
+  def finalRows(spark: SparkSession, root: Path): Seq[(String, String, Long, Long)] =
     throw new UnsupportedOperationException("Complete finalRows")
 
   def droppedRows(progress: Seq[StreamingQueryProgress]): Long =
     throw new UnsupportedOperationException("Complete droppedRows")
 
-  def eventLedger(phases: Seq[Seq[StreamingQueryProgress]], output: Seq[(String,String,Long,Long)]): (Long,Long,Long) =
+  def eventLedger(
+      phases: Seq[Seq[StreamingQueryProgress]],
+      output: Seq[(String, String, Long, Long)]
+  ): (Long, Long, Long) =
     throw new UnsupportedOperationException("Complete eventLedger")
 
   def rejectUnsupported(spark: SparkSession, root: Path, kind: String): Unit =
@@ -45,27 +91,43 @@ object Main {
 
   def main(args: Array[String]): Unit = {
     var ownedRoot: Path = null
-    val spark = SparkSession.builder().appName("ds60-spark-032").master("local[2]")
-      .config("spark.ui.enabled","false")
-      .config("spark.driver.host","127.0.0.1")
-      .config("spark.driver.bindAddress","127.0.0.1")
-      .config("spark.sql.shuffle.partitions","2")
-      .config("spark.sql.adaptive.enabled","false")
-      .config("spark.sql.ansi.enabled","true")
-      .config("spark.sql.session.timeZone","UTC").getOrCreate()
+    val spark = SparkSession
+      .builder()
+      .appName("ds60-spark-032")
+      .master("local[2]")
+      .config("spark.ui.enabled", "false")
+      .config("spark.driver.host", "127.0.0.1")
+      .config("spark.driver.bindAddress", "127.0.0.1")
+      .config("spark.sql.shuffle.partitions", "2")
+      .config("spark.sql.adaptive.enabled", "false")
+      .config("spark.sql.ansi.enabled", "true")
+      .config("spark.sql.session.timeZone", "UTC")
+      .getOrCreate()
     try {
       require(spark.sparkContext.master == "local[2]", "local-only course session")
       spark.sparkContext.setLogLevel("ERROR")
-      spark.conf.set("spark.sql.streaming.stopTimeout","10000")
-      ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(),".ds60-spark-032-")
-      Files.createDirectory(ownedRoot.resolve("input"));Files.createDirectory(ownedRoot.resolve("staging"))
+      spark.conf.set("spark.sql.streaming.stopTimeout", "10000")
+      ownedRoot =
+        Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(), ".ds60-spark-032-")
+      Files.createDirectory(ownedRoot.resolve("input"));
+      Files.createDirectory(ownedRoot.resolve("staging"))
       val batches = Seq(
-       Seq("""{"id":1,"team":"A","amount":10,"event_time":"2024-01-01T00:01:00Z"}""","""{"id":2,"team":"A","amount":20,"event_time":"2024-01-01T00:04:00Z"}"""),
-       Seq("""{"id":3,"team":"A","amount":5,"event_time":"2024-01-01T00:03:00Z"}""","""{"id":4,"team":"A","amount":30,"event_time":"2024-01-01T00:12:00Z"}"""),
-       Seq("""{"id":5,"team":"A","amount":999,"event_time":"2024-01-01T00:02:00Z"}""","""{"id":6,"team":"B","amount":7,"event_time":"2024-01-01T00:13:00Z"}"""),
-       Seq("""{"id":7,"team":"__advance__","amount":0,"event_time":"2024-01-01T00:30:00Z"}"""))
+        Seq(
+          """{"id":1,"team":"A","amount":10,"event_time":"2024-01-01T00:01:00Z"}""",
+          """{"id":2,"team":"A","amount":20,"event_time":"2024-01-01T00:04:00Z"}"""
+        ),
+        Seq(
+          """{"id":3,"team":"A","amount":5,"event_time":"2024-01-01T00:03:00Z"}""",
+          """{"id":4,"team":"A","amount":30,"event_time":"2024-01-01T00:12:00Z"}"""
+        ),
+        Seq(
+          """{"id":5,"team":"A","amount":999,"event_time":"2024-01-01T00:02:00Z"}""",
+          """{"id":6,"team":"B","amount":7,"event_time":"2024-01-01T00:13:00Z"}"""
+        ),
+        Seq("""{"id":7,"team":"__advance__","amount":0,"event_time":"2024-01-01T00:30:00Z"}""")
+      )
       locally {
-        val firstWindow = Seq((1,10L),(2,20L),(3,5L))
+        val firstWindow = Seq((1, 10L), (2, 20L), (3, 5L))
         assert(firstWindow.map(_._2).sum == 35L)
         println("Retained out-of-order event contributes to35,not30")
       }
@@ -75,7 +137,12 @@ object Main {
         println("Five-minute delay is event-time arithmetic;actual watermark still needs a receipt")
       }
       println("spark-032: worked examples passed; six task implementations remain")
-    } finally { try { require(spark.streams.active.isEmpty,"Query still active; preserve scratch"); if(ownedRoot != null) deleteOwned(ownedRoot) } finally { spark.stop() } }
+    } finally {
+      try {
+        require(spark.streams.active.isEmpty, "Query still active; preserve scratch");
+        if (ownedRoot != null) deleteOwned(ownedRoot)
+      } finally { spark.stop() }
+    }
   }
 }
 

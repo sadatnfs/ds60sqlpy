@@ -2,9 +2,13 @@ import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
-
 object Main {
-  def collected(frame: DataFrame): Seq[(Long,Option[String])] = frame.select("id","normalized").orderBy("id").collect().toSeq.map(r => (r.getLong(0),if(r.isNullAt(1)) None else Some(r.getString(1))))
+  def collected(frame: DataFrame): Seq[(Long, Option[String])] = frame
+    .select("id", "normalized")
+    .orderBy("id")
+    .collect()
+    .toSeq
+    .map(r => (r.getLong(0), if (r.isNullAt(1)) None else Some(r.getString(1))))
 
   def normalizeLabel(value: String): String =
     throw new UnsupportedOperationException("Complete normalizeLabel")
@@ -18,40 +22,92 @@ object Main {
   def planEvidence(frame: DataFrame): String =
     throw new UnsupportedOperationException("Complete planEvidence")
 
-  def labelCategories(frame: DataFrame): Seq[(String,Long)] =
+  def labelCategories(frame: DataFrame): Seq[(String, Long)] =
     throw new UnsupportedOperationException("Complete labelCategories")
 
-  def validateGolden(actual: Seq[(Long,Option[String])], expected: Seq[(Long,Option[String])]): Unit =
+  def validateGolden(
+      actual: Seq[(Long, Option[String])],
+      expected: Seq[(Long, Option[String])]
+  ): Unit =
     throw new UnsupportedOperationException("Complete validateGolden")
 
   def main(args: Array[String]): Unit = {
 
-    val spark = SparkSession.builder().appName("ds60-spark-026").master("local[2]")
-      .config("spark.ui.enabled","false")
-      .config("spark.driver.host","127.0.0.1")
-      .config("spark.driver.bindAddress","127.0.0.1")
-      .config("spark.sql.shuffle.partitions","2")
-      .config("spark.sql.adaptive.enabled","false")
-      .config("spark.sql.ansi.enabled","true")
-      .config("spark.sql.session.timeZone","UTC").getOrCreate()
+    val spark = SparkSession
+      .builder()
+      .appName("ds60-spark-026")
+      .master("local[2]")
+      .config("spark.ui.enabled", "false")
+      .config("spark.driver.host", "127.0.0.1")
+      .config("spark.driver.bindAddress", "127.0.0.1")
+      .config("spark.sql.shuffle.partitions", "2")
+      .config("spark.sql.adaptive.enabled", "false")
+      .config("spark.sql.ansi.enabled", "true")
+      .config("spark.sql.session.timeZone", "UTC")
+      .getOrCreate()
     try {
       require(spark.sparkContext.master == "local[2]", "local-only course session")
       spark.sparkContext.setLogLevel("ERROR")
-      val schema = StructType(Seq(StructField("id",LongType,false),StructField("label",StringType,true)))
-      val raw = spark.createDataFrame(spark.sparkContext.parallelize(Seq(Row(1L,null),Row(2L,""),Row(3L,"   "),Row(4L,"  ALPHA  Beta "),Row(5L,"\tA\nB\r "),Row(6L,"CAFÉ"),Row(7L,"Straße"),Row(8L,"\u00a0A\u00a0"),Row(9L,"İI"),Row(10L,"🙂 OK"),Row(11L,"e\u0301"),Row(12L,"NULL")),2),schema)
-      val expected = Seq((1L,None),(2L,Some("")),(3L,Some("")),(4L,Some("alpha beta")),(5L,Some("a b")),(6L,Some("cafÉ")),(7L,Some("straße")),(8L,Some("\u00a0a\u00a0")),(9L,Some("İi")),(10L,Some("🙂 ok")),(11L,Some("e\u0301")),(12L,Some("null")))
+      val schema = StructType(
+        Seq(StructField("id", LongType, false), StructField("label", StringType, true))
+      )
+      val raw = spark.createDataFrame(
+        spark.sparkContext.parallelize(
+          Seq(
+            Row(1L, null),
+            Row(2L, ""),
+            Row(3L, "   "),
+            Row(4L, "  ALPHA  Beta "),
+            Row(5L, "\tA\nB\r "),
+            Row(6L, "CAFÉ"),
+            Row(7L, "Straße"),
+            Row(8L, "\u00a0A\u00a0"),
+            Row(9L, "İI"),
+            Row(10L, "🙂 OK"),
+            Row(11L, "e\u0301"),
+            Row(12L, "NULL")
+          ),
+          2
+        ),
+        schema
+      )
+      val expected = Seq(
+        (1L, None),
+        (2L, Some("")),
+        (3L, Some("")),
+        (4L, Some("alpha beta")),
+        (5L, Some("a b")),
+        (6L, Some("cafÉ")),
+        (7L, Some("straße")),
+        (8L, Some("\u00a0a\u00a0")),
+        (9L, Some("İi")),
+        (10L, Some("🙂 ok")),
+        (11L, Some("e\u0301")),
+        (12L, Some("null"))
+      )
       locally {
-        val row = spark.sql("SELECT translate('CAFÉ','ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz') AS ascii_only").first()
+        val row = spark
+          .sql(
+            "SELECT translate('CAFÉ','ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz') AS ascii_only"
+          )
+          .first()
         assert(row.getString(0) == "cafÉ")
         println("ASCII mapping preserves non-ASCII É")
       }
       locally {
-        val row = spark.sql("SELECT CAST(NULL AS STRING) IS NULL AS missing, '' IS NULL AS empty_missing, 'null' IS NULL AS text_missing").first()
+        val row = spark
+          .sql(
+            "SELECT CAST(NULL AS STRING) IS NULL AS missing, '' IS NULL AS empty_missing, 'null' IS NULL AS text_missing"
+          )
+          .first()
         assert(row.getBoolean(0) && !row.getBoolean(1) && !row.getBoolean(2))
         println("Missing,empty and literal null text are distinct")
       }
       println("spark-026: worked examples passed; six task implementations remain")
-    } finally { try { () } finally { spark.stop() } }
+    } finally {
+      try { () }
+      finally { spark.stop() }
+    }
   }
 }
 

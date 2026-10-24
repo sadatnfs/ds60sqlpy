@@ -49,16 +49,8 @@
     "coordinate": "org.apache.spark:spark-sql_2.13:4.0.1",
     "master": "local[2]",
     "factor": 3,
-    "inputs": [
-      -2,
-      0,
-      7
-    ],
-    "expected_outputs": [
-      -6,
-      0,
-      21
-    ],
+    "inputs": [-2, 0, 7],
+    "expected_outputs": [-6, 0, 21],
     "java_target": "17",
     "scala_binary_target": "2.13"
   }

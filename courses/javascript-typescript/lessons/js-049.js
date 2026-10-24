@@ -20,4 +20,6 @@
 // Exercise 6: Explain interpolation limits for irregular observations.
 // Expected: Connecting samples is a visual assumption, not evidence between measurements.
 
-throw new Error("Implement the six D3 practice tasks in your saved pad before claiming completion.");
+throw new Error(
+  "Implement the six D3 practice tasks in your saved pad before claiming completion.",
+);

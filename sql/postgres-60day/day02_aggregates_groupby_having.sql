@@ -18,35 +18,47 @@
 --
 BEGIN;
 SET search_path TO training, public;
-
 -- Study contract
 -- Focus: Aggregate rows only after naming the grouping grain, then filter groups with `HAVING` and preserve numeric meaning.
 -- Assumptions: Money columns are exact `numeric`; round only presentation values. `COUNT(column)` excludes NULL while `COUNT(*)` counts rows.
 -- Pitfall: Selecting a non-grouped, non-aggregated column or using `WHERE` for an aggregate condition changes or invalidates the question.
 -- Predict row grain and NULL/order behavior before executing each example.
-
 -- Example 1: Orders per country
-SELECT c.country, COUNT(*) AS customers
-FROM customers c
-GROUP BY c.country
-ORDER BY customers DESC, c.country;
-
+SELECT
+  c.country,
+  COUNT(*) AS customers
+FROM
+  customers c
+GROUP BY
+  c.country
+ORDER BY
+  customers DESC,
+  c.country;
 -- Example 2: Revenue by category with HAVING
-SELECT p.category, ROUND(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)),2) AS revenue
-FROM order_items oi
-JOIN products p ON p.product_id = oi.product_id
-GROUP BY p.category
-HAVING SUM(oi.unit_price * oi.quantity) > 10000
-ORDER BY revenue DESC, p.category;
-
+SELECT
+  p.category,
+  ROUND(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)), 2) AS revenue
+FROM
+  order_items oi
+  JOIN products p ON p.product_id = oi.product_id
+GROUP BY
+  p.category
+HAVING
+  SUM(oi.unit_price * oi.quantity) > 10000
+ORDER BY
+  revenue DESC,
+  p.category;
 -- Example 3: Monthly orders and average order total
-SELECT date_trunc('month', o.order_date) AS month,
-       COUNT(*) AS orders,
-       ROUND(AVG(o.total_amount),2) AS avg_order
-FROM orders o
-GROUP BY month
-ORDER BY month DESC;
-
+SELECT
+  date_trunc('month', o.order_date) AS month,
+  COUNT(*) AS orders,
+  ROUND(AVG(o.total_amount), 2) AS avg_order
+FROM
+  orders o
+GROUP BY
+  month
+ORDER BY
+  month DESC;
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.
@@ -86,5 +98,4 @@ ORDER BY month DESC;
 --    Expected result/shape: For sql-02 Exercise 6, expected output: Up to 12 month rows in chronological order. The final columns are `order_month`, `order_count`, `order_revenue`, and `returned_orders`. The final order is `order_month`.
 --    Verify: For sql-02 Exercise 6, independently aggregate `orders` by `order_id`; require one output row for every distinct `order_id` tuple satisfying `(o.order_date >= date_trunc('month', CURRENT_TIMESTAMP) - INTERVAL '11 months')` and compare `order_month`, `order_count`, `order_revenue`, and `returned_orders` tuple by tuple. Tie two rows on `order_month` and give them different `order_month` values; verify `order_month` chooses a stable first/last row.
 --    Hint ladder, rung 1: For sql-02 Exercise 6, inspect the source keys that survive `WHERE`; then confirm the groups are `order_id`; then check `order_month` before applying the row cap.
-
 ROLLBACK;

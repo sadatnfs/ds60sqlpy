@@ -6,36 +6,46 @@ object Main {
   type Summary = Seq[(Option[String], Long, Long, Option[Long])]
 
   def ids(df: DataFrame): Seq[Long] =
-    df.select("event_id").orderBy("event_id").collect()
-      .map(_.getLong(0)).toSeq
+    df.select("event_id")
+      .orderBy("event_id")
+      .collect()
+      .map(_.getLong(0))
+      .toSeq
 
   def metrics(df: DataFrame): (Long, Long, Option[Long]) = {
-    val row = df.agg(
-      count(lit(1)).as("rows"),
-      count(col("amount_cents")).as("valued"),
-      sum(col("amount_cents")).as("total_cents")
-    ).first()
-    (row.getLong(0), row.getLong(1),
-      if (row.isNullAt(2)) None else Some(row.getLong(2)))
+    val row = df
+      .agg(
+        count(lit(1)).as("rows"),
+        count(col("amount_cents")).as("valued"),
+        sum(col("amount_cents")).as("total_cents")
+      )
+      .first()
+    (row.getLong(0), row.getLong(1), if (row.isNullAt(2)) None else Some(row.getLong(2)))
   }
 
   def summarize(df: DataFrame): DataFrame =
-    df.groupBy("team").agg(
-      count(lit(1)).as("rows"),
-      count(col("amount_cents")).as("valued"),
-      sum(col("amount_cents")).as("total_cents")
-    )
+    df.groupBy("team")
+      .agg(
+        count(lit(1)).as("rows"),
+        count(col("amount_cents")).as("valued"),
+        sum(col("amount_cents")).as("total_cents")
+      )
 
   def canonical(df: DataFrame): Summary = {
     val expectedSchema: Seq[(String, DataType)] = Seq(
-      ("team", StringType), ("rows", LongType),
-      ("valued", LongType), ("total_cents", LongType)
+      ("team", StringType),
+      ("rows", LongType),
+      ("valued", LongType),
+      ("total_cents", LongType)
     )
     assert(df.schema.fields.map(f => (f.name, f.dataType)).toSeq == expectedSchema)
     df.orderBy(col("team").asc_nulls_last).collect().toSeq.map { row =>
-      (if (row.isNullAt(0)) None else Some(row.getString(0)),
-        row.getLong(1), row.getLong(2),
-        if (row.isNullAt(3)) None else Some(row.getLong(3)))
+      (
+        if (row.isNullAt(0)) None else Some(row.getString(0)),
+        row.getLong(1),
+        row.getLong(2),
+        if (row.isNullAt(3)) None else Some(row.getLong(3))
+      )
     }
   }
 
@@ -43,29 +53,38 @@ object Main {
     raw.filter(col("status") === lit("paid"))
 
   def main(args: Array[String]): Unit = {
-    val spark = SparkSession.builder().appName("ds60-spark-013-solution")
+    val spark = SparkSession
+      .builder()
+      .appName("ds60-spark-013-solution")
       .master("local[2]")
       .config("spark.ui.enabled", "false")
       .config("spark.driver.host", "127.0.0.1")
       .config("spark.driver.bindAddress", "127.0.0.1")
       .config("spark.sql.shuffle.partitions", "2")
-      .config("spark.sql.session.timeZone", "UTC").getOrCreate()
+      .config("spark.sql.session.timeZone", "UTC")
+      .getOrCreate()
     try {
       require(spark.sparkContext.master == "local[2]")
-      val schema = StructType(Seq(
-        StructField("event_id", LongType, false),
-        StructField("team", StringType, true),
-        StructField("amount_cents", LongType, true),
-        StructField("status", StringType, false)
-      ))
+      val schema = StructType(
+        Seq(
+          StructField("event_id", LongType, false),
+          StructField("team", StringType, true),
+          StructField("amount_cents", LongType, true),
+          StructField("status", StringType, false)
+        )
+      )
       val rows = Seq(
-        Row(1L, "A", 100L, "paid"), Row(2L, "A", null, "paid"),
-        Row(3L, "B", 0L, "paid"), Row(4L, null, 50L, "paid"),
-        Row(5L, "B", 150L, "void"), Row(6L, "A", 100L, "paid"),
+        Row(1L, "A", 100L, "paid"),
+        Row(2L, "A", null, "paid"),
+        Row(3L, "B", 0L, "paid"),
+        Row(4L, null, 50L, "paid"),
+        Row(5L, "B", 150L, "void"),
+        Row(6L, "A", 100L, "paid"),
         Row(7L, "C", null, "paid")
       )
       val raw = spark.createDataFrame(
-        spark.sparkContext.parallelize(rows, 2), schema
+        spark.sparkContext.parallelize(rows, 2),
+        schema
       )
       val paid = paidEvents(raw)
       val golden: Summary = Seq(

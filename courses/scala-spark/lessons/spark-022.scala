@@ -2,47 +2,50 @@ import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
-
 object Main {
-  def runGrouped(frame: DataFrame, group: String): Seq[(Long,Long)] = {
+  def runGrouped(frame: DataFrame, group: String): Seq[(Long, Long)] = {
     val sc = frame.sparkSession.sparkContext
-    sc.setJobGroup(group,"Bounded shuffle evidence",true)
-    try frame.collect().toSeq.map(r => (r.getLong(0),r.getLong(1))).sortBy(_._1)
+    sc.setJobGroup(group, "Bounded shuffle evidence", true)
+    try frame.collect().toSeq.map(r => (r.getLong(0), r.getLong(1))).sortBy(_._1)
     finally sc.clearJobGroup()
   }
 
-  def sourceMetrics(source: DataFrame): (Long,Long,Long) =
+  def sourceMetrics(source: DataFrame): (Long, Long, Long) =
     throw new UnsupportedOperationException("Complete sourceMetrics")
 
   def buildGrouped(source: DataFrame, partitions: Int): DataFrame =
     throw new UnsupportedOperationException("Complete buildGrouped")
 
-  def exchangeMetrics(frame: DataFrame): Seq[Map[String,Long]] =
+  def exchangeMetrics(frame: DataFrame): Seq[Map[String, Long]] =
     throw new UnsupportedOperationException("Complete exchangeMetrics")
 
-  def stageEvidence(spark: SparkSession, group: String): Seq[(Int,Int,Int,Int)] =
+  def stageEvidence(spark: SparkSession, group: String): Seq[(Int, Int, Int, Int)] =
     throw new UnsupportedOperationException("Complete stageEvidence")
 
-  def compareResults(left: Seq[(Long,Long)], right: Seq[(Long,Long)]): Unit =
+  def compareResults(left: Seq[(Long, Long)], right: Seq[(Long, Long)]): Unit =
     throw new UnsupportedOperationException("Complete compareResults")
 
-  def workModel(reducers: Int): (Long,Long,Double) =
+  def workModel(reducers: Int): (Long, Long, Double) =
     throw new UnsupportedOperationException("Complete workModel")
 
   def main(args: Array[String]): Unit = {
 
-    val spark = SparkSession.builder().appName("ds60-spark-022").master("local[2]")
-      .config("spark.ui.enabled","false")
-      .config("spark.driver.host","127.0.0.1")
-      .config("spark.driver.bindAddress","127.0.0.1")
-      .config("spark.sql.shuffle.partitions","2")
-      .config("spark.sql.adaptive.enabled","false")
-      .config("spark.sql.ansi.enabled","true")
-      .config("spark.sql.session.timeZone","UTC").getOrCreate()
+    val spark = SparkSession
+      .builder()
+      .appName("ds60-spark-022")
+      .master("local[2]")
+      .config("spark.ui.enabled", "false")
+      .config("spark.driver.host", "127.0.0.1")
+      .config("spark.driver.bindAddress", "127.0.0.1")
+      .config("spark.sql.shuffle.partitions", "2")
+      .config("spark.sql.adaptive.enabled", "false")
+      .config("spark.sql.ansi.enabled", "true")
+      .config("spark.sql.session.timeZone", "UTC")
+      .getOrCreate()
     try {
       require(spark.sparkContext.master == "local[2]", "local-only course session")
       spark.sparkContext.setLogLevel("ERROR")
-      val source = spark.range(0L,20000L,1L,4).withColumn("key",col("id") % 1000L)
+      val source = spark.range(0L, 20000L, 1L, 4).withColumn("key", col("id") % 1000L)
       val originalShuffle = spark.conf.get("spark.sql.shuffle.partitions")
       locally {
         assert(source.count() == 20000L && source.rdd.getNumPartitions == 4)
@@ -52,10 +55,15 @@ object Main {
       locally {
         val partialUpper = 4L * 1000L
         assert(partialUpper == 4000L && partialUpper < 20000L)
-        println("Local partial aggregation can reduce occurrences before redistribution;this is a model")
+        println(
+          "Local partial aggregation can reduce occurrences before redistribution;this is a model"
+        )
       }
       println("spark-022: worked examples passed; six task implementations remain")
-    } finally { try { () } finally { spark.stop() } }
+    } finally {
+      try { () }
+      finally { spark.stop() }
+    }
   }
 }
 

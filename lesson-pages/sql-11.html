@@ -647,35 +647,54 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line"><span class="syntax-comment">--</span></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Study contract</span></span>
 <span class="source-line"><span class="syntax-comment">-- Focus: Use `CASE` to encode mutually exclusive business rules in deliberate order while preserving NULL as a distinct state when required.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Assumptions: Searched `CASE` uses first-match wins. Status/category labels are illustrative course rules, not universal business definitions.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Pitfall: Overlapping broad conditions placed first make later branches unreachable; an omitted `ELSE` produces NULL.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Predict row grain and NULL/order behavior before executing each example.</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Label orders by size</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">,</span></span>
-<span class="source-line">  <span class="syntax-keyword">CASE</span></span>
-<span class="source-line">    <span class="syntax-keyword">WHEN</span> o<span class="syntax-punctuation">.</span>total_amount <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">1000</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;XL&#x27;</span></span>
-<span class="source-line">    <span class="syntax-keyword">WHEN</span> o<span class="syntax-punctuation">.</span>total_amount <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">300</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;L&#x27;</span></span>
-<span class="source-line">    <span class="syntax-keyword">WHEN</span> o<span class="syntax-punctuation">.</span>total_amount <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">100</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;M&#x27;</span></span>
-<span class="source-line">    <span class="syntax-keyword">ELSE</span> <span class="syntax-string">&#x27;S&#x27;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> o<span class="syntax-punctuation">.</span>total_amount <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">1000</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;XL&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">WHEN</span> o<span class="syntax-punctuation">.</span>total_amount <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">300</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;L&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">WHEN</span> o<span class="syntax-punctuation">.</span>total_amount <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">100</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;M&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">ELSE</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;S&#x27;</span></span>
 <span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> order_size</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> orders o</span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>total_amount <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_id</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  orders o</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  o<span class="syntax-punctuation">.</span>total_amount <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  o<span class="syntax-punctuation">.</span>order_id</span>
 <span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">50</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Conditional aggregation with CASE</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span></span>
-<span class="source-line">  <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;30 days&#x27;</span> <span class="syntax-keyword">THEN</span> oi<span class="syntax-punctuation">.</span>quantity <span class="syntax-keyword">ELSE</span> <span class="syntax-number">0</span> <span class="syntax-keyword">END</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> qty_30d<span class="syntax-punctuation">,</span></span>
-<span class="source-line">  <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;90 days&#x27;</span> <span class="syntax-keyword">THEN</span> oi<span class="syntax-punctuation">.</span>quantity <span class="syntax-keyword">ELSE</span> <span class="syntax-number">0</span> <span class="syntax-keyword">END</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> qty_90d</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> order_items oi</span>
-<span class="source-line"><span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">ON</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>order_id</span>
-<span class="source-line"><span class="syntax-keyword">JOIN</span> products p <span class="syntax-keyword">ON</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>product_id</span>
-<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>category</span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> qty_30d <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;30 days&#x27;</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">      oi<span class="syntax-punctuation">.</span>quantity</span>
+<span class="source-line">    <span class="syntax-keyword">ELSE</span></span>
+<span class="source-line">      <span class="syntax-number">0</span></span>
+<span class="source-line">    <span class="syntax-keyword">END</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> qty_30d<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;90 days&#x27;</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">      oi<span class="syntax-punctuation">.</span>quantity</span>
+<span class="source-line">    <span class="syntax-keyword">ELSE</span></span>
+<span class="source-line">      <span class="syntax-number">0</span></span>
+<span class="source-line">    <span class="syntax-keyword">END</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> qty_90d</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  order_items oi</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">ON</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>order_id</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> products p <span class="syntax-keyword">ON</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>product_id</span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span>category</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  qty_30d <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
 <span class="source-line"><span class="syntax-comment">-- Work prediction -&gt; query writing -&gt; debugging -&gt; extension in order.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Keep answers in your own scratch file; this learner script remains answer-free.</span></span>
@@ -715,7 +734,6 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-11 Exercise 6, expected output: One row per payment method and display label. The final columns are `method`, `method_label`, and `payment_count`. The final order is `p.method`.</span></span>
 <span class="source-line"><span class="syntax-comment">--    Verify: For sql-11 Exercise 6, evaluate each of `payment_count` in a separate control `SELECT` over `payments`; require one final row and compare every value. Add one row to an existing group and one row for a new group; recompute `payment_count` for the existing `method` tuple and verify the new tuple appears exactly once.</span></span>
 <span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-11 Exercise 6, confirm the groups are `method`; then check `p.method` before applying the row cap.</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>
       </section>
@@ -1019,15 +1037,12 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-comment">--</span></span>
 <span class="source-line"><span class="syntax-comment">-- Target: PostgreSQL 16+; run only in advanced_sql_training.</span></span>
 <span class="source-line"><span class="syntax-comment">-- ON_ERROR_STOP is supplied by the documented psql command.</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Shared teaching contract</span></span>
 <span class="source-line"><span class="syntax-comment">-- Focus: Use `CASE` to encode mutually exclusive business rules in deliberate order while preserving NULL as a distinct state when required.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Assumptions: Searched `CASE` uses first-match wins. Status/category labels are illustrative course rules, not universal business definitions.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Pitfall: Overlapping broad conditions placed first make later branches unreachable; an omitted `ELSE` produces NULL.</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 1: Query writing</span></span>
 <span class="source-line"><span class="syntax-comment">-- Prompt: Classify orders as small, medium, or large by total amount.</span></span>
@@ -1040,16 +1055,20 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
 <span class="source-line"><span class="syntax-comment">-- - `CASE`: encodes ordered business conditions; the first true branch wins and `ELSE` defines the remainder.</span></span>
 <span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">CASE</span></span>
-<span class="source-line">         <span class="syntax-keyword">WHEN</span> o<span class="syntax-punctuation">.</span>total_amount <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">500</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;large&#x27;</span></span>
-<span class="source-line">         <span class="syntax-keyword">WHEN</span> o<span class="syntax-punctuation">.</span>total_amount <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">100</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;medium&#x27;</span></span>
-<span class="source-line">         <span class="syntax-keyword">ELSE</span> <span class="syntax-string">&#x27;small&#x27;</span></span>
-<span class="source-line">       <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> order_size</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o</span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> o<span class="syntax-punctuation">.</span>total_amount <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">500</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;large&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">WHEN</span> o<span class="syntax-punctuation">.</span>total_amount <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">100</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;medium&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">ELSE</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;small&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> order_size</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  orders <span class="syntax-keyword">AS</span> o</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 2: Query writing</span></span>
 <span class="source-line"><span class="syntax-comment">-- Prompt: Count order statuses in paid-like, open, returned, and other buckets with conditional aggregation.</span></span>
@@ -1061,12 +1080,13 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
 <span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
 <span class="source-line"><span class="syntax-comment">-- - `FILTER (WHERE ...)`: limits one aggregate without removing rows needed by neighboring aggregates.</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>status <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;paid&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;shipped&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;delivered&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> paid_like<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;placed&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> open_orders<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;returned&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> returned_orders<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> all_orders</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>status <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;paid&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;shipped&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;delivered&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> paid_like<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;placed&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> open_orders<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;returned&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> returned_orders<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> all_orders</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  orders <span class="syntax-keyword">AS</span> o<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 3: Query writing</span></span>
 <span class="source-line"><span class="syntax-comment">-- Prompt: Label missing customer segments separately from known segment values.</span></span>
@@ -1079,16 +1099,20 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
 <span class="source-line"><span class="syntax-comment">-- - `CASE`: encodes ordered business conditions; the first true branch wins and `ELSE` defines the remainder.</span></span>
 <span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>segment<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">CASE</span></span>
-<span class="source-line">         <span class="syntax-keyword">WHEN</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>segment <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;missing&#x27;</span></span>
-<span class="source-line">         <span class="syntax-keyword">WHEN</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>segment <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;gold&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;platinum&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;premium&#x27;</span></span>
-<span class="source-line">         <span class="syntax-keyword">ELSE</span> <span class="syntax-string">&#x27;core&#x27;</span></span>
-<span class="source-line">       <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> segment_group</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span></span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>segment<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>segment <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;missing&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">WHEN</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>segment <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;gold&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;platinum&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;premium&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">ELSE</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;core&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> segment_group</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  customers <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 4: Prediction</span></span>
 <span class="source-line"><span class="syntax-comment">-- Prompt: Predict the label for 500 when `&gt;= 100` appears before `&gt;= 500`, then repair the branch order.</span></span>
@@ -1102,15 +1126,21 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
 <span class="source-line"><span class="syntax-comment">-- - `CASE`: encodes ordered business conditions; the first true branch wins and `ELSE` defines the remainder.</span></span>
 <span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> amount<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">CASE</span></span>
-<span class="source-line">         <span class="syntax-keyword">WHEN</span> amount <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">500</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;high&#x27;</span></span>
-<span class="source-line">         <span class="syntax-keyword">WHEN</span> amount <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">100</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;medium&#x27;</span></span>
-<span class="source-line">         <span class="syntax-keyword">ELSE</span> <span class="syntax-string">&#x27;low&#x27;</span></span>
-<span class="source-line">       <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> corrected_label</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">50</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">100</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">500</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> sample<span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> amount<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  amount<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> amount <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">500</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;high&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">WHEN</span> amount <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">100</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;medium&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">ELSE</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;low&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> corrected_label</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">50</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-number">100</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-number">500</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> sample <span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  amount<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 5: Debugging</span></span>
 <span class="source-line"><span class="syntax-comment">-- Prompt: Replace a CASE expression that returns mixed numeric and text types with one consistent output type.</span></span>
@@ -1124,15 +1154,21 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
 <span class="source-line"><span class="syntax-comment">-- - `CASE`: encodes ordered business conditions; the first true branch wins and `ELSE` defines the remainder.</span></span>
 <span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> value<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">CASE</span></span>
-<span class="source-line">         <span class="syntax-keyword">WHEN</span> value <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;missing&#x27;</span></span>
-<span class="source-line">         <span class="syntax-keyword">WHEN</span> value <span class="syntax-operator">=</span> <span class="syntax-number">0</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;zero&#x27;</span></span>
-<span class="source-line">         <span class="syntax-keyword">ELSE</span> <span class="syntax-string">&#x27;nonzero&#x27;</span></span>
-<span class="source-line">       <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> value_state</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">NULL</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">integer</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> sample<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> value NULLS <span class="syntax-keyword">FIRST</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  value<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> value <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;missing&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">WHEN</span> value <span class="syntax-operator">=</span> <span class="syntax-number">0</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;zero&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">ELSE</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;nonzero&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> value_state</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">NULL</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">integer</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> sample <span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  value NULLS <span class="syntax-keyword">FIRST</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 6: Extension</span></span>
 <span class="source-line"><span class="syntax-comment">-- Prompt: Create payment-method display labels and preserve unknown future methods with an explicit fallback.</span></span>
@@ -1146,19 +1182,27 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-comment">-- - `CASE`: encodes ordered business conditions; the first true branch wins and `ELSE` defines the remainder.</span></span>
 <span class="source-line"><span class="syntax-comment">-- - `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.</span></span>
 <span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span><span class="syntax-keyword">method</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">CASE</span> p<span class="syntax-punctuation">.</span><span class="syntax-keyword">method</span></span>
-<span class="source-line">         <span class="syntax-keyword">WHEN</span> <span class="syntax-string">&#x27;card&#x27;</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;Card&#x27;</span></span>
-<span class="source-line">         <span class="syntax-keyword">WHEN</span> <span class="syntax-string">&#x27;paypal&#x27;</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;PayPal&#x27;</span></span>
-<span class="source-line">         <span class="syntax-keyword">WHEN</span> <span class="syntax-string">&#x27;bank&#x27;</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;Bank transfer&#x27;</span></span>
-<span class="source-line">         <span class="syntax-keyword">WHEN</span> <span class="syntax-string">&#x27;credit&#x27;</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;Store credit&#x27;</span></span>
-<span class="source-line">         <span class="syntax-keyword">ELSE</span> <span class="syntax-string">&#x27;Other&#x27;</span></span>
-<span class="source-line">       <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> method_label<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> payment_count</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> payments <span class="syntax-keyword">AS</span> p</span>
-<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span><span class="syntax-keyword">method</span></span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span><span class="syntax-keyword">method</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span><span class="syntax-keyword">method</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">CASE</span> p<span class="syntax-punctuation">.</span><span class="syntax-keyword">method</span></span>
+<span class="source-line">  <span class="syntax-keyword">WHEN</span> <span class="syntax-string">&#x27;card&#x27;</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;Card&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">WHEN</span> <span class="syntax-string">&#x27;paypal&#x27;</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;PayPal&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">WHEN</span> <span class="syntax-string">&#x27;bank&#x27;</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;Bank transfer&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">WHEN</span> <span class="syntax-string">&#x27;credit&#x27;</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;Store credit&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">ELSE</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;Other&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> method_label<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> payment_count</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  payments <span class="syntax-keyword">AS</span> p</span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span><span class="syntax-keyword">method</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span><span class="syntax-keyword">method</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- No course answer persists changes or temporary objects.</span></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>

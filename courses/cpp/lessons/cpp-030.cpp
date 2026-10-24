@@ -30,15 +30,34 @@
 #include <variant>
 #include <vector>
 
-
 int main() {
-    std::mutex m;std::condition_variable cv;std::queue<int> q;bool closed=false;int total=0;
-    std::thread consumer([&]{std::unique_lock<std::mutex> lock(m);for(;;){cv.wait(lock,[&]{return !q.empty()||closed;});if(q.empty()&&closed)break;total+=q.front();q.pop();}});
-    {std::lock_guard<std::mutex> lock(m);q.push(2);q.push(3);closed=true;}cv.notify_all();consumer.join();assert(total==5);
-    std::cout << "cpp-030 examples passed\n";
-    return 0;
+  std::mutex m;
+  std::condition_variable cv;
+  std::queue<int> q;
+  bool closed = false;
+  int total = 0;
+  std::thread consumer([&] {
+    std::unique_lock<std::mutex> lock(m);
+    for (;;) {
+      cv.wait(lock, [&] { return !q.empty() || closed; });
+      if (q.empty() && closed)
+        break;
+      total += q.front();
+      q.pop();
+    }
+  });
+  {
+    std::lock_guard<std::mutex> lock(m);
+    q.push(2);
+    q.push(3);
+    closed = true;
+  }
+  cv.notify_all();
+  consumer.join();
+  assert(total == 5);
+  std::cout << "cpp-030 examples passed\n";
+  return 0;
 }
-
 
 // Exercise 1: State the invariant. List queue state protected by m. Expected: Queue contents and closed flag share one mutex.
 // Exercise 2: Drain before exit. Produce 2 and 3 then close. Expected: Total 5 with both items consumed.

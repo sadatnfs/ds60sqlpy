@@ -678,65 +678,64 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line"><span class="syntax-comment">--</span></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Study contract</span></span>
 <span class="source-line"><span class="syntax-comment">-- Focus: Use `LAG` and `LEAD` to compare adjacent rows only after defining partition, chronology, tie-breakers, and first/last-row behavior.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Assumptions: Intervals are computed from `timestamptz` instants. The first/last row in a partition has no adjacent value and therefore returns NULL.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Pitfall: Omitting a partition compares unrelated entities; ordering only by a nonunique timestamp makes adjacency ambiguous.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Predict row grain and NULL/order behavior before executing each example.</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Period-over-period change per customer</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> cust_orders <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         o<span class="syntax-punctuation">.</span>total_amount</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> orders o</span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    o<span class="syntax-punctuation">.</span>total_amount</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    orders o</span>
 <span class="source-line"><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       order_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       order_date<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       total_amount<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       LAG<span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span></span>
-<span class="source-line">         PARTITION <span class="syntax-keyword">BY</span> customer_id</span>
-<span class="source-line">         <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> order_date<span class="syntax-punctuation">,</span> order_id</span>
-<span class="source-line">       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> prev_order_amount<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       total_amount <span class="syntax-operator">-</span> LAG<span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span></span>
-<span class="source-line">         PARTITION <span class="syntax-keyword">BY</span> customer_id</span>
-<span class="source-line">         <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> order_date<span class="syntax-punctuation">,</span> order_id</span>
-<span class="source-line">       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> delta_from_prev<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       LEAD<span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span></span>
-<span class="source-line">         PARTITION <span class="syntax-keyword">BY</span> customer_id</span>
-<span class="source-line">         <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> order_date<span class="syntax-punctuation">,</span> order_id</span>
-<span class="source-line">       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> next_order_amount</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> cust_orders</span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> customer_id<span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">,</span> order_id</span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  order_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  order_date<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  total_amount<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  LAG<span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> customer_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> order_date<span class="syntax-punctuation">,</span> order_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> prev_order_amount<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  total_amount <span class="syntax-operator">-</span> LAG<span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> customer_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> order_date<span class="syntax-punctuation">,</span> order_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> delta_from_prev<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  LEAD<span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> customer_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> order_date<span class="syntax-punctuation">,</span> order_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> next_order_amount</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  cust_orders</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  order_date<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  order_id</span>
 <span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">100</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- YoY comparison by month</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> monthly <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> order_date <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> month_utc<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> orders</span>
-<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> month_utc</span>
-<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> compared <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> month_utc<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         revenue<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         LAG<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">12</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> month_utc<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue_prev_year</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> monthly</span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> order_date <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> month_utc<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    orders</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">    month_utc</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">compared <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    month_utc<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    revenue<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    LAG<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">12</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> month_utc<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue_prev_year</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    monthly</span>
 <span class="source-line"><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> month_utc<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       revenue<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       revenue_prev_year<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       ROUND<span class="syntax-punctuation">(</span></span>
-<span class="source-line">         <span class="syntax-punctuation">(</span>revenue <span class="syntax-operator">-</span> revenue_prev_year<span class="syntax-punctuation">)</span></span>
-<span class="source-line">         <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span><span class="syntax-punctuation">(</span>revenue_prev_year<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">         <span class="syntax-number">4</span></span>
-<span class="source-line">       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> yoy_growth</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> compared</span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> month_utc <span class="syntax-keyword">DESC</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  month_utc<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  revenue<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  revenue_prev_year<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  ROUND<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>revenue <span class="syntax-operator">-</span> revenue_prev_year<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-keyword">NULLIF</span> <span class="syntax-punctuation">(</span>revenue_prev_year<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> yoy_growth</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  compared</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  month_utc <span class="syntax-keyword">DESC</span></span>
 <span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">36</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
 <span class="source-line"><span class="syntax-comment">-- Work prediction -&gt; query writing -&gt; debugging -&gt; extension in order.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Keep answers in your own scratch file; this learner script remains answer-free.</span></span>
@@ -776,7 +775,6 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-18 Exercise 6, expected output: One row per product with nullable next price. The final columns are `product_id`, `category`, `price`, and `next_price`. The final order is `p.category, p.price, p.product_id`.</span></span>
 <span class="source-line"><span class="syntax-comment">--    Verify: For sql-18 Exercise 6, choose one complete partition from `products`; hand-calculate its first, middle, and final window values for `category`, `price`, and `next_price`, then verify output keys remain `product_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.</span></span>
 <span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-18 Exercise 6, inspect one window partition before projecting; then check `p.category, p.price, p.product_id` before applying the row cap.</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>
       </section>
@@ -1111,15 +1109,12 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-comment">--</span></span>
 <span class="source-line"><span class="syntax-comment">-- Target: PostgreSQL 16+; run only in advanced_sql_training.</span></span>
 <span class="source-line"><span class="syntax-comment">-- ON_ERROR_STOP is supplied by the documented psql command.</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Shared teaching contract</span></span>
 <span class="source-line"><span class="syntax-comment">-- Focus: Use `LAG` and `LEAD` to compare adjacent rows only after defining partition, chronology, tie-breakers, and first/last-row behavior.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Assumptions: Intervals are computed from `timestamptz` instants. The first/last row in a partition has no adjacent value and therefore returns NULL.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Pitfall: Omitting a partition compares unrelated entities; ordering only by a nonunique timestamp makes adjacency ambiguous.</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 1: Query writing</span></span>
 <span class="source-line"><span class="syntax-comment">-- Prompt: Show each order with the previous order timestamp for that customer.</span></span>
@@ -1133,16 +1128,17 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-comment">-- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.</span></span>
 <span class="source-line"><span class="syntax-comment">-- - `PARTITION BY`: restarts a window calculation independently for each partition key.</span></span>
 <span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       LAG<span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span></span>
-<span class="source-line">         PARTITION <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id</span>
-<span class="source-line">         <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_id</span>
-<span class="source-line">       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> previous_order_date</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o</span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  LAG<span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> previous_order_date</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  orders <span class="syntax-keyword">AS</span> o</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 2: Query writing</span></span>
 <span class="source-line"><span class="syntax-comment">-- Prompt: Calculate days since each customer&#x27;s previous order.</span></span>
@@ -1158,21 +1154,25 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-comment">-- - `PARTITION BY`: restarts a window calculation independently for each partition key.</span></span>
 <span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> sequenced <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span><span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">         LAG<span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span></span>
-<span class="source-line">           PARTITION <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id</span>
-<span class="source-line">           <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_id</span>
-<span class="source-line">         <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> previous_order_date</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o</span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    o<span class="syntax-punctuation">.</span><span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    LAG<span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">,</span></span>
+<span class="source-line">      o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> previous_order_date</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    orders <span class="syntax-keyword">AS</span> o</span>
 <span class="source-line"><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> order_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       customer_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       order_date<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       previous_order_date<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">EXTRACT</span><span class="syntax-punctuation">(</span>EPOCH <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span>order_date <span class="syntax-operator">-</span> previous_order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-number">86400</span><span class="syntax-punctuation">.</span><span class="syntax-number">0</span> <span class="syntax-keyword">AS</span> days_since_previous</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> sequenced</span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> customer_id<span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">,</span> order_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  order_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  order_date<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  previous_order_date<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">EXTRACT</span><span class="syntax-punctuation">(</span>EPOCH <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span>order_date <span class="syntax-operator">-</span> previous_order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-number">86400</span><span class="syntax-punctuation">.</span><span class="syntax-number">0</span> <span class="syntax-keyword">AS</span> days_since_previous</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  sequenced</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  order_date<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  order_id<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 3: Query writing</span></span>
 <span class="source-line"><span class="syntax-comment">-- Prompt: Show each promotion with the next promotion start date for the same product.</span></span>
@@ -1186,16 +1186,17 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-comment">-- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.</span></span>
 <span class="source-line"><span class="syntax-comment">-- - `PARTITION BY`: restarts a window calculation independently for each partition key.</span></span>
 <span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> pr<span class="syntax-punctuation">.</span>promotion_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       pr<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       pr<span class="syntax-punctuation">.</span>start_date<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       LEAD<span class="syntax-punctuation">(</span>pr<span class="syntax-punctuation">.</span>start_date<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span></span>
-<span class="source-line">         PARTITION <span class="syntax-keyword">BY</span> pr<span class="syntax-punctuation">.</span>product_id</span>
-<span class="source-line">         <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> pr<span class="syntax-punctuation">.</span>start_date<span class="syntax-punctuation">,</span> pr<span class="syntax-punctuation">.</span>promotion_id</span>
-<span class="source-line">       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> next_promotion_start</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> promotions <span class="syntax-keyword">AS</span> pr</span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> pr<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span> pr<span class="syntax-punctuation">.</span>start_date<span class="syntax-punctuation">,</span> pr<span class="syntax-punctuation">.</span>promotion_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pr<span class="syntax-punctuation">.</span>promotion_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  pr<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  pr<span class="syntax-punctuation">.</span>start_date<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  LEAD<span class="syntax-punctuation">(</span>pr<span class="syntax-punctuation">.</span>start_date<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> pr<span class="syntax-punctuation">.</span>product_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> pr<span class="syntax-punctuation">.</span>start_date<span class="syntax-punctuation">,</span> pr<span class="syntax-punctuation">.</span>promotion_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> next_promotion_start</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  promotions <span class="syntax-keyword">AS</span> pr</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  pr<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  pr<span class="syntax-punctuation">.</span>start_date<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  pr<span class="syntax-punctuation">.</span>promotion_id<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 4: Prediction</span></span>
 <span class="source-line"><span class="syntax-comment">-- Prompt: Identify first rows in each customer partition using a NULL lag without replacing it with a fake date.</span></span>
@@ -1212,20 +1213,23 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-comment">-- - `PARTITION BY`: restarts a window calculation independently for each partition key.</span></span>
 <span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> sequenced <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span><span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">         LAG<span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span></span>
-<span class="source-line">           PARTITION <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id</span>
-<span class="source-line">           <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_id</span>
-<span class="source-line">         <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> previous_order_id</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o</span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    o<span class="syntax-punctuation">.</span><span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    LAG<span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">,</span></span>
+<span class="source-line">      o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> previous_order_id</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    orders <span class="syntax-keyword">AS</span> o</span>
 <span class="source-line"><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> order_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       customer_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       order_date</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> sequenced</span>
-<span class="source-line"><span class="syntax-keyword">WHERE</span> previous_order_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> customer_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  order_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  order_date</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  sequenced</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  previous_order_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  customer_id<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 5: Debugging</span></span>
 <span class="source-line"><span class="syntax-comment">-- Prompt: Compute month-over-month stored-revenue change after aggregating to month grain.</span></span>
@@ -1242,23 +1246,31 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-comment">-- - time normalization: makes reporting boundaries explicit; UTC is applied before deriving calendar buckets where required.</span></span>
 <span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> monthly <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> month_start<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o</span>
-<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> compared <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> month_start<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         revenue<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         LAG<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> month_start<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> previous_revenue</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> monthly</span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> month_start<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    orders <span class="syntax-keyword">AS</span> o</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">    date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">AT</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">compared <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    month_start<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    revenue<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    LAG<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> month_start<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> previous_revenue</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    monthly</span>
 <span class="source-line"><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> month_start<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       ROUND<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       ROUND<span class="syntax-punctuation">(</span>previous_revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> previous_revenue<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       ROUND<span class="syntax-punctuation">(</span>revenue <span class="syntax-operator">-</span> previous_revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue_change</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> compared</span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> month_start<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  month_start<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  ROUND<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  ROUND<span class="syntax-punctuation">(</span>previous_revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> previous_revenue<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  ROUND<span class="syntax-punctuation">(</span>revenue <span class="syntax-operator">-</span> previous_revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue_change</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  compared</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  month_start<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 6: Extension</span></span>
 <span class="source-line"><span class="syntax-comment">-- Prompt: Compare each product price with the next higher price in its category.</span></span>
@@ -1272,16 +1284,17 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-comment">-- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.</span></span>
 <span class="source-line"><span class="syntax-comment">-- - `PARTITION BY`: restarts a window calculation independently for each partition key.</span></span>
 <span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       p<span class="syntax-punctuation">.</span>price<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       LEAD<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">.</span>price<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span></span>
-<span class="source-line">         PARTITION <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>category</span>
-<span class="source-line">         <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>price<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>product_id</span>
-<span class="source-line">       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> next_price</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> products <span class="syntax-keyword">AS</span> p</span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>price<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span>price<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  LEAD<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">.</span>price<span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>category <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>price<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> next_price</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  products <span class="syntax-keyword">AS</span> p</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span>price<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- No course answer persists changes or temporary objects.</span></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>

@@ -1,9 +1,12 @@
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let values = vec![1, 2, 3, 4];
-        let result: Vec<_> = values.iter().copied().filter(|value| value % 2 == 0).map(|value| value * 10).collect();
+        let result: Vec<_> = values
+            .iter()
+            .copied()
+            .filter(|value| value % 2 == 0)
+            .map(|value| value * 10)
+            .collect();
         assert_eq!(result, vec![20, 40]);
         assert_eq!(values.len(), 4);
     }

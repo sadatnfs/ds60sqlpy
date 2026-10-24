@@ -30,14 +30,17 @@
 #include <variant>
 #include <vector>
 
-std::string encode(int id,int cents){return "v1,"+std::to_string(id)+","+std::to_string(cents);}
-int main() {
-    assert(encode(7,125)=="v1,7,125"); assert(encode(0,0)=="v1,0,0");
-    std::filesystem::path p=std::filesystem::path("records")/"batch.csv";assert(p.filename()=="batch.csv");
-    std::cout << "cpp-022 examples passed\n";
-    return 0;
+std::string encode(int id, int cents) {
+  return "v1," + std::to_string(id) + "," + std::to_string(cents);
 }
-
+int main() {
+  assert(encode(7, 125) == "v1,7,125");
+  assert(encode(0, 0) == "v1,0,0");
+  std::filesystem::path p = std::filesystem::path("records") / "batch.csv";
+  assert(p.filename() == "batch.csv");
+  std::cout << "cpp-022 examples passed\n";
+  return 0;
+}
 
 // Exercise 1: Specify the wire format. Document v1,7,125 field order and units. Expected: Version v1, ID 7, cents 125, three fields.
 // Exercise 2: Check zero values. Encode ID 0 and cents 0. Expected: v1,0,0.

@@ -30,18 +30,35 @@
 #include <variant>
 #include <vector>
 
-struct Analyzer { int total=0; };
-extern "C" Analyzer* analyzer_create() noexcept { try{return new Analyzer{};}catch(...){return nullptr;} }
-extern "C" void analyzer_destroy(Analyzer* p) noexcept { delete p; }
-extern "C" int analyzer_read(const Analyzer* p,int* out) noexcept {if(!p||!out)return 1;*out=p->total;return 0;}
-int main() {
-    Analyzer* raw=analyzer_create();assert(raw);std::unique_ptr<Analyzer,void(*)(Analyzer*)> owned(raw,analyzer_destroy);int out=-1;assert(analyzer_read(owned.get(),&out)==0 && out==0);assert(analyzer_read(nullptr,&out)==1);
-    // Reference extension checks for the exercise changes.
-    assert(analyzer_read(owned.get(),nullptr)==1);
-    std::cout << "cpp-039 examples passed\n";
-    return 0;
+struct Analyzer {
+  int total = 0;
+};
+extern "C" Analyzer *analyzer_create() noexcept {
+  try {
+    return new Analyzer{};
+  } catch (...) {
+    return nullptr;
+  }
 }
-
+extern "C" void analyzer_destroy(Analyzer *p) noexcept { delete p; }
+extern "C" int analyzer_read(const Analyzer *p, int *out) noexcept {
+  if (!p || !out)
+    return 1;
+  *out = p->total;
+  return 0;
+}
+int main() {
+  Analyzer *raw = analyzer_create();
+  assert(raw);
+  std::unique_ptr<Analyzer, void (*)(Analyzer *)> owned(raw, analyzer_destroy);
+  int out = -1;
+  assert(analyzer_read(owned.get(), &out) == 0 && out == 0);
+  assert(analyzer_read(nullptr, &out) == 1);
+  // Reference extension checks for the exercise changes.
+  assert(analyzer_read(owned.get(), nullptr) == 1);
+  std::cout << "cpp-039 examples passed\n";
+  return 0;
+}
 
 // Exercise 1: Document ownership. Name who destroys a successfully created handle. Expected: Caller invokes analyzer_destroy exactly once.
 // Exercise 2: Wrap safely. Use unique_ptr with analyzer_destroy as deleter. Expected: Scope exit calls the provider destructor once.

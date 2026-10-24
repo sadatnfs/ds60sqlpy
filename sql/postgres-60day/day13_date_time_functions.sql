@@ -18,40 +18,43 @@
 --
 BEGIN;
 SET search_path TO training, public;
-
 -- Study contract
 -- Focus: Treat timestamps as instants, dates as calendar values, and reporting zones/window boundaries as explicit parts of the query.
 -- Assumptions: Stored event/order timestamps are `timestamptz`. Relative examples use the database clock; reports label UTC explicitly where conversion matters.
 -- Pitfall: `BETWEEN` is inclusive at both ends and is often wrong for adjacent time windows; use half-open `[start, end)` predicates.
 -- Predict row grain and NULL/order behavior before executing each example.
-
 -- Age of customer in system
-SELECT customer_id, full_name,
-       now() - created_at AS tenure,
-       date_trunc('month', created_at AT TIME ZONE 'UTC')::date
-         AS cohort_month_utc
-FROM customers
-ORDER BY tenure DESC, customer_id
+SELECT
+  customer_id,
+  full_name,
+  now() - created_at AS tenure,
+  date_trunc('month', created_at AT TIME ZONE 'UTC')::date AS cohort_month_utc
+FROM
+  customers
+ORDER BY
+  tenure DESC,
+  customer_id
 LIMIT 50;
-
 -- Rolling seven *observed-day* revenue. ROWS counts rows, so a missing calendar
 -- day is not manufactured here; a dense calendar exercise addresses that case.
 WITH daily AS (
-  SELECT (o.order_date AT TIME ZONE 'UTC')::date AS d_utc,
-         SUM(o.total_amount) AS revenue
-  FROM orders o
-  GROUP BY d_utc
+  SELECT
+    (o.order_date AT TIME ZONE 'UTC')::date AS d_utc,
+    SUM(o.total_amount) AS revenue
+  FROM
+    orders o
+  GROUP BY
+    d_utc
 )
-SELECT d_utc,
-       revenue,
-       SUM(revenue) OVER (
-         ORDER BY d_utc
-         ROWS BETWEEN 6 PRECEDING AND CURRENT ROW
-       ) AS revenue_7_observed_days
-FROM daily
-ORDER BY d_utc DESC
+SELECT
+  d_utc,
+  revenue,
+  SUM(revenue) OVER (ORDER BY d_utc ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) AS revenue_7_observed_days
+FROM
+  daily
+ORDER BY
+  d_utc DESC
 LIMIT 30;
-
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.
@@ -91,5 +94,4 @@ LIMIT 30;
 --    Expected result/shape: For sql-13 Exercise 6, expected output: Exactly seven chronological rows. The final columns are `utc_date`, and `order_count`. The final order is `c.utc_date`.
 --    Verify: For sql-13 Exercise 6, project `order_id` plus the raw source columns from `orders` at each join stage; record row count and distinct `order_id`, then assert the final `utc_date`, and `order_count` values match those staged rows without unintended fanout or loss. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 --    Hint ladder, rung 1: For sql-13 Exercise 6, run `calendar`, and `daily_orders` one at a time. Record each CTE's row count and `order_id` uniqueness before the next stage uses it.
-
 ROLLBACK;

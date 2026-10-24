@@ -14,15 +14,12 @@
 --
 -- Target: PostgreSQL 16+; run only in advanced_sql_training.
 -- ON_ERROR_STOP is supplied by the documented psql command.
-
 BEGIN;
 SET search_path TO training, public;
-
 -- Shared teaching contract
 -- Focus: Use `FIRST_VALUE` and `LAST_VALUE` only with an ordering and frame that covers the intended partition.
 -- Assumptions: First/last refer to ordered rows, not minimum/maximum values unless ordering states that. Ties need unique keys for deterministic row identity.
 -- Pitfall: The default `LAST_VALUE` frame ends at the current row/peer group, often making it return the current value rather than the partition's final value.
-
 -- ---------------------------------------------------------------------------
 -- Exercise 1: Query writing
 -- Prompt: Show every order with the customer's first and last order timestamps.
@@ -36,19 +33,19 @@ SET search_path TO training, public;
 -- - `PARTITION BY`: restarts a window calculation independently for each partition key.
 -- - window frame: states exactly which rows or peers contribute to the current row's window result.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
-SELECT o.order_id,
-       o.customer_id,
-       o.order_date,
-       FIRST_VALUE(o.order_date) OVER customer_orders AS first_order_date,
-       LAST_VALUE(o.order_date) OVER customer_orders AS last_order_date
-FROM orders AS o
-WINDOW customer_orders AS (
-  PARTITION BY o.customer_id
-  ORDER BY o.order_date, o.order_id
-  ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
-)
-ORDER BY o.customer_id, o.order_date, o.order_id;
-
+SELECT
+  o.order_id,
+  o.customer_id,
+  o.order_date,
+  FIRST_VALUE(o.order_date) OVER customer_orders AS first_order_date,
+  LAST_VALUE(o.order_date) OVER customer_orders AS last_order_date
+FROM
+  orders AS o
+WINDOW customer_orders AS (PARTITION BY o.customer_id ORDER BY o.order_date, o.order_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)
+ORDER BY
+  o.customer_id,
+  o.order_date,
+  o.order_id;
 -- ---------------------------------------------------------------------------
 -- Exercise 2: Query writing
 -- Prompt: Show each product with the cheapest and most expensive price in its category.
@@ -62,19 +59,19 @@ ORDER BY o.customer_id, o.order_date, o.order_id;
 -- - `PARTITION BY`: restarts a window calculation independently for each partition key.
 -- - window frame: states exactly which rows or peers contribute to the current row's window result.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
-SELECT p.product_id,
-       p.category,
-       p.price,
-       FIRST_VALUE(p.price) OVER category_prices AS category_min_price,
-       LAST_VALUE(p.price) OVER category_prices AS category_max_price
-FROM products AS p
-WINDOW category_prices AS (
-  PARTITION BY p.category
-  ORDER BY p.price, p.product_id
-  ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
-)
-ORDER BY p.category, p.price, p.product_id;
-
+SELECT
+  p.product_id,
+  p.category,
+  p.price,
+  FIRST_VALUE(p.price) OVER category_prices AS category_min_price,
+  LAST_VALUE(p.price) OVER category_prices AS category_max_price
+FROM
+  products AS p
+WINDOW category_prices AS (PARTITION BY p.category ORDER BY p.price, p.product_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)
+ORDER BY
+  p.category,
+  p.price,
+  p.product_id;
 -- ---------------------------------------------------------------------------
 -- Exercise 3: Query writing
 -- Prompt: Compare every payment with the first and last payment amount for its order.
@@ -88,20 +85,20 @@ ORDER BY p.category, p.price, p.product_id;
 -- - `PARTITION BY`: restarts a window calculation independently for each partition key.
 -- - window frame: states exactly which rows or peers contribute to the current row's window result.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
-SELECT p.payment_id,
-       p.order_id,
-       p.payment_date,
-       p.amount,
-       FIRST_VALUE(p.amount) OVER payment_sequence AS first_payment_amount,
-       LAST_VALUE(p.amount) OVER payment_sequence AS last_payment_amount
-FROM payments AS p
-WINDOW payment_sequence AS (
-  PARTITION BY p.order_id
-  ORDER BY p.payment_date, p.payment_id
-  ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
-)
-ORDER BY p.order_id, p.payment_date, p.payment_id;
-
+SELECT
+  p.payment_id,
+  p.order_id,
+  p.payment_date,
+  p.amount,
+  FIRST_VALUE(p.amount) OVER payment_sequence AS first_payment_amount,
+  LAST_VALUE(p.amount) OVER payment_sequence AS last_payment_amount
+FROM
+  payments AS p
+WINDOW payment_sequence AS (PARTITION BY p.order_id ORDER BY p.payment_date, p.payment_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)
+ORDER BY
+  p.order_id,
+  p.payment_date,
+  p.payment_id;
 -- ---------------------------------------------------------------------------
 -- Exercise 4: Prediction
 -- Prompt: Demonstrate the default `LAST_VALUE` result versus a full-partition frame on values 10, 20, 30.
@@ -116,15 +113,16 @@ ORDER BY p.order_id, p.payment_date, p.payment_id;
 -- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
 -- - window frame: states exactly which rows or peers contribute to the current row's window result.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
-SELECT value,
-       LAST_VALUE(value) OVER (ORDER BY value) AS default_last_value,
-       LAST_VALUE(value) OVER (
-         ORDER BY value
-         ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
-       ) AS partition_last_value
-FROM (VALUES (10), (20), (30)) AS sample(value)
-ORDER BY value;
-
+SELECT
+  value,
+  LAST_VALUE(value) OVER (ORDER BY value) AS default_last_value,
+  LAST_VALUE(value) OVER (ORDER BY value ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS partition_last_value
+FROM (
+  VALUES (10),
+    (20),
+    (30)) AS sample (value)
+ORDER BY
+  value;
 -- ---------------------------------------------------------------------------
 -- Exercise 5: Debugging
 -- Prompt: Return one first and one last order per customer without using window output as an accidental duplicate report.
@@ -140,22 +138,22 @@ ORDER BY value;
 -- - window frame: states exactly which rows or peers contribute to the current row's window result.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 WITH annotated AS (
-  SELECT o.customer_id,
-         FIRST_VALUE(o.order_id) OVER customer_orders AS first_order_id,
-         LAST_VALUE(o.order_id) OVER customer_orders AS last_order_id
-  FROM orders AS o
-  WINDOW customer_orders AS (
-    PARTITION BY o.customer_id
-    ORDER BY o.order_date, o.order_id
-    ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
-  )
-)
-SELECT DISTINCT customer_id,
-       first_order_id,
-       last_order_id
-FROM annotated
-ORDER BY customer_id;
-
+  SELECT
+    o.customer_id,
+    FIRST_VALUE(o.order_id) OVER customer_orders AS first_order_id,
+      LAST_VALUE(o.order_id) OVER customer_orders AS last_order_id
+      FROM
+        orders AS o
+WINDOW customer_orders AS (PARTITION BY o.customer_id ORDER BY o.order_date,
+  o.order_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING))
+SELECT DISTINCT
+  customer_id,
+  first_order_id,
+  last_order_id
+FROM
+  annotated
+ORDER BY
+  customer_id;
 -- ---------------------------------------------------------------------------
 -- Exercise 6: Extension
 -- Prompt: Solve latest order per customer with PostgreSQL `DISTINCT ON` and compare its ordering contract with row number.
@@ -169,12 +167,15 @@ ORDER BY customer_id;
 -- - `FROM`: establishes the starting relation and therefore the initial row grain.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 SELECT DISTINCT ON (o.customer_id)
-       o.customer_id,
-       o.order_id,
-       o.order_date,
-       o.total_amount
-FROM orders AS o
-ORDER BY o.customer_id, o.order_date DESC, o.order_id DESC;
-
+  o.customer_id,
+  o.order_id,
+  o.order_date,
+  o.total_amount
+FROM
+  orders AS o
+ORDER BY
+  o.customer_id,
+  o.order_date DESC,
+  o.order_id DESC;
 -- No course answer persists changes or temporary objects.
 ROLLBACK;

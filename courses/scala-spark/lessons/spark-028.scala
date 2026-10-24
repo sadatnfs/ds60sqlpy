@@ -2,18 +2,27 @@ import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
-
 object Main {
-  case class Observation(values: Map[String,Long], exchanges: Seq[(String,Map[String,Long])])
+  case class Observation(values: Map[String, Long], exchanges: Seq[(String, Map[String, Long])])
   def observe(frame: DataFrame): Observation = {
-    val summary = frame.agg(count(lit(1)),countDistinct("fact_id"),count("amount"),sum("amount"),sum(col("amount")*col("factor")))
+    val summary = frame.agg(
+      count(lit(1)),
+      countDistinct("fact_id"),
+      count("amount"),
+      sum("amount"),
+      sum(col("amount") * col("factor"))
+    )
     val row = summary.collect().head
-    val names = Seq("rows","unique_facts","known_amounts","amount_total","weighted_total")
-    val values = names.zipWithIndex.map { case (name,index) => name -> row.getLong(index) }.toMap
-    val exchanges = summary.queryExecution.executedPlan.collect { case node if node.nodeName.contains("Exchange") => (node.nodeName,node.metrics.map { case (name,metric) => name -> metric.value }.toMap) }
-    Observation(values,exchanges)
+    val names = Seq("rows", "unique_facts", "known_amounts", "amount_total", "weighted_total")
+    val values = names.zipWithIndex.map { case (name, index) => name -> row.getLong(index) }.toMap
+    val exchanges = summary.queryExecution.executedPlan.collect {
+      case node if node.nodeName.contains("Exchange") =>
+        (node.nodeName, node.metrics.map { case (name, metric) => name -> metric.value }.toMap)
+    }
+    Observation(values, exchanges)
   }
-  def sameBag(left: DataFrame, right: DataFrame): Boolean = left.exceptAll(right).count() == 0L && right.exceptAll(left).count() == 0L
+  def sameBag(left: DataFrame, right: DataFrame): Boolean =
+    left.exceptAll(right).count() == 0L && right.exceptAll(left).count() == 0L
 
   def classifyFacts(raw: DataFrame): DataFrame =
     throw new UnsupportedOperationException("Complete classifyFacts")
@@ -27,7 +36,7 @@ object Main {
   def broadcastProduct(facts: DataFrame, dimension: DataFrame): DataFrame =
     throw new UnsupportedOperationException("Complete broadcastProduct")
 
-  def configurationReceipt(spark: SparkSession): Map[String,String] =
+  def configurationReceipt(spark: SparkSession): Map[String, String] =
     throw new UnsupportedOperationException("Complete configurationReceipt")
 
   def chooseProduct(facts: DataFrame, dimension: DataFrame, useBroadcast: Boolean): DataFrame =
@@ -35,38 +44,83 @@ object Main {
 
   def main(args: Array[String]): Unit = {
 
-    val spark = SparkSession.builder().appName("ds60-spark-028").master("local[2]")
-      .config("spark.ui.enabled","false")
-      .config("spark.driver.host","127.0.0.1")
-      .config("spark.driver.bindAddress","127.0.0.1")
-      .config("spark.sql.shuffle.partitions","2")
-      .config("spark.sql.adaptive.enabled","false")
-      .config("spark.sql.ansi.enabled","true")
-      .config("spark.sql.session.timeZone","UTC").getOrCreate()
+    val spark = SparkSession
+      .builder()
+      .appName("ds60-spark-028")
+      .master("local[2]")
+      .config("spark.ui.enabled", "false")
+      .config("spark.driver.host", "127.0.0.1")
+      .config("spark.driver.bindAddress", "127.0.0.1")
+      .config("spark.sql.shuffle.partitions", "2")
+      .config("spark.sql.adaptive.enabled", "false")
+      .config("spark.sql.ansi.enabled", "true")
+      .config("spark.sql.session.timeZone", "UTC")
+      .getOrCreate()
     try {
       require(spark.sparkContext.master == "local[2]", "local-only course session")
       spark.sparkContext.setLogLevel("ERROR")
-      spark.conf.set("spark.sql.autoBroadcastJoinThreshold","-1")
-      val factSchema = StructType(Seq(StructField("source_id",LongType,false),StructField("fact_id",LongType,true),StructField("key",LongType,false),StructField("amount",LongType,true)))
-      val generated = (1L to 2000L).map { id => Row(id,id,if(id<=1600L) 0L else (id-1601L)%4L+1L,if(id%10L==0L) null else java.lang.Long.valueOf(id%7L+1L)) }
-      val rawFacts = spark.createDataFrame(spark.sparkContext.parallelize(generated ++ Seq(Row(2001L,null,0L,10L),Row(2002L,2001L,99L,-3L)),4),factSchema)
-      val dimSchema = StructType(Seq(StructField("key",LongType,false),StructField("factor",LongType,false),StructField("approved",BooleanType,false)))
-      val rawDimension = spark.createDataFrame(spark.sparkContext.parallelize(Seq(Row(0L,1L,false),Row(0L,2L,true)) ++ (1L to 5L).map(k => Row(k,k+2L,true)),2),dimSchema)
-      val expectedMetrics = Map("rows"->2000L,"unique_facts"->2000L,"known_amounts"->1800L,"amount_total"->7196L,"weighted_total"->17913L)
+      spark.conf.set("spark.sql.autoBroadcastJoinThreshold", "-1")
+      val factSchema = StructType(
+        Seq(
+          StructField("source_id", LongType, false),
+          StructField("fact_id", LongType, true),
+          StructField("key", LongType, false),
+          StructField("amount", LongType, true)
+        )
+      )
+      val generated = (1L to 2000L).map { id =>
+        Row(
+          id,
+          id,
+          if (id <= 1600L) 0L else (id - 1601L) % 4L + 1L,
+          if (id % 10L == 0L) null else java.lang.Long.valueOf(id % 7L + 1L)
+        )
+      }
+      val rawFacts = spark.createDataFrame(
+        spark.sparkContext
+          .parallelize(generated ++ Seq(Row(2001L, null, 0L, 10L), Row(2002L, 2001L, 99L, -3L)), 4),
+        factSchema
+      )
+      val dimSchema = StructType(
+        Seq(
+          StructField("key", LongType, false),
+          StructField("factor", LongType, false),
+          StructField("approved", BooleanType, false)
+        )
+      )
+      val rawDimension = spark.createDataFrame(
+        spark.sparkContext.parallelize(
+          Seq(Row(0L, 1L, false), Row(0L, 2L, true)) ++ (1L to 5L).map(k => Row(k, k + 2L, true)),
+          2
+        ),
+        dimSchema
+      )
+      val expectedMetrics = Map(
+        "rows" -> 2000L,
+        "unique_facts" -> 2000L,
+        "known_amounts" -> 1800L,
+        "amount_total" -> 7196L,
+        "weighted_total" -> 17913L
+      )
       locally {
-        val predictedRawJoinRows = 1600L*2L + 400L
+        val predictedRawJoinRows = 1600L * 2L + 400L
         assert(predictedRawJoinRows == 3600L)
         println("Raw dimension multiplicity predicts3600 pairs for2000 accepted facts")
       }
       locally {
-        val known = (1L to 2000L).filter(_%10L!=0L)
-        val amountTotal = known.map(_%7L+1L).sum
-        val weighted = known.map { i => val key = if(i<=1600L) 0L else (i-1601L)%4L+1L;(i%7L+1L)*(key+2L) }.sum
+        val known = (1L to 2000L).filter(_ % 10L != 0L)
+        val amountTotal = known.map(_ % 7L + 1L).sum
+        val weighted = known.map { i =>
+          val key = if (i <= 1600L) 0L else (i - 1601L) % 4L + 1L; (i % 7L + 1L) * (key + 2L)
+        }.sum
         assert(known.size == 1800 && amountTotal == 7196L && weighted == 17913L)
         println("Independent formula totals=" + amountTotal + "," + weighted)
       }
       println("spark-028: worked examples passed; six task implementations remain")
-    } finally { try { () } finally { spark.stop() } }
+    } finally {
+      try { () }
+      finally { spark.stop() }
+    }
   }
 }
 

@@ -14,15 +14,12 @@
 --
 -- Target: PostgreSQL 16+; run only in advanced_sql_training.
 -- ON_ERROR_STOP is supplied by the documented psql command.
-
 BEGIN;
 SET search_path TO training, public;
-
 -- Shared teaching contract
 -- Focus: Modify only reviewed row sets, inspect writes with `RETURNING`, and make repeat behavior explicit through constraints and rollback-safe tests.
 -- Assumptions: Every exercise runs inside the disposable course transaction. Savepoints isolate demonstrations so one answer does not change the next.
 -- Pitfall: Never run an unbounded `UPDATE` or `DELETE`; preview candidate keys and do not treat `ON CONFLICT` as safe without naming its unique key.
-
 -- ---------------------------------------------------------------------------
 -- Exercise 1: Query writing
 -- Prompt: Materialize category net revenue into a temporary table with `INSERT ... SELECT`.
@@ -45,15 +42,22 @@ CREATE TEMP TABLE exercise_category_revenue (
   revenue numeric NOT NULL
 ) ON COMMIT DROP;
 INSERT INTO exercise_category_revenue (category, revenue)
-SELECT p.category,
-       SUM(oi.unit_price * oi.quantity * (1 - oi.discount))
-FROM order_items AS oi
-JOIN products AS p
-  ON p.product_id = oi.product_id
-GROUP BY p.category;
-SELECT category, ROUND(revenue, 2) AS revenue
-FROM exercise_category_revenue
-ORDER BY revenue DESC, category;
+SELECT
+  p.category,
+  SUM(oi.unit_price * oi.quantity * (1 - oi.discount))
+FROM
+  order_items AS oi
+  JOIN products AS p ON p.product_id = oi.product_id
+GROUP BY
+  p.category;
+SELECT
+  category,
+  ROUND(revenue, 2) AS revenue
+FROM
+  exercise_category_revenue
+ORDER BY
+  revenue DESC,
+  category;
 ROLLBACK TO SAVEPOINT exercise_1;
 
 -- ---------------------------------------------------------------------------
@@ -71,14 +75,24 @@ ROLLBACK TO SAVEPOINT exercise_1;
 -- - `RETURNING`: shows the rows changed by DML, providing immediate evidence of the affected population.
 -- - savepoint control: creates or restores an inner transaction checkpoint while the lesson's outer rollback remains the final guard.
 SAVEPOINT exercise_2;
-UPDATE employees AS e
-SET salary = ROUND(e.salary * 1.05, 2)
-WHERE e.department_id IN (
-  SELECT d.department_id
-  FROM departments AS d
-  WHERE d.name IN ('Sales', 'Engineering')
-)
-RETURNING e.employee_id, e.full_name, e.salary;
+
+UPDATE
+  employees AS e
+SET
+  salary = ROUND(e.salary * 1.05, 2)
+WHERE
+  e.department_id IN (
+    SELECT
+      d.department_id
+    FROM
+      departments AS d
+    WHERE
+      d.name IN ('Sales', 'Engineering'))
+RETURNING
+  e.employee_id,
+  e.full_name,
+  e.salary;
+
 ROLLBACK TO SAVEPOINT exercise_2;
 
 -- ---------------------------------------------------------------------------
@@ -96,14 +110,21 @@ ROLLBACK TO SAVEPOINT exercise_2;
 -- - `RETURNING`: shows the rows changed by DML, providing immediate evidence of the affected population.
 -- - savepoint control: creates or restores an inner transaction checkpoint while the lesson's outer rollback remains the final guard.
 SAVEPOINT exercise_3;
+
 DELETE FROM orders AS o
 WHERE o.order_date < CURRENT_TIMESTAMP - INTERVAL '1 year'
   AND NOT EXISTS (
-    SELECT 1
-    FROM payments AS p
-    WHERE p.order_id = o.order_id
-  )
-RETURNING o.order_id, o.customer_id, o.order_date;
+    SELECT
+      1
+    FROM
+      payments AS p
+    WHERE
+      p.order_id = o.order_id)
+RETURNING
+  o.order_id,
+  o.customer_id,
+  o.order_date;
+
 ROLLBACK TO SAVEPOINT exercise_3;
 
 -- ---------------------------------------------------------------------------
@@ -123,21 +144,32 @@ ROLLBACK TO SAVEPOINT exercise_3;
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 -- - savepoint control: creates or restores an inner transaction checkpoint while the lesson's outer rollback remains the final guard.
 SAVEPOINT exercise_4;
+
 CREATE TEMP TABLE exercise_feed (
   source_key text PRIMARY KEY,
   source_value numeric NOT NULL
 ) ON COMMIT DROP;
+
 INSERT INTO exercise_feed (source_key, source_value)
-VALUES ('source_a', 10)
+  VALUES ('source_a', 10)
 ON CONFLICT (source_key)
-DO UPDATE SET source_value = EXCLUDED.source_value;
+  DO UPDATE SET
+    source_value = EXCLUDED.source_value;
+
 INSERT INTO exercise_feed (source_key, source_value)
-VALUES ('source_a', 12)
+  VALUES ('source_a', 12)
 ON CONFLICT (source_key)
-DO UPDATE SET source_value = EXCLUDED.source_value;
-SELECT source_key, source_value
-FROM exercise_feed
-ORDER BY source_key;
+  DO UPDATE SET
+    source_value = EXCLUDED.source_value;
+
+SELECT
+  source_key,
+  source_value
+FROM
+  exercise_feed
+ORDER BY
+  source_key;
+
 ROLLBACK TO SAVEPOINT exercise_4;
 
 -- ---------------------------------------------------------------------------
@@ -159,24 +191,42 @@ ROLLBACK TO SAVEPOINT exercise_4;
 -- - `RETURNING`: shows the rows changed by DML, providing immediate evidence of the affected population.
 -- - savepoint control: creates or restores an inner transaction checkpoint while the lesson's outer rollback remains the final guard.
 SAVEPOINT exercise_5;
+
 CREATE TEMP TABLE exercise_product_candidates ON COMMIT DROP AS
-SELECT p.product_id
-FROM products AS p
-WHERE p.category = 'Books'
-ORDER BY p.product_id
+SELECT
+  p.product_id
+FROM
+  products AS p
+WHERE
+  p.category = 'Books'
+ORDER BY
+  p.product_id
 LIMIT 5;
+
 WITH updated AS (
-  UPDATE products AS p
-  SET price = ROUND(p.price * 0.99, 2)
-  WHERE p.product_id IN (
-    SELECT candidate.product_id
-    FROM exercise_product_candidates AS candidate
-  )
-  RETURNING p.product_id
+  UPDATE
+    products AS p
+  SET
+    price = ROUND(p.price * 0.99, 2)
+  WHERE
+    p.product_id IN (
+      SELECT
+        candidate.product_id
+      FROM
+        exercise_product_candidates AS candidate)
+    RETURNING
+      p.product_id
 )
-SELECT (SELECT COUNT(*) FROM exercise_product_candidates) AS candidate_count,
-       COUNT(*) AS updated_count
-FROM updated;
+SELECT
+  (
+    SELECT
+      COUNT(*)
+    FROM
+      exercise_product_candidates) AS candidate_count,
+  COUNT(*) AS updated_count
+FROM
+  updated;
+
 ROLLBACK TO SAVEPOINT exercise_5;
 
 -- ---------------------------------------------------------------------------
@@ -198,23 +248,36 @@ ROLLBACK TO SAVEPOINT exercise_5;
 -- - `RETURNING`: shows the rows changed by DML, providing immediate evidence of the affected population.
 -- - savepoint control: creates or restores an inner transaction checkpoint while the lesson's outer rollback remains the final guard.
 SAVEPOINT exercise_6;
+
 CREATE TEMP TABLE exercise_price_stage (
   product_id integer PRIMARY KEY,
   new_price numeric
 ) ON COMMIT DROP;
+
 INSERT INTO exercise_price_stage (product_id, new_price)
-SELECT p.product_id,
-       ROUND(p.price * 1.01, 2)
-FROM products AS p
-ORDER BY p.product_id
+SELECT
+  p.product_id,
+  ROUND(p.price * 1.01, 2)
+FROM
+  products AS p
+ORDER BY
+  p.product_id
 LIMIT 3;
-UPDATE products AS p
-SET price = stage.new_price
-FROM exercise_price_stage AS stage
-WHERE stage.product_id = p.product_id
+
+UPDATE
+  products AS p
+SET
+  price = stage.new_price
+FROM
+  exercise_price_stage AS stage
+WHERE
+  stage.product_id = p.product_id
   AND stage.new_price >= 0
   AND p.price IS DISTINCT FROM stage.new_price
-RETURNING p.product_id, p.price;
+RETURNING
+  p.product_id,
+  p.price;
+
 ROLLBACK TO SAVEPOINT exercise_6;
 
 -- No course answer persists changes or temporary objects.

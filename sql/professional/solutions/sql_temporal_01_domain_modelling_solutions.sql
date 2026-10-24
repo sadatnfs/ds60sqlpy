@@ -16,94 +16,54 @@
 BEGIN;
 SET LOCAL search_path TO pg_catalog, public;
 CREATE SCHEMA pro_temporal_lab;
-
 CREATE TABLE pro_temporal_lab.customer_terms (
-    term_version_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    customer_key text NOT NULL,
-    valid_period daterange NOT NULL,
-    system_period tstzrange NOT NULL,
-    monthly_rate numeric(10, 2) NOT NULL CHECK (monthly_rate >= 0),
-    recorded_reason text NOT NULL CHECK (btrim(recorded_reason) <> ''),
-    CHECK (NOT isempty(valid_period)),
-    CHECK (NOT isempty(system_period))
+  term_version_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  customer_key text NOT NULL,
+  valid_period daterange NOT NULL,
+  system_period tstzrange NOT NULL,
+  monthly_rate numeric(10, 2) NOT NULL CHECK (monthly_rate >= 0),
+  recorded_reason text NOT NULL CHECK (btrim(recorded_reason) <> ''),
+  CHECK (NOT isempty(valid_period)),
+  CHECK (NOT isempty(system_period))
 );
-
 -- Initial and March correction.
-INSERT INTO pro_temporal_lab.customer_terms (
-    customer_key,
-    valid_period,
-    system_period,
-    monthly_rate,
-    recorded_reason
-)
+INSERT INTO pro_temporal_lab.customer_terms (customer_key, valid_period, system_period, monthly_rate, recorded_reason)
 VALUES
-    (
-        'CUS-100',
-        daterange(DATE '2026-01-01', DATE '2026-04-01', '[)'),
-        tstzrange(
-            TIMESTAMPTZ '2026-03-01 00:00+00',
-            TIMESTAMPTZ '2026-03-10 00:00+00',
-            '[)'
-        ),
-        10.00,
-        'initial value'
-    ),
-    (
-        'CUS-100',
-        daterange(DATE '2026-01-01', DATE '2026-04-01', '[)'),
-        tstzrange(
-            TIMESTAMPTZ '2026-03-10 00:00+00',
-            TIMESTAMPTZ '2026-04-01 00:00+00',
-            '[)'
-        ),
-        12.00,
-        'March correction'
-    ),
-    -- Exercise 1: retroactive correction recorded April 1.
-    (
-        'CUS-100',
-        daterange(DATE '2026-01-01', DATE '2026-04-01', '[)'),
-        tstzrange(TIMESTAMPTZ '2026-04-01 00:00+00', NULL, '[)'),
-        11.00,
-        'retroactive correction recorded April 1'
-    );
-
+  ('CUS-100', daterange(DATE '2026-01-01', DATE '2026-04-01', '[)'), tstzrange(TIMESTAMPTZ '2026-03-01 00:00+00', TIMESTAMPTZ '2026-03-10 00:00+00', '[)'), 10.00, 'initial value'),
+  ('CUS-100', daterange(DATE '2026-01-01', DATE '2026-04-01', '[)'), tstzrange(TIMESTAMPTZ '2026-03-10 00:00+00', TIMESTAMPTZ '2026-04-01 00:00+00', '[)'), 12.00, 'March correction'),
+  -- Exercise 1: retroactive correction recorded April 1.
+  ('CUS-100', daterange(DATE '2026-01-01', DATE '2026-04-01', '[)'), tstzrange(TIMESTAMPTZ '2026-04-01 00:00+00', NULL, '[)'), 11.00, 'retroactive correction recorded April 1');
 SELECT
-    DATE '2026-02-15' AS valid_on,
-    query.system_as_of,
-    f.term_version_id,
-    f.monthly_rate,
-    f.recorded_reason
+  DATE '2026-02-15' AS valid_on,
+  query.system_as_of,
+  f.term_version_id,
+  f.monthly_rate,
+  f.recorded_reason
 FROM (
-    VALUES
-        (TIMESTAMPTZ '2026-03-15 00:00+00'),
-        (TIMESTAMPTZ '2026-04-02 00:00+00')
-) AS query(system_as_of)
-JOIN pro_temporal_lab.customer_terms AS f
-  ON f.customer_key = 'CUS-100'
- AND f.valid_period @> DATE '2026-02-15'
- AND f.system_period @> query.system_as_of
-ORDER BY query.system_as_of;
-
+  VALUES (TIMESTAMPTZ '2026-03-15 00:00+00'),
+    (TIMESTAMPTZ '2026-04-02 00:00+00')) AS query (system_as_of)
+  JOIN pro_temporal_lab.customer_terms AS f ON f.customer_key = 'CUS-100'
+    AND f.valid_period @> DATE '2026-02-15'
+    AND f.system_period @> query.system_as_of
+  ORDER BY
+    query.system_as_of;
 -- Exercise 4: immutable ledger and reversal of a reversal. A reversal must
 -- negate exactly one prior entry, and each entry may be reversed only once.
 CREATE TABLE pro_temporal_lab.ledger (
-    entry_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    subject_key text NOT NULL,
-    idempotency_key text NOT NULL UNIQUE,
-    event_kind text NOT NULL,
-    amount numeric(12, 2) NOT NULL,
-    currency text NOT NULL CHECK (currency ~ '^[A-Z]{3}$'),
-    reverses_entry_id bigint UNIQUE
-        REFERENCES pro_temporal_lab.ledger (entry_id)
+  entry_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  subject_key text NOT NULL,
+  idempotency_key text NOT NULL UNIQUE,
+  event_kind text NOT NULL,
+  amount numeric(12, 2) NOT NULL,
+  currency text NOT NULL CHECK (currency ~ '^[A-Z]{3}$'),
+  reverses_entry_id bigint UNIQUE REFERENCES pro_temporal_lab.ledger (entry_id)
 );
-
-CREATE FUNCTION pro_temporal_lab.validate_ledger_append()
-RETURNS trigger
-LANGUAGE plpgsql
-SECURITY INVOKER
-SET search_path = pg_catalog
-AS $function$
+CREATE FUNCTION pro_temporal_lab.validate_ledger_append ()
+  RETURNS trigger
+  LANGUAGE plpgsql
+  SECURITY INVOKER
+  SET search_path = pg_catalog
+  AS $function$
 DECLARE
     reversed_amount numeric(12, 2);
     reversed_subject_key text;
@@ -135,89 +95,70 @@ BEGIN
     END IF;
     RETURN NEW;
 END
-$function$;
-
-CREATE FUNCTION pro_temporal_lab.reject_ledger_mutation()
-RETURNS trigger
-LANGUAGE plpgsql
-SECURITY INVOKER
-SET search_path = pg_catalog
-AS $function$
+$function$
+;
+  CREATE FUNCTION pro_temporal_lab.reject_ledger_mutation ()
+    RETURNS trigger
+    LANGUAGE plpgsql
+    SECURITY INVOKER
+    SET search_path = pg_catalog AS $function$
 BEGIN
     RAISE EXCEPTION
         'ledger is append-only; append a reversal instead of changing history'
         USING ERRCODE = 'check_violation';
 END
 $function$;
-
-CREATE TRIGGER ledger_validate_append
-BEFORE INSERT ON pro_temporal_lab.ledger
-FOR EACH ROW
-EXECUTE FUNCTION pro_temporal_lab.validate_ledger_append();
-
-CREATE TRIGGER ledger_immutable
-BEFORE UPDATE OR DELETE ON pro_temporal_lab.ledger
-FOR EACH ROW
-EXECUTE FUNCTION pro_temporal_lab.reject_ledger_mutation();
-
--- The learner uses the domain name `change_ledger`; this automatically
--- updatable view exposes that name and the more descriptive identity column
--- while the base table retains the focused immutability trigger used below.
-CREATE VIEW pro_temporal_lab.change_ledger AS
-SELECT
-    l.entry_id AS ledger_entry_id,
-    l.subject_key,
-    l.idempotency_key,
-    l.event_kind,
-    l.amount,
-    l.currency,
-    l.reverses_entry_id
-FROM pro_temporal_lab.ledger AS l;
-
-INSERT INTO pro_temporal_lab.change_ledger (
-    subject_key, idempotency_key, event_kind, amount, currency
-)
-VALUES ('CUS-100', 'LEDGER-100', 'credit', 5.00, 'USD');
-
-INSERT INTO pro_temporal_lab.change_ledger (
-    subject_key,
-    idempotency_key,
-    event_kind,
-    amount,
-    currency,
-    reverses_entry_id
-)
-SELECT
-    l.subject_key,
-    'LEDGER-101',
-    'credit.reversal',
-    -5.00,
-    l.currency,
-    l.ledger_entry_id
-FROM pro_temporal_lab.change_ledger AS l
-WHERE l.idempotency_key = 'LEDGER-100';
-
-INSERT INTO pro_temporal_lab.change_ledger (
-    subject_key,
-    idempotency_key,
-    event_kind,
-    amount,
-    currency,
-    reverses_entry_id
-)
-SELECT
-    l.subject_key,
-    'LEDGER-102',
-    'reversal.corrected',
-    5.00,
-    l.currency,
-    l.ledger_entry_id
-FROM pro_temporal_lab.change_ledger AS l
-WHERE l.idempotency_key = 'LEDGER-101';
-
--- These negative controls prove the guarantees, rather than merely describing
--- them. Each inner block rolls back its failed statement automatically.
-DO $ledger_negative_controls$
+    CREATE TRIGGER ledger_validate_append
+      BEFORE INSERT ON pro_temporal_lab.ledger
+      FOR EACH ROW
+      EXECUTE FUNCTION pro_temporal_lab.validate_ledger_append ();
+      CREATE TRIGGER ledger_immutable
+        BEFORE UPDATE OR DELETE ON pro_temporal_lab.ledger
+        FOR EACH ROW
+        EXECUTE FUNCTION pro_temporal_lab.reject_ledger_mutation ();
+        -- The learner uses the domain name `change_ledger`; this automatically
+        -- updatable view exposes that name and the more descriptive identity column
+        -- while the base table retains the focused immutability trigger used below.
+        CREATE VIEW pro_temporal_lab.change_ledger AS
+        SELECT
+          l.entry_id AS ledger_entry_id,
+          l.subject_key,
+          l.idempotency_key,
+          l.event_kind,
+          l.amount,
+          l.currency,
+          l.reverses_entry_id
+        FROM
+          pro_temporal_lab.ledger AS l;
+        INSERT INTO pro_temporal_lab.change_ledger (subject_key, idempotency_key, event_kind, amount, currency)
+          VALUES ('CUS-100', 'LEDGER-100', 'credit', 5.00, 'USD');
+      INSERT INTO pro_temporal_lab.change_ledger (subject_key, idempotency_key, event_kind, amount, currency, reverses_entry_id)
+      SELECT
+        l.subject_key,
+        'LEDGER-101',
+        'credit.reversal',
+        -5.00,
+        l.currency,
+        l.ledger_entry_id
+      FROM
+        pro_temporal_lab.change_ledger AS l
+      WHERE
+        l.idempotency_key = 'LEDGER-100';
+      INSERT INTO pro_temporal_lab.change_ledger (subject_key, idempotency_key, event_kind, amount, currency, reverses_entry_id)
+      SELECT
+        l.subject_key,
+        'LEDGER-102',
+        'reversal.corrected',
+        5.00,
+        l.currency,
+        l.ledger_entry_id
+      FROM
+        pro_temporal_lab.change_ledger AS l
+      WHERE
+        l.idempotency_key = 'LEDGER-101';
+        -- These negative controls prove the guarantees, rather than merely describing
+        -- them. Each inner block rolls back its failed statement automatically.
+        DO $ledger_negative_controls$
 BEGIN
     BEGIN
         UPDATE pro_temporal_lab.change_ledger
@@ -280,49 +221,42 @@ BEGIN
     END;
 END
 $ledger_negative_controls$;
-
-SELECT
-    l.ledger_entry_id,
-    l.subject_key,
-    l.idempotency_key,
-    l.event_kind,
-    l.amount,
-    l.currency,
-    l.reverses_entry_id
-FROM pro_temporal_lab.change_ledger AS l
-ORDER BY l.ledger_entry_id;
-
--- Exercise 5: immutable, idempotent decision log for hold release/review.
--- Eligibility remains a report; no fixture row is physically deleted.
-CREATE TABLE pro_temporal_lab.retained_subjects (
-    record_key text PRIMARY KEY,
-    minimum_delete_at timestamptz NOT NULL
+        SELECT
+          l.ledger_entry_id,
+          l.subject_key,
+          l.idempotency_key,
+          l.event_kind,
+          l.amount,
+          l.currency,
+          l.reverses_entry_id
+        FROM
+          pro_temporal_lab.change_ledger AS l
+        ORDER BY
+          l.ledger_entry_id;
+          -- Exercise 5: immutable, idempotent decision log for hold release/review.
+          -- Eligibility remains a report; no fixture row is physically deleted.
+          CREATE TABLE pro_temporal_lab.retained_subjects (
+            record_key text PRIMARY KEY,
+            minimum_delete_at timestamptz NOT NULL
 );
-
-INSERT INTO pro_temporal_lab.retained_subjects
-VALUES
-    ('REC-1', TIMESTAMPTZ '2026-02-15 00:00+00'),
-    ('REC-2', TIMESTAMPTZ '2026-02-15 00:00+00');
-
-CREATE TABLE pro_temporal_lab.retention_decisions (
-    decision_event_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    decision_idempotency_key text NOT NULL UNIQUE,
-    record_key text NOT NULL
-        REFERENCES pro_temporal_lab.retained_subjects (record_key),
-    decision text NOT NULL CHECK (
-        decision IN ('hold_applied', 'hold_released', 'deletion_approved')
-    ),
-    approved_by text NOT NULL CHECK (btrim(approved_by) <> ''),
-    reason text NOT NULL CHECK (btrim(reason) <> ''),
-    decided_at timestamptz NOT NULL
+        INSERT INTO pro_temporal_lab.retained_subjects
+        VALUES
+          ('REC-1', TIMESTAMPTZ '2026-02-15 00:00+00'),
+          ('REC-2', TIMESTAMPTZ '2026-02-15 00:00+00');
+        CREATE TABLE pro_temporal_lab.retention_decisions (
+          decision_event_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          decision_idempotency_key text NOT NULL UNIQUE,
+          record_key text NOT NULL REFERENCES pro_temporal_lab.retained_subjects (record_key),
+          decision text NOT NULL CHECK (decision IN ('hold_applied', 'hold_released', 'deletion_approved')),
+          approved_by text NOT NULL CHECK (btrim(approved_by) <> ''),
+          reason text NOT NULL CHECK (btrim(reason) <> ''),
+          decided_at timestamptz NOT NULL
 );
-
-CREATE FUNCTION pro_temporal_lab.validate_retention_decision()
-RETURNS trigger
-LANGUAGE plpgsql
-SECURITY INVOKER
-SET search_path = pg_catalog
-AS $function$
+        CREATE FUNCTION pro_temporal_lab.validate_retention_decision ()
+          RETURNS trigger
+          LANGUAGE plpgsql
+          SECURITY INVOKER
+          SET search_path = pg_catalog AS $function$
 DECLARE
     previous_decision text;
     previous_decided_at timestamptz;
@@ -359,65 +293,31 @@ BEGIN
     RETURN NEW;
 END
 $function$;
-
-CREATE FUNCTION pro_temporal_lab.reject_retention_decision_mutation()
-RETURNS trigger
-LANGUAGE plpgsql
-SECURITY INVOKER
-SET search_path = pg_catalog
-AS $function$
+          CREATE FUNCTION pro_temporal_lab.reject_retention_decision_mutation ()
+            RETURNS trigger
+            LANGUAGE plpgsql
+            SECURITY INVOKER
+            SET search_path = pg_catalog AS $function$
 BEGIN
     RAISE EXCEPTION
         'retention decisions are append-only; append a new decision event'
         USING ERRCODE = 'check_violation';
 END
 $function$;
-
-CREATE TRIGGER retention_decision_validate_append
-BEFORE INSERT ON pro_temporal_lab.retention_decisions
-FOR EACH ROW
-EXECUTE FUNCTION pro_temporal_lab.validate_retention_decision();
-
-CREATE TRIGGER retention_decisions_immutable
-BEFORE UPDATE OR DELETE ON pro_temporal_lab.retention_decisions
-FOR EACH ROW
-EXECUTE FUNCTION pro_temporal_lab.reject_retention_decision_mutation();
-
-INSERT INTO pro_temporal_lab.retention_decisions (
-    decision_idempotency_key,
-    record_key,
-    decision,
-    approved_by,
-    reason,
-    decided_at
-)
-VALUES
-    (
-        'DEC-REC-1-HOLD',
-        'REC-1',
-        'hold_applied',
-        'policy-reviewer',
-        'active review',
-        TIMESTAMPTZ '2026-02-01 00:00+00'
-    ),
-    (
-        'DEC-REC-1-RELEASE',
-        'REC-1',
-        'hold_released',
-        'policy-reviewer',
-        'review completed',
-        TIMESTAMPTZ '2026-03-01 00:00+00'
-    ),
-    (
-        'DEC-REC-2-HOLD',
-        'REC-2',
-        'hold_applied',
-        'policy-reviewer',
-        'active investigation',
-        TIMESTAMPTZ '2026-02-10 00:00+00'
-    );
-
-DO $retention_negative_controls$
+            CREATE TRIGGER retention_decision_validate_append
+              BEFORE INSERT ON pro_temporal_lab.retention_decisions
+              FOR EACH ROW
+              EXECUTE FUNCTION pro_temporal_lab.validate_retention_decision ();
+              CREATE TRIGGER retention_decisions_immutable
+                BEFORE UPDATE OR DELETE ON pro_temporal_lab.retention_decisions
+                FOR EACH ROW
+                EXECUTE FUNCTION pro_temporal_lab.reject_retention_decision_mutation ();
+              INSERT INTO pro_temporal_lab.retention_decisions (decision_idempotency_key, record_key, decision, approved_by, reason, decided_at)
+              VALUES
+                ('DEC-REC-1-HOLD', 'REC-1', 'hold_applied', 'policy-reviewer', 'active review', TIMESTAMPTZ '2026-02-01 00:00+00'),
+                ('DEC-REC-1-RELEASE', 'REC-1', 'hold_released', 'policy-reviewer', 'review completed', TIMESTAMPTZ '2026-03-01 00:00+00'),
+                ('DEC-REC-2-HOLD', 'REC-2', 'hold_applied', 'policy-reviewer', 'active investigation', TIMESTAMPTZ '2026-02-10 00:00+00');
+              DO $retention_negative_controls$
 BEGIN
     BEGIN
         INSERT INTO pro_temporal_lab.retention_decisions (
@@ -508,37 +408,38 @@ BEGIN
     END;
 END
 $retention_negative_controls$;
-
-WITH latest_decision AS (
-    SELECT DISTINCT ON (rd.record_key)
-        rd.record_key,
-        rd.decision_event_id,
-        rd.decision_idempotency_key,
-        rd.decision,
-        rd.approved_by,
-        rd.reason,
-        rd.decided_at
-    FROM pro_temporal_lab.retention_decisions AS rd
-    ORDER BY rd.record_key, rd.decided_at DESC, rd.decision_event_id DESC
+              WITH latest_decision AS (
+                SELECT DISTINCT ON (rd.record_key)
+                  rd.record_key,
+                  rd.decision_event_id,
+                  rd.decision_idempotency_key,
+                  rd.decision,
+                  rd.approved_by,
+                  rd.reason,
+                  rd.decided_at
+                FROM
+                  pro_temporal_lab.retention_decisions AS rd
+                ORDER BY
+                  rd.record_key,
+                  rd.decided_at DESC,
+                  rd.decision_event_id DESC
 )
-SELECT
-    rs.record_key,
-    latest.decision_event_id,
-    latest.decision_idempotency_key,
-    latest.decision AS latest_decision,
-    latest.approved_by,
-    latest.reason,
-    latest.decided_at,
-    (
-        TIMESTAMPTZ '2026-03-15 00:00+00' >= rs.minimum_delete_at
-        AND latest.decision <> 'hold_applied'
-    ) AS eligible_for_deletion_review
-FROM pro_temporal_lab.retained_subjects AS rs
-LEFT JOIN latest_decision AS latest
-  ON latest.record_key = rs.record_key
-ORDER BY rs.record_key;
-
-DO $solution$
+              SELECT
+                rs.record_key,
+                latest.decision_event_id,
+                latest.decision_idempotency_key,
+                latest.decision AS latest_decision,
+                latest.approved_by,
+                latest.reason,
+                latest.decided_at,
+                (TIMESTAMPTZ '2026-03-15 00:00+00' >= rs.minimum_delete_at
+                  AND latest.decision <> 'hold_applied') AS eligible_for_deletion_review
+              FROM
+                pro_temporal_lab.retained_subjects AS rs
+              LEFT JOIN latest_decision AS latest ON latest.record_key = rs.record_key
+            ORDER BY
+              rs.record_key;
+              DO $solution$
 BEGIN
     IF (
         SELECT COUNT(*)
@@ -562,65 +463,41 @@ BEGIN
     END IF;
 END
 $solution$;
-
--- Exercise 2: probe immediately before and exactly at both upper bounds.
--- Half-open [lower, upper) means the old version stops matching at the upper
--- instant; an adjacent successor starts there without double matching.
-WITH probes(probe_id, valid_on, known_at, expected_matches) AS (
-    VALUES
-        (
-            'valid-before-upper',
-            DATE '2026-03-31',
-            TIMESTAMPTZ '2026-04-02 00:00+00',
-            1::bigint
-        ),
-        (
-            'valid-at-upper',
-            DATE '2026-04-01',
-            TIMESTAMPTZ '2026-04-02 00:00+00',
-            0::bigint
-        ),
-        (
-            'system-before-march-boundary',
-            DATE '2026-02-15',
-            TIMESTAMPTZ '2026-03-09 23:59:59+00',
-            1::bigint
-        ),
-        (
-            'system-at-march-boundary',
-            DATE '2026-02-15',
-            TIMESTAMPTZ '2026-03-10 00:00:00+00',
-            1::bigint
-        ),
-        (
-            'system-before-april-boundary',
-            DATE '2026-02-15',
-            TIMESTAMPTZ '2026-03-31 23:59:59+00',
-            1::bigint
-        ),
-        (
-            'system-at-april-boundary',
-            DATE '2026-02-15',
-            TIMESTAMPTZ '2026-04-01 00:00:00+00',
-            1::bigint
-        )
-)
-SELECT
-    p.probe_id,
-    p.valid_on,
-    p.known_at,
-    COUNT(f.term_version_id) AS matching_versions,
-    p.expected_matches,
-    COUNT(f.term_version_id) = p.expected_matches AS matches_expectation
-FROM probes AS p
-LEFT JOIN pro_temporal_lab.customer_terms AS f
-  ON f.customer_key = 'CUS-100'
- AND f.valid_period @> p.valid_on
- AND f.system_period @> p.known_at
-GROUP BY p.probe_id, p.valid_on, p.known_at, p.expected_matches
-ORDER BY p.probe_id;
-
-DO $boundary_invariant$
+              -- Exercise 2: probe immediately before and exactly at both upper bounds.
+              -- Half-open [lower, upper) means the old version stops matching at the upper
+              -- instant; an adjacent successor starts there without double matching.
+              WITH probes (
+                probe_id,
+                valid_on,
+                known_at,
+                expected_matches
+) AS (
+                VALUES ('valid-before-upper', DATE '2026-03-31', TIMESTAMPTZ '2026-04-02 00:00+00', 1::bigint),
+                  ('valid-at-upper', DATE '2026-04-01', TIMESTAMPTZ '2026-04-02 00:00+00', 0::bigint),
+                  ('system-before-march-boundary', DATE '2026-02-15', TIMESTAMPTZ '2026-03-09 23:59:59+00', 1::bigint),
+                  ('system-at-march-boundary', DATE '2026-02-15', TIMESTAMPTZ '2026-03-10 00:00:00+00', 1::bigint),
+                  ('system-before-april-boundary', DATE '2026-02-15', TIMESTAMPTZ '2026-03-31 23:59:59+00', 1::bigint),
+                  ('system-at-april-boundary', DATE '2026-02-15', TIMESTAMPTZ '2026-04-01 00:00:00+00', 1::bigint))
+              SELECT
+                p.probe_id,
+                p.valid_on,
+                p.known_at,
+                COUNT(f.term_version_id) AS matching_versions,
+                p.expected_matches,
+                COUNT(f.term_version_id) = p.expected_matches AS matches_expectation
+              FROM
+                probes AS p
+                LEFT JOIN pro_temporal_lab.customer_terms AS f ON f.customer_key = 'CUS-100'
+                  AND f.valid_period @> p.valid_on
+                  AND f.system_period @> p.known_at
+              GROUP BY
+                p.probe_id,
+                p.valid_on,
+                p.known_at,
+                p.expected_matches
+              ORDER BY
+                p.probe_id;
+                DO $boundary_invariant$
 BEGIN
     IF EXISTS (
         WITH probes(valid_on, known_at, expected_matches) AS (
@@ -668,181 +545,101 @@ BEGIN
     END IF;
 END
 $boundary_invariant$;
-
--- Exercise 3: an approved btree_gist exclusion constraint can reject current
--- period overlap under concurrency. The fallback must lock one stable business
--- key before checking; this core solution installs no extension.
-SELECT *
-FROM (
-    VALUES
-        (
-            1,
-            'btree_gist exclusion constraint',
-            'declarative equality on customer_key plus && on valid_period',
-            'requires approved extension and applies to the represented rows',
-            'database constraint handles concurrent conflicting writes'
-        ),
-        (
-            2,
-            'advisory-lock trigger fallback',
-            'lock hash(customer_key), then test current rows for overlap',
-            'all writers must use the same stable lock protocol',
-            'trigger raises exclusion_violation before the write'
-        )
-) AS enforcement_comparison(
-    approach_number,
-    approach,
-    enforcement_mechanism,
-    assumption_or_limit,
-    concurrent_failure_behavior
-)
-ORDER BY approach_number;
-
--- Exercise 6: domain assumptions include zone/clock authority, half-open bounds,
--- lateness, overlap/gap, correction authority, identity, unit/ledger semantics,
--- retention/hold/deletion, and replica/backup treatment.
-SELECT *
-FROM (
-    VALUES
-        (
-            1,
-            'time zone',
-            'store authoritative instants as timestamptz and retain IANA source zone',
-            'domain owner',
-            'reject unclassified ambiguous/nonexistent civil time'
-        ),
-        (
-            2,
-            'clock authority',
-            'source event time is business time; database clock is record time',
-            'platform owner',
-            'quarantine events from clocks outside the approved skew'
-        ),
-        (
-            3,
-            'late arrival',
-            '15-minute watermark is an example, not an approved production SLA',
-            'analytics owner',
-            'publish a correction/retraction for accepted late data'
-        ),
-        (
-            4,
-            'overlap and gap',
-            'current periods may be adjacent but never overlap per business key',
-            'data model owner',
-            'reject overlap; report gaps for domain review'
-        ),
-        (
-            5,
-            'history correction',
-            'authorized writers append system-time versions and ledger reversals',
-            'security owner',
-            'deny UPDATE/DELETE on immutable audit relations'
-        ),
-        (
-            6,
-            'retention and legal hold',
-            'eligibility is reviewed; a hold blocks deletion approval',
-            'records-policy owner',
-            'retain data and escalate conflicting policy'
-        ),
-        (
-            7,
-            'replicas and backups',
-            'retention, holds, and deletion evidence cover every maintained copy',
-            'recovery owner',
-            'stop deletion until propagation and restore tests are evidenced'
-        )
-) AS assumption_register(
-    assumption_number,
-    topic,
-    decision_or_assumption,
-    owner,
-    failure_response
-)
-ORDER BY assumption_number;
-
--- Exercise 7: retain both the authoritative instant and IANA source zone. These
--- civil examples are classified *before* accepting PostgreSQL's silent default
--- interpretation. Zero matching instants means nonexistent; multiple matching
--- instants mean ambiguous.
-WITH civil(case_id, local_time, zone_name) AS (
-    VALUES
-        (
-            'spring-gap',
-            TIMESTAMP '2026-03-08 02:30:00',
-            'America/Los_Angeles'::text
-        ),
-        (
-            'fall-fold',
-            TIMESTAMP '2026-11-01 01:30:00',
-            'America/Los_Angeles'::text
-        ),
-        (
-            'ordinary-time',
-            TIMESTAMP '2026-02-01 12:00:00',
-            'America/Los_Angeles'::text
-        )
+                -- Exercise 3: an approved btree_gist exclusion constraint can reject current
+                -- period overlap under concurrency. The fallback must lock one stable business
+                -- key before checking; this core solution installs no extension.
+                SELECT
+                  *
+                FROM (
+                  VALUES (1, 'btree_gist exclusion constraint', 'declarative equality on customer_key plus && on valid_period', 'requires approved extension and applies to the represented rows', 'database constraint handles concurrent conflicting writes'),
+                    (2, 'advisory-lock trigger fallback', 'lock hash(customer_key), then test current rows for overlap', 'all writers must use the same stable lock protocol', 'trigger raises exclusion_violation before the write')) AS enforcement_comparison (approach_number, approach, enforcement_mechanism, assumption_or_limit, concurrent_failure_behavior)
+              ORDER BY
+                approach_number;
+                  -- Exercise 6: domain assumptions include zone/clock authority, half-open bounds,
+                  -- lateness, overlap/gap, correction authority, identity, unit/ledger semantics,
+                  -- retention/hold/deletion, and replica/backup treatment.
+                  SELECT
+                    *
+                  FROM (
+                    VALUES (1, 'time zone', 'store authoritative instants as timestamptz and retain IANA source zone', 'domain owner', 'reject unclassified ambiguous/nonexistent civil time'),
+                      (2, 'clock authority', 'source event time is business time; database clock is record time', 'platform owner', 'quarantine events from clocks outside the approved skew'),
+                      (3, 'late arrival', '15-minute watermark is an example, not an approved production SLA', 'analytics owner', 'publish a correction/retraction for accepted late data'),
+                      (4, 'overlap and gap', 'current periods may be adjacent but never overlap per business key', 'data model owner', 'reject overlap; report gaps for domain review'),
+                      (5, 'history correction', 'authorized writers append system-time versions and ledger reversals', 'security owner', 'deny UPDATE/DELETE on immutable audit relations'),
+                      (6, 'retention and legal hold', 'eligibility is reviewed; a hold blocks deletion approval', 'records-policy owner', 'retain data and escalate conflicting policy'),
+                      (7, 'replicas and backups', 'retention, holds, and deletion evidence cover every maintained copy', 'recovery owner', 'stop deletion until propagation and restore tests are evidenced')) AS assumption_register (assumption_number, topic, decision_or_assumption, owner, failure_response)
+                ORDER BY
+                  assumption_number;
+                    -- Exercise 7: retain both the authoritative instant and IANA source zone. These
+                    -- civil examples are classified *before* accepting PostgreSQL's silent default
+                    -- interpretation. Zero matching instants means nonexistent; multiple matching
+                    -- instants mean ambiguous.
+                    WITH civil (
+                      case_id,
+                      local_time,
+                      zone_name
+) AS (
+                      VALUES ('spring-gap', TIMESTAMP '2026-03-08 02:30:00', 'America/Los_Angeles'::text),
+                        ('fall-fold', TIMESTAMP '2026-11-01 01:30:00', 'America/Los_Angeles'::text),
+                        ('ordinary-time', TIMESTAMP '2026-02-01 12:00:00', 'America/Los_Angeles'::text)
 ),
 defaults AS (
-    SELECT
-        c.*,
-        c.local_time AT TIME ZONE c.zone_name AS default_interpreted_instant
-    FROM civil AS c
+  SELECT
+    c.*, c.local_time AT TIME ZONE c.zone_name AS default_interpreted_instant
+  FROM
+    civil AS c
 ),
 candidate_instants AS (
-    SELECT
-        d.case_id,
-        candidate_instant
-    FROM defaults AS d
-    CROSS JOIN LATERAL generate_series(
-        d.default_interpreted_instant - INTERVAL '2 hours',
-        d.default_interpreted_instant + INTERVAL '2 hours',
-        INTERVAL '15 minutes'
-    ) AS candidate_instant
-    WHERE candidate_instant AT TIME ZONE d.zone_name = d.local_time
+  SELECT
+    d.case_id, candidate_instant
+  FROM
+    defaults AS d
+    CROSS JOIN LATERAL generate_series(d.default_interpreted_instant - INTERVAL '2 hours', d.default_interpreted_instant + INTERVAL '2 hours', INTERVAL '15 minutes') AS candidate_instant
+  WHERE
+    candidate_instant AT TIME ZONE d.zone_name = d.local_time
 ),
 classified AS (
-    SELECT
-        d.case_id,
-        d.local_time,
-        d.zone_name,
-        d.default_interpreted_instant,
-        COUNT(ci.candidate_instant) AS matching_instants,
-        array_agg(ci.candidate_instant ORDER BY ci.candidate_instant)
-            FILTER (WHERE ci.candidate_instant IS NOT NULL)
-            AS candidate_instants
-    FROM defaults AS d
-    LEFT JOIN candidate_instants AS ci
-      ON ci.case_id = d.case_id
-    GROUP BY
-        d.case_id,
-        d.local_time,
-        d.zone_name,
-        d.default_interpreted_instant
+  SELECT
+    d.case_id,
+    d.local_time,
+    d.zone_name,
+    d.default_interpreted_instant,
+    COUNT(ci.candidate_instant) AS matching_instants,
+    array_agg(ci.candidate_instant ORDER BY ci.candidate_instant) FILTER (WHERE ci.candidate_instant IS NOT NULL) AS candidate_instants
+  FROM
+    defaults AS d
+    LEFT JOIN candidate_instants AS ci ON ci.case_id = d.case_id
+  GROUP BY
+    d.case_id,
+    d.local_time,
+    d.zone_name,
+    d.default_interpreted_instant
 )
 SELECT
-    c.case_id,
-    c.local_time,
-    c.zone_name,
-    CASE
-        WHEN c.matching_instants = 0 THEN 'nonexistent'
-        WHEN c.matching_instants > 1 THEN 'ambiguous'
-        ELSE 'ordinary'
-    END AS civil_time_status,
-    c.matching_instants,
-    c.candidate_instants,
-    c.default_interpreted_instant,
-    CASE
-        WHEN c.matching_instants = 0
-        THEN 'reject or require an explicit business-approved shift'
-        WHEN c.matching_instants > 1
-        THEN 'require the intended UTC offset or selected candidate instant'
-        ELSE 'accept the sole round-trip candidate'
-    END AS resolution_policy
-FROM classified AS c
-ORDER BY c.case_id;
-
+  c.case_id,
+  c.local_time,
+  c.zone_name,
+  CASE WHEN c.matching_instants = 0 THEN
+    'nonexistent'
+  WHEN c.matching_instants > 1 THEN
+    'ambiguous'
+  ELSE
+    'ordinary'
+  END AS civil_time_status,
+  c.matching_instants,
+  c.candidate_instants,
+  c.default_interpreted_instant,
+  CASE WHEN c.matching_instants = 0 THEN
+    'reject or require an explicit business-approved shift'
+  WHEN c.matching_instants > 1 THEN
+    'require the intended UTC offset or selected candidate instant'
+  ELSE
+    'accept the sole round-trip candidate'
+  END AS resolution_policy
+FROM
+  classified AS c
+ORDER BY
+  c.case_id;
 DO $dst_fixture_invariant$
 DECLARE
     nonexistent_count bigint;
@@ -887,51 +684,33 @@ BEGIN
     END IF;
 END
 $dst_fixture_invariant$;
-
 -- Exercise 8: keep all three clocks and derive a documented watermark from
 -- event time; data beyond it needs a correction/retraction policy.
 CREATE TABLE pro_temporal_lab.timed_events (
-    event_key text PRIMARY KEY,
-    event_at timestamptz NOT NULL,
-    ingested_at timestamptz NOT NULL,
-    processed_at timestamptz NOT NULL
+  event_key text PRIMARY KEY,
+  event_at timestamptz NOT NULL,
+  ingested_at timestamptz NOT NULL,
+  processed_at timestamptz NOT NULL
 );
-
 INSERT INTO pro_temporal_lab.timed_events
 VALUES
-    (
-        'EV-1',
-        TIMESTAMPTZ '2026-01-01 10:00+00',
-        TIMESTAMPTZ '2026-01-01 10:02+00',
-        TIMESTAMPTZ '2026-01-01 10:03+00'
-    ),
-    (
-        'EV-LATE',
-        TIMESTAMPTZ '2026-01-01 09:30+00',
-        TIMESTAMPTZ '2026-01-01 11:00+00',
-        TIMESTAMPTZ '2026-01-01 11:01+00'
-    );
-
+  ('EV-1', TIMESTAMPTZ '2026-01-01 10:00+00', TIMESTAMPTZ '2026-01-01 10:02+00', TIMESTAMPTZ '2026-01-01 10:03+00'),
+  ('EV-LATE', TIMESTAMPTZ '2026-01-01 09:30+00', TIMESTAMPTZ '2026-01-01 11:00+00', TIMESTAMPTZ '2026-01-01 11:01+00');
 SELECT
-    COUNT(*) AS event_count,
-    max(e.event_at) AS maximum_event_time,
-    max(e.event_at) - INTERVAL '15 minutes' AS example_watermark,
-    max(e.ingested_at - e.event_at) AS maximum_arrival_delay,
-    max(e.processed_at - e.ingested_at) AS maximum_processing_delay,
-    COUNT(*) FILTER (
-        WHERE e.event_at
-              < (
-                  SELECT max(w.event_at) - INTERVAL '15 minutes'
-                  FROM pro_temporal_lab.timed_events AS w
-              )
-    ) AS events_behind_watermark,
-    'publish a corrected aggregate with stable window/version identity'
-        AS late_data_correction_policy
-FROM pro_temporal_lab.timed_events AS e;
-
--- Exercise 9: Type-2 dimension join uses business key plus half-open effective
--- containment and asserts at most one match.
-CREATE TABLE pro_temporal_lab.customer_dimension (
+  COUNT(*) AS event_count,
+  max(e.event_at) AS maximum_event_time,
+  max(e.event_at) - INTERVAL '15 minutes' AS example_watermark,
+  max(e.ingested_at - e.event_at) AS maximum_arrival_delay,
+  max(e.processed_at - e.ingested_at) AS maximum_processing_delay,
+  COUNT(*) FILTER (WHERE e.event_at < (
+    SELECT
+      max(w.event_at) - INTERVAL '15 minutes' FROM pro_temporal_lab.timed_events AS w)) AS events_behind_watermark,
+  'publish a corrected aggregate with stable window/version identity' AS late_data_correction_policy
+FROM
+  pro_temporal_lab.timed_events AS e;
+  -- Exercise 9: Type-2 dimension join uses business key plus half-open effective
+  -- containment and asserts at most one match.
+  CREATE TABLE pro_temporal_lab.customer_dimension (
     customer_version_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     customer_key text NOT NULL,
     effective_period daterange NOT NULL,
@@ -942,72 +721,47 @@ CREATE TABLE pro_temporal_lab.customer_dimension (
     CHECK (NOT isempty(effective_period)),
     CHECK (is_current = upper_inf(effective_period))
 );
-
-INSERT INTO pro_temporal_lab.customer_dimension (
-    customer_key,
-    effective_period,
-    segment,
-    is_current,
-    correction_reason,
-    recorded_at
-)
+INSERT INTO pro_temporal_lab.customer_dimension (customer_key, effective_period, segment, is_current, correction_reason, recorded_at)
 VALUES
-    (
-        'CUS-1',
-        daterange(DATE '2026-01-01', DATE '2026-02-01', '[)'),
-        'starter',
-        false,
-        'initial classification',
-        TIMESTAMPTZ '2026-01-01 00:00+00'
-    ),
-    (
-        'CUS-1',
-        daterange(DATE '2026-02-01', NULL, '[)'),
-        'established',
-        true,
-        'scheduled segment transition',
-        TIMESTAMPTZ '2026-01-20 00:00+00'
-    );
-
+  ('CUS-1', daterange(DATE '2026-01-01', DATE '2026-02-01', '[)'), 'starter', false, 'initial classification', TIMESTAMPTZ '2026-01-01 00:00+00'),
+  ('CUS-1', daterange(DATE '2026-02-01', NULL, '[)'), 'established', true, 'scheduled segment transition', TIMESTAMPTZ '2026-01-20 00:00+00');
 CREATE TABLE pro_temporal_lab.order_facts (
-    order_key text PRIMARY KEY,
-    customer_key text NOT NULL,
-    ordered_on date NOT NULL
+  order_key text PRIMARY KEY,
+  customer_key text NOT NULL,
+  ordered_on date NOT NULL
 );
-
 INSERT INTO pro_temporal_lab.order_facts
 VALUES
-    ('ORD-A', 'CUS-1', DATE '2026-01-31'),
-    ('ORD-B', 'CUS-1', DATE '2026-02-01');
-
+  ('ORD-A', 'CUS-1', DATE '2026-01-31'),
+  ('ORD-B', 'CUS-1', DATE '2026-02-01');
 CREATE VIEW pro_temporal_lab.order_dimension_resolution AS
 SELECT
-    order_fact.order_key,
-    order_fact.customer_key,
-    order_fact.ordered_on,
-    d.customer_version_id,
-    d.segment,
-    d.effective_period,
-    d.is_current,
-    d.correction_reason,
-    d.recorded_at
-FROM pro_temporal_lab.order_facts AS order_fact
-LEFT JOIN pro_temporal_lab.customer_dimension AS d
-  ON d.customer_key = order_fact.customer_key
- AND d.effective_period @> order_fact.ordered_on;
-
-SELECT
-    resolution.order_key,
-    resolution.ordered_on,
-    resolution.customer_version_id,
-    resolution.segment,
-    resolution.effective_period,
-    resolution.is_current,
-    resolution.correction_reason
-FROM pro_temporal_lab.order_dimension_resolution AS resolution
-ORDER BY resolution.order_key;
-
-DO $type_2_invariant$
+  order_fact.order_key,
+  order_fact.customer_key,
+  order_fact.ordered_on,
+  d.customer_version_id,
+  d.segment,
+  d.effective_period,
+  d.is_current,
+  d.correction_reason,
+  d.recorded_at
+FROM
+  pro_temporal_lab.order_facts AS order_fact
+  LEFT JOIN pro_temporal_lab.customer_dimension AS d ON d.customer_key = order_fact.customer_key
+    AND d.effective_period @> order_fact.ordered_on;
+    SELECT
+      resolution.order_key,
+      resolution.ordered_on,
+      resolution.customer_version_id,
+      resolution.segment,
+      resolution.effective_period,
+      resolution.is_current,
+      resolution.correction_reason
+    FROM
+      pro_temporal_lab.order_dimension_resolution AS resolution
+    ORDER BY
+      resolution.order_key;
+      DO $type_2_invariant$
 BEGIN
     IF EXISTS (
         SELECT order_fact.order_key
@@ -1032,39 +786,25 @@ BEGIN
     END IF;
 END
 $type_2_invariant$;
-
--- The negative control deliberately adds an overlapping version, proves the
--- diagnostic detects ORD-B, and then rolls back only that injected corruption.
-SAVEPOINT before_type_2_overlap;
-INSERT INTO pro_temporal_lab.customer_dimension (
-    customer_key,
-    effective_period,
-    segment,
-    is_current,
-    correction_reason,
-    recorded_at
-)
-VALUES (
-    'CUS-1',
-    daterange(DATE '2026-01-15', DATE '2026-02-15', '[)'),
-    'overlap-negative-control',
-    false,
-    'deliberate overlap for invariant test',
-    TIMESTAMPTZ '2026-01-25 00:00+00'
-);
-
-SELECT
-    order_fact.order_key,
-    COUNT(d.customer_version_id) AS matching_versions
-FROM pro_temporal_lab.order_facts AS order_fact
-LEFT JOIN pro_temporal_lab.customer_dimension AS d
-  ON d.customer_key = order_fact.customer_key
- AND d.effective_period @> order_fact.ordered_on
-GROUP BY order_fact.order_key
-HAVING COUNT(d.customer_version_id) > 1
-ORDER BY order_fact.order_key;
-
-DO $type_2_negative_control$
+      -- The negative control deliberately adds an overlapping version, proves the
+      -- diagnostic detects ORD-B, and then rolls back only that injected corruption.
+      SAVEPOINT before_type_2_overlap;
+    INSERT INTO pro_temporal_lab.customer_dimension (customer_key, effective_period, segment, is_current, correction_reason, recorded_at)
+      VALUES ('CUS-1', daterange(DATE '2026-01-15', DATE '2026-02-15', '[)'), 'overlap-negative-control', false, 'deliberate overlap for invariant test', TIMESTAMPTZ '2026-01-25 00:00+00');
+    SELECT
+      order_fact.order_key,
+      COUNT(d.customer_version_id) AS matching_versions
+    FROM
+      pro_temporal_lab.order_facts AS order_fact
+    LEFT JOIN pro_temporal_lab.customer_dimension AS d ON d.customer_key = order_fact.customer_key
+      AND d.effective_period @> order_fact.ordered_on
+  GROUP BY
+    order_fact.order_key
+  HAVING
+    COUNT(d.customer_version_id) > 1
+ORDER BY
+  order_fact.order_key;
+  DO $type_2_negative_control$
 BEGIN
     IF NOT EXISTS (
         SELECT order_fact.order_key
@@ -1080,112 +820,81 @@ BEGIN
 END
 $type_2_negative_control$;
 ROLLBACK TO SAVEPOINT before_type_2_overlap;
-
 -- Exercise 10: temporal parent/child containment is a cross-row rule. A safe
 -- trigger locks one business-key namespace, checks containment, and validates
 -- parent shrink/delete and concurrent changes; exclusion alone is insufficient.
-SELECT *
+SELECT
+  *
 FROM (
-    VALUES
-        (
-            1,
-            'child insert/update',
-            'advisory lock on business key, then require a containing parent',
-            'reject missing or multiply matching parent'
-        ),
-        (
-            2,
-            'parent shrink/delete',
-            'same lock namespace, then prove every child remains contained',
-            'reject the parent change or repair children first'
-        ),
-        (
-            3,
-            'bulk historical repair',
-            'stage, validate gaps/overlaps, then swap in one controlled transaction',
-            'retain old snapshot and reconciliation evidence'
-        ),
-        (
-            4,
-            'deferred validation',
-            'use only when the domain permits a bounded temporarily invalid state',
-            'block cutover until the final invariant query is empty'
-        )
-) AS temporal_integrity_plan(
-    step_number,
-    write_path,
-    concurrency_or_validation_control,
-    failure_response
-)
-ORDER BY step_number;
-
--- Exercise 11: compare each lower bound with the running maximum *prior* upper
--- bound. `upper()` is NULL for an unbounded range, so `upper_inf()` plus an
--- explicit infinity sentinel preserves that prior coverage.
-CREATE TABLE pro_temporal_lab.period_cases (
+  VALUES (1, 'child insert/update', 'advisory lock on business key, then require a containing parent', 'reject missing or multiply matching parent'),
+    (2, 'parent shrink/delete', 'same lock namespace, then prove every child remains contained', 'reject the parent change or repair children first'),
+    (3, 'bulk historical repair', 'stage, validate gaps/overlaps, then swap in one controlled transaction', 'retain old snapshot and reconciliation evidence'),
+    (4, 'deferred validation', 'use only when the domain permits a bounded temporarily invalid state', 'block cutover until the final invariant query is empty')) AS temporal_integrity_plan (step_number, write_path, concurrency_or_validation_control, failure_response)
+ORDER BY
+  step_number;
+  -- Exercise 11: compare each lower bound with the running maximum *prior* upper
+  -- bound. `upper()` is NULL for an unbounded range, so `upper_inf()` plus an
+  -- explicit infinity sentinel preserves that prior coverage.
+  CREATE TABLE pro_temporal_lab.period_cases (
     period_id integer PRIMARY KEY,
     business_key text NOT NULL,
     valid_period daterange NOT NULL
 );
-
 INSERT INTO pro_temporal_lab.period_cases
 VALUES
-    (1, 'ACCOUNT-1', daterange(DATE '2026-01-01', DATE '2026-01-10', '[)')),
-    (2, 'ACCOUNT-1', daterange(DATE '2026-01-01', DATE '2026-01-10', '[)')),
-    (3, 'ACCOUNT-1', daterange(DATE '2026-01-05', DATE '2026-01-07', '[)')),
-    (4, 'ACCOUNT-1', daterange(DATE '2026-01-10', DATE '2026-01-12', '[)')),
-    (5, 'ACCOUNT-1', daterange(DATE '2026-01-15', DATE '2026-01-18', '[)')),
-    (6, 'ACCOUNT-1', daterange(DATE '2026-01-18', NULL, '[)')),
-    (7, 'ACCOUNT-1', daterange(DATE '2026-01-20', DATE '2026-01-21', '[)')),
-    (8, 'ACCOUNT-1', 'empty'::daterange);
-
+  (1, 'ACCOUNT-1', daterange(DATE '2026-01-01', DATE '2026-01-10', '[)')),
+  (2, 'ACCOUNT-1', daterange(DATE '2026-01-01', DATE '2026-01-10', '[)')),
+  (3, 'ACCOUNT-1', daterange(DATE '2026-01-05', DATE '2026-01-07', '[)')),
+  (4, 'ACCOUNT-1', daterange(DATE '2026-01-10', DATE '2026-01-12', '[)')),
+  (5, 'ACCOUNT-1', daterange(DATE '2026-01-15', DATE '2026-01-18', '[)')),
+  (6, 'ACCOUNT-1', daterange(DATE '2026-01-18', NULL, '[)')),
+  (7, 'ACCOUNT-1', daterange(DATE '2026-01-20', DATE '2026-01-21', '[)')),
+  (8, 'ACCOUNT-1', 'empty'::daterange);
 CREATE VIEW pro_temporal_lab.period_diagnostics AS
 WITH duplicate_counts AS (
-    SELECT
-        p.*,
-        COUNT(*) OVER (
-            PARTITION BY p.business_key, p.valid_period
-        ) AS duplicate_count
-    FROM pro_temporal_lab.period_cases AS p
+  SELECT
+    p.*,
+    COUNT(*) OVER (PARTITION BY p.business_key,
+      p.valid_period) AS duplicate_count
+  FROM
+    pro_temporal_lab.period_cases AS p
 ),
 with_prior AS (
-    SELECT
-        p.*,
-        max(
-            CASE
-                WHEN NOT isempty(p.valid_period)
-                THEN COALESCE(upper(p.valid_period), 'infinity'::date)
-            END
-        ) OVER (
-            PARTITION BY p.business_key
-            ORDER BY
-                isempty(p.valid_period),
-                lower(p.valid_period),
-                COALESCE(upper(p.valid_period), 'infinity'::date),
-                p.period_id
-            ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING
-        ) AS prior_max_upper
-    FROM duplicate_counts AS p
+  SELECT
+    p.*,
+    max(
+      CASE WHEN NOT isempty(p.valid_period) THEN
+        COALESCE(upper(p.valid_period), 'infinity'::date)
+      END) OVER (PARTITION BY p.business_key ORDER BY isempty(p.valid_period),
+      lower(p.valid_period),
+      COALESCE(upper(p.valid_period), 'infinity'::date),
+      p.period_id ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING) AS prior_max_upper
+  FROM
+    duplicate_counts AS p
 )
 SELECT
-    w.period_id,
-    w.business_key,
-    w.valid_period,
-    upper_inf(w.valid_period) AS has_unbounded_upper,
-    w.duplicate_count,
-    w.prior_max_upper,
-    CASE
-        WHEN isempty(w.valid_period) THEN 'empty'
-        WHEN w.duplicate_count > 1 THEN 'duplicate'
-        WHEN w.prior_max_upper IS NULL THEN 'first'
-        WHEN lower(w.valid_period) < w.prior_max_upper THEN 'overlap'
-        WHEN lower(w.valid_period) = w.prior_max_upper THEN 'adjacent'
-        ELSE 'gap'
-    END AS relationship_to_prior_coverage
-FROM with_prior AS w
-;
-
-SELECT
+  w.period_id,
+  w.business_key,
+  w.valid_period,
+  upper_inf(w.valid_period) AS has_unbounded_upper,
+  w.duplicate_count,
+  w.prior_max_upper,
+  CASE WHEN isempty(w.valid_period) THEN
+    'empty'
+  WHEN w.duplicate_count > 1 THEN
+    'duplicate'
+  WHEN w.prior_max_upper IS NULL THEN
+    'first'
+  WHEN lower(w.valid_period) < w.prior_max_upper THEN
+    'overlap'
+  WHEN lower(w.valid_period) = w.prior_max_upper THEN
+    'adjacent'
+  ELSE
+    'gap'
+  END AS relationship_to_prior_coverage
+FROM
+  with_prior AS w;
+  SELECT
     d.period_id,
     d.business_key,
     d.valid_period,
@@ -1193,14 +902,14 @@ SELECT
     d.duplicate_count,
     d.prior_max_upper,
     d.relationship_to_prior_coverage
-FROM pro_temporal_lab.period_diagnostics AS d
-ORDER BY
+  FROM
+    pro_temporal_lab.period_diagnostics AS d
+  ORDER BY
     isempty(d.valid_period),
     lower(d.valid_period),
     COALESCE(upper(d.valid_period), 'infinity'::date),
     d.period_id;
-
-DO $period_diagnostics_invariant$
+    DO $period_diagnostics_invariant$
 BEGIN
     IF NOT EXISTS (
         SELECT 1
@@ -1230,56 +939,19 @@ BEGIN
     END IF;
 END
 $period_diagnostics_invariant$;
-
--- Exercise 12: archive only after hold-aware inventory, detach/move review,
--- count/checksum/dependency verification, encrypted access-controlled storage,
--- restore proof, propagated hold state, and immutable deletion evidence.
-SELECT *
-FROM (
-    VALUES
-        (
-            1,
-            'inventory',
-            'partition bounds, cross-partition keys, indexes, dependencies, holds',
-            'signed candidate manifest'
-        ),
-        (
-            2,
-            'hold gate',
-            'exclude any partition or row covered by active legal hold',
-            'empty unresolved-hold report'
-        ),
-        (
-            3,
-            'detach',
-            'quiesce or lock the write path and detach in a controlled window',
-            'catalog evidence and rollback point'
-        ),
-        (
-            4,
-            'archive',
-            'encrypt, checksum, restrict access, and record custody/location',
-            'artifact identity and checksum'
-        ),
-        (
-            5,
-            'reconcile',
-            'compare schema, counts, keys, aggregates, and checksums',
-            'source/archive reconciliation report'
-        ),
-        (
-            6,
-            'restore test',
-            'restore the artifact into an isolated target and run smoke queries',
-            'timestamped successful restore evidence'
-        ),
-        (
-            7,
-            'source deletion',
-            'delete only after approval, hold propagation, and restore proof',
-            'immutable deletion evidence or explicit retention decision'
-        )
-) AS archive_plan(step_number, phase, required_control, required_evidence)
-ORDER BY step_number;
-
+    -- Exercise 12: archive only after hold-aware inventory, detach/move review,
+    -- count/checksum/dependency verification, encrypted access-controlled storage,
+    -- restore proof, propagated hold state, and immutable deletion evidence.
+    SELECT
+      *
+    FROM (
+      VALUES (1, 'inventory', 'partition bounds, cross-partition keys, indexes, dependencies, holds', 'signed candidate manifest'),
+        (2, 'hold gate', 'exclude any partition or row covered by active legal hold', 'empty unresolved-hold report'),
+        (3, 'detach', 'quiesce or lock the write path and detach in a controlled window', 'catalog evidence and rollback point'),
+        (4, 'archive', 'encrypt, checksum, restrict access, and record custody/location', 'artifact identity and checksum'),
+        (5, 'reconcile', 'compare schema, counts, keys, aggregates, and checksums', 'source/archive reconciliation report'),
+        (6, 'restore test', 'restore the artifact into an isolated target and run smoke queries', 'timestamped successful restore evidence'),
+        (7, 'source deletion', 'delete only after approval, hold propagation, and restore proof', 'immutable deletion evidence or explicit retention decision')) AS archive_plan (step_number, phase, required_control, required_evidence)
+  ORDER BY
+    step_number;
 ROLLBACK;

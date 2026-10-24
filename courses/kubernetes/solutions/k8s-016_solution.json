@@ -39,9 +39,7 @@
               "allowPrivilegeEscalation": false,
               "readOnlyRootFilesystem": true,
               "capabilities": {
-                "drop": [
-                  "ALL"
-                ]
+                "drop": ["ALL"]
               }
             },
             "name": "read",
@@ -86,9 +84,7 @@
               "allowPrivilegeEscalation": false,
               "readOnlyRootFilesystem": true,
               "capabilities": {
-                "drop": [
-                  "ALL"
-                ]
+                "drop": ["ALL"]
               }
             },
             "name": "prepare",

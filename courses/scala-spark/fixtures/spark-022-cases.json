@@ -50,10 +50,7 @@
     "keys": 1000,
     "per_key": 20,
     "input_partitions": 4,
-    "reduce_partitions": [
-      2,
-      5
-    ],
+    "reduce_partitions": [2, 5],
     "metrics_scope": "Actual executed classic Spark4.0.1 Exchange metrics;dataSize is serialized exchange data,not claimed remote network bytes."
   }
 }

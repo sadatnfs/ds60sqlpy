@@ -18,32 +18,47 @@
 --
 BEGIN;
 SET search_path TO training, public;
-
 -- Study contract
 -- Focus: Combine CTE grain control with window comparisons so time-series and ranking logic remain readable and reconcilable.
 -- Assumptions: Monthly reporting uses UTC. Window order always includes chronological keys; revenue uses exact numeric and is rounded only in final output.
 -- Pitfall: Applying windows before aggregation compares detail rows, while filtering too early can remove the history a lag or moving frame needs.
 -- Predict row grain and NULL/order behavior before executing each example.
-
 WITH line AS (
-  SELECT o.order_id, o.customer_id, o.order_date,
-         SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS order_total
-  FROM orders o
-  JOIN order_items oi ON oi.order_id = o.order_id
-  GROUP BY o.order_id, o.customer_id, o.order_date
-), ranked AS (
-  SELECT line.*,
-         RANK() OVER (
-           PARTITION BY customer_id
-           ORDER BY order_total DESC
-         ) AS rnk
-  FROM line
+  SELECT
+    o.order_id,
+    o.customer_id,
+    o.order_date,
+    SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS order_total
+  FROM
+    orders o
+    JOIN order_items oi ON oi.order_id = o.order_id
+  GROUP BY
+    o.order_id,
+    o.customer_id,
+    o.order_date
+),
+ranked AS (
+  SELECT
+    line.*,
+    RANK() OVER (PARTITION BY customer_id ORDER BY order_total DESC) AS rnk
+  FROM
+    line
 )
-SELECT customer_id, order_id, order_date, order_total, rnk
-FROM ranked
-WHERE rnk <= 3
-ORDER BY customer_id, rnk, order_total DESC, order_id;
-
+SELECT
+  customer_id,
+  order_id,
+  order_date,
+  order_total,
+  rnk
+FROM
+  ranked
+WHERE
+  rnk <= 3
+ORDER BY
+  customer_id,
+  rnk,
+  order_total DESC,
+  order_id;
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.
@@ -83,5 +98,4 @@ ORDER BY customer_id, rnk, order_total DESC, order_id;
 --    Expected result/shape: For sql-26 Exercise 6, expected output: One row with zero difference. The final columns are `final_cumulative`, `independent_total`, and `difference`.
 --    Verify: For sql-26 Exercise 6, independently aggregate `orders` by `cumulative_revenue`; require one output row for every distinct `cumulative_revenue` tuple and compare `independent_total` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `independent_total` for the existing `cumulative_revenue` tuple and verify the new tuple appears exactly once.
 --    Hint ladder, rung 1: For sql-26 Exercise 6, run `monthly`, `running`, and `final` one at a time. Record each CTE's row count and `cumulative_revenue` uniqueness before the next stage uses it.
-
 ROLLBACK;

@@ -1,4 +1,10 @@
-fn parse_quantity(text: &str) -> Result<i32, &'static str> { let value: i32 = text.parse().map_err(|_| "not an integer")?; if value < 0 { return Err("negative quantity"); } Ok(value) }
+fn parse_quantity(text: &str) -> Result<i32, &'static str> {
+    let value: i32 = text.parse().map_err(|_| "not an integer")?;
+    if value < 0 {
+        return Err("negative quantity");
+    }
+    Ok(value)
+}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
@@ -9,7 +15,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     {
         let inputs = ["2", "bad", "3"];
-        let accepted: Vec<_> = inputs.iter().filter_map(|text| parse_quantity(text).ok()).collect();
+        let accepted: Vec<_> = inputs
+            .iter()
+            .filter_map(|text| parse_quantity(text).ok())
+            .collect();
         assert_eq!(accepted, vec![2, 3]);
         assert_eq!(inputs.len() - accepted.len(), 1);
     }

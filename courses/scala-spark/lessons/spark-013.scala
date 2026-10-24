@@ -8,29 +8,38 @@ object Main {
   def summarize(paid: org.apache.spark.sql.DataFrame): org.apache.spark.sql.DataFrame =
     throw new UnsupportedOperationException("Complete team summary")
   def main(args: Array[String]): Unit = {
-    val spark = SparkSession.builder().appName("ds60-spark-013-attempt")
+    val spark = SparkSession
+      .builder()
+      .appName("ds60-spark-013-attempt")
       .master("local[2]")
       .config("spark.ui.enabled", "false")
       .config("spark.driver.host", "127.0.0.1")
       .config("spark.driver.bindAddress", "127.0.0.1")
       .config("spark.sql.shuffle.partitions", "2")
-      .config("spark.sql.session.timeZone", "UTC").getOrCreate()
+      .config("spark.sql.session.timeZone", "UTC")
+      .getOrCreate()
     try {
       require(spark.sparkContext.master == "local[2]")
-      val schema = StructType(Seq(
-        StructField("event_id", LongType, false),
-        StructField("team", StringType, true),
-        StructField("amount_cents", LongType, true),
-        StructField("status", StringType, false)
-      ))
+      val schema = StructType(
+        Seq(
+          StructField("event_id", LongType, false),
+          StructField("team", StringType, true),
+          StructField("amount_cents", LongType, true),
+          StructField("status", StringType, false)
+        )
+      )
       val rows = Seq(
-        Row(1L, "A", 100L, "paid"), Row(2L, "A", null, "paid"),
-        Row(3L, "B", 0L, "paid"), Row(4L, null, 50L, "paid"),
-        Row(5L, "B", 150L, "void"), Row(6L, "A", 100L, "paid"),
+        Row(1L, "A", 100L, "paid"),
+        Row(2L, "A", null, "paid"),
+        Row(3L, "B", 0L, "paid"),
+        Row(4L, null, 50L, "paid"),
+        Row(5L, "B", 150L, "void"),
+        Row(6L, "A", 100L, "paid"),
         Row(7L, "C", null, "paid")
       )
       val raw = spark.createDataFrame(
-        spark.sparkContext.parallelize(rows, 2), schema
+        spark.sparkContext.parallelize(rows, 2),
+        schema
       )
       println(raw.schema.simpleString)
       // Exercise 1: retain event identity and filter status.

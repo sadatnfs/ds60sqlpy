@@ -2,11 +2,9 @@ import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
-
 object Main {
 
-
-  def canonical(frame: DataFrame): Seq[(Long,Long,Long)] =
+  def canonical(frame: DataFrame): Seq[(Long, Long, Long)] =
     throw new UnsupportedOperationException("Complete canonical")
 
   def keyedLayout(facts: DataFrame): DataFrame =
@@ -21,22 +19,29 @@ object Main {
   def localOrder(frame: DataFrame): DataFrame =
     throw new UnsupportedOperationException("Complete localOrder")
 
-  def preview(frame: DataFrame): Seq[(Long,Long,Long)] =
+  def preview(frame: DataFrame): Seq[(Long, Long, Long)] =
     throw new UnsupportedOperationException("Complete preview")
 
   def main(args: Array[String]): Unit = {
-    val spark = SparkSession.builder().appName("ds60-spark-020").master("local[2]")
-      .config("spark.ui.enabled","false")
-      .config("spark.driver.host","127.0.0.1")
-      .config("spark.driver.bindAddress","127.0.0.1")
-      .config("spark.sql.shuffle.partitions","2")
-      .config("spark.sql.adaptive.enabled","false")
-      .config("spark.sql.ansi.enabled","true")
-      .config("spark.sql.session.timeZone","UTC").getOrCreate()
+    val spark = SparkSession
+      .builder()
+      .appName("ds60-spark-020")
+      .master("local[2]")
+      .config("spark.ui.enabled", "false")
+      .config("spark.driver.host", "127.0.0.1")
+      .config("spark.driver.bindAddress", "127.0.0.1")
+      .config("spark.sql.shuffle.partitions", "2")
+      .config("spark.sql.adaptive.enabled", "false")
+      .config("spark.sql.ansi.enabled", "true")
+      .config("spark.sql.session.timeZone", "UTC")
+      .getOrCreate()
     try {
       require(spark.sparkContext.master == "local[2]", "local-only course session")
       spark.sparkContext.setLogLevel("ERROR")
-      val facts = spark.range(0L,24L,1L,4).withColumn("key",col("id") % 4L).withColumn("value",col("id") * 10L)
+      val facts = spark
+        .range(0L, 24L, 1L, 4)
+        .withColumn("key", col("id") % 4L)
+        .withColumn("value", col("id") * 10L)
       assert(spark.conf.get("spark.sql.adaptive.enabled") == "false")
       locally {
         assert(facts.count() == 24L && facts.rdd.getNumPartitions == 4)

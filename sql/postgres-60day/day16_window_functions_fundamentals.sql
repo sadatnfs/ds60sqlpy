@@ -19,58 +19,68 @@
 -- OVER(), PARTITION BY, ORDER BY, frames
 BEGIN;
 SET search_path TO training, public;
-
 -- Study contract
 -- Focus: Use window functions to add partition-level context while preserving row grain, with explicit partition and ordering semantics.
 -- Assumptions: Window aggregates do not collapse rows. When order matters, use a unique tie-breaker and declare the frame in later cumulative lessons.
 -- Pitfall: Filtering a window result in the same query level is invalid; compute it in a subquery or CTE first.
 -- Predict row grain and NULL/order behavior before executing each example.
-
 -- Aggregate once, then use a window over the grouped result to calculate
 -- the grand total without a second query.
 WITH category_totals AS (
-  SELECT p.category,
-         SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS revenue
-  FROM order_items oi
-  JOIN products p ON p.product_id = oi.product_id
-  GROUP BY p.category
+  SELECT
+    p.category,
+    SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS revenue
+  FROM
+    order_items oi
+    JOIN products p ON p.product_id = oi.product_id
+  GROUP BY
+    p.category
 )
-SELECT category,
-       ROUND(revenue, 2) AS category_revenue,
-       ROUND(SUM(revenue) OVER (), 2) AS total_revenue,
-       ROUND(revenue / NULLIF(SUM(revenue) OVER (), 0), 4) AS category_share
-FROM category_totals
-ORDER BY category_revenue DESC, category;
-
+SELECT
+  category,
+  ROUND(revenue, 2) AS category_revenue,
+  ROUND(SUM(revenue) OVER (), 2) AS total_revenue,
+  ROUND(revenue / NULLIF (SUM(revenue) OVER (), 0), 4) AS category_share
+FROM
+  category_totals
+ORDER BY
+  category_revenue DESC,
+  category;
 -- Row-wise metrics without collapsing rows
-SELECT o.order_id,
-       o.customer_id,
-       o.order_date,
-       o.total_amount,
-       ROUND(AVG(o.total_amount) OVER (PARTITION BY o.customer_id),2) AS avg_customer_order,
-       COUNT(*) OVER (PARTITION BY o.customer_id) AS orders_per_customer
-FROM orders o
-ORDER BY o.customer_id, o.order_date, o.order_id
+SELECT
+  o.order_id,
+  o.customer_id,
+  o.order_date,
+  o.total_amount,
+  ROUND(AVG(o.total_amount) OVER (PARTITION BY o.customer_id), 2) AS avg_customer_order,
+  COUNT(*) OVER (PARTITION BY o.customer_id) AS orders_per_customer
+FROM
+  orders o
+ORDER BY
+  o.customer_id,
+  o.order_date,
+  o.order_id
 LIMIT 100;
-
 -- Frame example. ROWS counts observed rows, not necessarily seven consecutive
 -- calendar days; a dense date spine is required when empty dates matter.
 WITH daily AS (
-  SELECT (o.order_date AT TIME ZONE 'UTC')::date AS d_utc,
-         SUM(o.total_amount) AS revenue
-  FROM orders o
-  GROUP BY d_utc
+  SELECT
+    (o.order_date AT TIME ZONE 'UTC')::date AS d_utc,
+    SUM(o.total_amount) AS revenue
+  FROM
+    orders o
+  GROUP BY
+    d_utc
 )
-SELECT d_utc,
-       revenue,
-       SUM(revenue) OVER (
-         ORDER BY d_utc
-         ROWS BETWEEN 6 PRECEDING AND CURRENT ROW
-       ) AS rolling_7_observed_days
-FROM daily
-ORDER BY d_utc DESC
+SELECT
+  d_utc,
+  revenue,
+  SUM(revenue) OVER (ORDER BY d_utc ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) AS rolling_7_observed_days
+FROM
+  daily
+ORDER BY
+  d_utc DESC
 LIMIT 30;
-
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.
@@ -110,5 +120,4 @@ LIMIT 30;
 --    Expected result/shape: For sql-16 Exercise 6, expected output: One row per order with customer and country totals. The final columns are `order_id`, `customer_id`, `country`, `customer_order_count`, `customer_revenue`, and `country_revenue`. The final order is `c.country, o.customer_id, o.order_date, o.order_id`.
 --    Verify: For sql-16 Exercise 6, choose one complete partition from `orders`, and `customers`; hand-calculate its first, middle, and final window values for `customer_order_count`, `customer_revenue`, and `country_revenue`, then verify output keys remain `order_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 --    Hint ladder, rung 1: For sql-16 Exercise 6, start with the first relation in `orders`, and `customers`; after each join, record total rows and distinct `order_id` so the exact fanout or loss is visible.
-
 ROLLBACK;

@@ -2,13 +2,7 @@
 // One workspace with separate legacy, worker and browser observation histories.
 const $ = (id) => document.getElementById(id);
 const phases = ["read", "predict", "attempt", "compare", "explain"];
-const finished = new Set([
-  "succeeded",
-  "failed",
-  "cancelled",
-  "timed_out",
-  "blocked",
-]);
+const finished = new Set(["succeeded", "failed", "cancelled", "timed_out", "blocked"]);
 const themes = {
   python: ["#795405", "#fff3cd", "#f2ce79", "#3d3421", "Py"],
   sql: ["#2458a6", "#e9f0ff", "#a9caff", "#22334c", "SQL"],
@@ -24,13 +18,7 @@ const themes = {
   docker: ["#0063a8", "#e7f5ff", "#9bd5ff", "#213b50", "Dc"],
   "javascript-typescript": ["#735700", "#fff4ca", "#f1d778", "#3d3522", "JS"],
   "scala-spark": ["#9a3043", "#ffeaf0", "#ffb1c0", "#482b35", "Sp"],
-  "deep-learning-tensorflow": [
-    "#934412",
-    "#fff0df",
-    "#ffc18a",
-    "#433327",
-    "TF",
-  ],
+  "deep-learning-tensorflow": ["#934412", "#fff0df", "#ffc18a", "#433327", "TF"],
   "deep-learning-pytorch": ["#a02d43", "#ffe9ee", "#ffafc0", "#482a34", "PT"],
   "llm-theory": ["#5542a5", "#eeeaff", "#c9bdff", "#322c4b", "Lm"],
   "llm-applied": ["#006b60", "#def6ee", "#8adfc9", "#223e38", "AI"],
@@ -71,8 +59,10 @@ let hintNumber = 1,
   catalogSearchTimer = null;
 const draftRevisions = new Map(),
   savedRevisions = new Map();
-const browserPreview = typeof globalThis.DS60BrowserPreview === "function"
-  ? new globalThis.DS60BrowserPreview($("browser-preview")) : null;
+const browserPreview =
+  typeof globalThis.DS60BrowserPreview === "function"
+    ? new globalThis.DS60BrowserPreview($("browser-preview"))
+    : null;
 let browserPreviewContext = null;
 let browserFullscreenPending = false,
   browserFullscreenSequence = 0,
@@ -81,25 +71,31 @@ function browserPreviewIsFullscreen() {
   return document.fullscreenElement === $("browser-preview-panel");
 }
 function updateBrowserFullscreenControls() {
-  const panel = $("browser-preview-panel"), button = $("browser-fullscreen"),
+  const panel = $("browser-preview-panel"),
+    button = $("browser-fullscreen"),
     fullscreen = browserPreviewIsFullscreen(),
-    supported = typeof panel.requestFullscreen === "function" &&
-      typeof document.exitFullscreen === "function" && document.fullscreenEnabled !== false;
+    supported =
+      typeof panel.requestFullscreen === "function" &&
+      typeof document.exitFullscreen === "function" &&
+      document.fullscreenEnabled !== false;
   button.hidden = !supported && !fullscreen;
   button.disabled = browserFullscreenPending || (!fullscreen && !browserPreview?.active);
   button.textContent = fullscreen ? "Exit fullscreen" : "Fullscreen preview";
   button.setAttribute("aria-pressed", String(fullscreen));
-  button.setAttribute("aria-label", fullscreen ? "Exit fullscreen visualization preview" :
-    "Show visualization preview fullscreen");
+  button.setAttribute(
+    "aria-label",
+    fullscreen ? "Exit fullscreen visualization preview" : "Show visualization preview fullscreen",
+  );
 }
 async function exitBrowserPreviewFullscreen() {
   if (!browserPreviewIsFullscreen()) return;
-  try { await document.exitFullscreen(); }
-  catch (_) {
+  try {
+    await document.exitFullscreen();
+  } catch (_) {
     if (browserPreviewIsFullscreen())
-      $("browser-fullscreen-status").textContent = "Could not leave fullscreen. Use the Exit fullscreen control or press Escape.";
-  }
-  finally {
+      $("browser-fullscreen-status").textContent =
+        "Could not leave fullscreen. Use the Exit fullscreen control or press Escape.";
+  } finally {
     if (!browserPreview?.active && !browserPreviewIsFullscreen())
       $("browser-preview-panel").hidden = true;
     updateBrowserFullscreenControls();
@@ -107,10 +103,17 @@ async function exitBrowserPreviewFullscreen() {
 }
 async function toggleBrowserFullscreen() {
   if (browserFullscreenPending) return;
-  const panel = $("browser-preview-panel"), fullscreen = browserPreviewIsFullscreen();
-  if (!fullscreen && (panel.hidden || !browserPreview?.active ||
-      typeof panel.requestFullscreen !== "function" || typeof document.exitFullscreen !== "function" ||
-      document.fullscreenEnabled === false)) return;
+  const panel = $("browser-preview-panel"),
+    fullscreen = browserPreviewIsFullscreen();
+  if (
+    !fullscreen &&
+    (panel.hidden ||
+      !browserPreview?.active ||
+      typeof panel.requestFullscreen !== "function" ||
+      typeof document.exitFullscreen !== "function" ||
+      document.fullscreenEnabled === false)
+  )
+    return;
   const sequence = ++browserFullscreenSequence;
   browserFullscreenPending = true;
   $("browser-fullscreen-status").textContent = "";
@@ -124,11 +127,13 @@ async function toggleBrowserFullscreen() {
       if (sequence !== browserFullscreenSequence || !browserPreview?.active || panel.hidden)
         await exitBrowserPreviewFullscreen();
       else if (browserPreviewIsFullscreen())
-        $("browser-fullscreen-status").textContent = "Fullscreen preview. Press Escape or choose Exit fullscreen to return.";
+        $("browser-fullscreen-status").textContent =
+          "Fullscreen preview. Press Escape or choose Exit fullscreen to return.";
     }
   } catch (_) {
     if (sequence === browserFullscreenSequence)
-      $("browser-fullscreen-status").textContent = "Fullscreen is unavailable in this browser or window. Your preview and saved work are unchanged.";
+      $("browser-fullscreen-status").textContent =
+        "Fullscreen is unavailable in this browser or window. Your preview and saved work are unchanged.";
   } finally {
     browserFullscreenPending = false;
     updateBrowserFullscreenControls();
@@ -140,7 +145,8 @@ function syncBrowserFullscreen() {
   if (!fullscreen) {
     if (!browserPreview?.active) $("browser-preview-panel").hidden = true;
     if (browserWasFullscreen && browserPreview?.active && !$("browser-preview-panel").hidden) {
-      $("browser-fullscreen-status").textContent = "Returned to the lesson. The same visualization is still running.";
+      $("browser-fullscreen-status").textContent =
+        "Returned to the lesson. The same visualization is still running.";
       $("browser-fullscreen").focus();
     }
   }
@@ -161,8 +167,12 @@ function showBrowserObservation(receipt) {
   if (!current || current.id !== receipt.lesson_id) return;
   resetResult();
   displayedJob = receipt;
-  $("job-status").textContent = "Browser observation: " + receipt.status +
-    " · " + Number(receipt.elapsed_seconds).toFixed(2) + " seconds";
+  $("job-status").textContent =
+    "Browser observation: " +
+    receipt.status +
+    " · " +
+    Number(receipt.elapsed_seconds).toFixed(2) +
+    " seconds";
   $("output").textContent = receipt.output || "(No console output.)";
   $("run-storage-status").textContent =
     "Saved browser observation. This is client-reported output, not a server verifier result. " +
@@ -171,28 +181,36 @@ function showBrowserObservation(receipt) {
   const submitted = highlightedSourceBlock(receipt.source);
   $("receipt-source").replaceChildren(submitted.pre);
   const revision = resultRevision;
-  classroom("classroom-highlight", {source:receipt.source,language:"javascript"})
+  classroom("classroom-highlight", { source: receipt.source, language: "javascript" })
     .then((data) => {
       if (resultRevision === revision && current?.id === receipt.lesson_id)
         submitted.code.innerHTML = data.html;
-    }).catch(() => {});
-  $("checks").append(node("li", "Browser observations do not provide independent semantic verification."));
+    })
+    .catch(() => {});
+  $("checks").append(
+    node("li", "Browser observations do not provide independent semantic verification."),
+  );
 }
 async function saveBrowserObservation(context, observation, show = true) {
   const result = await api("module-browser-record", {
-    lesson_id:context.id,
-    fields:{source:observation.source,output:observation.output,status:observation.status,
-      elapsed_seconds:Math.min(3600,Math.max(0,observation.elapsed_seconds || 0))},
+    lesson_id: context.id,
+    fields: {
+      source: observation.source,
+      output: observation.output,
+      status: observation.status,
+      elapsed_seconds: Math.min(3600, Math.max(0, observation.elapsed_seconds || 0)),
+    },
   });
   if (workspaceKey() === context.key) {
     if (show) showBrowserObservation(result.receipt);
-    const latest = await api("module-browser-history", {lesson_id:context.id});
+    const latest = await api("module-browser-history", { lesson_id: context.id });
     if (workspaceKey() === context.key) renderHistory(latest.history);
   }
   return result.receipt;
 }
 async function runBrowserPreview(context, intent) {
-  if (!browserPreview) throw new Error("The browser preview component did not load. Reload the classroom.");
+  if (!browserPreview)
+    throw new Error("The browser preview component did not load. Reload the classroom.");
   stopBrowserPreview("Replaced by another preview.");
   resetResult();
   browserPreviewContext = context;
@@ -204,7 +222,8 @@ async function runBrowserPreview(context, intent) {
     $("output").textContent = snapshot.output || "(No console output.)";
     if (type === "interaction-error") {
       $("job-status").textContent = "An interaction raised a browser error after the initial run.";
-      $("run-storage-status").textContent = "Inspect the console, then save the latest observation if useful. Earlier receipts stay unchanged.";
+      $("run-storage-status").textContent =
+        "Inspect the console, then save the latest observation if useful. Earlier receipts stay unchanged.";
     }
   });
   updateBrowserFullscreenControls();
@@ -215,10 +234,13 @@ async function runBrowserPreview(context, intent) {
     $("output").textContent = observation.output || "(No console output.)";
     $("browser-observation-save").disabled = !browserPreview.active;
   }
-  try { await saveBrowserObservation(context, observation); }
-  catch (error) {
+  try {
+    await saveBrowserObservation(context, observation);
+  } catch (error) {
     if (workspaceKey() === context.key)
-      $("run-storage-status").textContent = "The browser result could not be saved. Its current output is retained; copy it before leaving. " + error.message;
+      $("run-storage-status").textContent =
+        "The browser result could not be saved. Its current output is retained; copy it before leaving. " +
+        error.message;
   }
 }
 
@@ -234,9 +256,7 @@ function status(text, error = false) {
 }
 function pref(key, fallback = null) {
   try {
-    return (
-      JSON.parse(localStorage.getItem("ds60.classroom." + key)) ?? fallback
-    );
+    return JSON.parse(localStorage.getItem("ds60.classroom." + key)) ?? fallback;
   } catch (_) {
     return fallback;
   }
@@ -250,10 +270,7 @@ function track() {
   return index?.tracks.find((item) => item.id === trackId);
 }
 function hasLessonId(record, id) {
-  return (
-    record.id === id ||
-    (record.variants || []).some((variant) => variant.id === id)
-  );
+  return record.id === id || (record.variants || []).some((variant) => variant.id === id);
 }
 function locate(id) {
   for (const subject of index?.tracks || []) {
@@ -262,15 +279,10 @@ function locate(id) {
   }
   return null;
 }
-function lesson() {
-  return locate(lessonId)?.record;
-}
 function workspaceKey(data = current) {
   return data
     ? data.id +
-        (data.engine === "legacy"
-          ? ":" + data.runner.id + ":" + (data.mode || "snippet")
-          : "")
+        (data.engine === "legacy" ? ":" + data.runner.id + ":" + (data.mode || "snippet") : "")
     : "";
 }
 function contextOf(data = current) {
@@ -310,10 +322,7 @@ function sameFields(a, b) {
 }
 function stashDraft(key, fields) {
   try {
-    localStorage.setItem(
-      "ds60.classroom.unsaved." + key,
-      JSON.stringify(fields),
-    );
+    localStorage.setItem("ds60.classroom.unsaved." + key, JSON.stringify(fields));
     return true;
   } catch (_) {
     return false;
@@ -333,10 +342,7 @@ async function request(endpoint, action, fields = {}, bounded = true) {
       signal: controller.signal,
     });
     const data = await response.json();
-    if (!response.ok)
-      throw new Error(
-        data.error || "The local classroom rejected this action.",
-      );
+    if (!response.ok) throw new Error(data.error || "The local classroom rejected this action.");
     return data;
   } catch (error) {
     if (error.name === "AbortError")
@@ -358,8 +364,7 @@ function classroom(action, fields = {}) {
   return request("classroom", action, fields);
 }
 async function saveLesson(context, fields) {
-  if (context.engine === "module")
-    return api("module-save", { lesson_id: context.id, fields });
+  if (context.engine === "module") return api("module-save", { lesson_id: context.id, fields });
   if (!context.reading)
     await lab("save-pad", {
       lesson_id: context.id,
@@ -393,16 +398,14 @@ function queueSave() {
           (draftRevisions.get(context.key) || 0) === revision &&
           sameFields(values(), fields);
         if (sameDraft) {
-          $("save-state").textContent =
-            "Saved in your local learning workspace.";
+          $("save-state").textContent = "Saved in your local learning workspace.";
           try {
             localStorage.removeItem("ds60.classroom.unsaved." + context.key);
             if (context.engine === "module")
               localStorage.removeItem("ds60.module.unsaved." + context.id);
           } catch (_) {}
         } else if (sameView) {
-          $("save-state").textContent =
-            "Unsaved changes. Your newer draft is waiting to save.";
+          $("save-state").textContent = "Unsaved changes. Your newer draft is waiting to save.";
           stashDraft(context.key, values());
         }
       } catch (error) {
@@ -467,25 +470,18 @@ function setTheme(dark) {
 }
 function estimatedSessions(record) {
   const minutes = Number(record.estimated_minutes);
-  return minutes > 0
-    ? Math.max(1, Math.ceil(minutes / Number($("pace").value || 30)))
-    : null;
+  return minutes > 0 ? Math.max(1, Math.ceil(minutes / Number($("pace").value || 30))) : null;
 }
 function renderHome() {
   if (!index) return;
   const query = $("catalog-search").value.trim().toLowerCase(),
     terms = query.split(/\s+/).filter(Boolean),
-    matches = (text) =>
-      terms.every((term) => String(text).toLowerCase().includes(term));
+    matches = (text) => terms.every((term) => String(text).toLowerCase().includes(term));
   const cards = $("subject-cards");
   cards.replaceChildren();
   let count = 0;
   for (const subject of index.tracks) {
-    if (
-      query &&
-      !matches(subject.title + " " + subject.description + " " + subject.id)
-    )
-      continue;
+    if (query && !matches(subject.title + " " + subject.description + " " + subject.id)) continue;
     count++;
     const card = node("button", undefined, "subject-card");
     card.type = "button";
@@ -500,9 +496,7 @@ function renderHome() {
           "Explore clear explanations, worked examples, and a place to practice.",
       ),
     );
-    const authored = subject.lessons.filter(
-        (item) => item.status !== "planned",
-      ).length,
+    const authored = subject.lessons.filter((item) => item.status !== "planned").length,
       bottom = node("span", undefined, "card-bottom");
     bottom.append(
       node(
@@ -523,15 +517,7 @@ function renderHome() {
   if (query)
     for (const subject of index.tracks)
       for (const record of subject.lessons)
-        if (
-          matches(
-            record.title +
-              " " +
-              record.id +
-              " " +
-              (record.concepts || []).join(" "),
-          )
-        )
+        if (matches(record.title + " " + record.id + " " + (record.concepts || []).join(" ")))
           results.push({ subject, record });
   $("search-lessons").hidden = !results.length;
   $("search-lesson-list").replaceChildren();
@@ -550,15 +536,11 @@ function renderHome() {
       " matching paths and " +
       results.length +
       " matching lessons" +
-      (results.length > 40
-        ? " (showing the first 40; refine your search)."
-        : ".")
+      (results.length > 40 ? " (showing the first 40; refine your search)." : ".")
     : "";
   $("no-results").hidden = count > 0 || results.length > 0;
   const countLessons = index.tracks.reduce(
-    (total, subject) =>
-      total +
-      subject.lessons.filter((item) => item.status !== "planned").length,
+    (total, subject) => total + subject.lessons.filter((item) => item.status !== "planned").length,
     0,
   );
   $("catalog-summary").textContent =
@@ -593,8 +575,7 @@ async function showHome(historyMode = "push") {
   if (version !== intentVersion) return;
   if (
     current &&
-    (draftRevisions.get(workspaceKey()) || 0) >
-      (savedRevisions.get(workspaceKey()) || 0)
+    (draftRevisions.get(workspaceKey()) || 0) > (savedRevisions.get(workspaceKey()) || 0)
   ) {
     status(
       "Your draft changed while it was saving. Save the latest version before leaving this lesson.",
@@ -635,10 +616,7 @@ function renderNavigation() {
   renderPager();
 }
 function visibleLessons() {
-  const terms = $("lesson-query")
-    .value.toLowerCase()
-    .split(/\s+/)
-    .filter(Boolean);
+  const terms = $("lesson-query").value.toLowerCase().split(/\s+/).filter(Boolean);
   return (track()?.lessons || []).filter(
     (item) =>
       ($("stage").value === "all" || item.level === $("stage").value) &&
@@ -658,8 +636,7 @@ function renderLessons() {
   for (const item of rows) {
     const button = node("button", item.title);
     button.type = "button";
-    if (hasLessonId(item, lessonId))
-      button.setAttribute("aria-current", "page");
+    if (hasLessonId(item, lessonId)) button.setAttribute("aria-current", "page");
     const sessions = estimatedSessions(item);
     button.append(
       node(
@@ -668,9 +645,7 @@ function renderLessons() {
           (item.completed ? " · Demonstrated" : "") +
           " · " +
           (item.level || "") +
-          (sessions
-            ? " · ~" + sessions + (sessions === 1 ? " session" : " sessions")
-            : ""),
+          (sessions ? " · ~" + sessions + (sessions === 1 ? " session" : " sessions") : ""),
       ),
     );
     button.addEventListener("click", () =>
@@ -679,39 +654,24 @@ function renderLessons() {
     list.append(button);
   }
   if (!rows.length)
-    list.append(
-      node(
-        "p",
-        "No lessons match. Clear the search or choose another stage.",
-        "muted",
-      ),
-    );
+    list.append(node("p", "No lessons match. Clear the search or choose another stage.", "muted"));
 }
 function renderPager() {
   const rows = track()?.lessons || [],
     position = rows.findIndex((item) => hasLessonId(item, lessonId));
   $("previous-lesson").disabled = position <= 0;
   $("next-lesson").disabled = position < 0 || position >= rows.length - 1;
-  $("journey-position").textContent =
-    position >= 0 ? position + 1 + " of " + rows.length : "";
+  $("journey-position").textContent = position >= 0 ? position + 1 + " of " + rows.length : "";
   if (position > 0)
-    $("previous-lesson").setAttribute(
-      "aria-label",
-      "Previous: " + rows[position - 1].title,
-    );
+    $("previous-lesson").setAttribute("aria-label", "Previous: " + rows[position - 1].title);
   if (position >= 0 && position < rows.length - 1)
-    $("next-lesson").setAttribute(
-      "aria-label",
-      "Next: " + rows[position + 1].title,
-    );
+    $("next-lesson").setAttribute("aria-label", "Next: " + rows[position + 1].title);
 }
 async function switchTrack(id) {
   const subject = index.tracks.find((item) => item.id === id);
   if (!subject) return;
   const remembered = pref("lastTrack." + id);
-  const first =
-    subject.lessons.find((item) => item.status !== "planned") ||
-    subject.lessons[0];
+  const first = subject.lessons.find((item) => item.status !== "planned") || subject.lessons[0];
   if (!first) return;
   const target =
     remembered && subject.lessons.some((item) => hasLessonId(item, remembered))
@@ -733,9 +693,7 @@ async function fetchLesson(id, subject, requested = {}) {
     );
   const selected =
     capabilities.runners.find((item) => item.id === requested.language) ||
-    capabilities.runners.find(
-      (item) => item.id === capabilities.default_runner,
-    );
+    capabilities.runners.find((item) => item.id === capabilities.default_runner);
   if (!selected) throw new Error("The default lesson runner is unavailable.");
   const mode = selected.modes?.some((item) => item.id === requested.mode)
     ? requested.mode
@@ -771,9 +729,7 @@ async function fetchLesson(id, subject, requested = {}) {
     runtime_profile: reading ? "reading" : selected.id,
     source,
     source_filename:
-      mode === "lesson"
-        ? data.lesson_path.split("/").at(-1)
-        : "practice" + selected.file_suffix,
+      mode === "lesson" ? data.lesson_path.split("/").at(-1) : "practice" + selected.file_suffix,
     session: {
       ...data.session,
       prediction: data.session.predict || "",
@@ -820,8 +776,7 @@ function renderLegacyControls(data) {
   for (const item of data.capabilities.runners) {
     const option = node(
       "option",
-      item.title +
-        (item.kind === "reading" ? "" : item.can_run ? "" : " (save only)"),
+      item.title + (item.kind === "reading" ? "" : item.can_run ? "" : " (save only)"),
     );
     option.value = item.id;
     $("runner").append(option);
@@ -842,9 +797,7 @@ function renderLegacyControls(data) {
   $("hint").textContent = "";
   hintNumber = 1;
   phase = "read";
-  phaseNotes = Object.fromEntries(
-    phases.map((item) => [item, data.session[item] || ""]),
-  );
+  phaseNotes = Object.fromEntries(phases.map((item) => [item, data.session[item] || ""]));
   $("phase").value = phase;
   $("phase-note").value = phaseNotes[phase];
   $("phase-label").textContent = "Reading notes";
@@ -853,9 +806,7 @@ async function openLesson(id, save = true, requested = {}) {
   requested = {
     ...pref("context." + id, {}),
     ...Object.fromEntries(
-      Object.entries(requested).filter(
-        ([, value]) => value !== null && value !== undefined,
-      ),
+      Object.entries(requested).filter(([, value]) => value !== null && value !== undefined),
     ),
   };
   const found = locate(id);
@@ -868,8 +819,7 @@ async function openLesson(id, save = true, requested = {}) {
   if (version !== intentVersion) return;
   if (
     current &&
-    (draftRevisions.get(workspaceKey()) || 0) >
-      (savedRevisions.get(workspaceKey()) || 0)
+    (draftRevisions.get(workspaceKey()) || 0) > (savedRevisions.get(workspaceKey()) || 0)
   ) {
     status(
       "Your draft changed while it was saving. Save the latest version before switching lessons.",
@@ -899,17 +849,11 @@ async function openLesson(id, save = true, requested = {}) {
       node("p", found.record.lab || "This lesson has not been authored yet."),
       node("p", found.record.verification || ""),
     );
-    $("capability").textContent =
-      "Planned content has no coding workspace or claimed runtime yet.";
+    $("capability").textContent = "Planned content has no coding workspace or claimed runtime yet.";
     $("runtime-setup").hidden = true;
     $("llm-reading-route").hidden = true;
-    recordRoute(
-      "/classroom#" + new URLSearchParams({ lesson: id }),
-      requested._history || "push",
-    );
-    status(
-      "This lesson is planned. Choose an authored lesson to read and practice.",
-    );
+    recordRoute("/classroom#" + new URLSearchParams({ lesson: id }), requested._history || "push");
+    status("This lesson is planned. Choose an authored lesson to read and practice.");
     return;
   }
   status("Opening " + found.record.title + "...");
@@ -919,8 +863,7 @@ async function openLesson(id, save = true, requested = {}) {
   } catch (error) {
     if (sequence === loadSequence && version === intentVersion)
       status(
-        "Could not open this lesson. Your previous workspace is still here. " +
-          error.message,
+        "Could not open this lesson. Your previous workspace is still here. " + error.message,
         true,
       );
     throw error;
@@ -945,13 +888,10 @@ async function openLesson(id, save = true, requested = {}) {
   $("workspace-view").dataset.navigation = "closed";
   $("lesson-menu").setAttribute("aria-expanded", "false");
   const filters = pref("filters." + trackId, {});
-  $("stage").value = ["beginner", "intermediate", "advanced"].includes(
-    filters.stage,
-  )
+  $("stage").value = ["beginner", "intermediate", "advanced"].includes(filters.stage)
     ? filters.stage
     : "all";
-  $("lesson-query").value =
-    typeof filters.query === "string" ? filters.query : "";
+  $("lesson-query").value = typeof filters.query === "string" ? filters.query : "";
   renderNavigation();
   renderVariants(found.record, id);
   renderLegacyControls(data);
@@ -962,9 +902,7 @@ async function openLesson(id, save = true, requested = {}) {
   $("read-chapter").checked = data.session.review === "read";
   $("prediction-label").hidden = tutorial;
   $("prediction").hidden = tutorial;
-  $("pad-title").textContent = tutorial
-    ? "Worked examples and notes"
-    : "Code and reflection";
+  $("pad-title").textContent = tutorial ? "Worked examples and notes" : "Code and reflection";
   $("explanation-label").textContent = tutorial
     ? "Notes and interpretations"
     : "Explain the evidence";
@@ -983,15 +921,12 @@ async function openLesson(id, save = true, requested = {}) {
     $("badges").append(
       node(
         "span",
-        (data.estimated_minutes || found.record.estimated_minutes) +
-          " min suggested study",
+        (data.estimated_minutes || found.record.estimated_minutes) + " min suggested study",
         "badge",
       ),
     );
   renderPrerequisites(data.prerequisites || found.record.prerequisites || []);
-  $("llm-reading-route").hidden = !["llm-theory", "llm-applied"].includes(
-    trackId,
-  );
+  $("llm-reading-route").hidden = !["llm-theory", "llm-applied"].includes(trackId);
   $("guide").innerHTML = data.guide_html;
   renderSections();
   $("source").value = data.source || "";
@@ -1004,19 +939,14 @@ async function openLesson(id, save = true, requested = {}) {
   try {
     const backup = JSON.parse(
       localStorage.getItem("ds60.classroom.unsaved." + key) ||
-        (data.engine === "module"
-          ? localStorage.getItem("ds60.module.unsaved." + id)
-          : null) ||
+        (data.engine === "module" ? localStorage.getItem("ds60.module.unsaved." + id) : null) ||
         "null",
     );
     if (
       backup &&
-      ["source", "prediction", "explanation"].every(
-        (field) => typeof backup[field] === "string",
-      )
+      ["source", "prediction", "explanation"].every((field) => typeof backup[field] === "string")
     ) {
-      for (const field of ["source", "prediction", "explanation"])
-        $(field).value = backup[field];
+      for (const field of ["source", "prediction", "explanation"]) $(field).value = backup[field];
       if (tutorial && typeof backup.review === "string")
         $("read-chapter").checked = backup.review === "read";
       if (data.engine === "legacy" && backup.evidence) {
@@ -1039,19 +969,14 @@ async function openLesson(id, save = true, requested = {}) {
     ? "Recovered a browser draft. Save it to retain this version in your local learning workspace."
     : "Loaded from your local learning workspace.";
   $("language").textContent =
-    data.language +
-    (data.runtime_profile !== data.language
-      ? " · " + data.runtime_profile
-      : "");
+    data.language + (data.runtime_profile !== data.language ? " · " + data.runtime_profile : "");
   $("runtime-details").hidden = !data.runtime_guidance;
   $("runtime-guidance").textContent = data.runtime_guidance || "";
   $("planned").hidden = true;
   $("authored").hidden = false;
   resetResult();
   renderHistory(data.history || []);
-  const resumable = (data.history || []).find(
-    (job) => !finished.has(job.status),
-  );
+  const resumable = (data.history || []).find((job) => !finished.has(job.status));
   if (!activeJob && resumable) adoptJob(resumable, false);
   if (activeJobRecord?.lesson_id === id) showJob(activeJobRecord);
   else if (data.history?.length) showJob(data.history[0]);
@@ -1102,14 +1027,10 @@ async function openLesson(id, save = true, requested = {}) {
 function renderPrerequisites(ids) {
   $("prerequisites").replaceChildren();
   if (!ids.length) {
-    $("prerequisites").append(
-      node("span", "Start here: no earlier lesson is required."),
-    );
+    $("prerequisites").append(node("span", "Start here: no earlier lesson is required."));
     return;
   }
-  $("prerequisites").append(
-    node("span", "Helpful foundations, whenever you need them: "),
-  );
+  $("prerequisites").append(node("span", "Helpful foundations, whenever you need them: "));
   for (const id of ids) {
     const found = locate(id);
     if (!found) {
@@ -1137,24 +1058,18 @@ function setReadingView(focused) {
   readingFocused = focused;
   $("authored").className = "panes" + (focused ? " reading-focus" : "");
   $("reading-toggle").setAttribute("aria-pressed", String(focused));
-  $("reading-toggle").textContent = focused
-    ? "Show code and notes"
-    : "Focus on reading";
+  $("reading-toggle").textContent = focused ? "Show code and notes" : "Focus on reading";
 }
 function renderSections() {
   $("section-jump").replaceChildren();
   const first = node("option", "Choose a section");
   first.value = "";
   $("section-jump").append(first);
-  for (const heading of [
-    ...$("guide").querySelectorAll("h2,h3,h4,h5,h6"),
-  ].slice(0, 200)) {
+  for (const heading of [...$("guide").querySelectorAll("h2,h3,h4,h5,h6")].slice(0, 200)) {
     if (!heading.id) continue;
     let text = heading.textContent.replace(/\s*#\s*$/, "").trim();
     if (/^stat-\d+-\d+/.test(text))
-      text =
-        heading.nextElementSibling?.querySelector("strong")?.textContent ||
-        text;
+      text = heading.nextElementSibling?.querySelector("strong")?.textContent || text;
     const option = node("option", text);
     option.value = heading.id;
     $("section-jump").append(option);
@@ -1163,9 +1078,11 @@ function renderSections() {
 function updateControls() {
   $("cancel").disabled = !activeJob && !browserPreview?.active;
   $("cancel").hidden = current?.engine === "legacy" && !activeJob;
-  $("cancel").textContent = browserPreview?.active ? "Stop preview" : activeJobRecord
-    ? "Cancel " + activeJobRecord.lesson_id + " job"
-    : "Cancel job";
+  $("cancel").textContent = browserPreview?.active
+    ? "Stop preview"
+    : activeJobRecord
+      ? "Cancel " + activeJobRecord.lesson_id + " job"
+      : "Cancel job";
   if (!current) return;
   showCapability(current.capability);
 }
@@ -1173,9 +1090,7 @@ function showCapability(cap) {
   const reading = current.runtime_profile === "reading";
   const browser = current.runtime_profile === "javascript-browser";
   const activity = activeJobRecord
-    ? " A job for " +
-      activeJobRecord.lesson_id +
-      " is active or awaiting confirmation."
+    ? " A job for " + activeJobRecord.lesson_id + " is active or awaiting confirmation."
     : legacyRunActive
       ? " A bounded Python or SQL run is active. Wait for its result before running again."
       : "";
@@ -1185,31 +1100,23 @@ function showCapability(cap) {
       : cap.ready
         ? "Ready to run in your local classroom. " +
           (current.engine === "legacy" ? cap.detail || "" : "")
-        : (cap.profile || current.runtime_profile) +
-          " is not ready. " +
-          (cap.detail || "")) + activity;
-  $("capability").className =
-    "notice" + (!cap.ready && !reading ? " warn" : "");
+        : (cap.profile || current.runtime_profile) + " is not ready. " + (cap.detail || "")) +
+    activity;
+  $("capability").className = "notice" + (!cap.ready && !reading ? " warn" : "");
   $("runtime-setup").hidden =
-    cap.ready ||
-    reading ||
-    (!current.setup_commands?.length && !current.runtime_guidance);
-  $("runtime-commands").textContent = (current.setup_commands || []).join(
-    "\n\n",
-  );
+    cap.ready || reading || (!current.setup_commands?.length && !current.runtime_guidance);
+  $("runtime-commands").textContent = (current.setup_commands || []).join("\n\n");
   $("runtime-setup-note").textContent =
     current.engine === "legacy" ? current.runtime_guidance || "" : "";
   $("run").disabled =
-    !cap.ready ||
-    reading ||
-    activeJob !== null ||
-    submitInFlight ||
-    legacyRunActive;
+    !cap.ready || reading || activeJob !== null || submitInFlight || legacyRunActive;
   $("run").textContent = reading
     ? "Reading and reasoning"
     : legacyRunActive
       ? "Running..."
-      : browser ? "Run browser preview" : "Run code";
+      : browser
+        ? "Run browser preview"
+        : "Run code";
   $("timeout").disabled = reading || browser || legacyRunActive;
   $("timeout").hidden = browser;
   if (current.engine === "legacy") {
@@ -1222,9 +1129,7 @@ function showCapability(cap) {
       $("timeout").append(option);
     }
     $("timeout").value = String(
-      allowed.includes(old)
-        ? old
-        : current.effective.timeout_seconds || allowed[0],
+      allowed.includes(old) ? old : current.effective.timeout_seconds || allowed[0],
     );
   }
 }
@@ -1237,8 +1142,7 @@ function resetResult() {
   $("recover").hidden = true;
   $("reconnect").hidden = true;
   $("job-status").textContent = "No run yet for this lesson.";
-  $("output").textContent =
-    "Actual output and compiler diagnostics will appear here.";
+  $("output").textContent = "Actual output and compiler diagnostics will appear here.";
   $("checks").replaceChildren();
   $("sql-results").replaceChildren();
   $("figures").replaceChildren();
@@ -1249,11 +1153,7 @@ function renderHistory(records) {
   for (const job of records) {
     const button = node(
       "button",
-      (job.created_at || "") +
-        " · " +
-        job.status +
-        " · " +
-        (job.source_sha256 || "").slice(0, 10),
+      (job.created_at || "") + " · " + job.status + " · " + (job.source_sha256 || "").slice(0, 10),
     );
     button.addEventListener("click", () => {
       if (job.kind === "browser_observation") {
@@ -1273,38 +1173,41 @@ function tracebackLine(output, lineCount) {
     const match = text.match(/^\s*File "([^"\n]+)", line (\d+)/);
     if (!match) continue;
     const filename = match[1].split(/[\\/]/).at(-1);
-    if (
-      filename !== "practice.py" &&
-      !/^\.submission-[A-Za-z0-9_-]{1,64}\.py$/.test(filename)
-    )
+    if (filename !== "practice.py" && !/^\.submission-[A-Za-z0-9_-]{1,64}\.py$/.test(filename))
       continue;
     const candidate = Number(match[2]);
-    if (
-      Number.isSafeInteger(candidate) &&
-      candidate > 0 &&
-      candidate <= lineCount
-    )
+    if (Number.isSafeInteger(candidate) && candidate > 0 && candidate <= lineCount)
       line = candidate;
   }
   return line;
 }
 function expandedCompilerLine(output, language, lineCount) {
-  const names = {c:"main.c",go:"main.go",csharp:"Program.cs",rust:"main.rs",swift:"main.swift"},
+  const names = {
+      c: "main.c",
+      go: "main.go",
+      csharp: "Program.cs",
+      rust: "main.rs",
+      swift: "main.swift",
+    },
     filename = names[language];
   if (!filename) return null;
   const escaped = filename.replaceAll(".", "\\."),
     path = "((?:[^\\s()\"'<>]*[\\\\/])?" + escaped + ")",
     prefix = "(?:^|[\\s(\"'<>])",
-    location = language === "csharp"
-      ? "(?:\\((\\d+)(?:,\\d+)?\\)|:line\\s+(\\d+))"
-      : ":(\\d+)(?::\\d+)?(?=[:\\s,)]|$)",
+    location =
+      language === "csharp"
+        ? "(?:\\((\\d+)(?:,\\d+)?\\)|:line\\s+(\\d+))"
+        : ":(\\d+)(?::\\d+)?(?=[:\\s,)]|$)",
     pattern = new RegExp(prefix + path + location, "g");
   const match = [...output.matchAll(pattern)].find((candidate) => {
     const normalized = candidate[1].replaceAll("\\", "/").replace(/^file:\/\//, "");
     // Runtime backtraces can mention a dependency's own main.go/main.rs.
     // Only the submitted filename outside known library/build trees is useful.
-    return !/(?:^|\/)(?:node_modules|site-packages|rustlib|registry|library|include|obj|target|deps)(?:\/|$)/i.test(normalized) &&
-      !/^\/(?:usr|opt|lib|System)\//.test(normalized);
+    return (
+      !/(?:^|\/)(?:node_modules|site-packages|rustlib|registry|library|include|obj|target|deps)(?:\/|$)/i.test(
+        normalized,
+      ) && !/^\/(?:usr|opt|lib|System)\//.test(normalized)
+    );
   });
   if (!match) return null;
   const line = Number(match[2] || match[3]);
@@ -1326,39 +1229,27 @@ function sourceErrorLine(job) {
   if (["c", "go", "csharp", "rust", "swift"].includes(current.language))
     return expandedCompilerLine(output, current.language, count);
   let matches = [];
-  if (job.legacy && current.language === "python")
-    return tracebackLine(output, count);
+  if (job.legacy && current.language === "python") return tracebackLine(output, count);
   if (current.language === "python")
     matches = [
-      ...output.matchAll(
-        /(?:^|\n)\s*File\s+["'](?:[^"'\n]*[\/\\])?main\.py["'],\s*line\s+(\d+)/g,
-      ),
+      ...output.matchAll(/(?:^|\n)\s*File\s+["'](?:[^"'\n]*[/\\])?main\.py["'],\s*line\s+(\d+)/g),
     ];
   else if (current.language === "cpp")
-    matches = [
-      ...output.matchAll(/(?:^|\n)(?:[^\n]*[\/\\])?main\.cpp:(\d+)(?::\d+)?:/g),
-    ];
+    matches = [...output.matchAll(/(?:^|\n)(?:[^\n]*[/\\])?main\.cpp:(\d+)(?::\d+)?:/g)];
   else if (current.language === "java")
     matches = [
-      ...output.matchAll(
-        /(?:^|\n)(?:[^\n]*[\/\\])?Main\.java:(\d+):|\(Main\.java:(\d+)\)/g,
-      ),
+      ...output.matchAll(/(?:^|\n)(?:[^\n]*[/\\])?Main\.java:(\d+):|\(Main\.java:(\d+)\)/g),
     ];
   else if (current.language === "javascript")
-    matches = [
-      ...output.matchAll(/(?:^|[\s(/])(?:[^\s()]*\/)?main\.mjs:(\d+)/g),
-    ];
+    matches = [...output.matchAll(/(?:^|[\s(/])(?:[^\s()]*\/)?main\.mjs:(\d+)/g)];
   else if (current.language === "typescript")
     matches = [...output.matchAll(/(?:^|\n)main\.mts\((\d+),\d+\)/g)];
   else if (current.language === "scala")
     matches = [
-      ...output.matchAll(
-        /(?:^|\n)(?:[^\n]*[\/\\])?Main\.scala:(\d+):|\(Main\.scala:(\d+)\)/g,
-      ),
+      ...output.matchAll(/(?:^|\n)(?:[^\n]*[/\\])?Main\.scala:(\d+):|\(Main\.scala:(\d+)\)/g),
     ];
   if (!matches.length) return null;
-  const match =
-      current.language === "python" ? matches[matches.length - 1] : matches[0],
+  const match = current.language === "python" ? matches[matches.length - 1] : matches[0],
     line = Number(match[1] || match[2]);
   return Number.isInteger(line) && line >= 1 && line <= count ? line : null;
 }
@@ -1372,33 +1263,27 @@ function updateErrorJump() {
     const currentLine = sourceErrorLine(job);
     if (currentLine === null) {
       $("error-line").hidden = true;
-      status(
-        "The source changed. Compare the saved job source before inspecting its diagnostic.",
-      );
+      status("The source changed. Compare the saved job source before inspecting its diagnostic.");
       return;
     }
     const lines = $("source").value.split("\n"),
-      start =
-        lines.slice(0, currentLine - 1).join("\n").length +
-        (currentLine > 1 ? 1 : 0);
+      start = lines.slice(0, currentLine - 1).join("\n").length + (currentLine > 1 ? 1 : 0);
     $("source").focus();
-    $("source").setSelectionRange(
-      start,
-      start + (lines[currentLine - 1] || "").length,
-    );
+    $("source").setSelectionRange(start, start + (lines[currentLine - 1] || "").length);
   };
 }
 function showJob(job) {
-  if (job.kind === "browser_observation") { showBrowserObservation(job); return; }
+  if (job.kind === "browser_observation") {
+    showBrowserObservation(job);
+    return;
+  }
   if (!current || current.id !== job.lesson_id) return;
   displayedJob = job;
   const canReconnect = !finished.has(job.status),
     otherActive = activeJob && activeJob !== job.job_id;
   $("reconnect").hidden = !canReconnect;
   $("reconnect").disabled = !!otherActive;
-  $("reconnect").textContent = otherActive
-    ? "Another job is active"
-    : "Reconnect saved job";
+  $("reconnect").textContent = otherActive ? "Another job is active" : "Reconnect saved job";
   $("reconnect").onclick = () => {
     if (adoptJob(job, false)) {
       monitorPaused = false;
@@ -1414,33 +1299,21 @@ function showJob(job) {
     Number(job.elapsed_seconds || 0).toFixed(1) +
     "s · " +
     (job.detail || "") +
-    (job.truncated
-      ? " · Log truncated; exit status and checks remain explicit."
-      : "");
+    (job.truncated ? " · Log truncated; exit status and checks remain explicit." : "");
   $("output").textContent = job.output || "(No output yet.)";
   $("checks").replaceChildren();
   for (const check of job.checks || [])
     $("checks").append(
-      node(
-        "li",
-        (check.passed ? "PASS: " : "FAIL: ") +
-          check.name +
-          " · " +
-          check.detail,
-      ),
+      node("li", (check.passed ? "PASS: " : "FAIL: ") + check.name + " · " + check.detail),
     );
   if (job.status === "succeeded" && !(job.checks || []).length)
     $("checks").append(
-      node(
-        "li",
-        "Execution finished successfully. No semantic verifier ran for this lesson.",
-      ),
+      node("li", "Execution finished successfully. No semantic verifier ran for this lesson."),
     );
   updateErrorJump();
 }
 async function recoverInterrupted(job) {
-  if (job.status !== "interrupted" || !current || current.id !== job.lesson_id)
-    return;
+  if (job.status !== "interrupted" || !current || current.id !== job.lesson_id) return;
   if (activeJob && activeJob !== job.job_id) {
     status("Another job is active. Its monitor was preserved.", true);
     return;
@@ -1551,9 +1424,7 @@ async function poll() {
       }
     } else if (job.status === "interrupted") {
       monitorPaused = true;
-      status(
-        "The saved job needs reconnection. Its source was not submitted again.",
-      );
+      status("The saved job needs reconnection. Its source was not submitted again.");
     }
   } catch (error) {
     if (activeJob === key) {
@@ -1562,11 +1433,9 @@ async function poll() {
         activeJobRecord = {
           ...activeJobRecord,
           status: "interrupted",
-          detail:
-            "Monitoring interrupted; the worker outcome is not confirmed.",
+          detail: "Monitoring interrupted; the worker outcome is not confirmed.",
         };
-        if (current && activeJobRecord.lesson_id === current.id)
-          showJob(activeJobRecord);
+        if (current && activeJobRecord.lesson_id === current.id) showJob(activeJobRecord);
       }
       status(
         "Connection interrupted. Use Reconnect saved job before starting another experiment. " +
@@ -1619,9 +1488,7 @@ function showLegacyResult(result, context, source) {
   $("run-storage-status").textContent =
     result.receipt_saved === true
       ? "Saved run" +
-        (result.saved_at
-          ? " from " + new Date(result.saved_at).toLocaleString()
-          : "") +
+        (result.saved_at ? " from " + new Date(result.saved_at).toLocaleString() : "") +
         ". This output belongs to its recorded source; viewing it does not change your current pad."
       : result.receipt_saved === false
         ? "This run finished, but its result could not be saved. Copy any output you need before leaving or reloading. " +
@@ -1648,13 +1515,9 @@ function showLegacyResult(result, context, source) {
       ? " · Middle output was omitted; exit status and final messages are retained."
       : "");
   $("output").textContent = result.output || "(No printed output.)";
-  if (result.language === "sql" && result.mode !== "lesson")
-    showSqlResults(result.output);
+  if (result.language === "sql" && result.mode !== "lesson") showSqlResults(result.output);
   for (const [position, source] of (result.figures || []).entries()) {
-    if (
-      typeof source !== "string" ||
-      !/^data:image\/(?:png|jpeg|webp);base64,/.test(source)
-    )
+    if (typeof source !== "string" || !/^data:image\/(?:png|jpeg|webp);base64,/.test(source))
       continue;
     const image = node("img");
     image.src = source;
@@ -1728,16 +1591,11 @@ async function openRunReceipt(
       intentVersion === version &&
       sequence === receiptLoadSequence
     )
-      status(
-        "Could not open the saved run. Your source is unchanged. " +
-          error.message,
-        true,
-      );
+      status("Could not open the saved run. Your source is unchanged. " + error.message, true);
   }
 }
 async function refreshRunHistory({ showLatest = false } = {}) {
-  if (current?.engine !== "legacy" || current.runtime_profile === "reading")
-    return;
+  if (current?.engine !== "legacy" || current.runtime_profile === "reading") return;
   const context = contextOf(),
     version = intentVersion,
     sequence = ++runHistorySequence,
@@ -1762,15 +1620,11 @@ async function refreshRunHistory({ showLatest = false } = {}) {
         receipt.source_sha256.slice(0, 10),
     );
     button.type = "button";
-    button.addEventListener("click", () =>
-      openRunReceipt(context, receipt.id, version),
-    );
+    button.addEventListener("click", () => openRunReceipt(context, receipt.id, version));
     $("history").append(button);
   }
   if (!data.history.length)
-    $("history").append(
-      node("p", "No saved runs for this language and workspace yet.", "muted"),
-    );
+    $("history").append(node("p", "No saved runs for this language and workspace yet.", "muted"));
   if (showLatest && data.history.length && resultRevision === revision)
     await openRunReceipt(context, data.history[0].id, version, revision);
 }
@@ -1798,19 +1652,14 @@ function showSqlResults(output) {
     const body = node("tbody");
     for (const row of result.rows) {
       const line = node("tr");
-      for (const value of row)
-        line.append(node("td", value === null ? "NULL" : String(value)));
+      for (const value of row) line.append(node("td", value === null ? "NULL" : String(value)));
       body.append(line);
     }
     table.append(body);
     $("sql-results").append(table);
     if (result.truncated)
       $("sql-results").append(
-        node(
-          "p",
-          "This result was truncated at the runtime row limit.",
-          "muted",
-        ),
+        node("p", "This result was truncated at the runtime row limit.", "muted"),
       );
   }
 }
@@ -1840,9 +1689,7 @@ async function runCode() {
       intentVersion !== intent.version ||
       $("source").value !== intent.source
     ) {
-      status(
-        "The lesson or draft changed while saving. Review it and press Run again.",
-      );
+      status("The lesson or draft changed while saving. Review it and press Run again.");
       return;
     }
     if (current.runtime_profile === "javascript-browser") {
@@ -1852,9 +1699,7 @@ async function runCode() {
       updateControls();
       resetResult();
       $("output").textContent =
-        "Running your code. This request has a " +
-        intent.timeout +
-        "-second backend deadline.";
+        "Running your code. This request has a " + intent.timeout + "-second backend deadline.";
       status(
         "Your source and notes are saved. You may read another lesson while this bounded run finishes.",
       );
@@ -1911,8 +1756,7 @@ async function runCode() {
   }
 }
 async function refreshPadHistory() {
-  if (current?.engine !== "legacy" || current.runtime_profile === "reading")
-    return;
+  if (current?.engine !== "legacy" || current.runtime_profile === "reading") return;
   const context = contextOf(),
     data = await lab("pad-history", {
       lesson_id: context.id,
@@ -1923,19 +1767,14 @@ async function refreshPadHistory() {
   $("pad-history").replaceChildren();
   const placeholder = node(
     "option",
-    data.history.length
-      ? "Choose an earlier saved version"
-      : "No earlier versions yet",
+    data.history.length ? "Choose an earlier saved version" : "No earlier versions yet",
   );
   placeholder.value = "";
   $("pad-history").append(placeholder);
   for (const entry of data.history) {
     const option = node(
       "option",
-      new Date(entry.saved_at).toLocaleString() +
-        " · " +
-        entry.bytes +
-        " bytes",
+      new Date(entry.saved_at).toLocaleString() + " · " + entry.bytes + " bytes",
     );
     option.value = entry.id;
     $("pad-history").append(option);
@@ -1967,10 +1806,7 @@ function sameView(intent) {
 for (const id of ["home-button", "paths-button", "back-paths"])
   $(id).addEventListener("click", () =>
     showHome().catch((error) =>
-      status(
-        "Navigation paused to protect your unsaved work. " + error.message,
-        true,
-      ),
+      status("Navigation paused to protect your unsaved work. " + error.message, true),
     ),
   );
 $("theme-toggle").addEventListener("click", () => {
@@ -2013,9 +1849,7 @@ for (const [id, offset] of [
     const rows = track()?.lessons || [],
       position = rows.findIndex((item) => hasLessonId(item, lessonId));
     if (rows[position + offset])
-      openLesson(rows[position + offset].id).catch((error) =>
-        status(error.message, true),
-      );
+      openLesson(rows[position + offset].id).catch((error) => status(error.message, true));
   });
 $("variant").addEventListener("change", () =>
   openLesson($("variant").value).catch((error) => {
@@ -2039,13 +1873,7 @@ $("section-jump").addEventListener("change", () => {
     target.focus({ preventScroll: true });
   }
 });
-for (const id of [
-  "source",
-  "prediction",
-  "explanation",
-  "read-chapter",
-  "phase-note",
-])
+for (const id of ["source", "prediction", "explanation", "read-chapter", "phase-note"])
   $(id).addEventListener("input", markDirty);
 $("phase").addEventListener("change", () => {
   phaseNotes[phase] = $("phase-note").value;
@@ -2078,15 +1906,20 @@ $("run").addEventListener("click", runCode);
 $("browser-fullscreen").addEventListener("click", toggleBrowserFullscreen);
 document.addEventListener("fullscreenchange", syncBrowserFullscreen);
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape" && browserPreviewIsFullscreen())
-    void exitBrowserPreviewFullscreen();
+  if (event.key === "Escape" && browserPreviewIsFullscreen()) void exitBrowserPreviewFullscreen();
 });
 updateBrowserFullscreenControls();
 $("browser-observation-save").addEventListener("click", async () => {
-  const context = browserPreviewContext, snapshot = browserPreview?.snapshot();
-  if (!context || !snapshot || snapshot.status === "running" || workspaceKey() !== context.key) return;
-  try { await saveBrowserObservation(context, snapshot); status("The latest console observation was saved without rerunning the chart."); }
-  catch (error) { status("Could not save the observation. " + error.message, true); }
+  const context = browserPreviewContext,
+    snapshot = browserPreview?.snapshot();
+  if (!context || !snapshot || snapshot.status === "running" || workspaceKey() !== context.key)
+    return;
+  try {
+    await saveBrowserObservation(context, snapshot);
+    status("The latest console observation was saved without rerunning the chart.");
+  } catch (error) {
+    status("Could not save the observation. " + error.message, true);
+  }
 });
 $("cancel").addEventListener("click", async () => {
   if (browserPreview?.active) {
@@ -2105,8 +1938,7 @@ $("cancel").addEventListener("click", async () => {
     monitorPaused = false;
     await poll();
   } catch (error) {
-    if (activeJob === key)
-      status("Cancellation not confirmed. " + error.message, true);
+    if (activeJob === key) status("Cancellation not confirmed. " + error.message, true);
   }
 });
 $("save").addEventListener("click", () => flushSave().catch(() => {}));
@@ -2123,13 +1955,9 @@ $("refresh").addEventListener("click", async () => {
     } else {
       const capabilities = await lab("capabilities", { lesson_id: context.id });
       if (!sameView(intent)) return;
-      const selected = capabilities.runners.find(
-        (item) => item.id === context.language,
-      );
+      const selected = capabilities.runners.find((item) => item.id === context.language);
       if (!selected)
-        throw new Error(
-          "This language is no longer registered for the lesson. Reopen the lesson.",
-        );
+        throw new Error("This language is no longer registered for the lesson. Reopen the lesson.");
       current.capabilities = capabilities;
       current.runner = selected;
       current.effective = {
@@ -2138,9 +1966,7 @@ $("refresh").addEventListener("click", async () => {
       };
       current.capability = {
         profile: selected.id,
-        ready: Boolean(
-          current.effective.can_run && current.effective.available,
-        ),
+        ready: Boolean(current.effective.can_run && current.effective.available),
         detail: current.effective.reason || "",
       };
     }
@@ -2164,8 +1990,7 @@ $("download-source").addEventListener("click", () => {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 });
 $("starter").addEventListener("click", async () => {
-  if (current?.engine !== "legacy" || current.runtime_profile === "reading")
-    return;
+  if (current?.engine !== "legacy" || current.runtime_profile === "reading") return;
   const intent = selectedViewIntent();
   if (
     !confirm(
@@ -2235,8 +2060,7 @@ $("prepare-sql").addEventListener("click", async () => {
     if (sameView(intent)) {
       resetResult();
       $("output").textContent = result.output;
-      $("job-status").textContent =
-        "SQL preparation exited with status " + result.returncode;
+      $("job-status").textContent = "SQL preparation exited with status " + result.returncode;
     }
     status(
       "SQL training preparation exited with status " + result.returncode,
@@ -2261,11 +2085,7 @@ $("hint-button").addEventListener("click", async () => {
     hintNumber++;
     $("hint").textContent = data.hint;
     status(
-      "Hint " +
-        data.number +
-        " of " +
-        data.total +
-        ". Try a small change before asking again.",
+      "Hint " + data.number + " of " + data.total + ". Try a small change before asking again.",
     );
   } catch (error) {
     if (sameView(intent)) status(error.message, true);
@@ -2334,8 +2154,7 @@ window.addEventListener("beforeunload", (event) => {
     current &&
     (saveTimer ||
       pendingSaves ||
-      (draftRevisions.get(workspaceKey()) || 0) >
-        (savedRevisions.get(workspaceKey()) || 0))
+      (draftRevisions.get(workspaceKey()) || 0) > (savedRevisions.get(workspaceKey()) || 0))
   ) {
     stashDraft(workspaceKey(), values());
     event.preventDefault();
@@ -2344,20 +2163,16 @@ window.addEventListener("beforeunload", (event) => {
 });
 async function boot() {
   try {
-    $("pace").value = String(
-      [15, 30, 60, 90].includes(pref("pace")) ? pref("pace") : 30,
-    );
+    $("pace").value = String([15, 30, 60, 90].includes(pref("pace")) ? pref("pace") : 30);
     setTheme(
       pref(
         "dark",
-        typeof matchMedia === "function" &&
-          matchMedia("(prefers-color-scheme: dark)").matches,
+        typeof matchMedia === "function" && matchMedia("(prefers-color-scheme: dark)").matches,
       ),
     );
     index = await classroom("classroom-index");
     renderHome();
-    if (index.active_job && !finished.has(index.active_job.status))
-      adoptJob(index.active_job);
+    if (index.active_job && !finished.has(index.active_job.status)) adoptJob(index.active_job);
     const query = new URLSearchParams(location.search),
       fragment = new URLSearchParams(location.hash.slice(1)),
       id = query.get("lesson") || fragment.get("lesson");
@@ -2378,8 +2193,7 @@ async function boot() {
   }
 }
 function recordRoute(url, mode = "push") {
-  if (mode === "replace" || url === visibleRoute)
-    history.replaceState(null, "", url);
+  if (mode === "replace" || url === visibleRoute) history.replaceState(null, "", url);
   else history.pushState(null, "", url);
   visibleRoute = url;
 }
@@ -2397,10 +2211,7 @@ window.addEventListener("popstate", async () => {
     else if (!location.hash) await showHome("replace");
   } catch (error) {
     history.replaceState(null, "", visibleRoute);
-    status(
-      "Navigation paused to protect your unsaved work. " + error.message,
-      true,
-    );
+    status("Navigation paused to protect your unsaved work. " + error.message, true);
   }
 });
 function scrollToGuideFragment(fragment) {
@@ -2411,15 +2222,10 @@ function scrollToGuideFragment(fragment) {
   } catch (_) {
     return false;
   }
-  const unprefixed = id.replace(
-    /^(?:guide|reference|module-guide|lab-guide)--/,
-    "",
-  );
+  const unprefixed = id.replace(/^(?:guide|reference|module-guide|lab-guide)--/, "");
   const target = [...$("guide").querySelectorAll("[id]")].find(
     (element) =>
-      element.id === id ||
-      element.id === unprefixed ||
-      element.id.endsWith("--" + unprefixed),
+      element.id === id || element.id === unprefixed || element.id.endsWith("--" + unprefixed),
   );
   if (!target) return false;
   target.setAttribute("tabindex", "-1");
@@ -2440,8 +2246,7 @@ async function followGuideLink(event) {
   const anchor = event.target.closest?.("a[href]");
   if (
     !anchor ||
-    (anchor.getAttribute("download") !== null &&
-      anchor.getAttribute("download") !== undefined)
+    (anchor.getAttribute("download") !== null && anchor.getAttribute("download") !== undefined)
   )
     return;
   const target = anchor.getAttribute("target");
@@ -2455,34 +2260,23 @@ async function followGuideLink(event) {
   if (url.origin !== location.origin) return;
   const linked = /^\/lesson-pages\/([^/]+)\.html$/.exec(url.pathname),
     params = new URLSearchParams(url.hash.slice(1));
-  const mapped = Object.prototype.hasOwnProperty.call(
-    index?.lesson_links || {},
-    url.pathname,
-  )
+  const mapped = Object.prototype.hasOwnProperty.call(index?.lesson_links || {}, url.pathname)
     ? index.lesson_links[url.pathname]
     : null;
   const id =
     mapped ||
     linked?.[1] ||
-    (["/classroom", "/learn", "/journeys"].includes(url.pathname)
-      ? params.get("lesson")
-      : null);
+    (["/classroom", "/learn", "/journeys"].includes(url.pathname) ? params.get("lesson") : null);
   if (typeof id === "string" && locate(id)) {
     event.preventDefault();
     const opening = openLesson(id),
       version = intentVersion;
     try {
       await opening;
-      if (
-        current?.id === id &&
-        version === intentVersion &&
-        !params.has("lesson")
-      ) {
+      if (current?.id === id && version === intentVersion && !params.has("lesson")) {
         if (/^#solutions?(?:[-_]|$)/i.test(url.hash)) {
           if (current.learning_mode === "tutorial")
-            status(
-              "Worked explanations are already included in this tutorial chapter.",
-            );
+            status("Worked explanations are already included in this tutorial chapter.");
           else {
             $("reveal").scrollIntoView({ block: "center" });
             $("reveal").focus({ preventScroll: true });
@@ -2491,10 +2285,7 @@ async function followGuideLink(event) {
         } else scrollToGuideFragment(url.hash);
       }
     } catch (error) {
-      status(
-        "Navigation paused to protect your unsaved work. " + error.message,
-        true,
-      );
+      status("Navigation paused to protect your unsaved work. " + error.message, true);
     }
     return;
   }
@@ -2507,9 +2298,7 @@ $("solutions").addEventListener("click", followGuideLink);
 function updatePreviewVisibility() {
   $("syntax-preview").hidden = !previewVisible;
   $("syntax-toggle").setAttribute("aria-pressed", String(previewVisible));
-  $("syntax-toggle").textContent = previewVisible
-    ? "Hide syntax preview"
-    : "Syntax preview";
+  $("syntax-toggle").textContent = previewVisible ? "Hide syntax preview" : "Syntax preview";
   ++highlightSequence;
   clearTimeout(highlightTimer);
   if (previewVisible && current) renderSyntaxPreview();
@@ -2532,21 +2321,13 @@ async function renderSyntaxPreview() {
       $("source").value !== source
     )
       return;
-    $("syntax-code").replaceChildren(
-      highlightedSourceBlock(source, result.html).pre,
-    );
-    $("preview-status").textContent =
-      "Read-only syntax preview. Edit in the coding pad above.";
+    $("syntax-code").replaceChildren(highlightedSourceBlock(source, result.html).pre);
+    $("preview-status").textContent = "Read-only syntax preview. Edit in the coding pad above.";
   } catch (error) {
-    if (
-      sequence === highlightSequence &&
-      workspaceKey() === key &&
-      previewVisible
-    ) {
+    if (sequence === highlightSequence && workspaceKey() === key && previewVisible) {
       $("syntax-code").replaceChildren();
       $("preview-status").textContent =
-        "Syntax preview unavailable. Your editable source is unchanged. " +
-        error.message;
+        "Syntax preview unavailable. Your editable source is unchanged. " + error.message;
     }
   }
 }
@@ -2560,8 +2341,7 @@ $("source").addEventListener("input", () => {
   ++highlightSequence;
   clearTimeout(highlightTimer);
   if (previewVisible) {
-    $("preview-status").textContent =
-      "Preview is updating for your edited source...";
+    $("preview-status").textContent = "Preview is updating for your edited source...";
     highlightTimer = setTimeout(renderSyntaxPreview, 600);
   }
 });

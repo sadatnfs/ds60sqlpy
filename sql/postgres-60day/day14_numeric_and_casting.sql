@@ -18,31 +18,36 @@
 --
 BEGIN;
 SET search_path TO training, public;
-
 -- Study contract
 -- Focus: Choose numeric types and casts from domain precision, validate text before casting, and postpone rounding until presentation.
 -- Assumptions: Money is exact `numeric`; division casts denominators to numeric where fractions matter. NULL/zero denominators return NULL through `NULLIF`.
 -- Pitfall: Integer division truncates, unsafe text casts abort the statement, and repeated early rounding introduces avoidable error.
 -- Predict row grain and NULL/order behavior before executing each example.
-
 -- Rounding and casting
-SELECT order_id,
-       total_amount,
-       round(total_amount, 0) AS rounded,
-       cast(total_amount AS int) AS as_int
-FROM orders
-ORDER BY total_amount DESC, order_id
+SELECT
+  order_id,
+  total_amount,
+  round(total_amount, 0) AS rounded,
+  cast(total_amount AS int) AS as_int
+FROM
+  orders
+ORDER BY
+  total_amount DESC,
+  order_id
 LIMIT 50;
-
 -- Safe division and null handling
-SELECT p.category,
-       SUM(oi.quantity) AS qty,
-       ROUND(SUM(oi.unit_price*oi.quantity*(1-oi.discount)) / NULLIF(SUM(oi.quantity),0), 2) AS avg_price
-FROM order_items oi
-JOIN products p ON p.product_id = oi.product_id
-GROUP BY p.category
-ORDER BY avg_price DESC, p.category;
-
+SELECT
+  p.category,
+  SUM(oi.quantity) AS qty,
+  ROUND(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) / NULLIF (SUM(oi.quantity), 0), 2) AS avg_price
+FROM
+  order_items oi
+  JOIN products p ON p.product_id = oi.product_id
+GROUP BY
+  p.category
+ORDER BY
+  avg_price DESC,
+  p.category;
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.
@@ -82,5 +87,4 @@ ORDER BY avg_price DESC, p.category;
 --    Expected result/shape: For sql-14 Exercise 6, expected output: One row with two totals and their signed difference. The final columns are `sum_of_rounded_lines`, `rounded_exact_total`, and `rounding_difference`.
 --    Verify: For sql-14 Exercise 6, reselect the returned keys directly from the source; require unique `order_item_id` where the expected grain is one row per key and confirm the projected `sum_of_rounded_lines`, `rounded_exact_total`, and `rounding_difference` against `order_items`. Add one source row with a new `order_item_id`; verify the result gains exactly one row carrying that `order_item_id` value.
 --    Hint ladder, rung 1: For sql-14 Exercise 6, select `order_item_id` from `order_items` before adding derived columns.
-
 ROLLBACK;

@@ -2,11 +2,17 @@ import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
-
 object Main {
-  def logicalMetrics(frame: DataFrame): (Long,Long,Long,Long) = {
-    val row = frame.agg(count(lit(1)),countDistinct("fact_id"),sum("amount"),sum(col("amount") * col("factor"))).first()
-    (row.getLong(0),row.getLong(1),row.getLong(2),row.getLong(3))
+  def logicalMetrics(frame: DataFrame): (Long, Long, Long, Long) = {
+    val row = frame
+      .agg(
+        count(lit(1)),
+        countDistinct("fact_id"),
+        sum("amount"),
+        sum(col("amount") * col("factor"))
+      )
+      .first()
+    (row.getLong(0), row.getLong(1), row.getLong(2), row.getLong(3))
   }
   def joinPlan(frame: DataFrame): String = frame.queryExecution.executedPlan.toString
 
@@ -30,33 +36,47 @@ object Main {
 
   def main(args: Array[String]): Unit = {
 
-    val spark = SparkSession.builder().appName("ds60-spark-023").master("local[2]")
-      .config("spark.ui.enabled","false")
-      .config("spark.driver.host","127.0.0.1")
-      .config("spark.driver.bindAddress","127.0.0.1")
-      .config("spark.sql.shuffle.partitions","2")
-      .config("spark.sql.adaptive.enabled","false")
-      .config("spark.sql.ansi.enabled","true")
-      .config("spark.sql.session.timeZone","UTC").getOrCreate()
+    val spark = SparkSession
+      .builder()
+      .appName("ds60-spark-023")
+      .master("local[2]")
+      .config("spark.ui.enabled", "false")
+      .config("spark.driver.host", "127.0.0.1")
+      .config("spark.driver.bindAddress", "127.0.0.1")
+      .config("spark.sql.shuffle.partitions", "2")
+      .config("spark.sql.adaptive.enabled", "false")
+      .config("spark.sql.ansi.enabled", "true")
+      .config("spark.sql.session.timeZone", "UTC")
+      .getOrCreate()
     try {
       require(spark.sparkContext.master == "local[2]", "local-only course session")
       spark.sparkContext.setLogLevel("ERROR")
-      val facts = spark.range(0L,20000L,1L,4).withColumnRenamed("id","fact_id").withColumn("key",col("fact_id") % 20L).withColumn("amount",col("fact_id") % 7L + 1L)
-      val dimension = spark.range(0L,20L,1L,2).withColumnRenamed("id","key").withColumn("factor",col("key") + 1L)
-      spark.conf.set("spark.sql.autoBroadcastJoinThreshold","10485760")
-      spark.conf.set("spark.sql.join.preferSortMergeJoin","true")
+      val facts = spark
+        .range(0L, 20000L, 1L, 4)
+        .withColumnRenamed("id", "fact_id")
+        .withColumn("key", col("fact_id") % 20L)
+        .withColumn("amount", col("fact_id") % 7L + 1L)
+      val dimension = spark
+        .range(0L, 20L, 1L, 2)
+        .withColumnRenamed("id", "key")
+        .withColumn("factor", col("key") + 1L)
+      spark.conf.set("spark.sql.autoBroadcastJoinThreshold", "10485760")
+      spark.conf.set("spark.sql.join.preferSortMergeJoin", "true")
       locally {
         assert(facts.count() == 20000L && dimension.count() == 20L)
         assert(dimension.select("key").distinct().count() == 20L)
         println("Known finite build side:20 unique keys")
       }
       locally {
-        val total = (0L until 20000L).map(i => (i%7L+1L)*(i%20L+1L)).sum
+        val total = (0L until 20000L).map(i => (i % 7L + 1L) * (i % 20L + 1L)).sum
         assert(total == 839916L)
         println("Independent weighted-total oracle=" + total)
       }
       println("spark-023: worked examples passed; six task implementations remain")
-    } finally { try { () } finally { spark.stop() } }
+    } finally {
+      try { () }
+      finally { spark.stop() }
+    }
   }
 }
 

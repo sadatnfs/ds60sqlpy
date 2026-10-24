@@ -1,18 +1,22 @@
 // js-045: complete offline D3 browser reference.
-if (typeof d3 !== 'object' || d3.version !== '7.9.0') throw new Error('Prepared D3 7.9.0 is required.');
-const host = document.querySelector('#chart');
-const output = document.querySelector('#output');
-if (!host || !output) throw new Error('Preview chart/output nodes are required.');
+if (typeof d3 !== "object" || d3.version !== "7.9.0")
+  throw new Error("Prepared D3 7.9.0 is required.");
+const host = document.querySelector("#chart");
+const output = document.querySelector("#output");
+if (!host || !output) throw new Error("Preview chart/output nodes are required.");
 host.replaceChildren();
-const check = (condition, message) => { if (!condition) throw new Error(message); };
-const svg = d3.select(host)
-  .append('svg')
-  .attr('viewBox', '0 0 640 360')
-  .attr('role', 'img')
-  .attr('aria-label', "Keyed joins and object identity through updates")
-  .style('width', '100%')
-  .style('max-width', '640px');
-svg.append('title').text("Keyed joins and object identity through updates");
+const check = (condition, message) => {
+  if (!condition) throw new Error(message);
+};
+const svg = d3
+  .select(host)
+  .append("svg")
+  .attr("viewBox", "0 0 640 360")
+  .attr("role", "img")
+  .attr("aria-label", "Keyed joins and object identity through updates")
+  .style("width", "100%")
+  .style("max-width", "640px");
+svg.append("title").text("Keyed joins and object identity through updates");
 function draw(rows) {
   check(new Set(rows.map((d) => d.id)).size === rows.length, "Duplicate keys");
   svg

@@ -20,4 +20,6 @@
 // Exercise 6: Explain a correlation without claiming causation.
 // Expected: Describe association and identify alternative explanations.
 
-throw new Error("Implement the six D3 practice tasks in your saved pad before claiming completion.");
+throw new Error(
+  "Implement the six D3 practice tasks in your saved pad before claiming completion.",
+);

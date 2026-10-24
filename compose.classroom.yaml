@@ -11,13 +11,13 @@ x-classroom-worker: &classroom-worker
       source: classroom-runtime
       target: /run/ds60/worker-token
       read_only: true
-      volume: {nocopy: true}
+      volume: { nocopy: true }
   environment:
     DS60_WORKER_TOKEN_FILE: /run/ds60/worker-token/token
 
 services:
   postgres:
-    extends: {file: compose.yaml, service: postgres}
+    extends: { file: compose.yaml, service: postgres }
     image: ${DS60_POSTGRES_IMAGE:-postgres:17}
     networks: [default, module-private]
     # Host ports can be engine-selected while the app keeps its fixed inner port.
@@ -48,14 +48,14 @@ services:
       - type: volume
         source: classroom-runtime
         target: /runtime
-        volume: {nocopy: true}
+        volume: { nocopy: true }
       - type: volume
         source: classroom-learning
         target: /learning
-        volume: {nocopy: true}
+        volume: { nocopy: true }
 
   lab:
-    extends: {file: compose.yaml, service: lab}
+    extends: { file: compose.yaml, service: lab }
     profiles: !reset []
     environment:
       DS60_UID: "1000"
@@ -68,12 +68,12 @@ services:
       - type: volume
         source: classroom-learning
         target: /workspace/.learning
-        volume: {nocopy: true}
+        volume: { nocopy: true }
       - type: volume
         source: classroom-runtime
         target: /run/ds60/worker-token
         read_only: true
-        volume: {nocopy: true}
+        volume: { nocopy: true }
     depends_on:
       classroom-init:
         condition: service_completed_successfully
@@ -82,7 +82,7 @@ services:
 
   python-core-worker:
     <<: *classroom-worker
-    extends: {file: compose.modules.yaml, service: python-core-worker}
+    extends: { file: compose.modules.yaml, service: python-core-worker }
     build:
       args:
         DS60_CORE_IMAGE: classroom-base
@@ -91,59 +91,59 @@ services:
 
   cpp-worker:
     <<: *classroom-worker
-    extends: {file: compose.modules.yaml, service: cpp-worker}
+    extends: { file: compose.modules.yaml, service: cpp-worker }
 
   tensorflow-worker:
     <<: *classroom-worker
-    extends: {file: compose.modules.yaml, service: tensorflow-worker}
+    extends: { file: compose.modules.yaml, service: tensorflow-worker }
 
   scala-worker:
     <<: *classroom-worker
-    extends: {file: compose.modules.yaml, service: scala-worker}
+    extends: { file: compose.modules.yaml, service: scala-worker }
 
   spark-scala-worker:
     <<: *classroom-worker
-    extends: {file: compose.modules.yaml, service: spark-scala-worker}
+    extends: { file: compose.modules.yaml, service: spark-scala-worker }
 
   spark-python-worker:
     <<: *classroom-worker
-    extends: {file: compose.modules.yaml, service: spark-python-worker}
+    extends: { file: compose.modules.yaml, service: spark-python-worker }
 
   llm-worker:
     <<: *classroom-worker
-    extends: {file: compose.modules.yaml, service: llm-worker}
+    extends: { file: compose.modules.yaml, service: llm-worker }
 
   java-worker:
     <<: *classroom-worker
-    extends: {file: compose.modules.yaml, service: java-worker}
+    extends: { file: compose.modules.yaml, service: java-worker }
 
   javascript-worker:
     <<: *classroom-worker
-    extends: {file: compose.modules.yaml, service: javascript-worker}
+    extends: { file: compose.modules.yaml, service: javascript-worker }
 
   typescript-worker:
     <<: *classroom-worker
-    extends: {file: compose.modules.yaml, service: typescript-worker}
+    extends: { file: compose.modules.yaml, service: typescript-worker }
 
   c-worker:
     <<: *classroom-worker
-    extends: {file: compose.modules.yaml, service: c-worker}
+    extends: { file: compose.modules.yaml, service: c-worker }
 
   go-worker:
     <<: *classroom-worker
-    extends: {file: compose.modules.yaml, service: go-worker}
+    extends: { file: compose.modules.yaml, service: go-worker }
 
   csharp-worker:
     <<: *classroom-worker
-    extends: {file: compose.modules.yaml, service: csharp-worker}
+    extends: { file: compose.modules.yaml, service: csharp-worker }
 
   rust-worker:
     <<: *classroom-worker
-    extends: {file: compose.modules.yaml, service: rust-worker}
+    extends: { file: compose.modules.yaml, service: rust-worker }
 
   swift-worker:
     <<: *classroom-worker
-    extends: {file: compose.modules.yaml, service: swift-worker}
+    extends: { file: compose.modules.yaml, service: swift-worker }
 
 volumes:
   postgres-data: {}

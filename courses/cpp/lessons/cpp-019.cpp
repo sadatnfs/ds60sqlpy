@@ -30,15 +30,24 @@
 #include <variant>
 #include <vector>
 
-struct Score { int id; int points; };
+struct Score {
+  int id;
+  int points;
+};
 int main() {
-    std::vector<int> xs{-1,0,3}; auto view=xs|std::views::filter([](int x){return x>=0;})|std::views::transform([](int x){return x*2;});
-    std::vector<int> out; for(int x:view)out.push_back(x); assert((out==std::vector<int>{0,6}));
-    std::vector<Score> scores{{1,9},{2,4}}; std::ranges::sort(scores,{},&Score::points); assert(scores[0].id==2);
-    std::cout << "cpp-019 examples passed\n";
-    return 0;
+  std::vector<int> xs{-1, 0, 3};
+  auto view = xs | std::views::filter([](int x) { return x >= 0; }) |
+              std::views::transform([](int x) { return x * 2; });
+  std::vector<int> out;
+  for (int x : view)
+    out.push_back(x);
+  assert((out == std::vector<int>{0, 6}));
+  std::vector<Score> scores{{1, 9}, {2, 4}};
+  std::ranges::sort(scores, {}, &Score::points);
+  assert(scores[0].id == 2);
+  std::cout << "cpp-019 examples passed\n";
+  return 0;
 }
-
 
 // Exercise 1: Predict lazy output. Filter >=0 then double [-1,0,3]. Expected: [0,6].
 // Exercise 2: Change composition. Double first, then filter >0. Expected: [6]; zero is excluded by the new predicate.

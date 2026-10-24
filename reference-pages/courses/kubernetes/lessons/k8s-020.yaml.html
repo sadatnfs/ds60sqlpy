@@ -184,35 +184,35 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-tag">seccompProfile</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">          <span class="syntax-tag">type</span><span class="syntax-punctuation">:</span> RuntimeDefault</span>
 <span class="source-line">      <span class="syntax-tag">containers</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">      <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> hello</span>
-<span class="source-line">        <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ds60sqlpy-k8s-fixture:0.2.0</span>
-<span class="source-line">        <span class="syntax-tag">imagePullPolicy</span><span class="syntax-punctuation">:</span> Never</span>
-<span class="source-line">        <span class="syntax-tag">command</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">        <span class="syntax-punctuation">-</span> python</span>
-<span class="source-line">        <span class="syntax-punctuation">-</span> /fixture.py</span>
-<span class="source-line">        <span class="syntax-punctuation">-</span> server</span>
-<span class="source-line">        <span class="syntax-tag">ports</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">        <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> http</span>
-<span class="source-line">          <span class="syntax-tag">containerPort</span><span class="syntax-punctuation">:</span> 8080</span>
-<span class="source-line">        <span class="syntax-tag">readinessProbe</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">          <span class="syntax-tag">httpGet</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">            <span class="syntax-tag">path</span><span class="syntax-punctuation">:</span> /ready</span>
-<span class="source-line">            <span class="syntax-tag">port</span><span class="syntax-punctuation">:</span> http</span>
-<span class="source-line">          <span class="syntax-tag">periodSeconds</span><span class="syntax-punctuation">:</span> 2</span>
-<span class="source-line">          <span class="syntax-tag">failureThreshold</span><span class="syntax-punctuation">:</span> 2</span>
-<span class="source-line">        <span class="syntax-tag">resources</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">          <span class="syntax-tag">requests</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">            <span class="syntax-tag">cpu</span><span class="syntax-punctuation">:</span> 10m</span>
-<span class="source-line">            <span class="syntax-tag">memory</span><span class="syntax-punctuation">:</span> 16Mi</span>
-<span class="source-line">          <span class="syntax-tag">limits</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">            <span class="syntax-tag">cpu</span><span class="syntax-punctuation">:</span> 100m</span>
-<span class="source-line">            <span class="syntax-tag">memory</span><span class="syntax-punctuation">:</span> 64Mi</span>
-<span class="source-line">        <span class="syntax-tag">securityContext</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">          <span class="syntax-tag">allowPrivilegeEscalation</span><span class="syntax-punctuation">:</span> false</span>
-<span class="source-line">          <span class="syntax-tag">readOnlyRootFilesystem</span><span class="syntax-punctuation">:</span> true</span>
-<span class="source-line">          <span class="syntax-tag">capabilities</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">            <span class="syntax-tag">drop</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">            <span class="syntax-punctuation">-</span> ALL</span>
+<span class="source-line">        <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> hello</span>
+<span class="source-line">          <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ds60sqlpy-k8s-fixture:0.2.0</span>
+<span class="source-line">          <span class="syntax-tag">imagePullPolicy</span><span class="syntax-punctuation">:</span> Never</span>
+<span class="source-line">          <span class="syntax-tag">command</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-punctuation">-</span> python</span>
+<span class="source-line">            <span class="syntax-punctuation">-</span> /fixture.py</span>
+<span class="source-line">            <span class="syntax-punctuation">-</span> server</span>
+<span class="source-line">          <span class="syntax-tag">ports</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> http</span>
+<span class="source-line">              <span class="syntax-tag">containerPort</span><span class="syntax-punctuation">:</span> 8080</span>
+<span class="source-line">          <span class="syntax-tag">readinessProbe</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-tag">httpGet</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">              <span class="syntax-tag">path</span><span class="syntax-punctuation">:</span> /ready</span>
+<span class="source-line">              <span class="syntax-tag">port</span><span class="syntax-punctuation">:</span> http</span>
+<span class="source-line">            <span class="syntax-tag">periodSeconds</span><span class="syntax-punctuation">:</span> 2</span>
+<span class="source-line">            <span class="syntax-tag">failureThreshold</span><span class="syntax-punctuation">:</span> 2</span>
+<span class="source-line">          <span class="syntax-tag">resources</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-tag">requests</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">              <span class="syntax-tag">cpu</span><span class="syntax-punctuation">:</span> 10m</span>
+<span class="source-line">              <span class="syntax-tag">memory</span><span class="syntax-punctuation">:</span> 16Mi</span>
+<span class="source-line">            <span class="syntax-tag">limits</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">              <span class="syntax-tag">cpu</span><span class="syntax-punctuation">:</span> 100m</span>
+<span class="source-line">              <span class="syntax-tag">memory</span><span class="syntax-punctuation">:</span> 64Mi</span>
+<span class="source-line">          <span class="syntax-tag">securityContext</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-tag">allowPrivilegeEscalation</span><span class="syntax-punctuation">:</span> false</span>
+<span class="source-line">            <span class="syntax-tag">readOnlyRootFilesystem</span><span class="syntax-punctuation">:</span> true</span>
+<span class="source-line">            <span class="syntax-tag">capabilities</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">              <span class="syntax-tag">drop</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">                <span class="syntax-punctuation">-</span> ALL</span>
 <span class="source-line">---</span>
 <span class="source-line"><span class="syntax-tag">apiVersion</span><span class="syntax-punctuation">:</span> v1</span>
 <span class="source-line"><span class="syntax-tag">kind</span><span class="syntax-punctuation">:</span> Service</span>
@@ -222,10 +222,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">  <span class="syntax-tag">selector</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-tag">app</span><span class="syntax-punctuation">:</span> hello</span>
 <span class="source-line">  <span class="syntax-tag">ports</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">  <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> http</span>
-<span class="source-line">    <span class="syntax-tag">port</span><span class="syntax-punctuation">:</span> 8080</span>
-<span class="source-line">    <span class="syntax-tag">targetPort</span><span class="syntax-punctuation">:</span> http</span>
-<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> http</span>
+<span class="source-line">      <span class="syntax-tag">port</span><span class="syntax-punctuation">:</span> 8080</span>
+<span class="source-line">      <span class="syntax-tag">targetPort</span><span class="syntax-punctuation">:</span> http</span>
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Name the layers. Draw client namespace,DNS,Service,EndpointSlice,Pod port and HTTP route. Expected: Each layer has a distinct observation and possible failure.</span></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Verify the allowed path. Run the fixed Deployment/Service source under a qualified lease. Expected: Owned backend identity and exact /version response pass,with cleanup.</span></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Classify NXDOMAIN. Interpret a host-provided failed name-resolution trace. Expected: Investigate name,namespace and DNS context before backend application state.</span></span>

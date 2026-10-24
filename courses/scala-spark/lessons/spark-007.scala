@@ -1,5 +1,3 @@
-
-
 object Main {
   final case class Record(id: String, status: String, amount: Long)
 
@@ -23,21 +21,21 @@ object Main {
 
   def main(args: Array[String]): Unit = {
     locally {
-      val value: Either[String,Long] = Right(25L)
-      val invalid: Either[String,Long] = Left("invalid_amount")
+      val value: Either[String, Long] = Right(25L)
+      val invalid: Either[String, Long] = Left("invalid_amount")
       assert(value.map(_ + 5L) == Right(30L))
       assert(invalid.map(_ + 5L) == Left("invalid_amount"))
       println(value.map(_ / 5L))
     }
     locally {
       val combined = for {
-        amount <- (Right(20L): Either[String,Long])
-        fee <- (Right(5L): Either[String,Long])
+        amount <- (Right(20L): Either[String, Long])
+        fee <- (Right(5L): Either[String, Long])
       } yield amount + fee
       assert(combined == Right(25L))
       val blocked = for {
-        amount <- (Left("invalid_amount"): Either[String,Long])
-        fee <- (Right(5L): Either[String,Long])
+        amount <- (Left("invalid_amount"): Either[String, Long])
+        fee <- (Right(5L): Either[String, Long])
       } yield amount + fee
       assert(blocked == Left("invalid_amount"))
       println(combined)

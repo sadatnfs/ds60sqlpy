@@ -47,26 +47,10 @@
   ],
   "golden": {
     "events": [
-      [
-        "p1",
-        "paid",
-        100
-      ],
-      [
-        "p2",
-        "paid",
-        100
-      ],
-      [
-        "v1",
-        "voided",
-        null
-      ],
-      [
-        "r1",
-        "refunded",
-        25
-      ]
+      ["p1", "paid", 100],
+      ["p2", "paid", 100],
+      ["v1", "voided", null],
+      ["r1", "refunded", 25]
     ],
     "net_cents": 175,
     "counts": {

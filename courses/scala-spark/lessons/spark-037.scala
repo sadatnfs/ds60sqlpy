@@ -1,128 +1,235 @@
 import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
-import java.nio.file.{Files,Path,Paths,StandardOpenOption,StandardCopyOption}
+import java.nio.file.{Files, Path, Paths, StandardOpenOption, StandardCopyOption}
 import java.nio.charset.StandardCharsets
 import java.util.UUID
 import scala.jdk.CollectionConverters._
-import org.apache.spark.sql.streaming.{StreamingQuery,Trigger}
+import org.apache.spark.sql.streaming.{StreamingQuery, Trigger}
 import scala.collection.mutable.ArrayBuffer
 
 object Main {
-  val eventSchema = StructType(Seq(StructField("id",LongType,true),StructField("cents",LongType,true)))
+  val eventSchema = StructType(
+    Seq(StructField("id", LongType, true), StructField("cents", LongType, true))
+  )
   val ownedQueries = ArrayBuffer.empty[StreamingQuery]
-  case class RunReceipt(id: String,runId: String,inputRows: Long,batches: Seq[Long])
+  case class RunReceipt(id: String, runId: String, inputRows: Long, batches: Seq[Long])
   def deleteOwned(root: Path): Unit = {
     require(root.getFileName.toString.startsWith("spark-"))
     require(root.getParent == Paths.get(".").toAbsolutePath.normalize())
     val walk = Files.walk(root)
-    try walk.iterator().asScala.toVector.sortBy(_.getNameCount).reverse.foreach(p => Files.delete(p))
+    try
+      walk.iterator().asScala.toVector.sortBy(_.getNameCount).reverse.foreach(p => Files.delete(p))
     finally walk.close()
   }
-  def publishFile(root: Path,input: Path,name: String,lines: Seq[String]): Unit = {
+  def publishFile(root: Path, input: Path, name: String, lines: Seq[String]): Unit = {
     require(name.matches("batch-[0-9]{2}\\.json"))
     require(lines.size <= 8 && lines.forall(_.length <= 256))
     Files.createDirectories(input)
-    val staged = root.resolve("pending-"+UUID.randomUUID().toString+".json")
+    val staged = root.resolve("pending-" + UUID.randomUUID().toString + ".json")
     try {
-      Files.writeString(staged,lines.mkString("\n")+"\n",StandardCharsets.UTF_8,StandardOpenOption.CREATE_NEW)
-      Files.move(staged,input.resolve(name),StandardCopyOption.ATOMIC_MOVE)
+      Files.writeString(
+        staged,
+        lines.mkString("\n") + "\n",
+        StandardCharsets.UTF_8,
+        StandardOpenOption.CREATE_NEW
+      )
+      Files.move(staged, input.resolve(name), StandardCopyOption.ATOMIC_MOVE)
     } finally Files.deleteIfExists(staged)
   }
-  def runParquet(spark: SparkSession,input: Path,checkpoint: Path,output: Path): RunReceipt = {
-    val source = spark.readStream.schema(eventSchema).option("maxFilesPerTrigger",1).option("mode","FAILFAST").json(input.toString)
-    val query = source.writeStream.format("parquet").outputMode("append")
-      .option("checkpointLocation",checkpoint.toString).trigger(Trigger.AvailableNow()).start(output.toString)
+  def runParquet(spark: SparkSession, input: Path, checkpoint: Path, output: Path): RunReceipt = {
+    val source = spark.readStream
+      .schema(eventSchema)
+      .option("maxFilesPerTrigger", 1)
+      .option("mode", "FAILFAST")
+      .json(input.toString)
+    val query = source.writeStream
+      .format("parquet")
+      .outputMode("append")
+      .option("checkpointLocation", checkpoint.toString)
+      .trigger(Trigger.AvailableNow())
+      .start(output.toString)
     ownedQueries += query
     try {
-      require(query.awaitTermination(45000L),"Finite query exceeded45-second deadline")
-      require(query.exception.isEmpty,"Finite query failed")
-      RunReceipt(query.id.toString,query.runId.toString,query.recentProgress.map(_.numInputRows).sum,query.recentProgress.map(_.batchId).toSeq)
-    } finally { if(query.isActive) query.stop() }
+      require(query.awaitTermination(45000L), "Finite query exceeded45-second deadline")
+      require(query.exception.isEmpty, "Finite query failed")
+      RunReceipt(
+        query.id.toString,
+        query.runId.toString,
+        query.recentProgress.map(_.numInputRows).sum,
+        query.recentProgress.map(_.batchId).toSeq
+      )
+    } finally { if (query.isActive) query.stop() }
   }
-  def bag(spark: SparkSession,path: Path): Seq[String] = {
-    val frame=spark.read.parquet(path.toString)
-    require(frame.schema.fields.map(f => (f.name,f.dataType.simpleString)).toSeq == Seq(("id","bigint"),("cents","bigint")))
-    require(frame.count() <= 8L,"Tiny result bound exceeded")
-    frame.orderBy("id","cents").collect().map(r => s"${r.getLong(0)}:${r.getLong(1)}").toSeq
+  def bag(spark: SparkSession, path: Path): Seq[String] = {
+    val frame = spark.read.parquet(path.toString)
+    require(
+      frame.schema.fields.map(f => (f.name, f.dataType.simpleString)).toSeq == Seq(
+        ("id", "bigint"),
+        ("cents", "bigint")
+      )
+    )
+    require(frame.count() <= 8L, "Tiny result bound exceeded")
+    frame.orderBy("id", "cents").collect().map(r => s"${r.getLong(0)}:${r.getLong(1)}").toSeq
   }
 
-  val testSchema=StructType(Seq(StructField("id",LongType,true),StructField("event_second",LongType,true),StructField("cents",LongType,true)))
-  def runScenario(spark: SparkSession,input: Path,checkpoint: Path,output: Path,mode: String): RunReceipt = {
-    require(Set("restart","duplicates","late","invalid").contains(mode))
-    val raw=spark.readStream.schema(testSchema).option("maxFilesPerTrigger",1).option("mode","FAILFAST").json(input.toString)
-    val selected=mode match {
-      case "duplicates" => raw.select("id","cents").dropDuplicates("id")
-      case "late" => raw.filter(col("event_second") >= 90L).select("id","cents")
-      case "invalid" => raw.filter(col("id").isNotNull && col("event_second").isNotNull && col("cents").isNotNull && col("id") > 0L && col("cents") >= 0L).select("id","cents")
-      case _ => raw.select("id","cents")
+  val testSchema = StructType(
+    Seq(
+      StructField("id", LongType, true),
+      StructField("event_second", LongType, true),
+      StructField("cents", LongType, true)
+    )
+  )
+  def runScenario(
+      spark: SparkSession,
+      input: Path,
+      checkpoint: Path,
+      output: Path,
+      mode: String
+  ): RunReceipt = {
+    require(Set("restart", "duplicates", "late", "invalid").contains(mode))
+    val raw = spark.readStream
+      .schema(testSchema)
+      .option("maxFilesPerTrigger", 1)
+      .option("mode", "FAILFAST")
+      .json(input.toString)
+    val selected = mode match {
+      case "duplicates" => raw.select("id", "cents").dropDuplicates("id")
+      case "late"       => raw.filter(col("event_second") >= 90L).select("id", "cents")
+      case "invalid"    =>
+        raw
+          .filter(
+            col("id").isNotNull && col("event_second").isNotNull && col("cents").isNotNull && col(
+              "id"
+            ) > 0L && col("cents") >= 0L
+          )
+          .select("id", "cents")
+      case _ => raw.select("id", "cents")
     }
-    val query=selected.writeStream.format("parquet").outputMode("append").option("checkpointLocation",checkpoint.toString).trigger(Trigger.AvailableNow()).start(output.toString)
+    val query = selected.writeStream
+      .format("parquet")
+      .outputMode("append")
+      .option("checkpointLocation", checkpoint.toString)
+      .trigger(Trigger.AvailableNow())
+      .start(output.toString)
     ownedQueries += query
     try {
-      require(query.awaitTermination(45000L),"Scenario deadline exceeded")
+      require(query.awaitTermination(45000L), "Scenario deadline exceeded")
       require(query.exception.isEmpty)
-      RunReceipt(query.id.toString,query.runId.toString,query.recentProgress.map(_.numInputRows).sum,query.recentProgress.map(_.batchId).toSeq)
-    } finally { if(query.isActive) query.stop() }
+      RunReceipt(
+        query.id.toString,
+        query.runId.toString,
+        query.recentProgress.map(_.numInputRows).sum,
+        query.recentProgress.map(_.batchId).toSeq
+      )
+    } finally { if (query.isActive) query.stop() }
   }
-  def prepareCase(root: Path,name: String,lines: Seq[String]): (Path,Path,Path) = {
-    require(Set("restart","duplicates","late","invalid","demo").contains(name))
-    val input=root.resolve(name+"-input")
-    publishFile(root,input,"batch-01.json",lines)
-    (input,root.resolve(name+"-checkpoint"),root.resolve(name+"-output"))
+  def prepareCase(root: Path, name: String, lines: Seq[String]): (Path, Path, Path) = {
+    require(Set("restart", "duplicates", "late", "invalid", "demo").contains(name))
+    val input = root.resolve(name + "-input")
+    publishFile(root, input, "batch-01.json", lines)
+    (input, root.resolve(name + "-checkpoint"), root.resolve(name + "-output"))
   }
 
-  def baseline(spark: SparkSession,paths: (Path,Path,Path)): RunReceipt =
+  def baseline(spark: SparkSession, paths: (Path, Path, Path)): RunReceipt =
     throw new UnsupportedOperationException("Complete baseline")
 
-  def restartEmpty(spark: SparkSession,paths: (Path,Path,Path)): RunReceipt =
+  def restartEmpty(spark: SparkSession, paths: (Path, Path, Path)): RunReceipt =
     throw new UnsupportedOperationException("Complete restartEmpty")
 
-  def duplicateCase(spark: SparkSession,paths: (Path,Path,Path)): RunReceipt =
+  def duplicateCase(spark: SparkSession, paths: (Path, Path, Path)): RunReceipt =
     throw new UnsupportedOperationException("Complete duplicateCase")
 
-  def lateCase(spark: SparkSession,paths: (Path,Path,Path)): RunReceipt =
+  def lateCase(spark: SparkSession, paths: (Path, Path, Path)): RunReceipt =
     throw new UnsupportedOperationException("Complete lateCase")
 
-  def invalidCase(spark: SparkSession,paths: (Path,Path,Path)): RunReceipt =
+  def invalidCase(spark: SparkSession, paths: (Path, Path, Path)): RunReceipt =
     throw new UnsupportedOperationException("Complete invalidCase")
 
-  def requireBag(actual: Seq[String],expected: Seq[String]): Unit =
+  def requireBag(actual: Seq[String], expected: Seq[String]): Unit =
     throw new UnsupportedOperationException("Complete requireBag")
 
   def main(args: Array[String]): Unit = {
     var ownedRoot: Path = null
-    val spark = SparkSession.builder().appName("ds60-spark-037").master("local[2]")
-      .config("spark.ui.enabled","false")
-      .config("spark.driver.host","127.0.0.1")
-      .config("spark.driver.bindAddress","127.0.0.1")
-      .config("spark.sql.shuffle.partitions","2")
-      .config("spark.sql.adaptive.enabled","false")
-      .config("spark.sql.ansi.enabled","true")
-      .config("spark.sql.session.timeZone","UTC").getOrCreate()
+    val spark = SparkSession
+      .builder()
+      .appName("ds60-spark-037")
+      .master("local[2]")
+      .config("spark.ui.enabled", "false")
+      .config("spark.driver.host", "127.0.0.1")
+      .config("spark.driver.bindAddress", "127.0.0.1")
+      .config("spark.sql.shuffle.partitions", "2")
+      .config("spark.sql.adaptive.enabled", "false")
+      .config("spark.sql.ansi.enabled", "true")
+      .config("spark.sql.session.timeZone", "UTC")
+      .getOrCreate()
     try {
       require(spark.sparkContext.master == "local[2]", "local-only course session")
       spark.sparkContext.setLogLevel("ERROR")
-      require(spark.version == "4.0.1","Prepared Spark4.0.1 required")
-      spark.conf.set("spark.sql.streaming.stopTimeout","5000")
-      ownedRoot=Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(),"spark-037-")
-      val restartPaths=prepareCase(ownedRoot,"restart",Seq("""{"id":1,"event_second":100,"cents":100}""","""{"id":2,"event_second":110,"cents":200}"""))
-      val duplicatePaths=prepareCase(ownedRoot,"duplicates",Seq("""{"id":1,"event_second":100,"cents":100}""","""{"id":1,"event_second":100,"cents":100}"""))
-      val latePaths=prepareCase(ownedRoot,"late",Seq("""{"id":1,"event_second":80,"cents":100}""","""{"id":2,"event_second":90,"cents":200}""","""{"id":3,"event_second":110,"cents":300}"""))
-      val invalidPaths=prepareCase(ownedRoot,"invalid",Seq("""{"id":null,"event_second":100,"cents":100}""","""{"id":2,"event_second":100,"cents":-1}""","""{"id":3,"event_second":100,"cents":300}"""))
+      require(spark.version == "4.0.1", "Prepared Spark4.0.1 required")
+      spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
+      ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(), "spark-037-")
+      val restartPaths = prepareCase(
+        ownedRoot,
+        "restart",
+        Seq(
+          """{"id":1,"event_second":100,"cents":100}""",
+          """{"id":2,"event_second":110,"cents":200}"""
+        )
+      )
+      val duplicatePaths = prepareCase(
+        ownedRoot,
+        "duplicates",
+        Seq(
+          """{"id":1,"event_second":100,"cents":100}""",
+          """{"id":1,"event_second":100,"cents":100}"""
+        )
+      )
+      val latePaths = prepareCase(
+        ownedRoot,
+        "late",
+        Seq(
+          """{"id":1,"event_second":80,"cents":100}""",
+          """{"id":2,"event_second":90,"cents":200}""",
+          """{"id":3,"event_second":110,"cents":300}"""
+        )
+      )
+      val invalidPaths = prepareCase(
+        ownedRoot,
+        "invalid",
+        Seq(
+          """{"id":null,"event_second":100,"cents":100}""",
+          """{"id":2,"event_second":100,"cents":-1}""",
+          """{"id":3,"event_second":100,"cents":300}"""
+        )
+      )
       locally {
-        val demo=prepareCase(ownedRoot,"demo",Seq("""{"id":1,"event_second":100,"cents":100}""","""{"id":1,"event_second":100,"cents":100}"""))
-        val result=runScenario(spark,demo._1,demo._2,demo._3,"duplicates")
-        assert(result.inputRows==2L && bag(spark,demo._3)==Seq("1:100"))
+        val demo = prepareCase(
+          ownedRoot,
+          "demo",
+          Seq(
+            """{"id":1,"event_second":100,"cents":100}""",
+            """{"id":1,"event_second":100,"cents":100}"""
+          )
+        )
+        val result = runScenario(spark, demo._1, demo._2, demo._3, "duplicates")
+        assert(result.inputRows == 2L && bag(spark, demo._3) == Seq("1:100"))
       }
       locally {
-        val samples=Seq(80L,90L,110L)
-        assert(samples.filter(_ >= 90L)==Seq(90L,110L))
+        val samples = Seq(80L, 90L, 110L)
+        assert(samples.filter(_ >= 90L) == Seq(90L, 110L))
       }
       println("spark-037: worked examples passed; six task implementations remain")
-    } finally { try { ownedQueries.foreach(q => if(q.isActive) q.stop())
-require(!ownedQueries.exists(_.isActive),"Do not remove scratch while an owned query is active")
-if(ownedRoot != null) deleteOwned(ownedRoot) } finally { spark.stop() } }
+    } finally {
+      try {
+        ownedQueries.foreach(q => if (q.isActive) q.stop())
+        require(
+          !ownedQueries.exists(_.isActive),
+          "Do not remove scratch while an owned query is active"
+        )
+        if (ownedRoot != null) deleteOwned(ownedRoot)
+      } finally { spark.stop() }
+    }
   }
 }
 

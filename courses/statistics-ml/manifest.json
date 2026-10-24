@@ -14,9 +14,7 @@
       "id": "statistics-001",
       "title": "Problem Formulation and Statistical Reasoning",
       "chapter_path": "courses/statistics-ml/chapters/01-problem-formulation-and-statistical-reasoning.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_01.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_01.py"],
       "topic_ids": [
         "stat-01-01",
         "stat-01-02",
@@ -44,9 +42,7 @@
       "prerequisites": [],
       "level": "foundation",
       "minutes": 90,
-      "dependencies": [
-        "numpy"
-      ],
+      "dependencies": ["numpy"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -54,9 +50,7 @@
       "id": "statistics-002",
       "title": "Mathematical Foundations",
       "chapter_path": "courses/statistics-ml/chapters/02-mathematical-foundations.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_02.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_02.py"],
       "topic_ids": [
         "stat-02-01",
         "stat-02-02",
@@ -77,14 +71,10 @@
         "stat-02-17",
         "stat-02-18"
       ],
-      "prerequisites": [
-        "statistics-001"
-      ],
+      "prerequisites": ["statistics-001"],
       "level": "foundation",
       "minutes": 90,
-      "dependencies": [
-        "numpy"
-      ],
+      "dependencies": ["numpy"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -92,9 +82,7 @@
       "id": "statistics-003",
       "title": "Probability Fundamentals and Stochastic Processes",
       "chapter_path": "courses/statistics-ml/chapters/03-probability-fundamentals-and-stochastic-processes.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_03.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_03.py"],
       "topic_ids": [
         "stat-03-01",
         "stat-03-02",
@@ -122,14 +110,10 @@
         "stat-03-24",
         "stat-03-25"
       ],
-      "prerequisites": [
-        "statistics-002"
-      ],
+      "prerequisites": ["statistics-002"],
       "level": "foundation",
       "minutes": 90,
-      "dependencies": [
-        "numpy"
-      ],
+      "dependencies": ["numpy"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -137,9 +121,7 @@
       "id": "statistics-004",
       "title": "Probability Distributions You Should Recognize",
       "chapter_path": "courses/statistics-ml/chapters/04-probability-distributions-you-should-recognize.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_04.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_04.py"],
       "topic_ids": [
         "stat-04-01",
         "stat-04-02",
@@ -169,15 +151,10 @@
         "stat-04-26",
         "stat-04-27"
       ],
-      "prerequisites": [
-        "statistics-003"
-      ],
+      "prerequisites": ["statistics-003"],
       "level": "foundation",
       "minutes": 90,
-      "dependencies": [
-        "numpy",
-        "scipy"
-      ],
+      "dependencies": ["numpy", "scipy"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -185,9 +162,7 @@
       "id": "statistics-005",
       "title": "Sampling, Surveys, and Data Collection",
       "chapter_path": "courses/statistics-ml/chapters/05-sampling-surveys-and-data-collection.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_05.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_05.py"],
       "topic_ids": [
         "stat-05-01",
         "stat-05-02",
@@ -213,14 +188,10 @@
         "stat-05-22",
         "stat-05-23"
       ],
-      "prerequisites": [
-        "statistics-004"
-      ],
+      "prerequisites": ["statistics-004"],
       "level": "foundation",
       "minutes": 90,
-      "dependencies": [
-        "numpy"
-      ],
+      "dependencies": ["numpy"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -228,9 +199,7 @@
       "id": "statistics-006",
       "title": "Measurement, Exploratory Analysis, and Data Quality",
       "chapter_path": "courses/statistics-ml/chapters/06-measurement-exploratory-analysis-and-data-quality.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_06.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_06.py"],
       "topic_ids": [
         "stat-06-01",
         "stat-06-02",
@@ -258,15 +227,10 @@
         "stat-06-24",
         "stat-06-25"
       ],
-      "prerequisites": [
-        "statistics-005"
-      ],
+      "prerequisites": ["statistics-005"],
       "level": "foundation",
       "minutes": 90,
-      "dependencies": [
-        "numpy",
-        "pandas"
-      ],
+      "dependencies": ["numpy", "pandas"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -274,9 +238,7 @@
       "id": "statistics-007",
       "title": "Missing Data, Measurement Error, and Robust Statistics",
       "chapter_path": "courses/statistics-ml/chapters/07-missing-data-measurement-error-and-robust-statistics.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_07.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_07.py"],
       "topic_ids": [
         "stat-07-01",
         "stat-07-02",
@@ -304,15 +266,10 @@
         "stat-07-24",
         "stat-07-25"
       ],
-      "prerequisites": [
-        "statistics-006"
-      ],
+      "prerequisites": ["statistics-006"],
       "level": "foundation",
       "minutes": 90,
-      "dependencies": [
-        "numpy",
-        "scipy"
-      ],
+      "dependencies": ["numpy", "scipy"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -320,9 +277,7 @@
       "id": "statistics-008",
       "title": "Estimation and Statistical Inference",
       "chapter_path": "courses/statistics-ml/chapters/08-estimation-and-statistical-inference.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_08.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_08.py"],
       "topic_ids": [
         "stat-08-01",
         "stat-08-02",
@@ -354,15 +309,10 @@
         "stat-08-28",
         "stat-08-29"
       ],
-      "prerequisites": [
-        "statistics-007"
-      ],
+      "prerequisites": ["statistics-007"],
       "level": "foundation",
       "minutes": 90,
-      "dependencies": [
-        "numpy",
-        "scipy"
-      ],
+      "dependencies": ["numpy", "scipy"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -370,9 +320,7 @@
       "id": "statistics-009",
       "title": "Hypothesis Tests and Group Comparisons",
       "chapter_path": "courses/statistics-ml/chapters/09-hypothesis-tests-and-group-comparisons.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_09.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_09.py"],
       "topic_ids": [
         "stat-09-01",
         "stat-09-02",
@@ -408,15 +356,10 @@
         "stat-09-32",
         "stat-09-33"
       ],
-      "prerequisites": [
-        "statistics-008"
-      ],
+      "prerequisites": ["statistics-008"],
       "level": "foundation",
       "minutes": 90,
-      "dependencies": [
-        "numpy",
-        "scipy"
-      ],
+      "dependencies": ["numpy", "scipy"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -424,9 +367,7 @@
       "id": "statistics-010",
       "title": "Multiple Testing, Sequential Inference, and Selective Inference",
       "chapter_path": "courses/statistics-ml/chapters/10-multiple-testing-sequential-inference-and-selective-inference.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_10.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_10.py"],
       "topic_ids": [
         "stat-10-01",
         "stat-10-02",
@@ -451,15 +392,10 @@
         "stat-10-21",
         "stat-10-22"
       ],
-      "prerequisites": [
-        "statistics-009"
-      ],
+      "prerequisites": ["statistics-009"],
       "level": "foundation",
       "minutes": 90,
-      "dependencies": [
-        "numpy",
-        "statsmodels"
-      ],
+      "dependencies": ["numpy", "statsmodels"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -467,9 +403,7 @@
       "id": "statistics-011",
       "title": "Regression and Generalized Linear Models",
       "chapter_path": "courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_11.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_11.py"],
       "topic_ids": [
         "stat-11-01",
         "stat-11-02",
@@ -504,17 +438,10 @@
         "stat-11-31",
         "stat-11-32"
       ],
-      "prerequisites": [
-        "statistics-010"
-      ],
+      "prerequisites": ["statistics-010"],
       "level": "intermediate",
       "minutes": 120,
-      "dependencies": [
-        "numpy",
-        "scikit-learn",
-        "scipy",
-        "statsmodels"
-      ],
+      "dependencies": ["numpy", "scikit-learn", "scipy", "statsmodels"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -522,9 +449,7 @@
       "id": "statistics-012",
       "title": "Regression Diagnostics, Multilevel Models, and Longitudinal Analysis",
       "chapter_path": "courses/statistics-ml/chapters/12-regression-diagnostics-multilevel-models-and-longitudinal-analysis.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_12.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_12.py"],
       "topic_ids": [
         "stat-12-01",
         "stat-12-02",
@@ -551,14 +476,10 @@
         "stat-12-23",
         "stat-12-24"
       ],
-      "prerequisites": [
-        "statistics-011"
-      ],
+      "prerequisites": ["statistics-011"],
       "level": "intermediate",
       "minutes": 120,
-      "dependencies": [
-        "numpy"
-      ],
+      "dependencies": ["numpy"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -566,9 +487,7 @@
       "id": "statistics-013",
       "title": "Classical Experimental Design",
       "chapter_path": "courses/statistics-ml/chapters/13-classical-experimental-design.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_13.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_13.py"],
       "topic_ids": [
         "stat-13-01",
         "stat-13-02",
@@ -596,15 +515,10 @@
         "stat-13-24",
         "stat-13-25"
       ],
-      "prerequisites": [
-        "statistics-012"
-      ],
+      "prerequisites": ["statistics-012"],
       "level": "intermediate",
       "minutes": 120,
-      "dependencies": [
-        "numpy",
-        "scipy"
-      ],
+      "dependencies": ["numpy", "scipy"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -612,9 +526,7 @@
       "id": "statistics-014",
       "title": "Online Experimentation and A/B Testing",
       "chapter_path": "courses/statistics-ml/chapters/14-online-experimentation-and-a-b-testing.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_14.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_14.py"],
       "topic_ids": [
         "stat-14-01",
         "stat-14-02",
@@ -645,15 +557,10 @@
         "stat-14-27",
         "stat-14-28"
       ],
-      "prerequisites": [
-        "statistics-013"
-      ],
+      "prerequisites": ["statistics-013"],
       "level": "intermediate",
       "minutes": 120,
-      "dependencies": [
-        "numpy",
-        "scipy"
-      ],
+      "dependencies": ["numpy", "scipy"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -661,9 +568,7 @@
       "id": "statistics-015",
       "title": "Causal Inference Foundations",
       "chapter_path": "courses/statistics-ml/chapters/15-causal-inference-foundations.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_15.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_15.py"],
       "topic_ids": [
         "stat-15-01",
         "stat-15-02",
@@ -688,14 +593,10 @@
         "stat-15-21",
         "stat-15-22"
       ],
-      "prerequisites": [
-        "statistics-014"
-      ],
+      "prerequisites": ["statistics-014"],
       "level": "intermediate",
       "minutes": 120,
-      "dependencies": [
-        "numpy"
-      ],
+      "dependencies": ["numpy"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -703,9 +604,7 @@
       "id": "statistics-016",
       "title": "Quasi-Experiments and Causal Study Designs",
       "chapter_path": "courses/statistics-ml/chapters/16-quasi-experiments-and-causal-study-designs.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_16.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_16.py"],
       "topic_ids": [
         "stat-16-01",
         "stat-16-02",
@@ -730,14 +629,10 @@
         "stat-16-21",
         "stat-16-22"
       ],
-      "prerequisites": [
-        "statistics-015"
-      ],
+      "prerequisites": ["statistics-015"],
       "level": "intermediate",
       "minutes": 120,
-      "dependencies": [
-        "numpy"
-      ],
+      "dependencies": ["numpy"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -745,9 +640,7 @@
       "id": "statistics-017",
       "title": "Causal Estimation, Heterogeneous Effects, and Policy Learning",
       "chapter_path": "courses/statistics-ml/chapters/17-causal-estimation-heterogeneous-effects-and-policy-learning.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_17.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_17.py"],
       "topic_ids": [
         "stat-17-01",
         "stat-17-02",
@@ -779,14 +672,10 @@
         "stat-17-28",
         "stat-17-29"
       ],
-      "prerequisites": [
-        "statistics-016"
-      ],
+      "prerequisites": ["statistics-016"],
       "level": "intermediate",
       "minutes": 120,
-      "dependencies": [
-        "numpy"
-      ],
+      "dependencies": ["numpy"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -794,9 +683,7 @@
       "id": "statistics-018",
       "title": "Bayesian Statistics and Probabilistic Modeling",
       "chapter_path": "courses/statistics-ml/chapters/18-bayesian-statistics-and-probabilistic-modeling.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_18.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_18.py"],
       "topic_ids": [
         "stat-18-01",
         "stat-18-02",
@@ -829,15 +716,10 @@
         "stat-18-29",
         "stat-18-30"
       ],
-      "prerequisites": [
-        "statistics-017"
-      ],
+      "prerequisites": ["statistics-017"],
       "level": "intermediate",
       "minutes": 120,
-      "dependencies": [
-        "numpy",
-        "scipy"
-      ],
+      "dependencies": ["numpy", "scipy"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -845,9 +727,7 @@
       "id": "statistics-019",
       "title": "Statistical Learning and Classical Supervised Models",
       "chapter_path": "courses/statistics-ml/chapters/19-statistical-learning-and-classical-supervised-models.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_19.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_19.py"],
       "topic_ids": [
         "stat-19-01",
         "stat-19-02",
@@ -880,15 +760,10 @@
         "stat-19-29",
         "stat-19-30"
       ],
-      "prerequisites": [
-        "statistics-018"
-      ],
+      "prerequisites": ["statistics-018"],
       "level": "intermediate",
       "minutes": 120,
-      "dependencies": [
-        "numpy",
-        "scikit-learn"
-      ],
+      "dependencies": ["numpy", "scikit-learn"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -896,9 +771,7 @@
       "id": "statistics-020",
       "title": "Feature Engineering and Representation Learning",
       "chapter_path": "courses/statistics-ml/chapters/20-feature-engineering-and-representation-learning.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_20.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_20.py"],
       "topic_ids": [
         "stat-20-01",
         "stat-20-02",
@@ -923,14 +796,10 @@
         "stat-20-21",
         "stat-20-22"
       ],
-      "prerequisites": [
-        "statistics-019"
-      ],
+      "prerequisites": ["statistics-019"],
       "level": "intermediate",
       "minutes": 120,
-      "dependencies": [
-        "numpy"
-      ],
+      "dependencies": ["numpy"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -938,9 +807,7 @@
       "id": "statistics-021",
       "title": "Unsupervised Learning and Multivariate Analysis",
       "chapter_path": "courses/statistics-ml/chapters/21-unsupervised-learning-and-multivariate-analysis.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_21.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_21.py"],
       "topic_ids": [
         "stat-21-01",
         "stat-21-02",
@@ -969,15 +836,10 @@
         "stat-21-25",
         "stat-21-26"
       ],
-      "prerequisites": [
-        "statistics-020"
-      ],
+      "prerequisites": ["statistics-020"],
       "level": "intermediate",
       "minutes": 120,
-      "dependencies": [
-        "numpy",
-        "scikit-learn"
-      ],
+      "dependencies": ["numpy", "scikit-learn"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -985,9 +847,7 @@
       "id": "statistics-022",
       "title": "Model Validation and Predictive Performance",
       "chapter_path": "courses/statistics-ml/chapters/22-model-validation-and-predictive-performance.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_22.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_22.py"],
       "topic_ids": [
         "stat-22-01",
         "stat-22-02",
@@ -1020,15 +880,10 @@
         "stat-22-29",
         "stat-22-30"
       ],
-      "prerequisites": [
-        "statistics-021"
-      ],
+      "prerequisites": ["statistics-021"],
       "level": "intermediate",
       "minutes": 120,
-      "dependencies": [
-        "numpy",
-        "scikit-learn"
-      ],
+      "dependencies": ["numpy", "scikit-learn"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -1036,9 +891,7 @@
       "id": "statistics-023",
       "title": "Uncertainty Quantification and Distribution Shift",
       "chapter_path": "courses/statistics-ml/chapters/23-uncertainty-quantification-and-distribution-shift.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_23.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_23.py"],
       "topic_ids": [
         "stat-23-01",
         "stat-23-02",
@@ -1061,14 +914,10 @@
         "stat-23-19",
         "stat-23-20"
       ],
-      "prerequisites": [
-        "statistics-022"
-      ],
+      "prerequisites": ["statistics-022"],
       "level": "advanced",
       "minutes": 120,
-      "dependencies": [
-        "numpy"
-      ],
+      "dependencies": ["numpy"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -1076,9 +925,7 @@
       "id": "statistics-024",
       "title": "Explainability, Fairness, and Model Robustness",
       "chapter_path": "courses/statistics-ml/chapters/24-explainability-fairness-and-model-robustness.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_24.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_24.py"],
       "topic_ids": [
         "stat-24-01",
         "stat-24-02",
@@ -1104,14 +951,10 @@
         "stat-24-22",
         "stat-24-23"
       ],
-      "prerequisites": [
-        "statistics-023"
-      ],
+      "prerequisites": ["statistics-023"],
       "level": "advanced",
       "minutes": 120,
-      "dependencies": [
-        "numpy"
-      ],
+      "dependencies": ["numpy"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -1119,9 +962,7 @@
       "id": "statistics-025",
       "title": "Time-Series Foundations and Diagnostics",
       "chapter_path": "courses/statistics-ml/chapters/25-time-series-foundations-and-diagnostics.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_25.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_25.py"],
       "topic_ids": [
         "stat-25-01",
         "stat-25-02",
@@ -1149,14 +990,10 @@
         "stat-25-24",
         "stat-25-25"
       ],
-      "prerequisites": [
-        "statistics-024"
-      ],
+      "prerequisites": ["statistics-024"],
       "level": "advanced",
       "minutes": 120,
-      "dependencies": [
-        "numpy"
-      ],
+      "dependencies": ["numpy"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -1164,9 +1001,7 @@
       "id": "statistics-026",
       "title": "Classical Forecasting Methods",
       "chapter_path": "courses/statistics-ml/chapters/26-classical-forecasting-methods.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_26.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_26.py"],
       "topic_ids": [
         "stat-26-01",
         "stat-26-02",
@@ -1195,14 +1030,10 @@
         "stat-26-25",
         "stat-26-26"
       ],
-      "prerequisites": [
-        "statistics-025"
-      ],
+      "prerequisites": ["statistics-025"],
       "level": "advanced",
       "minutes": 120,
-      "dependencies": [
-        "numpy"
-      ],
+      "dependencies": ["numpy"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -1210,9 +1041,7 @@
       "id": "statistics-027",
       "title": "Advanced Forecasting and Forecast Evaluation",
       "chapter_path": "courses/statistics-ml/chapters/27-advanced-forecasting-and-forecast-evaluation.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_27.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_27.py"],
       "topic_ids": [
         "stat-27-01",
         "stat-27-02",
@@ -1245,14 +1074,10 @@
         "stat-27-29",
         "stat-27-30"
       ],
-      "prerequisites": [
-        "statistics-026"
-      ],
+      "prerequisites": ["statistics-026"],
       "level": "advanced",
       "minutes": 120,
-      "dependencies": [
-        "numpy"
-      ],
+      "dependencies": ["numpy"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -1260,9 +1085,7 @@
       "id": "statistics-028",
       "title": "Survival Analysis, Duration Models, and Reliability",
       "chapter_path": "courses/statistics-ml/chapters/28-survival-analysis-duration-models-and-reliability.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_28.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_28.py"],
       "topic_ids": [
         "stat-28-01",
         "stat-28-02",
@@ -1292,14 +1115,10 @@
         "stat-28-26",
         "stat-28-27"
       ],
-      "prerequisites": [
-        "statistics-027"
-      ],
+      "prerequisites": ["statistics-027"],
       "level": "advanced",
       "minutes": 120,
-      "dependencies": [
-        "numpy"
-      ],
+      "dependencies": ["numpy"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -1307,9 +1126,7 @@
       "id": "statistics-029",
       "title": "Anomaly Detection, Changepoints, and Statistical Process Control",
       "chapter_path": "courses/statistics-ml/chapters/29-anomaly-detection-changepoints-and-statistical-process-control.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_29.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_29.py"],
       "topic_ids": [
         "stat-29-01",
         "stat-29-02",
@@ -1333,14 +1150,10 @@
         "stat-29-20",
         "stat-29-21"
       ],
-      "prerequisites": [
-        "statistics-028"
-      ],
+      "prerequisites": ["statistics-028"],
       "level": "advanced",
       "minutes": 120,
-      "dependencies": [
-        "numpy"
-      ],
+      "dependencies": ["numpy"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -1348,9 +1161,7 @@
       "id": "statistics-030",
       "title": "Spatial and Spatiotemporal Statistics",
       "chapter_path": "courses/statistics-ml/chapters/30-spatial-and-spatiotemporal-statistics.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_30.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_30.py"],
       "topic_ids": [
         "stat-30-01",
         "stat-30-02",
@@ -1373,14 +1184,10 @@
         "stat-30-19",
         "stat-30-20"
       ],
-      "prerequisites": [
-        "statistics-029"
-      ],
+      "prerequisites": ["statistics-029"],
       "level": "advanced",
       "minutes": 120,
-      "dependencies": [
-        "numpy"
-      ],
+      "dependencies": ["numpy"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -1388,9 +1195,7 @@
       "id": "statistics-031",
       "title": "Network and Graph Analysis",
       "chapter_path": "courses/statistics-ml/chapters/31-network-and-graph-analysis.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_31.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_31.py"],
       "topic_ids": [
         "stat-31-01",
         "stat-31-02",
@@ -1410,14 +1215,10 @@
         "stat-31-16",
         "stat-31-17"
       ],
-      "prerequisites": [
-        "statistics-030"
-      ],
+      "prerequisites": ["statistics-030"],
       "level": "advanced",
       "minutes": 120,
-      "dependencies": [
-        "numpy"
-      ],
+      "dependencies": ["numpy"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -1425,9 +1226,7 @@
       "id": "statistics-032",
       "title": "Recommendation, Information Retrieval, and Ranking",
       "chapter_path": "courses/statistics-ml/chapters/32-recommendation-information-retrieval-and-ranking.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_32.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_32.py"],
       "topic_ids": [
         "stat-32-01",
         "stat-32-02",
@@ -1450,14 +1249,10 @@
         "stat-32-19",
         "stat-32-20"
       ],
-      "prerequisites": [
-        "statistics-031"
-      ],
+      "prerequisites": ["statistics-031"],
       "level": "advanced",
       "minutes": 120,
-      "dependencies": [
-        "numpy"
-      ],
+      "dependencies": ["numpy"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -1465,9 +1260,7 @@
       "id": "statistics-033",
       "title": "Deep Learning, Language, and Generative Modeling",
       "chapter_path": "courses/statistics-ml/chapters/33-deep-learning-language-and-generative-modeling.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_33.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_33.py"],
       "topic_ids": [
         "stat-33-01",
         "stat-33-02",
@@ -1497,14 +1290,10 @@
         "stat-33-26",
         "stat-33-27"
       ],
-      "prerequisites": [
-        "statistics-032"
-      ],
+      "prerequisites": ["statistics-032"],
       "level": "advanced",
       "minutes": 120,
-      "dependencies": [
-        "numpy"
-      ],
+      "dependencies": ["numpy"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -1512,9 +1301,7 @@
       "id": "statistics-034",
       "title": "Generative AI and Language-Model Evaluation",
       "chapter_path": "courses/statistics-ml/chapters/34-generative-ai-and-language-model-evaluation.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_34.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_34.py"],
       "topic_ids": [
         "stat-34-01",
         "stat-34-02",
@@ -1537,14 +1324,10 @@
         "stat-34-19",
         "stat-34-20"
       ],
-      "prerequisites": [
-        "statistics-033"
-      ],
+      "prerequisites": ["statistics-033"],
       "level": "advanced",
       "minutes": 120,
-      "dependencies": [
-        "numpy"
-      ],
+      "dependencies": ["numpy"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -1552,9 +1335,7 @@
       "id": "statistics-035",
       "title": "Bandits, Reinforcement Learning, and Adaptive Decisions",
       "chapter_path": "courses/statistics-ml/chapters/35-bandits-reinforcement-learning-and-adaptive-decisions.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_35.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_35.py"],
       "topic_ids": [
         "stat-35-01",
         "stat-35-02",
@@ -1580,14 +1361,10 @@
         "stat-35-22",
         "stat-35-23"
       ],
-      "prerequisites": [
-        "statistics-034"
-      ],
+      "prerequisites": ["statistics-034"],
       "level": "advanced",
       "minutes": 120,
-      "dependencies": [
-        "numpy"
-      ],
+      "dependencies": ["numpy"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -1595,9 +1372,7 @@
       "id": "statistics-036",
       "title": "Optimization and Operations Research",
       "chapter_path": "courses/statistics-ml/chapters/36-optimization-and-operations-research.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_36.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_36.py"],
       "topic_ids": [
         "stat-36-01",
         "stat-36-02",
@@ -1627,15 +1402,10 @@
         "stat-36-26",
         "stat-36-27"
       ],
-      "prerequisites": [
-        "statistics-035"
-      ],
+      "prerequisites": ["statistics-035"],
       "level": "advanced",
       "minutes": 120,
-      "dependencies": [
-        "numpy",
-        "scipy"
-      ],
+      "dependencies": ["numpy", "scipy"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -1643,9 +1413,7 @@
       "id": "statistics-037",
       "title": "Simulation and Computational Statistics",
       "chapter_path": "courses/statistics-ml/chapters/37-simulation-and-computational-statistics.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_37.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_37.py"],
       "topic_ids": [
         "stat-37-01",
         "stat-37-02",
@@ -1668,14 +1436,10 @@
         "stat-37-19",
         "stat-37-20"
       ],
-      "prerequisites": [
-        "statistics-036"
-      ],
+      "prerequisites": ["statistics-036"],
       "level": "advanced",
       "minutes": 120,
-      "dependencies": [
-        "numpy"
-      ],
+      "dependencies": ["numpy"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -1683,9 +1447,7 @@
       "id": "statistics-038",
       "title": "Product, Customer, Marketing, and Business Analytics",
       "chapter_path": "courses/statistics-ml/chapters/38-product-customer-marketing-and-business-analytics.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_38.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_38.py"],
       "topic_ids": [
         "stat-38-01",
         "stat-38-02",
@@ -1718,14 +1480,10 @@
         "stat-38-29",
         "stat-38-30"
       ],
-      "prerequisites": [
-        "statistics-037"
-      ],
+      "prerequisites": ["statistics-037"],
       "level": "advanced",
       "minutes": 120,
-      "dependencies": [
-        "numpy"
-      ],
+      "dependencies": ["numpy"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -1733,9 +1491,7 @@
       "id": "statistics-039",
       "title": "Research Synthesis and Specialized Statistical Methodologies",
       "chapter_path": "courses/statistics-ml/chapters/39-research-synthesis-and-specialized-statistical-methodologies.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_39.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_39.py"],
       "topic_ids": [
         "stat-39-01",
         "stat-39-02",
@@ -1768,14 +1524,10 @@
         "stat-39-29",
         "stat-39-30"
       ],
-      "prerequisites": [
-        "statistics-038"
-      ],
+      "prerequisites": ["statistics-038"],
       "level": "advanced",
       "minutes": 120,
-      "dependencies": [
-        "numpy"
-      ],
+      "dependencies": ["numpy"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -1783,9 +1535,7 @@
       "id": "statistics-040",
       "title": "Production Methodology, Governance, and Senior Scientific Judgment",
       "chapter_path": "courses/statistics-ml/chapters/40-production-methodology-governance-and-senior-scientific-judgment.md",
-      "example_paths": [
-        "courses/statistics-ml/examples/chapter_40.py"
-      ],
+      "example_paths": ["courses/statistics-ml/examples/chapter_40.py"],
       "topic_ids": [
         "stat-40-01",
         "stat-40-02",
@@ -1818,14 +1568,10 @@
         "stat-40-29",
         "stat-40-30"
       ],
-      "prerequisites": [
-        "statistics-039"
-      ],
+      "prerequisites": ["statistics-039"],
       "level": "advanced",
       "minutes": 120,
-      "dependencies": [
-        "numpy"
-      ],
+      "dependencies": ["numpy"],
       "mode": "tutorial",
       "network": "offline"
     }

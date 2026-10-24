@@ -1,8 +1,8 @@
 #include <iostream>
 
 int main() {
-    std::cout << "hello, learner\n";
-    return 0;
+  std::cout << "hello, learner\n";
+  return 0;
 }
 
 // Exercise 1: Compile a fixed source. Inputs: main.cpp with iostream include and int main. Expected: compilation and linking succeed; no syntax/link diagnostic. Verify: record the actual compiler and status, not a copied transcript.

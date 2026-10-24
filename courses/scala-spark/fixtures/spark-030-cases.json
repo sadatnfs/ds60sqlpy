@@ -46,11 +46,7 @@
     }
   ],
   "golden": {
-    "layouts": [
-      "local-classic",
-      "client-deploy",
-      "cluster-deploy"
-    ],
+    "layouts": ["local-classic", "client-deploy", "cluster-deploy"],
     "proposal_only": true,
     "expected_rows": 30,
     "remote_execution_performed": false,

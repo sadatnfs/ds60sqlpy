@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 import shutil
+import stat
 import subprocess
 import sys
 from collections.abc import Iterator
@@ -15,6 +16,7 @@ from typing import Any
 import pytest
 
 from scripts import format_repo as formatting
+from scripts import sql_formatting
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -197,7 +199,7 @@ def test_failed_stdout_formatter_preserves_original_source(
     assert "parse failed" in capsys.readouterr().err
 
 
-def test_sql_formatter_receives_psql_program_verbatim_and_ignores_user_rc(
+def test_sql_formatter_delegates_psql_source_to_semantic_guard(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     source = (
@@ -206,17 +208,16 @@ def test_sql_formatter_receives_psql_program_verbatim_and_ignores_user_rc(
     )
     path = put(tmp_path, "lesson.sql")
     path.write_bytes(source)
-    observed: list[tuple[list[str], bytes]] = []
+    observed: list[tuple[list[str], Path, bool]] = []
 
-    def fake_run(command: list[str], **kwargs: Any) -> subprocess.CompletedProcess[bytes]:
-        observed.append((command, kwargs["input"]))
-        return subprocess.CompletedProcess(command, 0, stdout=kwargs["input"], stderr=b"")
+    def guard(paths: list[str], root: Path, check: bool) -> bool:
+        observed.append((paths, root, check))
+        assert (root / paths[0]).read_bytes() == source
+        return False
 
-    monkeypatch.setattr(subprocess, "run", fake_run)
-    assert formatting.format_group("sql", [path.name], tmp_path, check=True)
-    assert len(observed) == 1
-    assert observed[0][0][0] == "pg_format" and "--no-rcfile" in observed[0][0]
-    assert observed[0][1] == source
+    monkeypatch.setattr(sql_formatting, "format_sql_paths", guard)
+    assert not formatting.format_group("sql", [path.name], tmp_path, check=True)
+    assert observed == [([path.name], tmp_path, True)]
     assert path.read_bytes() == source
 
 
@@ -231,7 +232,6 @@ def test_sql_formatter_receives_psql_program_verbatim_and_ignores_user_rc(
         "csharp",
         "swift",
         "scala",
-        "shell",
         "toml",
         "xml",
         "cmake",
@@ -364,6 +364,13 @@ elif args[:2] == ["context", "inspect"]:
     print(os.environ.get("FORMAT_TEST_ENDPOINT", "unix:///fake/docker.sock"))
 elif args[:2] == ["image", "inspect"]:
     sys.exit(0 if os.environ.get("FORMAT_TEST_IMAGE", "present") == "present" else 1)
+elif args[:1] == ["run"] and os.environ.get("FORMAT_TEST_REWRITE"):
+    target = Path(os.environ["FORMAT_TEST_REWRITE"])
+    original = target.read_text()
+    # Model an in-place formatter moving the executing shell's byte offsets.
+    # The added sentinel must never be read by the current invocation.
+    target.write_text("# reformatted spacing\\n" * 500 + original + "\\nexit 93\\n")
+    sys.exit(int(os.environ.get("FORMAT_TEST_RUN_EXIT", "0")))
 elif args[:1] not in (["build"], ["run"]):
     sys.exit(7)
 """,
@@ -576,3 +583,186 @@ def test_publication_preflight_still_rejects_links_after_materializing_entries(
     with pytest.raises(ValueError, match="symlink"):
         formatting.ensure_publication_paths(root)
     assert outside.read_text() == "value\n"
+
+
+@pytest.mark.parametrize("run_exit", [0, 7])
+def test_wrapper_self_reformat_cannot_change_control_flow_or_leak_inventory(
+    wrapper: Any, run_exit: int
+) -> None:
+    root, invoke = wrapper
+    git = shutil.which("git")
+    if git is None:
+        pytest.skip("Git unavailable")
+    subprocess.run([git, "init", "--quiet"], cwd=root, check=True, capture_output=True)
+    target = root / "scripts/format-repo"
+    before = target.read_bytes()
+    result, calls = invoke(
+        settings={
+            "FORMAT_TEST_REWRITE": str(target),
+            "FORMAT_TEST_RUN_EXIT": str(run_exit),
+        }
+    )
+    assert result.returncode == run_exit, result.stdout + result.stderr
+    assert target.read_bytes() != before
+    run = next(command for command in calls if command[0] == "run")
+    inventory = next(value for value in run if "dst=/tmp/source-files.bin" in value)
+    temporary = inventory.split("src=", 1)[1].split(",dst=", 1)[0]
+    assert not Path(temporary).exists()
+
+
+def test_docker_formatter_restores_one_terminal_newline_and_check_is_stable(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    path = put(tmp_path, "Dockerfile", "FROM scratch")
+
+    def no_final_newline(command: list[str], **kwargs: Any) -> subprocess.CompletedProcess[bytes]:
+        assert command == ["dockerfmt"]
+        return subprocess.CompletedProcess(
+            command, 0, stdout=kwargs["input"].rstrip(b"\r\n"), stderr=b""
+        )
+
+    monkeypatch.setattr(subprocess, "run", no_final_newline)
+    assert formatting.format_group("docker", [path.name], tmp_path, check=False)
+    assert path.read_bytes() == b"FROM scratch\n"
+    assert formatting.format_group("docker", [path.name], tmp_path, check=True)
+    assert path.read_bytes() == b"FROM scratch\n"
+
+
+def test_terminal_newline_repair_is_not_applied_to_other_stdout_formatters(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    path = put(tmp_path, "source.txt", "value\n")
+
+    def no_final_newline(command: list[str], **kwargs: Any) -> subprocess.CompletedProcess[bytes]:
+        return subprocess.CompletedProcess(command, 0, stdout=b"value", stderr=b"")
+
+    monkeypatch.setattr(subprocess, "run", no_final_newline)
+    assert not formatting.streamed(["other-formatter"], [path.name], tmp_path, check=True)
+    assert path.read_bytes() == b"value\n"
+    assert formatting.streamed(["other-formatter"], [path.name], tmp_path, check=False)
+    assert path.read_bytes() == b"value"
+
+
+def test_shell_formatting_keeps_executable_mode_inode_and_stable_check(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    script = put(tmp_path, "run.sh", "#!/usr/bin/env bash\necho  hello\n")
+    script.chmod(0o755)
+    original_inode = script.stat().st_ino
+
+    def format_stdout(command: list[str], **kwargs: Any) -> subprocess.CompletedProcess[bytes]:
+        assert command[0] == "shfmt" and "-w" not in command
+        formatted = kwargs["input"].replace(b"echo  hello", b"echo hello")
+        return subprocess.CompletedProcess(command, 0, stdout=formatted, stderr=b"")
+
+    monkeypatch.setattr(subprocess, "run", format_stdout)
+    assert not formatting.format_group("shell", [script.name], tmp_path, check=True)
+    assert script.read_bytes() == b"#!/usr/bin/env bash\necho  hello\n"
+    assert formatting.format_group("shell", [script.name], tmp_path, check=False)
+    assert script.read_bytes() == b"#!/usr/bin/env bash\necho hello\n"
+    assert stat.S_IMODE(script.stat().st_mode) == 0o755
+    assert script.stat().st_ino == original_inode
+    assert formatting.format_group("shell", [script.name], tmp_path, check=True)
+    assert stat.S_IMODE(script.stat().st_mode) == 0o755
+
+
+@pytest.mark.parametrize("outcome", ["success", "failure", "exception"])
+def test_inplace_formatter_restores_source_permissions_on_every_exit(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, outcome: str
+) -> None:
+    source = put(tmp_path, "executable.py", "print('lesson')\n")
+    source.chmod(0o755)
+
+    def replace_source(_command: list[str], root: Path) -> bool:
+        assert root == tmp_path
+        replacement = put(root, "replacement.py", "print('lesson')\n")
+        replacement.chmod(0o600)
+        replacement.replace(source)
+        if outcome == "exception":
+            raise RuntimeError("formatter interrupted")
+        return outcome == "success"
+
+    monkeypatch.setattr(formatting, "run", replace_source)
+    if outcome == "exception":
+        with pytest.raises(RuntimeError, match="formatter interrupted"):
+            formatting.run_formatter(["formatter"], [source.name], tmp_path, check=False)
+    else:
+        assert formatting.run_formatter(["formatter"], [source.name], tmp_path, check=False) is (
+            outcome == "success"
+        )
+    assert stat.S_IMODE(source.stat().st_mode) == 0o755
+
+
+def test_inplace_check_mode_never_changes_file_permissions(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    source = put(tmp_path, "executable.py", "print('lesson')\n")
+    source.chmod(0o755)
+    monkeypatch.setattr(formatting, "run", lambda _command, _root: True)
+
+    def forbidden_chmod(_path: Path, _mode: int, **_kwargs: Any) -> None:
+        pytest.fail("Read-only checking must not chmod source files")
+
+    monkeypatch.setattr(Path, "chmod", forbidden_chmod)
+    assert formatting.run_formatter(["formatter", "--check"], [source.name], tmp_path, check=True)
+    assert stat.S_IMODE(source.stat().st_mode) == 0o755
+
+
+def test_permission_restore_rejects_a_formatter_symlink_replacement(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root = tmp_path / "checkout"
+    source = put(root, "source.py", "print('lesson')\n")
+    source.chmod(0o755)
+    outside = put(tmp_path, "outside/private.py", "private = True\n")
+    outside.chmod(0o640)
+    before = (outside.read_bytes(), stat.S_IMODE(outside.stat().st_mode))
+    probe = tmp_path / "probe-link"
+    try:
+        probe.symlink_to(outside)
+        probe.unlink()
+    except OSError:
+        pytest.skip("Symlinks unavailable")
+
+    def replace_with_link(_command: list[str], _root: Path) -> bool:
+        source.unlink()
+        source.symlink_to(outside)
+        return True
+
+    monkeypatch.setattr(formatting, "run", replace_with_link)
+    with pytest.raises(ValueError, match="symlink"):
+        formatting.run_formatter(["formatter"], [source.name], root, check=False)
+    assert (outside.read_bytes(), stat.S_IMODE(outside.stat().st_mode)) == before
+
+
+@pytest.mark.parametrize(
+    ("outcomes", "expected", "writes"),
+    [
+        ([True, True], True, 1),
+        ([True, False, True, True], True, 2),
+        ([True, False, True, False], False, 2),
+        ([False], False, 1),
+    ],
+)
+def test_prettier_write_requires_bounded_convergence(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    outcomes: list[bool],
+    expected: bool,
+    writes: int,
+) -> None:
+    source = tmp_path / "example.ts"
+    source.write_text("const value = 1;\n", encoding="utf-8")
+    results = iter(outcomes)
+    commands: list[list[str]] = []
+
+    def tool(command: list[str], root: Path) -> bool:
+        assert root == tmp_path
+        commands.append(command)
+        return next(results)
+
+    monkeypatch.setattr(formatting, "run", tool)
+    assert formatting.format_group("web", ["example.ts"], tmp_path, False) is expected
+    assert sum("--write" in command for command in commands) == writes
+    assert len(commands) == len(outcomes)
+    assert source.read_text(encoding="utf-8") == "const value = 1;\n"

@@ -18,14 +18,23 @@
 --
 BEGIN;
 SET search_path TO training, public;
-
 -- Active sessions
-SELECT pid, usename, datname, state, query_start, NOW() - query_start AS running_for, left(query, 120) AS query
-FROM pg_stat_activity
-WHERE state <> 'idle'
-ORDER BY running_for DESC
+SELECT
+  pid,
+  usename,
+  datname,
+  state,
+  query_start,
+  NOW() - query_start AS running_for,
+  left (query,
+    120) AS query
+FROM
+  pg_stat_activity
+WHERE
+  state <> 'idle'
+ORDER BY
+  running_for DESC
 LIMIT 20;
-
 -- pg_stat_statements has three relevant states:
 --   1. absent: its view does not exist;
 --   2. installed but unusable: the view exists, but the server was not started
@@ -37,17 +46,21 @@ LIMIT 20;
 -- FROM pg_stat_statements
 -- ORDER BY total_exec_time DESC
 -- LIMIT 20;
-
 -- Slow queries from logs are an ops topic; here we simulate using EXPLAIN ANALYZE
 EXPLAIN ANALYZE
-SELECT p.category, SUM(oi.quantity) AS qty
-FROM order_items oi
-JOIN products p ON p.product_id = oi.product_id
-JOIN orders o ON o.order_id = oi.order_id
-WHERE o.order_date >= now() - interval '180 days'
-GROUP BY p.category
-ORDER BY qty DESC;
-
+SELECT
+  p.category,
+  SUM(oi.quantity) AS qty
+FROM
+  order_items oi
+  JOIN products p ON p.product_id = oi.product_id
+  JOIN orders o ON o.order_id = oi.order_id
+WHERE
+  o.order_date >= now() - interval '180 days'
+GROUP BY
+  p.category
+ORDER BY
+  qty DESC;
 -- Exercises
 -- 1. Identify the longest-running active queries on your system.
 --    Inputs: For sql-44 Exercise 1, take a read-only snapshot of `pg_stat_activity`. Build the answer toward `pid`, `usename`, `datname`, `state`, `runtime`, `wait_event_type`, `wait_event`, and `query`; keep `pid` visible because the output grain is one backend session.
@@ -83,5 +96,4 @@ ORDER BY qty DESC;
 --    Expected result/shape: For sql-44 Exercise 6, expected output: one row per `pid` whose state is `idle in transaction`. The final columns are `pid`, `usename`, `datname`, `transaction_age`, `wait_event_type`, and `wait_event`. The final order is `transaction_age DESC NULLS LAST`.
 --    Verify: For sql-44 Exercise 6, run an anti-check for any row whose state is not `idle in transaction`; require unique `pid`, non-NULL transaction starts, and nonnegative `transaction_age`, and compare every projected value with `pg_stat_activity`. When practical, open a controlled second `psql` session, run `BEGIN`, wait without committing, observe the session, then run `ROLLBACK` and confirm that it disappears from this result.
 --    Hint ladder, rung 1: For sql-44 Exercise 6, inspect the source keys that survive `WHERE`; then check `transaction_age DESC NULLS LAST` before applying the row cap.
-
 ROLLBACK;

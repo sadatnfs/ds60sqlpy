@@ -8,10 +8,9 @@
 // Task 6: Design storage and display policies for appointments in a named time zone.
 using System;
 
-internal static class Program
-{
-    private static void Main()
-    {
-        throw new NotImplementedException("Implement your own lesson attempt before running.");
-    }
+internal static class Program {
+  private static void Main() {
+    throw new NotImplementedException(
+        "Implement your own lesson attempt before running.");
+  }
 }

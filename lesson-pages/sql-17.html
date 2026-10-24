@@ -664,50 +664,55 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line"><span class="syntax-comment">--</span></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Study contract</span></span>
 <span class="source-line"><span class="syntax-comment">-- Focus: Choose `ROW_NUMBER`, `RANK`, or `DENSE_RANK` from tie semantics, and separate ranking from top-N filtering.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Assumptions: All ranking orders include a stable key when a unique sequence is required. Equal business values intentionally tie under rank functions.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Pitfall: `ROW_NUMBER` breaks ties, `RANK` leaves gaps, and `DENSE_RANK` does not; using the wrong function changes top-N membership.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Predict row grain and NULL/order behavior before executing each example.</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Rank customers by lifetime revenue (ties vs gaps)</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> cust_rev <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>unit_price<span class="syntax-operator">*</span>oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-operator">*</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">-</span>oi<span class="syntax-punctuation">.</span>discount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">c</span></span>
-<span class="source-line">  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">ON</span> o<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id</span>
-<span class="source-line">  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> order_items oi <span class="syntax-keyword">ON</span> oi<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_id</span>
-<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name</span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>unit_price <span class="syntax-operator">*</span> oi<span class="syntax-punctuation">.</span>quantity <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">-</span> oi<span class="syntax-punctuation">.</span>discount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    customers <span class="syntax-keyword">c</span></span>
+<span class="source-line">    <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">ON</span> o<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line">    <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> order_items oi <span class="syntax-keyword">ON</span> oi<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_id</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">    <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name</span>
 <span class="source-line"><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       full_name<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       revenue<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       ROW_NUMBER<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span></span>
-<span class="source-line">         <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> revenue <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> customer_id</span>
-<span class="source-line">       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> row_num<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       RANK<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>       OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> revenue <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> rank_pos<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       DENSE_RANK<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> revenue <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> dense_rank_pos</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> cust_rev</span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> revenue <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> customer_id</span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  full_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  revenue<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  ROW_NUMBER<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> revenue <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> customer_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> row_num<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  RANK<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> revenue <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> rank_pos<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  DENSE_RANK<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> revenue <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> dense_rank_pos</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  cust_rev</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  revenue <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  customer_id</span>
 <span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">30</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Rank employees by salary within department</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       d<span class="syntax-punctuation">.</span>name <span class="syntax-keyword">AS</span> department<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       e<span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       e<span class="syntax-punctuation">.</span>salary<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       RANK<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>department_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>salary <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> dept_rank</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> employees e</span>
-<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> departments d <span class="syntax-keyword">ON</span> d<span class="syntax-punctuation">.</span>department_id <span class="syntax-operator">=</span> e<span class="syntax-punctuation">.</span>department_id</span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> department NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">         dept_rank<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         e<span class="syntax-punctuation">.</span>salary <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">         e<span class="syntax-punctuation">.</span>employee_id</span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  e<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  d<span class="syntax-punctuation">.</span>name <span class="syntax-keyword">AS</span> department<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  e<span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  e<span class="syntax-punctuation">.</span>salary<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  RANK<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>department_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>salary <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> dept_rank</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  employees e</span>
+<span class="source-line">  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> departments d <span class="syntax-keyword">ON</span> d<span class="syntax-punctuation">.</span>department_id <span class="syntax-operator">=</span> e<span class="syntax-punctuation">.</span>department_id</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  department NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  dept_rank<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  e<span class="syntax-punctuation">.</span>salary <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  e<span class="syntax-punctuation">.</span>employee_id</span>
 <span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">50</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
 <span class="source-line"><span class="syntax-comment">-- Work prediction -&gt; query writing -&gt; debugging -&gt; extension in order.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Keep answers in your own scratch file; this learner script remains answer-free.</span></span>
@@ -747,7 +752,6 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-17 Exercise 6, expected output: Top two salary levels per department. The final columns are `employee_id`, `full_name`, `department_id`, `salary`, and `salary_rank`. The final order is `department_id, salary_rank, employee_id`.</span></span>
 <span class="source-line"><span class="syntax-comment">--    Verify: For sql-17 Exercise 6, run an anti-check that counts rows where NOT ((salary_rank &lt;= 2)); require unique `employee_id` where the expected grain is one row per key and confirm the projected `employee_id`, `full_name`, `department_id`, `salary`, and `salary_rank` against `employees`. Give two rows the same `department_id` value and different `employee_id` values; verify `department_id, salary_rank, employee_id` produces the intended rank and display order.</span></span>
 <span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-17 Exercise 6, run `ranked` one at a time. Record each CTE&#x27;s row count and `employee_id` uniqueness before the next stage uses it.</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>
       </section>
@@ -1082,15 +1086,12 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-comment">--</span></span>
 <span class="source-line"><span class="syntax-comment">-- Target: PostgreSQL 16+; run only in advanced_sql_training.</span></span>
 <span class="source-line"><span class="syntax-comment">-- ON_ERROR_STOP is supplied by the documented psql command.</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Shared teaching contract</span></span>
 <span class="source-line"><span class="syntax-comment">-- Focus: Choose `ROW_NUMBER`, `RANK`, or `DENSE_RANK` from tie semantics, and separate ranking from top-N filtering.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Assumptions: All ranking orders include a stable key when a unique sequence is required. Equal business values intentionally tie under rank functions.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Pitfall: `ROW_NUMBER` breaks ties, `RANK` leaves gaps, and `DENSE_RANK` does not; using the wrong function changes top-N membership.</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 1: Query writing</span></span>
 <span class="source-line"><span class="syntax-comment">-- Prompt: Number each customer&#x27;s orders from newest to oldest.</span></span>
@@ -1104,16 +1105,16 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-comment">-- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.</span></span>
 <span class="source-line"><span class="syntax-comment">-- - `PARTITION BY`: restarts a window calculation independently for each partition key.</span></span>
 <span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       ROW_NUMBER<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span></span>
-<span class="source-line">         PARTITION <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id</span>
-<span class="source-line">         <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-keyword">DESC</span></span>
-<span class="source-line">       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> recency_number</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o</span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> recency_number<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  ROW_NUMBER<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> recency_number</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  orders <span class="syntax-keyword">AS</span> o</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  o<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  recency_number<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 2: Query writing</span></span>
 <span class="source-line"><span class="syntax-comment">-- Prompt: Rank products by price within category using both `RANK` and `DENSE_RANK`.</span></span>
@@ -1127,18 +1128,18 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-comment">-- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.</span></span>
 <span class="source-line"><span class="syntax-comment">-- - `PARTITION BY`: restarts a window calculation independently for each partition key.</span></span>
 <span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       p<span class="syntax-punctuation">.</span>price<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       RANK<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span></span>
-<span class="source-line">         PARTITION <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>category <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>price <span class="syntax-keyword">DESC</span></span>
-<span class="source-line">       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> price_rank<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       DENSE_RANK<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span></span>
-<span class="source-line">         PARTITION <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>category <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>price <span class="syntax-keyword">DESC</span></span>
-<span class="source-line">       <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> dense_price_rank</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> products <span class="syntax-keyword">AS</span> p</span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>price <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span>price<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  RANK<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>category <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>price <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> price_rank<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  DENSE_RANK<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>category <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>price <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> dense_price_rank</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  products <span class="syntax-keyword">AS</span> p</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span>price <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 3: Query writing</span></span>
 <span class="source-line"><span class="syntax-comment">-- Prompt: Return the three highest-priced products per category, including price ties.</span></span>
@@ -1155,21 +1156,26 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-comment">-- - `PARTITION BY`: restarts a window calculation independently for each partition key.</span></span>
 <span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> ranked <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span><span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">         DENSE_RANK<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span></span>
-<span class="source-line">           PARTITION <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>category <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>price <span class="syntax-keyword">DESC</span></span>
-<span class="source-line">         <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> price_rank</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> products <span class="syntax-keyword">AS</span> p</span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    p<span class="syntax-punctuation">.</span><span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    DENSE_RANK<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>category <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>price <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> price_rank</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    products <span class="syntax-keyword">AS</span> p</span>
 <span class="source-line"><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> product_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       name<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       category<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       price<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       price_rank</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> ranked</span>
-<span class="source-line"><span class="syntax-keyword">WHERE</span> price_rank <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">3</span></span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> category<span class="syntax-punctuation">,</span> price_rank<span class="syntax-punctuation">,</span> product_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  product_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  price<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  price_rank</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  ranked</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  price_rank <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">3</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  price_rank<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  product_id<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 4: Prediction</span></span>
 <span class="source-line"><span class="syntax-comment">-- Prompt: Compare row number, rank, and dense rank on values 100, 100, and 90.</span></span>
@@ -1183,14 +1189,18 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
 <span class="source-line"><span class="syntax-comment">-- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.</span></span>
 <span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> sample_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       score<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       ROW_NUMBER<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> score <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> sample_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> row_number_value<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       RANK<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> score <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> rank_value<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       DENSE_RANK<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> score <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> dense_rank_value</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">90</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> sample<span class="syntax-punctuation">(</span>sample_id<span class="syntax-punctuation">,</span> score<span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> sample_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  sample_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  score<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  ROW_NUMBER<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> score <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> sample_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> row_number_value<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  RANK<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> score <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> rank_value<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  DENSE_RANK<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> score <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> dense_rank_value</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">90</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> sample <span class="syntax-punctuation">(</span>sample_id<span class="syntax-punctuation">,</span> score<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  sample_id<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 5: Debugging</span></span>
 <span class="source-line"><span class="syntax-comment">-- Prompt: Return exactly one latest order per customer even when timestamps tie.</span></span>
@@ -1207,21 +1217,24 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-comment">-- - `PARTITION BY`: restarts a window calculation independently for each partition key.</span></span>
 <span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> numbered <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span><span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">         ROW_NUMBER<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span></span>
-<span class="source-line">           PARTITION <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id</span>
-<span class="source-line">           <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-keyword">DESC</span></span>
-<span class="source-line">         <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> recency_number</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">AS</span> o</span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    o<span class="syntax-punctuation">.</span><span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    ROW_NUMBER<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>customer_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      o<span class="syntax-punctuation">.</span>order_id <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> recency_number</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    orders <span class="syntax-keyword">AS</span> o</span>
 <span class="source-line"><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> order_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       customer_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       order_date<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       total_amount</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> numbered</span>
-<span class="source-line"><span class="syntax-keyword">WHERE</span> recency_number <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> customer_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  order_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  order_date<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  total_amount</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  numbered</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  recency_number <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  customer_id<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 6: Extension</span></span>
 <span class="source-line"><span class="syntax-comment">-- Prompt: Rank employee salaries within department and show only the top two distinct salary levels.</span></span>
@@ -1238,21 +1251,26 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-comment">-- - `PARTITION BY`: restarts a window calculation independently for each partition key.</span></span>
 <span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> ranked <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span><span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">         DENSE_RANK<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span></span>
-<span class="source-line">           PARTITION <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>department_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>salary <span class="syntax-keyword">DESC</span></span>
-<span class="source-line">         <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> salary_rank</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> employees <span class="syntax-keyword">AS</span> e</span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    e<span class="syntax-punctuation">.</span><span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    DENSE_RANK<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>department_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>salary <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> salary_rank</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    employees <span class="syntax-keyword">AS</span> e</span>
 <span class="source-line"><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> employee_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       full_name<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       department_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       salary<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       salary_rank</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> ranked</span>
-<span class="source-line"><span class="syntax-keyword">WHERE</span> salary_rank <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">2</span></span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> department_id<span class="syntax-punctuation">,</span> salary_rank<span class="syntax-punctuation">,</span> employee_id<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  employee_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  full_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  department_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  salary<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  salary_rank</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  ranked</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  salary_rank <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">2</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  department_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  salary_rank<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  employee_id<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- No course answer persists changes or temporary objects.</span></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>

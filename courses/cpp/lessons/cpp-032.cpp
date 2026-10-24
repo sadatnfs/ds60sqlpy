@@ -30,14 +30,26 @@
 #include <variant>
 #include <vector>
 
-int checked_square(int x){if(x<0)throw std::invalid_argument("negative task");return x*x;}
-int main() {
-    auto first=std::async(std::launch::async,checked_square,3);auto second=std::async(std::launch::async,checked_square,4);assert(first.get()+second.get()==25);
-    auto failed=std::async(std::launch::async,checked_square,-1);bool seen=false;try{failed.get();}catch(const std::invalid_argument&){seen=true;}assert(seen);
-    std::cout << "cpp-032 examples passed\n";
-    return 0;
+int checked_square(int x) {
+  if (x < 0)
+    throw std::invalid_argument("negative task");
+  return x * x;
 }
-
+int main() {
+  auto first = std::async(std::launch::async, checked_square, 3);
+  auto second = std::async(std::launch::async, checked_square, 4);
+  assert(first.get() + second.get() == 25);
+  auto failed = std::async(std::launch::async, checked_square, -1);
+  bool seen = false;
+  try {
+    failed.get();
+  } catch (const std::invalid_argument &) {
+    seen = true;
+  }
+  assert(seen);
+  std::cout << "cpp-032 examples passed\n";
+  return 0;
+}
 
 // Exercise 1: Set a budget. Define maximum workers 2 and queued tasks 4. Expected: Both bounds documented independently.
 // Exercise 2: Compare serial results. Square 3 and 4 serially and in two futures. Expected: Exact total 25 in both paths.

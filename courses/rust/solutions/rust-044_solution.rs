@@ -1,5 +1,3 @@
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         use arrow::array::{Array, Decimal128Array};
@@ -14,7 +12,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         use arrow::datatypes::{DataType, TimeUnit};
         let times = TimestampMillisecondArray::from(vec![0_i64, 1000]).with_timezone("UTC");
         assert_eq!(times.value(1), 1000);
-        assert_eq!(times.data_type(), &DataType::Timestamp(TimeUnit::Millisecond, Some("UTC".into())));
+        assert_eq!(
+            times.data_type(),
+            &DataType::Timestamp(TimeUnit::Millisecond, Some("UTC".into()))
+        );
     }
     println!("rust-044: passed");
     Ok(())

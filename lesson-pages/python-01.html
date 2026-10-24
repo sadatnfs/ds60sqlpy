@@ -672,9 +672,8 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <pre class="highlighted-code"><code class="language-bash">.venv/bin/python</code></pre>
 <p>At the <code>&gt;&gt;&gt;</code> prompt, try the expressions below. Enter <code>exit()</code> when you are finished.</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-number">1</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span></span>
-<span class="source-line"><span class="syntax-string">&#x27;</span><span class="syntax-string">Hello </span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">world</span><span class="syntax-string">&#x27;</span></span>
-<span class="source-line"><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">data science</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line"></span></code></pre>
+<span class="source-line"><span class="syntax-string">&quot;</span><span class="syntax-string">Hello </span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&quot;</span><span class="syntax-string">world</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">data science</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 9</div><h4 id="learner--cell-12--3-your-first-script">3) Your first script<a class="heading-anchor" href="#learner--cell-12--3-your-first-script" aria-label="Link to this section">#</a></h4>
 <p>Create a file named <code>hello.py</code> with:</p>
@@ -695,8 +694,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">Hello, </span><span class="syntax-string">{</span>name<span class="syntax-string">}</span><span class="syntax-string">!</span><span class="syntax-string">&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"></span>
-<span class="source-line">greet<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Data Scientist</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line"></span></code></pre>
+<span class="source-line">greet<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Data Scientist</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 10</div><h4 id="learner--cell-14--4-inspecting-packages-in-the-course-environment">4) Inspecting packages in the course environment<a class="heading-anchor" href="#learner--cell-14--4-inspecting-packages-in-the-course-environment" aria-label="Link to this section">#</a></h4>
 <p>The setup script already installed NumPy and pandas. Verify them through the same interpreter instead of using a bare <code>pip</code> command:</p>
@@ -715,8 +713,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>sys<span class="syntax-operator">.</span>version<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>platform<span class="syntax-operator">.</span>platform<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>pd<span class="syntax-operator">.</span>__version__<span class="syntax-punctuation">)</span></span>
-<span class="source-line">np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line"></span></code></pre>
+<span class="source-line">np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 11</div><h4 id="learner--cell-16--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-16--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
 <p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
@@ -1106,9 +1103,10 @@ report <span class="syntax-operator">=</span> environment_report<span class="syn
 <span class="source-line">        a<span class="syntax-punctuation">,</span> b <span class="syntax-operator">=</span> b<span class="syntax-punctuation">,</span> a <span class="syntax-operator">%</span> b</span>
 <span class="source-line">    <span class="syntax-keyword">return</span> a</span>
 <span class="source-line"></span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">assert</span> gcd<span class="syntax-punctuation">(</span><span class="syntax-number">12</span><span class="syntax-punctuation">,</span> <span class="syntax-number">18</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">6</span></span>
 <span class="source-line"><span class="syntax-keyword">assert</span> gcd<span class="syntax-punctuation">(</span><span class="syntax-number">17</span><span class="syntax-punctuation">,</span> <span class="syntax-number">13</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span></span>
-<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">gcd tests passed</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span></code></pre>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">gcd tests passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><hr>
 <h4 id="solution-2--cell-3--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-2--cell-3--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
@@ -1184,8 +1182,7 @@ report <span class="syntax-operator">=</span> environment_report<span class="syn
 <span class="source-line"><span class="syntax-comment"># offline:</span></span>
 <span class="source-line"><span class="syntax-comment">#   .\.venv\Scripts\python.exe -m ipykernel install --user \</span></span>
 <span class="source-line"><span class="syntax-comment">#       --name ds60sqlpy --display-name &quot;Python (ds60sqlpy)&quot;</span></span>
-<span class="source-line"><span class="syntax-comment"># Package installation still requires the downloaded wheel cache or a network.</span></span>
-<span class="source-line"></span></code></pre>
+<span class="source-line"><span class="syntax-comment"># Package installation still requires the downloaded wheel cache or a network.</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><p>The repair changes kernel metadata; it should not involve copying packages between interpreters or adding an arbitrary global directory to <code>PATH</code>.</p></article></div>
       </section>

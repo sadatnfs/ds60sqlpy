@@ -19,90 +19,136 @@
 -- Trend analysis, anomaly detection, and forecast accuracy
 BEGIN;
 SET search_path TO training, public;
-
 -- Daily revenue baseline
 WITH daily AS (
-  SELECT date_trunc('day', o.order_date)::date AS d,
-         SUM(o.total_amount) AS revenue
-  FROM orders o
-  GROUP BY 1
-), stats AS (
+  SELECT
+    date_trunc('day', o.order_date)::date AS d,
+    SUM(o.total_amount) AS revenue
+  FROM
+    orders o
+  GROUP BY
+    1
+),
+stats AS (
   -- Rolling 14-day window to compute z-score style anomaly score
-  SELECT d,
-         revenue,
-         AVG(revenue) OVER (ORDER BY d ROWS BETWEEN 14 PRECEDING AND 1 PRECEDING) AS avg14,
-         STDDEV_SAMP(revenue) OVER (ORDER BY d ROWS BETWEEN 14 PRECEDING AND 1 PRECEDING) AS sd14
-  FROM daily
+  SELECT
+    d,
+    revenue,
+    AVG(revenue) OVER (ORDER BY d ROWS BETWEEN 14 PRECEDING AND 1 PRECEDING) AS avg14,
+    STDDEV_SAMP(revenue) OVER (ORDER BY d ROWS BETWEEN 14 PRECEDING AND 1 PRECEDING) AS sd14
+  FROM
+    daily
 )
-SELECT d,
-       ROUND(revenue,2) AS revenue,
-       ROUND(avg14,2)   AS rolling_avg14,
-       ROUND(sd14,2)    AS rolling_sd14,
-       CASE WHEN sd14 IS NULL OR sd14 = 0 THEN 0 ELSE ROUND((revenue - avg14)/sd14, 2) END AS z_score,
-       CASE WHEN sd14 IS NOT NULL AND sd14 > 0 AND ABS((revenue-avg14)/sd14) >= 3 THEN 'anomaly' ELSE 'normal' END AS flag
-FROM stats
-ORDER BY d DESC
+SELECT
+  d,
+  ROUND(revenue, 2) AS revenue,
+  ROUND(avg14, 2) AS rolling_avg14,
+  ROUND(sd14, 2) AS rolling_sd14,
+  CASE WHEN sd14 IS NULL
+    OR sd14 = 0 THEN
+    0
+  ELSE
+    ROUND((revenue - avg14) / sd14, 2)
+  END AS z_score,
+  CASE WHEN sd14 IS NOT NULL
+    AND sd14 > 0
+    AND ABS((revenue - avg14) / sd14) >= 3 THEN
+    'anomaly'
+  ELSE
+    'normal'
+  END AS flag
+FROM
+  stats
+ORDER BY
+  d DESC
 LIMIT 60;
-
 -- MAD-based anomaly (more robust to outliers)
 WITH daily AS (
-  SELECT date_trunc('day', o.order_date)::date AS d,
-         SUM(o.total_amount) AS revenue
-  FROM orders o
-  GROUP BY 1
-), med AS (
-  SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY revenue) AS median_rev FROM daily
-), dev AS (
-  SELECT d.revenue, d.d,
-         ABS(d.revenue - m.median_rev) AS abs_dev,
-         m.median_rev
-  FROM daily d CROSS JOIN med m
-), mad AS (
-  SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY abs_dev) AS mad
-  FROM dev
+  SELECT
+    date_trunc('day', o.order_date)::date AS d,
+    SUM(o.total_amount) AS revenue
+  FROM
+    orders o
+  GROUP BY
+    1
+),
+med AS (
+  SELECT
+    percentile_cont(0.5) WITHIN GROUP (ORDER BY revenue) AS median_rev
+  FROM
+    daily
+),
+dev AS (
+  SELECT
+    d.revenue,
+    d.d,
+    ABS(d.revenue - m.median_rev) AS abs_dev,
+    m.median_rev
+  FROM
+    daily d
+    CROSS JOIN med m
+),
+mad AS (
+  SELECT
+    percentile_cont(0.5) WITHIN GROUP (ORDER BY abs_dev) AS mad
+  FROM
+    dev
 )
-SELECT dev.d,
-       ROUND(dev.revenue, 2) AS revenue,
-       ROUND(dev.median_rev::numeric, 2) AS median_rev,
-       CASE
-         WHEN mad.mad = 0 THEN 0
-         ELSE ROUND(
-           (0.6745 * (dev.revenue - dev.median_rev) / mad.mad)::numeric,
-           2
-         )
-       END AS modified_z,
-       CASE
-         WHEN mad.mad > 0
-          AND ABS(0.6745 * (dev.revenue - dev.median_rev) / mad.mad) >= 3.5
-         THEN 'anomaly'
-         ELSE 'normal'
-       END AS flag
-FROM dev
-CROSS JOIN mad
-ORDER BY dev.d DESC
+SELECT
+  dev.d,
+  ROUND(dev.revenue, 2) AS revenue,
+  ROUND(dev.median_rev::numeric, 2) AS median_rev,
+  CASE WHEN mad.mad = 0 THEN
+    0
+  ELSE
+    ROUND((0.6745 * (dev.revenue - dev.median_rev) / mad.mad)::numeric, 2)
+  END AS modified_z,
+  CASE WHEN mad.mad > 0
+    AND ABS(0.6745 * (dev.revenue - dev.median_rev) / mad.mad) >= 3.5 THEN
+    'anomaly'
+  ELSE
+    'normal'
+  END AS flag
+FROM
+  dev
+  CROSS JOIN mad
+ORDER BY
+  dev.d DESC
 LIMIT 60;
-
 -- Forecast accuracy: compare MA(7) forecast to actual; compute MAPE for last 30 days
 WITH daily AS (
-  SELECT date_trunc('day', o.order_date)::date AS d,
-         SUM(o.total_amount) AS revenue
-  FROM orders o
-  GROUP BY 1
-), f AS (
-  SELECT d,
-         revenue,
-         AVG(revenue) OVER (ORDER BY d ROWS BETWEEN 7 PRECEDING AND 1 PRECEDING) AS ma7
-  FROM daily
+  SELECT
+    date_trunc('day', o.order_date)::date AS d,
+    SUM(o.total_amount) AS revenue
+  FROM
+    orders o
+  GROUP BY
+    1
+),
+f AS (
+  SELECT
+    d,
+    revenue,
+    AVG(revenue) OVER (ORDER BY d ROWS BETWEEN 7 PRECEDING AND 1 PRECEDING) AS ma7
+  FROM
+    daily
 )
-SELECT d,
-       ROUND(revenue,2) AS actual,
-       ROUND(ma7,2) AS forecast,
-       CASE WHEN revenue IS NULL OR revenue = 0 OR ma7 IS NULL THEN NULL
-            ELSE ROUND(ABS(revenue - ma7)/revenue, 4) END AS ape
-FROM f
-ORDER BY d DESC
+SELECT
+  d,
+  ROUND(revenue, 2) AS actual,
+  ROUND(ma7, 2) AS forecast,
+  CASE WHEN revenue IS NULL
+    OR revenue = 0
+    OR ma7 IS NULL THEN
+    NULL
+  ELSE
+    ROUND(ABS(revenue - ma7) / revenue, 4)
+  END AS ape
+FROM
+  f
+ORDER BY
+  d DESC
 LIMIT 30;
-
 -- Exercises
 -- 1. Replace MA(7) with seasonal naive (value from 7 days ago) and compare MAPE.
 --    Inputs: For sql-57 Exercise 1, read `orders` into a one-row-per-day calendar spine, calculate `ma7_forecast` and `seasonal_naive` in `forecasts`, and aggregate the final `model` and `mape`; the output grain is model, not order.
@@ -138,5 +184,4 @@ LIMIT 30;
 --    Expected result/shape: For sql-57 Exercise 6, expected output: one row per `day`. The final columns are `day`, `revenue`, `sd_z`, and `modified_mad_z`. The final order is `d.day`.
 --    Verify: For sql-57 Exercise 6, project `day` plus the raw source columns from `constant` at each join stage; record row count and distinct `day`, then assert the final `day`, `revenue`, `sd_z`, and `modified_mad_z` values match those staged rows without unintended fanout or loss. Add one source row with a new `day`; verify the result gains exactly one row carrying that `day` value.
 --    Hint ladder, rung 1: For sql-57 Exercise 6, run `center`, `deviations`, and `dispersion` one at a time. Record each CTE's row count and `day` uniqueness before the next stage uses it.
-
 ROLLBACK;

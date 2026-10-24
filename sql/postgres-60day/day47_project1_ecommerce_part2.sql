@@ -19,33 +19,47 @@
 -- Topics: Cohort retention analysis
 BEGIN;
 SET search_path TO training, public;
-
 WITH orders_m AS (
-  SELECT o.customer_id,
-         date_trunc('month', o.order_date)::date AS order_month
-  FROM orders o
-  GROUP BY o.customer_id, date_trunc('month', o.order_date)
-), cohorts AS (
-  SELECT c.customer_id,
-         date_trunc('month', c.created_at)::date AS cohort_month
-  FROM customers c
-), retention AS (
-  SELECT co.cohort_month,
-         om.order_month,
-         (
-           EXTRACT(YEAR FROM age(om.order_month, co.cohort_month)) * 12
-           + EXTRACT(MONTH FROM age(om.order_month, co.cohort_month))
-         )::int AS month_offset,
-         COUNT(DISTINCT om.customer_id) AS active_customers
-  FROM orders_m om
-  JOIN cohorts co ON co.customer_id = om.customer_id
-  GROUP BY co.cohort_month, om.order_month
+  SELECT
+    o.customer_id,
+    date_trunc('month', o.order_date)::date AS order_month
+  FROM
+    orders o
+  GROUP BY
+    o.customer_id,
+    date_trunc('month', o.order_date)
+),
+cohorts AS (
+  SELECT
+    c.customer_id,
+    date_trunc('month', c.created_at)::date AS cohort_month
+  FROM
+    customers c
+),
+retention AS (
+  SELECT
+    co.cohort_month,
+    om.order_month,
+    (EXTRACT(YEAR FROM age(om.order_month, co.cohort_month)) * 12 + EXTRACT(MONTH FROM age(om.order_month, co.cohort_month)))::int AS month_offset,
+    COUNT(DISTINCT om.customer_id) AS active_customers
+  FROM
+    orders_m om
+    JOIN cohorts co ON co.customer_id = om.customer_id
+  GROUP BY
+    co.cohort_month,
+    om.order_month
 )
-SELECT cohort_month, month_offset, active_customers
-FROM retention
-WHERE month_offset BETWEEN 0 AND 12
-ORDER BY cohort_month DESC, month_offset;
-
+SELECT
+  cohort_month,
+  month_offset,
+  active_customers
+FROM
+  retention
+WHERE
+  month_offset BETWEEN 0 AND 12
+ORDER BY
+  cohort_month DESC,
+  month_offset;
 -- Exercises
 -- 1. Convert active_customers to retention_rate by dividing by cohort size.
 --    Inputs: For sql-47 Exercise 1, read from `orders`, `customers`, and `age`. Build the answer toward `cohort_sizes`; keep `order_id` visible whenever the result has row-level grain.
@@ -81,5 +95,4 @@ ORDER BY cohort_month DESC, month_offset;
 --    Expected result/shape: For sql-47 Exercise 6, expected output: one row per `order_id`. The final columns are `order_id`, `customer_id`, `order_date`, `status`, and `total_amount`.
 --    Verify: For sql-47 Exercise 6, project `order_id` plus the raw source columns from `orders`, and `sample` at each join stage; record row count and distinct `order_id`, then assert the final `order_id`, `customer_id`, `order_date`, `status`, and `total_amount` values match those staged rows without unintended fanout or loss. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 --    Hint ladder, rung 1: For sql-47 Exercise 6, run `latest` one at a time. Record each CTE's row count and `order_id` uniqueness before the next stage uses it.
-
 ROLLBACK;

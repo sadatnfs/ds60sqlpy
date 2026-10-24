@@ -19,33 +19,49 @@
 -- Topics: Customer segmentation by lifetime value, cohort setup
 BEGIN;
 SET search_path TO training, public;
-
 -- Lifetime Value (LTV)
 WITH order_values AS (
-  SELECT o.customer_id,
-         SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS order_value
-  FROM orders o
-  JOIN order_items oi ON oi.order_id = o.order_id
-  GROUP BY o.customer_id, o.order_id
-), ltv AS (
-  SELECT customer_id, ROUND(SUM(order_value),2) AS ltv
-  FROM order_values
-  GROUP BY customer_id
+  SELECT
+    o.customer_id,
+    SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS order_value
+  FROM
+    orders o
+    JOIN order_items oi ON oi.order_id = o.order_id
+  GROUP BY
+    o.customer_id,
+    o.order_id
+),
+ltv AS (
+  SELECT
+    customer_id,
+    ROUND(SUM(order_value), 2) AS ltv
+  FROM
+    order_values
+  GROUP BY
+    customer_id
 )
-SELECT c.customer_id, c.country, c.segment, l.ltv,
-       NTILE(4) OVER (ORDER BY l.ltv DESC) AS ltv_quartile
-FROM customers c
-JOIN ltv l ON l.customer_id = c.customer_id
-ORDER BY l.ltv DESC
+SELECT
+  c.customer_id,
+  c.country,
+  c.segment,
+  l.ltv,
+  NTILE(4) OVER (ORDER BY l.ltv DESC) AS ltv_quartile
+FROM
+  customers c
+  JOIN ltv l ON l.customer_id = c.customer_id
+ORDER BY
+  l.ltv DESC
 LIMIT 100;
-
 -- Cohort setup by signup month
-SELECT date_trunc('month', created_at)::date AS cohort_month,
-       COUNT(*) AS new_customers
-FROM customers
-GROUP BY 1
-ORDER BY cohort_month DESC;
-
+SELECT
+  date_trunc('month', created_at)::date AS cohort_month,
+  COUNT(*) AS new_customers
+FROM
+  customers
+GROUP BY
+  1
+ORDER BY
+  cohort_month DESC;
 -- Exercises
 -- 1. Create LTV segments (gold/silver/bronze) based on thresholds and analyze by country.
 --    Inputs: For sql-46 Exercise 1, read from `customers`, and `orders`. Build the answer toward `country`, `ltv_segment`, `customers`, `avg_ltv`, and `total_ltv`; keep `country`, and `ltv_segment` visible whenever the result has row-level grain.
@@ -81,5 +97,4 @@ ORDER BY cohort_month DESC;
 --    Expected result/shape: For sql-46 Exercise 6, expected output: one row per `customer_id`. The final columns are `customer_id`, `ltv`, and `activity_status`. The final order is `c.customer_id`.
 --    Verify: For sql-46 Exercise 6, independently aggregate `customers`, and `orders` by `customer_id`; require one output row for every distinct `customer_id` tuple and compare `ltv`, and `activity_status` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `ltv`, and `activity_status` for the existing `customer_id` tuple and verify the new tuple appears exactly once.
 --    Hint ladder, rung 1: For sql-46 Exercise 6, start with the first relation in `customers`, and `orders`; after each join, record total rows and distinct `customer_id` so the exact fanout or loss is visible.
-
 ROLLBACK;

@@ -52,10 +52,7 @@
     "id_sum": 199990000,
     "key_0_rows": 16040,
     "other_key_rows": 40,
-    "configurations": [
-      2,
-      4
-    ],
+    "configurations": [2, 4],
     "max_partitions": 8,
     "hypothetical_prices": {
       "vcpu_hour": 0.05,

@@ -1,4 +1,10 @@
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream, ObjectInputStream, ObjectOutputStream, NotSerializableException}
+import java.io.{
+  ByteArrayInputStream,
+  ByteArrayOutputStream,
+  ObjectInputStream,
+  ObjectOutputStream,
+  NotSerializableException
+}
 
 object Main {
   final class Owner(val factor: Long) {
@@ -36,38 +42,48 @@ object Main {
   def roundTrip(function: Long => Long): Long => Long = {
     val bytes = new ByteArrayOutputStream()
     val output = new ObjectOutputStream(bytes)
-    try { output.writeObject(function); output.flush() } finally output.close()
+    try { output.writeObject(function); output.flush() }
+    finally output.close()
     val input = new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray))
-    try input.readObject().asInstanceOf[Long => Long] finally input.close()
+    try input.readObject().asInstanceOf[Long => Long]
+    finally input.close()
   }
 
   def versionReport(): Map[String, String] = {
-    Map("scala_actual" -> scala.util.Properties.versionNumberString,
-        "java_actual" -> System.getProperty("java.specification.version"),
-        "spark_target" -> "4.0.1")
+    Map(
+      "scala_actual" -> scala.util.Properties.versionNumberString,
+      "java_actual" -> System.getProperty("java.specification.version"),
+      "spark_target" -> "4.0.1"
+    )
   }
 
   def expectIllegalArgument(body: => Any): Unit = {
     var caught = false
-    try body catch { case _: IllegalArgumentException => caught = true }
+    try body
+    catch { case _: IllegalArgumentException => caught = true }
     assert(caught, "Expected IllegalArgumentException")
   }
   def expectArithmetic(body: => Any): Unit = {
     var caught = false
-    try body catch { case _: ArithmeticException => caught = true }
+    try body
+    catch { case _: ArithmeticException => caught = true }
     assert(caught, "Expected ArithmeticException")
   }
 
   def main(args: Array[String]): Unit = {
     // Exercise 1: Validate the prepared dependency family
-    assert(artifactCoordinate("spark-sql","2.13","4.0.1") == "org.apache.spark:spark-sql_2.13:4.0.1")
-    expectIllegalArgument(artifactCoordinate("spark-sql","3","4.0.1"))
-    expectIllegalArgument(artifactCoordinate("spark-sql","2.12","4.0.1"))
-    expectIllegalArgument(artifactCoordinate("spark-sql","2.13","4.2.0"))
-    expectIllegalArgument(artifactCoordinate("bad/name","2.13","4.0.1"))
+    assert(
+      artifactCoordinate("spark-sql", "2.13", "4.0.1") == "org.apache.spark:spark-sql_2.13:4.0.1"
+    )
+    expectIllegalArgument(artifactCoordinate("spark-sql", "3", "4.0.1"))
+    expectIllegalArgument(artifactCoordinate("spark-sql", "2.12", "4.0.1"))
+    expectIllegalArgument(artifactCoordinate("spark-sql", "2.13", "4.2.0"))
+    expectIllegalArgument(artifactCoordinate("bad/name", "2.13", "4.0.1"))
     // Exercise 2: Keep execution local and bounded
     assert(localMaster("local[2]") == "local[2]")
-    Seq("local[*]","spark://example:7077",null).foreach(value => expectIllegalArgument(localMaster(value)))
+    Seq("local[*]", "spark://example:7077", null).foreach(value =>
+      expectIllegalArgument(localMaster(value))
+    )
     // Exercise 3: Capture data instead of a resource owner
     val owner = new Owner(3L)
     val safe = captureValue(owner)
@@ -76,19 +92,24 @@ object Main {
     // Exercise 4: Observe the captured object graph
     assert(serializedSize(safe.asInstanceOf[AnyRef]) > 0)
     var rejected = false
-    try serializedSize(owner.bad.asInstanceOf[AnyRef]) catch { case _: NotSerializableException => rejected = true }
+    try serializedSize(owner.bad.asInstanceOf[AnyRef])
+    catch { case _: NotSerializableException => rejected = true }
     assert(rejected, "capturing the nonserializable owner must fail")
     // Exercise 5: Verify behavior after a local serialization round trip
     val restored = roundTrip(safe)
-    assert(Seq(-2L,0L,7L).forall(value => restored(value) == safe(value)))
+    assert(Seq(-2L, 0L, 7L).forall(value => restored(value) == safe(value)))
     assert(restored(7L) == 21L)
     // Exercise 6: Separate runtime readback from a target declaration
     val report = versionReport()
-    assert(report.keySet == Set("scala_actual","java_actual","spark_target"))
+    assert(report.keySet == Set("scala_actual", "java_actual", "spark_target"))
     assert(report("scala_actual").startsWith("2.13.") && report("java_actual") == "17")
     assert(report("spark_target") == "4.0.1")
     println("spark-009: six reference contracts passed")
-    println("Scala=" + scala.util.Properties.versionNumberString + "; Java=" + System.getProperty("java.version"))
+    println(
+      "Scala=" + scala.util.Properties.versionNumberString + "; Java=" + System.getProperty(
+        "java.version"
+      )
+    )
   }
 }
 

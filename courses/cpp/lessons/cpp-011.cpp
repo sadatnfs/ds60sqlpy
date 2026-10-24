@@ -30,15 +30,25 @@
 #include <variant>
 #include <vector>
 
-std::vector<std::string> read_lines(std::istream& input) { std::vector<std::string> out; std::string line; while(std::getline(input,line)) out.push_back(line); if(input.bad()) throw std::runtime_error("read failed"); return out; }
-int main() {
-    std::istringstream input("10\n20\n"); assert((read_lines(input)==std::vector<std::string>{"10","20"}));
-    std::istringstream empty(""); assert(read_lines(empty).empty());
-    std::istringstream no_newline("30"); assert(read_lines(no_newline).size()==1);
-    std::cout << "cpp-011 examples passed\n";
-    return 0;
+std::vector<std::string> read_lines(std::istream &input) {
+  std::vector<std::string> out;
+  std::string line;
+  while (std::getline(input, line))
+    out.push_back(line);
+  if (input.bad())
+    throw std::runtime_error("read failed");
+  return out;
 }
-
+int main() {
+  std::istringstream input("10\n20\n");
+  assert((read_lines(input) == std::vector<std::string>{"10", "20"}));
+  std::istringstream empty("");
+  assert(read_lines(empty).empty());
+  std::istringstream no_newline("30");
+  assert(read_lines(no_newline).size() == 1);
+  std::cout << "cpp-011 examples passed\n";
+  return 0;
+}
 
 // Exercise 1: Trace successful reads. Read the literal 10-newline-20-newline fixture. Expected: Two records [10,20].
 // Exercise 2: Handle empty input. Run read_lines on an empty string stream. Expected: Zero records, ordinary EOF.

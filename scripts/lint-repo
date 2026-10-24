@@ -3,7 +3,7 @@
 set -euo pipefail
 for arg in "$@"; do
   case "$arg" in
-    -h|--help)
+    -h | --help)
       cat <<'HELP'
 Usage: ./scripts/lint-repo [--build] [--list] [--language NAME]
 
@@ -16,7 +16,8 @@ Requires a local Linux Docker engine. Windows users run inside WSL 2.
 This command does not change source files, run lessons or modify learner state.
 Static and syntax checks supplement compilation, tests and runtime verification.
 HELP
-      exit 0 ;;
+      exit 0
+      ;;
   esac
 done
 script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)

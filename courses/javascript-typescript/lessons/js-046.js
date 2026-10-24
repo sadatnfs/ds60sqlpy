@@ -20,4 +20,6 @@
 // Exercise 6: Defend a scale choice for signed residuals.
 // Expected: A diverging domain with visible zero and explicit units.
 
-throw new Error("Implement the six D3 practice tasks in your saved pad before claiming completion.");
+throw new Error(
+  "Implement the six D3 practice tasks in your saved pad before claiming completion.",
+);

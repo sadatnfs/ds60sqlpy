@@ -35,8 +35,8 @@ spec:
             periodSeconds: 2
             failureThreshold: 2
           resources:
-            requests: {cpu: 10m, memory: 16Mi}
-            limits: {cpu: 100m, memory: 64Mi}
+            requests: { cpu: 10m, memory: 16Mi }
+            limits: { cpu: 100m, memory: 64Mi }
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
@@ -54,7 +54,6 @@ spec:
     - name: http
       port: 8080
       targetPort: http
-
 # Exercise 1: Predict controlled all-unready state; Running does not imply Ready or eligible backends.
 # Exercise 2: Prove two-replica healthy baseline using Deployment,Ready Pod UIDs,ready EndpointSlice UIDs and fresh client.
 # Exercise 3: Change only Service selector to app:wrong, observe zero matching backends, repair the saved source.

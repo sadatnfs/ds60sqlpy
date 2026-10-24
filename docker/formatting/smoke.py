@@ -1,6 +1,7 @@
 """Exercise every installed formatter without network or learner files."""
 
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -40,13 +41,12 @@ def main() -> None:
         ),
     ):
         stable(parser, [*prettier, "--parser", parser], source)
-    math = "\\(x^2 + y^2\\)"
-    stable(
-        "Markdown preserves mathematics and code fences",
-        [*prettier, "--parser", "markdown"],
-        f"# A lesson\n\n{math}\n\n```python\nx=1+2\n```\n",
-        (math, "x=1+2"),
-    )
+    sys.path.insert(0, str(CONFIG.parents[1]))
+    from scripts.format_repo import language_for
+
+    if language_for("README.md") is not None:
+        raise RuntimeError("Markdown must remain outside general formatter dispatch")
+    print("PASS Markdown stays outside general formatting", flush=True)
     clang = ["clang-format", "--style=file:" + str(CONFIG / "clang-format.yaml")]
     stable("C", [*clang, "--assume-filename=main.c"], "int main(void){return 0;}\n")
     stable("C++", [*clang, "--assume-filename=main.cpp"], "int main(){auto x=1;return x-1;}\n")

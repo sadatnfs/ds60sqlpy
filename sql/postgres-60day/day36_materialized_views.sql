@@ -18,23 +18,30 @@
 --
 BEGIN;
 SET search_path TO training, public;
-
 -- Materialized view for category revenue by month
 CREATE MATERIALIZED VIEW mv_category_month_revenue AS
-SELECT p.category,
-       date_trunc('month', o.order_date)::date AS month,
-       SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS revenue
-FROM order_items oi
-JOIN products p ON p.product_id = oi.product_id
-JOIN orders o ON o.order_id = oi.order_id
-GROUP BY p.category, date_trunc('month', o.order_date);
-
+SELECT
+  p.category,
+  date_trunc('month', o.order_date)::date AS month,
+  SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS revenue
+FROM
+  order_items oi
+  JOIN products p ON p.product_id = oi.product_id
+  JOIN orders o ON o.order_id = oi.order_id
+GROUP BY
+  p.category,
+  date_trunc('month', o.order_date);
 -- Query the MV
-SELECT * FROM mv_category_month_revenue ORDER BY month DESC, revenue DESC LIMIT 50;
-
+SELECT
+  *
+FROM
+  mv_category_month_revenue
+ORDER BY
+  month DESC,
+  revenue DESC
+LIMIT 50;
 -- Refresh when needed (will be rolled back)
 REFRESH MATERIALIZED VIEW mv_category_month_revenue;
-
 -- Exercises
 -- 1. Create a MV for weekly revenue by country.
 --    Inputs: For sql-36 Exercise 1, read from `orders`, `customers`, `order_items`, and `mv_weekly_country_revenue_solution`. Compute `week_start`, `country`, and `revenue` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
@@ -70,5 +77,4 @@ REFRESH MATERIALIZED VIEW mv_category_month_revenue;
 --    Expected result/shape: For sql-36 Exercise 6, expected output: at most 20 rows keyed by `week`, and `country`. The final columns are `week`, `country`, and `revenue`. The final order is `m.week DESC, c.country`.
 --    Verify: For sql-36 Exercise 6, assert no more than 20 rows, no duplicate `week`, and `country`, and no adjacent pair that violates `m.week DESC, c.country`. Rejoin the returned keys to `orders`, `customers`, and `mv_weekly_country_revenue_solution` to confirm `week`, `country`, and `revenue` came from the same source rows. Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `m.week DESC, c.country`.
 --    Hint ladder, rung 1: For sql-36 Exercise 6, run `months`, and `countries` one at a time. Record each CTE's row count and `week`, and `country` uniqueness before the next stage uses it.
-
 ROLLBACK;

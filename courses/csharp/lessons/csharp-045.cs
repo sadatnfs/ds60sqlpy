@@ -8,10 +8,9 @@
 // Task 6: Plan an external Native AOT experiment stating target architecture, native prerequisites and runtime checks.
 using System;
 
-internal static class Program
-{
-    private static void Main()
-    {
-        throw new NotImplementedException("Implement your own lesson attempt before running.");
-    }
+internal static class Program {
+  private static void Main() {
+    throw new NotImplementedException(
+        "Implement your own lesson attempt before running.");
+  }
 }

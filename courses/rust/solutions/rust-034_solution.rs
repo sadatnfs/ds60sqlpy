@@ -1,5 +1,3 @@
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let values = [2_i32, 3, 4];

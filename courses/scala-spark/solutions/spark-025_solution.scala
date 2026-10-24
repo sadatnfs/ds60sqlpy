@@ -1,7 +1,7 @@
 import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
-import java.nio.file.{Files,Path,Paths}
+import java.nio.file.{Files, Path, Paths}
 import scala.jdk.CollectionConverters._
 
 object Main {
@@ -11,97 +11,169 @@ object Main {
     finally paths.close()
   }
   def sameBag(left: DataFrame, right: DataFrame): Boolean = {
-    val columns = Seq("id","day","amount","payload")
-    val a = left.select(columns.map(col):_*);val b = right.select(columns.map(col):_*)
+    val columns = Seq("id", "day", "amount", "payload")
+    val a = left.select(columns.map(col): _*); val b = right.select(columns.map(col): _*)
     a.exceptAll(b).count() == 0L && b.exceptAll(a).count() == 0L
   }
 
   def writeCompact(source: DataFrame, path: String): DataFrame = {
-    source.repartition(2,col("day")).write.mode("errorifexists").partitionBy("day").parquet(path)
+    source.repartition(2, col("day")).write.mode("errorifexists").partitionBy("day").parquet(path)
     source.sparkSession.read.parquet(path)
   }
 
   def filteredProduct(frame: DataFrame): DataFrame = {
-    frame.filter(col("day") === "even" && col("id") >= 1990L).select("id","amount")
+    frame.filter(col("day") === "even" && col("id") >= 1990L).select("id", "amount")
   }
 
-  def scanEvidence(frame: DataFrame): Map[String,String] = {
+  def scanEvidence(frame: DataFrame): Map[String, String] = {
     frame.createOrReplaceTempView("ds60_spark_025_read")
-    val text = frame.sparkSession.sql("EXPLAIN FORMATTED SELECT id,amount FROM ds60_spark_025_read WHERE day='even' AND id>=1990").collect().map(_.getString(0)).mkString("\n")
-    Seq("ReadSchema","PartitionFilters","PushedFilters").map(name => name -> text.linesIterator.filter(_.contains(name)).mkString("\n")).toMap
+    val text = frame.sparkSession
+      .sql(
+        "EXPLAIN FORMATTED SELECT id,amount FROM ds60_spark_025_read WHERE day='even' AND id>=1990"
+      )
+      .collect()
+      .map(_.getString(0))
+      .mkString("\n")
+    Seq("ReadSchema", "PartitionFilters", "PushedFilters")
+      .map(name => name -> text.linesIterator.filter(_.contains(name)).mkString("\n"))
+      .toMap
   }
 
-  def fileInventory(path: String): (Int,Long) = {
+  def fileInventory(path: String): (Int, Long) = {
     val stream = Files.walk(Paths.get(path))
     try {
-     val files = stream.iterator().asScala.filter(p => Files.isRegularFile(p) && p.getFileName.toString.endsWith(".parquet")).toSeq
-     (files.size,files.map(p => Files.size(p)).sum)
+      val files = stream
+        .iterator()
+        .asScala
+        .filter(p => Files.isRegularFile(p) && p.getFileName.toString.endsWith(".parquet"))
+        .toSeq
+      (files.size, files.map(p => Files.size(p)).sum)
     } finally stream.close()
   }
 
-  def layoutReceipt(frame: DataFrame, path: String): (Int,Int,Int) = {
+  def layoutReceipt(frame: DataFrame, path: String): (Int, Int, Int) = {
     val stream = Files.list(Paths.get(path))
-    val directories = try stream.iterator().asScala.count(p => Files.isDirectory(p) && p.getFileName.toString.startsWith("day=")) finally stream.close()
-    (directories,fileInventory(path)._1,frame.rdd.getNumPartitions)
+    val directories =
+      try
+        stream
+          .iterator()
+          .asScala
+          .count(p => Files.isDirectory(p) && p.getFileName.toString.startsWith("day="))
+      finally stream.close()
+    (directories, fileInventory(path)._1, frame.rdd.getNumPartitions)
   }
 
   def rejectExisting(source: DataFrame, path: String): Unit = {
     var rejected = false
-    try source.write.mode("errorifexists").parquet(path) catch { case _: org.apache.spark.sql.AnalysisException => rejected = true }
-    require(rejected,"Existing path unexpectedly accepted")
+    try source.write.mode("errorifexists").parquet(path)
+    catch { case _: org.apache.spark.sql.AnalysisException => rejected = true }
+    require(rejected, "Existing path unexpectedly accepted")
   }
 
   def main(args: Array[String]): Unit = {
     var ownedRoot: Path = null
-    val spark = SparkSession.builder().appName("ds60-spark-025").master("local[2]")
-      .config("spark.ui.enabled","false")
-      .config("spark.driver.host","127.0.0.1")
-      .config("spark.driver.bindAddress","127.0.0.1")
-      .config("spark.sql.shuffle.partitions","2")
-      .config("spark.sql.adaptive.enabled","false")
-      .config("spark.sql.ansi.enabled","true")
-      .config("spark.sql.session.timeZone","UTC").getOrCreate()
+    val spark = SparkSession
+      .builder()
+      .appName("ds60-spark-025")
+      .master("local[2]")
+      .config("spark.ui.enabled", "false")
+      .config("spark.driver.host", "127.0.0.1")
+      .config("spark.driver.bindAddress", "127.0.0.1")
+      .config("spark.sql.shuffle.partitions", "2")
+      .config("spark.sql.adaptive.enabled", "false")
+      .config("spark.sql.ansi.enabled", "true")
+      .config("spark.sql.session.timeZone", "UTC")
+      .getOrCreate()
     try {
       require(spark.sparkContext.master == "local[2]", "local-only course session")
       spark.sparkContext.setLogLevel("ERROR")
-      ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(),".ds60-spark-025-")
-      val schema = StructType(Seq(StructField("id",LongType,false),StructField("day",StringType,false),StructField("amount",LongType,false),StructField("payload",StringType,false)))
-      val source = spark.createDataFrame(spark.sparkContext.parallelize((0L until 2000L).map(id => Row(id,if(id%2L==0L) "even" else "odd",id*7L,"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")),4),schema)
+      ownedRoot =
+        Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(), ".ds60-spark-025-")
+      val schema = StructType(
+        Seq(
+          StructField("id", LongType, false),
+          StructField("day", StringType, false),
+          StructField("amount", LongType, false),
+          StructField("payload", StringType, false)
+        )
+      )
+      val source = spark.createDataFrame(
+        spark.sparkContext.parallelize(
+          (0L until 2000L).map(id =>
+            Row(
+              id,
+              if (id % 2L == 0L) "even" else "odd",
+              id * 7L,
+              "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+            )
+          ),
+          4
+        ),
+        schema
+      )
       val compactPath = ownedRoot.resolve("compact").toString
       val manyPath = ownedRoot.resolve("many").toString
       // Exercise 1: Write and validate a compact partitioned round trip
-      val compact = writeCompact(source,compactPath)
-      assert(sameBag(source,compact) && compact.count() == 2000L)
-      assert(compact.schema.fields.map(f => f.name->f.dataType.typeName).toMap == Map("id"->"long","day"->"string","amount"->"long","payload"->"string"))
+      val compact = writeCompact(source, compactPath)
+      assert(sameBag(source, compact) && compact.count() == 2000L)
+      assert(
+        compact.schema.fields.map(f => f.name -> f.dataType.typeName).toMap == Map(
+          "id" -> "long",
+          "day" -> "string",
+          "amount" -> "long",
+          "payload" -> "string"
+        )
+      )
       assert(compact.agg(sum("amount")).first().getLong(0) == 13993000L)
       // Exercise 2: Read a narrow filtered projection with an independent oracle
       val selected = filteredProduct(compact)
-      assert(selected.columns.toSeq == Seq("id","amount"))
-      assert(selected.orderBy("id").collect().toSeq.map(r => (r.getLong(0),r.getLong(1))) == Seq(1990L,1992L,1994L,1996L,1998L).map(id => (id,id*7L)))
+      assert(selected.columns.toSeq == Seq("id", "amount"))
+      assert(
+        selected.orderBy("id").collect().toSeq.map(r => (r.getLong(0), r.getLong(1))) == Seq(1990L,
+          1992L, 1994L, 1996L, 1998L).map(id => (id, id * 7L))
+      )
       // Exercise 3: Locate partition, column and predicate evidence in the scan
       val evidence = scanEvidence(compact)
-      assert(evidence("ReadSchema").contains("id:bigint") && evidence("ReadSchema").contains("amount:bigint") && !evidence("ReadSchema").contains("payload"))
-      assert(evidence("PartitionFilters").contains("day") && evidence("PartitionFilters").contains("even"))
+      assert(
+        evidence("ReadSchema").contains("id:bigint") && evidence("ReadSchema").contains(
+          "amount:bigint"
+        ) && !evidence("ReadSchema").contains("payload")
+      )
+      assert(
+        evidence("PartitionFilters").contains("day") && evidence("PartitionFilters").contains(
+          "even"
+        )
+      )
       assert(evidence("PushedFilters").contains("GreaterThanOrEqual(id,1990)"))
       println(evidence)
       // Exercise 4: Compare a deliberately larger file count without changing data
       source.repartition(12).write.mode("errorifexists").partitionBy("day").parquet(manyPath)
       val many = spark.read.parquet(manyPath)
-      assert(sameBag(source,many))
-      val compactFiles = fileInventory(compactPath);val manyFiles = fileInventory(manyPath)
+      assert(sameBag(source, many))
+      val compactFiles = fileInventory(compactPath); val manyFiles = fileInventory(manyPath)
       assert(compactFiles._1 > 0 && manyFiles._1 > compactFiles._1)
-      assert(compactFiles._2 > 0L && manyFiles._2 > 0L && compactFiles._2 + manyFiles._2 < 32L*1024L*1024L)
+      assert(
+        compactFiles._2 > 0L && manyFiles._2 > 0L && compactFiles._2 + manyFiles._2 < 32L * 1024L * 1024L
+      )
       println("compact_data_files_bytes=" + compactFiles + ";many_data_files_bytes=" + manyFiles)
       // Exercise 5: Report storage partitions, files and scan partitions separately
-      val compactReceipt = layoutReceipt(compact,compactPath);val manyReceipt = layoutReceipt(many,manyPath)
-      assert(compactReceipt._1 == 2 && manyReceipt._1 == 2 && compactReceipt._2 == compactFiles._1 && manyReceipt._2 == manyFiles._1)
+      val compactReceipt = layoutReceipt(compact, compactPath);
+      val manyReceipt = layoutReceipt(many, manyPath)
+      assert(
+        compactReceipt._1 == 2 && manyReceipt._1 == 2 && compactReceipt._2 == compactFiles._1 && manyReceipt._2 == manyFiles._1
+      )
       assert(compactReceipt._3 > 0 && manyReceipt._3 > 0)
-      println("layout_directory_file_scan_counts=" + Seq(compactReceipt,manyReceipt))
+      println("layout_directory_file_scan_counts=" + Seq(compactReceipt, manyReceipt))
       // Exercise 6: Reject an existing target and preserve its product
-      rejectExisting(source,compactPath)
-      assert(sameBag(source,spark.read.parquet(compactPath)))
-      println("spark-025: six Scala reference contracts passed; Spark=" + spark.version + "; Scala=" + scala.util.Properties.versionNumberString)
-    } finally { try { if(ownedRoot != null) deleteOwned(ownedRoot) } finally { spark.stop() } }
+      rejectExisting(source, compactPath)
+      assert(sameBag(source, spark.read.parquet(compactPath)))
+      println(
+        "spark-025: six Scala reference contracts passed; Spark=" + spark.version + "; Scala=" + scala.util.Properties.versionNumberString
+      )
+    } finally {
+      try { if (ownedRoot != null) deleteOwned(ownedRoot) }
+      finally { spark.stop() }
+    }
   }
 }
 

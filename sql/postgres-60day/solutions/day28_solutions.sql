@@ -14,15 +14,12 @@
 --
 -- Target: PostgreSQL 16+; run only in advanced_sql_training.
 -- ON_ERROR_STOP is supplied by the documented psql command.
-
 BEGIN;
 SET search_path TO training, public;
-
 -- Shared teaching contract
 -- Focus: Query JSONB and XML with explicit path, type, missing-key, and safe-cast behavior instead of assuming semi-structured data is schema-free.
 -- Assumptions: JSON text extraction with `->>` returns text or NULL. XML XPath results are arrays. Course metadata keys are small and deterministic.
 -- Pitfall: Casting missing or malformed JSON text directly raises; broad JSON containment or regex extraction needs validation and appropriate indexing evidence.
-
 -- ---------------------------------------------------------------------------
 -- Exercise 1: Query writing
 -- Prompt: Extract customer acquisition channel and referrer from JSONB attributes.
@@ -34,12 +31,14 @@ SET search_path TO training, public;
 -- - `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
 -- - `FROM`: establishes the starting relation and therefore the initial row grain.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
-SELECT c.customer_id,
-       c.attributes ->> 'channel' AS channel,
-       c.attributes ->> 'referrer' AS referrer
-FROM customers AS c
-ORDER BY c.customer_id;
-
+SELECT
+  c.customer_id,
+  c.attributes ->> 'channel' AS channel,
+  c.attributes ->> 'referrer' AS referrer
+FROM
+  customers AS c
+ORDER BY
+  c.customer_id;
 -- ---------------------------------------------------------------------------
 -- Exercise 2: Query writing
 -- Prompt: Find mobile-channel customers using JSONB containment.
@@ -52,13 +51,16 @@ ORDER BY c.customer_id;
 -- - `FROM`: establishes the starting relation and therefore the initial row grain.
 -- - `WHERE`: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
-SELECT c.customer_id,
-       c.full_name,
-       c.attributes
-FROM customers AS c
-WHERE c.attributes @> '{"channel": "mobile"}'::jsonb
-ORDER BY c.customer_id;
-
+SELECT
+  c.customer_id,
+  c.full_name,
+  c.attributes
+FROM
+  customers AS c
+WHERE
+  c.attributes @> '{"channel": "mobile"}'::jsonb
+ORDER BY
+  c.customer_id;
 -- ---------------------------------------------------------------------------
 -- Exercise 3: Query writing
 -- Prompt: Count event rows with missing device metadata separately from present values.
@@ -70,11 +72,12 @@ ORDER BY c.customer_id;
 -- - `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
 -- - `FROM`: establishes the starting relation and therefore the initial row grain.
 -- - `FILTER (WHERE ...)`: limits one aggregate without removing rows needed by neighboring aggregates.
-SELECT COUNT(*) FILTER (WHERE e.metadata ? 'device') AS has_device_key,
-       COUNT(*) FILTER (WHERE NOT e.metadata ? 'device') AS missing_device_key,
-       COUNT(*) AS all_events
-FROM events AS e;
-
+SELECT
+  COUNT(*) FILTER (WHERE e.metadata ? 'device') AS has_device_key,
+  COUNT(*) FILTER (WHERE NOT e.metadata ? 'device') AS missing_device_key,
+  COUNT(*) AS all_events
+FROM
+  events AS e;
 -- ---------------------------------------------------------------------------
 -- Exercise 4: Prediction
 -- Prompt: Aggregate event-type counts into a JSONB object per customer and predict key ordering expectations.
@@ -89,18 +92,25 @@ FROM events AS e;
 -- - `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 WITH event_counts AS (
-  SELECT e.customer_id,
-         e.event_type,
-         COUNT(*) AS event_count
-  FROM events AS e
-  GROUP BY e.customer_id, e.event_type
+  SELECT
+    e.customer_id,
+    e.event_type,
+    COUNT(*) AS event_count
+  FROM
+    events AS e
+  GROUP BY
+    e.customer_id,
+    e.event_type
 )
-SELECT customer_id,
-       jsonb_object_agg(event_type, event_count ORDER BY event_type) AS counts_by_type
-FROM event_counts
-GROUP BY customer_id
-ORDER BY customer_id;
-
+SELECT
+  customer_id,
+  jsonb_object_agg(event_type, event_count ORDER BY event_type) AS counts_by_type
+FROM
+  event_counts
+GROUP BY
+  customer_id
+ORDER BY
+  customer_id;
 -- ---------------------------------------------------------------------------
 -- Exercise 5: Debugging
 -- Prompt: Extract order ID and status text from XML documents without assuming XPath returns a scalar.
@@ -112,12 +122,14 @@ ORDER BY customer_id;
 -- - `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
 -- - `FROM`: establishes the starting relation and therefore the initial row grain.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
-SELECT xd.doc_id,
-       ((xpath('string(/order/id)', xd.payload))[1])::text::integer AS order_id,
-       ((xpath('string(/order/status)', xd.payload))[1])::text AS order_status
-FROM xml_docs AS xd
-ORDER BY xd.doc_id;
-
+SELECT
+  xd.doc_id,
+  ((xpath('string(/order/id)', xd.payload))[1])::text::integer AS order_id,
+  ((xpath('string(/order/status)', xd.payload))[1])::text AS order_status
+FROM
+  xml_docs AS xd
+ORDER BY
+  xd.doc_id;
 -- ---------------------------------------------------------------------------
 -- Exercise 6: Extension
 -- Prompt: Safely cast a numeric JSON text field from sample payloads, returning NULL for missing or malformed values.
@@ -132,19 +144,20 @@ ORDER BY xd.doc_id;
 -- - `FROM`: establishes the starting relation and therefore the initial row grain.
 -- - `CASE`: encodes ordered business conditions; the first true branch wins and `ELSE` defines the remainder.
 -- - pattern predicate: matches text according to the chosen operator; escaping and case sensitivity are intentional semantics.
-WITH payloads(payload) AS (
-  VALUES
-    ('{"amount": "12.50"}'::jsonb),
+WITH payloads (
+  payload
+) AS (
+  VALUES ('{"amount": "12.50"}'::jsonb),
     ('{"amount": "bad"}'::jsonb),
-    ('{}'::jsonb)
-)
-SELECT payload,
-       CASE
-         WHEN payload ->> 'amount' ~ '^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$'
-           THEN (payload ->> 'amount')::numeric
-         ELSE NULL
-       END AS safe_amount
-FROM payloads;
-
+    ('{}'::jsonb))
+SELECT
+  payload,
+  CASE WHEN payload ->> 'amount' ~ '^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$' THEN
+    (payload ->> 'amount')::numeric
+  ELSE
+    NULL
+  END AS safe_amount
+FROM
+  payloads;
 -- No course answer persists changes or temporary objects.
 ROLLBACK;

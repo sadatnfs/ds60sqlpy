@@ -47,26 +47,10 @@
   ],
   "golden": {
     "canonical_batch": "1,100\n2,200\n",
-    "attempt_batch_ids": [
-      0,
-      0,
-      1
-    ],
-    "published_rows": [
-      "1,100",
-      "2,200",
-      "3,300"
-    ],
-    "unsafe_append_rows": [
-      "1,100",
-      "2,200",
-      "1,100",
-      "2,200"
-    ],
-    "key": [
-      "application_query_identity",
-      "batch_id"
-    ],
+    "attempt_batch_ids": [0, 0, 1],
+    "published_rows": ["1,100", "2,200", "3,300"],
+    "unsafe_append_rows": ["1,100", "2,200", "1,100", "2,200"],
+    "key": ["application_query_identity", "batch_id"],
     "failure_point": "after stage before publication",
     "limitations": [
       "single local writer",

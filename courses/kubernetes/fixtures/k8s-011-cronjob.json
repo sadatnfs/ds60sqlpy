@@ -38,13 +38,7 @@
                 "name": "task",
                 "image": "ds60sqlpy-k8s-fixture:0.2.0",
                 "imagePullPolicy": "Never",
-                "command": [
-                  "python",
-                  "/fixture.py",
-                  "task",
-                  "--outcome",
-                  "success"
-                ],
+                "command": ["python", "/fixture.py", "task", "--outcome", "success"],
                 "resources": {
                   "requests": {
                     "cpu": "10m",
@@ -59,9 +53,7 @@
                   "allowPrivilegeEscalation": false,
                   "readOnlyRootFilesystem": true,
                   "capabilities": {
-                    "drop": [
-                      "ALL"
-                    ]
+                    "drop": ["ALL"]
                   }
                 }
               }

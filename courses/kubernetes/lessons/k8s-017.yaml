@@ -21,36 +21,35 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       containers:
-      - name: hello
-        image: ds60sqlpy-k8s-fixture:0.2.0
-        imagePullPolicy: Never
-        command:
-        - python
-        - /fixture.py
-        - server
-        ports:
-        - name: http
-          containerPort: 8080
-        readinessProbe:
-          httpGet:
-            path: /ready
-            port: http
-          periodSeconds: 2
-          failureThreshold: 2
-        resources:
-          requests:
-            cpu: 10m
-            memory: 16Mi
-          limits:
-            cpu: 100m
-            memory: 64Mi
-        securityContext:
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: true
-          capabilities:
-            drop:
-            - ALL
-
+        - name: hello
+          image: ds60sqlpy-k8s-fixture:0.2.0
+          imagePullPolicy: Never
+          command:
+            - python
+            - /fixture.py
+            - server
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            periodSeconds: 2
+            failureThreshold: 2
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
 # Exercise 1: Map each control. Explain UID,capabilities,privilege escalation,seccomp and root filesystem fields. Expected: Each field is connected to its specific mechanism rather than one generic secure label.
 # Exercise 2: Run the allowed baseline. Use the fixed nonroot source in a qualified operation. Expected: Accepted source,observed workload readiness and owned cleanup are recorded.
 # Exercise 3: Reject a privileged mutation. Change allowPrivilegeEscalation or add privileged:true in a scratch source. Expected: Parser refusal before cluster mutation.

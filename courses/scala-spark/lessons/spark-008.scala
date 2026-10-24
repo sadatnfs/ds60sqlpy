@@ -2,7 +2,6 @@ import scala.util.control.NonFatal
 
 object Main {
 
-
   def bagEqual(left: Seq[Long], right: Seq[Long]): Boolean =
     throw new UnsupportedOperationException("Complete bagEqual")
 
@@ -23,10 +22,10 @@ object Main {
 
   def main(args: Array[String]): Unit = {
     locally {
-      val values = Seq(1L,1L,2L)
-      assert(values.toSet == Seq(1L,2L).toSet)
-      assert(values.sorted != Seq(1L,2L).sorted)
-      assert(values.sorted == Seq(2L,1L,1L).sorted)
+      val values = Seq(1L, 1L, 2L)
+      assert(values.toSet == Seq(1L, 2L).toSet)
+      assert(values.sorted != Seq(1L, 2L).sorted)
+      assert(values.sorted == Seq(2L, 1L, 1L).sorted)
       println("Set equality loses a repeated occurrence")
     }
     locally {

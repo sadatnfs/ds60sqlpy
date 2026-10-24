@@ -18,34 +18,36 @@
 --
 BEGIN;
 SET search_path TO training, public;
-
 -- Study contract
 -- Focus: Use distribution windows to express relative position while documenting ties, small partitions, and bucket size.
 -- Assumptions: `PERCENT_RANK` ranges from 0 to 1 using rank; `CUME_DIST` is the fraction at or below the current value; `NTILE` balances row counts.
 -- Pitfall: A percentile rank is not a probability or causal score, and `NTILE(10)` does not guarantee equal value ranges.
 -- Predict row grain and NULL/order behavior before executing each example.
-
 -- Segment customers into quartiles by lifetime revenue
 WITH cust_rev AS (
-  SELECT c.customer_id,
-         COALESCE(SUM(oi.unit_price*oi.quantity*(1-oi.discount)),0) AS revenue
-  FROM customers c
-  LEFT JOIN orders o ON o.customer_id = c.customer_id
-  LEFT JOIN order_items oi ON oi.order_id = o.order_id
-  GROUP BY c.customer_id
+  SELECT
+    c.customer_id,
+    COALESCE(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)), 0) AS revenue
+  FROM
+    customers c
+    LEFT JOIN orders o ON o.customer_id = c.customer_id
+    LEFT JOIN order_items oi ON oi.order_id = o.order_id
+  GROUP BY
+    c.customer_id
 )
-SELECT customer_id,
-       revenue,
-       -- NTILE must assign tied rows to physical buckets; customer_id makes
-       -- that assignment reproducible without changing PERCENT_RANK tie rules.
-       NTILE(4) OVER (
-         ORDER BY revenue DESC, customer_id
-       ) AS revenue_quartile,
-       ROUND((PERCENT_RANK() OVER (ORDER BY revenue))::numeric, 4) AS pct_rank
-FROM cust_rev
-ORDER BY revenue DESC, customer_id
+SELECT
+  customer_id,
+  revenue,
+  -- NTILE must assign tied rows to physical buckets; customer_id makes
+  -- that assignment reproducible without changing PERCENT_RANK tie rules.
+  NTILE(4) OVER (ORDER BY revenue DESC, customer_id) AS revenue_quartile,
+  ROUND((PERCENT_RANK() OVER (ORDER BY revenue))::numeric, 4) AS pct_rank
+FROM
+  cust_rev
+ORDER BY
+  revenue DESC,
+  customer_id
 LIMIT 50;
-
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.
@@ -85,5 +87,4 @@ LIMIT 50;
 --    Expected result/shape: For sql-21 Exercise 6, expected output: Customers in decile 1. The final columns are `customer_id`, `total_spend`, `decile`, and `population`. The final order is `total_spend DESC, customer_id`.
 --    Verify: For sql-21 Exercise 6, run an anti-check that counts rows where NOT ((decile = 1)); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, `total_spend`, `decile`, and `population` against `orders`. Give two rows the same `total_spend DESC` value and different `customer_id` values; verify `total_spend DESC, customer_id` produces the intended rank and display order.
 --    Hint ladder, rung 1: For sql-21 Exercise 6, run `spend`, and `bucketed` one at a time. Record each CTE's row count and `customer_id` uniqueness before the next stage uses it.
-
 ROLLBACK;

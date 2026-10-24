@@ -1,5 +1,15 @@
-enum Node { End, More(i32, Box<Node>) }
-impl Node { fn total(&self) -> i32 { match self { Self::End => 0, Self::More(value, next) => value + next.total() } } }
+enum Node {
+    End,
+    More(i32, Box<Node>),
+}
+impl Node {
+    fn total(&self) -> i32 {
+        match self {
+            Self::End => 0,
+            Self::More(value, next) => value + next.total(),
+        }
+    }
+}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {

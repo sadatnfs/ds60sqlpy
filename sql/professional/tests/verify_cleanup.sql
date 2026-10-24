@@ -1,6 +1,5 @@
 -- Read-only postcondition for professional SQL modules.
 \set ON_ERROR_STOP on
-
 DO $cleanup_check$
 DECLARE
     remaining_schemas text;

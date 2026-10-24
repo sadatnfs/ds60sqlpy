@@ -6,10 +6,7 @@
   "summary": "42 lessons in modern C++, from first compiled programs to ownership, portable builds, testing, concurrency and performance. Learn how to compile, inspect diagnostics and verify program behavior.",
   "north_star": "Build, test, explain and deliver a portable bounded C++20 program whose ownership, failure and performance claims survive independent review.",
   "entry_prerequisites": [],
-  "runtime_profiles": [
-    "reading",
-    "cpp20"
-  ],
+  "runtime_profiles": ["reading", "cpp20"],
   "stages": [
     {
       "id": "beginner",
@@ -38,828 +35,499 @@
       "outcome": "Distinguish source, compiler output and a running process without requiring another programming language.",
       "lab": "Trace a supplied hello.cpp, compiler transcript and exit-status worksheet; identify which file is editable.",
       "verification": "Label source/object/executable correctly and classify one compile error, one link error and one runtime failure.",
-      "concepts": [
-        "source",
-        "compiler",
-        "linker",
-        "process",
-        "exit status"
-      ]
+      "concepts": ["source", "compiler", "linker", "process", "exit status"]
     },
     {
       "id": "cpp-002",
       "title": "Your first C++20 target",
       "level": "beginner",
       "minutes": 90,
-      "prerequisites": [
-        "cpp-001"
-      ],
+      "prerequisites": ["cpp-001"],
       "runtime": "cpp20",
       "outcome": "Build and run a small program through a named CMake target.",
       "lab": "Configure a clean out-of-source Debug build, compile hello and run it with fixed input.",
       "verification": "CTest passes and stdout is exactly hello, learner; rebuilding after one source edit changes only the intended output.",
-      "concepts": [
-        "C++20",
-        "CMake",
-        "target",
-        "standard output"
-      ]
+      "concepts": ["C++20", "CMake", "target", "standard output"]
     },
     {
       "id": "cpp-003",
       "title": "Values, types and conversions",
       "level": "beginner",
       "minutes": 90,
-      "prerequisites": [
-        "cpp-002"
-      ],
+      "prerequisites": ["cpp-002"],
       "runtime": "cpp20",
       "outcome": "Choose an integer or floating type and predict conversions before executing.",
       "lab": "Trace integer division, explicit conversion and a signed-versus-unsigned comparison over small fixtures.",
       "verification": "Explain 7/2 versus 7.0/2 and reject a negative count before conversion to an unsigned size.",
-      "concepts": [
-        "types",
-        "initialization",
-        "conversion",
-        "numeric limits"
-      ]
+      "concepts": ["types", "initialization", "conversion", "numeric limits"]
     },
     {
       "id": "cpp-004",
       "title": "Branches, loops and state traces",
       "level": "beginner",
       "minutes": 90,
-      "prerequisites": [
-        "cpp-003"
-      ],
+      "prerequisites": ["cpp-003"],
       "runtime": "cpp20",
       "outcome": "Write a bounded loop with an explicit invariant.",
       "lab": "Implement positive-value counting over empty, mixed and all-negative vectors using supplied loop scaffolding.",
       "verification": "Counts are 0, 3 and 0 for the published fixtures; no input is modified and each loop terminates.",
-      "concepts": [
-        "control flow",
-        "invariant",
-        "boundary"
-      ]
+      "concepts": ["control flow", "invariant", "boundary"]
     },
     {
       "id": "cpp-005",
       "title": "Functions and parameter contracts",
       "level": "beginner",
       "minutes": 90,
-      "prerequisites": [
-        "cpp-004"
-      ],
+      "prerequisites": ["cpp-004"],
       "runtime": "cpp20",
       "outcome": "Separate input, output, precondition and postcondition in a function.",
       "lab": "Extract a unit-conversion function and compare value and reference parameters.",
       "verification": "Normal and boundary cases return the specified values; tests demonstrate which argument can change.",
-      "concepts": [
-        "functions",
-        "parameters",
-        "return value",
-        "contracts"
-      ]
+      "concepts": ["functions", "parameters", "return value", "contracts"]
     },
     {
       "id": "cpp-006",
       "title": "Strings and trustworthy integer input",
       "level": "beginner",
       "minutes": 105,
-      "prerequisites": [
-        "cpp-005"
-      ],
+      "prerequisites": ["cpp-005"],
       "runtime": "cpp20",
       "outcome": "Separate valid input from a failed parse without guessing from a numeric result.",
       "lab": "Parse whole integer tokens with from_chars and reject trailing characters, overflow and empty input.",
       "verification": "42 succeeds; 42x, empty text and an out-of-range decimal are rejected with distinct recorded reasons.",
-      "concepts": [
-        "string",
-        "from_chars",
-        "error code",
-        "full consumption"
-      ]
+      "concepts": ["string", "from_chars", "error code", "full consumption"]
     },
     {
       "id": "cpp-007",
       "title": "Vectors and standard algorithms",
       "level": "beginner",
       "minutes": 90,
-      "prerequisites": [
-        "cpp-005"
-      ],
+      "prerequisites": ["cpp-005"],
       "runtime": "cpp20",
       "outcome": "Use an owning sequence and choose an algorithm with a clear order contract.",
       "lab": "Sort a copy, find a value and accumulate a supplied integer sequence.",
       "verification": "Original order is unchanged, sorted output is exact, and empty input has the specified identity result.",
-      "concepts": [
-        "vector",
-        "ownership",
-        "algorithm",
-        "iterator"
-      ]
+      "concepts": ["vector", "ownership", "algorithm", "iterator"]
     },
     {
       "id": "cpp-008",
       "title": "Copies, const references and lifetimes",
       "level": "beginner",
       "minutes": 90,
-      "prerequisites": [
-        "cpp-007"
-      ],
+      "prerequisites": ["cpp-007"],
       "runtime": "cpp20",
       "outcome": "Explain which object is owned and which name borrows it.",
       "lab": "Compare an independent vector copy with a const reference, then draw their lifetimes.",
       "verification": "A mutation changes the referenced original but not its copy; a returned reference to a local is rejected in review.",
-      "concepts": [
-        "value semantics",
-        "const",
-        "reference",
-        "lifetime"
-      ]
+      "concepts": ["value semantics", "const", "reference", "lifetime"]
     },
     {
       "id": "cpp-009",
       "title": "Vectors own; references borrow",
       "level": "beginner",
       "minutes": 120,
-      "prerequisites": [
-        "cpp-006",
-        "cpp-008"
-      ],
+      "prerequisites": ["cpp-006", "cpp-008"],
       "runtime": "cpp20",
       "outcome": "Preserve ownership and perform checked access at collection boundaries.",
       "lab": "Complete the pilot's positive sum, replacement, checked read and filtered-copy contracts; diagnose an invalidated element reference.",
       "verification": "Fourteen explicit checks pass, including a 10000-element sum, negative indices and immutable input; explain why a dangling read must not be executed.",
-      "concepts": [
-        "RAII",
-        "vector",
-        "checked access",
-        "invalidation"
-      ]
+      "concepts": ["RAII", "vector", "checked access", "invalidation"]
     },
     {
       "id": "cpp-010",
       "title": "Structs, enums and meaningful states",
       "level": "beginner",
       "minutes": 90,
-      "prerequisites": [
-        "cpp-005",
-        "cpp-009"
-      ],
+      "prerequisites": ["cpp-005", "cpp-009"],
       "runtime": "cpp20",
       "outcome": "Represent a record and distinguish valid states from arbitrary strings.",
       "lab": "Model a reading with an enum status and validate its construction boundary.",
       "verification": "Published valid records round-trip and malformed states cannot enter the accepted collection.",
-      "concepts": [
-        "struct",
-        "enum class",
-        "invariant"
-      ]
+      "concepts": ["struct", "enum class", "invariant"]
     },
     {
       "id": "cpp-011",
       "title": "Files, streams and scoped resources",
       "level": "beginner",
       "minutes": 105,
-      "prerequisites": [
-        "cpp-006",
-        "cpp-009"
-      ],
+      "prerequisites": ["cpp-006", "cpp-009"],
       "runtime": "cpp20",
       "outcome": "Read a text fixture while distinguishing EOF, parse failure and an I/O error.",
       "lab": "Load a small readings file with line numbers and deterministic error output.",
       "verification": "Missing file returns a nonzero status; final newline/no-final-newline fixtures yield the same records and all streams close on exit.",
-      "concepts": [
-        "RAII",
-        "stream",
-        "EOF",
-        "I/O error"
-      ]
+      "concepts": ["RAII", "stream", "EOF", "I/O error"]
     },
     {
       "id": "cpp-012",
       "title": "Headers, translation units and the linker",
       "level": "beginner",
       "minutes": 90,
-      "prerequisites": [
-        "cpp-005",
-        "cpp-010"
-      ],
+      "prerequisites": ["cpp-005", "cpp-010"],
       "runtime": "cpp20",
       "outcome": "Distinguish a declaration from a definition and diagnose a link failure.",
       "lab": "Split a record parser into a header and implementation, then repair a missing definition fixture.",
       "verification": "A clean two-translation-unit build links once, and the negative fixture fails at the link phase rather than being misreported as a runtime failure.",
-      "concepts": [
-        "translation unit",
-        "header",
-        "ODR",
-        "linker"
-      ]
+      "concepts": ["translation unit", "header", "ODR", "linker"]
     },
     {
       "id": "cpp-013",
       "title": "Warnings and CTest as feedback",
       "level": "beginner",
       "minutes": 90,
-      "prerequisites": [
-        "cpp-009",
-        "cpp-012"
-      ],
+      "prerequisites": ["cpp-009", "cpp-012"],
       "runtime": "cpp20",
       "outcome": "Turn behavioral contracts into tests that still run in Release builds.",
       "lab": "Add explicit failing-return checks and target-scoped warnings; repair a supplied conversion bug.",
       "verification": "CTest fails before the repair and passes afterward in Debug and Release; no correctness check depends on assert remaining enabled.",
-      "concepts": [
-        "CTest",
-        "warnings",
-        "NDEBUG",
-        "test failure"
-      ]
+      "concepts": ["CTest", "warnings", "NDEBUG", "test failure"]
     },
     {
       "id": "cpp-014",
       "title": "Capstone 1: auditable readings CLI",
       "level": "beginner",
       "minutes": 180,
-      "prerequisites": [
-        "cpp-010",
-        "cpp-011",
-        "cpp-013"
-      ],
+      "prerequisites": ["cpp-010", "cpp-011", "cpp-013"],
       "runtime": "cpp20",
       "outcome": "Deliver a deterministic small CLI from source and explain its failure behavior.",
       "lab": "Build a readings summarizer with clean input, malformed rows and an empty file.",
       "verification": "A fresh build passes normal/error fixtures, prints exact totals, returns documented statuses and preserves the input bytes.",
-      "concepts": [
-        "CLI",
-        "parsing",
-        "tests",
-        "review"
-      ]
+      "concepts": ["CLI", "parsing", "tests", "review"]
     },
     {
       "id": "cpp-015",
       "title": "RAII and unique ownership",
       "level": "intermediate",
       "minutes": 105,
-      "prerequisites": [
-        "cpp-014"
-      ],
+      "prerequisites": ["cpp-014"],
       "runtime": "cpp20",
       "outcome": "Tie resource lifetime to an object and justify unique ownership.",
       "lab": "Wrap a fake handle with an observable close counter and use unique_ptr where dynamic lifetime is needed.",
       "verification": "Each acquired handle closes exactly once on normal return and exception paths; no raw owning new/delete is required.",
-      "concepts": [
-        "RAII",
-        "unique_ptr",
-        "destructor",
-        "exception safety"
-      ]
+      "concepts": ["RAII", "unique_ptr", "destructor", "exception safety"]
     },
     {
       "id": "cpp-016",
       "title": "Move semantics and the rule of zero",
       "level": "intermediate",
       "minutes": 105,
-      "prerequisites": [
-        "cpp-015"
-      ],
+      "prerequisites": ["cpp-015"],
       "runtime": "cpp20",
       "outcome": "Choose copying, moving or borrowing from an ownership contract.",
       "lab": "Instrument a value type, then replace unnecessary manual special members with standard members.",
       "verification": "Behavioral tests remain exact and the learner states which moved-from guarantees are used instead of assuming an empty source.",
-      "concepts": [
-        "move",
-        "rule of zero",
-        "value category"
-      ]
+      "concepts": ["move", "rule of zero", "value category"]
     },
     {
       "id": "cpp-017",
       "title": "Errors as values and exceptions",
       "level": "intermediate",
       "minutes": 105,
-      "prerequisites": [
-        "cpp-006",
-        "cpp-015"
-      ],
+      "prerequisites": ["cpp-006", "cpp-015"],
       "runtime": "cpp20",
       "outcome": "Select optional, variant or an exception according to the caller's information needs.",
       "lab": "Implement an error-bearing parse result and a boundary that translates exceptions to a CLI status.",
       "verification": "Valid data, expected invalid input and unexpected I/O failure follow three specified paths without losing context.",
-      "concepts": [
-        "optional",
-        "variant",
-        "exception",
-        "error boundary"
-      ]
+      "concepts": ["optional", "variant", "exception", "error boundary"]
     },
     {
       "id": "cpp-018",
       "title": "Views, iterators and invalidation",
       "level": "intermediate",
       "minutes": 105,
-      "prerequisites": [
-        "cpp-009",
-        "cpp-016"
-      ],
+      "prerequisites": ["cpp-009", "cpp-016"],
       "runtime": "cpp20",
       "outcome": "Use spans and string views without extending the lifetime of their storage.",
       "lab": "Review invalidation cases and build a safe view-based scan over stable owned storage.",
       "verification": "Tests match the owning implementation, and a lifetime diagram identifies vector reallocation and temporary-string hazards.",
-      "concepts": [
-        "span",
-        "string_view",
-        "iterator",
-        "invalidation"
-      ]
+      "concepts": ["span", "string_view", "iterator", "invalidation"]
     },
     {
       "id": "cpp-019",
       "title": "Ranges and deliberate algorithms",
       "level": "intermediate",
       "minutes": 105,
-      "prerequisites": [
-        "cpp-018"
-      ],
+      "prerequisites": ["cpp-018"],
       "runtime": "cpp20",
       "outcome": "Separate a lazy view from a materialized result and preserve ordering contracts.",
       "lab": "Compose filter/transform views and materialize a deterministic result using a qualified C++20 subset.",
       "verification": "Expected records match a simple reference loop; the view never outlives its owner and single-pass assumptions are identified.",
-      "concepts": [
-        "ranges",
-        "laziness",
-        "algorithm",
-        "projection"
-      ]
+      "concepts": ["ranges", "laziness", "algorithm", "projection"]
     },
     {
       "id": "cpp-020",
       "title": "Templates and concepts",
       "level": "intermediate",
       "minutes": 120,
-      "prerequisites": [
-        "cpp-005",
-        "cpp-018"
-      ],
+      "prerequisites": ["cpp-005", "cpp-018"],
       "runtime": "cpp20",
       "outcome": "Express a useful generic contract and read a constraint diagnostic.",
       "lab": "Write a constrained aggregation function and compile a deliberately unsupported call in a negative fixture.",
       "verification": "Valid integral and floating calls pass; an invalid type fails at the intended constraint with the documented diagnostic category.",
-      "concepts": [
-        "template",
-        "deduction",
-        "concept",
-        "constraint"
-      ]
+      "concepts": ["template", "deduction", "concept", "constraint"]
     },
     {
       "id": "cpp-021",
       "title": "Strong types and generic value APIs",
       "level": "intermediate",
       "minutes": 105,
-      "prerequisites": [
-        "cpp-010",
-        "cpp-020"
-      ],
+      "prerequisites": ["cpp-010", "cpp-020"],
       "runtime": "cpp20",
       "outcome": "Prevent mixing semantically different values with the same representation.",
       "lab": "Model identifiers and quantities as distinct value types with explicit operations.",
       "verification": "An invalid unit/identifier mix is rejected at compile time; equality and ordering obey the published laws.",
-      "concepts": [
-        "strong type",
-        "operator",
-        "law",
-        "value API"
-      ]
+      "concepts": ["strong type", "operator", "law", "value API"]
     },
     {
       "id": "cpp-022",
       "title": "Portable files and serialization",
       "level": "intermediate",
       "minutes": 120,
-      "prerequisites": [
-        "cpp-011",
-        "cpp-017"
-      ],
+      "prerequisites": ["cpp-011", "cpp-017"],
       "runtime": "cpp20",
       "outcome": "Define a durable wire format rather than dumping object memory.",
       "lab": "Encode a tiny versioned record with fixed widths, explicit byte order and length bounds.",
       "verification": "A published byte fixture decodes exactly; truncated, oversized and unknown-version records fail without out-of-bounds access.",
-      "concepts": [
-        "filesystem",
-        "serialization",
-        "endianness",
-        "versioning"
-      ]
+      "concepts": ["filesystem", "serialization", "endianness", "versioning"]
     },
     {
       "id": "cpp-023",
       "title": "Library boundaries and ABI",
       "level": "intermediate",
       "minutes": 105,
-      "prerequisites": [
-        "cpp-012",
-        "cpp-017",
-        "cpp-021"
-      ],
+      "prerequisites": ["cpp-012", "cpp-017", "cpp-021"],
       "runtime": "cpp20",
       "outcome": "Separate source compatibility from binary compatibility.",
       "lab": "Export a small library with public/private headers and an explicit C-compatible boundary example.",
       "verification": "A separate consumer compiles against the public target; the learner identifies why a foreign STL object is not a portable C ABI.",
-      "concepts": [
-        "API",
-        "ABI",
-        "visibility",
-        "C interface"
-      ]
+      "concepts": ["API", "ABI", "visibility", "C interface"]
     },
     {
       "id": "cpp-024",
       "title": "Property tests and bounded fuzzing",
       "level": "intermediate",
       "minutes": 120,
-      "prerequisites": [
-        "cpp-013",
-        "cpp-017"
-      ],
+      "prerequisites": ["cpp-013", "cpp-017"],
       "runtime": "cpp20",
       "outcome": "Test invariants across more than hand-picked examples while preserving a reproducible failure.",
       "lab": "Run a deterministic generated corpus and, where the qualified profile supports it, a time-bounded libFuzzer job.",
       "verification": "A minimized bad fixture is retained, its seed/corpus hash reproduces it, and no fuzzer is reported passed when the tool is unavailable.",
-      "concepts": [
-        "property",
-        "corpus",
-        "fuzzing",
-        "reproduction"
-      ]
+      "concepts": ["property", "corpus", "fuzzing", "reproduction"]
     },
     {
       "id": "cpp-025",
       "title": "Sanitizers and observable memory failures",
       "level": "intermediate",
       "minutes": 120,
-      "prerequisites": [
-        "cpp-015",
-        "cpp-018",
-        "cpp-024"
-      ],
+      "prerequisites": ["cpp-015", "cpp-018", "cpp-024"],
       "runtime": "cpp20",
       "outcome": "Use diagnostic builds to distinguish a memory error from a successful test run.",
       "lab": "Run curated lifetime/overflow negative fixtures under supported ASan/UBSan builds and fix the source.",
       "verification": "Positive fixtures pass; each negative fixture exits nonzero with the expected error class and symbolized source location; supported tools are recorded.",
-      "concepts": [
-        "ASan",
-        "UBSan",
-        "undefined behavior",
-        "symbolization"
-      ]
+      "concepts": ["ASan", "UBSan", "undefined behavior", "symbolization"]
     },
     {
       "id": "cpp-026",
       "title": "Debugging and measurement tools",
       "level": "intermediate",
       "minutes": 120,
-      "prerequisites": [
-        "cpp-013",
-        "cpp-025"
-      ],
+      "prerequisites": ["cpp-013", "cpp-025"],
       "runtime": "cpp20",
       "outcome": "Form a hypothesis from a stack, breakpoint or profile before editing code.",
       "lab": "Use a supplied crash and hot-loop fixture with the profile's available debugger and profiler.",
       "verification": "The selected frame/variable explains the failure, and an independent test distinguishes the proposed fix from the original behavior.",
-      "concepts": [
-        "debugger",
-        "stack",
-        "profile",
-        "hypothesis"
-      ]
+      "concepts": ["debugger", "stack", "profile", "hypothesis"]
     },
     {
       "id": "cpp-027",
       "title": "Reproducible dependencies and delivery",
       "level": "intermediate",
       "minutes": 105,
-      "prerequisites": [
-        "cpp-013",
-        "cpp-023"
-      ],
+      "prerequisites": ["cpp-013", "cpp-023"],
       "runtime": "cpp20",
       "outcome": "Build offline from reviewed inputs and name license/version obligations.",
       "lab": "Consume a pre-vendored tiny dependency through target-based CMake without configure-time downloads.",
       "verification": "Disconnected configure/build/CTest succeed; dependency versions and hashes are recorded and a missing fixture fails explicitly.",
-      "concepts": [
-        "vendoring",
-        "CMake target",
-        "offline",
-        "license"
-      ]
+      "concepts": ["vendoring", "CMake target", "offline", "license"]
     },
     {
       "id": "cpp-028",
       "title": "Capstone 2: reusable record library",
       "level": "intermediate",
       "minutes": 240,
-      "prerequisites": [
-        "cpp-022",
-        "cpp-024",
-        "cpp-025",
-        "cpp-027"
-      ],
+      "prerequisites": ["cpp-022", "cpp-024", "cpp-025", "cpp-027"],
       "runtime": "cpp20",
       "outcome": "Ship an installable library with robust parsing and an independent consumer.",
       "lab": "Deliver a versioned record library, corpus, package configuration and a relocation test.",
       "verification": "A clean consumer build and all corpus/property/sanitizer checks pass; no source-tree absolute path is required after installation.",
-      "concepts": [
-        "library",
-        "packaging",
-        "testing",
-        "compatibility"
-      ]
+      "concepts": ["library", "packaging", "testing", "compatibility"]
     },
     {
       "id": "cpp-029",
       "title": "Threads, joining and cancellation",
       "level": "advanced",
       "minutes": 120,
-      "prerequisites": [
-        "cpp-028"
-      ],
+      "prerequisites": ["cpp-028"],
       "runtime": "cpp20",
       "outcome": "Make thread lifetime and cancellation ownership explicit.",
       "lab": "Build a bounded task pair using jthread/stop_token when feature probes pass, with a documented joining alternative.",
       "verification": "Every worker terminates before its owner; cancellation reaches the intended checkpoint and no unsupported native library feature is silently assumed.",
-      "concepts": [
-        "thread",
-        "jthread",
-        "stop_token",
-        "lifetime"
-      ]
+      "concepts": ["thread", "jthread", "stop_token", "lifetime"]
     },
     {
       "id": "cpp-030",
       "title": "Mutexes, conditions and producer-consumer flow",
       "level": "advanced",
       "minutes": 120,
-      "prerequisites": [
-        "cpp-029"
-      ],
+      "prerequisites": ["cpp-029"],
       "runtime": "cpp20",
       "outcome": "Protect an invariant and use a predicate while waiting.",
       "lab": "Implement a bounded queue with condition_variable and deterministic close semantics.",
       "verification": "No item is lost or duplicated, queue capacity is never exceeded, and waiting threads exit after close without busy spinning.",
-      "concepts": [
-        "mutex",
-        "condition variable",
-        "invariant",
-        "queue"
-      ]
+      "concepts": ["mutex", "condition variable", "invariant", "queue"]
     },
     {
       "id": "cpp-031",
       "title": "Atomics and the memory model",
       "level": "advanced",
       "minutes": 135,
-      "prerequisites": [
-        "cpp-030"
-      ],
+      "prerequisites": ["cpp-030"],
       "runtime": "cpp20",
       "outcome": "Separate atomicity, ordering and visibility in an argument about a concurrent program.",
       "lab": "Analyze published litmus cases and implement a small acquire/release handoff.",
       "verification": "The happens-before argument names each synchronization edge; passing stress tests is not offered as proof of every allowed execution.",
-      "concepts": [
-        "atomic",
-        "memory order",
-        "happens-before"
-      ]
+      "concepts": ["atomic", "memory order", "happens-before"]
     },
     {
       "id": "cpp-032",
       "title": "Bounded parallel work and failure propagation",
       "level": "advanced",
       "minutes": 135,
-      "prerequisites": [
-        "cpp-017",
-        "cpp-030"
-      ],
+      "prerequisites": ["cpp-017", "cpp-030"],
       "runtime": "cpp20",
       "outcome": "Bound concurrency and transfer failures without abandoning owned work.",
       "lab": "Create a fixed-size executor with a bounded queue, cancellation and a failing task fixture.",
       "verification": "At most the configured worker count runs; a task failure is reported, all workers join and queued jobs follow the documented cancellation policy.",
-      "concepts": [
-        "executor",
-        "backpressure",
-        "cancellation",
-        "failure"
-      ]
+      "concepts": ["executor", "backpressure", "cancellation", "failure"]
     },
     {
       "id": "cpp-033",
       "title": "Testing concurrent code",
       "level": "advanced",
       "minutes": 120,
-      "prerequisites": [
-        "cpp-025",
-        "cpp-031",
-        "cpp-032"
-      ],
+      "prerequisites": ["cpp-025", "cpp-031", "cpp-032"],
       "runtime": "cpp20",
       "outcome": "Use deterministic scheduling evidence and separate race diagnostics from timing luck.",
       "lab": "Run controlled interleavings, stress fixtures and a separate TSan build where supported.",
       "verification": "Exact item-accounting checks pass and the curated race fixture is detected by TSan; no ASan/TSan combination is used.",
-      "concepts": [
-        "TSan",
-        "schedule",
-        "stress",
-        "race"
-      ]
+      "concepts": ["TSan", "schedule", "stress", "race"]
     },
     {
       "id": "cpp-034",
       "title": "Data layout, allocation and locality",
       "level": "advanced",
       "minutes": 120,
-      "prerequisites": [
-        "cpp-019",
-        "cpp-026"
-      ],
+      "prerequisites": ["cpp-019", "cpp-026"],
       "runtime": "cpp20",
       "outcome": "Explain a measured cost using layout and allocation evidence.",
       "lab": "Compare equivalent array-of-struct and struct-of-array scans on fixed datasets.",
       "verification": "Results are identical; allocation counts and repeated timing distributions are reported with hardware/compiler/build metadata.",
-      "concepts": [
-        "layout",
-        "cache",
-        "allocation",
-        "measurement"
-      ]
+      "concepts": ["layout", "cache", "allocation", "measurement"]
     },
     {
       "id": "cpp-035",
       "title": "Algorithmic and representation choices",
       "level": "advanced",
       "minutes": 120,
-      "prerequisites": [
-        "cpp-034"
-      ],
+      "prerequisites": ["cpp-034"],
       "runtime": "cpp20",
       "outcome": "Choose an optimization from growth behavior and measured constraints.",
       "lab": "Compare two lookup strategies across fixed input sizes and adversarial duplicates.",
       "verification": "Correctness matches a reference implementation and measured operation counts explain the crossover without a universal speed claim.",
-      "concepts": [
-        "complexity",
-        "representation",
-        "benchmark"
-      ]
+      "concepts": ["complexity", "representation", "benchmark"]
     },
     {
       "id": "cpp-036",
       "title": "Compile-time computation with a budget",
       "level": "advanced",
       "minutes": 120,
-      "prerequisites": [
-        "cpp-020",
-        "cpp-026"
-      ],
+      "prerequisites": ["cpp-020", "cpp-026"],
       "runtime": "cpp20",
       "outcome": "Choose runtime or compile-time work according to observable cost and constraints.",
       "lab": "Build a constexpr lookup table and contrast a bounded consteval validation step.",
       "verification": "Runtime output matches its reference, invalid constant input fails compilation, and compile time remains within the declared job budget.",
-      "concepts": [
-        "constexpr",
-        "consteval",
-        "compile budget"
-      ]
+      "concepts": ["constexpr", "consteval", "compile budget"]
     },
     {
       "id": "cpp-037",
       "title": "Composing generic interfaces",
       "level": "advanced",
       "minutes": 120,
-      "prerequisites": [
-        "cpp-019",
-        "cpp-020",
-        "cpp-036"
-      ],
+      "prerequisites": ["cpp-019", "cpp-020", "cpp-036"],
       "runtime": "cpp20",
       "outcome": "Balance reusable templates with comprehensible ownership and diagnostics.",
       "lab": "Design a constrained range pipeline with an explicitly owned result boundary.",
       "verification": "Several valid container inputs pass; an invalid borrow is rejected in review and an unsupported type produces the intended constraint failure.",
-      "concepts": [
-        "concepts",
-        "ranges",
-        "API",
-        "ownership"
-      ]
+      "concepts": ["concepts", "ranges", "API", "ownership"]
     },
     {
       "id": "cpp-038",
       "title": "Numerical and integer correctness",
       "level": "advanced",
       "minutes": 120,
-      "prerequisites": [
-        "cpp-017",
-        "cpp-025"
-      ],
+      "prerequisites": ["cpp-017", "cpp-025"],
       "runtime": "cpp20",
       "outcome": "State a numeric error/overflow contract instead of assuming one machine result.",
       "lab": "Compare exact integer accumulation and floating algorithms on cancellation and large-magnitude fixtures.",
       "verification": "Integer overflow is prevented, not relied upon; floating results satisfy justified absolute/relative tolerances and a failure counterexample is explained.",
-      "concepts": [
-        "overflow",
-        "floating point",
-        "tolerance",
-        "stability"
-      ]
+      "concepts": ["overflow", "floating point", "tolerance", "stability"]
     },
     {
       "id": "cpp-039",
       "title": "C interfaces and loading boundaries",
       "level": "advanced",
       "minutes": 120,
-      "prerequisites": [
-        "cpp-017",
-        "cpp-023",
-        "cpp-027"
-      ],
+      "prerequisites": ["cpp-017", "cpp-023", "cpp-027"],
       "runtime": "cpp20",
       "outcome": "Define ownership and error transport across a language/binary boundary.",
       "lab": "Expose a small C ABI with paired acquire/release operations using only reviewed fixture libraries.",
       "verification": "An independent consumer observes the same contract, each handle is released once and no arbitrary host library path is accepted.",
-      "concepts": [
-        "C ABI",
-        "handle",
-        "ownership",
-        "plugin boundary"
-      ]
+      "concepts": ["C ABI", "handle", "ownership", "plugin boundary"]
     },
     {
       "id": "cpp-040",
       "title": "Hardening parsers and execution boundaries",
       "level": "advanced",
       "minutes": 135,
-      "prerequisites": [
-        "cpp-022",
-        "cpp-024",
-        "cpp-025",
-        "cpp-032"
-      ],
+      "prerequisites": ["cpp-022", "cpp-024", "cpp-025", "cpp-032"],
       "runtime": "cpp20",
       "outcome": "Treat input lengths, paths and external effects as part of correctness.",
       "lab": "Attack a supplied parser with oversized lengths and traversal strings inside the isolated fixture workspace.",
       "verification": "Rejected inputs produce bounded errors, no write escapes the fixture output root and process/output/time limits are tested rather than assumed.",
-      "concepts": [
-        "bounds",
-        "path validation",
-        "resource limits",
-        "security"
-      ]
+      "concepts": ["bounds", "path validation", "resource limits", "security"]
     },
     {
       "id": "cpp-041",
       "title": "Portable release and performance evidence",
       "level": "advanced",
       "minutes": 150,
-      "prerequisites": [
-        "cpp-027",
-        "cpp-033",
-        "cpp-035",
-        "cpp-040"
-      ],
+      "prerequisites": ["cpp-027", "cpp-033", "cpp-035", "cpp-040"],
       "runtime": "cpp20",
       "outcome": "Publish a source release with precise platform and performance claims.",
       "lab": "Produce reproducible CMake presets, offline inputs, correctness checks and per-platform evidence records.",
       "verification": "Clean builds pass on each claimed target; unsupported sanitizer/toolchain cells stay marked pending and timing data includes uncertainty.",
-      "concepts": [
-        "portability",
-        "release",
-        "evidence",
-        "reproducibility"
-      ]
+      "concepts": ["portability", "release", "evidence", "reproducibility"]
     },
     {
       "id": "cpp-042",
       "title": "Capstone 3: bounded parallel analyzer",
       "level": "advanced",
       "minutes": 300,
-      "prerequisites": [
-        "cpp-033",
-        "cpp-035",
-        "cpp-038",
-        "cpp-039",
-        "cpp-041"
-      ],
+      "prerequisites": ["cpp-033", "cpp-035", "cpp-038", "cpp-039", "cpp-041"],
       "runtime": "cpp20",
       "outcome": "Deliver a correct concurrent analyzer and defend its lifetime, failure and performance decisions.",
       "lab": "Build a fixed-memory record analyzer with cancellation, malformed-input handling and an independent consumer.",
       "verification": "Reference output, cancellation/failure cleanup, sanitizer profiles and repeated benchmarks pass; no throughput gain is claimed without comparable evidence.",
-      "concepts": [
-        "capstone",
-        "concurrency",
-        "performance",
-        "review"
-      ]
+      "concepts": ["capstone", "concurrency", "performance", "review"]
     }
   ],
   "capstones": [

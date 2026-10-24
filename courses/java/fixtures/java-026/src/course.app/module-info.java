@@ -1,1 +1,3 @@
-module course.app { requires course.greeting; }
+module course.app {
+  requires course.greeting;
+}

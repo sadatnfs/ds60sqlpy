@@ -18,31 +18,33 @@
 --
 BEGIN;
 SET search_path TO training, public;
-
 -- Study contract
 -- Focus: Normalize and parse text with explicit locale/case assumptions, preserving original values when a transformation may be lossy.
 -- Assumptions: Course emails use one `@`; Unicode/collation behavior can vary. Text ordering is deterministic only with an explicit sort and tie-breaker.
 -- Pitfall: Regex is not a complete email or HTML parser; leading-wildcard searches may not use a normal b-tree index.
 -- Predict row grain and NULL/order behavior before executing each example.
-
 -- Clean emails and extract domains
-SELECT customer_id,
-       email,
-       lower(trim(email)) AS email_clean,
-       split_part(email, '@', 2) AS domain
-FROM customers
-ORDER BY customer_id
+SELECT
+  customer_id,
+  email,
+  lower(trim(email)) AS email_clean,
+  split_part(email, '@', 2) AS domain
+FROM
+  customers
+ORDER BY
+  customer_id
 LIMIT 50;
-
 -- Replace and substring
-SELECT product_id,
-       name,
-       replace(name, 'Product', 'Item') AS renamed,
-       substr(name, 1, 10) AS short_name
-FROM products
-ORDER BY product_id
+SELECT
+  product_id,
+  name,
+  replace(name, 'Product', 'Item') AS renamed,
+  substr(name, 1, 10) AS short_name
+FROM
+  products
+ORDER BY
+  product_id
 LIMIT 50;
-
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.
@@ -82,5 +84,4 @@ LIMIT 50;
 --    Expected result/shape: For sql-12 Exercise 6, expected output: One row per customer with a numeric suffix. The final columns are `customer_id`, `full_name`, and `parsed_customer_number`. The final order is `c.customer_id`.
 --    Verify: For sql-12 Exercise 6, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, `full_name`, and `parsed_customer_number` against `customers`. Repeat with `NULL` in `customer_id`, and `full_name` and state whether the row is kept, rejected, or classified.
 --    Hint ladder, rung 1: For sql-12 Exercise 6, check `c.customer_id` before applying the row cap.
-
 ROLLBACK;

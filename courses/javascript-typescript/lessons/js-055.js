@@ -20,4 +20,6 @@
 // Exercise 6: Defend when to use a static update.
 // Expected: Prefer immediate clarity when motion adds no explanatory value.
 
-throw new Error("Implement the six D3 practice tasks in your saved pad before claiming completion.");
+throw new Error(
+  "Implement the six D3 practice tasks in your saved pad before claiming completion.",
+);

@@ -14,15 +14,12 @@
 --
 -- Target: PostgreSQL 16+; run only in advanced_sql_training.
 -- ON_ERROR_STOP is supplied by the documented psql command.
-
 BEGIN;
 SET search_path TO training, public;
-
 -- Shared teaching contract
 -- Focus: Use `LAG` and `LEAD` to compare adjacent rows only after defining partition, chronology, tie-breakers, and first/last-row behavior.
 -- Assumptions: Intervals are computed from `timestamptz` instants. The first/last row in a partition has no adjacent value and therefore returns NULL.
 -- Pitfall: Omitting a partition compares unrelated entities; ordering only by a nonunique timestamp makes adjacency ambiguous.
-
 -- ---------------------------------------------------------------------------
 -- Exercise 1: Query writing
 -- Prompt: Show each order with the previous order timestamp for that customer.
@@ -36,16 +33,17 @@ SET search_path TO training, public;
 -- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
 -- - `PARTITION BY`: restarts a window calculation independently for each partition key.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
-SELECT o.order_id,
-       o.customer_id,
-       o.order_date,
-       LAG(o.order_date) OVER (
-         PARTITION BY o.customer_id
-         ORDER BY o.order_date, o.order_id
-       ) AS previous_order_date
-FROM orders AS o
-ORDER BY o.customer_id, o.order_date, o.order_id;
-
+SELECT
+  o.order_id,
+  o.customer_id,
+  o.order_date,
+  LAG(o.order_date) OVER (PARTITION BY o.customer_id ORDER BY o.order_date, o.order_id) AS previous_order_date
+FROM
+  orders AS o
+ORDER BY
+  o.customer_id,
+  o.order_date,
+  o.order_id;
 -- ---------------------------------------------------------------------------
 -- Exercise 2: Query writing
 -- Prompt: Calculate days since each customer's previous order.
@@ -61,21 +59,25 @@ ORDER BY o.customer_id, o.order_date, o.order_id;
 -- - `PARTITION BY`: restarts a window calculation independently for each partition key.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 WITH sequenced AS (
-  SELECT o.*,
-         LAG(o.order_date) OVER (
-           PARTITION BY o.customer_id
-           ORDER BY o.order_date, o.order_id
-         ) AS previous_order_date
-  FROM orders AS o
+  SELECT
+    o.*,
+    LAG(o.order_date) OVER (PARTITION BY o.customer_id ORDER BY o.order_date,
+      o.order_id) AS previous_order_date
+  FROM
+    orders AS o
 )
-SELECT order_id,
-       customer_id,
-       order_date,
-       previous_order_date,
-       EXTRACT(EPOCH FROM (order_date - previous_order_date)) / 86400.0 AS days_since_previous
-FROM sequenced
-ORDER BY customer_id, order_date, order_id;
-
+SELECT
+  order_id,
+  customer_id,
+  order_date,
+  previous_order_date,
+  EXTRACT(EPOCH FROM (order_date - previous_order_date)) / 86400.0 AS days_since_previous
+FROM
+  sequenced
+ORDER BY
+  customer_id,
+  order_date,
+  order_id;
 -- ---------------------------------------------------------------------------
 -- Exercise 3: Query writing
 -- Prompt: Show each promotion with the next promotion start date for the same product.
@@ -89,16 +91,17 @@ ORDER BY customer_id, order_date, order_id;
 -- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
 -- - `PARTITION BY`: restarts a window calculation independently for each partition key.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
-SELECT pr.promotion_id,
-       pr.product_id,
-       pr.start_date,
-       LEAD(pr.start_date) OVER (
-         PARTITION BY pr.product_id
-         ORDER BY pr.start_date, pr.promotion_id
-       ) AS next_promotion_start
-FROM promotions AS pr
-ORDER BY pr.product_id, pr.start_date, pr.promotion_id;
-
+SELECT
+  pr.promotion_id,
+  pr.product_id,
+  pr.start_date,
+  LEAD(pr.start_date) OVER (PARTITION BY pr.product_id ORDER BY pr.start_date, pr.promotion_id) AS next_promotion_start
+FROM
+  promotions AS pr
+ORDER BY
+  pr.product_id,
+  pr.start_date,
+  pr.promotion_id;
 -- ---------------------------------------------------------------------------
 -- Exercise 4: Prediction
 -- Prompt: Identify first rows in each customer partition using a NULL lag without replacing it with a fake date.
@@ -115,20 +118,23 @@ ORDER BY pr.product_id, pr.start_date, pr.promotion_id;
 -- - `PARTITION BY`: restarts a window calculation independently for each partition key.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 WITH sequenced AS (
-  SELECT o.*,
-         LAG(o.order_id) OVER (
-           PARTITION BY o.customer_id
-           ORDER BY o.order_date, o.order_id
-         ) AS previous_order_id
-  FROM orders AS o
+  SELECT
+    o.*,
+    LAG(o.order_id) OVER (PARTITION BY o.customer_id ORDER BY o.order_date,
+      o.order_id) AS previous_order_id
+  FROM
+    orders AS o
 )
-SELECT order_id,
-       customer_id,
-       order_date
-FROM sequenced
-WHERE previous_order_id IS NULL
-ORDER BY customer_id;
-
+SELECT
+  order_id,
+  customer_id,
+  order_date
+FROM
+  sequenced
+WHERE
+  previous_order_id IS NULL
+ORDER BY
+  customer_id;
 -- ---------------------------------------------------------------------------
 -- Exercise 5: Debugging
 -- Prompt: Compute month-over-month stored-revenue change after aggregating to month grain.
@@ -145,23 +151,31 @@ ORDER BY customer_id;
 -- - time normalization: makes reporting boundaries explicit; UTC is applied before deriving calendar buckets where required.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 WITH monthly AS (
-  SELECT date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date AS month_start,
-         SUM(o.total_amount) AS revenue
-  FROM orders AS o
-  GROUP BY date_trunc('month', o.order_date AT TIME ZONE 'UTC')
-), compared AS (
-  SELECT month_start,
-         revenue,
-         LAG(revenue) OVER (ORDER BY month_start) AS previous_revenue
-  FROM monthly
+  SELECT
+    date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date AS month_start,
+    SUM(o.total_amount) AS revenue
+  FROM
+    orders AS o
+  GROUP BY
+    date_trunc('month', o.order_date AT TIME ZONE 'UTC')
+),
+compared AS (
+  SELECT
+    month_start,
+    revenue,
+    LAG(revenue) OVER (ORDER BY month_start) AS previous_revenue
+  FROM
+    monthly
 )
-SELECT month_start,
-       ROUND(revenue, 2) AS revenue,
-       ROUND(previous_revenue, 2) AS previous_revenue,
-       ROUND(revenue - previous_revenue, 2) AS revenue_change
-FROM compared
-ORDER BY month_start;
-
+SELECT
+  month_start,
+  ROUND(revenue, 2) AS revenue,
+  ROUND(previous_revenue, 2) AS previous_revenue,
+  ROUND(revenue - previous_revenue, 2) AS revenue_change
+FROM
+  compared
+ORDER BY
+  month_start;
 -- ---------------------------------------------------------------------------
 -- Exercise 6: Extension
 -- Prompt: Compare each product price with the next higher price in its category.
@@ -175,15 +189,16 @@ ORDER BY month_start;
 -- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
 -- - `PARTITION BY`: restarts a window calculation independently for each partition key.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
-SELECT p.product_id,
-       p.category,
-       p.price,
-       LEAD(p.price) OVER (
-         PARTITION BY p.category
-         ORDER BY p.price, p.product_id
-       ) AS next_price
-FROM products AS p
-ORDER BY p.category, p.price, p.product_id;
-
+SELECT
+  p.product_id,
+  p.category,
+  p.price,
+  LEAD(p.price) OVER (PARTITION BY p.category ORDER BY p.price, p.product_id) AS next_price
+FROM
+  products AS p
+ORDER BY
+  p.category,
+  p.price,
+  p.product_id;
 -- No course answer persists changes or temporary objects.
 ROLLBACK;

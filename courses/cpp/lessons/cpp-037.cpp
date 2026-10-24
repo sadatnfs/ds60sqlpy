@@ -30,13 +30,20 @@
 #include <variant>
 #include <vector>
 
-template<std::ranges::input_range R> std::vector<int> keep_positive(R&& xs){std::vector<int> out;for(auto x:xs)if(x>0)out.push_back(x);return out;}
-int main() {
-    auto out=keep_positive(std::vector<int>{-1,0,2,2});assert((out==std::vector<int>{2,2}));assert(keep_positive(std::vector<int>{}).empty());
-    std::cout << "cpp-037 examples passed\n";
-    return 0;
+template <std::ranges::input_range R> std::vector<int> keep_positive(R &&xs) {
+  std::vector<int> out;
+  for (auto x : xs)
+    if (x > 0)
+      out.push_back(x);
+  return out;
 }
-
+int main() {
+  auto out = keep_positive(std::vector<int>{-1, 0, 2, 2});
+  assert((out == std::vector<int>{2, 2}));
+  assert(keep_positive(std::vector<int>{}).empty());
+  std::cout << "cpp-037 examples passed\n";
+  return 0;
+}
 
 // Exercise 1: State range requirements. Explain why one pass is sufficient for keep_positive. Expected: Input-range traversal only, no size prepass.
 // Exercise 2: Preserve multiplicity. Filter [-1,0,2,2] with >0. Expected: [2,2].

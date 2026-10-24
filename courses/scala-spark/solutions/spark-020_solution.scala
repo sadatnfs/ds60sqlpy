@@ -2,16 +2,19 @@ import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
-
 object Main {
 
-
-  def canonical(frame: DataFrame): Seq[(Long,Long,Long)] = {
-    frame.select("id","key","value").orderBy("id").collect().toSeq.map(r => (r.getLong(0),r.getLong(1),r.getLong(2)))
+  def canonical(frame: DataFrame): Seq[(Long, Long, Long)] = {
+    frame
+      .select("id", "key", "value")
+      .orderBy("id")
+      .collect()
+      .toSeq
+      .map(r => (r.getLong(0), r.getLong(1), r.getLong(2)))
   }
 
   def keyedLayout(facts: DataFrame): DataFrame = {
-    facts.repartition(6,col("key"))
+    facts.repartition(6, col("key"))
   }
 
   def reduceLayout(frame: DataFrame): DataFrame = {
@@ -19,40 +22,61 @@ object Main {
   }
 
   def partitionLedger(frame: DataFrame): DataFrame = {
-    frame.select(col("id"),spark_partition_id().as("partition_id")).groupBy("partition_id").agg(count(lit(1)).as("row_count"),sum("id").as("id_total"))
+    frame
+      .select(col("id"), spark_partition_id().as("partition_id"))
+      .groupBy("partition_id")
+      .agg(count(lit(1)).as("row_count"), sum("id").as("id_total"))
   }
 
   def localOrder(frame: DataFrame): DataFrame = {
-    frame.sortWithinPartitions(col("key"),col("id"))
+    frame.sortWithinPartitions(col("key"), col("id"))
   }
 
-  def preview(frame: DataFrame): Seq[(Long,Long,Long)] = {
-    frame.orderBy(col("key").desc,col("id").asc).limit(5).select("id","key","value").collect().toSeq.map(r => (r.getLong(0),r.getLong(1),r.getLong(2)))
+  def preview(frame: DataFrame): Seq[(Long, Long, Long)] = {
+    frame
+      .orderBy(col("key").desc, col("id").asc)
+      .limit(5)
+      .select("id", "key", "value")
+      .collect()
+      .toSeq
+      .map(r => (r.getLong(0), r.getLong(1), r.getLong(2)))
   }
 
   def main(args: Array[String]): Unit = {
-    val spark = SparkSession.builder().appName("ds60-spark-020").master("local[2]")
-      .config("spark.ui.enabled","false")
-      .config("spark.driver.host","127.0.0.1")
-      .config("spark.driver.bindAddress","127.0.0.1")
-      .config("spark.sql.shuffle.partitions","2")
-      .config("spark.sql.adaptive.enabled","false")
-      .config("spark.sql.ansi.enabled","true")
-      .config("spark.sql.session.timeZone","UTC").getOrCreate()
+    val spark = SparkSession
+      .builder()
+      .appName("ds60-spark-020")
+      .master("local[2]")
+      .config("spark.ui.enabled", "false")
+      .config("spark.driver.host", "127.0.0.1")
+      .config("spark.driver.bindAddress", "127.0.0.1")
+      .config("spark.sql.shuffle.partitions", "2")
+      .config("spark.sql.adaptive.enabled", "false")
+      .config("spark.sql.ansi.enabled", "true")
+      .config("spark.sql.session.timeZone", "UTC")
+      .getOrCreate()
     try {
       require(spark.sparkContext.master == "local[2]", "local-only course session")
       spark.sparkContext.setLogLevel("ERROR")
-      val facts = spark.range(0L,24L,1L,4).withColumn("key",col("id") % 4L).withColumn("value",col("id") * 10L)
+      val facts = spark
+        .range(0L, 24L, 1L, 4)
+        .withColumn("key", col("id") % 4L)
+        .withColumn("value", col("id") * 10L)
       assert(spark.conf.get("spark.sql.adaptive.enabled") == "false")
       // Exercise 1: Establish logical content independently of layout
-      val expected = (0L until 24L).map(id => (id,id%4L,id*10L))
+      val expected = (0L until 24L).map(id => (id, id % 4L, id * 10L))
       assert(canonical(facts) == expected)
-      val metrics = facts.agg(count(lit(1)),countDistinct("id"),sum("id"),sum("value")).first()
-      assert((0 until 4).map(metrics.getLong) == Seq(24L,24L,276L,2760L))
+      val metrics = facts.agg(count(lit(1)), countDistinct("id"), sum("id"), sum("value")).first()
+      assert((0 until 4).map(metrics.getLong) == Seq(24L, 24L, 276L, 2760L))
       // Exercise 2: Request keyed redistribution and test colocation
       val keyed = keyedLayout(facts)
       assert(keyed.rdd.getNumPartitions == 6 && canonical(keyed) == expected)
-      val colocated = keyed.withColumn("partition_id",spark_partition_id()).groupBy("key").agg(countDistinct("partition_id").as("partitions")).orderBy("key").collect()
+      val colocated = keyed
+        .withColumn("partition_id", spark_partition_id())
+        .groupBy("key")
+        .agg(countDistinct("partition_id").as("partitions"))
+        .orderBy("key")
+        .collect()
       assert(colocated.length == 4 && colocated.forall(_.getLong(1) == 1L))
       // Exercise 3: Reduce partitions without assuming balanced redistribution
       val reduced = reduceLayout(keyed)
@@ -60,25 +84,32 @@ object Main {
       val notIncreased = facts.coalesce(10)
       assert(notIncreased.rdd.getNumPartitions == 4 && canonical(notIncreased) == expected)
       // Exercise 4: Reconcile an occupied-partition ledger
-      for(frame <- Seq(keyed,reduced)) {
-       val total = frame.rdd.getNumPartitions
-       val ledger = partitionLedger(frame).collect().toSeq
-       assert(ledger.map(_.getLong(1)).sum == 24L && ledger.map(_.getLong(2)).sum == 276L)
-       assert(ledger.size <= total && ledger.forall(r => r.getInt(0) >= 0 && r.getInt(0) < total))
-       println("partition_count=" + total + ";occupied=" + ledger.size + ";ledger=" + ledger.mkString(","))
+      for (frame <- Seq(keyed, reduced)) {
+        val total = frame.rdd.getNumPartitions
+        val ledger = partitionLedger(frame).collect().toSeq
+        assert(ledger.map(_.getLong(1)).sum == 24L && ledger.map(_.getLong(2)).sum == 276L)
+        assert(ledger.size <= total && ledger.forall(r => r.getInt(0) >= 0 && r.getInt(0) < total))
+        println(
+          "partition_count=" + total + ";occupied=" + ledger.size + ";ledger=" + ledger.mkString(
+            ","
+          )
+        )
       }
       // Exercise 5: Verify ordering only within its promised scope
       val locallySorted = localOrder(facts.repartition(6))
-      val observed = locallySorted.select(spark_partition_id().as("pid"),col("key"),col("id")).collect().toSeq
-      for((_,partitionRows) <- observed.groupBy(_.getInt(0))) {
-       val pairs = partitionRows.map(r => (r.getLong(1),r.getLong(2)))
-       assert(pairs == pairs.sorted)
+      val observed =
+        locallySorted.select(spark_partition_id().as("pid"), col("key"), col("id")).collect().toSeq
+      for ((_, partitionRows) <- observed.groupBy(_.getInt(0))) {
+        val pairs = partitionRows.map(r => (r.getLong(1), r.getLong(2)))
+        assert(pairs == pairs.sorted)
       }
       assert(canonical(locallySorted) == expected)
       // Exercise 6: Create a globally ordered bounded preview
-      val expectedPreview = Seq(3L,7L,11L,15L,19L).map(id => (id,3L,id*10L))
-      for(frame <- Seq(facts,keyed,reduced)) assert(preview(frame) == expectedPreview)
-      println("spark-020: six Scala reference contracts passed; Spark=" + spark.version + "; Scala=" + scala.util.Properties.versionNumberString)
+      val expectedPreview = Seq(3L, 7L, 11L, 15L, 19L).map(id => (id, 3L, id * 10L))
+      for (frame <- Seq(facts, keyed, reduced)) assert(preview(frame) == expectedPreview)
+      println(
+        "spark-020: six Scala reference contracts passed; Spark=" + spark.version + "; Scala=" + scala.util.Properties.versionNumberString
+      )
     } finally { spark.stop() }
   }
 }

@@ -30,14 +30,25 @@
 #include <variant>
 #include <vector>
 
-struct Sample { int id; int value; };
+struct Sample {
+  int id;
+  int value;
+};
 int main() {
-    std::vector<Sample> rows{{1,10},{2,20},{3,30}};std::vector<int> values;values.reserve(rows.size());for(const auto& r:rows)values.push_back(r.value);
-    int aos=0;for(const auto& r:rows)aos+=r.value;int soa=std::accumulate(values.begin(),values.end(),0);assert(aos==60&&soa==60);assert(values.size()==3);
-    std::cout << "cpp-034 examples passed\n";
-    return 0;
+  std::vector<Sample> rows{{1, 10}, {2, 20}, {3, 30}};
+  std::vector<int> values;
+  values.reserve(rows.size());
+  for (const auto &r : rows)
+    values.push_back(r.value);
+  int aos = 0;
+  for (const auto &r : rows)
+    aos += r.value;
+  int soa = std::accumulate(values.begin(), values.end(), 0);
+  assert(aos == 60 && soa == 60);
+  assert(values.size() == 3);
+  std::cout << "cpp-034 examples passed\n";
+  return 0;
 }
-
 
 // Exercise 1: Draw both layouts. Sketch three records as AoS and as separate ID/value vectors. Expected: Same three logical rows with different physical grouping.
 // Exercise 2: Prove result equality. Sum values in both representations. Expected: 60 from each.

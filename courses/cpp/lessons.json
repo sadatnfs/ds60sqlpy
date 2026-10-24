@@ -9,9 +9,7 @@
       "runtime_profile": "reading",
       "guide_path": "courses/cpp/guides/cpp-001.md",
       "source_path": "courses/cpp/lessons/cpp-001.md",
-      "solution_paths": [
-        "courses/cpp/solutions/cpp-001_solutions.md"
-      ],
+      "solution_paths": ["courses/cpp/solutions/cpp-001_solutions.md"],
       "verification_id": null
     },
     {

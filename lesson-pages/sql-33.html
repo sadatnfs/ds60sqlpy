@@ -618,36 +618,42 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line"><span class="syntax-comment">--</span></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Composite index where predicates use (customer_id, order_date)</span></span>
-<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_orders_customer_date <span class="syntax-keyword">ON</span> orders<span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_orders_customer_date <span class="syntax-keyword">ON</span> orders <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Covering index (Postgres INCLUDE) for frequent query on order_items</span></span>
-<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_oi_order_product_inc <span class="syntax-keyword">ON</span> order_items<span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">,</span> product_id<span class="syntax-punctuation">)</span> INCLUDE <span class="syntax-punctuation">(</span>quantity<span class="syntax-punctuation">,</span> unit_price<span class="syntax-punctuation">,</span> discount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_oi_order_product_inc <span class="syntax-keyword">ON</span> order_items <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">,</span> product_id<span class="syntax-punctuation">)</span> INCLUDE <span class="syntax-punctuation">(</span>quantity<span class="syntax-punctuation">,</span> unit_price<span class="syntax-punctuation">,</span> discount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Partial index for an active subset. Partial-index predicates must be</span></span>
 <span class="source-line"><span class="syntax-comment">-- immutable, so a moving expression such as now() - interval &#x27;90 days&#x27; is</span></span>
 <span class="source-line"><span class="syntax-comment">-- not valid in PostgreSQL.</span></span>
-<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_orders_open</span>
-<span class="source-line">  <span class="syntax-keyword">ON</span> orders<span class="syntax-punctuation">(</span>order_date<span class="syntax-punctuation">)</span></span>
-<span class="source-line">  <span class="syntax-keyword">WHERE</span> status <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;placed&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;paid&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_orders_open <span class="syntax-keyword">ON</span> orders <span class="syntax-punctuation">(</span>order_date<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  status <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;placed&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;paid&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Test with EXPLAIN</span></span>
 <span class="source-line"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-keyword">ANALYZE</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> orders o</span>
-<span class="source-line"><span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> <span class="syntax-number">1</span> <span class="syntax-keyword">AND</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;365 days&#x27;</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  o<span class="syntax-punctuation">.</span>order_date</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  orders o</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  o<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line">  <span class="syntax-keyword">AND</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;365 days&#x27;</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-keyword">ANALYZE</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> oi<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span> oi<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span> oi<span class="syntax-punctuation">.</span>quantity</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> order_items oi</span>
-<span class="source-line"><span class="syntax-keyword">WHERE</span> oi<span class="syntax-punctuation">.</span>order_id <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> order_id</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> orders</span>
-<span class="source-line">  <span class="syntax-keyword">WHERE</span> status <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;placed&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;paid&#x27;</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">    <span class="syntax-keyword">AND</span> order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;90 days&#x27;</span></span>
-<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  oi<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  oi<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  oi<span class="syntax-punctuation">.</span>quantity</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  order_items oi</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  oi<span class="syntax-punctuation">.</span>order_id <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">      order_id</span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">      orders</span>
+<span class="source-line">    <span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">      status <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;placed&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;paid&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">AND</span> order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;90 days&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
 <span class="source-line"><span class="syntax-comment">-- 1. Add a composite index for (category, created_at) on products and test.</span></span>
 <span class="source-line"><span class="syntax-comment">--    Inputs: For sql-33 Exercise 1, run the underlying read-only query over `products`, `training.idx_products_category_created_solution`, and `idx_products_category_created_solution` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.</span></span>
@@ -684,7 +690,6 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-33 Exercise 6, expected output: one row per `customer_id`. The final columns are `all_customers`, and `null_segments`.</span></span>
 <span class="source-line"><span class="syntax-comment">--    Verify: For sql-33 Exercise 6, run the underlying query without `EXPLAIN` and preserve its `customer_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</span></span>
 <span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-33 Exercise 6, run the underlying query without `EXPLAIN` and preserve its `customer_id` rows.</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>
       </section>
@@ -902,62 +907,105 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-comment">--</span></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 1: equality first, range second in a composite index.</span></span>
-<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_products_category_created_solution</span>
-<span class="source-line">  <span class="syntax-keyword">ON</span> products<span class="syntax-punctuation">(</span>category<span class="syntax-punctuation">,</span> created_at<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
-<span class="source-line"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> BUFFERS<span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> product_id<span class="syntax-punctuation">,</span> name<span class="syntax-punctuation">,</span> created_at</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> products</span>
-<span class="source-line"><span class="syntax-keyword">WHERE</span> category <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;Home&#x27;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_products_category_created_solution <span class="syntax-keyword">ON</span> products <span class="syntax-punctuation">(</span>category<span class="syntax-punctuation">,</span> created_at<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  BUFFERS</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  product_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  created_at</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  products</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  category <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;Home&#x27;</span></span>
 <span class="source-line">  <span class="syntax-keyword">AND</span> created_at <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;1 year&#x27;</span></span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> created_at<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  created_at<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 2: a compact partial index for only high-value orders.</span></span>
-<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_orders_high_value_solution</span>
-<span class="source-line">  <span class="syntax-keyword">ON</span> orders<span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span></span>
-<span class="source-line">  <span class="syntax-keyword">WHERE</span> total_amount <span class="syntax-operator">&gt;</span> <span class="syntax-number">1000</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
-<span class="source-line"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> BUFFERS<span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> order_id<span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">,</span> total_amount</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> orders</span>
-<span class="source-line"><span class="syntax-keyword">WHERE</span> total_amount <span class="syntax-operator">&gt;</span> <span class="syntax-number">1000</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_orders_high_value_solution <span class="syntax-keyword">ON</span> orders <span class="syntax-punctuation">(</span>total_amount<span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  total_amount <span class="syntax-operator">&gt;</span> <span class="syntax-number">1000</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  BUFFERS</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  order_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  order_date<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  total_amount</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  orders</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  total_amount <span class="syntax-operator">&gt;</span> <span class="syntax-number">1000</span></span>
 <span class="source-line">  <span class="syntax-keyword">AND</span> order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;90 days&#x27;</span></span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> total_amount <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  total_amount <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 3: without the leftmost category equality, created_at alone cannot</span></span>
 <span class="source-line"><span class="syntax-comment">-- use the full composite search prefix as efficiently.</span></span>
-<span class="source-line"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> BUFFERS<span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> product_id<span class="syntax-punctuation">,</span> created_at</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> products</span>
-<span class="source-line"><span class="syntax-keyword">WHERE</span> created_at <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;1 year&#x27;</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  BUFFERS</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  product_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  created_at</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  products</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  created_at <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;1 year&#x27;</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 4: customer/date are search keys; status and total are payload that</span></span>
 <span class="source-line"><span class="syntax-comment">-- may permit an index-only scan once visibility-map state allows it.</span></span>
-<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_orders_history_cover_solution</span>
-<span class="source-line">  <span class="syntax-keyword">ON</span> orders<span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">,</span> order_date <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">  INCLUDE <span class="syntax-punctuation">(</span>status<span class="syntax-punctuation">,</span> total_amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span> BUFFERS<span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> order_id<span class="syntax-punctuation">,</span> order_date<span class="syntax-punctuation">,</span> status<span class="syntax-punctuation">,</span> total_amount</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> orders</span>
-<span class="source-line"><span class="syntax-keyword">WHERE</span> customer_id <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> order_date <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_orders_history_cover_solution <span class="syntax-keyword">ON</span> orders <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">,</span> order_date <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> INCLUDE <span class="syntax-punctuation">(</span>status<span class="syntax-punctuation">,</span> total_amount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  BUFFERS</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  order_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  order_date<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  status<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  total_amount</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  orders</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  customer_id <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  order_date <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 5: only the first predicate implies total_amount &gt; 1000. The second</span></span>
 <span class="source-line"><span class="syntax-comment">-- query is correct but is not eligible for the partial index.</span></span>
-<span class="source-line"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-keyword">SELECT</span> order_id <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">WHERE</span> total_amount <span class="syntax-operator">&gt;</span> <span class="syntax-number">1200</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-keyword">SELECT</span> order_id <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">WHERE</span> total_amount <span class="syntax-operator">&gt;</span> <span class="syntax-number">500</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">EXPLAIN</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  order_id</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  orders</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  total_amount <span class="syntax-operator">&gt;</span> <span class="syntax-number">1200</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">EXPLAIN</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  order_id</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  orders</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  total_amount <span class="syntax-operator">&gt;</span> <span class="syntax-number">500</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 6: measure the candidate subset before paying for another index.</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> all_customers<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> segment <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> null_segments</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> customers<span class="syntax-punctuation">;</span></span>
-<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_customers_null_segment_solution</span>
-<span class="source-line">  <span class="syntax-keyword">ON</span> customers<span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span></span>
-<span class="source-line">  <span class="syntax-keyword">WHERE</span> segment <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-keyword">SELECT</span> customer_id <span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">WHERE</span> segment <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> all_customers<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> FILTER <span class="syntax-punctuation">(</span><span class="syntax-keyword">WHERE</span> segment <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> null_segments</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  customers<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">INDEX</span> idx_customers_null_segment_solution <span class="syntax-keyword">ON</span> customers <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  segment <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">EXPLAIN</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  customer_id</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  customers</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  segment <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>
       </section>

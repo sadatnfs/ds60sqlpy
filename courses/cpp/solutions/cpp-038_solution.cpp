@@ -30,17 +30,25 @@
 #include <variant>
 #include <vector>
 
-std::optional<int> safe_add(int a,int b){if(a<0||b<0||a>std::numeric_limits<int>::max()-b)return {};return a+b;}
-int main() {
-    assert(safe_add(100,25)==125);assert(!safe_add(std::numeric_limits<int>::max(),1));
-    double value=0.1+0.2;assert(std::abs(value-0.3)<1e-12);
-    assert(100+25==125);
-    // Reference extension checks for the exercise changes.
-    assert(safe_add(0,0)==0);assert(!safe_add(-1,2));assert(safe_add(std::numeric_limits<int>::max(),0)==std::numeric_limits<int>::max());
-    std::cout << "cpp-038 examples passed\n";
-    return 0;
+std::optional<int> safe_add(int a, int b) {
+  if (a < 0 || b < 0 || a > std::numeric_limits<int>::max() - b)
+    return {};
+  return a + b;
 }
-
+int main() {
+  assert(safe_add(100, 25) == 125);
+  assert(!safe_add(std::numeric_limits<int>::max(), 1));
+  double value = 0.1 + 0.2;
+  assert(std::abs(value - 0.3) < 1e-12);
+  assert(100 + 25 == 125);
+  // Reference extension checks for the exercise changes.
+  assert(safe_add(0, 0) == 0);
+  assert(!safe_add(-1, 2));
+  assert(safe_add(std::numeric_limits<int>::max(), 0) ==
+         std::numeric_limits<int>::max());
+  std::cout << "cpp-038 examples passed\n";
+  return 0;
+}
 
 // Exercise 1: Keep exact units. Add 100 and 25 integer cents. Expected: Exactly 125 cents.
 // Exercise 2: Reject overflow. Try INT_MAX plus 1. Expected: Absent result without evaluating overflow.

@@ -20,4 +20,6 @@
 // Exercise 6: Apply the same pattern to an HTML list.
 // Expected: Current records reconcile to current list items.
 
-throw new Error("Implement the six D3 practice tasks in your saved pad before claiming completion.");
+throw new Error(
+  "Implement the six D3 practice tasks in your saved pad before claiming completion.",
+);

@@ -177,32 +177,28 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-keyword">using</span> System.Text.RegularExpressions<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">using</span> System.Buffers<span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span>
-<span class="source-line"><span class="syntax-keyword">internal</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Program</span></span>
-<span class="source-line"><span class="syntax-punctuation">{</span></span>
-<span class="source-line">    <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">Check</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">bool</span> condition<span class="syntax-punctuation">,</span> <span class="syntax-keyword">string</span> reason<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">internal</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Program</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">  <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">Check</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">bool</span> condition<span class="syntax-punctuation">,</span> <span class="syntax-keyword">string</span> reason<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>condition<span class="syntax-punctuation">)</span></span>
+<span class="source-line">      <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> <span class="syntax-function">InvalidOperationException</span><span class="syntax-punctuation">(</span>reason<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
+<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">async</span> Task <span class="syntax-function">Main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
-<span class="source-line">        <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>condition<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-keyword">new</span> InvalidOperationException<span class="syntax-punctuation">(</span>reason<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">string</span> greeting <span class="syntax-operator">=</span> <span class="syntax-string">&quot;Hello, C#&quot;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      Check<span class="syntax-punctuation">(</span>greeting<span class="syntax-punctuation">.</span>Length <span class="syntax-operator">==</span> <span class="syntax-number">9</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;greeting length&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      Console<span class="syntax-punctuation">.</span>WriteLine<span class="syntax-punctuation">(</span>greeting<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">}</span></span>
-<span class="source-line"></span>
-<span class="source-line">    <span class="syntax-keyword">private</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">async</span> Task <span class="syntax-function">Main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line">    <span class="syntax-punctuation">{</span></span>
-<span class="source-line">        <span class="syntax-punctuation">{</span></span>
-<span class="source-line">            <span class="syntax-keyword">string</span> greeting <span class="syntax-operator">=</span> <span class="syntax-string">&quot;Hello, C#&quot;</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">            Check<span class="syntax-punctuation">(</span>greeting<span class="syntax-punctuation">.</span>Length <span class="syntax-operator">==</span> <span class="syntax-number">9</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;greeting length&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">            Console<span class="syntax-punctuation">.</span>WriteLine<span class="syntax-punctuation">(</span>greeting<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">        <span class="syntax-punctuation">}</span></span>
-<span class="source-line">        <span class="syntax-punctuation">{</span></span>
-<span class="source-line">            <span class="syntax-keyword">int</span> boxes <span class="syntax-operator">=</span> <span class="syntax-number">3</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">            <span class="syntax-keyword">int</span> itemsPerBox <span class="syntax-operator">=</span> <span class="syntax-number">4</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">            <span class="syntax-keyword">int</span> total <span class="syntax-operator">=</span> boxes <span class="syntax-operator">*</span> itemsPerBox<span class="syntax-punctuation">;</span></span>
-<span class="source-line">            Check<span class="syntax-punctuation">(</span>total <span class="syntax-operator">==</span> <span class="syntax-number">12</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;computed total&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">            Check<span class="syntax-punctuation">(</span>total <span class="syntax-operator">!=</span> boxes <span class="syntax-operator">+</span> itemsPerBox<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;multiplication is not addition&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">        <span class="syntax-punctuation">}</span></span>
-<span class="source-line">        Console<span class="syntax-punctuation">.</span>WriteLine<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;csharp-001: passed&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">        <span class="syntax-keyword">await</span> Task<span class="syntax-punctuation">.</span>CompletedTask<span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">int</span> boxes <span class="syntax-operator">=</span> <span class="syntax-number">3</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">int</span> itemsPerBox <span class="syntax-operator">=</span> <span class="syntax-number">4</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      <span class="syntax-keyword">int</span> total <span class="syntax-operator">=</span> boxes <span class="syntax-operator">*</span> itemsPerBox<span class="syntax-punctuation">;</span></span>
+<span class="source-line">      Check<span class="syntax-punctuation">(</span>total <span class="syntax-operator">==</span> <span class="syntax-number">12</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;computed total&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">      Check<span class="syntax-punctuation">(</span>total <span class="syntax-operator">!=</span> boxes <span class="syntax-operator">+</span> itemsPerBox<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;multiplication is not addition&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line">    <span class="syntax-punctuation">}</span></span>
-<span class="source-line"></span>
-<span class="source-line"></span>
+<span class="source-line">    Console<span class="syntax-punctuation">.</span>WriteLine<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;csharp-001: passed&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">    <span class="syntax-keyword">await</span> Task<span class="syntax-punctuation">.</span>CompletedTask<span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
 <span class="source-line"><span class="syntax-punctuation">}</span></span>
 <span class="source-line"></span></code></pre></article>
   </main>

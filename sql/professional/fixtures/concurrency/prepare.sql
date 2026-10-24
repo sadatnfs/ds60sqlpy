@@ -13,8 +13,9 @@ SET LOCAL statement_timeout = '10s';
 CREATE SCHEMA sql_concurrency_live;
 CREATE TABLE sql_concurrency_live.stock (
   sku text PRIMARY KEY,
-  available integer NOT NULL CHECK(available>=0),
-  version integer NOT NULL CHECK(version>0)
+  available integer NOT NULL CHECK (available >= 0),
+  version integer NOT NULL CHECK (version > 0)
 );
-INSERT INTO sql_concurrency_live.stock VALUES ('A',5,1);
+INSERT INTO sql_concurrency_live.stock
+  VALUES ('A', 5, 1);
 COMMIT;

@@ -14,15 +14,12 @@
 --
 -- Target: PostgreSQL 16+; run only in advanced_sql_training.
 -- ON_ERROR_STOP is supplied by the documented psql command.
-
 BEGIN;
 SET search_path TO training, public;
-
 -- Shared teaching contract
 -- Focus: Use distribution windows to express relative position while documenting ties, small partitions, and bucket size.
 -- Assumptions: `PERCENT_RANK` ranges from 0 to 1 using rank; `CUME_DIST` is the fraction at or below the current value; `NTILE` balances row counts.
 -- Pitfall: A percentile rank is not a probability or causal score, and `NTILE(10)` does not guarantee equal value ranges.
-
 -- ---------------------------------------------------------------------------
 -- Exercise 1: Query writing
 -- Prompt: Assign customers to four stored-spend buckets.
@@ -38,19 +35,24 @@ SET search_path TO training, public;
 -- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 WITH customer_spend AS (
-  SELECT o.customer_id,
-         SUM(o.total_amount) AS stored_spend
-  FROM orders AS o
-  GROUP BY o.customer_id
+  SELECT
+    o.customer_id,
+    SUM(o.total_amount) AS stored_spend
+  FROM
+    orders AS o
+  GROUP BY
+    o.customer_id
 )
-SELECT customer_id,
-       ROUND(stored_spend, 2) AS stored_spend,
-       NTILE(4) OVER (
-         ORDER BY stored_spend DESC, customer_id
-       ) AS spend_quartile
-FROM customer_spend
-ORDER BY spend_quartile, stored_spend DESC, customer_id;
-
+SELECT
+  customer_id,
+  ROUND(stored_spend, 2) AS stored_spend,
+  NTILE(4) OVER (ORDER BY stored_spend DESC, customer_id) AS spend_quartile
+FROM
+  customer_spend
+ORDER BY
+  spend_quartile,
+  stored_spend DESC,
+  customer_id;
 -- ---------------------------------------------------------------------------
 -- Exercise 2: Query writing
 -- Prompt: Calculate salary percent rank within each department.
@@ -64,15 +66,17 @@ ORDER BY spend_quartile, stored_spend DESC, customer_id;
 -- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
 -- - `PARTITION BY`: restarts a window calculation independently for each partition key.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
-SELECT e.employee_id,
-       e.department_id,
-       e.salary,
-       PERCENT_RANK() OVER (
-         PARTITION BY e.department_id ORDER BY e.salary
-       ) AS salary_percent_rank
-FROM employees AS e
-ORDER BY e.department_id, e.salary, e.employee_id;
-
+SELECT
+  e.employee_id,
+  e.department_id,
+  e.salary,
+  PERCENT_RANK() OVER (PARTITION BY e.department_id ORDER BY e.salary) AS salary_percent_rank
+FROM
+  employees AS e
+ORDER BY
+  e.department_id,
+  e.salary,
+  e.employee_id;
 -- ---------------------------------------------------------------------------
 -- Exercise 3: Query writing
 -- Prompt: Calculate cumulative distribution of product price within category.
@@ -86,15 +90,17 @@ ORDER BY e.department_id, e.salary, e.employee_id;
 -- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
 -- - `PARTITION BY`: restarts a window calculation independently for each partition key.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
-SELECT p.product_id,
-       p.category,
-       p.price,
-       CUME_DIST() OVER (
-         PARTITION BY p.category ORDER BY p.price
-       ) AS price_cume_dist
-FROM products AS p
-ORDER BY p.category, p.price, p.product_id;
-
+SELECT
+  p.product_id,
+  p.category,
+  p.price,
+  CUME_DIST() OVER (PARTITION BY p.category ORDER BY p.price) AS price_cume_dist
+FROM
+  products AS p
+ORDER BY
+  p.category,
+  p.price,
+  p.product_id;
 -- ---------------------------------------------------------------------------
 -- Exercise 4: Prediction
 -- Prompt: Compare percent rank and cumulative distribution for tied values 10, 10, and 20.
@@ -108,13 +114,17 @@ ORDER BY p.category, p.price, p.product_id;
 -- - `FROM`: establishes the starting relation and therefore the initial row grain.
 -- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
-SELECT row_id,
-       value,
-       PERCENT_RANK() OVER (ORDER BY value) AS percent_rank_value,
-       CUME_DIST() OVER (ORDER BY value) AS cume_dist_value
-FROM (VALUES (1, 10), (2, 10), (3, 20)) AS sample(row_id, value)
-ORDER BY row_id;
-
+SELECT
+  row_id,
+  value,
+  PERCENT_RANK() OVER (ORDER BY value) AS percent_rank_value,
+  CUME_DIST() OVER (ORDER BY value) AS cume_dist_value
+FROM (
+  VALUES (1, 10),
+    (2, 10),
+    (3, 20)) AS sample (row_id, value)
+ORDER BY
+  row_id;
 -- ---------------------------------------------------------------------------
 -- Exercise 5: Debugging
 -- Prompt: Audit the row count in each customer spend decile rather than assuming exact equality.
@@ -130,23 +140,31 @@ ORDER BY row_id;
 -- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 WITH spend AS (
-  SELECT o.customer_id,
-         SUM(o.total_amount) AS total_spend
-  FROM orders AS o
-  GROUP BY o.customer_id
-), bucketed AS (
-  SELECT customer_id,
-         NTILE(10) OVER (
-           ORDER BY total_spend DESC, customer_id
-         ) AS decile
-  FROM spend
+  SELECT
+    o.customer_id,
+    SUM(o.total_amount) AS total_spend
+  FROM
+    orders AS o
+  GROUP BY
+    o.customer_id
+),
+bucketed AS (
+  SELECT
+    customer_id,
+    NTILE(10) OVER (ORDER BY total_spend DESC,
+      customer_id) AS decile
+  FROM
+    spend
 )
-SELECT decile,
-       COUNT(*) AS customers
-FROM bucketed
-GROUP BY decile
-ORDER BY decile;
-
+SELECT
+  decile,
+  COUNT(*) AS customers
+FROM
+  bucketed
+GROUP BY
+  decile
+ORDER BY
+  decile;
 -- ---------------------------------------------------------------------------
 -- Exercise 6: Extension
 -- Prompt: Return customers in the top stored-spend decile with their spend and population share.
@@ -163,26 +181,35 @@ ORDER BY decile;
 -- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 WITH spend AS (
-  SELECT o.customer_id,
-         SUM(o.total_amount) AS total_spend
-  FROM orders AS o
-  GROUP BY o.customer_id
-), bucketed AS (
-  SELECT customer_id,
-         total_spend,
-         NTILE(10) OVER (
-           ORDER BY total_spend DESC, customer_id
-         ) AS decile,
-         COUNT(*) OVER () AS population
-  FROM spend
+  SELECT
+    o.customer_id,
+    SUM(o.total_amount) AS total_spend
+  FROM
+    orders AS o
+  GROUP BY
+    o.customer_id
+),
+bucketed AS (
+  SELECT
+    customer_id,
+    total_spend,
+    NTILE(10) OVER (ORDER BY total_spend DESC,
+      customer_id) AS decile,
+    COUNT(*) OVER () AS population
+  FROM
+    spend
 )
-SELECT customer_id,
-       ROUND(total_spend, 2) AS total_spend,
-       decile,
-       population
-FROM bucketed
-WHERE decile = 1
-ORDER BY total_spend DESC, customer_id;
-
+SELECT
+  customer_id,
+  ROUND(total_spend, 2) AS total_spend,
+  decile,
+  population
+FROM
+  bucketed
+WHERE
+  decile = 1
+ORDER BY
+  total_spend DESC,
+  customer_id;
 -- No course answer persists changes or temporary objects.
 ROLLBACK;

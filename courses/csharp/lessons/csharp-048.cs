@@ -8,10 +8,9 @@
 // Task 6: Deliver a project README with build commands, architecture, failure policies, tests, operational limits and a proposed next extension.
 using System;
 
-internal static class Program
-{
-    private static void Main()
-    {
-        throw new NotImplementedException("Implement your own lesson attempt before running.");
-    }
+internal static class Program {
+  private static void Main() {
+    throw new NotImplementedException(
+        "Implement your own lesson attempt before running.");
+  }
 }

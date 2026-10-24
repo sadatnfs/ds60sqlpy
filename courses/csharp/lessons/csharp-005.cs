@@ -8,10 +8,9 @@
 // Task 6: Choose a routing policy with three mutually exclusive outcomes and explain how invalid values are represented.
 using System;
 
-internal static class Program
-{
-    private static void Main()
-    {
-        throw new NotImplementedException("Implement your own lesson attempt before running.");
-    }
+internal static class Program {
+  private static void Main() {
+    throw new NotImplementedException(
+        "Implement your own lesson attempt before running.");
+  }
 }

@@ -2,11 +2,17 @@ import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
-
 object Main {
-  def logicalMetrics(frame: DataFrame): (Long,Long,Long,Long) = {
-    val row = frame.agg(count(lit(1)),countDistinct("fact_id"),sum("amount"),sum(col("amount") * col("factor"))).first()
-    (row.getLong(0),row.getLong(1),row.getLong(2),row.getLong(3))
+  def logicalMetrics(frame: DataFrame): (Long, Long, Long, Long) = {
+    val row = frame
+      .agg(
+        count(lit(1)),
+        countDistinct("fact_id"),
+        sum("amount"),
+        sum(col("amount") * col("factor"))
+      )
+      .first()
+    (row.getLong(0), row.getLong(1), row.getLong(2), row.getLong(3))
   }
   def joinPlan(frame: DataFrame): String = frame.queryExecution.executedPlan.toString
 
@@ -15,86 +21,138 @@ object Main {
   }
 
   def ordinaryJoin(facts: DataFrame, dimension: DataFrame): DataFrame = {
-    facts.join(dimension,Seq("key"),"inner").select("fact_id","key","amount","factor")
+    facts.join(dimension, Seq("key"), "inner").select("fact_id", "key", "amount", "factor")
   }
 
   def withoutAutomaticBroadcast(facts: DataFrame, dimension: DataFrame): DataFrame = {
-    facts.sparkSession.conf.set("spark.sql.autoBroadcastJoinThreshold","-1")
-    ordinaryJoin(facts,dimension)
+    facts.sparkSession.conf.set("spark.sql.autoBroadcastJoinThreshold", "-1")
+    ordinaryJoin(facts, dimension)
   }
 
   def hintedJoin(facts: DataFrame, dimension: DataFrame): DataFrame = {
-    facts.join(broadcast(dimension),Seq("key"),"inner").select("fact_id","key","amount","factor")
+    facts
+      .join(broadcast(dimension), Seq("key"), "inner")
+      .select("fact_id", "key", "amount", "factor")
   }
 
   def unsupportedHint(facts: DataFrame, dimension: DataFrame): DataFrame = {
-    facts.join(broadcast(dimension),Seq("key"),"full_outer").select("fact_id","key","amount","factor")
+    facts
+      .join(broadcast(dimension), Seq("key"), "full_outer")
+      .select("fact_id", "key", "amount", "factor")
   }
 
   def boundedBroadcast(dimension: DataFrame): DataFrame = {
-    require(!dimension.isStreaming,"Streaming input is not a bounded build table")
+    require(!dimension.isStreaming, "Streaming input is not a bounded build table")
     val rows = dimension.limit(101).count()
-    require(rows <= 100L,"Broadcast row budget exceeded")
-    require(dimension.select("key").distinct().count() == rows && dimension.filter(col("key").isNull).count() == 0L,"Build keys must be unique and known")
+    require(rows <= 100L, "Broadcast row budget exceeded")
+    require(
+      dimension.select("key").distinct().count() == rows && dimension
+        .filter(col("key").isNull)
+        .count() == 0L,
+      "Build keys must be unique and known"
+    )
     val estimate = estimatedBytes(dimension)
-    require(estimate > 0 && estimate <= BigInt(1048576),"Broadcast estimate outside declared budget")
+    require(
+      estimate > 0 && estimate <= BigInt(1048576),
+      "Broadcast estimate outside declared budget"
+    )
     broadcast(dimension)
   }
 
   def main(args: Array[String]): Unit = {
 
-    val spark = SparkSession.builder().appName("ds60-spark-023").master("local[2]")
-      .config("spark.ui.enabled","false")
-      .config("spark.driver.host","127.0.0.1")
-      .config("spark.driver.bindAddress","127.0.0.1")
-      .config("spark.sql.shuffle.partitions","2")
-      .config("spark.sql.adaptive.enabled","false")
-      .config("spark.sql.ansi.enabled","true")
-      .config("spark.sql.session.timeZone","UTC").getOrCreate()
+    val spark = SparkSession
+      .builder()
+      .appName("ds60-spark-023")
+      .master("local[2]")
+      .config("spark.ui.enabled", "false")
+      .config("spark.driver.host", "127.0.0.1")
+      .config("spark.driver.bindAddress", "127.0.0.1")
+      .config("spark.sql.shuffle.partitions", "2")
+      .config("spark.sql.adaptive.enabled", "false")
+      .config("spark.sql.ansi.enabled", "true")
+      .config("spark.sql.session.timeZone", "UTC")
+      .getOrCreate()
     try {
       require(spark.sparkContext.master == "local[2]", "local-only course session")
       spark.sparkContext.setLogLevel("ERROR")
-      val facts = spark.range(0L,20000L,1L,4).withColumnRenamed("id","fact_id").withColumn("key",col("fact_id") % 20L).withColumn("amount",col("fact_id") % 7L + 1L)
-      val dimension = spark.range(0L,20L,1L,2).withColumnRenamed("id","key").withColumn("factor",col("key") + 1L)
-      spark.conf.set("spark.sql.autoBroadcastJoinThreshold","10485760")
-      spark.conf.set("spark.sql.join.preferSortMergeJoin","true")
+      val facts = spark
+        .range(0L, 20000L, 1L, 4)
+        .withColumnRenamed("id", "fact_id")
+        .withColumn("key", col("fact_id") % 20L)
+        .withColumn("amount", col("fact_id") % 7L + 1L)
+      val dimension = spark
+        .range(0L, 20L, 1L, 2)
+        .withColumnRenamed("id", "key")
+        .withColumn("factor", col("key") + 1L)
+      spark.conf.set("spark.sql.autoBroadcastJoinThreshold", "10485760")
+      spark.conf.set("spark.sql.join.preferSortMergeJoin", "true")
       // Exercise 1: Inspect statistics and the automatic threshold separately
       val estimate = estimatedBytes(dimension)
       val threshold = BigInt(spark.conf.get("spark.sql.autoBroadcastJoinThreshold"))
       assert(estimate > 0 && estimate < threshold && threshold == BigInt(10485760))
-      println("dimension_estimated_bytes=" + estimate + ";threshold=" + threshold + ";actual_rows=" + dimension.count() + ";version=" + spark.version)
+      println(
+        "dimension_estimated_bytes=" + estimate + ";threshold=" + threshold + ";actual_rows=" + dimension
+          .count() + ";version=" + spark.version
+      )
       // Exercise 2: Observe the automatic plan and verify its relational output
-      val automatic = ordinaryJoin(facts,dimension)
-      assert(logicalMetrics(automatic) == (20000L,20000L,79997L,839916L))
+      val automatic = ordinaryJoin(facts, dimension)
+      assert(logicalMetrics(automatic) == (20000L, 20000L, 79997L, 839916L))
       val automaticPlan = joinPlan(automatic)
       assert(automaticPlan.contains("Join"))
-      println("automatic_threshold=" + spark.conf.get("spark.sql.autoBroadcastJoinThreshold") + ";plan=" + automaticPlan)
+      println(
+        "automatic_threshold=" + spark.conf.get(
+          "spark.sql.autoBroadcastJoinThreshold"
+        ) + ";plan=" + automaticPlan
+      )
       // Exercise 3: Disable automatic broadcasting for a fresh comparison
-      val shuffled = withoutAutomaticBroadcast(facts,dimension)
-      assert(logicalMetrics(shuffled) == (20000L,20000L,79997L,839916L))
-      assert(!joinPlan(shuffled).contains("BroadcastHashJoin") && spark.conf.get("spark.sql.adaptive.enabled") == "false")
+      val shuffled = withoutAutomaticBroadcast(facts, dimension)
+      assert(logicalMetrics(shuffled) == (20000L, 20000L, 79997L, 839916L))
+      assert(
+        !joinPlan(shuffled).contains("BroadcastHashJoin") && spark.conf.get(
+          "spark.sql.adaptive.enabled"
+        ) == "false"
+      )
       println("disabled_threshold=-1;plan=" + joinPlan(shuffled))
       // Exercise 4: Request an eligible explicit broadcast and reconcile bags
-      val hinted = hintedJoin(facts,dimension)
-      assert(logicalMetrics(hinted) == (20000L,20000L,79997L,839916L))
+      val hinted = hintedJoin(facts, dimension)
+      assert(logicalMetrics(hinted) == (20000L, 20000L, 79997L, 839916L))
       val hintedPlan = joinPlan(hinted)
       assert(hintedPlan.contains("BroadcastHashJoin") && hintedPlan.contains("BroadcastExchange"))
       assert(hinted.exceptAll(shuffled).count() == 0L && shuffled.exceptAll(hinted).count() == 0L)
       println("explicit_broadcast_plan=" + hintedPlan)
       // Exercise 5: Observe an unsupported hint without changing the business result
-      val full = unsupportedHint(facts,dimension)
-      assert(logicalMetrics(full) == (20000L,20000L,79997L,839916L))
+      val full = unsupportedHint(facts, dimension)
+      assert(logicalMetrics(full) == (20000L, 20000L, 79997L, 839916L))
       assert(!joinPlan(full).contains("BroadcastHashJoin"))
       println("full_outer_observed_plan=" + joinPlan(full))
       // Exercise 6: Gate a broadcast candidate on explicit bounded evidence
-      assert(logicalMetrics(ordinaryJoin(facts,boundedBroadcast(dimension))) == (20000L,20000L,79997L,839916L))
-      for(candidate <- Seq(dimension.unionByName(dimension.filter(col("key") === 0L)),spark.range(101L).withColumnRenamed("id","key").withColumn("factor",lit(1L)))) {
-       var failed = false
-       try boundedBroadcast(candidate) catch { case _: IllegalArgumentException => failed = true }
-       assert(failed)
+      assert(
+        logicalMetrics(ordinaryJoin(facts, boundedBroadcast(dimension))) == (
+          20000L,
+          20000L,
+          79997L,
+          839916L
+        )
+      )
+      for (
+        candidate <- Seq(
+          dimension.unionByName(dimension.filter(col("key") === 0L)),
+          spark.range(101L).withColumnRenamed("id", "key").withColumn("factor", lit(1L))
+        )
+      ) {
+        var failed = false
+        try boundedBroadcast(candidate)
+        catch { case _: IllegalArgumentException => failed = true }
+        assert(failed)
       }
-      println("spark-023: six Scala reference contracts passed; Spark=" + spark.version + "; Scala=" + scala.util.Properties.versionNumberString)
-    } finally { try { () } finally { spark.stop() } }
+      println(
+        "spark-023: six Scala reference contracts passed; Spark=" + spark.version + "; Scala=" + scala.util.Properties.versionNumberString
+      )
+    } finally {
+      try { () }
+      finally { spark.stop() }
+    }
   }
 }
 

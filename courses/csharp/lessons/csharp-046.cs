@@ -8,10 +8,9 @@
 // Task 6: Review a proposed new feature and justify adopting it using readability, compatibility and tooling evidence.
 using System;
 
-internal static class Program
-{
-    private static void Main()
-    {
-        throw new NotImplementedException("Implement your own lesson attempt before running.");
-    }
+internal static class Program {
+  private static void Main() {
+    throw new NotImplementedException(
+        "Implement your own lesson attempt before running.");
+  }
 }

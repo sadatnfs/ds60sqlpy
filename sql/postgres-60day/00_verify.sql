@@ -2,7 +2,6 @@
 -- Fail-fast invariants for the deterministic PostgreSQL course dataset.
 -- Run after 00_setup.sql. The DO block raises an exception if any invariant
 -- fails; the final query provides a compact human-readable profile.
-
 SET search_path TO training, public;
 
 DO $course_invariants$
@@ -193,26 +192,53 @@ BEGIN
 END
 $course_invariants$;
 
-SELECT 'customers' AS object_name,
-       COUNT(*) AS row_count,
-       COUNT(DISTINCT country) AS distinct_dimension_values
-FROM customers
+SELECT
+  'customers' AS object_name,
+  COUNT(*) AS row_count,
+  COUNT(DISTINCT country) AS distinct_dimension_values
+FROM
+  customers
 UNION ALL
-SELECT 'orders', COUNT(*), COUNT(DISTINCT customer_id)
-FROM orders
+SELECT
+  'orders',
+  COUNT(*),
+  COUNT(DISTINCT customer_id)
+FROM
+  orders
 UNION ALL
-SELECT 'order_items', COUNT(*), COUNT(DISTINCT product_id)
-FROM order_items
+SELECT
+  'order_items',
+  COUNT(*),
+  COUNT(DISTINCT product_id)
+FROM
+  order_items
 UNION ALL
-SELECT 'payments', COUNT(*), COUNT(DISTINCT method)
-FROM payments
+SELECT
+  'payments',
+  COUNT(*),
+  COUNT(DISTINCT method)
+FROM
+  payments
 UNION ALL
-SELECT 'events', COUNT(*), COUNT(DISTINCT customer_id)
-FROM events
+SELECT
+  'events',
+  COUNT(*),
+  COUNT(DISTINCT customer_id)
+FROM
+  events
 UNION ALL
-SELECT 'employees', COUNT(*), COUNT(DISTINCT department_id)
-FROM employees
+SELECT
+  'employees',
+  COUNT(*),
+  COUNT(DISTINCT department_id)
+FROM
+  employees
 UNION ALL
-SELECT 'promotions', COUNT(*), COUNT(DISTINCT product_id)
-FROM promotions
-ORDER BY object_name;
+SELECT
+  'promotions',
+  COUNT(*),
+  COUNT(DISTINCT product_id)
+FROM
+  promotions
+ORDER BY
+  object_name;

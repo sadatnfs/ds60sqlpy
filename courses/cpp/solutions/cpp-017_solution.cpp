@@ -30,19 +30,35 @@
 #include <variant>
 #include <vector>
 
-struct ParseError { std::string reason; };
-using Result=std::variant<int,ParseError>;
-Result positive(int x) { if(x<0)return ParseError{"negative"}; return x; }
-int main() {
-    auto ok=positive(0); assert(std::get<int>(ok)==0);
-    auto bad=positive(-1); assert(std::get<ParseError>(bad).reason=="negative");
-    std::optional<int> missing; assert(!missing);
-    // Reference extension checks for the exercise changes.
-    auto bounded=[](int x)->Result{if(x<0)return ParseError{"negative"};if(x>100)return ParseError{"too_large"};return x;};assert(std::get<int>(bounded(100))==100);assert(std::get<ParseError>(bounded(101)).reason=="too_large");
-    std::cout << "cpp-017 examples passed\n";
-    return 0;
+struct ParseError {
+  std::string reason;
+};
+using Result = std::variant<int, ParseError>;
+Result positive(int x) {
+  if (x < 0)
+    return ParseError{"negative"};
+  return x;
 }
-
+int main() {
+  auto ok = positive(0);
+  assert(std::get<int>(ok) == 0);
+  auto bad = positive(-1);
+  assert(std::get<ParseError>(bad).reason == "negative");
+  std::optional<int> missing;
+  assert(!missing);
+  // Reference extension checks for the exercise changes.
+  auto bounded = [](int x) -> Result {
+    if (x < 0)
+      return ParseError{"negative"};
+    if (x > 100)
+      return ParseError{"too_large"};
+    return x;
+  };
+  assert(std::get<int>(bounded(100)) == 100);
+  assert(std::get<ParseError>(bounded(101)).reason == "too_large");
+  std::cout << "cpp-017 examples passed\n";
+  return 0;
+}
 
 // Exercise 1: Classify alternatives. Evaluate positive for 0,5,-1. Expected: Two success values 0,5 and one negative error.
 // Exercise 2: Write an observer. Use get_if to print value or reason without throwing. Expected: All three inputs produce a classified outcome.

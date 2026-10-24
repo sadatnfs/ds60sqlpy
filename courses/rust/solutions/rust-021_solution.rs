@@ -1,9 +1,13 @@
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let mut count = 0;
-        { let mut add = |value| { count += value; }; add(2); add(3); }
+        {
+            let mut add = |value| {
+                count += value;
+            };
+            add(2);
+            add(3);
+        }
         assert_eq!(count, 5);
     }
 

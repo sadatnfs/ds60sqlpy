@@ -8,10 +8,9 @@
 // Task 6: Write a benchmark plan specifying workload, correctness checks, warmup and allocation measurements.
 using System;
 
-internal static class Program
-{
-    private static void Main()
-    {
-        throw new NotImplementedException("Implement your own lesson attempt before running.");
-    }
+internal static class Program {
+  private static void Main() {
+    throw new NotImplementedException(
+        "Implement your own lesson attempt before running.");
+  }
 }

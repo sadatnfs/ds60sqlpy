@@ -1,4 +1,4 @@
-import { strict as assert } from 'node:assert';
+import { strict as assert } from "node:assert";
 
 function lowerBound(values, target, trace = []) {
   let low = 0;
@@ -22,7 +22,7 @@ function uniqueIndex(rows) {
 class MinHeap {
   values = [];
   push(value) {
-    if (!Number.isFinite(value)) throw new TypeError('finite value required');
+    if (!Number.isFinite(value)) throw new TypeError("finite value required");
     const values = this.values;
     values.push(value);
     let index = values.length - 1;
@@ -57,7 +57,11 @@ export async function verify() {
   {
     const trace = [];
     assert.equal(lowerBound([1, 4, 4, 8], 4, trace), 1);
-    assert.deepEqual(trace, [[0, 4, 2], [0, 2, 1], [0, 1, 0]]);
+    assert.deepEqual(trace, [
+      [0, 4, 2],
+      [0, 2, 1],
+      [0, 1, 0],
+    ]);
   }
 
   // Exercise 2: Use a heap for repeated minimum extraction
@@ -86,9 +90,12 @@ export async function verify() {
 
   // Exercise 5: Reject duplicate index keys
   {
-    const index = uniqueIndex([{ id: 'A', value: 7 }, { id: 'B', value: 9 }]);
-    assert.equal(index.get('A').value, 7);
-    assert.throws(() => uniqueIndex([{ id: 'A' }, { id: 'A' }]), /duplicate/u);
+    const index = uniqueIndex([
+      { id: "A", value: 7 },
+      { id: "B", value: 9 },
+    ]);
+    assert.equal(index.get("A").value, 7);
+    assert.throws(() => uniqueIndex([{ id: "A" }, { id: "A" }]), /duplicate/u);
   }
 
   // Exercise 6: Check the heap invariant after every update

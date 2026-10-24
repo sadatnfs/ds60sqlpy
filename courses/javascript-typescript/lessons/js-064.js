@@ -20,4 +20,6 @@
 // Exercise 6: Design an accessible large-scatter interface.
 // Expected: Canvas marks plus keyboard filtering, summary and exact-record access.
 
-throw new Error("Implement the six D3 practice tasks in your saved pad before claiming completion.");
+throw new Error(
+  "Implement the six D3 practice tasks in your saved pad before claiming completion.",
+);

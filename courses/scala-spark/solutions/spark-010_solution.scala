@@ -2,43 +2,63 @@ import scala.collection.mutable.ArrayBuffer
 
 object Main {
 
-
   def strictPipeline(values: Seq[Int]): Seq[Int] = {
-    require(values.forall(value => value >= -1000000 && value <= 1000000), "input outside bounded domain")
+    require(
+      values.forall(value => value >= -1000000 && value <= 1000000),
+      "input outside bounded domain"
+    )
     values.filter(_ % 2 == 0).map(_ * 2)
   }
 
   def tracedIterator(values: Seq[Int], trace: ArrayBuffer[String]): Iterator[Int] = {
-    require(values.forall(value => value >= -1000000 && value <= 1000000), "input outside bounded domain")
-    values.iterator.filter { value =>
-      trace += s"filter:$value"
-      value % 2 == 0
-    }.map { value =>
-      trace += s"map:$value"
-      value * 2
-    }
+    require(
+      values.forall(value => value >= -1000000 && value <= 1000000),
+      "input outside bounded domain"
+    )
+    values.iterator
+      .filter { value =>
+        trace += s"filter:$value"
+        value % 2 == 0
+      }
+      .map { value =>
+        trace += s"map:$value"
+        value * 2
+      }
   }
 
   def consumeTwice(values: Iterator[Int]): (Vector[Int], Vector[Int]) = {
     val first = values.toVector
     val second = values.toVector
-    (first,second)
+    (first, second)
   }
 
   def freshFactory(values: Seq[Int]): () => Iterator[Int] = {
-    require(values.forall(value => value >= -1000000 && value <= 1000000), "input outside bounded domain")
+    require(
+      values.forall(value => value >= -1000000 && value <= 1000000),
+      "input outside bounded domain"
+    )
     () => values.iterator.filter(_ % 2 == 0).map(_ * 2)
   }
 
   def retryTotals(records: Seq[(String, Long)], attempts: Int): (Long, Long) = {
     require(attempts >= 0, "attempt count must be nonnegative")
-    require(records.forall { case (id,amount) => id != null && id.trim.nonEmpty && amount >= 0L && amount <= 1000000L }, "invalid event domain")
+    require(
+      records.forall { case (id, amount) =>
+        id != null && id.trim.nonEmpty && amount >= 0L && amount <= 1000000L
+      },
+      "invalid event domain"
+    )
     val groups = records.groupBy(_._1)
-    require(groups.values.forall(rows => rows.map(_._2).distinct.size == 1), "conflicting payload for one event ID")
-    val oneAttempt = records.foldLeft(0L)((total,row) => Math.addExact(total,row._2))
-    val naive = Math.multiplyExact(oneAttempt,attempts.toLong)
-    val logical = if (attempts == 0) 0L else groups.values.foldLeft(0L)((total,rows) => Math.addExact(total,rows.head._2))
-    (naive,logical)
+    require(
+      groups.values.forall(rows => rows.map(_._2).distinct.size == 1),
+      "conflicting payload for one event ID"
+    )
+    val oneAttempt = records.foldLeft(0L)((total, row) => Math.addExact(total, row._2))
+    val naive = Math.multiplyExact(oneAttempt, attempts.toLong)
+    val logical =
+      if (attempts == 0) 0L
+      else groups.values.foldLeft(0L)((total, rows) => Math.addExact(total, rows.head._2))
+    (naive, logical)
   }
 
   def boundedTake(values: Iterator[Int], limit: Int): Vector[Int] = {
@@ -48,53 +68,61 @@ object Main {
 
   def expectIllegalArgument(body: => Any): Unit = {
     var caught = false
-    try body catch { case _: IllegalArgumentException => caught = true }
+    try body
+    catch { case _: IllegalArgumentException => caught = true }
     assert(caught, "Expected IllegalArgumentException")
   }
   def expectArithmetic(body: => Any): Unit = {
     var caught = false
-    try body catch { case _: ArithmeticException => caught = true }
+    try body
+    catch { case _: ArithmeticException => caught = true }
     assert(caught, "Expected ArithmeticException")
   }
 
   def main(args: Array[String]): Unit = {
     // Exercise 1: Establish a pure strict result
-    val raw = Seq(1,2,3,4)
-    assert(strictPipeline(raw) == Seq(4,8) && raw == Seq(1,2,3,4))
-    assert(strictPipeline(Seq(0,2,2)) == Seq(0,4,4) && strictPipeline(Seq.empty).isEmpty)
+    val raw = Seq(1, 2, 3, 4)
+    assert(strictPipeline(raw) == Seq(4, 8) && raw == Seq(1, 2, 3, 4))
+    assert(strictPipeline(Seq(0, 2, 2)) == Seq(0, 4, 4) && strictPipeline(Seq.empty).isEmpty)
     expectIllegalArgument(strictPipeline(Seq(1000001)))
     // Exercise 2: Locate the evaluation boundary
     val trace = ArrayBuffer.empty[String]
-    val iterator = tracedIterator(raw,trace)
+    val iterator = tracedIterator(raw, trace)
     assert(trace.isEmpty)
     assert(iterator.take(1).toVector == Vector(4))
-    assert(trace.toVector == Vector("filter:1","filter:2","map:2"))
+    assert(trace.toVector == Vector("filter:1", "filter:2", "map:2"))
     assert(iterator.toVector == Vector(8))
-    assert(trace.toVector == Vector("filter:1","filter:2","map:2","filter:3","filter:4","map:4"))
+    assert(
+      trace.toVector == Vector("filter:1", "filter:2", "map:2", "filter:3", "filter:4", "map:4")
+    )
     // Exercise 3: Expose one-shot traversal state
-    assert(consumeTwice(Iterator(1,2,3)) == (Vector(1,2,3),Vector.empty[Int]))
-    assert(consumeTwice(Iterator.empty) == (Vector.empty[Int],Vector.empty[Int]))
+    assert(consumeTwice(Iterator(1, 2, 3)) == (Vector(1, 2, 3), Vector.empty[Int]))
+    assert(consumeTwice(Iterator.empty) == (Vector.empty[Int], Vector.empty[Int]))
     // Exercise 4: Provide repeatability deliberately
     val factory = freshFactory(raw)
-    val first = factory();val second = factory()
-    assert(first.toVector == Vector(4,8) && second.toVector == Vector(4,8))
-    assert(raw == Seq(1,2,3,4))
+    val first = factory(); val second = factory()
+    assert(first.toVector == Vector(4, 8) && second.toVector == Vector(4, 8))
+    assert(raw == Seq(1, 2, 3, 4))
     // Exercise 5: Separate repeated delivery from logical identity
-    val deliveries = Seq(("a",100L),("b",50L),("a",100L))
-    assert(retryTotals(deliveries,2) == (500L,150L))
-    assert(retryTotals(deliveries,0) == (0L,0L))
-    expectIllegalArgument(retryTotals(Seq(("a",100L),("a",101L)),1))
-    expectIllegalArgument(retryTotals(deliveries,-1))
+    val deliveries = Seq(("a", 100L), ("b", 50L), ("a", 100L))
+    assert(retryTotals(deliveries, 2) == (500L, 150L))
+    assert(retryTotals(deliveries, 0) == (0L, 0L))
+    expectIllegalArgument(retryTotals(Seq(("a", 100L), ("a", 101L)), 1))
+    expectIllegalArgument(retryTotals(deliveries, -1))
     // Exercise 6: Consume only a declared bounded prefix
     var visits = 0
     val infinite = Iterator.from(1).map { value => visits += 1; value }
-    assert(boundedTake(infinite,3) == Vector(1,2,3) && visits == 3)
+    assert(boundedTake(infinite, 3) == Vector(1, 2, 3) && visits == 3)
     assert(infinite.next() == 4)
     val untouched = Iterator.from(1)
-    assert(boundedTake(untouched,0).isEmpty && untouched.next() == 1)
-    expectIllegalArgument(boundedTake(Iterator.from(1),1001))
+    assert(boundedTake(untouched, 0).isEmpty && untouched.next() == 1)
+    expectIllegalArgument(boundedTake(Iterator.from(1), 1001))
     println("spark-010: six reference contracts passed")
-    println("Scala=" + scala.util.Properties.versionNumberString + "; Java=" + System.getProperty("java.version"))
+    println(
+      "Scala=" + scala.util.Properties.versionNumberString + "; Java=" + System.getProperty(
+        "java.version"
+      )
+    )
   }
 }
 

@@ -4,24 +4,31 @@
 #include <limits>
 
 int main() {
-    const int whole = 7 / 2;
-    const double fractional = 7.0 / 2.0;
-    const double promoted = static_cast<double>(7) / 2;
-    if (whole != 3 || fractional != 3.5 || promoted != 3.5) return 1;
-    const double truncatedThenConverted = static_cast<double>(7 / 2);
-    if (truncatedThenConverted != 3.0) return 2;
-    const long long external = -1;
-    if (external >= 0) return 3;
-    const std::int64_t wide = 1000000LL * 10000LL;
-    if (wide != 10000000000LL) return 4;
-    const int cents = 125 + 75;
-    if (cents != 200) return 5;
-    const int positive = 3;
-    const std::size_t count = static_cast<std::size_t>(positive);
-    if (count != 3U) return 6;
-    std::cout << "whole=3 fractional=3.5 promoted=3.5 late=3\n";
-    std::cout << "negative rejected; wide=" << wide << "; cents=" << cents << '\n';
-    return 0;
+  const int whole = 7 / 2;
+  const double fractional = 7.0 / 2.0;
+  const double promoted = static_cast<double>(7) / 2;
+  if (whole != 3 || fractional != 3.5 || promoted != 3.5)
+    return 1;
+  const double truncatedThenConverted = static_cast<double>(7 / 2);
+  if (truncatedThenConverted != 3.0)
+    return 2;
+  const long long external = -1;
+  if (external >= 0)
+    return 3;
+  const std::int64_t wide = 1000000LL * 10000LL;
+  if (wide != 10000000000LL)
+    return 4;
+  const int cents = 125 + 75;
+  if (cents != 200)
+    return 5;
+  const int positive = 3;
+  const std::size_t count = static_cast<std::size_t>(positive);
+  if (count != 3U)
+    return 6;
+  std::cout << "whole=3 fractional=3.5 promoted=3.5 late=3\n";
+  std::cout << "negative rejected; wide=" << wide << "; cents=" << cents
+            << '\n';
+  return 0;
 }
 
 // Exercise 1: Predict integer division. Inputs: 7/2 and7.0/2.0. Expected: 3 and3.5. Verify: compare both numeric results and explain operand types.

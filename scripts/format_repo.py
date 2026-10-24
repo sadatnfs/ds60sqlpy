@@ -13,6 +13,7 @@ import fnmatch
 import json
 import os
 import shutil
+import stat
 import subprocess
 import sys
 from collections import defaultdict
@@ -22,6 +23,9 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
+
+from scripts.check_public_release import CREDENTIAL_DIRECTORY  # noqa: E402
+
 LANGUAGES = (
     "python",
     "web",
@@ -55,7 +59,6 @@ SUFFIXES = {
     ".css": "web",
     ".scss": "web",
     ".html": "web",
-    ".md": "web",
     ".json": "web",
     ".jsonc": "web",
     ".yaml": "web",
@@ -94,7 +97,7 @@ IGNORED_DIRS = {
     ".aws",
     ".oci",
     ".ssh",
-    ".codex",
+    CREDENTIAL_DIRECTORY,
     ".serena",
     "__pycache__",
     "node_modules",
@@ -132,7 +135,9 @@ def source_files(root: Path) -> list[str]:
     """Use Git's ignore rules when available and a conservative ZIP fallback."""
     host_inventory = os.environ.get("DS60_FORMAT_FILE_LIST")
     if host_inventory:
-        candidates = sorted({os.fsdecode(p) for p in Path(host_inventory).read_bytes().split(b"\0") if p})
+        candidates = sorted(
+            {os.fsdecode(p) for p in Path(host_inventory).read_bytes().split(b"\0") if p}
+        )
     elif (root / ".git").exists():
         result = subprocess.run(
             [
@@ -160,8 +165,10 @@ def source_files(root: Path) -> list[str]:
             )
             candidates.extend((Path(current) / f).relative_to(root).as_posix() for f in filenames)
     wanted = {
-        name for name in candidates
-        if not Path(name).is_absolute() and ".." not in Path(name).parts
+        name
+        for name in candidates
+        if not Path(name).is_absolute()
+        and ".." not in Path(name).parts
         and not any(part in IGNORED_DIRS for part in Path(name).parts)
     }
     ancestors = {parent.as_posix() for name in wanted for parent in Path(name).parents}
@@ -245,7 +252,14 @@ def batches(paths: list[str], count: int = 100) -> list[list[str]]:
     return [["./" + p for p in paths[i : i + count]] for i in range(0, len(paths), count)]
 
 
-def streamed(command: list[str], paths: list[str], root: Path, check: bool) -> bool:
+def streamed(
+    command: list[str],
+    paths: list[str],
+    root: Path,
+    check: bool,
+    *,
+    terminal_newline: bool = False,
+) -> bool:
     """Use stdout formatters without executing source or writing on parse errors."""
     success = True
     for name in paths:
@@ -256,13 +270,31 @@ def streamed(command: list[str], paths: list[str], root: Path, check: bool) -> b
             print(f"Formatter failed: {name}", file=sys.stderr)
             print(result.stderr.decode("utf-8", errors="replace"), file=sys.stderr)
             success = False
-        elif result.stdout != original:
-            if check:
-                print(f"Needs formatting: {name}")
-                success = False
-            else:
-                path.write_bytes(result.stdout)
+        else:
+            formatted = result.stdout
+            if terminal_newline:
+                formatted = formatted.rstrip(b"\r\n") + b"\n"
+            if formatted != original:
+                if check:
+                    print(f"Needs formatting: {name}")
+                    success = False
+                else:
+                    path.write_bytes(formatted)
     return success
+
+
+def run_formatter(command: list[str], paths: list[str], root: Path, check: bool) -> bool:
+    """Retain source permissions when an in-place formatter replaces a file."""
+    modes = {} if check else {name: stat.S_IMODE((root / name).stat().st_mode) for name in paths}
+    try:
+        return run(command, root)
+    finally:
+        for name, mode in modes.items():
+            path = root / name
+            if path.is_symlink():
+                raise ValueError(f"Formatter replaced source with a symlink: {name}")
+            if stat.S_IMODE(path.stat().st_mode) != mode:
+                path.chmod(mode)
 
 
 def format_group(language: str, paths: list[str], root: Path, check: bool) -> bool:
@@ -275,26 +307,11 @@ def format_group(language: str, paths: list[str], root: Path, check: bool) -> bo
             check,
         )
     if language == "sql":
-        return streamed(
-            [
-                "pg_format",
-                "--no-rcfile",
-                "--redundant-parenthesis",
-                "--spaces",
-                "2",
-                "--keyword-case",
-                "0",
-                "--function-case",
-                "0",
-                "--type-case",
-                "0",
-            ],
-            paths,
-            root,
-            check,
-        )
+        from scripts.sql_formatting import format_sql_paths
+
+        return format_sql_paths(paths, root, check)
     if language == "docker":
-        return streamed(["dockerfmt"], paths, root, check)
+        return streamed(["dockerfmt"], paths, root, check, terminal_newline=True)
     if language == "go" and check:
         result = subprocess.run(
             ["gofmt", "-l", *["./" + p for p in paths]],
@@ -341,7 +358,8 @@ def format_group(language: str, paths: list[str], root: Path, check: bool) -> bo
         if check:
             command += ["--test"]
     elif language == "shell":
-        command = ["shfmt", "-ln", "bash", "-i", "2", "-ci", "-d" if check else "-w"]
+        # shfmt -w can replace files with restrictive modes on shared mounts.
+        return streamed(["shfmt", "-ln", "bash", "-i", "2", "-ci"], paths, root, check)
     elif language == "cmake":
         command = [
             "cmake-format",
@@ -351,7 +369,17 @@ def format_group(language: str, paths: list[str], root: Path, check: bool) -> bo
         ]
     else:
         raise ValueError(f"No formatter for {language}")
-    results = [run(command + batch, root) for batch in batches(paths)]
+    results = []
+    for batch in batches(paths):
+        passed = run_formatter(command + batch, batch, root, check)
+        if passed and not check and language in {"web", "java", "toml", "xml"}:
+            # Some complex TypeScript layouts need one additional Prettier pass.
+            # Bound convergence and never report a write pass as stable without a check.
+            verify = ["--check" if part == "--write" else part for part in command]
+            if not run(verify + batch, root):
+                passed = run_formatter(command + batch, batch, root, False)
+                passed = run(verify + batch, root) and passed
+        results.append(passed)
     return all(results)
 
 
@@ -386,7 +414,9 @@ def ensure_publication_paths(root: Path) -> None:
                 continue
             path = Path(entry.path)
             if entry.is_symlink():
-                raise ValueError(f"Publication path must not be a symlink: {path.relative_to(root)}")
+                raise ValueError(
+                    f"Publication path must not be a symlink: {path.relative_to(root)}"
+                )
             if entry.is_dir(follow_symlinks=False):
                 check_directory(path)
 
@@ -516,7 +546,14 @@ def main(argv: list[str] | None = None) -> int:
         command = [sys.executable, str(ROOT / "scripts/normalize_lesson_prose.py")]
         if not args.check:
             command.append("--write")
-        success = run(command, ROOT) and generated_views(ROOT, args.check)
+        success = run(command, ROOT)
+        if success:
+            sync = [sys.executable, str(ROOT / "scripts/sync_example_fences.py")]
+            if args.check:
+                sync.append("--check")
+            success = run(sync, ROOT)
+        if success:
+            success = generated_views(ROOT, args.check)
     elif args.language:
         print("Language-only pass: run the full command to refresh/check generated readers.")
     print("Formatting checks passed." if success else "Formatting failed; see diagnostics above.")

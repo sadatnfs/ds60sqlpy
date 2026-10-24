@@ -20,4 +20,6 @@
 // Exercise 6: Explain why position and length suit count comparison.
 // Expected: A common baseline supports meaningful magnitude comparison.
 
-throw new Error("Implement the six D3 practice tasks in your saved pad before claiming completion.");
+throw new Error(
+  "Implement the six D3 practice tasks in your saved pad before claiming completion.",
+);

@@ -8,10 +8,9 @@
 // Task 6: Choose a sequence API for a large file and document repeated-enumeration and resource-lifetime behavior.
 using System;
 
-internal static class Program
-{
-    private static void Main()
-    {
-        throw new NotImplementedException("Implement your own lesson attempt before running.");
-    }
+internal static class Program {
+  private static void Main() {
+    throw new NotImplementedException(
+        "Implement your own lesson attempt before running.");
+  }
 }

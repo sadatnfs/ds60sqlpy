@@ -30,17 +30,28 @@
 #include <variant>
 #include <vector>
 
-std::vector<int> doubled(const std::vector<int>& xs) { auto out=xs; for(int& x:out) x*=2; return out; }
-int main() {
-    const std::vector<int> input{2,4}; auto output=doubled(input);
-    assert((output==std::vector<int>{4,8})); assert((input==std::vector<int>{2,4}));
-    output[0]=99; assert(input[0]==2); assert(doubled({}).empty());
-    // Reference extension checks for the exercise changes.
-    auto observer=[](const std::vector<int>& xs){return xs.size();}; assert(observer(input)==2); assert(observer({})==0); assert((doubled({5})==std::vector<int>{10}));
-    std::cout << "cpp-008 examples passed\n";
-    return 0;
+std::vector<int> doubled(const std::vector<int> &xs) {
+  auto out = xs;
+  for (int &x : out)
+    x *= 2;
+  return out;
 }
-
+int main() {
+  const std::vector<int> input{2, 4};
+  auto output = doubled(input);
+  assert((output == std::vector<int>{4, 8}));
+  assert((input == std::vector<int>{2, 4}));
+  output[0] = 99;
+  assert(input[0] == 2);
+  assert(doubled({}).empty());
+  // Reference extension checks for the exercise changes.
+  auto observer = [](const std::vector<int> &xs) { return xs.size(); };
+  assert(observer(input) == 2);
+  assert(observer({}) == 0);
+  assert((doubled({5}) == std::vector<int>{10}));
+  std::cout << "cpp-008 examples passed\n";
+  return 0;
+}
 
 // Exercise 1: Draw owners. Draw input, copied output and borrowed parameter. Expected: Two owners and one temporary borrow, no extra owner for the reference.
 // Exercise 2: Predict mutation. Change output[0] to 99 after doubled([2,4]). Expected: Input first value 2; output first value 99.

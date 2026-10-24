@@ -621,38 +621,68 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line"><span class="syntax-comment">--</span></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Null analysis and basic profiling</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;customers&#x27;</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">table</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">rows</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> email <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span> <span class="syntax-number">1</span> <span class="syntax-keyword">ELSE</span> <span class="syntax-number">0</span> <span class="syntax-keyword">END</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> null_emails<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> country <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span> <span class="syntax-number">1</span> <span class="syntax-keyword">ELSE</span> <span class="syntax-number">0</span> <span class="syntax-keyword">END</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> null_country</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> customers<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-string">&#x27;customers&#x27;</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">table</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">rows</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> email <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">      <span class="syntax-number">1</span></span>
+<span class="source-line">    <span class="syntax-keyword">ELSE</span></span>
+<span class="source-line">      <span class="syntax-number">0</span></span>
+<span class="source-line">    <span class="syntax-keyword">END</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> null_emails<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> country <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">      <span class="syntax-number">1</span></span>
+<span class="source-line">    <span class="syntax-keyword">ELSE</span></span>
+<span class="source-line">      <span class="syntax-number">0</span></span>
+<span class="source-line">    <span class="syntax-keyword">END</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> null_country</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  customers<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Duplicate detection (emails should be unique ideally)</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> email<span class="syntax-punctuation">,</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> cnt</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> customers</span>
-<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> email</span>
-<span class="source-line"><span class="syntax-keyword">HAVING</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">1</span></span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> cnt <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  email<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> cnt</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  customers</span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  email</span>
+<span class="source-line"><span class="syntax-keyword">HAVING</span></span>
+<span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">1</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  cnt <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Orphan checks (should be zero due to FK, but as validation queries)</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> oi<span class="syntax-punctuation">.</span>order_id</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> order_items oi</span>
-<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">ON</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>order_id</span>
-<span class="source-line"><span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  oi<span class="syntax-punctuation">.</span>order_id</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  order_items oi</span>
+<span class="source-line">  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">ON</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>order_id</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  o<span class="syntax-punctuation">.</span>order_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
 <span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">10</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>payment_id</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> payments p</span>
-<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">ON</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> p<span class="syntax-punctuation">.</span>order_id</span>
-<span class="source-line"><span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span>payment_id</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  payments p</span>
+<span class="source-line">  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">ON</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> p<span class="syntax-punctuation">.</span>order_id</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  o<span class="syntax-punctuation">.</span>order_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
 <span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">10</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Domain/constraint validation examples</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">WHERE</span> total_amount <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span> <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">10</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> payments <span class="syntax-keyword">WHERE</span> amount <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span> <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">10</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-operator">*</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  orders</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  total_amount <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span></span>
+<span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">10</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-operator">*</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  payments</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  amount <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span></span>
+<span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">10</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
 <span class="source-line"><span class="syntax-comment">-- 1. Build a validation report summarizing nulls, duplicates, and constraint violations across core tables.</span></span>
 <span class="source-line"><span class="syntax-comment">--    Inputs: For sql-42 Exercise 1, read from `customers`, `orders`, `order_items`, `products`, and `payments`. Build the answer toward `check_name`, and `failing_rows`; keep `check_name` visible whenever the result has row-level grain.</span></span>
@@ -688,7 +718,6 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-42 Exercise 6, expected output: one row per `product_id`. The final columns are `promotion_a`, `promotion_b`, and `product_id`. The final order is `a.product_id, promotion_a, promotion_b`.</span></span>
 <span class="source-line"><span class="syntax-comment">--    Verify: For sql-42 Exercise 6, project `product_id` plus the raw source columns from `promotions` at each join stage; record row count and distinct `product_id`, then assert the final `promotion_a`, `promotion_b`, and `product_id` values match those staged rows without unintended fanout or loss. Insert rows immediately before, exactly at, and immediately after the literal lower and upper comparisons in the final `WHERE` clause; identify which rows pass each inclusive or exclusive comparison.</span></span>
 <span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-42 Exercise 6, start with the first relation in `promotions`; after each join, record total rows and distinct `product_id` so the exact fanout or loss is visible.</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>
       </section>
@@ -921,98 +950,160 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 1: one compact validation report. Constraints make most counts zero;</span></span>
 <span class="source-line"><span class="syntax-comment">-- keeping the checks executable protects future changes and imported data.</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;customers.null_email&#x27;</span> <span class="syntax-keyword">AS</span> check_name<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> failing_rows</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> customers</span>
-<span class="source-line"><span class="syntax-keyword">WHERE</span> email <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-string">&#x27;customers.null_email&#x27;</span> <span class="syntax-keyword">AS</span> check_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> failing_rows</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  customers</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  email <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
 <span class="source-line"><span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;customers.duplicate_normalized_email&#x27;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-string">&#x27;customers.duplicate_normalized_email&#x27;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">lower</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">trim</span><span class="syntax-punctuation">(</span>email<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> customers</span>
-<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">lower</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">trim</span><span class="syntax-punctuation">(</span>email<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">  <span class="syntax-keyword">HAVING</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">1</span></span>
-<span class="source-line"><span class="syntax-punctuation">)</span> duplicates</span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    <span class="syntax-keyword">lower</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">trim</span><span class="syntax-punctuation">(</span>email<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    customers</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">    <span class="syntax-keyword">lower</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">trim</span><span class="syntax-punctuation">(</span>email<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">HAVING</span></span>
+<span class="source-line">    <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> duplicates</span>
 <span class="source-line"><span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;orders.negative_total&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> orders</span>
-<span class="source-line"><span class="syntax-keyword">WHERE</span> total_amount <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-string">&#x27;orders.negative_total&#x27;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  orders</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  total_amount <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span></span>
 <span class="source-line"><span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;orders.orphan_customer&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> orders o</span>
-<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> customers <span class="syntax-keyword">c</span> <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-string">&#x27;orders.orphan_customer&#x27;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  orders o</span>
+<span class="source-line">  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> customers <span class="syntax-keyword">c</span> <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
 <span class="source-line"><span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;order_items.orphan_order_or_product&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> order_items oi</span>
-<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> products p <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>product_id<span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">OR</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-string">&#x27;order_items.orphan_order_or_product&#x27;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  order_items oi</span>
+<span class="source-line">  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> products p <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>product_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  o<span class="syntax-punctuation">.</span>order_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line">  <span class="syntax-keyword">OR</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
 <span class="source-line"><span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;order_items.invalid_quantity_or_discount&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> order_items</span>
-<span class="source-line"><span class="syntax-keyword">WHERE</span> quantity <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span> <span class="syntax-keyword">OR</span> discount <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">0</span> <span class="syntax-keyword">AND</span> <span class="syntax-number">1</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-string">&#x27;order_items.invalid_quantity_or_discount&#x27;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  order_items</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  quantity <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span></span>
+<span class="source-line">  <span class="syntax-keyword">OR</span> discount <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">BETWEEN</span> <span class="syntax-number">0</span> <span class="syntax-keyword">AND</span> <span class="syntax-number">1</span></span>
 <span class="source-line"><span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;payments.negative_or_orphan&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> payments p</span>
-<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">WHERE</span> p<span class="syntax-punctuation">.</span>amount <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span> <span class="syntax-keyword">OR</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> check_name<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-string">&#x27;payments.negative_or_orphan&#x27;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  payments p</span>
+<span class="source-line">  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span>amount <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span></span>
+<span class="source-line">  <span class="syntax-keyword">OR</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  check_name<span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 2: email-format validation.</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span> email</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> customers</span>
-<span class="source-line"><span class="syntax-keyword">WHERE</span> email <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
-<span class="source-line">   <span class="syntax-keyword">OR</span> email <span class="syntax-operator">!</span><span class="syntax-operator">~</span><span class="syntax-operator">*</span> <span class="syntax-string">&#x27;^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$&#x27;</span></span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> customer_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  email</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  customers</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  email <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line">  <span class="syntax-keyword">OR</span> email <span class="syntax-operator">!</span><span class="syntax-operator">~</span><span class="syntax-operator">*</span> <span class="syntax-string">&#x27;^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$&#x27;</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  customer_id<span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 3: a CHECK passes TRUE or UNKNOWN. The catalog query shows which</span></span>
 <span class="source-line"><span class="syntax-comment">-- course columns also carry NOT NULL, the separate rule that rejects NULL.</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">table_name</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">column_name</span><span class="syntax-punctuation">,</span> is_nullable</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> information_schema<span class="syntax-punctuation">.</span>columns</span>
-<span class="source-line"><span class="syntax-keyword">WHERE</span> table_schema <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;training&#x27;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-keyword">table_name</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">column_name</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  is_nullable</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  information_schema<span class="syntax-punctuation">.</span>columns</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  table_schema <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;training&#x27;</span></span>
 <span class="source-line">  <span class="syntax-keyword">AND</span> <span class="syntax-keyword">table_name</span> <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;orders&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;payments&#x27;</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line">  <span class="syntax-keyword">AND</span> <span class="syntax-keyword">column_name</span> <span class="syntax-keyword">IN</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;total_amount&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;amount&#x27;</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">table_name</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">column_name</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  <span class="syntax-keyword">table_name</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">column_name</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 4: aggregate lines to order grain before comparing with the stored</span></span>
 <span class="source-line"><span class="syntax-comment">-- header. The one-cent tolerance is an explicit currency policy.</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> calculated <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> order_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>quantity <span class="syntax-operator">*</span> unit_price <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">-</span> discount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> line_total</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> order_items</span>
-<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> order_id</span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    order_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>quantity <span class="syntax-operator">*</span> unit_price <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">-</span> discount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> line_total</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    order_items</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">    order_id</span>
 <span class="source-line"><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">,</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>line_total<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       o<span class="syntax-punctuation">.</span>total_amount <span class="syntax-operator">-</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>line_total <span class="syntax-keyword">AS</span> difference</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> orders o</span>
-<span class="source-line"><span class="syntax-keyword">JOIN</span> calculated <span class="syntax-keyword">c</span> <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">ABS</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount <span class="syntax-operator">-</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>line_total<span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">.</span><span class="syntax-number">01</span></span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>line_total<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  o<span class="syntax-punctuation">.</span>total_amount <span class="syntax-operator">-</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>line_total <span class="syntax-keyword">AS</span> difference</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  orders o</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> calculated <span class="syntax-keyword">c</span> <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  <span class="syntax-keyword">ABS</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount <span class="syntax-operator">-</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>line_total<span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">.</span><span class="syntax-number">01</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 5: keep both normalized key and raw variants for remediation.</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">lower</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">trim</span><span class="syntax-punctuation">(</span>email<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> normalized_email<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       array_agg<span class="syntax-punctuation">(</span>email <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> email<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> raw_variants<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">rows</span></span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> customers</span>
-<span class="source-line"><span class="syntax-keyword">WHERE</span> email <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
-<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">lower</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">trim</span><span class="syntax-punctuation">(</span>email<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">HAVING</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">1</span></span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> normalized_email<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-keyword">lower</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">trim</span><span class="syntax-punctuation">(</span>email<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> normalized_email<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  array_agg<span class="syntax-punctuation">(</span>email <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> email<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> raw_variants<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">rows</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  customers</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  email <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  <span class="syntax-keyword">lower</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">trim</span><span class="syntax-punctuation">(</span>email<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">HAVING</span></span>
+<span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&gt;</span> <span class="syntax-number">1</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  normalized_email<span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 6: compare each promotion pair once. Inclusive endpoints overlap</span></span>
 <span class="source-line"><span class="syntax-comment">-- when neither range ends strictly before the other starts.</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> a<span class="syntax-punctuation">.</span>promotion_id <span class="syntax-keyword">AS</span> promotion_a<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       b<span class="syntax-punctuation">.</span>promotion_id <span class="syntax-keyword">AS</span> promotion_b<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       a<span class="syntax-punctuation">.</span>product_id</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> promotions a</span>
-<span class="source-line"><span class="syntax-keyword">JOIN</span> promotions b</span>
-<span class="source-line">  <span class="syntax-keyword">ON</span> b<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> a<span class="syntax-punctuation">.</span>product_id</span>
-<span class="source-line"> <span class="syntax-keyword">AND</span> b<span class="syntax-punctuation">.</span>promotion_id <span class="syntax-operator">&gt;</span> a<span class="syntax-punctuation">.</span>promotion_id</span>
-<span class="source-line"> <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span>start_date <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> b<span class="syntax-punctuation">.</span>end_date</span>
-<span class="source-line"> <span class="syntax-keyword">AND</span> b<span class="syntax-punctuation">.</span>start_date <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> a<span class="syntax-punctuation">.</span>end_date</span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> a<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span> promotion_a<span class="syntax-punctuation">,</span> promotion_b<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  a<span class="syntax-punctuation">.</span>promotion_id <span class="syntax-keyword">AS</span> promotion_a<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  b<span class="syntax-punctuation">.</span>promotion_id <span class="syntax-keyword">AS</span> promotion_b<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  a<span class="syntax-punctuation">.</span>product_id</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  promotions a</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> promotions b <span class="syntax-keyword">ON</span> b<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> a<span class="syntax-punctuation">.</span>product_id</span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> b<span class="syntax-punctuation">.</span>promotion_id <span class="syntax-operator">&gt;</span> a<span class="syntax-punctuation">.</span>promotion_id</span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span>start_date <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> b<span class="syntax-punctuation">.</span>end_date</span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> b<span class="syntax-punctuation">.</span>start_date <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> a<span class="syntax-punctuation">.</span>end_date</span>
+<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">    a<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    promotion_a<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    promotion_b<span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>
       </section>
 

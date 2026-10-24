@@ -14,30 +14,32 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Buffers;
 
-internal static class Program
-{
-    private static void Check(bool condition, string reason)
+internal static class Program {
+  private static void Check(bool condition, string reason) {
+    if (!condition)
+      throw new InvalidOperationException(reason);
+  }
+
+  private static async Task Main() {
     {
-        if (!condition) throw new InvalidOperationException(reason);
+      int[] values = { 2, 4, 6, 8 };
+      int comparisons = 0;
+      bool found = false;
+      foreach (int value in values) {
+        comparisons++;
+        if (value == 8) {
+          found = true;
+          break;
+        }
+      }
+      Check(found && comparisons == 4, "last-element linear search");
     }
-
-    private static async Task Main()
     {
-        {
-            int[] values = { 2, 4, 6, 8 };
-            int comparisons = 0;
-            bool found = false;
-            foreach (int value in values) { comparisons++; if (value == 8) { found = true; break; } }
-            Check(found && comparisons == 4, "last-element linear search");
-        }
-        {
-            var index = new HashSet<int>(new[] { 2, 4, 6, 8 });
-            Check(index.Contains(8) && !index.Contains(9), "indexed membership");
-            Check(index.Count == 4, "index has stored identities");
-        }
-        Console.WriteLine("csharp-037: passed");
-        await Task.CompletedTask;
+      var index = new HashSet<int>(new[] { 2, 4, 6, 8 });
+      Check(index.Contains(8) && !index.Contains(9), "indexed membership");
+      Check(index.Count == 4, "index has stored identities");
     }
-
-
+    Console.WriteLine("csharp-037: passed");
+    await Task.CompletedTask;
+  }
 }

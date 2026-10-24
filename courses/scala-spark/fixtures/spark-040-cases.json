@@ -59,14 +59,7 @@
     },
     "expected_utc": "2026-10-23T19:00:00Z",
     "partition_counterexample": {
-      "ids": [
-        -10,
-        0,
-        5,
-        10,
-        99,
-        null
-      ],
+      "ids": [-10, 0, 5, 10, 99, null],
       "lowerBound": 0,
       "upperBound": 10,
       "numPartitions": 2,

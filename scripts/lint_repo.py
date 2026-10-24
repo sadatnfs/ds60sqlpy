@@ -24,6 +24,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from scripts.format_repo import LANGUAGES, batches, inventory  # noqa: E402
+from scripts.sql_formatting import sql_for_parser as sql_for_parser  # noqa: E402
 
 GRAMMARS = {
     "c": "c",
@@ -52,48 +53,6 @@ WEB_GRAMMARS = {
 }
 JAVASCRIPT_SUFFIXES = {".js", ".mjs", ".cjs", ".jsx", ".ts", ".mts", ".cts", ".tsx"}
 QUALITY_ROOTS = ("src/", "scripts/", "tests/", "bridge/", "python/professional/")
-PSQL_COMMANDS = {
-    "set",
-    "unset",
-    "getenv",
-    "echo",
-    "warn",
-    "qecho",
-    "if",
-    "elif",
-    "else",
-    "endif",
-    "ir",
-    "i",
-    "include",
-    "include_relative",
-    "connect",
-    "c",
-    "copy",
-    "quit",
-    "q",
-    "pset",
-    "gset",
-    "gexec",
-    "g",
-    "gx",
-    "timing",
-    "watch",
-    "o",
-    "out",
-    "a",
-    "t",
-    "x",
-    "f",
-    "r",
-    "encoding",
-    "conninfo",
-    "d",
-    "dt",
-    "du",
-    "dn",
-    "l",
-}
 
 
 def run(command: list[str], root: Path) -> bool:
@@ -103,98 +62,6 @@ def run(command: list[str], root: Path) -> bool:
         print(f"Missing lint tool: {command[0]}. Use ./scripts/lint-repo.", file=sys.stderr)
         return False
     return result.returncode == 0
-
-
-def _quoted_end(text: str, start: int, quote: str, backslashes: bool = False) -> int:
-    index = start + 1
-    while index < len(text):
-        if backslashes and text[index] == "\\":
-            index += 2
-        elif text[index] == quote:
-            if index + 1 < len(text) and text[index + 1] == quote:
-                index += 2
-            else:
-                return index + 1
-        else:
-            index += 1
-    raise ValueError("Unterminated SQL quoted value")
-
-
-def sql_for_parser(text: str) -> str:
-    """Separate psql controls without interpreting them or rewriting source.
-
-    Quoted SQL, comments, and dollar-quoted function bodies are copied verbatim.
-    psql variables become grammar placeholders, so this checks statement syntax,
-    not a particular variable expansion, psql branch result, or routine body.
-    """
-    chunks: list[str] = []
-    index = 0
-    while index < len(text):
-        if text.startswith("--", index):
-            end = text.find("\n", index)
-            end = len(text) if end < 0 else end
-            chunks.append(text[index:end])
-            index = end
-            continue
-        if text.startswith("/*", index):
-            end, depth = index + 2, 1
-            while end < len(text) and depth:
-                if text.startswith("/*", end):
-                    depth += 1
-                    end += 2
-                elif text.startswith("*/", end):
-                    depth -= 1
-                    end += 2
-                else:
-                    end += 1
-            if depth:
-                raise ValueError("Unterminated SQL block comment")
-            chunks.append(text[index:end])
-            index = end
-            continue
-        if text[index] in "'\"":
-            backslashes = index > 0 and text[index - 1] in "eE"
-            end = _quoted_end(text, index, text[index], backslashes)
-            chunks.append(text[index:end])
-            index = end
-            continue
-        if text[index] == "$":
-            match = re.match(r"\$(?:[A-Za-z_]\w*)?\$", text[index:])
-            if match:
-                delimiter = match.group()
-                end = text.find(delimiter, index + len(delimiter))
-                if end < 0:
-                    raise ValueError("Unterminated SQL dollar-quoted body")
-                end += len(delimiter)
-                chunks.append(text[index:end])
-                index = end
-                continue
-        if text[index] == "\\":
-            end = text.find("\n", index)
-            end = len(text) if end < 0 else end
-            command = text[index + 1 : end].split(maxsplit=1)
-            name = command[0] if command else ""
-            if name not in PSQL_COMMANDS:
-                raise ValueError(f"Unsupported psql control \\{name}; add a reviewed parser rule")
-            chunks.append(";" if name in {"g", "gx", "gset", "gexec"} else " ")
-            index = end
-            continue
-        if text.startswith("::", index):
-            chunks.append("::")
-            index += 2
-            continue
-        if text[index] == ":":
-            variable = re.match(
-                r":(?:'[^'\n]+'|\"[^\"\n]+\"|[A-Za-z_]\w*|\{\?[A-Za-z_]\w*\})", text[index:]
-            )
-            if variable:
-                token = variable.group()
-                chunks.append("'psql_value'" if token.startswith(":'") else '"psql_value"')
-                index += len(token)
-                continue
-        chunks.append(text[index])
-        index += 1
-    return "".join(chunks)
 
 
 def grammar_source(path: str, source: bytes, grammar: str) -> tuple[str, bytes]:

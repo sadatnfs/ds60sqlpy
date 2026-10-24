@@ -18,42 +18,60 @@
 --
 BEGIN;
 SET search_path TO training, public;
-
 -- Study contract
 -- Focus: Use outer joins to preserve a declared side and make absence visible without accidentally filtering it away.
 -- Assumptions: Missing matches appear as NULL-extended columns. Decide whether absence means zero, unknown, or an exception before applying `COALESCE`.
 -- Pitfall: A right-side predicate in `WHERE` can turn a left join into an inner join; put match-qualification predicates in `ON` when unmatched left rows must remain.
 -- Predict row grain and NULL/order behavior before executing each example.
-
 -- LEFT JOIN: customers without orders
-SELECT c.customer_id, c.full_name, COUNT(o.order_id) AS orders
-FROM customers c
-LEFT JOIN orders o ON o.customer_id = c.customer_id
-GROUP BY c.customer_id, c.full_name
-ORDER BY orders ASC, c.customer_id
+SELECT
+  c.customer_id,
+  c.full_name,
+  COUNT(o.order_id) AS orders
+FROM
+  customers c
+  LEFT JOIN orders o ON o.customer_id = c.customer_id
+GROUP BY
+  c.customer_id,
+  c.full_name
+ORDER BY
+  orders ASC,
+  c.customer_id
 LIMIT 25;
-
 -- RIGHT JOIN: products that appear in orders (or not)
-SELECT p.product_id, p.name, COALESCE(SUM(oi.quantity),0) AS sold_qty
-FROM order_items oi
-RIGHT JOIN products p ON p.product_id = oi.product_id
-GROUP BY p.product_id, p.name
-ORDER BY sold_qty ASC, p.product_id
+SELECT
+  p.product_id,
+  p.name,
+  COALESCE(SUM(oi.quantity), 0) AS sold_qty
+FROM
+  order_items oi
+  RIGHT JOIN products p ON p.product_id = oi.product_id
+GROUP BY
+  p.product_id,
+  p.name
+ORDER BY
+  sold_qty ASC,
+  p.product_id
 LIMIT 25;
-
 -- FULL OUTER JOIN: payments vs orders.
 -- A payment foreign key prevents an orphan payment in this dataset, while an
 -- order may legitimately have no payment. Keep both keys visible when auditing.
-SELECT o.order_id,
-       p.payment_id,
-       p.order_id AS payment_order_id,
-       o.total_amount,
-       p.amount AS payment_amount
-FROM orders o
-FULL OUTER JOIN payments p ON p.order_id = o.order_id
-WHERE o.order_id IS NULL OR p.order_id IS NULL
-ORDER BY COALESCE(o.order_id, p.order_id), p.payment_id; -- mismatches
-
+SELECT
+  o.order_id,
+  p.payment_id,
+  p.order_id AS payment_order_id,
+  o.total_amount,
+  p.amount AS payment_amount
+FROM
+  orders o
+  FULL OUTER JOIN payments p ON p.order_id = o.order_id
+WHERE
+  o.order_id IS NULL
+  OR p.order_id IS NULL
+ORDER BY
+  COALESCE(o.order_id, p.order_id),
+  p.payment_id;
+-- mismatches
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.
@@ -93,5 +111,4 @@ ORDER BY COALESCE(o.order_id, p.order_id), p.payment_id; -- mismatches
 --    Expected result/shape: For sql-04 Exercise 6, expected output: One summary row with three mutually interpretable counts. The final columns are `matched_products`, `unsold_products`, and `orphan_item_product_ids`.
 --    Verify: For sql-04 Exercise 6, project `product_id` plus the raw source columns from `products`, and `order_items` at each join stage; record row count and distinct `product_id`, then assert the final `matched_products`, `unsold_products`, and `orphan_item_product_ids` values match those staged rows without unintended fanout or loss. Add one source row with a new `product_id`; verify the result gains exactly one row carrying that `product_id` value.
 --    Hint ladder, rung 1: For sql-04 Exercise 6, start with the first relation in `products`, and `order_items`; after each join, record total rows and distinct `product_id` so the exact fanout or loss is visible.
-
 ROLLBACK;

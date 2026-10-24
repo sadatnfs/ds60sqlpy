@@ -14,15 +14,12 @@
 --
 -- Target: PostgreSQL 16+; run only in advanced_sql_training.
 -- ON_ERROR_STOP is supplied by the documented psql command.
-
 BEGIN;
 SET search_path TO training, public;
-
 -- Shared teaching contract
 -- Focus: Define cumulative and moving window frames explicitly so peers, boundaries, and partition resets match the business question.
 -- Assumptions: Ordered money windows use exact numeric. `ROWS` counts physical ordered rows; `RANGE` groups peers with equal ordering values.
 -- Pitfall: Relying on the default frame can include tied peers unexpectedly; a moving-row window is not automatically a moving-time window.
-
 -- ---------------------------------------------------------------------------
 -- Exercise 1: Query writing
 -- Prompt: Calculate cumulative stored revenue across all orders.
@@ -36,16 +33,16 @@ SET search_path TO training, public;
 -- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
 -- - window frame: states exactly which rows or peers contribute to the current row's window result.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
-SELECT o.order_id,
-       o.order_date,
-       o.total_amount,
-       SUM(o.total_amount) OVER (
-         ORDER BY o.order_date, o.order_id
-         ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-       ) AS cumulative_revenue
-FROM orders AS o
-ORDER BY o.order_date, o.order_id;
-
+SELECT
+  o.order_id,
+  o.order_date,
+  o.total_amount,
+  SUM(o.total_amount) OVER (ORDER BY o.order_date, o.order_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS cumulative_revenue
+FROM
+  orders AS o
+ORDER BY
+  o.order_date,
+  o.order_id;
 -- ---------------------------------------------------------------------------
 -- Exercise 2: Query writing
 -- Prompt: Calculate each customer's cumulative stored spend.
@@ -60,18 +57,18 @@ ORDER BY o.order_date, o.order_id;
 -- - `PARTITION BY`: restarts a window calculation independently for each partition key.
 -- - window frame: states exactly which rows or peers contribute to the current row's window result.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
-SELECT o.order_id,
-       o.customer_id,
-       o.order_date,
-       o.total_amount,
-       SUM(o.total_amount) OVER (
-         PARTITION BY o.customer_id
-         ORDER BY o.order_date, o.order_id
-         ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-       ) AS customer_cumulative_spend
-FROM orders AS o
-ORDER BY o.customer_id, o.order_date, o.order_id;
-
+SELECT
+  o.order_id,
+  o.customer_id,
+  o.order_date,
+  o.total_amount,
+  SUM(o.total_amount) OVER (PARTITION BY o.customer_id ORDER BY o.order_date, o.order_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS customer_cumulative_spend
+FROM
+  orders AS o
+ORDER BY
+  o.customer_id,
+  o.order_date,
+  o.order_id;
 -- ---------------------------------------------------------------------------
 -- Exercise 3: Query writing
 -- Prompt: Calculate a trailing seven-order average within each customer.
@@ -86,20 +83,17 @@ ORDER BY o.customer_id, o.order_date, o.order_id;
 -- - `PARTITION BY`: restarts a window calculation independently for each partition key.
 -- - window frame: states exactly which rows or peers contribute to the current row's window result.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
-SELECT o.order_id,
-       o.customer_id,
-       o.order_date,
-       ROUND(
-         AVG(o.total_amount) OVER (
-           PARTITION BY o.customer_id
-           ORDER BY o.order_date, o.order_id
-           ROWS BETWEEN 6 PRECEDING AND CURRENT ROW
-         ),
-         2
-       ) AS trailing_7_order_average
-FROM orders AS o
-ORDER BY o.customer_id, o.order_date, o.order_id;
-
+SELECT
+  o.order_id,
+  o.customer_id,
+  o.order_date,
+  ROUND(AVG(o.total_amount) OVER (PARTITION BY o.customer_id ORDER BY o.order_date, o.order_id ROWS BETWEEN 6 PRECEDING AND CURRENT ROW), 2) AS trailing_7_order_average
+FROM
+  orders AS o
+ORDER BY
+  o.customer_id,
+  o.order_date,
+  o.order_id;
 -- ---------------------------------------------------------------------------
 -- Exercise 4: Prediction
 -- Prompt: Compare `ROWS` and `RANGE` cumulative sums when two rows share the same ordering value.
@@ -114,24 +108,18 @@ ORDER BY o.customer_id, o.order_date, o.order_id;
 -- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
 -- - window frame: states exactly which rows or peers contribute to the current row's window result.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
-SELECT row_id,
-       sort_value,
-       amount,
-       SUM(amount) OVER (
-         ORDER BY sort_value, row_id
-         ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-       ) AS rows_sum,
-       SUM(amount) OVER (
-         ORDER BY sort_value
-         RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-       ) AS range_sum
-FROM (VALUES
-  (1, 1, 10),
-  (2, 1, 20),
-  (3, 2, 5)
-) AS sample(row_id, sort_value, amount)
-ORDER BY row_id;
-
+SELECT
+  row_id,
+  sort_value,
+  amount,
+  SUM(amount) OVER (ORDER BY sort_value, row_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS rows_sum,
+  SUM(amount) OVER (ORDER BY sort_value RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS range_sum
+FROM (
+  VALUES (1, 1, 10),
+    (2, 1, 20),
+    (3, 2, 5)) AS sample (row_id, sort_value, amount)
+ORDER BY
+  row_id;
 -- ---------------------------------------------------------------------------
 -- Exercise 5: Debugging
 -- Prompt: Reset a running expense total at each category and month.
@@ -147,18 +135,19 @@ ORDER BY row_id;
 -- - window frame: states exactly which rows or peers contribute to the current row's window result.
 -- - time normalization: makes reporting boundaries explicit; UTC is applied before deriving calendar buckets where required.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
-SELECT e.expense_id,
-       e.category,
-       e.expense_date,
-       e.amount,
-       SUM(e.amount) OVER (
-         PARTITION BY e.category, date_trunc('month', e.expense_date)
-         ORDER BY e.expense_date, e.expense_id
-         ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-       ) AS category_month_running_expense
-FROM expenses AS e
-ORDER BY e.category, e.expense_date, e.expense_id;
-
+SELECT
+  e.expense_id,
+  e.category,
+  e.expense_date,
+  e.amount,
+  SUM(e.amount) OVER (PARTITION BY e.category, date_trunc('month', e.expense_date) ORDER BY e.expense_date,
+    e.expense_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS category_month_running_expense
+FROM
+  expenses AS e
+ORDER BY
+  e.category,
+  e.expense_date,
+  e.expense_id;
 -- ---------------------------------------------------------------------------
 -- Exercise 6: Extension
 -- Prompt: Prove the final cumulative stored revenue equals the ordinary stored-revenue sum.
@@ -177,25 +166,32 @@ ORDER BY e.category, e.expense_date, e.expense_id;
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 -- - `LIMIT`: is applied after ordering and is meaningful only when the query first defines which rows come first.
 WITH running AS (
-  SELECT o.order_id,
-         o.order_date,
-         SUM(o.total_amount) OVER (
-           ORDER BY o.order_date, o.order_id
-           ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-         ) AS cumulative_revenue
-  FROM orders AS o
-), final_running AS (
-  SELECT r.cumulative_revenue
-  FROM running AS r
-  ORDER BY r.order_date DESC, r.order_id DESC
+  SELECT
+    o.order_id,
+    o.order_date,
+    SUM(o.total_amount) OVER (ORDER BY o.order_date,
+      o.order_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS cumulative_revenue
+  FROM
+    orders AS o
+),
+final_running AS (
+  SELECT
+    r.cumulative_revenue
+  FROM
+    running AS r
+  ORDER BY
+    r.order_date DESC,
+    r.order_id DESC
   LIMIT 1
 )
-SELECT ROUND(fr.cumulative_revenue, 2) AS final_cumulative,
-       ROUND(SUM(o.total_amount), 2) AS aggregate_total,
-       ROUND(fr.cumulative_revenue - SUM(o.total_amount), 2) AS difference
-FROM final_running AS fr
-CROSS JOIN orders AS o
-GROUP BY fr.cumulative_revenue;
-
+SELECT
+  ROUND(fr.cumulative_revenue, 2) AS final_cumulative,
+  ROUND(SUM(o.total_amount), 2) AS aggregate_total,
+  ROUND(fr.cumulative_revenue - SUM(o.total_amount), 2) AS difference
+FROM
+  final_running AS fr
+  CROSS JOIN orders AS o
+GROUP BY
+  fr.cumulative_revenue;
 -- No course answer persists changes or temporary objects.
 ROLLBACK;

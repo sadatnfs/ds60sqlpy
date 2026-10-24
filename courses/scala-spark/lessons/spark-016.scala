@@ -2,10 +2,15 @@ import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
-
 object Main {
-  def factIds(frame: DataFrame): Seq[Long] = frame.select("fact_id").orderBy("fact_id").collect().map(_.getLong(0)).toSeq
-  def pairIds(frame: DataFrame): Seq[(Long,Long)] = frame.select("fact_id","dimension_row").orderBy("fact_id","dimension_row").collect().toSeq.map(row => (row.getLong(0),row.getLong(1)))
+  def factIds(frame: DataFrame): Seq[Long] =
+    frame.select("fact_id").orderBy("fact_id").collect().map(_.getLong(0)).toSeq
+  def pairIds(frame: DataFrame): Seq[(Long, Long)] = frame
+    .select("fact_id", "dimension_row")
+    .orderBy("fact_id", "dimension_row")
+    .collect()
+    .toSeq
+    .map(row => (row.getLong(0), row.getLong(1)))
 
   def multiplicity(facts: DataFrame, dimension: DataFrame): DataFrame =
     throw new UnsupportedOperationException("Complete multiplicity")
@@ -16,7 +21,7 @@ object Main {
   def leftJoin(facts: DataFrame, dimension: DataFrame): DataFrame =
     throw new UnsupportedOperationException("Complete leftJoin")
 
-  def membership(facts: DataFrame, dimension: DataFrame): (DataFrame,DataFrame) =
+  def membership(facts: DataFrame, dimension: DataFrame): (DataFrame, DataFrame) =
     throw new UnsupportedOperationException("Complete membership")
 
   def nullSafeJoin(facts: DataFrame, dimension: DataFrame): DataFrame =
@@ -26,21 +31,63 @@ object Main {
     throw new UnsupportedOperationException("Complete safeEnrichment")
 
   def main(args: Array[String]): Unit = {
-    val spark = SparkSession.builder().appName("ds60-spark-016").master("local[2]")
-      .config("spark.ui.enabled","false")
-      .config("spark.driver.host","127.0.0.1")
-      .config("spark.driver.bindAddress","127.0.0.1")
-      .config("spark.sql.shuffle.partitions","2")
-      .config("spark.sql.adaptive.enabled","false")
-      .config("spark.sql.ansi.enabled","true")
-      .config("spark.sql.session.timeZone","UTC").getOrCreate()
+    val spark = SparkSession
+      .builder()
+      .appName("ds60-spark-016")
+      .master("local[2]")
+      .config("spark.ui.enabled", "false")
+      .config("spark.driver.host", "127.0.0.1")
+      .config("spark.driver.bindAddress", "127.0.0.1")
+      .config("spark.sql.shuffle.partitions", "2")
+      .config("spark.sql.adaptive.enabled", "false")
+      .config("spark.sql.ansi.enabled", "true")
+      .config("spark.sql.session.timeZone", "UTC")
+      .getOrCreate()
     try {
       require(spark.sparkContext.master == "local[2]", "local-only course session")
       spark.sparkContext.setLogLevel("ERROR")
-      val factSchema = StructType(Seq(StructField("fact_id",LongType,false),StructField("key",StringType,true),StructField("amount_cents",LongType,false)))
-      val dimensionSchema = StructType(Seq(StructField("dimension_row",LongType,false),StructField("key",StringType,true),StructField("label",StringType,false)))
-      val facts = spark.createDataFrame(spark.sparkContext.parallelize(Seq(Row(1L,"A",10L),Row(2L,"A",20L),Row(3L,"B",30L),Row(4L,"C",40L),Row(5L,null,50L),Row(6L,"D",60L)),2),factSchema)
-      val dimension = spark.createDataFrame(spark.sparkContext.parallelize(Seq(Row(101L,"A","alpha1"),Row(102L,"A","alpha2"),Row(103L,"A","alpha3"),Row(104L,"B","beta"),Row(105L,null,"unknown"),Row(106L,"E","epsilon")),2),dimensionSchema)
+      val factSchema = StructType(
+        Seq(
+          StructField("fact_id", LongType, false),
+          StructField("key", StringType, true),
+          StructField("amount_cents", LongType, false)
+        )
+      )
+      val dimensionSchema = StructType(
+        Seq(
+          StructField("dimension_row", LongType, false),
+          StructField("key", StringType, true),
+          StructField("label", StringType, false)
+        )
+      )
+      val facts = spark.createDataFrame(
+        spark.sparkContext.parallelize(
+          Seq(
+            Row(1L, "A", 10L),
+            Row(2L, "A", 20L),
+            Row(3L, "B", 30L),
+            Row(4L, "C", 40L),
+            Row(5L, null, 50L),
+            Row(6L, "D", 60L)
+          ),
+          2
+        ),
+        factSchema
+      )
+      val dimension = spark.createDataFrame(
+        spark.sparkContext.parallelize(
+          Seq(
+            Row(101L, "A", "alpha1"),
+            Row(102L, "A", "alpha2"),
+            Row(103L, "A", "alpha3"),
+            Row(104L, "B", "beta"),
+            Row(105L, null, "unknown"),
+            Row(106L, "E", "epsilon")
+          ),
+          2
+        ),
+        dimensionSchema
+      )
       locally {
         val aFacts = facts.filter(col("key") === lit("A")).count()
         val aDimensions = dimension.filter(col("key") === lit("A")).count()
@@ -48,7 +95,11 @@ object Main {
         println(s"A predicts ${aFacts * aDimensions} joined pairs")
       }
       locally {
-        val comparison = spark.sql("SELECT CAST(NULL AS STRING) = CAST(NULL AS STRING) AS ordinary, CAST(NULL AS STRING) <=> CAST(NULL AS STRING) AS null_safe").first()
+        val comparison = spark
+          .sql(
+            "SELECT CAST(NULL AS STRING) = CAST(NULL AS STRING) AS ordinary, CAST(NULL AS STRING) <=> CAST(NULL AS STRING) AS null_safe"
+          )
+          .first()
         assert(comparison.isNullAt(0) && comparison.getBoolean(1))
         println("Ordinary equality is unknown;explicit NULL-safe equality is true")
       }

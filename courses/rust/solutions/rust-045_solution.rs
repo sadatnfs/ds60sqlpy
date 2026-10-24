@@ -1,11 +1,12 @@
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let values = [1_i32, 2, 3, 4, 5];
         let mut total = 0;
         let mut rows = 0;
-        for batch in values.chunks(2) { rows += batch.len(); total += batch.iter().sum::<i32>(); }
+        for batch in values.chunks(2) {
+            rows += batch.len();
+            total += batch.iter().sum::<i32>();
+        }
         assert_eq!((rows, total), (5, 15));
     }
 

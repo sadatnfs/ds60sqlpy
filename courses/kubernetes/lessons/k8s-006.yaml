@@ -21,36 +21,35 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       containers:
-      - name: hello
-        image: ds60sqlpy-k8s-fixture:0.2.0
-        imagePullPolicy: Never
-        command:
-        - python
-        - /fixture.py
-        - server
-        ports:
-        - name: http
-          containerPort: 8080
-        readinessProbe:
-          httpGet:
-            path: /ready
-            port: http
-          periodSeconds: 2
-          failureThreshold: 2
-        resources:
-          requests:
-            cpu: 10m
-            memory: 16Mi
-          limits:
-            cpu: 100m
-            memory: 64Mi
-        securityContext:
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: true
-          capabilities:
-            drop:
-            - ALL
-
+        - name: hello
+          image: ds60sqlpy-k8s-fixture:0.2.0
+          imagePullPolicy: Never
+          command:
+            - python
+            - /fixture.py
+            - server
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            periodSeconds: 2
+            failureThreshold: 2
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
 # Exercise 1: Draw ownership. Trace Deployment,ReplicaSet and Pod controller references for the baseline. Expected: A UID-linked graph connects exactly two owned Pods to the intended Deployment.
 # Exercise 2: Compare generation evidence. Interpret generation4 with observedGeneration3 and readyReplicas2. Expected: Latest desired state not yet confirmed observed.
 # Exercise 3: Establish a fresh baseline. Use the allowed two-replica source in a qualified browser operation. Expected: Two Ready owned Pod UIDs and cleanup evidence,with a new Run identity.

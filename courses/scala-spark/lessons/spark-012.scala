@@ -2,11 +2,9 @@ import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
-
 object Main {
 
-
-  def schemaFields(frame: DataFrame): Seq[(String,String,Boolean)] =
+  def schemaFields(frame: DataFrame): Seq[(String, String, Boolean)] =
     throw new UnsupportedOperationException("Complete schemaFields")
 
   def teamA(frame: DataFrame): DataFrame =
@@ -18,33 +16,40 @@ object Main {
   def observedRows(frame: DataFrame): DataFrame =
     throw new UnsupportedOperationException("Complete observedRows")
 
-  def canonical(frame: DataFrame): Seq[(Long,Option[String],Option[Long])] =
+  def canonical(frame: DataFrame): Seq[(Long, Option[String], Option[Long])] =
     throw new UnsupportedOperationException("Complete canonical")
 
-  def settings(spark: SparkSession): Map[String,String] =
+  def settings(spark: SparkSession): Map[String, String] =
     throw new UnsupportedOperationException("Complete settings")
 
   def main(args: Array[String]): Unit = {
-    val spark = SparkSession.builder().appName("ds60-spark-012").master("local[2]")
-      .config("spark.ui.enabled","false")
-      .config("spark.driver.host","127.0.0.1")
-      .config("spark.driver.bindAddress","127.0.0.1")
-      .config("spark.sql.shuffle.partitions","2")
-      .config("spark.sql.adaptive.enabled","false")
-      .config("spark.sql.ansi.enabled","true")
-      .config("spark.sql.session.timeZone","UTC").getOrCreate()
+    val spark = SparkSession
+      .builder()
+      .appName("ds60-spark-012")
+      .master("local[2]")
+      .config("spark.ui.enabled", "false")
+      .config("spark.driver.host", "127.0.0.1")
+      .config("spark.driver.bindAddress", "127.0.0.1")
+      .config("spark.sql.shuffle.partitions", "2")
+      .config("spark.sql.adaptive.enabled", "false")
+      .config("spark.sql.ansi.enabled", "true")
+      .config("spark.sql.session.timeZone", "UTC")
+      .getOrCreate()
     try {
       require(spark.sparkContext.master == "local[2]", "local-only course session")
       spark.sparkContext.setLogLevel("ERROR")
-      val schema = StructType(Seq(
-        StructField("event_id",LongType,false),
-        StructField("team",StringType,true),
-        StructField("amount_cents",LongType,true)))
-      val rows = Seq(Row(1L,"A",0L),Row(2L,"B",null),Row(3L,"A",25L),Row(4L,"B",40L))
-      val raw = spark.createDataFrame(spark.sparkContext.parallelize(rows,2),schema)
+      val schema = StructType(
+        Seq(
+          StructField("event_id", LongType, false),
+          StructField("team", StringType, true),
+          StructField("amount_cents", LongType, true)
+        )
+      )
+      val rows = Seq(Row(1L, "A", 0L), Row(2L, "B", null), Row(3L, "A", 25L), Row(4L, "B", 40L))
+      val raw = spark.createDataFrame(spark.sparkContext.parallelize(rows, 2), schema)
       locally {
         val names = raw.schema.fields.map(_.name).toSeq
-        assert(names == Seq("event_id","team","amount_cents"))
+        assert(names == Seq("event_id", "team", "amount_cents"))
         assert(raw.schema("event_id").dataType == LongType)
         assert(!raw.schema("event_id").nullable && raw.schema("amount_cents").nullable)
         println(raw.schema.simpleString)
@@ -53,7 +58,12 @@ object Main {
         val planned = raw.filter(col("team") === lit("A"))
         val observedCount = planned.count()
         assert(observedCount == 2L)
-        assert(planned.select("event_id").orderBy("event_id").collect().map(_.getLong(0)).toSeq == Seq(1L,3L))
+        assert(
+          planned.select("event_id").orderBy("event_id").collect().map(_.getLong(0)).toSeq == Seq(
+            1L,
+            3L
+          )
+        )
         println(s"team A rows=$observedCount")
       }
       println("spark-012: worked examples passed; six task implementations remain")

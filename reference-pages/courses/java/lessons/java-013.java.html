@@ -163,33 +163,34 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-java"><code><span class="source-line"><span class="syntax-comment">// Answer-free learner worksheet. Save your own Main.java before editing.</span></span>
 <span class="source-line"><span class="syntax-keyword">public</span> <span class="syntax-keyword">class</span> <span class="syntax-class">Main</span> <span class="syntax-punctuation">{</span></span>
-<span class="source-line">    <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span></span>
-<span class="source-line">        <span class="syntax-comment">// Exercise 1: Use a predicate</span></span>
-<span class="source-line">        <span class="syntax-comment">// Create a Predicate&lt;Integer&gt; accepting positive values and test3,0,-1.</span></span>
-<span class="source-line">        <span class="syntax-comment">// Expected: true,false,false.</span></span>
 <span class="source-line"></span>
-<span class="source-line">        <span class="syntax-comment">// Exercise 2: Compose transformations</span></span>
-<span class="source-line">        <span class="syntax-comment">// Strip a string,then uppercase it withLocale.ROOT.</span></span>
-<span class="source-line">        <span class="syntax-comment">// Expected: inputspace red space becomesRED.</span></span>
+<span class="source-line">  <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span></span>
+<span class="source-line">    <span class="syntax-comment">// Exercise 1: Use a predicate</span></span>
+<span class="source-line">    <span class="syntax-comment">// Create a Predicate&lt;Integer&gt; accepting positive values and test3,0,-1.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: true,false,false.</span></span>
 <span class="source-line"></span>
-<span class="source-line">        <span class="syntax-comment">// Exercise 3: Distinguish composition order</span></span>
-<span class="source-line">        <span class="syntax-comment">// Compose add1 andmultiply2 usingandThen andcompose on3.</span></span>
-<span class="source-line">        <span class="syntax-comment">// Expected: andThen8;compose7.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Exercise 2: Compose transformations</span></span>
+<span class="source-line">    <span class="syntax-comment">// Strip a string,then uppercase it withLocale.ROOT.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: inputspace red space becomesRED.</span></span>
 <span class="source-line"></span>
-<span class="source-line">        <span class="syntax-comment">// Exercise 4: Capture a stable threshold</span></span>
-<span class="source-line">        <span class="syntax-comment">// Capture local threshold10 in a predicate and test9,10,11.</span></span>
-<span class="source-line">        <span class="syntax-comment">// Expected: false,true,true under&gt;=.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Exercise 3: Distinguish composition order</span></span>
+<span class="source-line">    <span class="syntax-comment">// Compose add1 andmultiply2 usingandThen andcompose on3.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: andThen8;compose7.</span></span>
 <span class="source-line"></span>
-<span class="source-line">        <span class="syntax-comment">// Exercise 5: Expose mutable captured state</span></span>
-<span class="source-line">        <span class="syntax-comment">// Capture a list in aConsumer and append two values.</span></span>
-<span class="source-line">        <span class="syntax-comment">// Expected: captured list becomesa,b.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Exercise 4: Capture a stable threshold</span></span>
+<span class="source-line">    <span class="syntax-comment">// Capture local threshold10 in a predicate and test9,10,11.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: false,true,true under&gt;=.</span></span>
 <span class="source-line"></span>
-<span class="source-line">        <span class="syntax-comment">// Exercise 6: Use a named function for a contract</span></span>
-<span class="source-line">        <span class="syntax-comment">// Pass a method reference to a parser that rejects blank input and parses a positive</span></span>
-<span class="source-line">        <span class="syntax-comment">// integer.</span></span>
-<span class="source-line">        <span class="syntax-comment">// Expected: 7 accepted;blank rejected.</span></span>
-<span class="source-line">        System<span class="syntax-punctuation">.</span><span class="syntax-attribute">out</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">println</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement and check the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line">    <span class="syntax-punctuation">}</span></span>
+<span class="source-line">    <span class="syntax-comment">// Exercise 5: Expose mutable captured state</span></span>
+<span class="source-line">    <span class="syntax-comment">// Capture a list in aConsumer and append two values.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: captured list becomesa,b.</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-comment">// Exercise 6: Use a named function for a contract</span></span>
+<span class="source-line">    <span class="syntax-comment">// Pass a method reference to a parser that rejects blank input and parses a positive</span></span>
+<span class="source-line">    <span class="syntax-comment">// integer.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: 7 accepted;blank rejected.</span></span>
+<span class="source-line">    System<span class="syntax-punctuation">.</span><span class="syntax-attribute">out</span><span class="syntax-punctuation">.</span><span class="syntax-attribute">println</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Implement and check the six exercises in your saved copy.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-punctuation">}</span></span>
 <span class="source-line"><span class="syntax-punctuation">}</span></span>
 <span class="source-line"></span></code></pre></article>
   </main>

@@ -1,5 +1,3 @@
-
-
 object Main {
   sealed trait Event { def id: String }
   final case class Paid(id: String, cents: Long) extends Event {
@@ -35,8 +33,8 @@ object Main {
 
   def main(args: Array[String]): Unit = {
     locally {
-      val first = Paid("p1",100L)
-      val second = Paid("p2",100L)
+      val first = Paid("p1", 100L)
+      val second = Paid("p2", 100L)
       assert(first != second)
       assert(first.cents == second.cents)
       val revised = first.copy(cents = 125L)
@@ -45,13 +43,13 @@ object Main {
     }
     locally {
       def describe(event: Event): String = event match {
-        case Paid(id,amount) => s"paid:$id:$amount"
-        case Voided(id,reason) => s"voided:$id:$reason"
-        case Refunded(id,amount) => s"refunded:$id:$amount"
+        case Paid(id, amount)     => s"paid:$id:$amount"
+        case Voided(id, reason)   => s"voided:$id:$reason"
+        case Refunded(id, amount) => s"refunded:$id:$amount"
       }
-      assert(describe(Refunded("r1",25L)) == "refunded:r1:25")
-      assert(describe(Voided("v1","duplicate")) == "voided:v1:duplicate")
-      println(describe(Paid("p1",0L)))
+      assert(describe(Refunded("r1", 25L)) == "refunded:r1:25")
+      assert(describe(Voided("v1", "duplicate")) == "voided:v1:duplicate")
+      println(describe(Paid("p1", 0L)))
     }
     println("spark-006: worked examples passed; six task implementations remain")
   }

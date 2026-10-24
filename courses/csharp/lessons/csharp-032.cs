@@ -8,10 +8,9 @@
 // Task 6: Design an adapter boundary for a file or HTTP source without putting I/O inside the pure aggregation.
 using System;
 
-internal static class Program
-{
-    private static void Main()
-    {
-        throw new NotImplementedException("Implement your own lesson attempt before running.");
-    }
+internal static class Program {
+  private static void Main() {
+    throw new NotImplementedException(
+        "Implement your own lesson attempt before running.");
+  }
 }

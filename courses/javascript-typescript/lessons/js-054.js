@@ -20,4 +20,6 @@
 // Exercise 6: Plan real narrow-screen acceptance.
 // Expected: Readable labels, no clipping, keyboard access and stable data meaning.
 
-throw new Error("Implement the six D3 practice tasks in your saved pad before claiming completion.");
+throw new Error(
+  "Implement the six D3 practice tasks in your saved pad before claiming completion.",
+);

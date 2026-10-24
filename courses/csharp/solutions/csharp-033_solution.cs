@@ -14,29 +14,39 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Buffers;
 
-internal static class Program
-{
-    private static void Check(bool condition, string reason)
-    {
-        if (!condition) throw new InvalidOperationException(reason);
-    }
+internal static class Program {
+  private static void Check(bool condition, string reason) {
+    if (!condition)
+      throw new InvalidOperationException(reason);
+  }
 
-    private static async Task Main()
+  private static async Task Main() {
     {
-        {
-            var counter = new LockedCounter();
-            await Task.WhenAll(Enumerable.Range(0, 4).Select(_ => Task.Run(() => { for (int i = 0; i < 100; i++) counter.Add(); })));
-            Check(counter.Value == 400, "all protected increments");
-        }
-        {
-            var account = new LockedCounter();
-            account.Add(); account.Add();
-            Check(account.Value == 2, "consistent observation");
-            Check(account.Value >= 0, "valid state");
-        }
-        Console.WriteLine("csharp-033: passed");
-        await Task.CompletedTask;
+      var counter = new LockedCounter();
+      await Task.WhenAll(Enumerable.Range(0, 4).Select(
+          _ => Task.Run(() => {
+            for (int i = 0; i < 100; i++)
+              counter.Add();
+          })));
+      Check(counter.Value == 400, "all protected increments");
     }
+    {
+      var account = new LockedCounter();
+      account.Add();
+      account.Add();
+      Check(account.Value == 2, "consistent observation");
+      Check(account.Value >= 0, "valid state");
+    }
+    Console.WriteLine("csharp-033: passed");
+    await Task.CompletedTask;
+  }
 
-    public sealed class LockedCounter { private readonly object gate = new(); private int value; public void Add() { lock (gate) value++; } public int Value { get { lock (gate) return value; } } }
+  public sealed class LockedCounter {
+    private readonly object gate = new();
+    private int value;
+    public void Add() { lock (gate) value++; }
+    public int Value {
+      get { lock (gate) return value; }
+    }
+  }
 }

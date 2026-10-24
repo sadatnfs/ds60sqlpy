@@ -18,32 +18,48 @@
 --
 BEGIN;
 SET search_path TO training, public;
-
 -- Predicate pushdown by filtering early in CTE
 WITH filtered_orders AS (
-  SELECT order_id, customer_id FROM orders WHERE order_date >= now() - interval '30 days'
+  SELECT
+    order_id,
+    customer_id
+  FROM
+    orders
+  WHERE
+    order_date >= now() - interval '30 days'
 )
-SELECT c.country, COUNT(*)
-FROM filtered_orders fo
-JOIN customers c ON c.customer_id = fo.customer_id
-GROUP BY c.country
-ORDER BY COUNT(*) DESC;
-
+SELECT
+  c.country,
+  COUNT(*)
+FROM
+  filtered_orders fo
+  JOIN customers c ON c.customer_id = fo.customer_id
+GROUP BY
+  c.country
+ORDER BY
+  COUNT(*) DESC;
 -- Avoid SELECT * and unnecessary columns to reduce I/O
 EXPLAIN ANALYZE
-SELECT o.order_id, o.customer_id
-FROM orders o
-WHERE o.order_date >= now() - interval '7 days';
-
+SELECT
+  o.order_id,
+  o.customer_id
+FROM
+  orders o
+WHERE
+  o.order_date >= now() - interval '7 days';
 -- Join order rewrite (ensure correct join conditions, indexes)
 EXPLAIN
-SELECT p.category, SUM(oi.quantity) AS qty
-FROM order_items oi
-JOIN products p ON p.product_id = oi.product_id
-JOIN orders o ON o.order_id = oi.order_id
-WHERE o.status IN ('paid','shipped','delivered')
-GROUP BY p.category;
-
+SELECT
+  p.category,
+  SUM(oi.quantity) AS qty
+FROM
+  order_items oi
+  JOIN products p ON p.product_id = oi.product_id
+  JOIN orders o ON o.order_id = oi.order_id
+WHERE
+  o.status IN ('paid', 'shipped', 'delivered')
+GROUP BY
+  p.category;
 -- Exercises
 -- 1. Replace subqueries with joins and compare plans.
 --    Inputs: For sql-34 Exercise 1, run the underlying read-only query over `orders`, `order_items`, and `products` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
@@ -79,5 +95,4 @@ GROUP BY p.category;
 --    Expected result/shape: For sql-34 Exercise 6, expected output: one row per `customer_id`. The final columns are `customer_id`. The final order is `c.customer_id`.
 --    Verify: For sql-34 Exercise 6, run an anti-check that counts rows where NOT ((NOT EXISTS ( SELECT 1 FROM orders o WHERE o.customer_id = c.customer_id ))); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id` against `customers`, and `orders`. Repeat with `NULL` in `customer_id` and state whether the row is kept, rejected, or classified.
 --    Hint ladder, rung 1: For sql-34 Exercise 6, inspect the source keys that survive `WHERE`; then check `c.customer_id` before applying the row cap.
-
 ROLLBACK;

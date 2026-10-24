@@ -20,4 +20,6 @@
 // Exercise 6: Compare two groups with different sample sizes.
 // Expected: Choose counts or normalized density according to the comparison question.
 
-throw new Error("Implement the six D3 practice tasks in your saved pad before claiming completion.");
+throw new Error(
+  "Implement the six D3 practice tasks in your saved pad before claiming completion.",
+);

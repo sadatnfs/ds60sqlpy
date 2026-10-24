@@ -47,71 +47,21 @@
   ],
   "golden": {
     "rows": [
-      [
-        1,
-        "100"
-      ],
-      [
-        2,
-        "0"
-      ],
-      [
-        3,
-        " 25 "
-      ],
-      [
-        4,
-        null
-      ],
-      [
-        5,
-        "bad"
-      ],
-      [
-        6,
-        "9223372036854775808"
-      ],
-      [
-        7,
-        "-5"
-      ],
-      [
-        8,
-        "50"
-      ]
+      [1, "100"],
+      [2, "0"],
+      [3, " 25 "],
+      [4, null],
+      [5, "bad"],
+      [6, "9223372036854775808"],
+      [7, "-5"],
+      [8, "50"]
     ],
-    "parse_accepted_ids": [
-      1,
-      2,
-      3,
-      4,
-      7,
-      8
-    ],
-    "parse_rejected_ids": [
-      5,
-      6
-    ],
-    "missing_ids": [
-      4
-    ],
-    "parse_metrics": [
-      6,
-      5,
-      170
-    ],
-    "domain_ids": [
-      1,
-      2,
-      3,
-      4,
-      8
-    ],
-    "domain_metrics": [
-      5,
-      4,
-      175
-    ],
+    "parse_accepted_ids": [1, 2, 3, 4, 7, 8],
+    "parse_rejected_ids": [5, 6],
+    "missing_ids": [4],
+    "parse_metrics": [6, 5, 170],
+    "domain_ids": [1, 2, 3, 4, 8],
+    "domain_metrics": [5, 4, 175],
     "strict_error": "CAST_INVALID_INPUT"
   }
 }

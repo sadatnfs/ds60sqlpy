@@ -30,13 +30,16 @@
 #include <variant>
 #include <vector>
 
-namespace vendored { constexpr int api_version=1; constexpr int add(int a,int b){return a+b;} }
+namespace vendored {
+constexpr int api_version = 1;
+constexpr int add(int a, int b) { return a + b; }
+} // namespace vendored
 int main() {
-    static_assert(vendored::api_version==1);assert(vendored::add(2,3)==5);
-    std::cout << "cpp-027 examples passed\n";
-    return 0;
+  static_assert(vendored::api_version == 1);
+  assert(vendored::add(2, 3) == 5);
+  std::cout << "cpp-027 examples passed\n";
+  return 0;
 }
-
 
 // Exercise 1: Inventory inputs. List compiler, C++ level, dependency source and build generator. Expected: Four concrete identities, including dependency content hash.
 // Exercise 2: Build offline. Build the supplied local target in a fresh owned directory without network. Expected: Configure/build/test complete without downloads.

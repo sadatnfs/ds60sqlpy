@@ -18,33 +18,47 @@
 --
 BEGIN;
 SET search_path TO training, public;
-
 -- Study contract
 -- Focus: Use cross joins for intentional combinations and self joins for relationships within one table, with explicit cardinality controls.
 -- Assumptions: The employee hierarchy uses `manager_id`; equality pairs need a strict key ordering to avoid self-pairs and mirrored duplicates.
 -- Pitfall: An accidental cross join multiplies row counts. Estimate left × right cardinality before materializing combinations.
 -- Predict row grain and NULL/order behavior before executing each example.
-
 -- CROSS JOIN: all category-country pairs with counts
 WITH cats AS (
-  SELECT DISTINCT category FROM products
-), ctries AS (
-  SELECT DISTINCT country FROM customers
+  SELECT DISTINCT
+    category
+  FROM
+    products
+),
+ctries AS (
+  SELECT DISTINCT
+    country
+  FROM
+    customers
 )
-SELECT cats.category, ctries.country
-FROM cats CROSS JOIN ctries
-ORDER BY 1,2;
-
+SELECT
+  cats.category,
+  ctries.country
+FROM
+  cats
+  CROSS JOIN ctries
+ORDER BY
+  1,
+  2;
 -- Self-join: employee-manager hierarchy
-SELECT e.employee_id, e.full_name AS employee, m.full_name AS manager
-FROM employees e
-LEFT JOIN employees m ON m.employee_id = e.manager_id
-ORDER BY manager NULLS FIRST,
-         m.employee_id NULLS FIRST,
-         employee,
-         e.employee_id
+SELECT
+  e.employee_id,
+  e.full_name AS employee,
+  m.full_name AS manager
+FROM
+  employees e
+  LEFT JOIN employees m ON m.employee_id = e.manager_id
+ORDER BY
+  manager NULLS FIRST,
+  m.employee_id NULLS FIRST,
+  employee,
+  e.employee_id
 LIMIT 50;
-
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.
@@ -84,5 +98,4 @@ LIMIT 50;
 --    Expected result/shape: For sql-05 Exercise 6, expected output: One row per employee with up to two ancestor columns. The final columns are `employee_id`, `employee_name`, `manager_name`, and `grandmanager_name`. The final order is `e.employee_id`.
 --    Verify: For sql-05 Exercise 6, project `employee_id` plus the raw source columns from `employees` at each join stage; record row count and distinct `employee_id`, then assert the final `employee_id`, `employee_name`, `manager_name`, and `grandmanager_name` values match those staged rows without unintended fanout or loss. Add one source row with a new `employee_id`; verify the result gains exactly one row carrying that `employee_id` value.
 --    Hint ladder, rung 1: For sql-05 Exercise 6, start with the first relation in `employees`; after each join, record total rows and distinct `employee_id` so the exact fanout or loss is visible.
-
 ROLLBACK;

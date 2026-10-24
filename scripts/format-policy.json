@@ -259,6 +259,10 @@
     {
       "pattern": "courses/*/authoring/*parity_receipt.json",
       "reason": "Historical source identities and runtime evidence retain their original bytes; source formatting must not manufacture new qualification evidence."
+    },
+    {
+      "pattern": "*.md",
+      "reason": "Authored Markdown uses the existing reviewed prose/math normalizer. Generic Markdown formatting can change literal identifiers and meaningful code-span spaces in the classroom reader."
     }
   ],
   "preserve": [

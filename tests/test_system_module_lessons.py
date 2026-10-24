@@ -10,6 +10,7 @@ import shutil
 import subprocess
 from pathlib import Path
 from typing import Any, cast
+from urllib.parse import unquote
 
 import pytest
 
@@ -128,14 +129,46 @@ def test_networking_extension_has_complete_distinct_evidence_and_honest_host_con
         assert len(explanation.split()) >= 450
 
 
+def _lesson_link_targets(source: str) -> list[str]:
+    # Angle destinations allow parentheses, and optional titles can follow a
+    # newline. Neither syntax changes the actual destination being validated.
+    pattern = re.compile(
+        r"\[[^\]]+\]\(\s*(?:<(?P<angle>[^<>\n]+)>|"
+        r"(?P<plain>(?:\\.|[^()\s]+|\([^()]*\))+))"
+        r"(?:\s+(?:\"[^\"]*\"|'[^']*'|\([^)]*\)))?\s*\)"
+    )
+    return [
+        match.group("angle") or match.group("plain")
+        for match in pattern.finditer(_markdown_link_text(source))
+    ]
+
+
+def test_lesson_link_destinations_preserve_parentheses_and_ignore_titles() -> None:
+    source = (
+        "[API](<https://example.org/Math.html#addExact(long,long)>)\n"
+        '[Guide](../guides/start.md\n "A useful title")\n'
+        "[Space](<../guides/two words.md>)\n"
+        "`[literal](not-a-link.md)`\n"
+    )
+    assert _lesson_link_targets(source) == [
+        "https://example.org/Math.html#addExact(long,long)",
+        "../guides/start.md",
+        "../guides/two words.md",
+    ]
+
+
 @pytest.mark.parametrize("track", EXPECTED)
 def test_system_lesson_links_stay_inside_real_authored_tree(track: str) -> None:
     for path in (ROOT / "courses" / track).rglob("*.md"):
-        for target in re.findall(r"\[[^\]]+\]\(([^)]+)\)", _markdown_link_text(path.read_text())):
-            if target.startswith(("https://", "http://", "#")):
+        for target in _lesson_link_targets(path.read_text()):
+            if target.startswith(("https://", "http://", "mailto:", "#")):
                 continue
-            relative = target.split("#", 1)[0]
-            assert (path.parent / relative).exists(), (path.relative_to(ROOT), target)
+            relative = unquote(target.split("#", 1)[0])
+            resolved = (path.parent / relative).resolve()
+            assert resolved.is_relative_to(ROOT) and resolved.exists(), (
+                path.relative_to(ROOT),
+                target,
+            )
 
 
 def test_spark_local_oracle_matches_shared_fixture_without_spark() -> None:

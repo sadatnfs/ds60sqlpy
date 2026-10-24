@@ -1,9 +1,13 @@
 \set ON_ERROR_STOP on
 \if :{?course_role}
 \else
-  SELECT current_user AS course_role \gset
+SELECT
+  current_user AS course_role
+\gset
 \endif
-SELECT set_config('ds60.course_role', :'course_role', false) AS configured_role \gset
+SELECT
+  set_config('ds60.course_role', :'course_role', false) AS configured_role
+\gset
 DO $verify$
 BEGIN
   IF current_database()<>'advanced_sql_training'
@@ -41,4 +45,7 @@ BEGIN
   END IF;
 END
 $verify$;
-SELECT current_user AS course_login, current_database() AS disposable_database;
+
+SELECT
+  current_user AS course_login,
+  current_database() AS disposable_database;

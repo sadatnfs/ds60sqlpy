@@ -14,28 +14,27 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Buffers;
 
-internal static class Program
-{
-    private static void Check(bool condition, string reason)
-    {
-        if (!condition) throw new InvalidOperationException(reason);
-    }
+internal static class Program {
+  private static void Check(bool condition, string reason) {
+    if (!condition)
+      throw new InvalidOperationException(reason);
+  }
 
-    private static async Task Main()
+  private static async Task Main() {
     {
-        {
-            var property = typeof(Metric).GetProperty(nameof(Metric.Count));
-            Check(property is not null && property.PropertyType == typeof(int), "known metadata");
-            Check(typeof(Metric).GetProperty("Missing") is null, "absent member");
-        }
-        {
-            var metric = new Metric(4);
-            Func<Metric, int> getCount = value => value.Count;
-            Check(getCount(metric) == 4, "typed projection");
-        }
-        Console.WriteLine("csharp-045: passed");
-        await Task.CompletedTask;
+      var property = typeof(Metric).GetProperty(nameof(Metric.Count));
+      Check(property is not null && property.PropertyType == typeof(int),
+            "known metadata");
+      Check(typeof(Metric).GetProperty("Missing") is null, "absent member");
     }
+    {
+      var metric = new Metric(4);
+      Func<Metric, int> getCount = value => value.Count;
+      Check(getCount(metric) == 4, "typed projection");
+    }
+    Console.WriteLine("csharp-045: passed");
+    await Task.CompletedTask;
+  }
 
-    public record Metric(int Count);
+  public record Metric(int Count);
 }

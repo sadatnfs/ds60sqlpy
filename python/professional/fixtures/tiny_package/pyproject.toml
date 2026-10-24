@@ -9,7 +9,7 @@ description = "Offline fixture package for the DS60 packaging lesson"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
-authors = [{name = "DS60 curriculum"}]
+authors = [{ name = "DS60 curriculum" }]
 dependencies = []
 
 [project.scripts]

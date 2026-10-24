@@ -21,50 +21,50 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       containers:
-      - name: hello
-        image: ds60sqlpy-k8s-fixture:0.2.0
-        imagePullPolicy: Never
-        command:
-        - python
-        - /fixture.py
-        - server
-        ports:
-        - name: http
-          containerPort: 8080
-        readinessProbe:
-          httpGet:
-            path: /ready
-            port: http
-          periodSeconds: 2
-          failureThreshold: 2
-        resources:
-          requests:
-            cpu: 10m
-            memory: 16Mi
-          limits:
-            cpu: 100m
-            memory: 64Mi
-        securityContext:
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: true
-          capabilities:
-            drop:
-            - ALL
-        env:
-        - name: DS60_STARTUP_DELAY_SECONDS
-          value: '3'
-        startupProbe:
-          httpGet:
-            path: /startup
-            port: http
-          periodSeconds: 1
-          failureThreshold: 10
-        livenessProbe:
-          httpGet:
-            path: /live
-            port: http
-          periodSeconds: 2
-          failureThreshold: 2
+        - name: hello
+          image: ds60sqlpy-k8s-fixture:0.2.0
+          imagePullPolicy: Never
+          command:
+            - python
+            - /fixture.py
+            - server
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            periodSeconds: 2
+            failureThreshold: 2
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          env:
+            - name: DS60_STARTUP_DELAY_SECONDS
+              value: "3"
+          startupProbe:
+            httpGet:
+              path: /startup
+              port: http
+            periodSeconds: 1
+            failureThreshold: 10
+          livenessProbe:
+            httpGet:
+              path: /live
+              port: http
+            periodSeconds: 2
+            failureThreshold: 2
 ---
 apiVersion: v1
 kind: Service
@@ -74,10 +74,9 @@ spec:
   selector:
     app: hello
   ports:
-  - name: http
-    port: 8080
-    targetPort: http
-
+    - name: http
+      port: 8080
+      targetPort: http
 # Exercise 1: Name each question. Explain the decision made by startup,readiness and liveness. Expected: Initialization gate,traffic eligibility and restart policy are distinguished.
 # Exercise 2: Run the healthy delayed fixture. Use the admitted source and record its actual bounded healthy result. Expected: Startup delay is configured3;controller/backend/client checks eventually establish the observed healthy baseline.
 # Exercise 3: Trace readiness removal. Analyze case A and identify what additional evidence would show recovery. Expected: No direct restart claim;new Ready/endpoint/client observations are required after repair.

@@ -1,7 +1,4 @@
-
-
 object Main {
-
 
   def accepted(values: Seq[Long]): Seq[Long] = {
     values.filter(_ >= 0L)
@@ -29,7 +26,10 @@ object Main {
   }
 
   def groupedSummary(records: Seq[(String, Long)]): Map[String, (Long, Long)] = {
-    require(records.forall { case (group, _) => group != null && group.trim.nonEmpty }, "group labels must be known")
+    require(
+      records.forall { case (group, _) => group != null && group.trim.nonEmpty },
+      "group labels must be known"
+    )
     records.filter(_._2 >= 0L).groupBy(_._1).map { case (group, rows) =>
       group -> summary(rows.map(_._2))
     }
@@ -37,12 +37,14 @@ object Main {
 
   def expectIllegalArgument(body: => Any): Unit = {
     var caught = false
-    try body catch { case _: IllegalArgumentException => caught = true }
+    try body
+    catch { case _: IllegalArgumentException => caught = true }
     assert(caught, "Expected IllegalArgumentException")
   }
   def expectArithmetic(body: => Any): Unit = {
     var caught = false
-    try body catch { case _: ArithmeticException => caught = true }
+    try body
+    catch { case _: ArithmeticException => caught = true }
     assert(caught, "Expected ArithmeticException")
   }
 
@@ -70,12 +72,16 @@ object Main {
     assert(frequency == Map(100L -> 2L, 0L -> 1L, 25L -> 1L))
     assert(frequency.values.sum == 4L && frequencies(Seq.empty[Long]).isEmpty)
     // Exercise 6: Transfer the bag contract to grouped reporting
-    val grouped = groupedSummary(Seq(("A",100L),("A",100L),("B",0L),("B",25L),("C",-5L)))
-    assert(grouped == Map("A" -> (2L,200L), "B" -> (2L,25L)))
+    val grouped = groupedSummary(Seq(("A", 100L), ("A", 100L), ("B", 0L), ("B", 25L), ("C", -5L)))
+    assert(grouped == Map("A" -> (2L, 200L), "B" -> (2L, 25L)))
     assert(grouped.values.map(_._1).sum == 4L && grouped.values.map(_._2).sum == 225L)
-    expectIllegalArgument(groupedSummary(Seq(("",-5L))))
+    expectIllegalArgument(groupedSummary(Seq(("", -5L))))
     println("spark-004: six reference contracts passed")
-    println("Scala=" + scala.util.Properties.versionNumberString + "; Java=" + System.getProperty("java.version"))
+    println(
+      "Scala=" + scala.util.Properties.versionNumberString + "; Java=" + System.getProperty(
+        "java.version"
+      )
+    )
   }
 }
 

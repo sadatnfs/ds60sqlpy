@@ -8,10 +8,9 @@
 // Task 6: Design a text-field limit and explain whether its contract measures bytes, scalars or user-visible graphemes.
 using System;
 
-internal static class Program
-{
-    private static void Main()
-    {
-        throw new NotImplementedException("Implement your own lesson attempt before running.");
-    }
+internal static class Program {
+  private static void Main() {
+    throw new NotImplementedException(
+        "Implement your own lesson attempt before running.");
+  }
 }

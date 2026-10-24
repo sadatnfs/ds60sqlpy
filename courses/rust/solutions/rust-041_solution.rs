@@ -1,10 +1,10 @@
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         use arrow::array::{Array, Int32Builder, ListBuilder};
         let mut builder = ListBuilder::new(Int32Builder::new());
-        builder.values().append_value(2); builder.values().append_null(); builder.append(true);
+        builder.values().append_value(2);
+        builder.values().append_null();
+        builder.append(true);
         builder.append(true);
         builder.append(false);
         let lists = builder.finish();

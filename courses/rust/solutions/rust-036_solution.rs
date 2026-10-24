@@ -1,5 +1,3 @@
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let policy = ["edition=2024", "locked", "offline-after-preparation"];

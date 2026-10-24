@@ -18,37 +18,45 @@
 --
 BEGIN;
 SET search_path TO training, public;
-
 -- Study contract
 -- Focus: Use correlated subqueries for row-specific existence or comparison while keeping correlation keys and NULL behavior explicit.
 -- Assumptions: `EXISTS` tests whether at least one row qualifies and ignores selected values. `NOT EXISTS` remains safe when inner columns can be NULL.
 -- Pitfall: A correlated subquery can run conceptually per outer row; do not use it when a join or pre-aggregation states the grain more clearly.
 -- Predict row grain and NULL/order behavior before executing each example.
-
 -- EXISTS: customers who purchased Electronics
-SELECT c.*
-FROM customers c
-WHERE EXISTS (
-  SELECT 1
-  FROM orders o
-  JOIN order_items oi ON oi.order_id = o.order_id
-  JOIN products p ON p.product_id = oi.product_id
-  WHERE o.customer_id = c.customer_id
-    AND p.category = 'Electronics'
-)
-ORDER BY c.customer_id;
-
+SELECT
+  c.*
+FROM
+  customers c
+WHERE
+  EXISTS (
+    SELECT
+      1
+    FROM
+      orders o
+      JOIN order_items oi ON oi.order_id = o.order_id
+      JOIN products p ON p.product_id = oi.product_id
+    WHERE
+      o.customer_id = c.customer_id
+      AND p.category = 'Electronics')
+ORDER BY
+  c.customer_id;
 -- IN with correlated condition
-SELECT p.product_id, p.name
-FROM products p
-WHERE p.product_id IN (
-  SELECT DISTINCT oi.product_id
-  FROM order_items oi
-  JOIN orders o ON o.order_id = oi.order_id
-  WHERE o.order_date >= now() - interval '30 days'
-)
-ORDER BY p.product_id;
-
+SELECT
+  p.product_id,
+  p.name
+FROM
+  products p
+WHERE
+  p.product_id IN ( SELECT DISTINCT
+      oi.product_id
+    FROM
+      order_items oi
+      JOIN orders o ON o.order_id = oi.order_id
+    WHERE
+      o.order_date >= now() - interval '30 days')
+ORDER BY
+  p.product_id;
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.
@@ -88,5 +96,4 @@ ORDER BY p.product_id;
 --    Expected result/shape: For sql-09 Exercise 6, expected output: One row per customer satisfying the universal condition. The final columns are `customer_id`, and `full_name`. The final order is `c.customer_id`.
 --    Verify: For sql-09 Exercise 6, run an anti-check that counts rows where NOT ((EXISTS ( SELECT 1 FROM orders AS any_order WHERE any_order.customer_id = c.customer_id ) AND NOT EXISTS ( SELECT 1 FROM orders AS o WHERE o.customer_id = c.customer_id AND NOT EXISTS ( SELECT 1 FROM payments AS p WHERE p.order_id = o.order_)); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, and `full_name` against `customers`, `orders`, and `payments`. Add one row for which `(EXISTS ( SELECT 1 FROM orders AS any_order WHERE any_order.customer_id = c.customer_id ) AND NOT EXISTS ( SELECT 1 FROM orders AS o WHERE o.customer_id = c.customer_id AND NOT EXISTS ( SELECT 1 FROM payments AS p WHERE p.order_id = o.order_)` is true and one for which it is false; verify only the matching `customer_id` value is returned.
 --    Hint ladder, rung 1: For sql-09 Exercise 6, inspect the source keys that survive `WHERE`; then check `c.customer_id` before applying the row cap.
-
 ROLLBACK;

@@ -20,4 +20,6 @@
 // Exercise 6: Review zoom for a long time series.
 // Expected: Bounds, clipping, readable ticks and accessible alternate controls.
 
-throw new Error("Implement the six D3 practice tasks in your saved pad before claiming completion.");
+throw new Error(
+  "Implement the six D3 practice tasks in your saved pad before claiming completion.",
+);

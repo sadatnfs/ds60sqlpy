@@ -191,52 +191,52 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-tag">seccompProfile</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">          <span class="syntax-tag">type</span><span class="syntax-punctuation">:</span> RuntimeDefault</span>
 <span class="source-line">      <span class="syntax-tag">containers</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">      <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> hello</span>
-<span class="source-line">        <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ds60sqlpy-k8s-fixture:0.2.0</span>
-<span class="source-line">        <span class="syntax-tag">imagePullPolicy</span><span class="syntax-punctuation">:</span> Never</span>
-<span class="source-line">        <span class="syntax-tag">command</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">        <span class="syntax-punctuation">-</span> python</span>
-<span class="source-line">        <span class="syntax-punctuation">-</span> /fixture.py</span>
-<span class="source-line">        <span class="syntax-punctuation">-</span> server</span>
-<span class="source-line">        <span class="syntax-tag">ports</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">        <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> http</span>
-<span class="source-line">          <span class="syntax-tag">containerPort</span><span class="syntax-punctuation">:</span> 8080</span>
-<span class="source-line">        <span class="syntax-tag">readinessProbe</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">          <span class="syntax-tag">httpGet</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">            <span class="syntax-tag">path</span><span class="syntax-punctuation">:</span> /ready</span>
-<span class="source-line">            <span class="syntax-tag">port</span><span class="syntax-punctuation">:</span> http</span>
-<span class="source-line">          <span class="syntax-tag">periodSeconds</span><span class="syntax-punctuation">:</span> 2</span>
-<span class="source-line">          <span class="syntax-tag">failureThreshold</span><span class="syntax-punctuation">:</span> 2</span>
-<span class="source-line">        <span class="syntax-tag">resources</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">          <span class="syntax-tag">requests</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">            <span class="syntax-tag">cpu</span><span class="syntax-punctuation">:</span> 10m</span>
-<span class="source-line">            <span class="syntax-tag">memory</span><span class="syntax-punctuation">:</span> 16Mi</span>
-<span class="source-line">          <span class="syntax-tag">limits</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">            <span class="syntax-tag">cpu</span><span class="syntax-punctuation">:</span> 100m</span>
-<span class="source-line">            <span class="syntax-tag">memory</span><span class="syntax-punctuation">:</span> 64Mi</span>
-<span class="source-line">        <span class="syntax-tag">securityContext</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">          <span class="syntax-tag">allowPrivilegeEscalation</span><span class="syntax-punctuation">:</span> false</span>
-<span class="source-line">          <span class="syntax-tag">readOnlyRootFilesystem</span><span class="syntax-punctuation">:</span> true</span>
-<span class="source-line">          <span class="syntax-tag">capabilities</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">            <span class="syntax-tag">drop</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">            <span class="syntax-punctuation">-</span> ALL</span>
-<span class="source-line">        <span class="syntax-tag">env</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">        <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> DS60_MESSAGE</span>
-<span class="source-line">          <span class="syntax-tag">valueFrom</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">            <span class="syntax-tag">configMapKeyRef</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">              <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> hello-config</span>
-<span class="source-line">              <span class="syntax-tag">key</span><span class="syntax-punctuation">:</span> message</span>
-<span class="source-line">        <span class="syntax-tag">volumeMounts</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">        <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> lesson-config</span>
-<span class="source-line">          <span class="syntax-tag">mountPath</span><span class="syntax-punctuation">:</span> /config</span>
-<span class="source-line">          <span class="syntax-tag">readOnly</span><span class="syntax-punctuation">:</span> true</span>
+<span class="source-line">        <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> hello</span>
+<span class="source-line">          <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ds60sqlpy-k8s-fixture:0.2.0</span>
+<span class="source-line">          <span class="syntax-tag">imagePullPolicy</span><span class="syntax-punctuation">:</span> Never</span>
+<span class="source-line">          <span class="syntax-tag">command</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-punctuation">-</span> python</span>
+<span class="source-line">            <span class="syntax-punctuation">-</span> /fixture.py</span>
+<span class="source-line">            <span class="syntax-punctuation">-</span> server</span>
+<span class="source-line">          <span class="syntax-tag">ports</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> http</span>
+<span class="source-line">              <span class="syntax-tag">containerPort</span><span class="syntax-punctuation">:</span> 8080</span>
+<span class="source-line">          <span class="syntax-tag">readinessProbe</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-tag">httpGet</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">              <span class="syntax-tag">path</span><span class="syntax-punctuation">:</span> /ready</span>
+<span class="source-line">              <span class="syntax-tag">port</span><span class="syntax-punctuation">:</span> http</span>
+<span class="source-line">            <span class="syntax-tag">periodSeconds</span><span class="syntax-punctuation">:</span> 2</span>
+<span class="source-line">            <span class="syntax-tag">failureThreshold</span><span class="syntax-punctuation">:</span> 2</span>
+<span class="source-line">          <span class="syntax-tag">resources</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-tag">requests</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">              <span class="syntax-tag">cpu</span><span class="syntax-punctuation">:</span> 10m</span>
+<span class="source-line">              <span class="syntax-tag">memory</span><span class="syntax-punctuation">:</span> 16Mi</span>
+<span class="source-line">            <span class="syntax-tag">limits</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">              <span class="syntax-tag">cpu</span><span class="syntax-punctuation">:</span> 100m</span>
+<span class="source-line">              <span class="syntax-tag">memory</span><span class="syntax-punctuation">:</span> 64Mi</span>
+<span class="source-line">          <span class="syntax-tag">securityContext</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-tag">allowPrivilegeEscalation</span><span class="syntax-punctuation">:</span> false</span>
+<span class="source-line">            <span class="syntax-tag">readOnlyRootFilesystem</span><span class="syntax-punctuation">:</span> true</span>
+<span class="source-line">            <span class="syntax-tag">capabilities</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">              <span class="syntax-tag">drop</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">                <span class="syntax-punctuation">-</span> ALL</span>
+<span class="source-line">          <span class="syntax-tag">env</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> DS60_MESSAGE</span>
+<span class="source-line">              <span class="syntax-tag">valueFrom</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">                <span class="syntax-tag">configMapKeyRef</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">                  <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> hello-config</span>
+<span class="source-line">                  <span class="syntax-tag">key</span><span class="syntax-punctuation">:</span> message</span>
+<span class="source-line">          <span class="syntax-tag">volumeMounts</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> lesson-config</span>
+<span class="source-line">              <span class="syntax-tag">mountPath</span><span class="syntax-punctuation">:</span> /config</span>
+<span class="source-line">              <span class="syntax-tag">readOnly</span><span class="syntax-punctuation">:</span> true</span>
 <span class="source-line">      <span class="syntax-tag">volumes</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">      <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> lesson-config</span>
-<span class="source-line">        <span class="syntax-tag">configMap</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">          <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> hello-config</span>
-<span class="source-line">          <span class="syntax-tag">items</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">          <span class="syntax-punctuation">-</span> <span class="syntax-tag">key</span><span class="syntax-punctuation">:</span> message</span>
-<span class="source-line">            <span class="syntax-tag">path</span><span class="syntax-punctuation">:</span> message</span>
+<span class="source-line">        <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> lesson-config</span>
+<span class="source-line">          <span class="syntax-tag">configMap</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> hello-config</span>
+<span class="source-line">            <span class="syntax-tag">items</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">              <span class="syntax-punctuation">-</span> <span class="syntax-tag">key</span><span class="syntax-punctuation">:</span> message</span>
+<span class="source-line">                <span class="syntax-tag">path</span><span class="syntax-punctuation">:</span> message</span>
 <span class="source-line">---</span>
 <span class="source-line"><span class="syntax-tag">apiVersion</span><span class="syntax-punctuation">:</span> v1</span>
 <span class="source-line"><span class="syntax-tag">kind</span><span class="syntax-punctuation">:</span> Service</span>
@@ -246,9 +246,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">  <span class="syntax-tag">selector</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-tag">app</span><span class="syntax-punctuation">:</span> hello</span>
 <span class="source-line">  <span class="syntax-tag">ports</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">  <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> http</span>
-<span class="source-line">    <span class="syntax-tag">port</span><span class="syntax-punctuation">:</span> 8080</span>
-<span class="source-line">    <span class="syntax-tag">targetPort</span><span class="syntax-punctuation">:</span> http</span>
+<span class="source-line">    <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> http</span>
+<span class="source-line">      <span class="syntax-tag">port</span><span class="syntax-punctuation">:</span> 8080</span>
+<span class="source-line">      <span class="syntax-tag">targetPort</span><span class="syntax-punctuation">:</span> http</span>
 <span class="source-line"></span></code></pre></article>
   </main>
 </body>

@@ -46,17 +46,8 @@
     }
   ],
   "golden": {
-    "tokens": [
-      "0",
-      "25",
-      null,
-      "bad",
-      "supplied-null"
-    ],
-    "observed": [
-      0,
-      25
-    ],
+    "tokens": ["0", "25", null, "bad", "supplied-null"],
+    "observed": [0, 25],
     "counts": {
       "observed": 2,
       "missing": 1,

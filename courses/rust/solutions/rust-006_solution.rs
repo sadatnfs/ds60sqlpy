@@ -1,10 +1,10 @@
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let values = vec![2, 4, 6];
         let mut total = 0;
-        for value in &values { total += value; }
+        for value in &values {
+            total += value;
+        }
         assert_eq!(total, 12);
         assert_eq!(values.len(), 3);
     }

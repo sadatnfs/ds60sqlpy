@@ -142,18 +142,7 @@
           "cents": 5
         }
       ],
-      "deliveries": [
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10
-      ],
+      "deliveries": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
       "duplicates": 2,
       "late": 1,
       "invalid": 2,
@@ -161,18 +150,8 @@
       "total_cents": 75
     },
     "golden_state_json": "{\"accepted\":[{\"cents\":10,\"event_second\":100,\"id\":\"A\"},{\"cents\":20,\"event_second\":105,\"id\":\"B\"},{\"cents\":0,\"event_second\":95,\"id\":\"D\"},{\"cents\":40,\"event_second\":120,\"id\":\"E\"},{\"cents\":5,\"event_second\":110,\"id\":\"F\"}],\"deliveries\":[1,2,3,4,5,6,7,8,9,10],\"duplicates\":2,\"invalid\":2,\"late\":1,\"max_event_second\":120,\"total_cents\":75}",
-    "attempt_batch_ids": [
-      0,
-      0,
-      1,
-      2
-    ],
-    "callback_rows": [
-      4,
-      4,
-      4,
-      2
-    ],
+    "attempt_batch_ids": [0, 0, 1, 2],
+    "callback_rows": [4, 4, 4, 2],
     "logical_occurrences": 10,
     "physical_callback_rows": 14,
     "policy": "domain invalid;known equal duplicate;known conflicting invalid;new older than frozen previous_max-10 late;otherwise accepted",

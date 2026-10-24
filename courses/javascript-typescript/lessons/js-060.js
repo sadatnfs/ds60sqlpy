@@ -20,4 +20,6 @@
 // Exercise 6: Design a changing treemap with identity preserved.
 // Expected: Stable keys, explicit updates and a readable alternate value list.
 
-throw new Error("Implement the six D3 practice tasks in your saved pad before claiming completion.");
+throw new Error(
+  "Implement the six D3 practice tasks in your saved pad before claiming completion.",
+);

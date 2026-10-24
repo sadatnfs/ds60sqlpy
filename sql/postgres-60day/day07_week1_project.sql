@@ -19,33 +19,49 @@
 -- Build a comprehensive report combining joins, aggregates, set ops
 BEGIN;
 SET search_path TO training, public;
-
 -- Study contract
 -- Focus: Integrate foundational SELECT, aggregation, joins, NULL handling, and set reasoning into reconciled business outputs.
 -- Assumptions: Revenue means exact net line revenue unless a prompt explicitly asks for stored order totals. Every ranked output has a deterministic tie-breaker.
 -- Pitfall: A polished result is not trustworthy until its grain, denominator, missing-row policy, and reconciliation are explicit.
 -- Predict row grain and NULL/order behavior before executing each example.
-
 -- Customer revenue by country and category (last 90 days)
 WITH recent_orders AS (
-  SELECT * FROM orders WHERE order_date >= now() - interval '90 days'
-), line AS (
-  SELECT ro.order_id, ro.customer_id, c.country, p.category,
-         (oi.unit_price * oi.quantity * (1 - oi.discount)) AS line_revenue
-  FROM recent_orders ro
+  SELECT
+    *
+  FROM
+    orders
+  WHERE
+    order_date >= now() - interval '90 days'
+),
+line AS (
+  SELECT
+    ro.order_id,
+    ro.customer_id,
+    c.country,
+    p.category,
+    (oi.unit_price * oi.quantity * (1 - oi.discount)) AS line_revenue
+FROM
+  recent_orders ro
   JOIN customers c ON c.customer_id = ro.customer_id
   JOIN order_items oi ON oi.order_id = ro.order_id
   JOIN products p ON p.product_id = oi.product_id
 )
-SELECT country, category,
-       ROUND(SUM(line_revenue),2) AS revenue,
-       COUNT(DISTINCT customer_id) AS buyers,
-       ROUND(SUM(line_revenue)/NULLIF(COUNT(DISTINCT customer_id),0),2) AS rev_per_buyer
-FROM line
-GROUP BY country, category
-ORDER BY revenue DESC, country, category
+SELECT
+  country,
+  category,
+  ROUND(SUM(line_revenue), 2) AS revenue,
+  COUNT(DISTINCT customer_id) AS buyers,
+  ROUND(SUM(line_revenue) / NULLIF (COUNT(DISTINCT customer_id), 0), 2) AS rev_per_buyer
+FROM
+  line
+GROUP BY
+  country,
+  category
+ORDER BY
+  revenue DESC,
+  country,
+  category
 LIMIT 50;
-
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.
@@ -85,5 +101,4 @@ LIMIT 50;
 --    Expected result/shape: For sql-07 Exercise 6, expected output: Exactly one audit row. The final columns are `customer_rows`, `order_rows`, `order_item_rows`, `payment_rows`, and `customers_without_orders`.
 --    Verify: For sql-07 Exercise 6, evaluate each of `customer_rows`, `order_rows`, `order_item_rows`, `payment_rows`, and `customers_without_orders` in a separate control `SELECT` over `customers`, `orders`, `order_items`, and `payments`; require one final row and compare every value. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
 --    Hint ladder, rung 1: For sql-07 Exercise 6, inspect the source keys that survive `WHERE`.
-
 ROLLBACK;

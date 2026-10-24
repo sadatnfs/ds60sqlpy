@@ -2,11 +2,8 @@
 -- verification has passed.
 \set ON_ERROR_STOP on
 BEGIN;
-
-SELECT pg_catalog.pg_advisory_xact_lock(
-    pg_catalog.hashtextextended('ds60sqlpy:pro_migration_lab', 0)
-);
-
+SELECT
+  pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended('ds60sqlpy:pro_migration_lab', 0));
 DO $preflight$
 DECLARE
     id_exists boolean;
@@ -59,44 +56,35 @@ BEGIN
     );
 END
 $preflight$;
-
-SELECT pg_catalog.current_setting('ds60.migration_applied')::boolean
-    AS migration_applied
+SELECT
+  pg_catalog.current_setting('ds60.migration_applied')::boolean AS migration_applied
 \gset
-
 \if :migration_applied
-    \echo 'Migration 004 identity and schema contract verified; skipping body'
+\echo 'Migration 004 identity and schema contract verified; skipping body'
 \else
-    ALTER TABLE pro_migration_lab.service_requests
-        ALTER COLUMN priority_code SET DEFAULT 'normal',
-        ALTER COLUMN priority_code SET NOT NULL;
+ALTER TABLE pro_migration_lab.service_requests
+  ALTER COLUMN priority_code SET DEFAULT 'normal',
+  ALTER COLUMN priority_code SET NOT NULL;
 
-    -- The old view depends on urgency_label, so replace the dependency and
-    -- storage column atomically inside this migration.
-    DROP VIEW pro_migration_lab.service_requests_api;
+-- The old view depends on urgency_label, so replace the dependency and
+-- storage column atomically inside this migration.
+DROP VIEW pro_migration_lab.service_requests_api;
 
-    ALTER TABLE pro_migration_lab.service_requests
-        DROP COLUMN urgency_label;
+ALTER TABLE pro_migration_lab.service_requests
+  DROP COLUMN urgency_label;
 
-    CREATE VIEW pro_migration_lab.service_requests_api AS
-    SELECT
-        sr.request_id,
-        sr.request_key,
-        sr.summary,
-        sr.priority_code,
-        sr.opened_at
-    FROM pro_migration_lab.service_requests AS sr;
+CREATE VIEW pro_migration_lab.service_requests_api AS
+SELECT
+  sr.request_id,
+  sr.request_key,
+  sr.summary,
+  sr.priority_code,
+  sr.opened_at
+FROM
+  pro_migration_lab.service_requests AS sr;
 
-    INSERT INTO pro_migration_lab.schema_migrations (
-        migration_id,
-        migration_name,
-        content_tag
-    )
-    VALUES (
-        4,
-        'contract_priority',
-        'course-fixture-004-v1'
-    );
+INSERT INTO pro_migration_lab.schema_migrations (migration_id, migration_name, content_tag)
+  VALUES (4, 'contract_priority', 'course-fixture-004-v1');
+
 \endif
-
 COMMIT;

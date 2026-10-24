@@ -24,7 +24,13 @@ x-worker: &worker
   environment: &worker-env
     DS60_WORKER_TOKEN_FILE: /run/ds60/worker-token
   healthcheck:
-    test: ["CMD", "python3", "-c", "import json,os,urllib.request; t=open(os.environ['DS60_WORKER_TOKEN_FILE']).read().strip(); r=urllib.request.urlopen(urllib.request.Request('http://127.0.0.1:8081/health',headers={'X-DS60-Worker-Token':t}),timeout=3); assert json.load(r)['ready']"]
+    test:
+      [
+        "CMD",
+        "python3",
+        "-c",
+        "import json,os,urllib.request; t=open(os.environ['DS60_WORKER_TOKEN_FILE']).read().strip(); r=urllib.request.urlopen(urllib.request.Request('http://127.0.0.1:8081/health',headers={'X-DS60-Worker-Token':t}),timeout=3); assert json.load(r)['ready']",
+      ]
     interval: 5s
     timeout: 5s
     retries: 24

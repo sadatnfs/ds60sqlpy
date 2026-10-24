@@ -26,10 +26,7 @@
   {
     "number": 6,
     "definitions": "std::optional<int> parse_int(std::string_view s) { int out=0; auto [ptr,ec]=std::from_chars(s.data(),s.data()+s.size(),out); if(ec!=std::errc{} || ptr!=s.data()+s.size()) return std::nullopt; return out; }",
-    "program_bodies": [
-      "assert(parse_int(\"42\")==42);",
-      "assert(!parse_int(\"12x\"));"
-    ],
+    "program_bodies": ["assert(parse_int(\"42\")==42);", "assert(!parse_int(\"12x\"));"],
     "original_observations": [
       "All two characters are consumed, yielding 42.",
       "The x remains, so the field is rejected despite a valid numeric prefix."
@@ -182,10 +179,7 @@
   {
     "number": 20,
     "definitions": "#include <concepts>\ntemplate<std::integral T> T identity_sum(T a,T b) { return a+b; }",
-    "program_bodies": [
-      "assert(identity_sum(2,3)==5);",
-      "static_assert(!std::integral<double>);"
-    ],
+    "program_bodies": ["assert(identity_sum(2,3)==5);", "static_assert(!std::integral<double>);"],
     "original_observations": [
       "Deduction selects int and the result is 5.",
       "double does not satisfy this integral-only interface."
@@ -422,10 +416,7 @@
   {
     "number": 40,
     "definitions": "bool safe_id(std::string_view s){if(s.empty()||s.size()>16)return false;for(unsigned char c:s)if(!((c>='a'&&c<='z')||(c>='0'&&c<='9')||c=='_'))return false;return true;}",
-    "program_bodies": [
-      "assert(safe_id(\"batch_7\"));",
-      "assert(!safe_id(\"../secret\"));"
-    ],
+    "program_bodies": ["assert(safe_id(\"batch_7\"));", "assert(!safe_id(\"../secret\"));"],
     "original_observations": [
       "The seven-character identifier uses only the allowed alphabet.",
       "Dot and slash violate the narrow identifier grammar."

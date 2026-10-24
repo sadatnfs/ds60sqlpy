@@ -67,27 +67,14 @@
       ]
     },
     "expected": {
-      "restart": [
-        "1:100",
-        "2:200"
-      ],
-      "duplicates": [
-        "1:100"
-      ],
-      "late": [
-        "2:200",
-        "3:300"
-      ],
-      "invalid": [
-        "3:300"
-      ]
+      "restart": ["1:100", "2:200"],
+      "duplicates": ["1:100"],
+      "late": ["2:200", "3:300"],
+      "invalid": ["3:300"]
     },
     "cutoff_policy": "event_second >= 90;explicit admission rule,not engine watermark",
     "invalid_count": 2,
-    "mutation": [
-      "1:100",
-      "1:100"
-    ],
+    "mutation": ["1:100", "1:100"],
     "query_deadline_seconds": 45,
     "progress_scope": "Actual JSON scan progress may reflect predicate pushdown;raw source counts are measured independently"
   }

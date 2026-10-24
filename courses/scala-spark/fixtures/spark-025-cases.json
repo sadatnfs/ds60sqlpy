@@ -48,17 +48,8 @@
   "golden": {
     "rows": 2000,
     "amount_total": 13993000,
-    "selected_ids": [
-      1990,
-      1992,
-      1994,
-      1996,
-      1998
-    ],
-    "directory_partitions": [
-      "even",
-      "odd"
-    ],
+    "selected_ids": [1990, 1992, 1994, 1996, 1998],
+    "directory_partitions": ["even", "odd"],
     "scope": "Fresh owned root beneath current job with compact/many children;finally removes only that root."
   }
 }

@@ -38,10 +38,11 @@ def test_receipt_lookup_retains_exact_historical_identity(tmp_path: Path) -> Non
     current = b"value = 1\n"
     (tmp_path / "curriculum").mkdir()
     record = create_record("example.py", original, current)
+    records: list[dict[str, str]] = [record]
     payload = {
         "schema_version": 1,
         "evidence_kind": "python_ast_formatting_parity",
-        "records": [record],
+        "records": records,
     }
     target = tmp_path / "curriculum/source-format-parity.json"
     target.write_text(json.dumps(payload))
@@ -49,7 +50,7 @@ def test_receipt_lookup_retains_exact_historical_identity(tmp_path: Path) -> Non
         source_digest_before_formatting(tmp_path, "example.py", current)
         == hashlib.sha256(original).hexdigest()
     )
-    payload["records"].append(record)
+    records.append(record)
     target.write_text(json.dumps(payload))
     with pytest.raises(ValueError, match="Duplicate"):
         source_digest_before_formatting(tmp_path, "example.py", current)

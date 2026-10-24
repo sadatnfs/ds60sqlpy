@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends python3 \
 # a package manager, fetch a module or rebuild a writable shared cache.
 ENV CGO_ENABLED=0 GOTOOLCHAIN=local GOMAXPROCS=2 GOCACHE=/opt/go-cache
 RUN mkdir -p /opt/course-go \
-    && go list -export -f '{{if .Export}}packagefile {{.ImportPath}}={{.Export}}{{end}}' std > /opt/course-go/importcfg \
+    && go list -export -f '{{if .Export}}packagefile {{.ImportPath}}={{.Export}}{{end}}' std >/opt/course-go/importcfg \
     && test -s /opt/course-go/importcfg && chmod -R a+rX /opt/course-go /opt/go-cache
 WORKDIR /opt/worker
 COPY src/ds60sqlpy/__init__.py src/ds60sqlpy/http_server.py src/ds60sqlpy/module_worker.py src/ds60sqlpy/worker_operations.py /opt/worker/src/ds60sqlpy/

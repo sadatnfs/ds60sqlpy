@@ -46,54 +46,17 @@
     }
   ],
   "golden": {
-    "phases": [
-      [
-        1,
-        2
-      ],
-      [
-        3,
-        4
-      ],
-      [
-        5,
-        6
-      ],
-      [
-        7
-      ]
-    ],
-    "accepted_business_ids": [
-      1,
-      2,
-      3,
-      4,
-      6
-    ],
+    "phases": [[1, 2], [3, 4], [5, 6], [7]],
+    "accepted_business_ids": [1, 2, 3, 4, 6],
     "dropped_id": 5,
     "advancer_id": 7,
     "input_rows": 7,
     "dropped_rows": 1,
     "finalized_business_records": 5,
     "final": [
-      [
-        "00:00",
-        "A",
-        3,
-        35
-      ],
-      [
-        "00:10",
-        "A",
-        1,
-        30
-      ],
-      [
-        "00:10",
-        "B",
-        1,
-        7
-      ]
+      ["00:00", "A", 3, 35],
+      ["00:10", "A", 1, 30],
+      ["00:10", "B", 1, 7]
     ],
     "watermark_delay": "5 minutes",
     "window_duration": "5 minutes"

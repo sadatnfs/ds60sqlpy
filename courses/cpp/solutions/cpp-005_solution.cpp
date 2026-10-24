@@ -30,18 +30,29 @@
 #include <variant>
 #include <vector>
 
-int clamp_reading(int x,int low,int high) { if(low>high) throw std::invalid_argument("reversed bounds"); return std::max(low,std::min(x,high)); }
-int main() {
-    assert(clamp_reading(12,0,10)==10);
-    assert(clamp_reading(-3,0,10)==0);
-    assert(clamp_reading(5,0,10)==5);
-    bool rejected=false; try { (void)clamp_reading(5,10,0); } catch(const std::invalid_argument&) { rejected=true; } assert(rejected);
-    // Reference extension checks for the exercise changes.
-    for(int x:std::vector<int>{2,3,4}) assert(clamp_reading(x,3,3)==3); assert(clamp_reading(1250,0,1000)==1000);
-    std::cout << "cpp-005 examples passed\n";
-    return 0;
+int clamp_reading(int x, int low, int high) {
+  if (low > high)
+    throw std::invalid_argument("reversed bounds");
+  return std::max(low, std::min(x, high));
 }
-
+int main() {
+  assert(clamp_reading(12, 0, 10) == 10);
+  assert(clamp_reading(-3, 0, 10) == 0);
+  assert(clamp_reading(5, 0, 10) == 5);
+  bool rejected = false;
+  try {
+    (void)clamp_reading(5, 10, 0);
+  } catch (const std::invalid_argument &) {
+    rejected = true;
+  }
+  assert(rejected);
+  // Reference extension checks for the exercise changes.
+  for (int x : std::vector<int>{2, 3, 4})
+    assert(clamp_reading(x, 3, 3) == 3);
+  assert(clamp_reading(1250, 0, 1000) == 1000);
+  std::cout << "cpp-005 examples passed\n";
+  return 0;
+}
 
 // Exercise 1: Predict the contract. Evaluate -3,5,12 for bounds [0,10]. Expected: Results [0,5,10].
 // Exercise 2: Check parameter isolation. Call with variable x=12 and inspect x afterward. Expected: Result 10; caller x still 12.

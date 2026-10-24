@@ -8,10 +8,9 @@
 // Task 6: Draw dependency direction for a command-line adapter, HTTP adapter and shared domain library.
 using System;
 
-internal static class Program
-{
-    private static void Main()
-    {
-        throw new NotImplementedException("Implement your own lesson attempt before running.");
-    }
+internal static class Program {
+  private static void Main() {
+    throw new NotImplementedException(
+        "Implement your own lesson attempt before running.");
+  }
 }

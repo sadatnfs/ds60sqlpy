@@ -5,44 +5,93 @@ import org.apache.spark.storage.StorageLevel
 
 object Main {
 
-
   def transform(source: DataFrame): DataFrame =
     throw new UnsupportedOperationException("Complete transform")
 
-  def schemaContract(frame: DataFrame): Seq[(String,String)] =
+  def schemaContract(frame: DataFrame): Seq[(String, String)] =
     throw new UnsupportedOperationException("Complete schemaContract")
 
   def assertSameBag(actual: DataFrame, expected: DataFrame): Unit =
     throw new UnsupportedOperationException("Complete assertSameBag")
 
-  def cachedSummary(frame: DataFrame): (Long,Long,String) =
+  def cachedSummary(frame: DataFrame): (Long, Long, String) =
     throw new UnsupportedOperationException("Complete cachedSummary")
 
   def failingReuse(frame: DataFrame): Unit =
     throw new UnsupportedOperationException("Complete failingReuse")
 
-  def differenceCounts(actual: DataFrame, expected: DataFrame): (Long,Long) =
+  def differenceCounts(actual: DataFrame, expected: DataFrame): (Long, Long) =
     throw new UnsupportedOperationException("Complete differenceCounts")
 
   def main(args: Array[String]): Unit = {
 
-    val spark = SparkSession.builder().appName("ds60-spark-027").master("local[2]")
-      .config("spark.ui.enabled","false")
-      .config("spark.driver.host","127.0.0.1")
-      .config("spark.driver.bindAddress","127.0.0.1")
-      .config("spark.sql.shuffle.partitions","2")
-      .config("spark.sql.adaptive.enabled","false")
-      .config("spark.sql.ansi.enabled","true")
-      .config("spark.sql.session.timeZone","UTC").getOrCreate()
+    val spark = SparkSession
+      .builder()
+      .appName("ds60-spark-027")
+      .master("local[2]")
+      .config("spark.ui.enabled", "false")
+      .config("spark.driver.host", "127.0.0.1")
+      .config("spark.driver.bindAddress", "127.0.0.1")
+      .config("spark.sql.shuffle.partitions", "2")
+      .config("spark.sql.adaptive.enabled", "false")
+      .config("spark.sql.ansi.enabled", "true")
+      .config("spark.sql.session.timeZone", "UTC")
+      .getOrCreate()
     try {
       require(spark.sparkContext.master == "local[2]", "local-only course session")
       spark.sparkContext.setLogLevel("ERROR")
-      val schema = StructType(Seq(StructField("entity_id",LongType,false),StructField("segment",StringType,true),StructField("amount",LongType,true)))
-      val source = spark.createDataFrame(spark.sparkContext.parallelize(Seq(Row(1L,"a",10L),Row(1L,"a",10L),Row(2L,"a",null),Row(3L,"b",0L),Row(4L,"b",20L),Row(4L,"b",20L),Row(5L,null,5L),Row(6L,"c",-5L)),2),schema)
-      val goldenSchema = StructType(Seq(StructField("entity_id",LongType,false),StructField("segment",StringType,true),StructField("doubled",LongType,true)))
-      val golden = spark.createDataFrame(spark.sparkContext.parallelize(Seq(Row(1L,"a",20L),Row(1L,"a",20L),Row(2L,"a",null),Row(3L,"b",0L),Row(4L,"b",40L),Row(4L,"b",40L),Row(5L,null,10L)),2),goldenSchema)
+      val schema = StructType(
+        Seq(
+          StructField("entity_id", LongType, false),
+          StructField("segment", StringType, true),
+          StructField("amount", LongType, true)
+        )
+      )
+      val source = spark.createDataFrame(
+        spark.sparkContext.parallelize(
+          Seq(
+            Row(1L, "a", 10L),
+            Row(1L, "a", 10L),
+            Row(2L, "a", null),
+            Row(3L, "b", 0L),
+            Row(4L, "b", 20L),
+            Row(4L, "b", 20L),
+            Row(5L, null, 5L),
+            Row(6L, "c", -5L)
+          ),
+          2
+        ),
+        schema
+      )
+      val goldenSchema = StructType(
+        Seq(
+          StructField("entity_id", LongType, false),
+          StructField("segment", StringType, true),
+          StructField("doubled", LongType, true)
+        )
+      )
+      val golden = spark.createDataFrame(
+        spark.sparkContext.parallelize(
+          Seq(
+            Row(1L, "a", 20L),
+            Row(1L, "a", 20L),
+            Row(2L, "a", null),
+            Row(3L, "b", 0L),
+            Row(4L, "b", 40L),
+            Row(4L, "b", 40L),
+            Row(5L, null, 10L)
+          ),
+          2
+        ),
+        goldenSchema
+      )
       locally {
-        assert(source.count() == 8L && source.select("entity_id","segment","amount").distinct().count() == 6L)
+        assert(
+          source.count() == 8L && source
+            .select("entity_id", "segment", "amount")
+            .distinct()
+            .count() == 6L
+        )
         assert(golden.count() == 7L && golden.agg(sum("doubled")).first().getLong(0) == 130L)
         println("Golden bag contains duplicates and unknown values deliberately")
       }
@@ -53,7 +102,10 @@ object Main {
         println("Identical displayed digits can have different field types")
       }
       println("spark-027: worked examples passed; six task implementations remain")
-    } finally { try { () } finally { spark.stop() } }
+    } finally {
+      try { () }
+      finally { spark.stop() }
+    }
   }
 }
 

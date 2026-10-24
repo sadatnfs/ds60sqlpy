@@ -20,4 +20,6 @@
 // Exercise 6: Design a reproducible saved view.
 // Expected: Record data identity, filters, units and aggregation policy.
 
-throw new Error("Implement the six D3 practice tasks in your saved pad before claiming completion.");
+throw new Error(
+  "Implement the six D3 practice tasks in your saved pad before claiming completion.",
+);

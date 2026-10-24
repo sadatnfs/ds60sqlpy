@@ -11,13 +11,7 @@
       "minutes": 120,
       "prerequisites": [],
       "runtime": "python-core",
-      "concepts": [
-        "document",
-        "sentence",
-        "token",
-        "label",
-        "task formulation"
-      ],
+      "concepts": ["document", "sentence", "token", "label", "task formulation"],
       "outcome": "Explain and implement language as data and the unit of analysis with inspectable data and measured errors.",
       "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
       "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
@@ -27,17 +21,9 @@
       "title": "Unicode, normalization and loss of information",
       "level": "beginner",
       "minutes": 120,
-      "prerequisites": [
-        "nlp-001"
-      ],
+      "prerequisites": ["nlp-001"],
       "runtime": "python-core",
-      "concepts": [
-        "code point",
-        "NFC",
-        "NFKC",
-        "encoding",
-        "normalization"
-      ],
+      "concepts": ["code point", "NFC", "NFKC", "encoding", "normalization"],
       "outcome": "Explain and implement unicode, normalization and loss of information with inspectable data and measured errors.",
       "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
       "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
@@ -47,17 +33,9 @@
       "title": "Regular expressions and explainable extraction",
       "level": "beginner",
       "minutes": 120,
-      "prerequisites": [
-        "nlp-002"
-      ],
+      "prerequisites": ["nlp-002"],
       "runtime": "python-core",
-      "concepts": [
-        "regex",
-        "span",
-        "escaping",
-        "precision",
-        "recall"
-      ],
+      "concepts": ["regex", "span", "escaping", "precision", "recall"],
       "outcome": "Explain and implement regular expressions and explainable extraction with inspectable data and measured errors.",
       "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
       "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
@@ -67,16 +45,9 @@
       "title": "Segmentation, tokenization and subwords",
       "level": "beginner",
       "minutes": 120,
-      "prerequisites": [
-        "nlp-003"
-      ],
+      "prerequisites": ["nlp-003"],
       "runtime": "python-core",
-      "concepts": [
-        "word boundary",
-        "byte pair encoding",
-        "unknown token",
-        "offset"
-      ],
+      "concepts": ["word boundary", "byte pair encoding", "unknown token", "offset"],
       "outcome": "Explain and implement segmentation, tokenization and subwords with inspectable data and measured errors.",
       "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
       "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
@@ -86,17 +57,9 @@
       "title": "Morphology, syntax and linguistic structure",
       "level": "beginner",
       "minutes": 120,
-      "prerequisites": [
-        "nlp-004"
-      ],
+      "prerequisites": ["nlp-004"],
       "runtime": "python-core",
-      "concepts": [
-        "lemma",
-        "stem",
-        "part of speech",
-        "dependency",
-        "ambiguity"
-      ],
+      "concepts": ["lemma", "stem", "part of speech", "dependency", "ambiguity"],
       "outcome": "Explain and implement morphology, syntax and linguistic structure with inspectable data and measured errors.",
       "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
       "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
@@ -106,16 +69,9 @@
       "title": "N-gram models, smoothing and perplexity",
       "level": "beginner",
       "minutes": 120,
-      "prerequisites": [
-        "nlp-005"
-      ],
+      "prerequisites": ["nlp-005"],
       "runtime": "python-core",
-      "concepts": [
-        "conditional probability",
-        "smoothing",
-        "log likelihood",
-        "perplexity"
-      ],
+      "concepts": ["conditional probability", "smoothing", "log likelihood", "perplexity"],
       "outcome": "Explain and implement n-gram models, smoothing and perplexity with inspectable data and measured errors.",
       "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
       "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
@@ -125,16 +81,9 @@
       "title": "Counts, TF-IDF and sparse representations",
       "level": "beginner",
       "minutes": 120,
-      "prerequisites": [
-        "nlp-006"
-      ],
+      "prerequisites": ["nlp-006"],
       "runtime": "python-core",
-      "concepts": [
-        "document frequency",
-        "TF-IDF",
-        "sparse matrix",
-        "normalization"
-      ],
+      "concepts": ["document frequency", "TF-IDF", "sparse matrix", "normalization"],
       "outcome": "Explain and implement counts, tf-idf and sparse representations with inspectable data and measured errors.",
       "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
       "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
@@ -144,16 +93,9 @@
       "title": "Naive Bayes as a text baseline",
       "level": "beginner",
       "minutes": 120,
-      "prerequisites": [
-        "nlp-007"
-      ],
+      "prerequisites": ["nlp-007"],
       "runtime": "python-core",
-      "concepts": [
-        "conditional independence",
-        "log odds",
-        "smoothing",
-        "imbalance"
-      ],
+      "concepts": ["conditional independence", "log odds", "smoothing", "imbalance"],
       "outcome": "Explain and implement naive bayes as a text baseline with inspectable data and measured errors.",
       "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
       "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
@@ -163,16 +105,9 @@
       "title": "Linear text classification and calibrated scores",
       "level": "intermediate",
       "minutes": 120,
-      "prerequisites": [
-        "nlp-008"
-      ],
+      "prerequisites": ["nlp-008"],
       "runtime": "python-core",
-      "concepts": [
-        "logistic regression",
-        "regularization",
-        "threshold",
-        "calibration"
-      ],
+      "concepts": ["logistic regression", "regularization", "threshold", "calibration"],
       "outcome": "Explain and implement linear text classification and calibrated scores with inspectable data and measured errors.",
       "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
       "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
@@ -182,17 +117,9 @@
       "title": "Sequence labeling and Viterbi decoding",
       "level": "intermediate",
       "minutes": 120,
-      "prerequisites": [
-        "nlp-009"
-      ],
+      "prerequisites": ["nlp-009"],
       "runtime": "python-core",
-      "concepts": [
-        "HMM",
-        "transition",
-        "emission",
-        "Viterbi",
-        "BIO"
-      ],
+      "concepts": ["HMM", "transition", "emission", "Viterbi", "BIO"],
       "outcome": "Explain and implement sequence labeling and viterbi decoding with inspectable data and measured errors.",
       "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
       "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
@@ -202,17 +129,9 @@
       "title": "Entities, relations and extraction boundaries",
       "level": "intermediate",
       "minutes": 120,
-      "prerequisites": [
-        "nlp-010"
-      ],
+      "prerequisites": ["nlp-010"],
       "runtime": "python-core",
-      "concepts": [
-        "named entity",
-        "span",
-        "relation",
-        "coreference",
-        "matching"
-      ],
+      "concepts": ["named entity", "span", "relation", "coreference", "matching"],
       "outcome": "Explain and implement entities, relations and extraction boundaries with inspectable data and measured errors.",
       "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
       "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
@@ -222,17 +141,9 @@
       "title": "Distributional embeddings and similarity",
       "level": "intermediate",
       "minutes": 120,
-      "prerequisites": [
-        "nlp-011"
-      ],
+      "prerequisites": ["nlp-011"],
       "runtime": "python-core",
-      "concepts": [
-        "co-occurrence",
-        "PMI",
-        "embedding",
-        "cosine",
-        "analogy"
-      ],
+      "concepts": ["co-occurrence", "PMI", "embedding", "cosine", "analogy"],
       "outcome": "Explain and implement distributional embeddings and similarity with inspectable data and measured errors.",
       "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
       "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
@@ -242,17 +153,9 @@
       "title": "Topic discovery and latent structure",
       "level": "intermediate",
       "minutes": 120,
-      "prerequisites": [
-        "nlp-012"
-      ],
+      "prerequisites": ["nlp-012"],
       "runtime": "python-core",
-      "concepts": [
-        "LSA",
-        "NMF",
-        "LDA",
-        "topic coherence",
-        "stability"
-      ],
+      "concepts": ["LSA", "NMF", "LDA", "topic coherence", "stability"],
       "outcome": "Explain and implement topic discovery and latent structure with inspectable data and measured errors.",
       "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
       "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
@@ -262,16 +165,9 @@
       "title": "Sentence representations and semantic search",
       "level": "intermediate",
       "minutes": 120,
-      "prerequisites": [
-        "nlp-013"
-      ],
+      "prerequisites": ["nlp-013"],
       "runtime": "python-core",
-      "concepts": [
-        "pooling",
-        "embedding space",
-        "negative sample",
-        "semantic retrieval"
-      ],
+      "concepts": ["pooling", "embedding space", "negative sample", "semantic retrieval"],
       "outcome": "Explain and implement sentence representations and semantic search with inspectable data and measured errors.",
       "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
       "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
@@ -281,16 +177,9 @@
       "title": "Contextual encoders for classification and tagging",
       "level": "intermediate",
       "minutes": 120,
-      "prerequisites": [
-        "nlp-014"
-      ],
+      "prerequisites": ["nlp-014"],
       "runtime": "python-core",
-      "concepts": [
-        "bidirectional attention",
-        "encoder",
-        "mask",
-        "pooling"
-      ],
+      "concepts": ["bidirectional attention", "encoder", "mask", "pooling"],
       "outcome": "Explain and implement contextual encoders for classification and tagging with inspectable data and measured errors.",
       "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
       "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
@@ -300,16 +189,9 @@
       "title": "Sequence-to-sequence learning and summarization",
       "level": "intermediate",
       "minutes": 120,
-      "prerequisites": [
-        "nlp-015"
-      ],
+      "prerequisites": ["nlp-015"],
       "runtime": "python-core",
-      "concepts": [
-        "encoder decoder",
-        "cross attention",
-        "teacher forcing",
-        "exposure bias"
-      ],
+      "concepts": ["encoder decoder", "cross attention", "teacher forcing", "exposure bias"],
       "outcome": "Explain and implement sequence-to-sequence learning and summarization with inspectable data and measured errors.",
       "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
       "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
@@ -319,17 +201,9 @@
       "title": "Evaluating generated language without a single perfect answer",
       "level": "advanced",
       "minutes": 120,
-      "prerequisites": [
-        "nlp-016"
-      ],
+      "prerequisites": ["nlp-016"],
       "runtime": "python-core",
-      "concepts": [
-        "BLEU",
-        "ROUGE",
-        "semantic metric",
-        "factual support",
-        "human judgment"
-      ],
+      "concepts": ["BLEU", "ROUGE", "semantic metric", "factual support", "human judgment"],
       "outcome": "Explain and implement evaluating generated language without a single perfect answer with inspectable data and measured errors.",
       "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
       "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
@@ -339,16 +213,9 @@
       "title": "Multilingual NLP and domain shift",
       "level": "advanced",
       "minutes": 120,
-      "prerequisites": [
-        "nlp-017"
-      ],
+      "prerequisites": ["nlp-017"],
       "runtime": "python-core",
-      "concepts": [
-        "language identification",
-        "tokenization equity",
-        "alignment",
-        "transfer"
-      ],
+      "concepts": ["language identification", "tokenization equity", "alignment", "transfer"],
       "outcome": "Explain and implement multilingual nlp and domain shift with inspectable data and measured errors.",
       "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
       "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
@@ -358,17 +225,9 @@
       "title": "Annotation, agreement and uncertain labels",
       "level": "advanced",
       "minutes": 120,
-      "prerequisites": [
-        "nlp-018"
-      ],
+      "prerequisites": ["nlp-018"],
       "runtime": "python-core",
-      "concepts": [
-        "annotation guide",
-        "kappa",
-        "adjudication",
-        "soft label",
-        "disagreement"
-      ],
+      "concepts": ["annotation guide", "kappa", "adjudication", "soft label", "disagreement"],
       "outcome": "Explain and implement annotation, agreement and uncertain labels with inspectable data and measured errors.",
       "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
       "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
@@ -378,16 +237,9 @@
       "title": "Weak supervision and active learning",
       "level": "advanced",
       "minutes": 120,
-      "prerequisites": [
-        "nlp-019"
-      ],
+      "prerequisites": ["nlp-019"],
       "runtime": "python-core",
-      "concepts": [
-        "labeling function",
-        "conflict",
-        "uncertainty sampling",
-        "selection bias"
-      ],
+      "concepts": ["labeling function", "conflict", "uncertainty sampling", "selection bias"],
       "outcome": "Explain and implement weak supervision and active learning with inspectable data and measured errors.",
       "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
       "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
@@ -397,16 +249,9 @@
       "title": "Text leakage, duplicates and evaluation design",
       "level": "advanced",
       "minutes": 120,
-      "prerequisites": [
-        "nlp-020"
-      ],
+      "prerequisites": ["nlp-020"],
       "runtime": "python-core",
-      "concepts": [
-        "document family",
-        "near duplicate",
-        "temporal split",
-        "bootstrap"
-      ],
+      "concepts": ["document family", "near duplicate", "temporal split", "bootstrap"],
       "outcome": "Explain and implement text leakage, duplicates and evaluation design with inspectable data and measured errors.",
       "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
       "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
@@ -416,17 +261,9 @@
       "title": "Retrieval pipelines and ranking evaluation",
       "level": "advanced",
       "minutes": 120,
-      "prerequisites": [
-        "nlp-021"
-      ],
+      "prerequisites": ["nlp-021"],
       "runtime": "python-core",
-      "concepts": [
-        "inverted index",
-        "BM25",
-        "hybrid retrieval",
-        "nDCG",
-        "MRR"
-      ],
+      "concepts": ["inverted index", "BM25", "hybrid retrieval", "nDCG", "MRR"],
       "outcome": "Explain and implement retrieval pipelines and ranking evaluation with inspectable data and measured errors.",
       "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
       "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
@@ -436,17 +273,9 @@
       "title": "Reliable NLP systems and changing corpora",
       "level": "advanced",
       "minutes": 120,
-      "prerequisites": [
-        "nlp-022"
-      ],
+      "prerequisites": ["nlp-022"],
       "runtime": "python-core",
-      "concepts": [
-        "drift",
-        "subgroup",
-        "privacy",
-        "lineage",
-        "monitoring"
-      ],
+      "concepts": ["drift", "subgroup", "privacy", "lineage", "monitoring"],
       "outcome": "Explain and implement reliable nlp systems and changing corpora with inspectable data and measured errors.",
       "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
       "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."
@@ -456,18 +285,9 @@
       "title": "An end-to-end domain text analytics case study",
       "level": "advanced",
       "minutes": 120,
-      "prerequisites": [
-        "nlp-023"
-      ],
+      "prerequisites": ["nlp-023"],
       "runtime": "python-core",
-      "concepts": [
-        "corpus",
-        "baseline",
-        "extraction",
-        "retrieval",
-        "evaluation",
-        "error analysis"
-      ],
+      "concepts": ["corpus", "baseline", "extraction", "retrieval", "evaluation", "error analysis"],
       "outcome": "Explain and implement an end-to-end domain text analytics case study with inspectable data and measured errors.",
       "lab": "Use a small authored corpus to trace the calculation, compare a baseline and inspect counterexamples.",
       "verification": "Check numerical or span-level expected results, perturb input assumptions and interpret the observed errors."

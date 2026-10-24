@@ -78,12 +78,21 @@ def _code(source: str) -> str:
 
 def _exercise(source: str, number: int) -> str:
     match = re.search(
-        rf"^-- Exercise {number}\b.*?(?=^-- Exercise [1-9][0-9]*\b|\Z)",
+        rf"^[ \t]*-- Exercise {number}\b.*?(?=^[ \t]*-- Exercise [1-9][0-9]*\b|\Z)",
         source,
         flags=re.MULTILINE | re.DOTALL,
     )
     assert match is not None, f"solution SQL is missing Exercise {number}"
     return match.group(0)
+
+
+def test_exercise_boundaries_allow_comment_indentation_without_merging_tasks() -> None:
+    source = "  -- Exercise 1: First task\nSELECT 11;\n\t-- Exercise 2: Second task\nSELECT 22;\n"
+    assert "SELECT 11" in _exercise(source, 1)
+    assert "SELECT 22" not in _exercise(source, 1)
+    assert "SELECT 22" in _exercise(source, 2)
+    with pytest.raises(AssertionError, match="missing Exercise 3"):
+        _exercise(source, 3)
 
 
 def _view_body(source: str, view_name: str) -> str:

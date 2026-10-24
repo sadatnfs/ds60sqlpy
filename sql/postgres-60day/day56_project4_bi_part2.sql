@@ -19,61 +19,95 @@
 -- Ranking and percentile reporting, multi-dimensional splits
 BEGIN;
 SET search_path TO training, public;
-
 -- Percentile distribution of order values per country-month
 WITH orders_m AS (
-  SELECT c.country,
-         date_trunc('month', o.order_date)::date AS month,
-         o.total_amount AS amt
-  FROM orders o
-  JOIN customers c ON c.customer_id = o.customer_id
+  SELECT
+    c.country,
+    date_trunc('month', o.order_date)::date AS month,
+    o.total_amount AS amt
+  FROM
+    orders o
+    JOIN customers c ON c.customer_id = o.customer_id
 )
-SELECT country,
-       month,
-       PERCENTILE_CONT(0.5)  WITHIN GROUP (ORDER BY amt) AS p50,
-       PERCENTILE_CONT(0.9)  WITHIN GROUP (ORDER BY amt) AS p90,
-       PERCENTILE_CONT(0.99) WITHIN GROUP (ORDER BY amt) AS p99
-FROM orders_m
-GROUP BY country, month
-ORDER BY month DESC, country
+SELECT
+  country,
+  month,
+  PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY amt) AS p50,
+  PERCENTILE_CONT(0.9) WITHIN GROUP (ORDER BY amt) AS p90,
+  PERCENTILE_CONT(0.99) WITHIN GROUP (ORDER BY amt) AS p99
+FROM
+  orders_m
+GROUP BY
+  country,
+  month
+ORDER BY
+  month DESC,
+  country
 LIMIT 200;
-
 -- Top-N per dimension (category) within country using window rank
 WITH prod_rev AS (
-  SELECT c.country,
-         p.category,
-         p.product_id,
-         p.name,
-         SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS revenue
-  FROM orders o
-  JOIN customers c  ON c.customer_id = o.customer_id
-  JOIN order_items oi ON oi.order_id = o.order_id
-  JOIN products p   ON p.product_id = oi.product_id
-  GROUP BY c.country, p.category, p.product_id, p.name
-), ranked AS (
-  SELECT *, RANK() OVER (PARTITION BY country ORDER BY revenue DESC) AS rnk_country,
-            RANK() OVER (PARTITION BY country, category ORDER BY revenue DESC) AS rnk_in_cat
-  FROM prod_rev
+  SELECT
+    c.country,
+    p.category,
+    p.product_id,
+    p.name,
+    SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS revenue
+  FROM
+    orders o
+    JOIN customers c ON c.customer_id = o.customer_id
+    JOIN order_items oi ON oi.order_id = o.order_id
+    JOIN products p ON p.product_id = oi.product_id
+  GROUP BY
+    c.country,
+    p.category,
+    p.product_id,
+    p.name
+),
+ranked AS (
+  SELECT
+    *,
+    RANK() OVER (PARTITION BY country ORDER BY revenue DESC) AS rnk_country,
+    RANK() OVER (PARTITION BY country,
+      category ORDER BY revenue DESC) AS rnk_in_cat
+  FROM
+    prod_rev
 )
-SELECT * FROM ranked
-WHERE rnk_in_cat <= 5
-ORDER BY country, category, rnk_in_cat;
-
+SELECT
+  *
+FROM
+  ranked
+WHERE
+  rnk_in_cat <= 5
+ORDER BY
+  country,
+  category,
+  rnk_in_cat;
 -- CUBE for multi-dimensional subtotals across country, category
 WITH line AS (
-  SELECT c.country, p.category,
-         (oi.unit_price*oi.quantity*(1-oi.discount)) AS revenue
-  FROM orders o
-  JOIN customers c ON c.customer_id = o.customer_id
-  JOIN order_items oi ON oi.order_id = o.order_id
-  JOIN products p ON p.product_id = oi.product_id
+  SELECT
+    c.country,
+    p.category,
+    (oi.unit_price * oi.quantity * (1 - oi.discount)) AS revenue
+  FROM
+    orders o
+    JOIN customers c ON c.customer_id = o.customer_id
+    JOIN order_items oi ON oi.order_id = o.order_id
+    JOIN products p ON p.product_id = oi.product_id
 )
-SELECT country, category, ROUND(SUM(revenue),2) AS revenue,
-       GROUPING(country) AS g_country, GROUPING(category) AS g_cat
-FROM line
-GROUP BY CUBE (country, category)
-ORDER BY country NULLS FIRST, category NULLS FIRST;
-
+SELECT
+  country,
+  category,
+  ROUND(SUM(revenue), 2) AS revenue,
+  GROUPING (country) AS g_country,
+  GROUPING (category) AS g_cat
+FROM
+  line
+GROUP BY
+  CUBE (country,
+    category)
+ORDER BY
+  country NULLS FIRST,
+  category NULLS FIRST;
 -- Exercises
 -- 1. Add payment method to the CUBE and measure row count increase.
 --    Inputs: For sql-56 Exercise 1, read from `payments`, `orders`, `customers`, `order_items`, and `products`. Compute `two_dimension_rows`, and `three_dimension_rows` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
@@ -109,5 +143,4 @@ ORDER BY country NULLS FIRST, category NULLS FIRST;
 --    Expected result/shape: For sql-56 Exercise 6, expected output: one row per `category`. The final columns are `category`, `observations`, `continuous_p50`, and `discrete_p50`. The final order is `category`.
 --    Verify: For sql-56 Exercise 6, independently aggregate `orders`, `order_items`, and `products` by `category`; require one output row for every distinct `category` tuple and compare `continuous_p50`, and `discrete_p50` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `continuous_p50`, and `discrete_p50` for the existing `category` tuple and verify the new tuple appears exactly once.
 --    Hint ladder, rung 1: For sql-56 Exercise 6, run `category_order` one at a time. Record each CTE's row count and `category` uniqueness before the next stage uses it.
-
 ROLLBACK;

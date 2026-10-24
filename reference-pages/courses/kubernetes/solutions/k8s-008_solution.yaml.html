@@ -198,8 +198,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">            <span class="syntax-tag">periodSeconds</span><span class="syntax-punctuation">:</span> 2</span>
 <span class="source-line">            <span class="syntax-tag">failureThreshold</span><span class="syntax-punctuation">:</span> 2</span>
 <span class="source-line">          <span class="syntax-tag">resources</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">            <span class="syntax-tag">requests</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span><span class="syntax-tag">cpu</span><span class="syntax-punctuation">:</span> 10m<span class="syntax-punctuation">,</span><span class="syntax-tag"> memory</span><span class="syntax-punctuation">:</span> 16Mi<span class="syntax-punctuation">}</span></span>
-<span class="source-line">            <span class="syntax-tag">limits</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span><span class="syntax-tag">cpu</span><span class="syntax-punctuation">:</span> 100m<span class="syntax-punctuation">,</span><span class="syntax-tag"> memory</span><span class="syntax-punctuation">:</span> 64Mi<span class="syntax-punctuation">}</span></span>
+<span class="source-line">            <span class="syntax-tag">requests</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span><span class="syntax-tag"> cpu</span><span class="syntax-punctuation">:</span> 10m<span class="syntax-punctuation">,</span><span class="syntax-tag"> memory</span><span class="syntax-punctuation">:</span> 16Mi <span class="syntax-punctuation">}</span></span>
+<span class="source-line">            <span class="syntax-tag">limits</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span><span class="syntax-tag"> cpu</span><span class="syntax-punctuation">:</span> 100m<span class="syntax-punctuation">,</span><span class="syntax-tag"> memory</span><span class="syntax-punctuation">:</span> 64Mi <span class="syntax-punctuation">}</span></span>
 <span class="source-line">          <span class="syntax-tag">securityContext</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">            <span class="syntax-tag">allowPrivilegeEscalation</span><span class="syntax-punctuation">:</span> false</span>
 <span class="source-line">            <span class="syntax-tag">readOnlyRootFilesystem</span><span class="syntax-punctuation">:</span> true</span>
@@ -217,7 +217,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">    <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> http</span>
 <span class="source-line">      <span class="syntax-tag">port</span><span class="syntax-punctuation">:</span> 8080</span>
 <span class="source-line">      <span class="syntax-tag">targetPort</span><span class="syntax-punctuation">:</span> http</span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 1: Predict controlled all-unready state; Running does not imply Ready or eligible backends.</span></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Prove two-replica healthy baseline using Deployment,Ready Pod UIDs,ready EndpointSlice UIDs and fresh client.</span></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Change only Service selector to app:wrong, observe zero matching backends, repair the saved source.</span></span>

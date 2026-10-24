@@ -46,20 +46,9 @@
     }
   ],
   "golden": {
-    "local_day_ids": [
-      1,
-      2,
-      3,
-      5
-    ],
-    "same_instant_ids": [
-      2,
-      5
-    ],
-    "fold_ids": [
-      2,
-      3
-    ],
+    "local_day_ids": [1, 2, 3, 5],
+    "same_instant_ids": [2, 5],
+    "fold_ids": [2, 3],
     "fold_seconds": 3600,
     "local_day_hours": 25
   }

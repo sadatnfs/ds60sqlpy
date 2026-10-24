@@ -18,57 +18,78 @@
 --
 BEGIN;
 SET search_path TO training, public;
-
 -- Study contract
 -- Focus: Modify only reviewed row sets, inspect writes with `RETURNING`, and make repeat behavior explicit through constraints and rollback-safe tests.
 -- Assumptions: Every exercise runs inside the disposable course transaction. Savepoints isolate demonstrations so one answer does not change the next.
 -- Pitfall: Never run an unbounded `UPDATE` or `DELETE`; preview candidate keys and do not treat `ON CONFLICT` as safe without naming its unique key.
 -- Predict row grain and NULL/order behavior before executing each example.
-
 -- Example: Insert promotional budget rollups into a temp table
 CREATE TEMP TABLE tmp_category_revenue AS
-SELECT p.category, ROUND(SUM(oi.unit_price*oi.quantity*(1-oi.discount)),2) AS revenue
-FROM order_items oi
-JOIN products p ON p.product_id = oi.product_id
-GROUP BY p.category;
-
-SELECT category, revenue
-FROM tmp_category_revenue
-ORDER BY revenue DESC, category;
-
+SELECT
+  p.category,
+  ROUND(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)), 2) AS revenue
+FROM
+  order_items oi
+  JOIN products p ON p.product_id = oi.product_id
+GROUP BY
+  p.category;
+SELECT
+  category,
+  revenue
+FROM
+  tmp_category_revenue
+ORDER BY
+  revenue DESC,
+  category;
 -- Example: Update salaries by department performance (demo only).
 -- Capture RETURNING in a data-modifying CTE so the evidence can be sorted.
 WITH changed AS (
-  UPDATE employees AS e
-  SET salary = e.salary * 1.05
-  WHERE e.department_id IN (
-    SELECT d.department_id
-    FROM departments AS d
-    WHERE d.name IN ('Sales','Engineering')
-  )
-  RETURNING e.employee_id, e.department_id, e.salary
+  UPDATE
+    employees AS e
+  SET
+    salary = e.salary * 1.05
+  WHERE
+    e.department_id IN (
+      SELECT
+        d.department_id
+      FROM
+        departments AS d
+      WHERE
+        d.name IN ('Sales', 'Engineering'))
+    RETURNING
+      e.employee_id,
+      e.department_id,
+      e.salary
 )
-SELECT employee_id, department_id, salary
-FROM changed
-ORDER BY employee_id;
-
+SELECT
+  employee_id,
+  department_id,
+  salary
+FROM
+  changed
+ORDER BY
+  employee_id;
 -- Example: Delete unpaid old orders (demo only)
 WITH deleted AS (
   DELETE FROM orders AS o
   WHERE o.order_date < now() - interval '365 days'
     AND NOT EXISTS (
-      SELECT 1
-      FROM payments AS p
-      WHERE p.order_id = o.order_id
-    )
-  RETURNING o.order_id
+      SELECT
+        1
+      FROM
+        payments AS p
+      WHERE
+        p.order_id = o.order_id)
+    RETURNING
+      o.order_id
 )
-SELECT order_id
-FROM deleted
-ORDER BY order_id;
-
+SELECT
+  order_id
+FROM
+  deleted
+ORDER BY
+  order_id;
 -- All changes will be rolled back below
-
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.
@@ -108,5 +129,4 @@ ORDER BY order_id;
 --    Expected result/shape: For sql-10 Exercise 6, expected output: Returned rows only for valid changed products. The final columns are `product_id`. The final order is `p.product_id`.
 --    Verify: For sql-10 Exercise 6, materialize the intended `product_id` target set first; require the command tag/`RETURNING` set to match it, then query `exercise_price_stage`, `products`, and `stage.new_price` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `product_id` values in both cases.
 --    Hint ladder, rung 1: For sql-10 Exercise 6, materialize the intended `product_id` target set first; require the command tag/`RETURNING` set to match it, then query `exercise_price_stage`, `products`, and `stage.new_price` again and prove rollback or idempotent retry.
-
 ROLLBACK;

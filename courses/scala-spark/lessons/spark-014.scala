@@ -2,19 +2,30 @@ import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
-
 object Main {
-  type Summary = Seq[(Option[String],Long,Long,Option[Long])]
-  def ids(frame: DataFrame): Seq[Long] = frame.select("event_id").orderBy("event_id").collect().map(_.getLong(0)).toSeq
-  def metrics(frame: DataFrame): (Long,Long,Option[Long]) = {
-    val row = frame.agg(count(lit(1)),count(col("amount_cents")),sum(col("amount_cents"))).first()
-    (row.getLong(0),row.getLong(1),if (row.isNullAt(2)) None else Some(row.getLong(2)))
+  type Summary = Seq[(Option[String], Long, Long, Option[Long])]
+  def ids(frame: DataFrame): Seq[Long] =
+    frame.select("event_id").orderBy("event_id").collect().map(_.getLong(0)).toSeq
+  def metrics(frame: DataFrame): (Long, Long, Option[Long]) = {
+    val row = frame.agg(count(lit(1)), count(col("amount_cents")), sum(col("amount_cents"))).first()
+    (row.getLong(0), row.getLong(1), if (row.isNullAt(2)) None else Some(row.getLong(2)))
   }
   def canonical(frame: DataFrame): Summary = {
-    assert(frame.schema.fields.map(field => (field.name,field.dataType)).toSeq == Seq(
-      ("team",StringType),("rows",LongType),("valued",LongType),("total_cents",LongType)))
+    assert(
+      frame.schema.fields.map(field => (field.name, field.dataType)).toSeq == Seq(
+        ("team", StringType),
+        ("rows", LongType),
+        ("valued", LongType),
+        ("total_cents", LongType)
+      )
+    )
     frame.orderBy(col("team").asc_nulls_last).collect().toSeq.map { row =>
-      (if (row.isNullAt(0)) None else Some(row.getString(0)),row.getLong(1),row.getLong(2),if (row.isNullAt(3)) None else Some(row.getLong(3)))
+      (
+        if (row.isNullAt(0)) None else Some(row.getString(0)),
+        row.getLong(1),
+        row.getLong(2),
+        if (row.isNullAt(3)) None else Some(row.getLong(3))
+      )
     }
   }
 
@@ -37,29 +48,45 @@ object Main {
     throw new UnsupportedOperationException("Complete auditedSqlReport")
 
   def main(args: Array[String]): Unit = {
-    val spark = SparkSession.builder().appName("ds60-spark-014").master("local[2]")
-      .config("spark.ui.enabled","false")
-      .config("spark.driver.host","127.0.0.1")
-      .config("spark.driver.bindAddress","127.0.0.1")
-      .config("spark.sql.shuffle.partitions","2")
-      .config("spark.sql.adaptive.enabled","false")
-      .config("spark.sql.ansi.enabled","true")
-      .config("spark.sql.session.timeZone","UTC").getOrCreate()
+    val spark = SparkSession
+      .builder()
+      .appName("ds60-spark-014")
+      .master("local[2]")
+      .config("spark.ui.enabled", "false")
+      .config("spark.driver.host", "127.0.0.1")
+      .config("spark.driver.bindAddress", "127.0.0.1")
+      .config("spark.sql.shuffle.partitions", "2")
+      .config("spark.sql.adaptive.enabled", "false")
+      .config("spark.sql.ansi.enabled", "true")
+      .config("spark.sql.session.timeZone", "UTC")
+      .getOrCreate()
     try {
       require(spark.sparkContext.master == "local[2]", "local-only course session")
       spark.sparkContext.setLogLevel("ERROR")
-      val schema = StructType(Seq(
-        StructField("source_row",LongType,false),StructField("event_id",LongType,true),
-        StructField("team",StringType,true),StructField("amount_cents",LongType,true),
-        StructField("status",StringType,true)))
+      val schema = StructType(
+        Seq(
+          StructField("source_row", LongType, false),
+          StructField("event_id", LongType, true),
+          StructField("team", StringType, true),
+          StructField("amount_cents", LongType, true),
+          StructField("status", StringType, true)
+        )
+      )
       val rows = Seq(
-       Row(1L,1L,"A",100L,"paid"),Row(2L,2L,"A",null,"paid"),
-       Row(3L,3L,"B",0L,"paid"),Row(4L,4L,null,50L,"paid"),
-       Row(5L,5L,"B",150L,"void"),Row(6L,6L,"A",100L,"paid"),
-       Row(7L,7L,"C",null,"paid"),Row(8L,8L,"B",25L,"paid"),
-       Row(9L,9L,"E",0L,"paid"),Row(10L,10L,"D",200L,"paid"),
-       Row(11L,11L,"A",10L,"mystery"),Row(12L,null,"A",5L,"paid"))
-      val raw = spark.createDataFrame(spark.sparkContext.parallelize(rows,2),schema)
+        Row(1L, 1L, "A", 100L, "paid"),
+        Row(2L, 2L, "A", null, "paid"),
+        Row(3L, 3L, "B", 0L, "paid"),
+        Row(4L, 4L, null, 50L, "paid"),
+        Row(5L, 5L, "B", 150L, "void"),
+        Row(6L, 6L, "A", 100L, "paid"),
+        Row(7L, 7L, "C", null, "paid"),
+        Row(8L, 8L, "B", 25L, "paid"),
+        Row(9L, 9L, "E", 0L, "paid"),
+        Row(10L, 10L, "D", 200L, "paid"),
+        Row(11L, 11L, "A", 10L, "mystery"),
+        Row(12L, null, "A", 5L, "paid")
+      )
+      val raw = spark.createDataFrame(spark.sparkContext.parallelize(rows, 2), schema)
       locally {
         assert(raw.count() == 12L)
         assert(raw.select("source_row").distinct().count() == 12L)
@@ -67,9 +94,21 @@ object Main {
         println("Source occurrence identity survives a missing business ID")
       }
       locally {
-        val unknown = raw.filter(col("amount_cents").isNull).select("event_id").orderBy("event_id").collect().map(_.getLong(0)).toSeq
-        val zero = raw.filter(col("amount_cents") === lit(0L)).select("event_id").orderBy("event_id").collect().map(_.getLong(0)).toSeq
-        assert(unknown == Seq(2L,7L) && zero == Seq(3L,9L))
+        val unknown = raw
+          .filter(col("amount_cents").isNull)
+          .select("event_id")
+          .orderBy("event_id")
+          .collect()
+          .map(_.getLong(0))
+          .toSeq
+        val zero = raw
+          .filter(col("amount_cents") === lit(0L))
+          .select("event_id")
+          .orderBy("event_id")
+          .collect()
+          .map(_.getLong(0))
+          .toSeq
+        assert(unknown == Seq(2L, 7L) && zero == Seq(3L, 9L))
         println("Unknown amounts and observed zeros have different identities")
       }
       println("spark-014: worked examples passed; six task implementations remain")

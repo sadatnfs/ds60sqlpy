@@ -1,16 +1,30 @@
 #!/usr/bin/env bash
 # One pinned Linux toolchain for contributors on Linux, macOS and Windows/WSL 2.
 set -euo pipefail
-root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)
-force_build=0
-readonly_mount=0
-args=()
-for arg in "$@"; do
-  case "$arg" in
-    --build) force_build=1 ;;
-    --check|--list|--lint) readonly_mount=1; args+=("$arg") ;;
-    -h|--help)
-      cat <<'HELP'
+# The formatter can rewrite this script while Docker runs. Parse the complete
+# function and final compound command before performing any repository writes.
+source_list=""
+cleanup() {
+  if [[ -n "$source_list" ]]; then
+    rm -f "$source_list"
+  fi
+}
+trap cleanup EXIT
+
+main() {
+  root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)
+  force_build=0
+  readonly_mount=0
+  args=()
+  for arg in "$@"; do
+    case "$arg" in
+      --build) force_build=1 ;;
+      --check | --list | --lint)
+        readonly_mount=1
+        args+=("$arg")
+        ;;
+      -h | --help)
+        cat <<'HELP'
 Usage: ./scripts/format-repo [--check|--lint] [--build] [--list] [--language NAME]
 
 Default: format maintained sources and refresh generated readers.
@@ -24,56 +38,76 @@ Requires Bash and a local Linux Docker engine. Windows users run inside WSL 2.
 Tools are built once per toolchain version, then run offline. This command does
 not start/stop classroom containers, execute lessons, or modify learner state.
 HELP
-      exit 0 ;;
-    *) args+=("$arg") ;;
+        exit 0
+        ;;
+      *) args+=("$arg") ;;
+    esac
+  done
+  command -v docker >/dev/null 2>&1 || {
+    echo 'Docker is required; start your Linux-container engine.' >&2
+    exit 2
+  }
+  engine=$(docker info --format '{{.OSType}}') || {
+    echo 'Start Docker and retry.' >&2
+    exit 2
+  }
+  [[ "$engine" == linux ]] || {
+    echo 'Select Linux containers (Windows uses WSL 2).' >&2
+    exit 2
+  }
+  # Bind mounts refer to the engine host, so a remote daemon cannot safely format this checkout.
+  endpoint=${DOCKER_HOST:-}
+  if [[ -n "${DOCKER_CONTEXT:-}" ]]; then
+    endpoint=$(docker context inspect "$DOCKER_CONTEXT" --format '{{.Endpoints.docker.Host}}')
+  elif [[ -z "$endpoint" ]]; then
+    endpoint=$(docker context inspect --format '{{.Endpoints.docker.Host}}')
+  fi
+  case "$endpoint" in
+    unix://*) ;;
+    *)
+      echo 'Use a local Docker context with a Unix socket for repository formatting.' >&2
+      exit 2
+      ;;
   esac
-done
-command -v docker >/dev/null 2>&1 || { echo 'Docker is required; start your Linux-container engine.' >&2; exit 2; }
-engine=$(docker info --format '{{.OSType}}') || { echo 'Start Docker and retry.' >&2; exit 2; }
-[[ "$engine" == linux ]] || { echo 'Select Linux containers (Windows uses WSL 2).' >&2; exit 2; }
-# Bind mounts refer to the engine host, so a remote daemon cannot safely format this checkout.
-endpoint=${DOCKER_HOST:-}
-if [[ -n "${DOCKER_CONTEXT:-}" ]]; then
-  endpoint=$(docker context inspect "$DOCKER_CONTEXT" --format '{{.Endpoints.docker.Host}}')
-elif [[ -z "$endpoint" ]]; then
-  endpoint=$(docker context inspect --format '{{.Endpoints.docker.Host}}')
-fi
-case "$endpoint" in
-  unix://*) ;;
-  *) echo 'Use a local Docker context with a Unix socket for repository formatting.' >&2; exit 2 ;;
-esac
-fingerprint=$(
-  cd "$root"
-  find docker/formatting -type f -not -path '*/node_modules/*' -not -path '*/__pycache__/*' -print |
-    LC_ALL=C sort | while IFS= read -r file; do cksum "$file"; done | cksum | awk '{print $1 "-" $2}'
-)
-image="ds60-formatting:$fingerprint"
-if [[ "$force_build" == 1 ]] || ! docker image inspect "$image" >/dev/null 2>&1; then
-  echo 'Preparing the formatting tools. Downloads are needed only for this build.'
-  registry=${DS60_FORMAT_NPM_REGISTRY:-https://registry.npmjs.org}
-  case "$registry" in
-    https://*'@'*|https://*'?'*|https://*'#'*|https://*' '*|https://*'
-'*)
-      echo 'Use a public HTTPS npm registry URL without credentials or query parameters.' >&2; exit 2 ;;
-    https://*) ;;
-    *) echo 'The optional npm registry must use HTTPS.' >&2; exit 2 ;;
-  esac
-  docker build --progress=plain --build-arg "NPM_REGISTRY=$registry" -t "$image" "$root/docker/formatting"
-fi
-mount="type=bind,src=$root,dst=/workspace"
-if [[ "$readonly_mount" == 1 ]]; then mount="$mount,readonly"; fi
-inventory_args=()
-source_list=""
-cleanup() { if [[ -n "$source_list" ]]; then rm -f "$source_list"; fi; }
-trap cleanup EXIT
-if [[ -e "$root/.git" ]] && command -v git >/dev/null 2>&1; then
-  source_list=$(mktemp "${TMPDIR:-/tmp}/ds60-format-files.XXXXXX")
-  git -C "$root" ls-files --cached --others --exclude-standard -z > "$source_list"
-  inventory_args=(--env DS60_FORMAT_FILE_LIST=/tmp/source-files.bin
-    --mount "type=bind,src=$source_list,dst=/tmp/source-files.bin,readonly")
-fi
-docker run --rm --init --network=none --read-only --cap-drop=ALL \
-  --security-opt=no-new-privileges --user "$(id -u):$(id -g)" \
-  --tmpfs /tmp:rw,nosuid,size=1g --env HOME=/tmp --env PYTHONDONTWRITEBYTECODE=1 \
-  --env PYTHONUTF8=1 --env RUFF_CACHE_DIR=/tmp/ruff --mount "$mount" \
-  ${inventory_args[@]+"${inventory_args[@]}"} --workdir /workspace "$image" python3 /workspace/scripts/format_repo.py ${args[@]+"${args[@]}"}
+  fingerprint=$(
+    cd "$root"
+    find docker/formatting -type f -not -path '*/node_modules/*' -not -path '*/__pycache__/*' -print |
+      LC_ALL=C sort | while IFS= read -r file; do cksum "$file"; done | cksum | awk '{print $1 "-" $2}'
+  )
+  image="ds60-formatting:$fingerprint"
+  if [[ "$force_build" == 1 ]] || ! docker image inspect "$image" >/dev/null 2>&1; then
+    echo 'Preparing the formatting tools. Downloads are needed only for this build.'
+    registry=${DS60_FORMAT_NPM_REGISTRY:-https://registry.npmjs.org}
+    case "$registry" in
+      https://*'@'* | https://*'?'* | https://*'#'* | https://*' '* | https://*$'\n'*)
+        echo 'Use a public HTTPS npm registry URL without credentials or query parameters.' >&2
+        exit 2
+        ;;
+      https://*) ;;
+      *)
+        echo 'The optional npm registry must use HTTPS.' >&2
+        exit 2
+        ;;
+    esac
+    docker build --progress=plain --build-arg "NPM_REGISTRY=$registry" -t "$image" "$root/docker/formatting"
+  fi
+  mount="type=bind,src=$root,dst=/workspace"
+  if [[ "$readonly_mount" == 1 ]]; then mount="$mount,readonly"; fi
+  inventory_args=()
+  if [[ -e "$root/.git" ]] && command -v git >/dev/null 2>&1; then
+    source_list=$(mktemp "${TMPDIR:-/tmp}/ds60-format-files.XXXXXX")
+    git -C "$root" ls-files --cached --others --exclude-standard -z >"$source_list"
+    inventory_args=(--env DS60_FORMAT_FILE_LIST=/tmp/source-files.bin
+      --mount "type=bind,src=$source_list,dst=/tmp/source-files.bin,readonly")
+  fi
+  docker run --rm --init --network=none --read-only --cap-drop=ALL \
+    --security-opt=no-new-privileges --user "$(id -u):$(id -g)" \
+    --tmpfs /tmp:rw,nosuid,size=1g --env HOME=/tmp --env PYTHONDONTWRITEBYTECODE=1 \
+    --env PYTHONUTF8=1 --env RUFF_CACHE_DIR=/tmp/ruff --mount "$mount" \
+    ${inventory_args[@]+"${inventory_args[@]}"} --workdir /workspace "$image" python3 /workspace/scripts/format_repo.py ${args[@]+"${args[@]}"}
+}
+
+{
+  main "$@"
+  exit
+}

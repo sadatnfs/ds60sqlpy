@@ -18,44 +18,54 @@
 --
 BEGIN;
 SET search_path TO training, public;
-
 -- Study contract
 -- Focus: Combine named windows, explicit frames, exclusions, and gap/session logic while keeping each intermediate grain inspectable.
 -- Assumptions: Event sessions use a 30-minute inactivity threshold and UTC instants. Named windows share partition/order clauses but may still need different frames.
 -- Pitfall: Layered window calculations require CTEs because one window result cannot generally be nested directly inside another at the same query level.
 -- Predict row grain and NULL/order behavior before executing each example.
-
 -- Multi-level analysis: rank within partition, then across all
 WITH prod_rev AS (
-  SELECT p.product_id,
-         p.name,
-         p.category,
-         SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS revenue
-  FROM order_items oi
-  JOIN products p ON p.product_id = oi.product_id
-  GROUP BY p.product_id, p.name, p.category
+  SELECT
+    p.product_id,
+    p.name,
+    p.category,
+    SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS revenue
+  FROM
+    order_items oi
+    JOIN products p ON p.product_id = oi.product_id
+  GROUP BY
+    p.product_id,
+    p.name,
+    p.category
 )
-SELECT *,
+SELECT
+  *,
   RANK() OVER (PARTITION BY category ORDER BY revenue DESC) AS rank_in_category,
   RANK() OVER (ORDER BY revenue DESC) AS rank_overall
-FROM prod_rev
-ORDER BY category, rank_in_category, revenue DESC, product_id
+FROM
+  prod_rev
+ORDER BY
+  category,
+  rank_in_category,
+  revenue DESC,
+  product_id
 LIMIT 100;
-
 -- Combine multiple windows in one query
-SELECT o.customer_id,
-       o.order_id,
-       o.total_amount,
-       AVG(o.total_amount) OVER (PARTITION BY o.customer_id) AS avg_per_customer,
-       SUM(o.total_amount) OVER () AS total_revenue_all,
-       RANK() OVER (PARTITION BY o.customer_id ORDER BY o.total_amount DESC) AS order_value_rank
-FROM orders o
-ORDER BY o.customer_id,
-         order_value_rank,
-         o.total_amount DESC,
-         o.order_id
+SELECT
+  o.customer_id,
+  o.order_id,
+  o.total_amount,
+  AVG(o.total_amount) OVER (PARTITION BY o.customer_id) AS avg_per_customer,
+  SUM(o.total_amount) OVER () AS total_revenue_all,
+  RANK() OVER (PARTITION BY o.customer_id ORDER BY o.total_amount DESC) AS order_value_rank
+FROM
+  orders o
+ORDER BY
+  o.customer_id,
+  order_value_rank,
+  o.total_amount DESC,
+  o.order_id
 LIMIT 100;
-
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.
@@ -95,5 +105,4 @@ LIMIT 100;
 --    Expected result/shape: For sql-22 Exercise 6, expected output: One row per customer session. The final columns are `customer_id`, `session_number`, `session_start`, `session_end`, `event_count`, and `session_duration`. The final order is `customer_id, session_number`.
 --    Verify: For sql-22 Exercise 6, independently aggregate `events` by `customer_id`, and `session_number`; require one output row for every distinct `customer_id`, and `session_number` tuple and compare `event_count`, and `session_duration` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `event_count`, and `session_duration` for the existing `customer_id`, and `session_number` tuple and verify the new tuple appears exactly once.
 --    Hint ladder, rung 1: For sql-22 Exercise 6, run `sequenced`, `flagged`, and `assigned` one at a time. Record each CTE's row count and `customer_id`, and `session_number` uniqueness before the next stage uses it.
-
 ROLLBACK;

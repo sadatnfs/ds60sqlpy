@@ -618,25 +618,30 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line"><span class="syntax-comment">--</span></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Logical export/import examples with COPY (server must have file access; adjust paths)</span></span>
 <span class="source-line"><span class="syntax-comment">-- Export:</span></span>
 <span class="source-line"><span class="syntax-comment">-- COPY customers TO &#x27;/tmp/customers.csv&#x27; CSV HEADER;</span></span>
 <span class="source-line"><span class="syntax-comment">-- COPY orders    TO &#x27;/tmp/orders.csv&#x27;    CSV HEADER;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Import into staging tables (demo only)</span></span>
-<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> customers_stg <span class="syntax-punctuation">(</span><span class="syntax-keyword">LIKE</span> customers <span class="syntax-keyword">INCLUDING</span> <span class="syntax-keyword">ALL</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> customers_stg <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">LIKE</span> customers <span class="syntax-keyword">INCLUDING</span> <span class="syntax-keyword">ALL</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- COPY customers_stg FROM &#x27;/tmp/customers.csv&#x27; CSV HEADER; -- example only</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Verify counts between base and staged</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;customers&#x27;</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">table</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> base_cnt <span class="syntax-keyword">FROM</span> customers</span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-string">&#x27;customers&#x27;</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">table</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> base_cnt</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  customers</span>
 <span class="source-line"><span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;customers_stg&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> customers_stg<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-string">&#x27;customers_stg&#x27;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  customers_stg<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Point-in-time concepts (notes):</span></span>
 <span class="source-line"><span class="syntax-comment">-- - Use WAL archiving and base backups for PITR (outside SQL scope)</span></span>
 <span class="source-line"><span class="syntax-comment">-- - For ad-hoc recovery, restore into a separate DB and compare using EXCEPT/INTERSECT</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
 <span class="source-line"><span class="syntax-comment">-- 1. Export/import a subset. COPY table has no WHERE clause; use</span></span>
 <span class="source-line"><span class="syntax-comment">--    COPY (SELECT ... WHERE ...) TO STDOUT or client-side \copy in psql.</span></span>
@@ -673,7 +678,6 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-43 Exercise 6, expected output: a restore manifest, object/count reconciliation, recovery-point evidence, smoke-test result, and cleanup record. The final columns are `email`, `staged_name`, and `restored_name`. The final order is `s.email`.</span></span>
 <span class="source-line"><span class="syntax-comment">--    Verify: For sql-43 Exercise 6, restore into an isolated target and reconcile `customers_restore_stage`, `customers`, `c.country`, and `c.segment` using schema inventory, object/row counts, key samples, critical aggregates/checksums, application smoke tests, and an explicit cleanup result. Inject one missing or invalid artifact in the disposable target and prove validation stops before cutover.</span></span>
 <span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-43 Exercise 6, start with the first relation in `customers_restore_stage`, `customers`, `c.country`, and `c.segment`; after each join, record total rows and distinct `customer_id` so the exact fanout or loss is visible.</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>
       </section>
@@ -900,79 +904,117 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-comment">--</span></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 1: emit a filtered CSV through the client connection.</span></span>
 <span class="source-line"><span class="syntax-comment">-- In interactive psql, replace COPY ... TO STDOUT with:</span></span>
 <span class="source-line"><span class="syntax-comment">-- \copy (SELECT * FROM training.customers WHERE country=&#x27;US&#x27;)</span></span>
 <span class="source-line"><span class="syntax-comment">--   TO &#x27;customers_us.csv&#x27; WITH (FORMAT csv, HEADER true)</span></span>
 <span class="source-line"><span class="syntax-keyword">COPY</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span> full_name<span class="syntax-punctuation">,</span> email<span class="syntax-punctuation">,</span> country<span class="syntax-punctuation">,</span> created_at<span class="syntax-punctuation">,</span> segment<span class="syntax-punctuation">,</span> attributes</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> customers</span>
-<span class="source-line">  <span class="syntax-keyword">WHERE</span> country <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;US&#x27;</span></span>
-<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> customer_id</span>
-<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">TO</span> <span class="syntax-keyword">STDOUT</span> <span class="syntax-keyword">WITH</span> <span class="syntax-punctuation">(</span>FORMAT csv<span class="syntax-punctuation">,</span> HEADER <span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    full_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    email<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    created_at<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    segment<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    attributes</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    customers</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">    country <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;US&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">    customer_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">TO</span> <span class="syntax-keyword">STDOUT</span> <span class="syntax-keyword">WITH</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">    FORMAT csv<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    HEADER <span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- A temporary staging table models the result of a later \copy ... FROM file.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> customers_restore_stage <span class="syntax-keyword">AS</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> full_name<span class="syntax-punctuation">,</span> email<span class="syntax-punctuation">,</span> country<span class="syntax-punctuation">,</span> created_at<span class="syntax-punctuation">,</span> segment<span class="syntax-punctuation">,</span> attributes</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> customers</span>
-<span class="source-line"><span class="syntax-keyword">WHERE</span> country <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;US&#x27;</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
-<span class="source-line"><span class="syntax-keyword">UPDATE</span> customers_restore_stage</span>
-<span class="source-line"><span class="syntax-keyword">SET</span> full_name <span class="syntax-operator">=</span> full_name <span class="syntax-operator">|</span><span class="syntax-operator">|</span> <span class="syntax-string">&#x27; [restored]&#x27;</span></span>
-<span class="source-line"><span class="syntax-keyword">WHERE</span> email <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;customer1@example.com&#x27;</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  full_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  email<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  created_at<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  segment<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  attributes</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  customers</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  country <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;US&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">UPDATE</span></span>
+<span class="source-line">  customers_restore_stage</span>
+<span class="source-line"><span class="syntax-keyword">SET</span></span>
+<span class="source-line">  full_name <span class="syntax-operator">=</span> full_name <span class="syntax-operator">|</span><span class="syntax-operator">|</span> <span class="syntax-string">&#x27; [restored]&#x27;</span></span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  email <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;customer1@example.com&#x27;</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 2: idempotent restore keyed by the schema&#x27;s unique email.</span></span>
-<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> customers<span class="syntax-punctuation">(</span>full_name<span class="syntax-punctuation">,</span> email<span class="syntax-punctuation">,</span> country<span class="syntax-punctuation">,</span> created_at<span class="syntax-punctuation">,</span> segment<span class="syntax-punctuation">,</span> attributes<span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> full_name<span class="syntax-punctuation">,</span> email<span class="syntax-punctuation">,</span> country<span class="syntax-punctuation">,</span> created_at<span class="syntax-punctuation">,</span> segment<span class="syntax-punctuation">,</span> attributes</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> customers_restore_stage</span>
-<span class="source-line"><span class="syntax-keyword">ON</span> CONFLICT <span class="syntax-punctuation">(</span>email<span class="syntax-punctuation">)</span> <span class="syntax-keyword">DO</span> <span class="syntax-keyword">UPDATE</span></span>
-<span class="source-line"><span class="syntax-keyword">SET</span> full_name <span class="syntax-operator">=</span> EXCLUDED<span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> customers <span class="syntax-punctuation">(</span>full_name<span class="syntax-punctuation">,</span> email<span class="syntax-punctuation">,</span> country<span class="syntax-punctuation">,</span> created_at<span class="syntax-punctuation">,</span> segment<span class="syntax-punctuation">,</span> attributes<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  full_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  email<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  created_at<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  segment<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  attributes</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  customers_restore_stage</span>
+<span class="source-line"><span class="syntax-keyword">ON</span> CONFLICT <span class="syntax-punctuation">(</span>email<span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">DO</span> <span class="syntax-keyword">UPDATE</span> <span class="syntax-keyword">SET</span></span>
+<span class="source-line">    full_name <span class="syntax-operator">=</span> EXCLUDED<span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span></span>
 <span class="source-line">    country <span class="syntax-operator">=</span> EXCLUDED<span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span></span>
 <span class="source-line">    segment <span class="syntax-operator">=</span> EXCLUDED<span class="syntax-punctuation">.</span>segment<span class="syntax-punctuation">,</span></span>
 <span class="source-line">    attributes <span class="syntax-operator">=</span> EXCLUDED<span class="syntax-punctuation">.</span>attributes<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> staged_rows <span class="syntax-keyword">FROM</span> customers_restore_stage<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> staged_rows</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  customers_restore_stage<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 3: COPY above writes from the database backend to STDOUT; psql</span></span>
 <span class="source-line"><span class="syntax-comment">-- \copy consumes that stream on the client. The latter is normally appropriate</span></span>
 <span class="source-line"><span class="syntax-comment">-- when the learner controls the client filesystem but not the server host.</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 4: a manifest makes export scope auditable. clock_timestamp is the</span></span>
 <span class="source-line"><span class="syntax-comment">-- observation time; row/key fields are deterministic for this snapshot.</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;training.customers&#x27;</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">table_name</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">row_count</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">MIN</span><span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> min_key<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">MAX</span><span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> max_key<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       clock_timestamp<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> observed_at</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> customers<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-string">&#x27;training.customers&#x27;</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">table_name</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">row_count</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">MIN</span><span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> min_key<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">MAX</span><span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> max_key<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  clock_timestamp<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> observed_at</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  customers<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 5: ROW_NUMBER chooses one repeatable winner per normalized email.</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> staged_duplicates <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">lower</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">trim</span><span class="syntax-punctuation">(</span>email<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> normalized_email<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         ROW_NUMBER<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span></span>
-<span class="source-line">           PARTITION <span class="syntax-keyword">BY</span> <span class="syntax-keyword">lower</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">trim</span><span class="syntax-punctuation">(</span>email<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">           <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> created_at <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> full_name<span class="syntax-punctuation">,</span> email</span>
-<span class="source-line">         <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> winner_rank</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> customers_restore_stage</span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-keyword">lower</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">trim</span><span class="syntax-punctuation">(</span>email<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> normalized_email<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    ROW_NUMBER<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> <span class="syntax-keyword">lower</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">trim</span><span class="syntax-punctuation">(</span>email<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> created_at <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      full_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">      email<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> winner_rank</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    customers_restore_stage</span>
 <span class="source-line"><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> full_name<span class="syntax-punctuation">,</span> email<span class="syntax-punctuation">,</span> country</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> staged_duplicates</span>
-<span class="source-line"><span class="syntax-keyword">WHERE</span> winner_rank <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> email<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  full_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  email<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  country</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  staged_duplicates</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  winner_rank <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  email<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 6: IS DISTINCT FROM is NULL-safe and returns only actual column</span></span>
 <span class="source-line"><span class="syntax-comment">-- differences between stage and target.</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> s<span class="syntax-punctuation">.</span>email<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       s<span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">AS</span> staged_name<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">AS</span> restored_name</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> customers_restore_stage s</span>
-<span class="source-line"><span class="syntax-keyword">JOIN</span> customers <span class="syntax-keyword">c</span> <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>email<span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">WHERE</span> s<span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name</span>
-<span class="source-line">   <span class="syntax-keyword">OR</span> s<span class="syntax-punctuation">.</span>country <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country</span>
-<span class="source-line">   <span class="syntax-keyword">OR</span> s<span class="syntax-punctuation">.</span>segment <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>segment</span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> s<span class="syntax-punctuation">.</span>email<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  s<span class="syntax-punctuation">.</span>email<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  s<span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">AS</span> staged_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">AS</span> restored_name</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  customers_restore_stage s</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> customers <span class="syntax-keyword">c</span> <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>email<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  s<span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name</span>
+<span class="source-line">  <span class="syntax-keyword">OR</span> s<span class="syntax-punctuation">.</span>country <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country</span>
+<span class="source-line">  <span class="syntax-keyword">OR</span> s<span class="syntax-punctuation">.</span>segment <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>segment</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  s<span class="syntax-punctuation">.</span>email<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>
       </section>

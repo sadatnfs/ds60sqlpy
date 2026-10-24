@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.28)
 project(ds60_cpp_002 LANGUAGES CXX)
 include(CTest)
 add_executable(hello main.cpp)
-set_target_properties(hello PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
+set_target_properties(
+  hello
+  PROPERTIES CXX_STANDARD 20
+             CXX_STANDARD_REQUIRED ON
+             CXX_EXTENSIONS OFF)
 add_test(NAME greeting COMMAND hello)
 set_tests_properties(greeting PROPERTIES TIMEOUT 5 PASS_REGULAR_EXPRESSION "hello, learner")

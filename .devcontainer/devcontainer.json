@@ -18,8 +18,5 @@
       }
     }
   },
-  "forwardPorts": [
-    5432,
-    8888
-  ]
+  "forwardPorts": [5432, 8888]
 }

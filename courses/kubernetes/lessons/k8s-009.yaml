@@ -28,52 +28,52 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       containers:
-      - name: hello
-        image: ds60sqlpy-k8s-fixture:0.2.0
-        imagePullPolicy: Never
-        command:
-        - python
-        - /fixture.py
-        - server
-        ports:
-        - name: http
-          containerPort: 8080
-        readinessProbe:
-          httpGet:
-            path: /ready
-            port: http
-          periodSeconds: 2
-          failureThreshold: 2
-        resources:
-          requests:
-            cpu: 10m
-            memory: 16Mi
-          limits:
-            cpu: 100m
-            memory: 64Mi
-        securityContext:
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: true
-          capabilities:
-            drop:
-            - ALL
-        env:
-        - name: DS60_MESSAGE
-          valueFrom:
-            configMapKeyRef:
-              name: hello-config
-              key: message
-        volumeMounts:
-        - name: lesson-config
-          mountPath: /config
-          readOnly: true
+        - name: hello
+          image: ds60sqlpy-k8s-fixture:0.2.0
+          imagePullPolicy: Never
+          command:
+            - python
+            - /fixture.py
+            - server
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            periodSeconds: 2
+            failureThreshold: 2
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          env:
+            - name: DS60_MESSAGE
+              valueFrom:
+                configMapKeyRef:
+                  name: hello-config
+                  key: message
+          volumeMounts:
+            - name: lesson-config
+              mountPath: /config
+              readOnly: true
       volumes:
-      - name: lesson-config
-        configMap:
-          name: hello-config
-          items:
-          - key: message
-            path: message
+        - name: lesson-config
+          configMap:
+            name: hello-config
+            items:
+              - key: message
+                path: message
 ---
 apiVersion: v1
 kind: Service
@@ -83,10 +83,9 @@ spec:
   selector:
     app: hello
   ports:
-  - name: http
-    port: 8080
-    targetPort: http
-
+    - name: http
+      port: 8080
+      targetPort: http
 # Exercise 1: Map names and keys. Trace hello-config/message through environment and volume fields. Expected: Both consumers reference the same namespaced key;mount path is read-only /config/message.
 # Exercise 2: Run the initial value contract. Use the configured hello source under a freshly qualified contract-2 lease. Expected: Fresh client verifies /version plus /message=reviewer and /file-message=reviewer,then owned cleanup.
 # Exercise 3: Predict an environment update. Keep the same process while a synthetic ConfigMap value changes from hello to reviewer. Expected: Existing environment remains hello until a new process starts.

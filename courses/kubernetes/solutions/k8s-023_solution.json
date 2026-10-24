@@ -14,9 +14,7 @@
             "name": "lesson-gateway"
           }
         ],
-        "hostnames": [
-          "lesson.local"
-        ],
+        "hostnames": ["lesson.local"],
         "rules": [
           {
             "matches": [

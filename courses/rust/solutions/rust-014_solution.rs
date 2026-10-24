@@ -1,5 +1,3 @@
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let measured = Some(0);

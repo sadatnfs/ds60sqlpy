@@ -14,30 +14,26 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Buffers;
 
-internal static class Program
-{
-    private static void Check(bool condition, string reason)
+internal static class Program {
+  private static void Check(bool condition, string reason) {
+    if (!condition)
+      throw new InvalidOperationException(reason);
+  }
+
+  private static async Task Main() {
     {
-        if (!condition) throw new InvalidOperationException(reason);
+      int whole = 7 / 2;
+      double fraction = (double)7 / 2;
+      Check(whole == 3, "integer division");
+      Check(fraction == 3.5, "floating division");
     }
-
-    private static async Task Main()
     {
-        {
-            int whole = 7 / 2;
-            double fraction = (double)7 / 2;
-            Check(whole == 3, "integer division");
-            Check(fraction == 3.5, "floating division");
-        }
-        {
-            bool accepted = int.TryParse("42", out int value);
-            bool rejected = int.TryParse("forty-two", out _);
-            Check(accepted && value == 42, "valid count");
-            Check(!rejected, "invalid count is not zero");
-        }
-        Console.WriteLine("csharp-002: passed");
-        await Task.CompletedTask;
+      bool accepted = int.TryParse("42", out int value);
+      bool rejected = int.TryParse("forty-two", out _);
+      Check(accepted && value == 42, "valid count");
+      Check(!rejected, "invalid count is not zero");
     }
-
-
+    Console.WriteLine("csharp-002: passed");
+    await Task.CompletedTask;
+  }
 }

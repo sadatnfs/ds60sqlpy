@@ -14,15 +14,12 @@
 --
 -- Target: PostgreSQL 16+; run only in advanced_sql_training.
 -- ON_ERROR_STOP is supplied by the documented psql command.
-
 BEGIN;
 SET search_path TO training, public;
-
 -- Shared teaching contract
 -- Focus: Use window functions to add partition-level context while preserving row grain, with explicit partition and ordering semantics.
 -- Assumptions: Window aggregates do not collapse rows. When order matters, use a unique tie-breaker and declare the frame in later cumulative lessons.
 -- Pitfall: Filtering a window result in the same query level is invalid; compute it in a subquery or CTE first.
-
 -- ---------------------------------------------------------------------------
 -- Exercise 1: Query writing
 -- Prompt: Show each order with the customer's average order total.
@@ -36,13 +33,17 @@ SET search_path TO training, public;
 -- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
 -- - `PARTITION BY`: restarts a window calculation independently for each partition key.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
-SELECT o.order_id,
-       o.customer_id,
-       o.total_amount,
-       ROUND(AVG(o.total_amount) OVER (PARTITION BY o.customer_id), 2) AS customer_average
-FROM orders AS o
-ORDER BY o.customer_id, o.order_date, o.order_id;
-
+SELECT
+  o.order_id,
+  o.customer_id,
+  o.total_amount,
+  ROUND(AVG(o.total_amount) OVER (PARTITION BY o.customer_id), 2) AS customer_average
+FROM
+  orders AS o
+ORDER BY
+  o.customer_id,
+  o.order_date,
+  o.order_id;
 -- ---------------------------------------------------------------------------
 -- Exercise 2: Query writing
 -- Prompt: Show each employee salary with department average, minimum, and maximum.
@@ -56,15 +57,18 @@ ORDER BY o.customer_id, o.order_date, o.order_id;
 -- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
 -- - `PARTITION BY`: restarts a window calculation independently for each partition key.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
-SELECT e.employee_id,
-       e.department_id,
-       e.salary,
-       ROUND(AVG(e.salary) OVER (PARTITION BY e.department_id), 2) AS department_average,
-       MIN(e.salary) OVER (PARTITION BY e.department_id) AS department_minimum,
-       MAX(e.salary) OVER (PARTITION BY e.department_id) AS department_maximum
-FROM employees AS e
-ORDER BY e.department_id, e.employee_id;
-
+SELECT
+  e.employee_id,
+  e.department_id,
+  e.salary,
+  ROUND(AVG(e.salary) OVER (PARTITION BY e.department_id), 2) AS department_average,
+  MIN(e.salary) OVER (PARTITION BY e.department_id) AS department_minimum,
+  MAX(e.salary) OVER (PARTITION BY e.department_id) AS department_maximum
+FROM
+  employees AS e
+ORDER BY
+  e.department_id,
+  e.employee_id;
 -- ---------------------------------------------------------------------------
 -- Exercise 3: Query writing
 -- Prompt: Calculate every order's share of its customer's stored revenue.
@@ -79,17 +83,17 @@ ORDER BY e.department_id, e.employee_id;
 -- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
 -- - `PARTITION BY`: restarts a window calculation independently for each partition key.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
-SELECT o.order_id,
-       o.customer_id,
-       o.total_amount,
-       ROUND(
-         o.total_amount
-           / NULLIF(SUM(o.total_amount) OVER (PARTITION BY o.customer_id), 0),
-         4
-       ) AS customer_revenue_share
-FROM orders AS o
-ORDER BY o.customer_id, o.order_date, o.order_id;
-
+SELECT
+  o.order_id,
+  o.customer_id,
+  o.total_amount,
+  ROUND(o.total_amount / NULLIF (SUM(o.total_amount) OVER (PARTITION BY o.customer_id), 0), 4) AS customer_revenue_share
+FROM
+  orders AS o
+ORDER BY
+  o.customer_id,
+  o.order_date,
+  o.order_id;
 -- ---------------------------------------------------------------------------
 -- Exercise 4: Prediction
 -- Prompt: Compare `GROUP BY customer_id` with `AVG(...) OVER (PARTITION BY customer_id)` and report their row counts.
@@ -107,19 +111,34 @@ ORDER BY o.customer_id, o.order_date, o.order_id;
 -- - `PARTITION BY`: restarts a window calculation independently for each partition key.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 WITH grouped AS (
-  SELECT o.customer_id, AVG(o.total_amount) AS average_total
-  FROM orders AS o
-  GROUP BY o.customer_id
-), windowed AS (
-  SELECT o.order_id,
-         AVG(o.total_amount) OVER (PARTITION BY o.customer_id) AS average_total
-  FROM orders AS o
+  SELECT
+    o.customer_id,
+    AVG(o.total_amount) AS average_total
+  FROM
+    orders AS o
+  GROUP BY
+    o.customer_id
+),
+windowed AS (
+  SELECT
+    o.order_id,
+    AVG(o.total_amount) OVER (PARTITION BY o.customer_id) AS average_total
+  FROM
+    orders AS o
 )
-SELECT 'grouped' AS method, COUNT(*) AS row_count FROM grouped
+SELECT
+  'grouped' AS method,
+  COUNT(*) AS row_count
+FROM
+  grouped
 UNION ALL
-SELECT 'windowed' AS method, COUNT(*) AS row_count FROM windowed
-ORDER BY method;
-
+SELECT
+  'windowed' AS method,
+  COUNT(*) AS row_count
+FROM
+  windowed
+ORDER BY
+  method;
 -- ---------------------------------------------------------------------------
 -- Exercise 5: Debugging
 -- Prompt: Return orders above their customer average without placing a window function in `WHERE`.
@@ -136,18 +155,25 @@ ORDER BY method;
 -- - `PARTITION BY`: restarts a window calculation independently for each partition key.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 WITH scored AS (
-  SELECT o.*,
-         AVG(o.total_amount) OVER (PARTITION BY o.customer_id) AS customer_average
-  FROM orders AS o
+  SELECT
+    o.*,
+    AVG(o.total_amount) OVER (PARTITION BY o.customer_id) AS customer_average
+  FROM
+    orders AS o
 )
-SELECT order_id,
-       customer_id,
-       total_amount,
-       ROUND(customer_average, 2) AS customer_average
-FROM scored
-WHERE total_amount > customer_average
-ORDER BY customer_id, total_amount DESC, order_id;
-
+SELECT
+  order_id,
+  customer_id,
+  total_amount,
+  ROUND(customer_average, 2) AS customer_average
+FROM
+  scored
+WHERE
+  total_amount > customer_average
+ORDER BY
+  customer_id,
+  total_amount DESC,
+  order_id;
 -- ---------------------------------------------------------------------------
 -- Exercise 6: Extension
 -- Prompt: Show order count and revenue context at both customer and country levels in the same row.
@@ -162,16 +188,20 @@ ORDER BY customer_id, total_amount DESC, order_id;
 -- - `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
 -- - `PARTITION BY`: restarts a window calculation independently for each partition key.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
-SELECT o.order_id,
-       o.customer_id,
-       c.country,
-       COUNT(*) OVER (PARTITION BY o.customer_id) AS customer_order_count,
-       SUM(o.total_amount) OVER (PARTITION BY o.customer_id) AS customer_revenue,
-       SUM(o.total_amount) OVER (PARTITION BY c.country) AS country_revenue
-FROM orders AS o
-JOIN customers AS c
-  ON c.customer_id = o.customer_id
-ORDER BY c.country, o.customer_id, o.order_date, o.order_id;
-
+SELECT
+  o.order_id,
+  o.customer_id,
+  c.country,
+  COUNT(*) OVER (PARTITION BY o.customer_id) AS customer_order_count,
+  SUM(o.total_amount) OVER (PARTITION BY o.customer_id) AS customer_revenue,
+  SUM(o.total_amount) OVER (PARTITION BY c.country) AS country_revenue
+FROM
+  orders AS o
+  JOIN customers AS c ON c.customer_id = o.customer_id
+ORDER BY
+  c.country,
+  o.customer_id,
+  o.order_date,
+  o.order_id;
 -- No course answer persists changes or temporary objects.
 ROLLBACK;

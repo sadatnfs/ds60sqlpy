@@ -20,4 +20,6 @@
 // Exercise 6: Design axes for counts and rates side by side.
 // Expected: Separate unit labels and denominators make the comparison explicit.
 
-throw new Error("Implement the six D3 practice tasks in your saved pad before claiming completion.");
+throw new Error(
+  "Implement the six D3 practice tasks in your saved pad before claiming completion.",
+);

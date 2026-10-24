@@ -13,19 +13,10 @@
         "matchConstraints": {
           "resourceRules": [
             {
-              "apiGroups": [
-                "apps"
-              ],
-              "apiVersions": [
-                "v1"
-              ],
-              "operations": [
-                "CREATE",
-                "UPDATE"
-              ],
-              "resources": [
-                "deployments"
-              ]
+              "apiGroups": ["apps"],
+              "apiVersions": ["v1"],
+              "operations": ["CREATE", "UPDATE"],
+              "resources": ["deployments"]
             }
           ]
         },
@@ -45,9 +36,7 @@
       },
       "spec": {
         "policyName": "lesson-approved-image",
-        "validationActions": [
-          "Deny"
-        ],
+        "validationActions": ["Deny"],
         "matchResources": {
           "namespaceSelector": {
             "matchLabels": {

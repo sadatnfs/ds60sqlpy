@@ -114,8 +114,6 @@ def test_docker_project_guide_has_real_install_targets_and_scoped_persistent_mou
     assert "docker.sock" not in guide
     for fixture in ("multifile", "record-library"):
         cmake = (BASE / "fixtures" / fixture / "CMakeLists.txt").read_text()
-        assert (
-            "install(TARGETS" in cmake
-            and "install(EXPORT" in cmake
-            and "INSTALL_INTERFACE:include" in cmake
-        )
+        assert re.search(r"(?m)^\s*install\s*\(\s*TARGETS\b", cmake)
+        assert re.search(r"(?m)^\s*install\s*\(\s*EXPORT\b", cmake)
+        assert "INSTALL_INTERFACE:include" in cmake

@@ -7,11 +7,7 @@
 extern "C" {
 #endif
 
-enum stats_status {
-  STATS_OK,
-  STATS_INVALID,
-  STATS_OVERFLOW
-};
+enum stats_status { STATS_OK, STATS_INVALID, STATS_OVERFLOW };
 
 /*
  * Sum count live integers without modifying them.

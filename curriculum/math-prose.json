@@ -677,31 +677,22 @@
     {
       "source": "(-Z)*(-H)=Z*H",
       "latex": "-Z\\cdot -H=Z\\cdot H",
-      "paths": [
-        "courses/nlp/guides/nlp-013.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-013.md"]
     },
     {
       "source": "(0-2)^2=4",
       "latex": "{\\left(0-2\\right)}^{2}=4",
-      "paths": [
-        "courses/deep-learning-tensorflow/solutions/tf-005_solutions.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/solutions/tf-005_solutions.md"]
     },
     {
       "source": "(1*1+3*3)/4=2.5",
       "latex": "\\frac{1\\cdot 1+3\\cdot 3}{4}=2.5",
-      "paths": [
-        "courses/llm-theory/guides/llm-027.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-027.md"]
     },
     {
       "source": "(1+log(2))*a",
       "latex": "(1+\\log(2))\\cdot a",
-      "paths": [
-        "courses/nlp/guides/nlp-007.md",
-        "courses/nlp/solutions/nlp-007_solutions.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-007.md", "courses/nlp/solutions/nlp-007_solutions.md"]
     },
     {
       "source": "(1-m^t)",
@@ -728,23 +719,17 @@
     {
       "source": "(1/G)",
       "latex": "\\frac{1}{G}",
-      "paths": [
-        "courses/llm-theory/guides/llm-001.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-001.md"]
     },
     {
       "source": "(2+4+6)/3",
       "latex": "\\frac{2+4+6}{3}",
-      "paths": [
-        "courses/deep-learning-tensorflow/guides/tf-001.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/guides/tf-001.md"]
     },
     {
       "source": "(3*log(8))/3=log(8)",
       "latex": "\\frac{3\\cdot \\log(8)}{3}=\\log(8)",
-      "paths": [
-        "courses/llm-theory/guides/llm-031.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-031.md"]
     },
     {
       "source": "(3*w-6)^2",
@@ -757,38 +742,27 @@
     {
       "source": "(3/4)*(1-5/4)=-3/16",
       "latex": "\\frac{3}{4}\\cdot (1-\\frac{5}{4})=\\frac{-3}{16}",
-      "paths": [
-        "courses/llm-theory/guides/llm-047.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-047.md"]
     },
     {
       "source": "(log(18)+log(17)+log(9))/3",
       "latex": "\\frac{\\log(18)+\\log(17)+\\log(9)}{3}",
-      "paths": [
-        "courses/llm-theory/guides/llm-028.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-028.md"]
     },
     {
       "source": "(p-y)^2",
       "latex": "{\\left(p-y\\right)}^{2}",
-      "paths": [
-        "courses/nlp/guides/nlp-009.md",
-        "courses/nlp/solutions/nlp-009_solutions.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-009.md", "courses/nlp/solutions/nlp-009_solutions.md"]
     },
     {
       "source": "(q-1)*u",
       "latex": "(q-1)\\cdot u",
-      "paths": [
-        "courses/statistics-ml/chapters/27-advanced-forecasting-and-forecast-evaluation.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/27-advanced-forecasting-and-forecast-evaluation.md"]
     },
     {
       "source": "(tau-1)*u",
       "latex": "(\\tau-1)\\cdot u",
-      "paths": [
-        "courses/statistics-ml/chapters/27-advanced-forecasting-and-forecast-evaluation.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/27-advanced-forecasting-and-forecast-evaluation.md"]
     },
     {
       "source": "(w+1)^2",
@@ -824,9 +798,7 @@
     {
       "source": "(x-3)^2",
       "latex": "{\\left(x-3\\right)}^{2}",
-      "paths": [
-        "courses/statistics-ml/chapters/36-optimization-and-operations-research.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/36-optimization-and-operations-research.md"]
     },
     {
       "source": "-0.1*(-4)/(4+epsilon)",
@@ -839,9 +811,7 @@
     {
       "source": "-1/(n-1)",
       "latex": "\\frac{-1}{n-1}",
-      "paths": [
-        "courses/statistics-ml/chapters/30-spatial-and-spatiotemporal-statistics.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/30-spatial-and-spatiotemporal-statistics.md"]
     },
     {
       "source": "-1/3",
@@ -863,9 +833,7 @@
     {
       "source": "-2/15",
       "latex": "\\frac{-2}{15}",
-      "paths": [
-        "courses/deep-learning-tensorflow/guides/tf-011.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/guides/tf-011.md"]
     },
     {
       "source": "-2/3",
@@ -891,9 +859,7 @@
     {
       "source": "-4*h+h*h",
       "latex": "-4\\cdot h+h\\cdot h",
-      "paths": [
-        "courses/deep-learning-tensorflow/solutions/tf-005_solutions.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/solutions/tf-005_solutions.md"]
     },
     {
       "source": "-4/15",
@@ -906,9 +872,7 @@
     {
       "source": "-4/3",
       "latex": "\\frac{-4}{3}",
-      "paths": [
-        "courses/deep-learning-tensorflow/guides/tf-008.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/guides/tf-008.md"]
     },
     {
       "source": "-56/3",
@@ -953,16 +917,12 @@
     {
       "source": "-log(0.01)/4",
       "latex": "\\frac{-\\log(0.01)}{4}",
-      "paths": [
-        "courses/nlp/guides/nlp-006.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-006.md"]
     },
     {
       "source": "-log(p1)-log(p2)-log(p3)",
       "latex": "-\\log(p_{1})-\\log(p_{2})-\\log(p_{3})",
-      "paths": [
-        "courses/llm-theory/guides/llm-003.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-003.md"]
     },
     {
       "source": "-log(p_y)",
@@ -975,23 +935,17 @@
     {
       "source": "-p*log(p)-(1-p)*log(1-p)",
       "latex": "-p\\cdot \\log(p)-(1-p)\\cdot \\log(1-p)",
-      "paths": [
-        "courses/nlp/guides/nlp-020.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-020.md"]
     },
     {
       "source": "-sigmoid(-m)",
       "latex": "-\\sigma(-m)",
-      "paths": [
-        "courses/llm-theory/guides/llm-033.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-033.md"]
     },
     {
       "source": "-y*log(p)-(1-y)*log(1-p)",
       "latex": "-y\\cdot \\log(p)-(1-y)\\cdot \\log(1-p)",
-      "paths": [
-        "courses/nlp/guides/nlp-009.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-009.md"]
     },
     {
       "source": ".01*2*(.75*.7+.25*.3)=.012",
@@ -1034,16 +988,12 @@
     {
       "source": ".4*.1=.04",
       "latex": "0.4\\cdot 0.1=0.04",
-      "paths": [
-        "courses/nlp/solutions/nlp-010_solutions.md"
-      ]
+      "paths": ["courses/nlp/solutions/nlp-010_solutions.md"]
     },
     {
       "source": ".4*.5=.2",
       "latex": "0.4\\cdot 0.5=0.2",
-      "paths": [
-        "courses/llm-theory/guides/llm-004.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-004.md"]
     },
     {
       "source": ".5*1.5+1=1.75",
@@ -1072,23 +1022,17 @@
     {
       "source": ".6*.6=.36",
       "latex": "0.6\\cdot 0.6=0.36",
-      "paths": [
-        "courses/nlp/solutions/nlp-010_solutions.md"
-      ]
+      "paths": ["courses/nlp/solutions/nlp-010_solutions.md"]
     },
     {
       "source": ".8*.2+.1*.8=.24",
       "latex": "0.8\\cdot 0.2+0.1\\cdot 0.8=0.24",
-      "paths": [
-        "courses/statistics-ml/chapters/24-explainability-fairness-and-model-robustness.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/24-explainability-fairness-and-model-robustness.md"]
     },
     {
       "source": ".8*.8+.1*.2=.66",
       "latex": "0.8\\cdot 0.8+0.1\\cdot 0.2=0.66",
-      "paths": [
-        "courses/statistics-ml/chapters/24-explainability-fairness-and-model-robustness.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/24-explainability-fairness-and-model-robustness.md"]
     },
     {
       "source": ".8/.2",
@@ -1131,16 +1075,12 @@
     {
       "source": "0*0",
       "latex": "0\\cdot 0",
-      "paths": [
-        "courses/deep-learning-tensorflow/solutions/tf-003_solutions.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/solutions/tf-003_solutions.md"]
     },
     {
       "source": "0*1",
       "latex": "0\\cdot 1",
-      "paths": [
-        "courses/deep-learning-tensorflow/guides/tf-003.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/guides/tf-003.md"]
     },
     {
       "source": "0+2=2",
@@ -1154,9 +1094,7 @@
     {
       "source": "0-0.2*(-0.25)=0.05",
       "latex": "0-0.2\\cdot (-0.25)=0.05",
-      "paths": [
-        "courses/llm-applied/guides/llm-applied-019.md"
-      ]
+      "paths": ["courses/llm-applied/guides/llm-applied-019.md"]
     },
     {
       "source": "0.0/1.0",
@@ -1169,16 +1107,12 @@
     {
       "source": "0.03/7",
       "latex": "\\frac{0.03}{7}",
-      "paths": [
-        "courses/llm-applied/guides/llm-applied-017.md"
-      ]
+      "paths": ["courses/llm-applied/guides/llm-applied-017.md"]
     },
     {
       "source": "0.1*sum(Y)*X",
       "latex": "0.1\\cdot \\operatorname{sum}(Y)\\cdot X",
-      "paths": [
-        "courses/llm-applied/guides/llm-applied-017.md"
-      ]
+      "paths": ["courses/llm-applied/guides/llm-applied-017.md"]
     },
     {
       "source": "0.1*w\u00b2",
@@ -1191,9 +1125,7 @@
     {
       "source": "0.25*0.25=0.0625",
       "latex": "0.25\\cdot 0.25=0.0625",
-      "paths": [
-        "courses/llm-applied/guides/llm-applied-019.md"
-      ]
+      "paths": ["courses/llm-applied/guides/llm-applied-019.md"]
     },
     {
       "source": "0.3+0.2=0.5",
@@ -1206,23 +1138,17 @@
     {
       "source": "0.5**3=0.125",
       "latex": "{0.5}^{3}=0.125",
-      "paths": [
-        "courses/llm-theory/solutions/llm-005_solutions.md"
-      ]
+      "paths": ["courses/llm-theory/solutions/llm-005_solutions.md"]
     },
     {
       "source": "0.5*0.25*0.8=0.1",
       "latex": "0.5\\cdot 0.25\\cdot 0.8=0.1",
-      "paths": [
-        "courses/llm-theory/solutions/llm-003_solutions.md"
-      ]
+      "paths": ["courses/llm-theory/solutions/llm-003_solutions.md"]
     },
     {
       "source": "0.5*0.4*0.99*0.7=0.1386",
       "latex": "0.5\\cdot 0.4\\cdot 0.99\\cdot 0.7=0.1386",
-      "paths": [
-        "courses/nlp/guides/nlp-010.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-010.md"]
     },
     {
       "source": "0.5*1+0.5*4=2.5",
@@ -1245,9 +1171,7 @@
     {
       "source": "0.6*0.6*0.3*0.7=0.0756",
       "latex": "0.6\\cdot 0.6\\cdot 0.3\\cdot 0.7=0.0756",
-      "paths": [
-        "courses/nlp/guides/nlp-010.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-010.md"]
     },
     {
       "source": "0.8^2=0.64",
@@ -1268,16 +1192,12 @@
     {
       "source": "0/3",
       "latex": "\\frac{0}{3}",
-      "paths": [
-        "courses/llm-theory/guides/llm-042.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-042.md"]
     },
     {
       "source": "0<=3<=10",
       "latex": "0\\le 3\\le 10",
-      "paths": [
-        "courses/llm-applied/guides/llm-applied-002.md"
-      ]
+      "paths": ["courses/llm-applied/guides/llm-applied-002.md"]
     },
     {
       "source": "0<=o<s",
@@ -1298,16 +1218,12 @@
     {
       "source": "1*0",
       "latex": "1\\cdot 0",
-      "paths": [
-        "courses/deep-learning-tensorflow/guides/tf-003.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/guides/tf-003.md"]
     },
     {
       "source": "1*1",
       "latex": "1\\cdot 1",
-      "paths": [
-        "courses/deep-learning-tensorflow/guides/tf-003.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/guides/tf-003.md"]
     },
     {
       "source": "1+(m-1)*ICC",
@@ -1334,23 +1250,17 @@
     {
       "source": "1+ceil((n-s)/d)",
       "latex": "1+\\left\\lceil \\frac{n-s}{d}\\right\\rceil",
-      "paths": [
-        "courses/llm-applied/guides/llm-applied-005.md"
-      ]
+      "paths": ["courses/llm-applied/guides/llm-applied-005.md"]
     },
     {
       "source": "1+ceil(4/2)=3",
       "latex": "1+\\left\\lceil \\frac{4}{2}\\right\\rceil=3",
-      "paths": [
-        "courses/llm-applied/guides/llm-applied-005.md"
-      ]
+      "paths": ["courses/llm-applied/guides/llm-applied-005.md"]
     },
     {
       "source": "1+log(tf_ij)",
       "latex": "1+\\log(\\mathrm{tf}_{ij})",
-      "paths": [
-        "courses/nlp/guides/nlp-007.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-007.md"]
     },
     {
       "source": "1-0.05^(1/n)",
@@ -1363,9 +1273,7 @@
     {
       "source": "1-1=0",
       "latex": "1-1=0",
-      "paths": [
-        "courses/deep-learning-tensorflow/solutions/tf-003_solutions.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/solutions/tf-003_solutions.md"]
     },
     {
       "source": "1-3+2=0",
@@ -1386,9 +1294,7 @@
     {
       "source": "1-n/N",
       "latex": "1-\\frac{n}{N}",
-      "paths": [
-        "courses/statistics-ml/chapters/05-sampling-surveys-and-data-collection.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/05-sampling-surveys-and-data-collection.md"]
     },
     {
       "source": "1.5*log(2)",
@@ -1442,16 +1348,12 @@
     {
       "source": "1.7/7",
       "latex": "\\frac{1.7}{7}",
-      "paths": [
-        "courses/llm-applied/guides/llm-applied-017.md"
-      ]
+      "paths": ["courses/llm-applied/guides/llm-applied-017.md"]
     },
     {
       "source": "1.7/7=17/70",
       "latex": "\\frac{1.7}{7}=\\frac{17}{70}",
-      "paths": [
-        "courses/llm-applied/guides/llm-applied-017.md"
-      ]
+      "paths": ["courses/llm-applied/guides/llm-applied-017.md"]
     },
     {
       "source": "1.80\u00d710^308",
@@ -1464,9 +1366,7 @@
     {
       "source": "1.96*sigma/sqrt(n)",
       "latex": "\\frac{1.96\\cdot \\sigma}{\\sqrt{n}}",
-      "paths": [
-        "courses/statistics-ml/chapters/08-estimation-and-statistical-inference.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/08-estimation-and-statistical-inference.md"]
     },
     {
       "source": "1/(1+exp(-1))",
@@ -1494,23 +1394,17 @@
     {
       "source": "1/(c+r)",
       "latex": "\\frac{1}{c+r}",
-      "paths": [
-        "courses/llm-applied/guides/llm-applied-008.md"
-      ]
+      "paths": ["courses/llm-applied/guides/llm-applied-008.md"]
     },
     {
       "source": "1/(k+rank)",
       "latex": "\\frac{1}{k+\\mathrm{rank}}",
-      "paths": [
-        "courses/nlp/guides/nlp-022.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-022.md"]
     },
     {
       "source": "1/(mu-lambda)",
       "latex": "\\frac{1}{\\mu-\\lambda}",
-      "paths": [
-        "courses/statistics-ml/chapters/36-optimization-and-operations-research.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/36-optimization-and-operations-research.md"]
     },
     {
       "source": "1/(v_i+tau_squared)",
@@ -1540,9 +1434,7 @@
     {
       "source": "1/12",
       "latex": "\\frac{1}{12}",
-      "paths": [
-        "courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md"]
     },
     {
       "source": "1/15",
@@ -1566,16 +1458,12 @@
     {
       "source": "1/17",
       "latex": "\\frac{1}{17}",
-      "paths": [
-        "courses/llm-theory/guides/llm-028.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-028.md"]
     },
     {
       "source": "1/18",
       "latex": "\\frac{1}{18}",
-      "paths": [
-        "courses/llm-theory/guides/llm-028.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-028.md"]
     },
     {
       "source": "1/2",
@@ -1706,9 +1594,7 @@
     {
       "source": "1/6",
       "latex": "\\frac{1}{6}",
-      "paths": [
-        "courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md"]
     },
     {
       "source": "1/61+1/63",
@@ -1738,9 +1624,7 @@
     {
       "source": "1/62-1/63=1/3906",
       "latex": "\\frac{1}{62}-\\frac{1}{63}=\\frac{1}{3906}",
-      "paths": [
-        "courses/llm-applied/guides/llm-applied-008.md"
-      ]
+      "paths": ["courses/llm-applied/guides/llm-applied-008.md"]
     },
     {
       "source": "1/63",
@@ -1753,16 +1637,12 @@
     {
       "source": "1/64",
       "latex": "\\frac{1}{64}",
-      "paths": [
-        "courses/llm-applied/guides/llm-applied-015.md"
-      ]
+      "paths": ["courses/llm-applied/guides/llm-applied-015.md"]
     },
     {
       "source": "1/7",
       "latex": "\\frac{1}{7}",
-      "paths": [
-        "courses/llm-theory/guides/llm-044.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-044.md"]
     },
     {
       "source": "1/8",
@@ -1807,16 +1687,12 @@
     {
       "source": "1/T",
       "latex": "\\frac{1}{T}",
-      "paths": [
-        "courses/llm-theory/guides/llm-002.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-002.md"]
     },
     {
       "source": "1/c",
       "latex": "\\frac{1}{c}",
-      "paths": [
-        "courses/llm-applied/guides/llm-applied-008.md"
-      ]
+      "paths": ["courses/llm-applied/guides/llm-applied-008.md"]
     },
     {
       "source": "1/e",
@@ -1850,9 +1726,7 @@
     {
       "source": "1/s",
       "latex": "\\frac{1}{s}",
-      "paths": [
-        "courses/statistics-ml/chapters/02-mathematical-foundations.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/02-mathematical-foundations.md"]
     },
     {
       "source": "1/sqrt(0.5*0.25)",
@@ -1865,9 +1739,7 @@
     {
       "source": "1/sqrt(1.01)",
       "latex": "\\frac{1}{\\sqrt{1.01}}",
-      "paths": [
-        "courses/llm-applied/guides/llm-applied-007.md"
-      ]
+      "paths": ["courses/llm-applied/guides/llm-applied-007.md"]
     },
     {
       "source": "1/sqrt(2)",
@@ -1898,9 +1770,7 @@
     {
       "source": "1/theta",
       "latex": "\\frac{1}{\\theta}",
-      "paths": [
-        "courses/statistics-ml/chapters/08-estimation-and-statistical-inference.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/08-estimation-and-statistical-inference.md"]
     },
     {
       "source": "1/v_i",
@@ -1912,16 +1782,12 @@
     {
       "source": "10/11",
       "latex": "\\frac{10}{11}",
-      "paths": [
-        "courses/llm-theory/guides/llm-001.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-001.md"]
     },
     {
       "source": "10/12",
       "latex": "\\frac{10}{12}",
-      "paths": [
-        "courses/nlp/guides/nlp-018.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-018.md"]
     },
     {
       "source": "10/14",
@@ -1933,9 +1799,7 @@
     {
       "source": "10/3",
       "latex": "\\frac{10}{3}",
-      "paths": [
-        "courses/statistics-ml/chapters/27-advanced-forecasting-and-forecast-evaluation.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/27-advanced-forecasting-and-forecast-evaluation.md"]
     },
     {
       "source": "10/4=2.5",
@@ -1947,16 +1811,12 @@
     {
       "source": "10/7",
       "latex": "\\frac{10}{7}",
-      "paths": [
-        "courses/llm-applied/guides/llm-applied-017.md"
-      ]
+      "paths": ["courses/llm-applied/guides/llm-applied-017.md"]
     },
     {
       "source": "100*80/20=400",
       "latex": "\\frac{100\\cdot 80}{20}=400",
-      "paths": [
-        "courses/statistics-ml/chapters/05-sampling-surveys-and-data-collection.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/05-sampling-surveys-and-data-collection.md"]
     },
     {
       "source": "100/1000=10",
@@ -1984,9 +1844,7 @@
     {
       "source": "10^-2000",
       "latex": "{10}^{-2000}",
-      "paths": [
-        "courses/llm-theory/guides/llm-003.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-003.md"]
     },
     {
       "source": "12/27",
@@ -2023,9 +1881,7 @@
     {
       "source": "13/30",
       "latex": "\\frac{13}{30}",
-      "paths": [
-        "courses/nlp/solutions/nlp-008_solutions.md"
-      ]
+      "paths": ["courses/nlp/solutions/nlp-008_solutions.md"]
     },
     {
       "source": "14/3",
@@ -2059,16 +1915,12 @@
     {
       "source": "16*6=96",
       "latex": "16\\cdot 6=96",
-      "paths": [
-        "courses/deep-learning-tensorflow/solutions/tf-006_solutions.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/solutions/tf-006_solutions.md"]
     },
     {
       "source": "16*w^4-8*w^2+1",
       "latex": "16\\cdot {w}^{4}-8\\cdot {w}^{2}+1",
-      "paths": [
-        "courses/deep-learning-tensorflow/solutions/tf-006_solutions.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/solutions/tf-006_solutions.md"]
     },
     {
       "source": "16/3",
@@ -2084,9 +1936,7 @@
     {
       "source": "16/9",
       "latex": "\\frac{16}{9}",
-      "paths": [
-        "courses/deep-learning-tensorflow/guides/tf-008.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/guides/tf-008.md"]
     },
     {
       "source": "16\u00d76\u00d73=288",
@@ -2107,9 +1957,7 @@
     {
       "source": "1^t",
       "latex": "{1}^{t}",
-      "paths": [
-        "courses/llm-applied/guides/llm-applied-015.md"
-      ]
+      "paths": ["courses/llm-applied/guides/llm-applied-015.md"]
     },
     {
       "source": "1\u00d71+2\u00d70+4\u00d70+5\u00d7(-1)=-4",
@@ -2122,16 +1970,12 @@
     {
       "source": "2*(-4)*2=-16",
       "latex": "2\\cdot (-4)\\cdot 2=-16",
-      "paths": [
-        "courses/deep-learning-tensorflow/solutions/tf-007_solutions.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/solutions/tf-007_solutions.md"]
     },
     {
       "source": "2*(0-2)=-4",
       "latex": "2\\cdot (0-2)=-4",
-      "paths": [
-        "courses/deep-learning-tensorflow/solutions/tf-005_solutions.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/solutions/tf-005_solutions.md"]
     },
     {
       "source": "2*(0.125)*(-0.05)=-0.0125",
@@ -2160,9 +2004,7 @@
     {
       "source": "2*0",
       "latex": "2\\cdot 0",
-      "paths": [
-        "courses/deep-learning-tensorflow/guides/tf-003.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/guides/tf-003.md"]
     },
     {
       "source": "2*1*(1/4)=1/2",
@@ -2191,9 +2033,7 @@
     {
       "source": "2*B*L*Hkv*d*s",
       "latex": "2\\cdot B\\cdot L\\cdot H_{kv}\\cdot d\\cdot s",
-      "paths": [
-        "courses/llm-theory/guides/llm-046.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-046.md"]
     },
     {
       "source": "2*B*T*Hkv*d*s",
@@ -2222,9 +2062,7 @@
     {
       "source": "2*L*B*Hkv*T*Dh",
       "latex": "2\\cdot L\\cdot B\\cdot H_{kv}\\cdot T\\cdot D_h",
-      "paths": [
-        "courses/llm-theory/guides/llm-025.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-025.md"]
     },
     {
       "source": "2*L*B*Hkv*T*d*s",
@@ -2253,9 +2091,7 @@
     {
       "source": "2*log(1.6)",
       "latex": "2\\cdot \\log(1.6)",
-      "paths": [
-        "courses/llm-applied/guides/llm-applied-006.md"
-      ]
+      "paths": ["courses/llm-applied/guides/llm-applied-006.md"]
     },
     {
       "source": "2*log(2)",
@@ -2268,9 +2104,7 @@
     {
       "source": "2*log(2)/3",
       "latex": "\\frac{2\\cdot \\log(2)}{3}",
-      "paths": [
-        "courses/deep-learning-tensorflow/guides/tf-021.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/guides/tf-021.md"]
     },
     {
       "source": "2*log(3)",
@@ -2299,9 +2133,7 @@
     {
       "source": "2+3-1=4",
       "latex": "2+3-1=4",
-      "paths": [
-        "courses/deep-learning-tensorflow/solutions/tf-003_solutions.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/solutions/tf-003_solutions.md"]
     },
     {
       "source": "2-6=-4",
@@ -2314,16 +2146,12 @@
     {
       "source": "2.2/(1+1.2)=1",
       "latex": "\\frac{2.2}{1+1.2}=1",
-      "paths": [
-        "courses/llm-applied/guides/llm-applied-006.md"
-      ]
+      "paths": ["courses/llm-applied/guides/llm-applied-006.md"]
     },
     {
       "source": "2.2/3.1",
       "latex": "\\frac{2.2}{3.1}",
-      "paths": [
-        "courses/llm-applied/guides/llm-applied-006.md"
-      ]
+      "paths": ["courses/llm-applied/guides/llm-applied-006.md"]
     },
     {
       "source": "2/(2+8)=0.2",
@@ -2351,10 +2179,7 @@
     {
       "source": "2/15",
       "latex": "\\frac{2}{15}",
-      "paths": [
-        "courses/nlp/guides/nlp-021.md",
-        "courses/nlp/solutions/nlp-021_solutions.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-021.md", "courses/nlp/solutions/nlp-021_solutions.md"]
     },
     {
       "source": "2/18=1/9",
@@ -2435,16 +2260,12 @@
     {
       "source": "2/4=0.5",
       "latex": "\\frac{2}{4}=0.5",
-      "paths": [
-        "courses/llm-theory/guides/llm-040.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-040.md"]
     },
     {
       "source": "2/5",
       "latex": "\\frac{2}{5}",
-      "paths": [
-        "courses/llm-theory/guides/llm-004.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-004.md"]
     },
     {
       "source": "2/7",
@@ -2473,9 +2294,7 @@
     {
       "source": "20/10=2",
       "latex": "\\frac{20}{10}=2",
-      "paths": [
-        "courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md"]
     },
     {
       "source": "20/4=5",
@@ -2488,9 +2307,7 @@
     {
       "source": "200*4",
       "latex": "200\\cdot 4",
-      "paths": [
-        "courses/statistics-ml/chapters/05-sampling-surveys-and-data-collection.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/05-sampling-surveys-and-data-collection.md"]
     },
     {
       "source": "202/3",
@@ -2503,16 +2320,12 @@
     {
       "source": "22/3",
       "latex": "\\frac{22}{3}",
-      "paths": [
-        "courses/deep-learning-tensorflow/guides/tf-002.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/guides/tf-002.md"]
     },
     {
       "source": "23/6",
       "latex": "\\frac{23}{6}",
-      "paths": [
-        "courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md"]
     },
     {
       "source": "25/3",
@@ -2524,9 +2337,7 @@
     {
       "source": "256-120-20-20-40=56",
       "latex": "256-120-20-20-40=56",
-      "paths": [
-        "courses/llm-applied/guides/llm-applied-003.md"
-      ]
+      "paths": ["courses/llm-applied/guides/llm-applied-003.md"]
     },
     {
       "source": "28/15",
@@ -2551,9 +2362,7 @@
     {
       "source": "2^(7/4)",
       "latex": "{2}^{\\frac{7}{4}}",
-      "paths": [
-        "courses/llm-theory/guides/llm-005.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-005.md"]
     },
     {
       "source": "2^-10",
@@ -2590,9 +2399,7 @@
     {
       "source": "2^t",
       "latex": "{2}^{t}",
-      "paths": [
-        "courses/llm-applied/guides/llm-applied-015.md"
-      ]
+      "paths": ["courses/llm-applied/guides/llm-applied-015.md"]
     },
     {
       "source": "2\u00d712=24",
@@ -2613,37 +2420,27 @@
     {
       "source": "3*(-1)",
       "latex": "3\\cdot (-1)",
-      "paths": [
-        "courses/deep-learning-tensorflow/guides/tf-003.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/guides/tf-003.md"]
     },
     {
       "source": "3*(w-1)^2",
       "latex": "3\\cdot {\\left(w-1\\right)}^{2}",
-      "paths": [
-        "courses/deep-learning-tensorflow/solutions/tf-005_solutions.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/solutions/tf-005_solutions.md"]
     },
     {
       "source": "3*0.4^2=0.48",
       "latex": "3\\cdot {0.4}^{2}=0.48",
-      "paths": [
-        "courses/deep-learning-tensorflow/solutions/tf-005_solutions.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/solutions/tf-005_solutions.md"]
     },
     {
       "source": "3*1",
       "latex": "3\\cdot 1",
-      "paths": [
-        "courses/deep-learning-tensorflow/solutions/tf-003_solutions.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/solutions/tf-003_solutions.md"]
     },
     {
       "source": "3*4=12",
       "latex": "3\\cdot 4=12",
-      "paths": [
-        "courses/statistics-ml/chapters/25-time-series-foundations-and-diagnostics.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/25-time-series-foundations-and-diagnostics.md"]
     },
     {
       "source": "3*log(2)",
@@ -2703,16 +2500,12 @@
     {
       "source": "3+4*c",
       "latex": "3+4\\cdot c",
-      "paths": [
-        "courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md"]
     },
     {
       "source": "3+4*x",
       "latex": "3+4\\cdot x",
-      "paths": [
-        "courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md"]
     },
     {
       "source": "3-1+2=4",
@@ -2741,9 +2534,7 @@
     {
       "source": "3/10",
       "latex": "\\frac{3}{10}",
-      "paths": [
-        "courses/llm-applied/guides/llm-applied-024.md"
-      ]
+      "paths": ["courses/llm-applied/guides/llm-applied-024.md"]
     },
     {
       "source": "3/10=0.3",
@@ -2758,16 +2549,12 @@
     {
       "source": "3/14",
       "latex": "\\frac{3}{14}",
-      "paths": [
-        "courses/deep-learning-tensorflow/guides/tf-008.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/guides/tf-008.md"]
     },
     {
       "source": "3/2",
       "latex": "\\frac{3}{2}",
-      "paths": [
-        "courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md"]
     },
     {
       "source": "3/3",
@@ -2819,9 +2606,7 @@
     {
       "source": "32*2+2*16",
       "latex": "32\\cdot 2+2\\cdot 16",
-      "paths": [
-        "courses/llm-applied/guides/llm-applied-018.md"
-      ]
+      "paths": ["courses/llm-applied/guides/llm-applied-018.md"]
     },
     {
       "source": "32*32=1024",
@@ -2874,9 +2659,7 @@
     {
       "source": "4/(4+1)=0.8",
       "latex": "\\frac{4}{4+1}=0.8",
-      "paths": [
-        "courses/statistics-ml/chapters/26-classical-forecasting-methods.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/26-classical-forecasting-methods.md"]
     },
     {
       "source": "4/12",
@@ -2908,9 +2691,7 @@
     {
       "source": "4/7",
       "latex": "\\frac{4}{7}",
-      "paths": [
-        "courses/llm-theory/guides/llm-044.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-044.md"]
     },
     {
       "source": "448/225",
@@ -2923,9 +2704,7 @@
     {
       "source": "5*abs(a)",
       "latex": "5\\cdot \\left|a\\right|",
-      "paths": [
-        "courses/llm-theory/guides/llm-020.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-020.md"]
     },
     {
       "source": "5/10",
@@ -2946,9 +2725,7 @@
     {
       "source": "5/4",
       "latex": "\\frac{5}{4}",
-      "paths": [
-        "courses/llm-theory/guides/llm-047.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-047.md"]
     },
     {
       "source": "5/6",
@@ -2994,9 +2771,7 @@
     {
       "source": "6*(w-1)",
       "latex": "6\\cdot (w-1)",
-      "paths": [
-        "courses/deep-learning-tensorflow/solutions/tf-005_solutions.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/solutions/tf-005_solutions.md"]
     },
     {
       "source": "6*4*2",
@@ -3009,9 +2784,7 @@
     {
       "source": "6*4=24",
       "latex": "6\\cdot 4=24",
-      "paths": [
-        "courses/deep-learning-tensorflow/solutions/tf-006_solutions.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/solutions/tf-006_solutions.md"]
     },
     {
       "source": "6-3+(8-6)/.5=7",
@@ -3046,9 +2819,7 @@
     {
       "source": "6/10=0.6",
       "latex": "\\frac{6}{10}=0.6",
-      "paths": [
-        "courses/llm-applied/guides/llm-applied-013.md"
-      ]
+      "paths": ["courses/llm-applied/guides/llm-applied-013.md"]
     },
     {
       "source": "6/27",
@@ -3076,16 +2847,12 @@
     {
       "source": "64*w^3-16*w",
       "latex": "64\\cdot {w}^{3}-16\\cdot w",
-      "paths": [
-        "courses/deep-learning-tensorflow/solutions/tf-006_solutions.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/solutions/tf-006_solutions.md"]
     },
     {
       "source": "64+32=96",
       "latex": "64+32=96",
-      "paths": [
-        "courses/llm-applied/guides/llm-applied-018.md"
-      ]
+      "paths": ["courses/llm-applied/guides/llm-applied-018.md"]
     },
     {
       "source": "7*log(2)/4",
@@ -3100,23 +2867,17 @@
     {
       "source": "7/3",
       "latex": "\\frac{7}{3}",
-      "paths": [
-        "courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md"]
     },
     {
       "source": "72-9*8=0",
       "latex": "72-9\\cdot 8=0",
-      "paths": [
-        "courses/llm-applied/guides/llm-applied-011.md"
-      ]
+      "paths": ["courses/llm-applied/guides/llm-applied-011.md"]
     },
     {
       "source": "8*2+2*8=32",
       "latex": "8\\cdot 2+2\\cdot 8=32",
-      "paths": [
-        "courses/llm-theory/guides/llm-032.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-032.md"]
     },
     {
       "source": "8*512\u00b2*4",
@@ -3178,16 +2939,12 @@
     {
       "source": "8/9",
       "latex": "\\frac{8}{9}",
-      "paths": [
-        "courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md"]
     },
     {
       "source": "800*1",
       "latex": "800\\cdot 1",
-      "paths": [
-        "courses/statistics-ml/chapters/05-sampling-surveys-and-data-collection.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/05-sampling-surveys-and-data-collection.md"]
     },
     {
       "source": "868/225",
@@ -3208,9 +2965,7 @@
     {
       "source": "9/7",
       "latex": "\\frac{9}{7}",
-      "paths": [
-        "courses/llm-applied/guides/llm-applied-005.md"
-      ]
+      "paths": ["courses/llm-applied/guides/llm-applied-005.md"]
     },
     {
       "source": "90/585",
@@ -3222,9 +2977,7 @@
     {
       "source": "900/(900+990)",
       "latex": "\\frac{900}{900+990}",
-      "paths": [
-        "courses/statistics-ml/chapters/22-model-validation-and-predictive-performance.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/22-model-validation-and-predictive-performance.md"]
     },
     {
       "source": "91/150",
@@ -3237,9 +2990,7 @@
     {
       "source": "96/10464=1/109",
       "latex": "\\frac{96}{10464}=\\frac{1}{109}",
-      "paths": [
-        "courses/llm-applied/guides/llm-applied-018.md"
-      ]
+      "paths": ["courses/llm-applied/guides/llm-applied-018.md"]
     },
     {
       "source": "A*B",
@@ -3268,23 +3019,17 @@
     {
       "source": "A*x<=b",
       "latex": "A\\cdot x\\le b",
-      "paths": [
-        "courses/statistics-ml/chapters/36-optimization-and-operations-research.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/36-optimization-and-operations-research.md"]
     },
     {
       "source": "A=-1",
       "latex": "A=-1",
-      "paths": [
-        "courses/llm-theory/guides/llm-040.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-040.md"]
     },
     {
       "source": "A=.6",
       "latex": "A=0.6",
-      "paths": [
-        "courses/llm-theory/guides/llm-003.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-003.md"]
     },
     {
       "source": "A=0",
@@ -3297,9 +3042,7 @@
     {
       "source": "A=2",
       "latex": "A=2",
-      "paths": [
-        "courses/llm-theory/guides/llm-029.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-029.md"]
     },
     {
       "source": "A=A_pt^T",
@@ -3312,9 +3055,7 @@
     {
       "source": "A=[0.5]",
       "latex": "A=[0.5]",
-      "paths": [
-        "courses/llm-theory/guides/llm-005.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-005.md"]
     },
     {
       "source": "A=[1,1]",
@@ -3367,16 +3108,12 @@
     {
       "source": "B=+1",
       "latex": "B=+1",
-      "paths": [
-        "courses/llm-theory/guides/llm-040.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-040.md"]
     },
     {
       "source": "B=.4",
       "latex": "B=0.4",
-      "paths": [
-        "courses/llm-theory/guides/llm-003.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-003.md"]
     },
     {
       "source": "B=0",
@@ -3419,9 +3156,7 @@
     {
       "source": "B=[0.25,0.25,0.25]",
       "latex": "B=[0.25,0.25,0.25]",
-      "paths": [
-        "courses/llm-theory/guides/llm-005.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-005.md"]
     },
     {
       "source": "B=[1/2,1/4,1/4]",
@@ -3434,16 +3169,12 @@
     {
       "source": "BP=exp(-0.5)",
       "latex": "\\mathrm{BP}=\\exp(-0.5)",
-      "paths": [
-        "courses/nlp/guides/nlp-017.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-017.md"]
     },
     {
       "source": "BP=min(1,exp(1-r/c))",
       "latex": "\\mathrm{BP}=\\min(1,\\exp(1-\\frac{r}{c}))",
-      "paths": [
-        "courses/nlp/guides/nlp-017.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-017.md"]
     },
     {
       "source": "B^T",
@@ -3458,10 +3189,7 @@
     {
       "source": "C=0.1",
       "latex": "C=0.1",
-      "paths": [
-        "courses/nlp/guides/nlp-009.md",
-        "courses/nlp/solutions/nlp-009_solutions.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-009.md", "courses/nlp/solutions/nlp-009_solutions.md"]
     },
     {
       "source": "C=1",
@@ -3474,9 +3202,7 @@
     {
       "source": "C=10",
       "latex": "C=10",
-      "paths": [
-        "courses/nlp/guides/nlp-009.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-009.md"]
     },
     {
       "source": "C=4",
@@ -3489,9 +3215,7 @@
     {
       "source": "C=A*B",
       "latex": "C=A\\cdot B",
-      "paths": [
-        "courses/statistics-ml/chapters/13-classical-experimental-design.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/13-classical-experimental-design.md"]
     },
     {
       "source": "C=[1/3,1/3,1/3]",
@@ -3520,9 +3244,7 @@
     {
       "source": "CE=log(3)",
       "latex": "\\mathrm{CE}=\\log(3)",
-      "paths": [
-        "courses/deep-learning-tensorflow/guides/tf-014.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/guides/tf-014.md"]
     },
     {
       "source": "C^(alpha/(alpha+beta))",
@@ -3543,9 +3265,7 @@
     {
       "source": "C_FP*(1-p)<C_FN*p",
       "latex": "C_{\\mathrm{FP}}\\cdot (1-p)<C_{\\mathrm{FN}}\\cdot p",
-      "paths": [
-        "courses/statistics-ml/chapters/22-model-validation-and-predictive-performance.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/22-model-validation-and-predictive-performance.md"]
     },
     {
       "source": "C_FP/(C_FP+C_FN)",
@@ -3567,37 +3287,27 @@
     {
       "source": "C_u+1=3",
       "latex": "C_{u}+1=3",
-      "paths": [
-        "courses/llm-theory/guides/llm-004.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-004.md"]
     },
     {
       "source": "C_u>0",
       "latex": "C_{u}>0",
-      "paths": [
-        "courses/llm-theory/guides/llm-004.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-004.md"]
     },
     {
       "source": "C_uv/C_u",
       "latex": "\\frac{C_{uv}}{C_{u}}",
-      "paths": [
-        "courses/llm-theory/guides/llm-004.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-004.md"]
     },
     {
       "source": "Cov(X,Y)",
       "latex": "\\operatorname{Cov}(X,Y)",
-      "paths": [
-        "courses/statistics-ml/chapters/14-online-experimentation-and-a-b-testing.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/14-online-experimentation-and-a-b-testing.md"]
     },
     {
       "source": "Cov(f,g)/Var(g)",
       "latex": "\\frac{\\operatorname{Cov}(f,g)}{\\operatorname{Var}(g)}",
-      "paths": [
-        "courses/statistics-ml/chapters/37-simulation-and-computational-statistics.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/37-simulation-and-computational-statistics.md"]
     },
     {
       "source": "D*Hq*d",
@@ -3610,9 +3320,7 @@
     {
       "source": "D=10",
       "latex": "D=10",
-      "paths": [
-        "courses/llm-theory/guides/llm-029.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-029.md"]
     },
     {
       "source": "D=2",
@@ -3666,9 +3374,7 @@
     {
       "source": "E=W_restored-W",
       "latex": "E=W_{\\mathrm{restored}}-W",
-      "paths": [
-        "courses/llm-theory/guides/llm-034.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-034.md"]
     },
     {
       "source": "E=[[0,0],[1,0],[0,2]]",
@@ -3689,32 +3395,22 @@
     {
       "source": "F1=2/(2+1+2)=0.4",
       "latex": "F_{1}=\\frac{2}{2+1+2}=0.4",
-      "paths": [
-        "courses/nlp/guides/nlp-011.md",
-        "courses/nlp/solutions/nlp-011_solutions.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-011.md", "courses/nlp/solutions/nlp-011_solutions.md"]
     },
     {
       "source": "F1=6/7",
       "latex": "F_{1}=\\frac{6}{7}",
-      "paths": [
-        "courses/nlp/guides/nlp-017.md",
-        "courses/nlp/solutions/nlp-017_solutions.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-017.md", "courses/nlp/solutions/nlp-017_solutions.md"]
     },
     {
       "source": "F=0",
       "latex": "F=0",
-      "paths": [
-        "courses/llm-theory/guides/llm-045.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-045.md"]
     },
     {
       "source": "F>10",
       "latex": "F>10",
-      "paths": [
-        "courses/statistics-ml/chapters/16-quasi-experiments-and-causal-study-designs.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/16-quasi-experiments-and-causal-study-designs.md"]
     },
     {
       "source": "FN=1",
@@ -3729,10 +3425,7 @@
     {
       "source": "FN=2",
       "latex": "\\mathrm{FN}=2",
-      "paths": [
-        "courses/nlp/guides/nlp-011.md",
-        "courses/nlp/solutions/nlp-011_solutions.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-011.md", "courses/nlp/solutions/nlp-011_solutions.md"]
     },
     {
       "source": "FP=1",
@@ -3771,23 +3464,17 @@
     {
       "source": "G=[[1,2],[3,4],[5,6]]",
       "latex": "G=[[1,2],[3,4],[5,6]]",
-      "paths": [
-        "courses/llm-theory/guides/llm-008.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-008.md"]
     },
     {
       "source": "G=dL/dO",
       "latex": "G=\\frac{\\partial L}{\\partial O}",
-      "paths": [
-        "courses/llm-theory/guides/llm-043.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-043.md"]
     },
     {
       "source": "G=dL/dX",
       "latex": "G=\\frac{\\partial L}{\\partial X}",
-      "paths": [
-        "courses/llm-theory/guides/llm-008.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-008.md"]
     },
     {
       "source": "G=dL/dY",
@@ -3806,65 +3493,47 @@
     {
       "source": "G=dL/dy",
       "latex": "G=\\frac{\\partial L}{\\partial y}",
-      "paths": [
-        "courses/llm-theory/guides/llm-032.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-032.md"]
     },
     {
       "source": "H*Dh",
       "latex": "H\\cdot D_h",
-      "paths": [
-        "courses/llm-theory/guides/llm-025.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-025.md"]
     },
     {
       "source": "H*T*T",
       "latex": "H\\cdot T\\cdot T",
-      "paths": [
-        "courses/llm-theory/guides/llm-011.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-011.md"]
     },
     {
       "source": "H=-(1/N)",
       "latex": "H=-\\frac{1}{N}",
-      "paths": [
-        "courses/llm-theory/guides/llm-005.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-005.md"]
     },
     {
       "source": "H=2",
       "latex": "H=2",
-      "paths": [
-        "courses/llm-theory/guides/llm-025.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-025.md"]
     },
     {
       "source": "H=dL/dS",
       "latex": "H=\\frac{\\partial L}{\\partial S}",
-      "paths": [
-        "courses/llm-theory/guides/llm-043.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-043.md"]
     },
     {
       "source": "H^T",
       "latex": "{H}^{T}",
-      "paths": [
-        "courses/llm-theory/guides/llm-043.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-043.md"]
     },
     {
       "source": "Hkv=2",
       "latex": "H_{kv}=2",
-      "paths": [
-        "courses/llm-theory/guides/llm-046.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-046.md"]
     },
     {
       "source": "Hq*d",
       "latex": "H_q\\cdot d",
-      "paths": [
-        "courses/llm-theory/guides/llm-046.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-046.md"]
     },
     {
       "source": "Hq*d*D",
@@ -3877,9 +3546,7 @@
     {
       "source": "Hq=4",
       "latex": "H_q=4",
-      "paths": [
-        "courses/llm-theory/guides/llm-046.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-046.md"]
     },
     {
       "source": "Hq=Hkv=8",
@@ -3908,9 +3575,7 @@
     {
       "source": "IDF=log(1+(N-df+0.5)/(df+0.5))",
       "latex": "\\mathrm{IDF}=\\log(1+\\frac{N-\\partial f+0.5}{\\partial f+0.5})",
-      "paths": [
-        "courses/nlp/guides/nlp-022.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-022.md"]
     },
     {
       "source": "J=I/r-xxT/(d*r\u00b3)",
@@ -3923,9 +3588,7 @@
     {
       "source": "J=I/sqrt(epsilon)",
       "latex": "J=\\frac{I}{\\sqrt{\\epsilon}}",
-      "paths": [
-        "courses/llm-theory/guides/llm-045.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-045.md"]
     },
     {
       "source": "Ju=u/r",
@@ -3954,9 +3617,7 @@
     {
       "source": "K/sqrt(d)",
       "latex": "\\frac{K}{\\sqrt{d}}",
-      "paths": [
-        "courses/llm-theory/guides/llm-043.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-043.md"]
     },
     {
       "source": "K=0",
@@ -3985,9 +3646,7 @@
     {
       "source": "K=X*W_K",
       "latex": "K=X\\cdot W_{K}",
-      "paths": [
-        "courses/nlp/guides/nlp-015.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-015.md"]
     },
     {
       "source": "K=k1",
@@ -4026,9 +3685,7 @@
     {
       "source": "L=(a-1)^2",
       "latex": "L={\\left(a-1\\right)}^{2}",
-      "paths": [
-        "courses/deep-learning-tensorflow/guides/tf-006.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/guides/tf-006.md"]
     },
     {
       "source": "L=(a-1)\u00b2",
@@ -4058,9 +3715,7 @@
     {
       "source": "L=1.62",
       "latex": "L=1.62",
-      "paths": [
-        "courses/llm-theory/guides/llm-029.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-029.md"]
     },
     {
       "source": "L=12",
@@ -4107,16 +3762,12 @@
     {
       "source": "L=A*C^(-alpha)",
       "latex": "L=A\\cdot {C}^{-\\alpha}",
-      "paths": [
-        "courses/llm-theory/guides/llm-029.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-029.md"]
     },
     {
       "source": "L=L_floor+A*C^(-alpha)",
       "latex": "L=L_{\\mathrm{floor}}+A\\cdot {C}^{-\\alpha}",
-      "paths": [
-        "courses/llm-theory/guides/llm-029.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-029.md"]
     },
     {
       "source": "L=S/(BD)",
@@ -4129,9 +3780,7 @@
     {
       "source": "L=log(1+exp(-m))",
       "latex": "L=\\log(1+\\exp(-m))",
-      "paths": [
-        "courses/llm-theory/guides/llm-033.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-033.md"]
     },
     {
       "source": "M*D",
@@ -4177,9 +3826,7 @@
     {
       "source": "N=20",
       "latex": "N=20",
-      "paths": [
-        "courses/nlp/guides/nlp-012.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-012.md"]
     },
     {
       "source": "N=3",
@@ -4221,23 +3868,17 @@
     {
       "source": "N_cj+alpha*V",
       "latex": "N_{cj}+\\alpha\\cdot V",
-      "paths": [
-        "courses/nlp/guides/nlp-008.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-008.md"]
     },
     {
       "source": "O=AV",
       "latex": "O=AV",
-      "paths": [
-        "courses/llm-theory/guides/llm-043.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-043.md"]
     },
     {
       "source": "P(A|BOS)=.5",
       "latex": "\\Pr(A\\mid \\mathrm{BOS})=0.5",
-      "paths": [
-        "courses/llm-theory/guides/llm-003.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-003.md"]
     },
     {
       "source": "P(B)>0",
@@ -4249,16 +3890,12 @@
     {
       "source": "P(EOS|A)=.2",
       "latex": "\\Pr(\\mathrm{EOS}\\mid A)=0.2",
-      "paths": [
-        "courses/llm-theory/guides/llm-003.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-003.md"]
     },
     {
       "source": "P(EOS|tea)=3/9=1/3",
       "latex": "\\Pr(\\mathrm{EOS}\\mid \\mathrm{tea})=\\frac{3}{9}=\\frac{1}{3}",
-      "paths": [
-        "courses/nlp/guides/nlp-006.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-006.md"]
     },
     {
       "source": "P(Y<10)",
@@ -4285,9 +3922,7 @@
     {
       "source": "P(we|BOS)=(2+1)/(3+7)=0.3",
       "latex": "\\Pr(\\mathrm{we}\\mid \\mathrm{BOS})=\\frac{2+1}{3+7}=0.3",
-      "paths": [
-        "courses/nlp/guides/nlp-006.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-006.md"]
     },
     {
       "source": "P*1=0",
@@ -4300,9 +3935,7 @@
     {
       "source": "PPL=K",
       "latex": "\\mathrm{PPL}=K",
-      "paths": [
-        "courses/llm-theory/guides/llm-005.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-005.md"]
     },
     {
       "source": "P^T",
@@ -4317,23 +3950,17 @@
     {
       "source": "Q*K_transpose",
       "latex": "Q\\cdot K^{\\mathsf T}",
-      "paths": [
-        "courses/nlp/guides/nlp-016.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-016.md"]
     },
     {
       "source": "Q*K_transpose/sqrt(d_k)",
       "latex": "\\frac{Q\\cdot K^{\\mathsf T}}{\\sqrt{d_{k}}}",
-      "paths": [
-        "courses/nlp/guides/nlp-015.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-015.md"]
     },
     {
       "source": "Q/sqrt(d)",
       "latex": "\\frac{Q}{\\sqrt{d}}",
-      "paths": [
-        "courses/llm-theory/guides/llm-043.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-043.md"]
     },
     {
       "source": "Q/sqrt(d_k)",
@@ -4370,9 +3997,7 @@
     {
       "source": "Q=X*W_Q",
       "latex": "Q=X\\cdot W_{Q}",
-      "paths": [
-        "courses/nlp/guides/nlp-015.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-015.md"]
     },
     {
       "source": "QK^T",
@@ -4441,16 +4066,12 @@
     {
       "source": "S=QK^T/sqrt(d)",
       "latex": "S=\\frac{{QK}^{T}}{\\sqrt{d}}",
-      "paths": [
-        "courses/llm-theory/guides/llm-043.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-043.md"]
     },
     {
       "source": "SE=sigma*sqrt(2/n)",
       "latex": "\\mathrm{SE}=\\sigma\\cdot \\sqrt{\\frac{2}{n}}",
-      "paths": [
-        "courses/statistics-ml/chapters/13-classical-experimental-design.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/13-classical-experimental-design.md"]
     },
     {
       "source": "S_r/N",
@@ -4471,30 +4092,22 @@
     {
       "source": "T*V",
       "latex": "T\\cdot V",
-      "paths": [
-        "courses/llm-theory/guides/llm-008.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-008.md"]
     },
     {
       "source": "T=0",
       "latex": "T=0",
-      "paths": [
-        "courses/llm-theory/guides/llm-002.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-002.md"]
     },
     {
       "source": "T=16",
       "latex": "T=16",
-      "paths": [
-        "courses/llm-theory/guides/llm-025.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-025.md"]
     },
     {
       "source": "T=2",
       "latex": "T=2",
-      "paths": [
-        "courses/llm-theory/guides/llm-002.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-002.md"]
     },
     {
       "source": "T=2048",
@@ -4515,9 +4128,7 @@
     {
       "source": "T=32",
       "latex": "T=32",
-      "paths": [
-        "courses/llm-theory/guides/llm-025.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-025.md"]
     },
     {
       "source": "T=x_transpose*beta+error",
@@ -4529,9 +4140,7 @@
     {
       "source": "TN/(TN+FP)",
       "latex": "\\frac{\\mathrm{TN}}{\\mathrm{TN}+\\mathrm{FP}}",
-      "paths": [
-        "courses/statistics-ml/chapters/22-model-validation-and-predictive-performance.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/22-model-validation-and-predictive-performance.md"]
     },
     {
       "source": "TN=1",
@@ -4544,16 +4153,12 @@
     {
       "source": "TP/(TP+FN)",
       "latex": "\\frac{\\mathrm{TP}}{\\mathrm{TP}+\\mathrm{FN}}",
-      "paths": [
-        "courses/statistics-ml/chapters/22-model-validation-and-predictive-performance.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/22-model-validation-and-predictive-performance.md"]
     },
     {
       "source": "TP/(TP+FP)",
       "latex": "\\frac{\\mathrm{TP}}{\\mathrm{TP}+\\mathrm{FP}}",
-      "paths": [
-        "courses/statistics-ml/chapters/22-model-validation-and-predictive-performance.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/22-model-validation-and-predictive-performance.md"]
     },
     {
       "source": "TP=1",
@@ -4568,10 +4173,7 @@
     {
       "source": "TP=2",
       "latex": "\\mathrm{TP}=2",
-      "paths": [
-        "courses/nlp/guides/nlp-003.md",
-        "courses/nlp/solutions/nlp-003_solutions.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-003.md", "courses/nlp/solutions/nlp-003_solutions.md"]
     },
     {
       "source": "Tq=1",
@@ -4584,9 +4186,7 @@
     {
       "source": "U-1/2",
       "latex": "U-\\frac{1}{2}",
-      "paths": [
-        "courses/statistics-ml/chapters/37-simulation-and-computational-statistics.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/37-simulation-and-computational-statistics.md"]
     },
     {
       "source": "U=XW_u",
@@ -4599,16 +4199,12 @@
     {
       "source": "U^2",
       "latex": "{U}^{2}",
-      "paths": [
-        "courses/statistics-ml/chapters/37-simulation-and-computational-statistics.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/37-simulation-and-computational-statistics.md"]
     },
     {
       "source": "V=1",
       "latex": "V=1",
-      "paths": [
-        "courses/nlp/guides/nlp-010.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-010.md"]
     },
     {
       "source": "V=16",
@@ -4621,16 +4217,12 @@
     {
       "source": "V=2",
       "latex": "V=2",
-      "paths": [
-        "courses/nlp/guides/nlp-008.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-008.md"]
     },
     {
       "source": "V=3",
       "latex": "V=3",
-      "paths": [
-        "courses/llm-theory/guides/llm-004.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-004.md"]
     },
     {
       "source": "V=8",
@@ -4643,9 +4235,7 @@
     {
       "source": "V=X*W_V",
       "latex": "V=X\\cdot W_{V}",
-      "paths": [
-        "courses/nlp/guides/nlp-015.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-015.md"]
     },
     {
       "source": "V=[[1,2],[3,4],[5,6]]",
@@ -4658,9 +4248,7 @@
     {
       "source": "V=[[2,0],[0,2],[6,6]]",
       "latex": "V=[[2,0],[0,2],[6,6]]",
-      "paths": [
-        "courses/deep-learning-tensorflow/guides/tf-022.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/guides/tf-022.md"]
     },
     {
       "source": "V^T",
@@ -4674,23 +4262,17 @@
     {
       "source": "Var(X)-2",
       "latex": "\\operatorname{Var}(X)-2",
-      "paths": [
-        "courses/statistics-ml/chapters/14-online-experimentation-and-a-b-testing.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/14-online-experimentation-and-a-b-testing.md"]
     },
     {
       "source": "Var(Y)+theta^2",
       "latex": "\\operatorname{Var}(Y)+{\\theta}^{2}",
-      "paths": [
-        "courses/statistics-ml/chapters/14-online-experimentation-and-a-b-testing.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/14-online-experimentation-and-a-b-testing.md"]
     },
     {
       "source": "Var(mean)=sigma^2/n",
       "latex": "\\operatorname{Var}(\\mathrm{mean})=\\frac{{\\sigma}^{2}}{n}",
-      "paths": [
-        "courses/statistics-ml/chapters/25-time-series-foundations-and-diagnostics.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/25-time-series-foundations-and-diagnostics.md"]
     },
     {
       "source": "Var(y)=x\u00b2*p/q",
@@ -4703,9 +4285,7 @@
     {
       "source": "W*H",
       "latex": "W\\cdot H",
-      "paths": [
-        "courses/nlp/guides/nlp-013.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-013.md"]
     },
     {
       "source": "W+(1+1/M)*B",
@@ -4717,9 +4297,7 @@
     {
       "source": "W+A*B",
       "latex": "W+A\\cdot B",
-      "paths": [
-        "courses/llm-theory/guides/llm-032.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-032.md"]
     },
     {
       "source": "W=H=3",
@@ -4741,23 +4319,17 @@
     {
       "source": "W=[[0.02]]",
       "latex": "W=[[0.02]]",
-      "paths": [
-        "courses/deep-learning-tensorflow/guides/tf-003.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/guides/tf-003.md"]
     },
     {
       "source": "W=[[0.1,-0.9],[1.7,-0.2]]",
       "latex": "W=[[0.1,-0.9],[1.7,-0.2]]",
-      "paths": [
-        "courses/llm-theory/guides/llm-034.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-034.md"]
     },
     {
       "source": "W=[[1,0],[0,1],[-1,1]]",
       "latex": "W=[[1,0],[0,1],[-1,1]]",
-      "paths": [
-        "courses/deep-learning-tensorflow/guides/tf-003.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/guides/tf-003.md"]
     },
     {
       "source": "W=[[1,2,3],[4,5,6]]",
@@ -4802,9 +4374,7 @@
     {
       "source": "X=SE",
       "latex": "X=\\mathrm{SE}",
-      "paths": [
-        "courses/llm-theory/guides/llm-008.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-008.md"]
     },
     {
       "source": "X=[1,2]",
@@ -4825,9 +4395,7 @@
     {
       "source": "X=[[100],[200]]",
       "latex": "X=[[100],[200]]",
-      "paths": [
-        "courses/deep-learning-tensorflow/guides/tf-003.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/guides/tf-003.md"]
     },
     {
       "source": "XB^T",
@@ -4851,16 +4419,12 @@
     {
       "source": "X_transpose*(p-y)/n",
       "latex": "\\frac{X^{\\mathsf T}\\cdot (p-y)}{n}",
-      "paths": [
-        "courses/nlp/guides/nlp-015.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-015.md"]
     },
     {
       "source": "Y=HW_d",
       "latex": "Y=HW_{d}",
-      "paths": [
-        "courses/llm-theory/guides/llm-045.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-045.md"]
     },
     {
       "source": "Y=X+sXK",
@@ -4905,9 +4469,7 @@
     {
       "source": "[-5,5]/sqrt(25+1e-5)",
       "latex": "\\frac{[-5,5]}{\\sqrt{25+1\\times10^{-5}}}",
-      "paths": [
-        "courses/llm-theory/guides/llm-010.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-010.md"]
     },
     {
       "source": "[0,0.5,2/3,0.8]",
@@ -4936,24 +4498,17 @@
     {
       "source": "[0.18,1/15]",
       "latex": "[0.18,\\frac{1}{15}]",
-      "paths": [
-        "courses/nlp/guides/nlp-008.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-008.md"]
     },
     {
       "source": "[0.3,1/3,0.3,1/3]",
       "latex": "[0.3,\\frac{1}{3},0.3,\\frac{1}{3}]",
-      "paths": [
-        "courses/nlp/guides/nlp-006.md",
-        "courses/nlp/solutions/nlp-006_solutions.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-006.md", "courses/nlp/solutions/nlp-006_solutions.md"]
     },
     {
       "source": "[0.5*0.2,0.5*(2/3)]=[0.1,1/3]",
       "latex": "[0.5\\cdot 0.2,0.5\\cdot \\frac{2}{3}]=[0.1,\\frac{1}{3}]",
-      "paths": [
-        "courses/nlp/guides/nlp-008.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-008.md"]
     },
     {
       "source": "[1,1,1]/3",
@@ -4975,9 +4530,7 @@
     {
       "source": "[1,sqrt(3)]",
       "latex": "[1,\\sqrt{3}]",
-      "paths": [
-        "courses/llm-theory/solutions/llm-002_solutions.md"
-      ]
+      "paths": ["courses/llm-theory/solutions/llm-002_solutions.md"]
     },
     {
       "source": "[1/(1+a),a/(1+a),1,0.5]",
@@ -5006,9 +4559,7 @@
     {
       "source": "[1/2,0,1/2]",
       "latex": "[\\frac{1}{2},0,\\frac{1}{2}]",
-      "paths": [
-        "courses/llm-theory/solutions/llm-002_solutions.md"
-      ]
+      "paths": ["courses/llm-theory/solutions/llm-002_solutions.md"]
     },
     {
       "source": "[1/2,1/2]",
@@ -5021,30 +4572,22 @@
     {
       "source": "[1/3,1/3,1/3]",
       "latex": "[\\frac{1}{3},\\frac{1}{3},\\frac{1}{3}]",
-      "paths": [
-        "courses/llm-theory/guides/llm-004.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-004.md"]
     },
     {
       "source": "[1/3,1]",
       "latex": "[\\frac{1}{3},1]",
-      "paths": [
-        "courses/llm-theory/solutions/llm-002_solutions.md"
-      ]
+      "paths": ["courses/llm-theory/solutions/llm-002_solutions.md"]
     },
     {
       "source": "[1/4,3/4]",
       "latex": "[\\frac{1}{4},\\frac{3}{4}]",
-      "paths": [
-        "courses/llm-theory/solutions/llm-002_solutions.md"
-      ]
+      "paths": ["courses/llm-theory/solutions/llm-002_solutions.md"]
     },
     {
       "source": "[1/5,4/5]",
       "latex": "[\\frac{1}{5},\\frac{4}{5}]",
-      "paths": [
-        "courses/nlp/guides/nlp-008.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-008.md"]
     },
     {
       "source": "[1/sqrt(2),0,1/sqrt(2)]",
@@ -5074,9 +4617,7 @@
     {
       "source": "[2,2,1]/5",
       "latex": "\\frac{[2,2,1]}{5}",
-      "paths": [
-        "courses/llm-theory/guides/llm-004.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-004.md"]
     },
     {
       "source": "[2,3,14/3]",
@@ -5089,38 +4630,27 @@
     {
       "source": "[2/3,1,0]",
       "latex": "[\\frac{2}{3},1,0]",
-      "paths": [
-        "courses/nlp/guides/nlp-019.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-019.md"]
     },
     {
       "source": "[2/3,1/3]",
       "latex": "[\\frac{2}{3},\\frac{1}{3}]",
-      "paths": [
-        "courses/nlp/guides/nlp-008.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-008.md"]
     },
     {
       "source": "[3,2,1]/6",
       "latex": "\\frac{[3,2,1]}{6}",
-      "paths": [
-        "courses/llm-theory/guides/llm-004.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-004.md"]
     },
     {
       "source": "[3/13,10/13]",
       "latex": "[\\frac{3}{13},\\frac{10}{13}]",
-      "paths": [
-        "courses/nlp/guides/nlp-008.md",
-        "courses/nlp/solutions/nlp-008_solutions.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-008.md", "courses/nlp/solutions/nlp-008_solutions.md"]
     },
     {
       "source": "[3/4,1/4]",
       "latex": "[\\frac{3}{4},\\frac{1}{4}]",
-      "paths": [
-        "courses/llm-theory/guides/llm-002.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-002.md"]
     },
     {
       "source": "[34,202/3]",
@@ -5147,9 +4677,7 @@
     {
       "source": "[4/6,2/6]",
       "latex": "[\\frac{4}{6},\\frac{2}{6}]",
-      "paths": [
-        "courses/nlp/guides/nlp-008.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-008.md"]
     },
     {
       "source": "[8/3,8/3]",
@@ -5186,10 +4714,7 @@
     {
       "source": "[[1/5,4/5],[4/6,2/6]]",
       "latex": "[[\\frac{1}{5},\\frac{4}{5}],[\\frac{4}{6},\\frac{2}{6}]]",
-      "paths": [
-        "courses/nlp/guides/nlp-008.md",
-        "courses/nlp/solutions/nlp-008_solutions.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-008.md", "courses/nlp/solutions/nlp-008_solutions.md"]
     },
     {
       "source": "[[2,0],[1,1],[8/3,8/3]]",
@@ -5211,24 +4736,17 @@
     {
       "source": "[log(3),0]",
       "latex": "[\\log(3),0]",
-      "paths": [
-        "courses/llm-theory/guides/llm-002.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-002.md"]
     },
     {
       "source": "[log(3/2)+1,1,log(3/2)+1]",
       "latex": "[\\log(\\frac{3}{2})+1,1,\\log(\\frac{3}{2})+1]",
-      "paths": [
-        "courses/nlp/guides/nlp-007.md",
-        "courses/nlp/solutions/nlp-007_solutions.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-007.md", "courses/nlp/solutions/nlp-007_solutions.md"]
     },
     {
       "source": "[sqrt(3)/(sqrt(3)+1),1/(sqrt(3)+1)]",
       "latex": "[\\frac{\\sqrt{3}}{\\sqrt{3}+1},\\frac{1}{\\sqrt{3}+1}]",
-      "paths": [
-        "courses/llm-theory/guides/llm-002.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-002.md"]
     },
     {
       "source": "a+c>0",
@@ -5301,9 +4819,7 @@
     {
       "source": "a=[1,0]",
       "latex": "a=[1,0]",
-      "paths": [
-        "courses/deep-learning-tensorflow/guides/tf-025.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/guides/tf-025.md"]
     },
     {
       "source": "a=exp(1/sqrt(2))",
@@ -5316,9 +4832,7 @@
     {
       "source": "a=log(1.5)+1",
       "latex": "a=\\log(1.5)+1",
-      "paths": [
-        "courses/nlp/guides/nlp-007.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-007.md"]
     },
     {
       "source": "a=log(2)",
@@ -5356,9 +4870,7 @@
     {
       "source": "abs(a)*sqrt(10)",
       "latex": "\\left|a\\right|\\cdot \\sqrt{10}",
-      "paths": [
-        "courses/llm-theory/guides/llm-020.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-020.md"]
     },
     {
       "source": "alpha*A*P^(-alpha)=beta*B*(kP/C)^beta",
@@ -5379,16 +4891,12 @@
     {
       "source": "alpha*N/T",
       "latex": "\\frac{\\alpha\\cdot N}{T}",
-      "paths": [
-        "courses/llm-theory/guides/llm-047.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-047.md"]
     },
     {
       "source": "alpha*V",
       "latex": "\\alpha\\cdot V",
-      "paths": [
-        "courses/nlp/solutions/nlp-006_solutions.md"
-      ]
+      "paths": ["courses/nlp/solutions/nlp-006_solutions.md"]
     },
     {
       "source": "alpha/(alpha+beta)",
@@ -5430,16 +4938,12 @@
     {
       "source": "alpha=0.2",
       "latex": "\\alpha=0.2",
-      "paths": [
-        "courses/statistics-ml/chapters/26-classical-forecasting-methods.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/26-classical-forecasting-methods.md"]
     },
     {
       "source": "alpha=0.5",
       "latex": "\\alpha=0.5",
-      "paths": [
-        "courses/statistics-ml/chapters/26-classical-forecasting-methods.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/26-classical-forecasting-methods.md"]
     },
     {
       "source": "alpha=1",
@@ -5453,9 +4957,7 @@
     {
       "source": "alpha=exp(m-m_new)",
       "latex": "\\alpha=\\exp(m-m_{\\mathrm{new}})",
-      "paths": [
-        "courses/llm-theory/guides/llm-046.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-046.md"]
     },
     {
       "source": "alpha=r=2",
@@ -5468,16 +4970,12 @@
     {
       "source": "alpha>0",
       "latex": "\\alpha>0",
-      "paths": [
-        "courses/nlp/guides/nlp-006.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-006.md"]
     },
     {
       "source": "b*S",
       "latex": "b\\cdot S",
-      "paths": [
-        "courses/llm-theory/guides/llm-029.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-029.md"]
     },
     {
       "source": "b+c>0",
@@ -5566,9 +5064,7 @@
     {
       "source": "beta=0.7",
       "latex": "\\beta=0.7",
-      "paths": [
-        "courses/statistics-ml/chapters/26-classical-forecasting-methods.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/26-classical-forecasting-methods.md"]
     },
     {
       "source": "beta=2",
@@ -5604,9 +5100,7 @@
     {
       "source": "c=0",
       "latex": "c=0",
-      "paths": [
-        "courses/deep-learning-tensorflow/guides/tf-007.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/guides/tf-007.md"]
     },
     {
       "source": "c=1",
@@ -5643,9 +5137,7 @@
     {
       "source": "c>0",
       "latex": "c>0",
-      "paths": [
-        "courses/nlp/guides/nlp-017.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-017.md"]
     },
     {
       "source": "c^T*1=0",
@@ -5666,16 +5158,12 @@
     {
       "source": "c_transpose*x",
       "latex": "c^{\\mathsf T}\\cdot x",
-      "paths": [
-        "courses/statistics-ml/chapters/36-optimization-and-operations-research.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/36-optimization-and-operations-research.md"]
     },
     {
       "source": "cos(2*pi*k*t/m)",
       "latex": "\\cos(\\frac{2\\cdot \\pi\\cdot k\\cdot t}{m})",
-      "paths": [
-        "courses/statistics-ml/chapters/25-time-series-foundations-and-diagnostics.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/25-time-series-foundations-and-diagnostics.md"]
     },
     {
       "source": "d/2",
@@ -5688,10 +5176,7 @@
     {
       "source": "d0>d1>d2=0",
       "latex": "d_{0}>d_{1}>d_{2}=0",
-      "paths": [
-        "courses/nlp/guides/nlp-022.md",
-        "courses/nlp/solutions/nlp-022_solutions.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-022.md", "courses/nlp/solutions/nlp-022_solutions.md"]
     },
     {
       "source": "d=1",
@@ -5770,9 +5255,7 @@
     {
       "source": "dL/dA=G",
       "latex": "\\frac{\\partial L}{\\partial A}=G",
-      "paths": [
-        "courses/llm-theory/guides/llm-043.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-043.md"]
     },
     {
       "source": "dL/dA=X^T",
@@ -5785,16 +5268,12 @@
     {
       "source": "dL/dE=S^T",
       "latex": "\\frac{\\partial L}{\\partial E}={S}^{T}",
-      "paths": [
-        "courses/llm-theory/guides/llm-008.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-008.md"]
     },
     {
       "source": "dL/dH=R",
       "latex": "\\frac{\\partial L}{\\partial H}=R",
-      "paths": [
-        "courses/llm-theory/guides/llm-045.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-045.md"]
     },
     {
       "source": "dL/dK=(dL/dS_score)^T",
@@ -5823,9 +5302,7 @@
     {
       "source": "dL/dV=A^T",
       "latex": "\\frac{\\partial L}{\\partial V}={A}^{T}",
-      "paths": [
-        "courses/llm-theory/guides/llm-043.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-043.md"]
     },
     {
       "source": "dL/dV=P^T",
@@ -5854,9 +5331,7 @@
     {
       "source": "dL/da=2*(a-1)=6",
       "latex": "\\frac{\\partial L}{\\partial a}=2\\cdot (a-1)=6",
-      "paths": [
-        "courses/deep-learning-tensorflow/guides/tf-006.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/guides/tf-006.md"]
     },
     {
       "source": "dL/ds_j=(p_j-y_j)/tau",
@@ -5869,16 +5344,12 @@
     {
       "source": "dL/ds_j=a_j",
       "latex": "\\frac{\\partial L}{\\partial s_{j}}=a_{j}",
-      "paths": [
-        "courses/llm-theory/guides/llm-009.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-009.md"]
     },
     {
       "source": "dL/dv_j=a_j",
       "latex": "\\frac{\\partial L}{\\partial v_{j}}=a_{j}",
-      "paths": [
-        "courses/llm-theory/guides/llm-009.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-009.md"]
     },
     {
       "source": "dL/dw=6\u00d74\u00d72=48",
@@ -5914,16 +5385,12 @@
     {
       "source": "d_k=2",
       "latex": "d_{k}=2",
-      "paths": [
-        "courses/llm-theory/guides/llm-009.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-009.md"]
     },
     {
       "source": "da/dz=2*z=4",
       "latex": "\\frac{\\partial a}{\\partial z}=2\\cdot z=4",
-      "paths": [
-        "courses/deep-learning-tensorflow/guides/tf-006.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/guides/tf-006.md"]
     },
     {
       "source": "delta=n-m",
@@ -5951,9 +5418,7 @@
     {
       "source": "delta_policy=1",
       "latex": "\\delta_{\\mathrm{policy}}=1",
-      "paths": [
-        "courses/llm-theory/guides/llm-033.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-033.md"]
     },
     {
       "source": "delta_ref=1",
@@ -5966,9 +5431,7 @@
     {
       "source": "delta_reference=1",
       "latex": "\\delta_{\\mathrm{reference}}=1",
-      "paths": [
-        "courses/llm-theory/guides/llm-033.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-033.md"]
     },
     {
       "source": "delta_theta=1",
@@ -6006,9 +5469,7 @@
     {
       "source": "dy/dz_j=g_j*(e_j-y)",
       "latex": "\\frac{\\partial y}{\\partial z_{j}}=g_{j}\\cdot (e_{j}-y)",
-      "paths": [
-        "courses/llm-theory/guides/llm-047.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-047.md"]
     },
     {
       "source": "dz/dw=2",
@@ -6038,16 +5499,12 @@
     {
       "source": "ell=.5+1=1.5",
       "latex": "\\ell=0.5+1=1.5",
-      "paths": [
-        "courses/llm-theory/guides/llm-046.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-046.md"]
     },
     {
       "source": "ell=0",
       "latex": "\\ell=0",
-      "paths": [
-        "courses/llm-theory/guides/llm-046.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-046.md"]
     },
     {
       "source": "ell_A=1.5",
@@ -6086,10 +5543,7 @@
     {
       "source": "exp(-.5)",
       "latex": "\\exp(-0.5)",
-      "paths": [
-        "courses/nlp/guides/nlp-017.md",
-        "courses/nlp/solutions/nlp-017_solutions.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-017.md", "courses/nlp/solutions/nlp-017_solutions.md"]
     },
     {
       "source": "exp(-1)",
@@ -6118,16 +5572,12 @@
     {
       "source": "exp(-z)",
       "latex": "\\exp(-z)",
-      "paths": [
-        "courses/nlp/guides/nlp-009.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-009.md"]
     },
     {
       "source": "exp(0)=1",
       "latex": "\\exp(0)=1",
-      "paths": [
-        "courses/llm-theory/guides/llm-002.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-002.md"]
     },
     {
       "source": "exp(1)",
@@ -6147,9 +5597,7 @@
     {
       "source": "exp(1)/(exp(2)+exp(1))",
       "latex": "\\frac{\\exp(1)}{\\exp(2)+\\exp(1)}",
-      "paths": [
-        "courses/llm-theory/guides/llm-012.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-012.md"]
     },
     {
       "source": "exp(1000)",
@@ -6173,9 +5621,7 @@
     {
       "source": "exp(1001)",
       "latex": "\\exp(1001)",
-      "paths": [
-        "courses/deep-learning-tensorflow/guides/tf-029.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/guides/tf-029.md"]
     },
     {
       "source": "exp(2)/(1+exp(2))",
@@ -6187,16 +5633,12 @@
     {
       "source": "exp(3)/(exp(3)+exp(1))",
       "latex": "\\frac{\\exp(3)}{\\exp(3)+\\exp(1)}",
-      "paths": [
-        "courses/nlp/guides/nlp-014.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-014.md"]
     },
     {
       "source": "exp(H)",
       "latex": "\\exp(H)",
-      "paths": [
-        "courses/llm-theory/guides/llm-005.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-005.md"]
     },
     {
       "source": "exp(beta)",
@@ -6208,9 +5650,7 @@
     {
       "source": "exp(beta_j)",
       "latex": "\\exp(\\beta_{j})",
-      "paths": [
-        "courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md"]
     },
     {
       "source": "exp(log(2)-log(4))=.5",
@@ -6247,9 +5687,7 @@
     {
       "source": "exp(m_block-m)",
       "latex": "\\exp(m_{\\mathrm{block}}-m)",
-      "paths": [
-        "courses/llm-theory/guides/llm-046.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-046.md"]
     },
     {
       "source": "exp(mu)",
@@ -6285,9 +5723,7 @@
     {
       "source": "exp(score-m)",
       "latex": "\\exp(\\mathrm{score}-m)",
-      "paths": [
-        "courses/llm-theory/guides/llm-046.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-046.md"]
     },
     {
       "source": "exp(z_i-z_j)",
@@ -6327,9 +5763,7 @@
     {
       "source": "floor((H-K)/S)+1",
       "latex": "\\left\\lfloor \\frac{H-K}{S}\\right\\rfloor+1",
-      "paths": [
-        "courses/deep-learning-tensorflow/guides/tf-019.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/guides/tf-019.md"]
     },
     {
       "source": "g/2",
@@ -6350,9 +5784,7 @@
     {
       "source": "g=-4",
       "latex": "g=-4",
-      "paths": [
-        "courses/llm-theory/guides/llm-022.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-022.md"]
     },
     {
       "source": "g=0",
@@ -6392,9 +5824,7 @@
     {
       "source": "g=dL/do",
       "latex": "g=\\frac{\\partial L}{\\partial o}",
-      "paths": [
-        "courses/llm-theory/guides/llm-009.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-009.md"]
     },
     {
       "source": "g_i=dL/dz_i",
@@ -6440,9 +5870,7 @@
     {
       "source": "gradient=-4",
       "latex": "\\mathrm{gradient}=-4",
-      "paths": [
-        "courses/llm-theory/guides/llm-015.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-015.md"]
     },
     {
       "source": "gradient=-56/3",
@@ -6555,9 +5983,7 @@
     {
       "source": "h_gated=4",
       "latex": "h_{\\mathrm{gated}}=4",
-      "paths": [
-        "courses/llm-theory/guides/llm-045.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-045.md"]
     },
     {
       "source": "h_i=1",
@@ -6577,9 +6003,7 @@
     {
       "source": "i=j",
       "latex": "i=j",
-      "paths": [
-        "courses/llm-theory/guides/llm-002.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-002.md"]
     },
     {
       "source": "i>=P-1",
@@ -6592,23 +6016,17 @@
     {
       "source": "idf=log(1+(N-df+.5)/(df+.5))",
       "latex": "\\mathrm{idf}=\\log(1+\\frac{N-\\partial f+0.5}{\\partial f+0.5})",
-      "paths": [
-        "courses/llm-applied/guides/llm-applied-006.md"
-      ]
+      "paths": ["courses/llm-applied/guides/llm-applied-006.md"]
     },
     {
       "source": "idf_j=log((1+n)/(1+df_j))+1",
       "latex": "\\mathrm{idf}_{j}=\\log(\\frac{1+n}{1+\\partial f_{j}})+1",
-      "paths": [
-        "courses/nlp/guides/nlp-007.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-007.md"]
     },
     {
       "source": "input=[2,5,7]",
       "latex": "\\mathrm{input}=[2,5,7]",
-      "paths": [
-        "courses/llm-theory/guides/llm-017.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-017.md"]
     },
     {
       "source": "j=1",
@@ -6621,9 +6039,7 @@
     {
       "source": "k1/b",
       "latex": "\\frac{k_{1}}{b}",
-      "paths": [
-        "courses/llm-applied/guides/llm-applied-006.md"
-      ]
+      "paths": ["courses/llm-applied/guides/llm-applied-006.md"]
     },
     {
       "source": "k1=1.2",
@@ -6651,9 +6067,7 @@
     {
       "source": "k=100",
       "latex": "k=100",
-      "paths": [
-        "courses/llm-applied/guides/llm-applied-008.md"
-      ]
+      "paths": ["courses/llm-applied/guides/llm-applied-008.md"]
     },
     {
       "source": "k=18",
@@ -6683,16 +6097,12 @@
     {
       "source": "k=5",
       "latex": "k=5",
-      "paths": [
-        "courses/llm-applied/guides/llm-applied-008.md"
-      ]
+      "paths": ["courses/llm-applied/guides/llm-applied-008.md"]
     },
     {
       "source": "k=60",
       "latex": "k=60",
-      "paths": [
-        "courses/nlp/guides/nlp-022.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-022.md"]
     },
     {
       "source": "k=[3,-1]",
@@ -6712,37 +6122,27 @@
     {
       "source": "k_j/sqrt(d)-a*(i-j)",
       "latex": "\\frac{k_{j}}{\\sqrt{d}}-a\\cdot (i-j)",
-      "paths": [
-        "courses/llm-theory/guides/llm-044.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-044.md"]
     },
     {
       "source": "k_j/sqrt(d_k)",
       "latex": "\\frac{k_{j}}{\\sqrt{d_{k}}}",
-      "paths": [
-        "courses/llm-theory/guides/llm-009.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-009.md"]
     },
     {
       "source": "kappa=(p_o-p_e)/(1-p_e)",
       "latex": "\\kappa=\\frac{p_{o}-p_{e}}{1-p_{e}}",
-      "paths": [
-        "courses/nlp/guides/nlp-019.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-019.md"]
     },
     {
       "source": "kappa=1/3",
       "latex": "\\kappa=\\frac{1}{3}",
-      "paths": [
-        "courses/nlp/guides/nlp-019.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-019.md"]
     },
     {
       "source": "l_T+h*b_T",
       "latex": "l_{T}+h\\cdot b_{T}",
-      "paths": [
-        "courses/statistics-ml/chapters/26-classical-forecasting-methods.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/26-classical-forecasting-methods.md"]
     },
     {
       "source": "lambda*t",
@@ -6776,37 +6176,27 @@
     {
       "source": "lambda=2",
       "latex": "\\lambda=2",
-      "paths": [
-        "courses/statistics-ml/chapters/36-optimization-and-operations-research.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/36-optimization-and-operations-research.md"]
     },
     {
       "source": "log(.2/.8)",
       "latex": "\\log(\\frac{0.2}{0.8})",
-      "paths": [
-        "courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md"]
     },
     {
       "source": "log(0)",
       "latex": "\\log(0)",
-      "paths": [
-        "courses/nlp/solutions/nlp-012_solutions.md"
-      ]
+      "paths": ["courses/nlp/solutions/nlp-012_solutions.md"]
     },
     {
       "source": "log(0.0756)",
       "latex": "\\log(0.0756)",
-      "paths": [
-        "courses/nlp/guides/nlp-010.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-010.md"]
     },
     {
       "source": "log(1+1.5/2.5)",
       "latex": "\\log(1+\\frac{1.5}{2.5})",
-      "paths": [
-        "courses/nlp/guides/nlp-022.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-022.md"]
     },
     {
       "source": "log(1+1.5/2.5)=log(1.6)",
@@ -6874,9 +6264,7 @@
     {
       "source": "log(1+exp(z))-yz",
       "latex": "\\log(1+\\exp(z))-yz",
-      "paths": [
-        "courses/deep-learning-tensorflow/guides/tf-013.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/guides/tf-013.md"]
     },
     {
       "source": "log(1.25)",
@@ -6889,16 +6277,12 @@
     {
       "source": "log(1.6)",
       "latex": "\\log(1.6)",
-      "paths": [
-        "courses/llm-applied/guides/llm-applied-006.md"
-      ]
+      "paths": ["courses/llm-applied/guides/llm-applied-006.md"]
     },
     {
       "source": "log(1.8/2)/log(2/1)",
       "latex": "\\frac{\\log(\\frac{1.8}{2})}{\\log(\\frac{2}{1})}",
-      "paths": [
-        "courses/llm-theory/guides/llm-029.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-029.md"]
     },
     {
       "source": "log(1/2)",
@@ -6919,9 +6303,7 @@
     {
       "source": "log(10)/3",
       "latex": "\\frac{\\log(10)}{3}",
-      "paths": [
-        "courses/llm-theory/guides/llm-003.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-003.md"]
     },
     {
       "source": "log(16)",
@@ -6990,23 +6372,17 @@
     {
       "source": "log(3/(4/3))=log(9/4)",
       "latex": "\\log(\\frac{3}{\\frac{4}{3}})=\\log(\\frac{9}{4})",
-      "paths": [
-        "courses/llm-applied/guides/llm-applied-019.md"
-      ]
+      "paths": ["courses/llm-applied/guides/llm-applied-019.md"]
     },
     {
       "source": "log(3/2)",
       "latex": "\\log(\\frac{3}{2})",
-      "paths": [
-        "courses/llm-applied/guides/llm-applied-019.md"
-      ]
+      "paths": ["courses/llm-applied/guides/llm-applied-019.md"]
     },
     {
       "source": "log(3/2)+1",
       "latex": "\\log(\\frac{3}{2})+1",
-      "paths": [
-        "courses/nlp/guides/nlp-007.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-007.md"]
     },
     {
       "source": "log(4)",
@@ -7023,16 +6399,12 @@
     {
       "source": "log(4/2.45)=log(80/49)",
       "latex": "\\log(\\frac{4}{2.45})=\\log(\\frac{80}{49})",
-      "paths": [
-        "courses/nlp/guides/nlp-012.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-012.md"]
     },
     {
       "source": "log(5/3)",
       "latex": "\\log(\\frac{5}{3})",
-      "paths": [
-        "courses/llm-applied/guides/llm-applied-019.md"
-      ]
+      "paths": ["courses/llm-applied/guides/llm-applied-019.md"]
     },
     {
       "source": "log(8)",
@@ -7047,24 +6419,17 @@
     {
       "source": "log(8)/5",
       "latex": "\\frac{\\log(8)}{5}",
-      "paths": [
-        "courses/llm-theory/guides/llm-017.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-017.md"]
     },
     {
       "source": "log(80/49)",
       "latex": "\\log(\\frac{80}{49})",
-      "paths": [
-        "courses/nlp/guides/nlp-012.md",
-        "courses/nlp/solutions/nlp-012_solutions.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-012.md", "courses/nlp/solutions/nlp-012_solutions.md"]
     },
     {
       "source": "log(C)",
       "latex": "\\log(C)",
-      "paths": [
-        "courses/llm-theory/guides/llm-029.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-029.md"]
     },
     {
       "source": "log(K)",
@@ -7077,9 +6442,7 @@
     {
       "source": "log(L)",
       "latex": "\\log(L)",
-      "paths": [
-        "courses/llm-theory/guides/llm-029.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-029.md"]
     },
     {
       "source": "log(L2/L1)/log(C2/C1)",
@@ -7108,9 +6471,7 @@
     {
       "source": "log(theta)",
       "latex": "\\log(\\theta)",
-      "paths": [
-        "courses/statistics-ml/chapters/08-estimation-and-statistical-inference.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/08-estimation-and-statistical-inference.md"]
     },
     {
       "source": "logit>=0",
@@ -7125,9 +6486,7 @@
     {
       "source": "logits/0",
       "latex": "\\frac{\\mathrm{logits}}{0}",
-      "paths": [
-        "courses/llm-theory/solutions/llm-023_solutions.md"
-      ]
+      "paths": ["courses/llm-theory/solutions/llm-023_solutions.md"]
     },
     {
       "source": "logits>=0",
@@ -7140,9 +6499,7 @@
     {
       "source": "loss=(2*w-4)^2",
       "latex": "\\mathrm{loss}={\\left(2\\cdot w-4\\right)}^{2}",
-      "paths": [
-        "courses/deep-learning-tensorflow/solutions/tf-007_solutions.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/solutions/tf-007_solutions.md"]
     },
     {
       "source": "loss=(a-1)**2",
@@ -7163,16 +6520,12 @@
     {
       "source": "loss=(w*x-4)^2",
       "latex": "\\mathrm{loss}={\\left(w\\cdot x-4\\right)}^{2}",
-      "paths": [
-        "courses/deep-learning-tensorflow/guides/tf-007.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/guides/tf-007.md"]
     },
     {
       "source": "loss=(w-2)^2",
       "latex": "\\mathrm{loss}={\\left(w-2\\right)}^{2}",
-      "paths": [
-        "courses/deep-learning-tensorflow/guides/tf-007.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/guides/tf-007.md"]
     },
     {
       "source": "loss=64",
@@ -7249,9 +6602,7 @@
     {
       "source": "m=beta*(delta_policy-delta_reference)",
       "latex": "m=\\beta\\cdot (\\delta_{\\mathrm{policy}}-\\delta_{\\mathrm{reference}})",
-      "paths": [
-        "courses/llm-theory/guides/llm-033.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-033.md"]
     },
     {
       "source": "m=beta*(delta_theta-delta_ref)",
@@ -7272,9 +6623,7 @@
     {
       "source": "m=max(m_a,m_b)",
       "latex": "m=\\max(m_{a},m_{b})",
-      "paths": [
-        "courses/llm-theory/guides/llm-046.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-046.md"]
     },
     {
       "source": "m=max(z)",
@@ -7295,16 +6644,12 @@
     {
       "source": "m_i*l_i",
       "latex": "m_{i}\\cdot l_{i}",
-      "paths": [
-        "courses/llm-applied/guides/llm-applied-014.md"
-      ]
+      "paths": ["courses/llm-applied/guides/llm-applied-014.md"]
     },
     {
       "source": "m_new=max(m,max(b))",
       "latex": "m_{\\mathrm{new}}=\\max(m,\\max(b))",
-      "paths": [
-        "courses/llm-theory/guides/llm-046.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-046.md"]
     },
     {
       "source": "m_t=0",
@@ -7333,9 +6678,7 @@
     {
       "source": "mean(X)",
       "latex": "\\operatorname{mean}(X)",
-      "paths": [
-        "courses/statistics-ml/chapters/08-estimation-and-statistical-inference.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/08-estimation-and-statistical-inference.md"]
     },
     {
       "source": "mean(x\u00b2)",
@@ -7348,9 +6691,7 @@
     {
       "source": "min(1,p_i/q_i)",
       "latex": "\\min(1,\\frac{p_{i}}{q_{i}})",
-      "paths": [
-        "courses/llm-theory/guides/llm-048.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-048.md"]
     },
     {
       "source": "min(p_i,q_i)+R*r_i=p_i",
@@ -7363,9 +6704,7 @@
     {
       "source": "min(p_i,q_i)+Rr_i=p_i",
       "latex": "\\min(p_{i},q_{i})+Rr_{i}=p_{i}",
-      "paths": [
-        "courses/llm-theory/guides/llm-048.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-048.md"]
     },
     {
       "source": "min=1",
@@ -7386,16 +6725,12 @@
     {
       "source": "n/S0",
       "latex": "\\frac{n}{S_{0}}",
-      "paths": [
-        "courses/statistics-ml/chapters/30-spatial-and-spatiotemporal-statistics.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/30-spatial-and-spatiotemporal-statistics.md"]
     },
     {
       "source": "n1*n2/m",
       "latex": "\\frac{n_{1}\\cdot n_{2}}{m}",
-      "paths": [
-        "courses/statistics-ml/chapters/05-sampling-surveys-and-data-collection.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/05-sampling-surveys-and-data-collection.md"]
     },
     {
       "source": "n<=s",
@@ -7417,9 +6752,7 @@
     {
       "source": "n=1+5=6",
       "latex": "n=1+5=6",
-      "paths": [
-        "courses/llm-theory/guides/llm-046.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-046.md"]
     },
     {
       "source": "n=1.1",
@@ -7432,9 +6765,7 @@
     {
       "source": "n=10",
       "latex": "n=10",
-      "paths": [
-        "courses/llm-theory/guides/llm-039.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-039.md"]
     },
     {
       "source": "n=100",
@@ -7510,9 +6841,7 @@
     {
       "source": "omega=0.1",
       "latex": "\\omega=0.1",
-      "paths": [
-        "courses/statistics-ml/chapters/26-classical-forecasting-methods.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/26-classical-forecasting-methods.md"]
     },
     {
       "source": "output=h1+h2",
@@ -7526,9 +6855,7 @@
     {
       "source": "p*omega_i",
       "latex": "p\\cdot \\omega_{i}",
-      "paths": [
-        "courses/llm-theory/guides/llm-044.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-044.md"]
     },
     {
       "source": "p-q=[.3,-.2,-.1]",
@@ -7541,9 +6868,7 @@
     {
       "source": "p1*p2*p3",
       "latex": "p_{1}\\cdot p_{2}\\cdot p_{3}",
-      "paths": [
-        "courses/llm-theory/guides/llm-003.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-003.md"]
     },
     {
       "source": "p1/p0",
@@ -7570,23 +6895,17 @@
     {
       "source": "p=(.5,.3,.2)",
       "latex": "p=(0.5,0.3,0.2)",
-      "paths": [
-        "courses/llm-theory/guides/llm-048.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-048.md"]
     },
     {
       "source": "p=.03",
       "latex": "p=0.03",
-      "paths": [
-        "courses/statistics-ml/chapters/09-hypothesis-tests-and-group-comparisons.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/09-hypothesis-tests-and-group-comparisons.md"]
     },
     {
       "source": "p=.2",
       "latex": "p=0.2",
-      "paths": [
-        "courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md"]
     },
     {
       "source": "p=.5",
@@ -7625,9 +6944,7 @@
     {
       "source": "p=1/(1+exp(-1/sqrt(2)))",
       "latex": "p=\\frac{1}{1+\\exp(\\frac{-1}{\\sqrt{2}})}",
-      "paths": [
-        "courses/nlp/guides/nlp-016.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-016.md"]
     },
     {
       "source": "p=1/(1+exp(-z))",
@@ -7658,9 +6975,7 @@
     {
       "source": "p=[.75,.25]",
       "latex": "p=[0.75,0.25]",
-      "paths": [
-        "courses/llm-theory/guides/llm-002.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-002.md"]
     },
     {
       "source": "p=exp(a)/(1+exp(a))",
@@ -7682,9 +6997,7 @@
     {
       "source": "p=sigmoid(eta)=1/(1+exp(-eta))",
       "latex": "p=\\sigma(\\eta)=\\frac{1}{1+\\exp(-\\eta)}",
-      "paths": [
-        "courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md"]
     },
     {
       "source": "p>C/(B+C)",
@@ -7705,30 +7018,22 @@
     {
       "source": "p_e=.99^2+.01^2",
       "latex": "p_{e}={0.99}^{2}+{0.01}^{2}",
-      "paths": [
-        "courses/nlp/guides/nlp-019.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-019.md"]
     },
     {
       "source": "p_e=1",
       "latex": "p_{e}=1",
-      "paths": [
-        "courses/nlp/guides/nlp-019.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-019.md"]
     },
     {
       "source": "p_e=1/2",
       "latex": "p_{e}=\\frac{1}{2}",
-      "paths": [
-        "courses/nlp/guides/nlp-019.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-019.md"]
     },
     {
       "source": "p_e=p_A*p_B+(1-p_A)*(1-p_B)",
       "latex": "p_{e}=p_{A}\\cdot p_{B}+(1-p_{A})\\cdot (1-p_{B})",
-      "paths": [
-        "courses/nlp/guides/nlp-019.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-019.md"]
     },
     {
       "source": "p_i/p_j",
@@ -7741,9 +7046,7 @@
     {
       "source": "p_i/q_i",
       "latex": "\\frac{p_{i}}{q_{i}}",
-      "paths": [
-        "courses/llm-theory/solutions/llm-048_solutions.md"
-      ]
+      "paths": ["courses/llm-theory/solutions/llm-048_solutions.md"]
     },
     {
       "source": "p_i=exp(z_i)/Z",
@@ -7779,16 +7082,12 @@
     {
       "source": "p_o=2/3",
       "latex": "p_{o}=\\frac{2}{3}",
-      "paths": [
-        "courses/nlp/guides/nlp-019.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-019.md"]
     },
     {
       "source": "p_t=softmax(z_t)",
       "latex": "p_{t}=\\operatorname{softmax}(z_{t})",
-      "paths": [
-        "courses/llm-theory/guides/llm-047.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-047.md"]
     },
     {
       "source": "p_u_transpose*q_i",
@@ -7808,9 +7107,7 @@
     {
       "source": "p_upper=1-0.05^(1/n)",
       "latex": "p_{\\mathrm{upper}}=1-{0.05}^{\\frac{1}{n}}",
-      "paths": [
-        "courses/llm-theory/guides/llm-039.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-039.md"]
     },
     {
       "source": "p_upper=1-alpha^(1/N)",
@@ -7831,31 +7128,22 @@
     {
       "source": "precision=1/2",
       "latex": "\\mathrm{precision}=\\frac{1}{2}",
-      "paths": [
-        "courses/nlp/guides/nlp-011.md",
-        "courses/nlp/solutions/nlp-011_solutions.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-011.md", "courses/nlp/solutions/nlp-011_solutions.md"]
     },
     {
       "source": "precision=recall=2/3",
       "latex": "\\mathrm{precision}=\\mathrm{recall}=\\frac{2}{3}",
-      "paths": [
-        "courses/nlp/guides/nlp-003.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-003.md"]
     },
     {
       "source": "q*u",
       "latex": "q\\cdot u",
-      "paths": [
-        "courses/statistics-ml/chapters/27-advanced-forecasting-and-forecast-evaluation.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/27-advanced-forecasting-and-forecast-evaluation.md"]
     },
     {
       "source": "q/sqrt(d_k)",
       "latex": "\\frac{q}{\\sqrt{d_{k}}}",
-      "paths": [
-        "courses/llm-theory/guides/llm-009.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-009.md"]
     },
     {
       "source": "q1=0",
@@ -7912,9 +7200,7 @@
     {
       "source": "q=(.2,.5,.3)",
       "latex": "q=(0.2,0.5,0.3)",
-      "paths": [
-        "courses/llm-theory/guides/llm-048.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-048.md"]
     },
     {
       "source": "q=(a,b)",
@@ -7927,16 +7213,12 @@
     {
       "source": "q=0.5",
       "latex": "q=0.5",
-      "paths": [
-        "courses/deep-learning-tensorflow/guides/tf-017.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/guides/tf-017.md"]
     },
     {
       "source": "q=0.9",
       "latex": "q=0.9",
-      "paths": [
-        "courses/statistics-ml/chapters/27-advanced-forecasting-and-forecast-evaluation.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/27-advanced-forecasting-and-forecast-evaluation.md"]
     },
     {
       "source": "q=1-p",
@@ -7965,9 +7247,7 @@
     {
       "source": "q=k=[1,0]",
       "latex": "q=k=[1,0]",
-      "paths": [
-        "courses/llm-theory/guides/llm-044.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-044.md"]
     },
     {
       "source": "q_i*a_i=min(p_i,q_i)",
@@ -7980,9 +7260,7 @@
     {
       "source": "q_i*min(1,p_i/q_i)=min(p_i,q_i)",
       "latex": "q_{i}\\cdot \\min(1,\\frac{p_{i}}{q_{i}})=\\min(p_{i},q_{i})",
-      "paths": [
-        "courses/llm-theory/guides/llm-048.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-048.md"]
     },
     {
       "source": "q_i=0",
@@ -8003,9 +7281,7 @@
     {
       "source": "q_i^T",
       "latex": "{q_{i}}^{T}",
-      "paths": [
-        "courses/llm-theory/guides/llm-044.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-044.md"]
     },
     {
       "source": "r*(Din+Dout)",
@@ -8052,30 +7328,22 @@
     {
       "source": "r=sqrt(epsilon)",
       "latex": "r=\\sqrt{\\epsilon}",
-      "paths": [
-        "courses/llm-theory/guides/llm-045.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-045.md"]
     },
     {
       "source": "r=sqrt(mean(x\u00b2)+epsilon)",
       "latex": "r=\\sqrt{\\operatorname{mean}({x}^{2})+\\epsilon}",
-      "paths": [
-        "courses/llm-theory/guides/llm-045.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-045.md"]
     },
     {
       "source": "r=y-X",
       "latex": "r=y-X",
-      "paths": [
-        "courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md"]
     },
     {
       "source": "r^3",
       "latex": "{r}^{3}",
-      "paths": [
-        "courses/llm-theory/guides/llm-045.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-045.md"]
     },
     {
       "source": "r_bd/(BD)",
@@ -8096,9 +7364,7 @@
     {
       "source": "r_i=max(p_i-q_i,0)/R",
       "latex": "r_{i}=\\frac{\\max(p_{i}-q_{i},0)}{R}",
-      "paths": [
-        "courses/llm-theory/guides/llm-048.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-048.md"]
     },
     {
       "source": "r_i=r_raw_i/R",
@@ -8135,17 +7401,12 @@
     {
       "source": "rate*gradient",
       "latex": "\\mathrm{rate}\\cdot \\mathrm{gradient}",
-      "paths": [
-        "courses/deep-learning-tensorflow/guides/tf-005.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/guides/tf-005.md"]
     },
     {
       "source": "recall=1/3",
       "latex": "\\mathrm{recall}=\\frac{1}{3}",
-      "paths": [
-        "courses/nlp/guides/nlp-011.md",
-        "courses/nlp/solutions/nlp-011_solutions.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-011.md", "courses/nlp/solutions/nlp-011_solutions.md"]
     },
     {
       "source": "rho=.3",
@@ -8157,9 +7418,7 @@
     {
       "source": "rho=.8",
       "latex": "\\rho=0.8",
-      "paths": [
-        "courses/statistics-ml/chapters/14-online-experimentation-and-a-b-testing.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/14-online-experimentation-and-a-b-testing.md"]
     },
     {
       "source": "s/(s-o)",
@@ -8278,9 +7537,7 @@
     {
       "source": "s_ij=q_i^T",
       "latex": "s_{ij}={q_{i}}^{T}",
-      "paths": [
-        "courses/llm-theory/guides/llm-009.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-009.md"]
     },
     {
       "source": "scale/2",
@@ -8310,9 +7567,7 @@
     {
       "source": "sigma_f^2",
       "latex": "{\\sigma_{f}}^{2}",
-      "paths": [
-        "courses/statistics-ml/chapters/37-simulation-and-computational-statistics.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/37-simulation-and-computational-statistics.md"]
     },
     {
       "source": "sigma_squared/(sigma_squared+epsilon)",
@@ -8333,9 +7588,7 @@
     {
       "source": "sigmoid(g)+g*sigmoid(g)*(1-sigmoid(g))",
       "latex": "\\sigma(g)+g\\cdot \\sigma(g)\\cdot (1-\\sigma(g))",
-      "paths": [
-        "courses/llm-theory/guides/llm-045.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-045.md"]
     },
     {
       "source": "sigmoid(z)=1/(1+exp(-z))",
@@ -8348,9 +7601,7 @@
     {
       "source": "sin(2*pi*k*t/m)",
       "latex": "\\sin(\\frac{2\\cdot \\pi\\cdot k\\cdot t}{m})",
-      "paths": [
-        "courses/statistics-ml/chapters/25-time-series-foundations-and-diagnostics.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/25-time-series-foundations-and-diagnostics.md"]
     },
     {
       "source": "softmax(S)",
@@ -8363,9 +7614,7 @@
     {
       "source": "sqrt(.25+epsilon)",
       "latex": "\\sqrt{0.25+\\epsilon}",
-      "paths": [
-        "courses/llm-theory/guides/llm-045.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-045.md"]
     },
     {
       "source": "sqrt(0.5)",
@@ -8378,9 +7627,7 @@
     {
       "source": "sqrt(1+1/n)",
       "latex": "\\sqrt{1+\\frac{1}{n}}",
-      "paths": [
-        "courses/statistics-ml/chapters/08-estimation-and-statistical-inference.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/08-estimation-and-statistical-inference.md"]
     },
     {
       "source": "sqrt(1+epsilon)",
@@ -8518,9 +7765,7 @@
     {
       "source": "sqrt(d_k)",
       "latex": "\\sqrt{d_{k}}",
-      "paths": [
-        "courses/llm-theory/guides/llm-009.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-009.md"]
     },
     {
       "source": "sqrt(epsilon)",
@@ -8541,9 +7786,7 @@
     {
       "source": "sum(log(1+exp(eta))-y*eta)",
       "latex": "\\operatorname{sum}(\\log(1+\\exp(\\eta))-y\\cdot \\eta)",
-      "paths": [
-        "courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md"]
     },
     {
       "source": "sum(w\u00b2)",
@@ -8556,37 +7799,27 @@
     {
       "source": "sum=3",
       "latex": "\\mathrm{sum}=3",
-      "paths": [
-        "courses/deep-learning-tensorflow/guides/tf-017.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/guides/tf-017.md"]
     },
     {
       "source": "sum=5",
       "latex": "\\mathrm{sum}=5",
-      "paths": [
-        "courses/deep-learning-tensorflow/guides/tf-017.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/guides/tf-017.md"]
     },
     {
       "source": "target=[5,7,3]",
       "latex": "\\mathrm{target}=[5,7,3]",
-      "paths": [
-        "courses/llm-theory/guides/llm-017.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-017.md"]
     },
     {
       "source": "tau*u",
       "latex": "\\tau\\cdot u",
-      "paths": [
-        "courses/statistics-ml/chapters/27-advanced-forecasting-and-forecast-evaluation.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/27-advanced-forecasting-and-forecast-evaluation.md"]
     },
     {
       "source": "tau=0.9",
       "latex": "\\tau=0.9",
-      "paths": [
-        "courses/statistics-ml/chapters/27-advanced-forecasting-and-forecast-evaluation.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/27-advanced-forecasting-and-forecast-evaluation.md"]
     },
     {
       "source": "tau=1",
@@ -8620,9 +7853,7 @@
     {
       "source": "tf*(k1+1)/(tf+k1*(1-b+b*length/avg_length))",
       "latex": "\\frac{\\mathrm{tf}\\cdot (k_{1}+1)}{\\mathrm{tf}+k_{1}\\cdot (1-b+\\frac{b\\cdot \\mathrm{length}}{\\mathrm{avg}_{\\mathrm{length}}})}",
-      "paths": [
-        "courses/llm-applied/guides/llm-applied-006.md"
-      ]
+      "paths": ["courses/llm-applied/guides/llm-applied-006.md"]
     },
     {
       "source": "tf=1",
@@ -8642,9 +7873,7 @@
     {
       "source": "u<a_i",
       "latex": "u<a_{i}",
-      "paths": [
-        "courses/llm-theory/guides/llm-048.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-048.md"]
     },
     {
       "source": "u=0",
@@ -8675,9 +7904,7 @@
     {
       "source": "u>=0",
       "latex": "u\\ge 0",
-      "paths": [
-        "courses/statistics-ml/chapters/27-advanced-forecasting-and-forecast-evaluation.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/27-advanced-forecasting-and-forecast-evaluation.md"]
     },
     {
       "source": "v1=0.016",
@@ -8792,9 +8019,7 @@
     {
       "source": "w=28/15",
       "latex": "w=\\frac{28}{15}",
-      "paths": [
-        "courses/deep-learning-tensorflow/guides/tf-011.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/guides/tf-011.md"]
     },
     {
       "source": "w=3",
@@ -8807,9 +8032,7 @@
     {
       "source": "w=448/225",
       "latex": "w=\\frac{448}{225}",
-      "paths": [
-        "courses/deep-learning-tensorflow/guides/tf-023.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/guides/tf-023.md"]
     },
     {
       "source": "w=[.75,0]",
@@ -8862,9 +8085,7 @@
     {
       "source": "width=2",
       "latex": "\\mathrm{width}=2",
-      "paths": [
-        "courses/llm-theory/guides/llm-011.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-011.md"]
     },
     {
       "source": "x*x+1",
@@ -8879,16 +8100,12 @@
     {
       "source": "x+c*1",
       "latex": "x+c\\cdot 1",
-      "paths": [
-        "courses/llm-theory/guides/llm-045.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-045.md"]
     },
     {
       "source": "x+y<=4",
       "latex": "x+y\\le 4",
-      "paths": [
-        "courses/statistics-ml/chapters/36-optimization-and-operations-research.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/36-optimization-and-operations-research.md"]
     },
     {
       "source": "x/(1+x)",
@@ -8916,16 +8133,12 @@
     {
       "source": "x<=2",
       "latex": "x\\le 2",
-      "paths": [
-        "courses/statistics-ml/chapters/36-optimization-and-operations-research.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/36-optimization-and-operations-research.md"]
     },
     {
       "source": "x=(0,1,2)",
       "latex": "x=(0,1,2)",
-      "paths": [
-        "courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md"]
     },
     {
       "source": "x=0",
@@ -8992,9 +8205,7 @@
     {
       "source": "x=[1,2,3,4,5,6]",
       "latex": "x=[1,2,3,4,5,6]",
-      "paths": [
-        "courses/deep-learning-tensorflow/guides/tf-009.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/guides/tf-009.md"]
     },
     {
       "source": "x=[1,2,3]",
@@ -9049,10 +8260,7 @@
     {
       "source": "x^T",
       "latex": "{x}^{T}",
-      "paths": [
-        "courses/llm-theory/guides/llm-020.md",
-        "courses/llm-theory/guides/llm-045.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-020.md", "courses/llm-theory/guides/llm-045.md"]
     },
     {
       "source": "x_i/r",
@@ -9065,23 +8273,17 @@
     {
       "source": "y<=3",
       "latex": "y\\le 3",
-      "paths": [
-        "courses/statistics-ml/chapters/36-optimization-and-operations-research.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/36-optimization-and-operations-research.md"]
     },
     {
       "source": "y=(1,2,4)",
       "latex": "y=(1,2,4)",
-      "paths": [
-        "courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md"]
     },
     {
       "source": "y=0.95",
       "latex": "y=0.95",
-      "paths": [
-        "courses/llm-theory/guides/llm-032.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-032.md"]
     },
     {
       "source": "y=1",
@@ -9111,16 +8313,12 @@
     {
       "source": "y=5/4",
       "latex": "y=\\frac{5}{4}",
-      "paths": [
-        "courses/llm-theory/guides/llm-047.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-047.md"]
     },
     {
       "source": "y=[2,4,6]",
       "latex": "y=[2,4,6]",
-      "paths": [
-        "courses/deep-learning-tensorflow/guides/tf-002.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/guides/tf-002.md"]
     },
     {
       "source": "y=gamma*z+beta",
@@ -9141,16 +8339,12 @@
     {
       "source": "y=x*(W+A*B)",
       "latex": "y=x\\cdot (W+A\\cdot B)",
-      "paths": [
-        "courses/llm-theory/guides/llm-032.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-032.md"]
     },
     {
       "source": "y=x/r",
       "latex": "y=\\frac{x}{r}",
-      "paths": [
-        "courses/llm-theory/guides/llm-045.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-045.md"]
     },
     {
       "source": "y_bar=3",
@@ -9162,9 +8356,7 @@
     {
       "source": "y_i=x_i/r",
       "latex": "y_{i}=\\frac{x_{i}}{r}",
-      "paths": [
-        "courses/llm-theory/guides/llm-045.md"
-      ]
+      "paths": ["courses/llm-theory/guides/llm-045.md"]
     },
     {
       "source": "y_ij=X_ij",
@@ -9176,9 +8368,7 @@
     {
       "source": "y_t-beta*x_t",
       "latex": "y_{t}-\\beta\\cdot x_{t}",
-      "paths": [
-        "courses/statistics-ml/chapters/25-time-series-foundations-and-diagnostics.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/25-time-series-foundations-and-diagnostics.md"]
     },
     {
       "source": "z=0",
@@ -9192,9 +8382,7 @@
     {
       "source": "z=1",
       "latex": "z=1",
-      "paths": [
-        "courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md"
-      ]
+      "paths": ["courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md"]
     },
     {
       "source": "z=2",
@@ -9209,9 +8397,7 @@
     {
       "source": "z=2*2+1*(-1)-0.5=2.5",
       "latex": "z=2\\cdot 2+1\\cdot (-1)-0.5=2.5",
-      "paths": [
-        "courses/nlp/guides/nlp-009.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-009.md"]
     },
     {
       "source": "z=2*w",
@@ -9235,9 +8421,7 @@
     {
       "source": "z=3*w",
       "latex": "z=3\\cdot w",
-      "paths": [
-        "courses/deep-learning-tensorflow/guides/tf-006.md"
-      ]
+      "paths": ["courses/deep-learning-tensorflow/guides/tf-006.md"]
     },
     {
       "source": "z=beta*(d-r)",
@@ -9258,10 +8442,7 @@
     {
       "source": "z=w_transpose*x+b",
       "latex": "z=w^{\\mathsf T}\\cdot x+b",
-      "paths": [
-        "courses/nlp/guides/nlp-009.md",
-        "courses/nlp/solutions/nlp-009_solutions.md"
-      ]
+      "paths": ["courses/nlp/guides/nlp-009.md", "courses/nlp/solutions/nlp-009_solutions.md"]
     },
     {
       "source": "z=wt",

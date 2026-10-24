@@ -14,9 +14,7 @@
             "app": "hello"
           }
         },
-        "policyTypes": [
-          "Ingress"
-        ]
+        "policyTypes": ["Ingress"]
       }
     },
     {
@@ -31,9 +29,7 @@
             "app": "hello"
           }
         },
-        "policyTypes": [
-          "Ingress"
-        ],
+        "policyTypes": ["Ingress"],
         "ingress": [
           {
             "from": [

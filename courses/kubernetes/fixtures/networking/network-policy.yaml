@@ -2,15 +2,15 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: network-study-allow-client
-  labels: {course-fixture: deep-networking}
+  labels: { course-fixture: deep-networking }
 spec:
   podSelector:
-    matchLabels: {app: network-study}
+    matchLabels: { app: network-study }
   policyTypes: [Ingress]
   ingress:
     - from:
         - namespaceSelector:
-            matchLabels: {study-role: client}
+            matchLabels: { study-role: client }
           podSelector:
-            matchLabels: {role: tester}
-      ports: [{protocol: TCP, port: 8080}]
+            matchLabels: { role: tester }
+      ports: [{ protocol: TCP, port: 8080 }]

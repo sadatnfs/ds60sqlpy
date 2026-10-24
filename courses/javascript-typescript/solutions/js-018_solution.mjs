@@ -1,8 +1,8 @@
-import { strict as assert } from 'node:assert';
-import { mkdtemp, writeFile, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { spawnSync } from 'node:child_process';
+import { strict as assert } from "node:assert";
+import { mkdtemp, writeFile, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { spawnSync } from "node:child_process";
 
 const CLI_SOURCE = String.raw`
 async function main() {
@@ -41,11 +41,16 @@ async function main() {
 main().catch(error => { process.stderr.write(error.message + '\n'); process.exitCode = 2; });
 `;
 async function runCli(args, input) {
-  const directory = await mkdtemp(join(tmpdir(), 'course-cli-'));
+  const directory = await mkdtemp(join(tmpdir(), "course-cli-"));
   try {
-    const path = join(directory, 'main.mjs');
-    await writeFile(path, CLI_SOURCE, 'utf8');
-    const result = spawnSync(process.execPath, [path, ...args], { input, encoding: 'utf8', timeout: 10000, maxBuffer: 1024 * 1024 });
+    const path = join(directory, "main.mjs");
+    await writeFile(path, CLI_SOURCE, "utf8");
+    const result = spawnSync(process.execPath, [path, ...args], {
+      input,
+      encoding: "utf8",
+      timeout: 10000,
+      maxBuffer: 1024 * 1024,
+    });
     if (result.error) throw result.error;
     if (result.signal) throw new Error(`CLI terminated by ${result.signal}`);
     return result;
@@ -57,51 +62,56 @@ async function runCli(args, input) {
 export async function verify() {
   // Exercise 1: Aggregate valid rows through a real child process
   {
-    const input = [{ id: 'A', quantity: 2, priceCents: 125 }, { id: 'B', quantity: 3, priceCents: 100 }].map(JSON.stringify).join('\n');
-    const result = await runCli(['--sum'], input);
+    const input = [
+      { id: "A", quantity: 2, priceCents: 125 },
+      { id: "B", quantity: 3, priceCents: 100 },
+    ]
+      .map(JSON.stringify)
+      .join("\n");
+    const result = await runCli(["--sum"], input);
     assert.equal(result.status, 0, result.stderr);
     assert.deepEqual(JSON.parse(result.stdout), { rows: 2, totalCents: 550 });
-    assert.equal(result.stderr, '');
-    assert.equal(result.stdout.trim().split('\n').length, 1);
+    assert.equal(result.stderr, "");
+    assert.equal(result.stdout.trim().split("\n").length, 1);
   }
 
   // Exercise 2: Reject unknown arguments before consuming data
   {
-    const result = await runCli(['--unknown'], '');
+    const result = await runCli(["--unknown"], "");
     assert.equal(result.status, 2);
-    assert.equal(result.stdout, '');
+    assert.equal(result.stdout, "");
     assert.match(result.stderr, /usage/u);
   }
 
   // Exercise 3: Report the first invalid row without a partial result
   {
-    const result = await runCli(['--sum'], '{"id":"A","quantity":1,"priceCents":5}\n{broken');
+    const result = await runCli(["--sum"], '{"id":"A","quantity":1,"priceCents":5}\n{broken');
     assert.equal(result.status, 2);
-    assert.equal(result.stdout, '');
+    assert.equal(result.stdout, "");
     assert.match(result.stderr, /line 2/u);
   }
 
   // Exercise 4: Reject duplicate business identifiers
   {
-    const row = JSON.stringify({ id: 'A', quantity: 1, priceCents: 5 });
-    const result = await runCli(['--sum'], row + '\n' + row);
+    const row = JSON.stringify({ id: "A", quantity: 1, priceCents: 5 });
+    const result = await runCli(["--sum"], row + "\n" + row);
     assert.equal(result.status, 2);
-    assert.equal(result.stdout, '');
+    assert.equal(result.stdout, "");
     assert.match(result.stderr, /duplicate id/u);
   }
 
   // Exercise 5: Define empty input deliberately
   {
-    const result = await runCli(['--sum'], '\n  \n');
+    const result = await runCli(["--sum"], "\n  \n");
     assert.equal(result.status, 0, result.stderr);
     assert.deepEqual(JSON.parse(result.stdout), { rows: 0, totalCents: 0 });
   }
 
   // Exercise 6: Enforce an input budget before retaining all data
   {
-    const result = await runCli(['--sum'], 'x'.repeat(4097));
+    const result = await runCli(["--sum"], "x".repeat(4097));
     assert.equal(result.status, 2);
-    assert.equal(result.stdout, '');
+    assert.equal(result.stdout, "");
     assert.match(result.stderr, /input limit/u);
   }
 

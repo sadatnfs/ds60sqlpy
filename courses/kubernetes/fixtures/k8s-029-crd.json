@@ -23,23 +23,15 @@
         "schema": {
           "openAPIV3Schema": {
             "type": "object",
-            "required": [
-              "spec"
-            ],
+            "required": ["spec"],
             "properties": {
               "spec": {
                 "type": "object",
-                "required": [
-                  "message",
-                  "replicas"
-                ],
+                "required": ["message", "replicas"],
                 "properties": {
                   "message": {
                     "type": "string",
-                    "enum": [
-                      "hello",
-                      "reviewer"
-                    ]
+                    "enum": ["hello", "reviewer"]
                   },
                   "replicas": {
                     "type": "integer",

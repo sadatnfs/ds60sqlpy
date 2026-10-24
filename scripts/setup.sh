@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
 set -eu
 
-script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-repo_root=$(CDPATH= cd -- "${script_dir}/.." && pwd)
+script_dir=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
+repo_root=$(CDPATH='' cd -- "${script_dir}/.." && pwd)
 cd "${repo_root}"
 
 usage() {
@@ -13,19 +13,34 @@ profile=core
 dependency_mode=auto
 while [ "$#" -gt 0 ]; do
   case "$1" in
-    --advanced) profile=advanced; shift ;;
+    --advanced)
+      profile=advanced
+      shift
+      ;;
     --dependency-mode)
-      if [ "$#" -lt 2 ]; then usage >&2; exit 2; fi
+      if [ "$#" -lt 2 ]; then
+        usage >&2
+        exit 2
+      fi
       dependency_mode=$2
       shift 2
       ;;
-    --help|-h) usage; exit 0 ;;
-    *) usage >&2; exit 2 ;;
+    --help | -h)
+      usage
+      exit 0
+      ;;
+    *)
+      usage >&2
+      exit 2
+      ;;
   esac
 done
 case "$dependency_mode" in
-  auto|locked|project) ;;
-  *) usage >&2; exit 2 ;;
+  auto | locked | project) ;;
+  *)
+    usage >&2
+    exit 2
+    ;;
 esac
 
 # Never let an inherited uv environment setting select another project's
@@ -61,9 +76,8 @@ raise SystemExit(not valid)
 else
   bootstrap_python=
   for candidate in python3.12 python3.11 python3 python; do
-    if command -v "${candidate}" >/dev/null 2>&1 \
-      && "${candidate}" -c 'import sys; raise SystemExit(not ((3, 11) <= sys.version_info[:2] < (3, 13)))'
-    then
+    if command -v "${candidate}" >/dev/null 2>&1 &&
+      "${candidate}" -c 'import sys; raise SystemExit(not ((3, 11) <= sys.version_info[:2] < (3, 13)))'; then
       bootstrap_python=${candidate}
       break
     fi

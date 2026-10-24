@@ -1,5 +1,3 @@
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let count = 3;
@@ -8,7 +6,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     {
-        let classify = |score| match score { 0..=59 => "retry", 60..=100 => "pass", _ => "invalid" };
+        let classify = |score| match score {
+            0..=59 => "retry",
+            60..=100 => "pass",
+            _ => "invalid",
+        };
         assert_eq!(classify(59), "retry");
         assert_eq!(classify(60), "pass");
         assert_eq!(classify(101), "invalid");

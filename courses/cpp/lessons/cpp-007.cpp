@@ -30,16 +30,17 @@
 #include <variant>
 #include <vector>
 
-
 int main() {
-    std::vector<int> original{3,1,3,0}; auto sorted=original; std::sort(sorted.begin(),sorted.end());
-    assert((sorted==std::vector<int>{0,1,3,3})); assert(original[0]==3);
-    assert(std::accumulate(sorted.begin(),sorted.end(),0LL)==7);
-    assert(std::count(sorted.begin(),sorted.end(),3)==2);
-    std::cout << "cpp-007 examples passed\n";
-    return 0;
+  std::vector<int> original{3, 1, 3, 0};
+  auto sorted = original;
+  std::sort(sorted.begin(), sorted.end());
+  assert((sorted == std::vector<int>{0, 1, 3, 3}));
+  assert(original[0] == 3);
+  assert(std::accumulate(sorted.begin(), sorted.end(), 0LL) == 7);
+  assert(std::count(sorted.begin(), sorted.end(), 3) == 2);
+  std::cout << "cpp-007 examples passed\n";
+  return 0;
 }
-
 
 // Exercise 1: Predict sorting. Sort [3,1,3,0] on paper. Expected: [0,1,3,3], size 4.
 // Exercise 2: Preserve evidence. Sort a copy and compare the original. Expected: Original remains [3,1,3,0].

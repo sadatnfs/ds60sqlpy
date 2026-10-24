@@ -18,48 +18,70 @@
 --
 BEGIN;
 SET search_path TO training, public;
-
 -- Study contract
 -- Focus: Build recursive CTEs from compatible anchor and recursive members, carrying depth/path evidence and an explicit termination or cycle rule.
 -- Assumptions: Employee hierarchy roots have `manager_id IS NULL`; multiple roots are valid. Array paths use integer employee IDs.
 -- Pitfall: `UNION ALL` without a cycle/termination guard can recurse indefinitely; `UNION` duplicate removal is not a substitute for a path rule.
 -- Predict row grain and NULL/order behavior before executing each example.
-
 -- Organization hierarchy traversal
 WITH RECURSIVE org AS (
-  SELECT e.employee_id,
-         e.full_name,
-         e.manager_id,
-         1 AS depth,
-         ARRAY[e.employee_id] AS path
-  FROM employees e
-  WHERE e.manager_id IS NULL
+  SELECT
+    e.employee_id,
+    e.full_name,
+    e.manager_id,
+    1 AS depth,
+    ARRAY[e.employee_id] AS path
+  FROM
+    employees e
+  WHERE
+    e.manager_id IS NULL
   UNION ALL
-  SELECT e.employee_id,
-         e.full_name,
-         e.manager_id,
-         o.depth + 1,
-         o.path || e.employee_id
-  FROM employees e
-  JOIN org o ON e.manager_id = o.employee_id
-  -- A path is evidence of traversal and a guard against malformed cycles.
-  WHERE NOT e.employee_id = ANY(o.path)
-)
-SELECT employee_id, full_name, manager_id, depth, path
-FROM org
-ORDER BY depth, full_name, employee_id
+  SELECT
+    e.employee_id,
+    e.full_name,
+    e.manager_id,
+    o.depth + 1,
+    o.path || e.employee_id
+  FROM
+    employees e
+    JOIN org o ON e.manager_id = o.employee_id
+    -- A path is evidence of traversal and a guard against malformed cycles.
+  WHERE
+    NOT e.employee_id = ANY (o.path))
+SELECT
+  employee_id,
+  full_name,
+  manager_id,
+  depth,
+  path
+FROM
+  org
+ORDER BY
+  depth,
+  full_name,
+  employee_id
 LIMIT 100;
-
 -- Generate a sequence of dates (first day of month for last 12 months)
 WITH RECURSIVE months AS (
-  SELECT date_trunc('month', CURRENT_DATE)::date AS m, 1 AS n
+  SELECT
+    date_trunc('month', CURRENT_DATE)::date AS m,
+    1 AS n
   UNION ALL
-  SELECT (m - interval '1 month')::date, n+1 FROM months WHERE n < 12
+  SELECT
+    (m - interval '1 month')::date,
+    n + 1
+  FROM
+    months
+  WHERE
+    n < 12
 )
-SELECT m AS month_start, n AS step
-FROM months
-ORDER BY month_start;
-
+SELECT
+  m AS month_start,
+  n AS step
+FROM
+  months
+ORDER BY
+  month_start;
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.
@@ -99,5 +121,4 @@ ORDER BY month_start;
 --    Expected result/shape: For sql-24 Exercise 6, expected output: One row per observed depth. The final columns are `depth`, and `employee_count`. The final order is `depth`.
 --    Verify: For sql-24 Exercise 6, independently aggregate `employees`, and `organization` by `depth`; require one output row for every distinct `depth` tuple and compare `employee_count` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `employee_count` for the existing `depth` tuple and verify the new tuple appears exactly once.
 --    Hint ladder, rung 1: For sql-24 Exercise 6, start with the first relation in `employees`, and `organization`; after each join, record total rows and distinct `depth` so the exact fanout or loss is visible.
-
 ROLLBACK;

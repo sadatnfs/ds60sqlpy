@@ -1,82 +1,88 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Isolated D3 lesson preview</title>
-<style>
-:root { color-scheme: light; font: 15px/1.5 system-ui,sans-serif; color:#18212f; background:#fff; }
-body { margin:16px; overflow-wrap:anywhere; }
-#chart { max-width:100%; min-height:240px; }
-svg,canvas { max-width:100%; height:auto; }
-button,input,select { font:inherit; }
-button { padding:.4rem .7rem; }
-:focus-visible { outline:3px solid #2563eb; outline-offset:3px; }
-#output { white-space:pre-wrap; font:13px/1.5 ui-monospace,monospace; }
-.sr-only { position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0); }
-</style>
-</head>
-<body><div id="chart" aria-label="Lesson visualization"></div><pre id="output" aria-live="polite"></pre>
-<script>__DS60_D3_BUNDLE__</script>
-<script>
-(() => {
-  "use strict";
-  const expectedOrigin = __DS60_BROWSER_ORIGIN__;
-  let connected = false;
-  window.addEventListener("message", async (event) => {
-    if (connected || event.source !== parent || event.origin !== expectedOrigin ||
-        event.data?.type !== "ds60-browser-connect" || event.ports.length !== 1 ||
-        typeof event.data.source !== "string" ||
-        new TextEncoder().encode(event.data.source).length > 48000) return;
-    connected = true;
-    const port = event.ports[0], source = event.data.source;
-    const started = performance.now();
-    let text = "", truncated = false, finished = false, outputTimer = null;
-    const limit = 30000;
-    function display(value) {
-      if (typeof value === "string") return value;
-      try { return JSON.stringify(value) ?? String(value); }
-      catch (_) { return String(value); }
-    }
-    function send(type, extra = {}) {
-      port.postMessage({ type, output:text, truncated,
-        elapsed_seconds:Math.min(3600,(performance.now()-started)/1000), ...extra });
-    }
-    function log(...values) {
-      if (truncated) return;
-      const line = values.map(display).join(" ") + "\n";
-      if (new TextEncoder().encode(text + line).length > limit) {
-        if (!truncated) text += "\n[Further console output omitted.]\n";
-        truncated = true;
-      } else if (!truncated) text += line;
-      if (outputTimer === null) outputTimer = setTimeout(() => {
-        outputTimer = null;
-        send("output");
-      }, 50);
-    }
-    console.log = (...values) => log(...values);
-    console.info = (...values) => log(...values);
-    console.warn = (...values) => log("Warning:", ...values);
-    console.error = (...values) => log("Error:", ...values);
-    console.assert = (condition,...values) => {
-      if (!condition) throw new Error(values.map(display).join(" ") || "Assertion failed");
-    };
-    function fail(error) {
-      log(error?.stack || error?.message || String(error));
-      if (!finished) { finished=true;send("complete",{status:"failed"}); }
-      else send("interaction-error", {status:"failed"});
-    }
-    window.addEventListener("error", (event) => { event.preventDefault();fail(event.error || event.message); });
-    window.addEventListener("unhandledrejection", (event) => { event.preventDefault();fail(event.reason); });
-    port.start();
-    send("started");
-    try {
-      const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
-      // Use ordinary browser globals. Binding chart/output as parameters would
-      // incorrectly reject learner declarations such as const output = ... .
-      await new AsyncFunction(source)();
-      if (!finished) { finished=true;send("complete",{status:"succeeded"}); }
-    } catch (error) { fail(error); }
-  });
-})();
-</script></body></html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Isolated D3 lesson preview</title>
+    <style>
+      :root { color-scheme: light; font: 15px/1.5 system-ui,sans-serif; color:#18212f; background:#fff; }
+      body { margin:16px; overflow-wrap:anywhere; }
+      #chart { max-width:100%; min-height:240px; }
+      svg,canvas { max-width:100%; height:auto; }
+      button,input,select { font:inherit; }
+      button { padding:.4rem .7rem; }
+      :focus-visible { outline:3px solid #2563eb; outline-offset:3px; }
+      #output { white-space:pre-wrap; font:13px/1.5 ui-monospace,monospace; }
+      .sr-only { position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0); }
+    </style>
+  </head>
+  <body
+    ><div id="chart" aria-label="Lesson visualization"></div
+    ><pre id="output" aria-live="polite"></pre>
+    <script>
+      __DS60_D3_BUNDLE__
+    </script>
+    <script>
+      (() => {
+        "use strict";
+        const expectedOrigin = __DS60_BROWSER_ORIGIN__;
+        let connected = false;
+        window.addEventListener("message", async (event) => {
+          if (connected || event.source !== parent || event.origin !== expectedOrigin ||
+              event.data?.type !== "ds60-browser-connect" || event.ports.length !== 1 ||
+              typeof event.data.source !== "string" ||
+              new TextEncoder().encode(event.data.source).length > 48000) return;
+          connected = true;
+          const port = event.ports[0], source = event.data.source;
+          const started = performance.now();
+          let text = "", truncated = false, finished = false, outputTimer = null;
+          const limit = 30000;
+          function display(value) {
+            if (typeof value === "string") return value;
+            try { return JSON.stringify(value) ?? String(value); }
+            catch (_) { return String(value); }
+          }
+          function send(type, extra = {}) {
+            port.postMessage({ type, output:text, truncated,
+              elapsed_seconds:Math.min(3600,(performance.now()-started)/1000), ...extra });
+          }
+          function log(...values) {
+            if (truncated) return;
+            const line = values.map(display).join(" ") + "\n";
+            if (new TextEncoder().encode(text + line).length > limit) {
+              if (!truncated) text += "\n[Further console output omitted.]\n";
+              truncated = true;
+            } else if (!truncated) text += line;
+            if (outputTimer === null) outputTimer = setTimeout(() => {
+              outputTimer = null;
+              send("output");
+            }, 50);
+          }
+          console.log = (...values) => log(...values);
+          console.info = (...values) => log(...values);
+          console.warn = (...values) => log("Warning:", ...values);
+          console.error = (...values) => log("Error:", ...values);
+          console.assert = (condition,...values) => {
+            if (!condition) throw new Error(values.map(display).join(" ") || "Assertion failed");
+          };
+          function fail(error) {
+            log(error?.stack || error?.message || String(error));
+            if (!finished) { finished=true;send("complete",{status:"failed"}); }
+            else send("interaction-error", {status:"failed"});
+          }
+          window.addEventListener("error", (event) => { event.preventDefault();fail(event.error || event.message); });
+          window.addEventListener("unhandledrejection", (event) => { event.preventDefault();fail(event.reason); });
+          port.start();
+          send("started");
+          try {
+            const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+            // Use ordinary browser globals. Binding chart/output as parameters would
+            // incorrectly reject learner declarations such as const output = ... .
+            await new AsyncFunction(source)();
+            if (!finished) { finished=true;send("complete",{status:"succeeded"}); }
+          } catch (error) { fail(error); }
+        });
+      })();
+    </script></body
+  ></html
+>

@@ -8,10 +8,9 @@
 // Task 6: Replace several loosely related flags in a program with explicit states and justify which impossible combinations disappear.
 using System;
 
-internal static class Program
-{
-    private static void Main()
-    {
-        throw new NotImplementedException("Implement your own lesson attempt before running.");
-    }
+internal static class Program {
+  private static void Main() {
+    throw new NotImplementedException(
+        "Implement your own lesson attempt before running.");
+  }
 }

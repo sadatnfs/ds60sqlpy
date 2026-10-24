@@ -20,4 +20,6 @@
 // Exercise 6: Plan a real boundary-data integration.
 // Expected: Source/license, date, stable IDs, topology and projection checks.
 
-throw new Error("Implement the six D3 practice tasks in your saved pad before claiming completion.");
+throw new Error(
+  "Implement the six D3 practice tasks in your saved pad before claiming completion.",
+);

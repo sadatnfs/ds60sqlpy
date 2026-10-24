@@ -18,31 +18,45 @@
 --
 BEGIN;
 SET search_path TO training, public;
-
 -- Study contract
 -- Focus: Use inner joins only when unmatched rows should disappear, and verify key cardinality before aggregating.
 -- Assumptions: Foreign keys define expected many-to-one relationships. Net line revenue is `unit_price * quantity * (1 - discount)`.
 -- Pitfall: A missing or incomplete `ON` condition creates row multiplication; joining two detail tables before aggregation can multiply measures.
 -- Predict row grain and NULL/order behavior before executing each example.
-
 -- Example: Orders with customer and items (3-table join)
-SELECT o.order_id, o.order_date, c.full_name, p.name AS product, oi.quantity, oi.unit_price
-FROM orders o
-JOIN customers c   ON c.customer_id = o.customer_id
-JOIN order_items oi ON oi.order_id = o.order_id
-JOIN products p    ON p.product_id = oi.product_id
-ORDER BY o.order_date DESC, o.order_id DESC, p.product_id
+SELECT
+  o.order_id,
+  o.order_date,
+  c.full_name,
+  p.name AS product,
+  oi.quantity,
+  oi.unit_price
+FROM
+  orders o
+  JOIN customers c ON c.customer_id = o.customer_id
+  JOIN order_items oi ON oi.order_id = o.order_id
+  JOIN products p ON p.product_id = oi.product_id
+ORDER BY
+  o.order_date DESC,
+  o.order_id DESC,
+  p.product_id
 LIMIT 50;
-
 -- Multiple joins with filters
-SELECT o.order_id, c.country, SUM(oi.quantity) AS total_items
-FROM orders o
-JOIN customers c ON c.customer_id = o.customer_id
-JOIN order_items oi ON oi.order_id = o.order_id
-GROUP BY o.order_id, c.country
-ORDER BY total_items DESC, o.order_id
+SELECT
+  o.order_id,
+  c.country,
+  SUM(oi.quantity) AS total_items
+FROM
+  orders o
+  JOIN customers c ON c.customer_id = o.customer_id
+  JOIN order_items oi ON oi.order_id = o.order_id
+GROUP BY
+  o.order_id,
+  c.country
+ORDER BY
+  total_items DESC,
+  o.order_id
 LIMIT 20;
-
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.
@@ -82,5 +96,4 @@ LIMIT 20;
 --    Expected result/shape: For sql-03 Exercise 6, expected output: One row per country represented by an order. The final columns are `country`, and `net_revenue`. The final order is `net_revenue DESC, c.country`.
 --    Verify: For sql-03 Exercise 6, independently aggregate `order_items`, `orders`, and `customers` by `country`; require one output row for every distinct `country` tuple and compare `net_revenue` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `net_revenue` for the existing `country` tuple and verify the new tuple appears exactly once.
 --    Hint ladder, rung 1: For sql-03 Exercise 6, start with the first relation in `order_items`, `orders`, and `customers`; after each join, record total rows and distinct `country` so the exact fanout or loss is visible.
-
 ROLLBACK;

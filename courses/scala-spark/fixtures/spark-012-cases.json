@@ -47,53 +47,18 @@
   ],
   "golden": {
     "schema": [
-      [
-        "event_id",
-        "bigint",
-        false
-      ],
-      [
-        "team",
-        "string",
-        true
-      ],
-      [
-        "amount_cents",
-        "bigint",
-        true
-      ]
+      ["event_id", "bigint", false],
+      ["team", "string", true],
+      ["amount_cents", "bigint", true]
     ],
     "rows": [
-      [
-        1,
-        "A",
-        0
-      ],
-      [
-        2,
-        "B",
-        null
-      ],
-      [
-        3,
-        "A",
-        25
-      ],
-      [
-        4,
-        "B",
-        40
-      ]
+      [1, "A", 0],
+      [2, "B", null],
+      [3, "A", 25],
+      [4, "B", 40]
     ],
-    "team_a_ids": [
-      1,
-      3
-    ],
-    "observed_ids": [
-      1,
-      3,
-      4
-    ],
+    "team_a_ids": [1, 3],
+    "observed_ids": [1, 3, 4],
     "observed_total": 65,
     "master": "local[2]",
     "spark_version": "4.0.1"

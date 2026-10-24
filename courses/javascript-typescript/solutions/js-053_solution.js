@@ -1,18 +1,22 @@
 // js-053: complete offline D3 browser reference.
-if (typeof d3 !== 'object' || d3.version !== '7.9.0') throw new Error('Prepared D3 7.9.0 is required.');
-const host = document.querySelector('#chart');
-const output = document.querySelector('#output');
-if (!host || !output) throw new Error('Preview chart/output nodes are required.');
+if (typeof d3 !== "object" || d3.version !== "7.9.0")
+  throw new Error("Prepared D3 7.9.0 is required.");
+const host = document.querySelector("#chart");
+const output = document.querySelector("#output");
+if (!host || !output) throw new Error("Preview chart/output nodes are required.");
 host.replaceChildren();
-const check = (condition, message) => { if (!condition) throw new Error(message); };
-const svg = d3.select(host)
-  .append('svg')
-  .attr('viewBox', '0 0 640 360')
-  .attr('role', 'img')
-  .attr('aria-label', "Grouped and stacked bars: totals, composition and denominators")
-  .style('width', '100%')
-  .style('max-width', '640px');
-svg.append('title').text("Grouped and stacked bars: totals, composition and denominators");
+const check = (condition, message) => {
+  if (!condition) throw new Error(message);
+};
+const svg = d3
+  .select(host)
+  .append("svg")
+  .attr("viewBox", "0 0 640 360")
+  .attr("role", "img")
+  .attr("aria-label", "Grouped and stacked bars: totals, composition and denominators")
+  .style("width", "100%")
+  .style("max-width", "640px");
+svg.append("title").text("Grouped and stacked bars: totals, composition and denominators");
 const rows = [
   { group: "X", a: 2, b: 3 },
   { group: "Y", a: 4, b: 2 },

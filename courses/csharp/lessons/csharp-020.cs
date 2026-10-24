@@ -8,10 +8,9 @@
 // Task 6: Choose streaming or materialization for a large import and explain memory and repeatability tradeoffs.
 using System;
 
-internal static class Program
-{
-    private static void Main()
-    {
-        throw new NotImplementedException("Implement your own lesson attempt before running.");
-    }
+internal static class Program {
+  private static void Main() {
+    throw new NotImplementedException(
+        "Implement your own lesson attempt before running.");
+  }
 }

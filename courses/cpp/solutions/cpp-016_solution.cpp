@@ -30,17 +30,26 @@
 #include <variant>
 #include <vector>
 
-struct Batch { std::vector<int> values; std::string label; };
+struct Batch {
+  std::vector<int> values;
+  std::string label;
+};
 int main() {
-    Batch a{{1,2,3},"first"}; Batch copy=a; copy.values[0]=9; assert(a.values[0]==1);
-    Batch moved=std::move(a); assert((moved.values==std::vector<int>{1,2,3}));
-    a=Batch{{4},"reused"}; assert(a.values[0]==4);
-    // Reference extension checks for the exercise changes.
-    auto make_batch=[](){return Batch{{8,9},"factory"};};auto returned=make_batch();assert((returned.values==std::vector<int>{8,9}));
-    std::cout << "cpp-016 examples passed\n";
-    return 0;
+  Batch a{{1, 2, 3}, "first"};
+  Batch copy = a;
+  copy.values[0] = 9;
+  assert(a.values[0] == 1);
+  Batch moved = std::move(a);
+  assert((moved.values == std::vector<int>{1, 2, 3}));
+  a = Batch{{4}, "reused"};
+  assert(a.values[0] == 4);
+  // Reference extension checks for the exercise changes.
+  auto make_batch = []() { return Batch{{8, 9}, "factory"}; };
+  auto returned = make_batch();
+  assert((returned.values == std::vector<int>{8, 9}));
+  std::cout << "cpp-016 examples passed\n";
+  return 0;
 }
-
 
 // Exercise 1: Contrast copy and move. Copy a Batch and mutate the copy. Expected: Original values unchanged.
 // Exercise 2: Inspect the receiver. Move Batch([1,2,3]) into a new owner. Expected: Receiver values exactly [1,2,3].

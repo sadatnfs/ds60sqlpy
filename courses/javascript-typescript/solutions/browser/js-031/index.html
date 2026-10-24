@@ -1,3 +1,34 @@
-<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'><meta http-equiv='Content-Security-Policy' content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'"><title>js-031: browser practice</title><link rel='icon' type='image/svg+xml' href='favicon.svg'><link rel='stylesheet' href='style.css'><script src='app.js' defer></script></head><body><main><h1>js-031: Completed reference</h1><p>Use the guide and record actual browser observations. No Node execution is implied.</p><section><h2>Literal text renderer</h2><label for='text'>Text to render</label><textarea id='text'>&lt;img src=x onerror=alert(1)&gt;</textarea><button id='render' type='button'>Render as text</button><pre id='output'></pre><p id='count' role='status'>Not rendered</p></section>
-<section><h2>Local navigation policy</h2><label for='url'>Candidate URL</label><input id='url' value='./help.html'><button id='check' type='button'>Check URL</button><p id='url-status' role='status'>Not checked</p><div id='link'></div></section>
-<section><h2>Policy evidence</h2><p>The page uses local app.js and style.css. Inspect the meta CSP and browser resource list. Checking a rejected candidate does not navigate to it.</p><p id='origin'></p></section></main></body></html>
+<!doctype html>
+<html lang="en"
+  ><head
+    ><meta charset="utf-8" /><meta
+      name="viewport"
+      content="width=device-width, initial-scale=1" /><meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" /><title
+      >js-031: browser practice</title
+    ><link rel="icon" type="image/svg+xml" href="favicon.svg" /><link
+      rel="stylesheet"
+      href="style.css" /><script src="app.js" defer></script></head
+  ><body
+    ><main
+      ><h1>js-031: Completed reference</h1
+      ><p>Use the guide and record actual browser observations. No Node execution is implied.</p
+      ><section
+        ><h2>Literal text renderer</h2><label for="text">Text to render</label
+        ><textarea id="text">&lt;img src=x onerror=alert(1)&gt;</textarea
+        ><button id="render" type="button">Render as text</button><pre id="output"></pre
+        ><p id="count" role="status">Not rendered</p></section
+      >
+      <section
+        ><h2>Local navigation policy</h2><label for="url">Candidate URL</label
+        ><input id="url" value="./help.html" /><button id="check" type="button">Check URL</button
+        ><p id="url-status" role="status">Not checked</p><div id="link"></div
+      ></section>
+      <section
+        ><h2>Policy evidence</h2
+        ><p
+          >The page uses local app.js and style.css. Inspect the meta CSP and browser resource list.
+          Checking a rejected candidate does not navigate to it.</p
+        ><p id="origin"></p></section></main></body
+></html>

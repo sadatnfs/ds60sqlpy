@@ -47,53 +47,20 @@
   ],
   "golden": {
     "rows": [
-      [
-        1,
-        0
-      ],
-      [
-        2,
-        20
-      ],
-      [
-        3,
-        null
-      ],
-      [
-        4,
-        20
-      ]
+      [1, 0],
+      [2, 20],
+      [3, null],
+      [4, 20]
     ],
-    "above_ten_ids": [
-      2,
-      4
-    ],
-    "missing_ids": [
-      3
-    ],
-    "zero_ids": [
-      1
-    ],
-    "combined_ids": [
-      2
-    ],
+    "above_ten_ids": [2, 4],
+    "missing_ids": [3],
+    "zero_ids": [1],
+    "combined_ids": [2],
     "projection": [
-      [
-        1,
-        1
-      ],
-      [
-        2,
-        21
-      ],
-      [
-        3,
-        null
-      ],
-      [
-        4,
-        21
-      ]
+      [1, 1],
+      [2, 21],
+      [3, null],
+      [4, 21]
     ]
   }
 }

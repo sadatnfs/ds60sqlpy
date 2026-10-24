@@ -1,6 +1,43 @@
-body { font: 18px/1.6 system-ui, sans-serif; max-width: 52rem; margin: 2rem auto; padding: 0 1rem; color: #182232; background: #f6f8fb; }
-section { background: white; border: 1px solid #ccd5e0; padding: 1.25rem; margin: 1rem 0; border-radius: .5rem; }
-button, input, textarea { font: inherit; margin: .3rem; padding: .4rem .7rem; }
-label { display: block; } textarea { width: 90%; min-height: 5rem; }
-:focus-visible { outline: 3px solid #1260b5; outline-offset: 3px; }
-pre, output { white-space: pre-wrap; overflow-wrap: anywhere; } [hidden] { display: none; }
+body {
+  font:
+    18px/1.6 system-ui,
+    sans-serif;
+  max-width: 52rem;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  color: #182232;
+  background: #f6f8fb;
+}
+section {
+  background: white;
+  border: 1px solid #ccd5e0;
+  padding: 1.25rem;
+  margin: 1rem 0;
+  border-radius: 0.5rem;
+}
+button,
+input,
+textarea {
+  font: inherit;
+  margin: 0.3rem;
+  padding: 0.4rem 0.7rem;
+}
+label {
+  display: block;
+}
+textarea {
+  width: 90%;
+  min-height: 5rem;
+}
+:focus-visible {
+  outline: 3px solid #1260b5;
+  outline-offset: 3px;
+}
+pre,
+output {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+[hidden] {
+  display: none;
+}

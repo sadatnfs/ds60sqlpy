@@ -74,11 +74,7 @@
                 "name": "observer",
                 "image": "ds60sqlpy-k8s-fixture:0.2.0",
                 "imagePullPolicy": "Never",
-                "command": [
-                  "python",
-                  "-u",
-                  "/lesson/app.py"
-                ],
+                "command": ["python", "-u", "/lesson/app.py"],
                 "env": [
                   {
                     "name": "SYNTHETIC_MARKER",
@@ -117,9 +113,7 @@
                   "allowPrivilegeEscalation": false,
                   "readOnlyRootFilesystem": true,
                   "capabilities": {
-                    "drop": [
-                      "ALL"
-                    ]
+                    "drop": ["ALL"]
                   }
                 },
                 "readinessProbe": {

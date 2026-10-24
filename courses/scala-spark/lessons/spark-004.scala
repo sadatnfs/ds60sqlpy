@@ -1,7 +1,4 @@
-
-
 object Main {
-
 
   def accepted(values: Seq[Long]): Seq[Long] =
     throw new UnsupportedOperationException("Complete accepted")

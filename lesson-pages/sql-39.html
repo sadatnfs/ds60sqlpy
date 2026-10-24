@@ -626,13 +626,19 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line"><span class="syntax-comment">--</span></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Observe locks (requires access to pg_catalog)</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> pid<span class="syntax-punctuation">,</span> locktype<span class="syntax-punctuation">,</span> relation<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>regclass<span class="syntax-punctuation">,</span> <span class="syntax-keyword">mode</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">granted</span></span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> pg_locks</span>
-<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> pg_class <span class="syntax-keyword">ON</span> pg_locks<span class="syntax-punctuation">.</span>relation <span class="syntax-operator">=</span> pg_class<span class="syntax-punctuation">.</span>oid</span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">granted</span> <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> relation<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pid<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  locktype<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  relation<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>regclass<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">mode</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">granted</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  pg_locks</span>
+<span class="source-line">  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> pg_class <span class="syntax-keyword">ON</span> pg_locks<span class="syntax-punctuation">.</span>relation <span class="syntax-operator">=</span> pg_class<span class="syntax-punctuation">.</span>oid</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  <span class="syntax-keyword">granted</span> <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  relation<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Row-level locking for concurrent updates</span></span>
 <span class="source-line"><span class="syntax-comment">-- Session A:</span></span>
 <span class="source-line"><span class="syntax-comment">--   BEGIN; SELECT * FROM orders WHERE order_id = 1 FOR UPDATE;</span></span>
@@ -640,19 +646,28 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line"><span class="syntax-comment">--   BEGIN; SELECT * FROM orders WHERE order_id = 1 FOR UPDATE; -- will wait</span></span>
 <span class="source-line"><span class="syntax-comment">-- Deadlock demo (do NOT run in prod):</span></span>
 <span class="source-line"><span class="syntax-comment">--   A locks row X then tries row Y; B locks row Y then tries row X -&gt; deadlock</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Correct lock ordering strategy: always lock rows in a consistent order</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> to_lock <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> order_id <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">WHERE</span> total_amount <span class="syntax-operator">&gt;</span> <span class="syntax-number">900</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> order_id <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">5</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    order_id</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    orders</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">    total_amount <span class="syntax-operator">&gt;</span> <span class="syntax-number">900</span></span>
+<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">    order_id</span>
+<span class="source-line">  <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">5</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> orders o</span>
-<span class="source-line"><span class="syntax-keyword">JOIN</span> to_lock t <span class="syntax-keyword">ON</span> t<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_id</span>
-<span class="source-line"><span class="syntax-keyword">FOR</span> <span class="syntax-keyword">UPDATE</span><span class="syntax-punctuation">;</span> <span class="syntax-comment">-- consistent order prevents deadlocks</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-operator">*</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  orders o</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> to_lock t <span class="syntax-keyword">ON</span> t<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_id</span>
+<span class="source-line">  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">UPDATE</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-comment">-- consistent order prevents deadlocks</span></span>
 <span class="source-line"><span class="syntax-comment">-- Explicit advisory locks (application-level)</span></span>
 <span class="source-line"><span class="syntax-comment">-- SELECT pg_try_advisory_lock(42);  -- returns boolean</span></span>
 <span class="source-line"><span class="syntax-comment">-- SELECT pg_advisory_unlock(42);</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
 <span class="source-line"><span class="syntax-comment">-- 1. Simulate a deadlock in two sessions and capture with pg_locks.</span></span>
 <span class="source-line"><span class="syntax-comment">--    Inputs: For sql-39 Exercise 1, read the target keys from `orders`, and `pg_locks` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.</span></span>
@@ -693,7 +708,6 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-39 Exercise 7, expected output: exactly one aggregate summary row. The final columns are `ROLLBACK`.</span></span>
 <span class="source-line"><span class="syntax-comment">--    Verify: For sql-39 Exercise 7, evaluate each of `row_count` in a separate control `SELECT` over `pg_try_advisory_xact_lock`; require one final row and compare every value. Add one source row with a new `ROLLBACK`; verify the result gains exactly one row carrying that `ROLLBACK` value.</span></span>
 <span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-39 Exercise 7, select `ROLLBACK` from `pg_try_advisory_xact_lock` before adding derived columns.</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>
       </section>
@@ -943,90 +957,126 @@ WHERE order_id = 1;</code></pre>
 <span class="source-line"><span class="syntax-comment">--</span></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 2: deadlocks are prevented when every writer locks shared keys in</span></span>
 <span class="source-line"><span class="syntax-comment">-- the same consistent order.</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> keys <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> order_id</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> orders</span>
-<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> order_id</span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    order_id</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    orders</span>
+<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">    order_id</span>
 <span class="source-line">  <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>order_id</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> orders o</span>
-<span class="source-line"><span class="syntax-keyword">JOIN</span> keys k <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>order_id</span>
-<span class="source-line"><span class="syntax-keyword">FOR</span> <span class="syntax-keyword">UPDATE</span> <span class="syntax-keyword">OF</span> o<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  o<span class="syntax-punctuation">.</span>order_id</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  orders o</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> keys k <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  o<span class="syntax-punctuation">.</span>order_id</span>
+<span class="source-line">  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">UPDATE</span></span>
+<span class="source-line">    <span class="syntax-keyword">OF</span> o<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 3: a runnable job-queue pattern.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_jobs <span class="syntax-punctuation">(</span></span>
 <span class="source-line">  job_id <span class="syntax-builtin">int</span> <span class="syntax-keyword">GENERATED</span> ALWAYS <span class="syntax-keyword">AS</span> <span class="syntax-keyword">IDENTITY</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  payload <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  processed_at timestamptz</span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> solution_jobs<span class="syntax-punctuation">(</span>payload<span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;first&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;second&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;third&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;fourth&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> job_id<span class="syntax-punctuation">,</span> payload</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> solution_jobs</span>
-<span class="source-line"><span class="syntax-keyword">WHERE</span> processed_at <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> job_id</span>
-<span class="source-line"><span class="syntax-keyword">FOR</span> <span class="syntax-keyword">UPDATE</span> SKIP LOCKED</span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> solution_jobs <span class="syntax-punctuation">(</span>payload<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">VALUES</span></span>
+<span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;first&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;second&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;third&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;fourth&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  job_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  payload</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  solution_jobs</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  processed_at <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  job_id</span>
+<span class="source-line"><span class="syntax-keyword">FOR</span> <span class="syntax-keyword">UPDATE</span></span>
+<span class="source-line">  SKIP LOCKED</span>
 <span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Transaction-scoped advisory locks release automatically at transaction end.</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_try_advisory_xact_lock<span class="syntax-punctuation">(</span><span class="syntax-number">3901</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> acquired_course_lock<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_try_advisory_xact_lock<span class="syntax-punctuation">(</span><span class="syntax-number">3901</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> acquired_course_lock<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 1: manual deadlock reproduction requires two concurrent sessions:</span></span>
 <span class="source-line"><span class="syntax-comment">-- A: BEGIN; UPDATE orders SET status=status WHERE order_id=1;</span></span>
 <span class="source-line"><span class="syntax-comment">-- B: BEGIN; UPDATE orders SET status=status WHERE order_id=2;</span></span>
 <span class="source-line"><span class="syntax-comment">-- A: UPDATE orders SET status=status WHERE order_id=2;</span></span>
 <span class="source-line"><span class="syntax-comment">-- B: UPDATE orders SET status=status WHERE order_id=1; -- deadlock detected</span></span>
 <span class="source-line"><span class="syntax-comment">-- Inspect pg_locks from a third session before issuing the final statement.</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 4: NOWAIT uses the same row-lock semantics but raises SQLSTATE 55P03</span></span>
 <span class="source-line"><span class="syntax-comment">-- immediately if another session owns a conflicting lock. EXPLAIN verifies the</span></span>
 <span class="source-line"><span class="syntax-comment">-- runnable shape without requiring/blocking a second connection here.</span></span>
 <span class="source-line"><span class="syntax-keyword">EXPLAIN</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> order_id <span class="syntax-keyword">FROM</span> orders <span class="syntax-keyword">WHERE</span> order_id <span class="syntax-operator">=</span> <span class="syntax-number">1</span> <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">UPDATE</span> NOWAIT<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  order_id</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  orders</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  order_id <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line"><span class="syntax-keyword">FOR</span> <span class="syntax-keyword">UPDATE</span></span>
+<span class="source-line">  NOWAIT<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 5: select and update claimed jobs in one statement. SKIP LOCKED lets</span></span>
 <span class="source-line"><span class="syntax-comment">-- concurrent workers choose different available rows.</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> claimed <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> job_id</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> solution_jobs</span>
-<span class="source-line">  <span class="syntax-keyword">WHERE</span> processed_at <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
-<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> job_id</span>
-<span class="source-line">  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">UPDATE</span> SKIP LOCKED</span>
-<span class="source-line">  <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">5</span></span>
-<span class="source-line"><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">UPDATE</span> solution_jobs j</span>
-<span class="source-line"><span class="syntax-keyword">SET</span> processed_at <span class="syntax-operator">=</span> clock_timestamp<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> claimed <span class="syntax-keyword">c</span></span>
-<span class="source-line"><span class="syntax-keyword">WHERE</span> j<span class="syntax-punctuation">.</span>job_id <span class="syntax-operator">=</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>job_id</span>
-<span class="source-line">RETURNING j<span class="syntax-punctuation">.</span>job_id<span class="syntax-punctuation">,</span> j<span class="syntax-punctuation">.</span>payload<span class="syntax-punctuation">,</span> j<span class="syntax-punctuation">.</span>processed_at<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    job_id</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    solution_jobs</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">    processed_at <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">    job_id</span>
+<span class="source-line">  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">UPDATE</span></span>
+<span class="source-line">    SKIP LOCKED</span>
+<span class="source-line">  <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">UPDATE</span></span>
+<span class="source-line">  solution_jobs j</span>
+<span class="source-line"><span class="syntax-keyword">SET</span></span>
+<span class="source-line">  processed_at <span class="syntax-operator">=</span> clock_timestamp<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  claimed <span class="syntax-keyword">c</span></span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  j<span class="syntax-punctuation">.</span>job_id <span class="syntax-operator">=</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>job_id</span>
+<span class="source-line">RETURNING</span>
+<span class="source-line">  j<span class="syntax-punctuation">.</span>job_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  j<span class="syntax-punctuation">.</span>payload<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  j<span class="syntax-punctuation">.</span>processed_at<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 6: both selection and locking retain the same unique order_id order;</span></span>
 <span class="source-line"><span class="syntax-comment">-- every competing transaction must follow that contract.</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> ordered_keys <span class="syntax-keyword">AS</span> MATERIALIZED <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> order_id</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> orders</span>
-<span class="source-line">  <span class="syntax-keyword">WHERE</span> total_amount <span class="syntax-operator">&gt;</span> <span class="syntax-number">900</span></span>
-<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> order_id</span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    order_id</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    orders</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">    total_amount <span class="syntax-operator">&gt;</span> <span class="syntax-number">900</span></span>
+<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">    order_id</span>
 <span class="source-line">  <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">5</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>order_id</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> ordered_keys k</span>
-<span class="source-line"><span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>order_id</span>
-<span class="source-line"><span class="syntax-keyword">FOR</span> <span class="syntax-keyword">UPDATE</span> <span class="syntax-keyword">OF</span> o<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  o<span class="syntax-punctuation">.</span>order_id</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  ordered_keys k</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  o<span class="syntax-punctuation">.</span>order_id</span>
+<span class="source-line">  <span class="syntax-keyword">FOR</span> <span class="syntax-keyword">UPDATE</span></span>
+<span class="source-line">    <span class="syntax-keyword">OF</span> o<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 7: transaction-scoped advisory locks cannot be forgotten after</span></span>
 <span class="source-line"><span class="syntax-comment">-- COMMIT/ROLLBACK. The second attempt in this transaction remains successful</span></span>
 <span class="source-line"><span class="syntax-comment">-- because this backend already owns the same lock.</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_try_advisory_xact_lock<span class="syntax-punctuation">(</span><span class="syntax-number">3902</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> first_attempt<span class="syntax-punctuation">;</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_try_advisory_xact_lock<span class="syntax-punctuation">(</span><span class="syntax-number">3902</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> same_owner_attempt<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_try_advisory_xact_lock<span class="syntax-punctuation">(</span><span class="syntax-number">3902</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> first_attempt<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pg_try_advisory_xact_lock<span class="syntax-punctuation">(</span><span class="syntax-number">3902</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> same_owner_attempt<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>
       </section>

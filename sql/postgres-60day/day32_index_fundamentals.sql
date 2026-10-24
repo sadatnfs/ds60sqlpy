@@ -18,20 +18,35 @@
 --
 BEGIN;
 SET search_path TO training, public;
-
 -- Create simple indexes (demonstration; rolled back)
-CREATE INDEX idx_orders_total_amount ON orders(total_amount);
-CREATE INDEX idx_orders_order_date ON orders(order_date);
-CREATE INDEX idx_customers_country ON customers(country);
-
+CREATE INDEX idx_orders_total_amount ON orders (total_amount);
+CREATE INDEX idx_orders_order_date ON orders (order_date);
+CREATE INDEX idx_customers_country ON customers (country);
 -- Observe plan changes
-EXPLAIN ANALYZE SELECT order_id FROM orders WHERE total_amount > 500 LIMIT 100;
-EXPLAIN ANALYZE SELECT * FROM orders WHERE order_date >= now() - interval '30 days';
-EXPLAIN ANALYZE SELECT * FROM customers WHERE country = 'US';
-
+EXPLAIN ANALYZE
+SELECT
+  order_id
+FROM
+  orders
+WHERE
+  total_amount > 500
+LIMIT 100;
+EXPLAIN ANALYZE
+SELECT
+  *
+FROM
+  orders
+WHERE
+  order_date >= now() - interval '30 days';
+EXPLAIN ANALYZE
+SELECT
+  *
+FROM
+  customers
+WHERE
+  country = 'US';
 -- Hash index example (not commonly needed; Postgres B-tree supports = well)
 -- CREATE INDEX idx_customers_email_hash ON customers USING hash(email);
-
 -- Exercises
 -- 1. Create an index on products(category) and test a category filter.
 --    Inputs: For sql-32 Exercise 1, run the underlying read-only query over `products`, `training.idx_products_category_solution`, and `idx_products_category_solution` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
@@ -68,5 +83,4 @@ EXPLAIN ANALYZE SELECT * FROM customers WHERE country = 'US';
 --    Expected result/shape: For sql-32 Exercise 6, expected output: at most 10 rows keyed by `customer_id`. The final columns are `customer_id`, and `country`. The final order is `country, customer_id`.
 --    Verify: For sql-32 Exercise 6, assert no more than 10 rows, no duplicate `customer_id`, and no adjacent pair that violates `country, customer_id`. Rejoin the returned keys to `customers` to confirm `customer_id`, and `country` came from the same source rows. Run with 10 minus one and 10 plus one eligible rows; require the output cap of 10 while retaining `country, customer_id`.
 --    Hint ladder, rung 1: For sql-32 Exercise 6, check `country, customer_id` before applying the row cap.
-
 ROLLBACK;

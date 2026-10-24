@@ -20,4 +20,6 @@
 // Exercise 6: Transfer identity reasoning to a live leaderboard.
 // Expected: Scores change and ranks reorder while participant IDs remain stable.
 
-throw new Error("Implement the six D3 practice tasks in your saved pad before claiming completion.");
+throw new Error(
+  "Implement the six D3 practice tasks in your saved pad before claiming completion.",
+);

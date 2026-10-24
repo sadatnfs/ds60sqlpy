@@ -1,4 +1,10 @@
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream, ObjectInputStream, ObjectOutputStream, NotSerializableException}
+import java.io.{
+  ByteArrayInputStream,
+  ByteArrayOutputStream,
+  ObjectInputStream,
+  ObjectOutputStream,
+  NotSerializableException
+}
 
 object Main {
   final class Owner(val factor: Long) {

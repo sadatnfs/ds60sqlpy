@@ -30,14 +30,31 @@
 #include <variant>
 #include <vector>
 
-struct Tracked { int* live; explicit Tracked(int& count):live(&count){++*live;} ~Tracked(){--*live;} Tracked(const Tracked&)=delete; Tracked& operator=(const Tracked&)=delete; };
+struct Tracked {
+  int *live;
+  explicit Tracked(int &count) : live(&count) { ++*live; }
+  ~Tracked() { --*live; }
+  Tracked(const Tracked &) = delete;
+  Tracked &operator=(const Tracked &) = delete;
+};
 int main() {
-    int live=0; { auto owner=std::make_unique<Tracked>(live); assert(live==1); auto next=std::move(owner); assert(!owner && next); } assert(live==0);
-    try { auto owner=std::make_unique<Tracked>(live); throw std::runtime_error("abort"); } catch(const std::runtime_error&) {} assert(live==0);
-    std::cout << "cpp-015 examples passed\n";
-    return 0;
+  int live = 0;
+  {
+    auto owner = std::make_unique<Tracked>(live);
+    assert(live == 1);
+    auto next = std::move(owner);
+    assert(!owner && next);
+  }
+  assert(live == 0);
+  try {
+    auto owner = std::make_unique<Tracked>(live);
+    throw std::runtime_error("abort");
+  } catch (const std::runtime_error &) {
+  }
+  assert(live == 0);
+  std::cout << "cpp-015 examples passed\n";
+  return 0;
 }
-
 
 // Exercise 1: Trace ownership. Draw p and q before and after moving unique_ptr<int>(7). Expected: One live allocation; exactly one owner at each point.
 // Exercise 2: Check normal cleanup. Run the Tracked scoped case. Expected: live=1 inside and 0 afterward.

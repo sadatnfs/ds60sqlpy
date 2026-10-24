@@ -46,37 +46,13 @@
     }
   ],
   "golden": {
-    "source": [
-      1,
-      2,
-      3,
-      4
-    ],
-    "accepted_doubled": [
-      4,
-      8
-    ],
-    "trace": [
-      "filter:1",
-      "filter:2",
-      "map:2",
-      "filter:3",
-      "filter:4",
-      "map:4"
-    ],
+    "source": [1, 2, 3, 4],
+    "accepted_doubled": [4, 8],
+    "trace": ["filter:1", "filter:2", "map:2", "filter:3", "filter:4", "map:4"],
     "retry_records": [
-      [
-        "a",
-        100
-      ],
-      [
-        "b",
-        50
-      ],
-      [
-        "a",
-        100
-      ]
+      ["a", 100],
+      ["b", 50],
+      ["a", 100]
     ],
     "attempts": 2,
     "naive_cents": 500,

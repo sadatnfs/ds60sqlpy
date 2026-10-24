@@ -1,8 +1,8 @@
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
-        fn total(values: &[i32]) -> i32 { values.iter().sum() }
+        fn total(values: &[i32]) -> i32 {
+            values.iter().sum()
+        }
         assert_eq!(total(&[2, 3, 4]), 9);
         assert_eq!(total(&vec![1, 2]), 3);
         assert_eq!(total(&[]), 0);

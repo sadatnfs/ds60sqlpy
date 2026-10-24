@@ -19,182 +19,268 @@
 -- Focus: Complex business logic, performance requirements, stakeholder queries
 BEGIN;
 SET search_path TO training, public;
-
 -- 1. Business KPI Suite (multi-level calculations)
 -- a) LTV by cohort and segment
 WITH order_values AS (
-  SELECT o.customer_id, o.order_id,
-         SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS order_value,
-         o.order_date
-  FROM orders o
-  JOIN order_items oi ON oi.order_id = o.order_id
-  GROUP BY o.customer_id, o.order_id, o.order_date
-), ltv AS (
-  SELECT customer_id,
-         date_trunc('month', MIN(order_date))::date AS first_order_month,
-         SUM(order_value) AS ltv
-  FROM order_values
-  GROUP BY customer_id
-), cohort AS (
-  SELECT c.customer_id,
-         date_trunc('month', c.created_at)::date AS cohort_month,
-         COALESCE(c.segment,'standard') AS segment
-  FROM customers c
+  SELECT
+    o.customer_id,
+    o.order_id,
+    SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS order_value,
+    o.order_date
+  FROM
+    orders o
+    JOIN order_items oi ON oi.order_id = o.order_id
+  GROUP BY
+    o.customer_id,
+    o.order_id,
+    o.order_date
+),
+ltv AS (
+  SELECT
+    customer_id,
+    date_trunc('month', MIN(order_date))::date AS first_order_month,
+    SUM(order_value) AS ltv
+  FROM
+    order_values
+  GROUP BY
+    customer_id
+),
+cohort AS (
+  SELECT
+    c.customer_id,
+    date_trunc('month', c.created_at)::date AS cohort_month,
+    COALESCE(c.segment, 'standard') AS segment
+  FROM
+    customers c
 )
-SELECT cohort.segment,
-       cohort.cohort_month,
-       ROUND(AVG(ltv.ltv),2) AS avg_ltv,
-       COUNT(*) AS customers
-FROM ltv
-JOIN cohort ON cohort.customer_id = ltv.customer_id
-GROUP BY cohort.segment, cohort.cohort_month
-ORDER BY cohort.cohort_month DESC, avg_ltv DESC
+SELECT
+  cohort.segment,
+  cohort.cohort_month,
+  ROUND(AVG(ltv.ltv), 2) AS avg_ltv,
+  COUNT(*) AS customers
+FROM
+  ltv
+  JOIN cohort ON cohort.customer_id = ltv.customer_id
+GROUP BY
+  cohort.segment,
+  cohort.cohort_month
+ORDER BY
+  cohort.cohort_month DESC,
+  avg_ltv DESC
 LIMIT 100;
-
 -- b) Ordered conversion funnel from events -> orders (last 90 days).
 -- First collect the earliest page view. Each later CTE can only choose a
 -- timestamp at or after the timestamp supplied by its previous stage.
 WITH viewed_stage AS (
-  SELECT c.customer_id,
-         MIN(e.event_time) FILTER (
-           WHERE e.event_type = 'page_view'
-         ) AS viewed_at
-  FROM customers c
-  LEFT JOIN events e
-    ON e.customer_id = c.customer_id
-   AND e.event_time >= CURRENT_TIMESTAMP - interval '90 days'
-  GROUP BY c.customer_id
-), added_stage AS (
-  SELECT viewed.customer_id,
-         viewed.viewed_at,
-         MIN(event.event_time) AS added_at
-  FROM viewed_stage viewed
-  LEFT JOIN events event
-    ON event.customer_id = viewed.customer_id
-   AND event.event_type = 'add_to_cart'
-   AND event.event_time >= viewed.viewed_at
-  GROUP BY viewed.customer_id, viewed.viewed_at
-), checkout_stage AS (
-  SELECT added.customer_id,
-         added.viewed_at,
-         added.added_at,
-         MIN(event.event_time) AS checkout_at
-  FROM added_stage added
-  LEFT JOIN events event
-    ON event.customer_id = added.customer_id
-   AND event.event_type = 'checkout'
-   AND event.event_time >= added.added_at
-  GROUP BY added.customer_id, added.viewed_at, added.added_at
-), purchase_stage AS (
-  SELECT checkout.customer_id,
-         checkout.viewed_at,
-         checkout.added_at,
-         checkout.checkout_at,
-         MIN(customer_order.order_date) AS purchased_at
-  FROM checkout_stage checkout
-  LEFT JOIN orders customer_order
-    ON customer_order.customer_id = checkout.customer_id
-   AND customer_order.order_date >= checkout.checkout_at
-   AND customer_order.order_date >= CURRENT_TIMESTAMP - interval '90 days'
-  GROUP BY checkout.customer_id, checkout.viewed_at,
-           checkout.added_at, checkout.checkout_at
-), activity AS (
-  SELECT customer_id,
-         viewed_at IS NOT NULL AS viewed,
-         added_at IS NOT NULL AND added_at >= viewed_at AS added,
-         checkout_at IS NOT NULL AND checkout_at >= added_at AS checked_out,
-         purchased_at IS NOT NULL AND purchased_at >= checkout_at AS bought
-  FROM purchase_stage
+  SELECT
+    c.customer_id,
+    MIN(e.event_time) FILTER (WHERE e.event_type = 'page_view') AS viewed_at
+  FROM
+    customers c
+    LEFT JOIN events e ON e.customer_id = c.customer_id
+      AND e.event_time >= CURRENT_TIMESTAMP - interval '90 days'
+  GROUP BY
+    c.customer_id
+),
+added_stage AS (
+  SELECT
+    viewed.customer_id,
+    viewed.viewed_at,
+    MIN(event.event_time) AS added_at
+  FROM
+    viewed_stage viewed
+    LEFT JOIN events event ON event.customer_id = viewed.customer_id
+      AND event.event_type = 'add_to_cart'
+      AND event.event_time >= viewed.viewed_at
+  GROUP BY
+    viewed.customer_id,
+    viewed.viewed_at
+),
+checkout_stage AS (
+  SELECT
+    added.customer_id,
+    added.viewed_at,
+    added.added_at,
+    MIN(event.event_time) AS checkout_at
+  FROM
+    added_stage added
+    LEFT JOIN events event ON event.customer_id = added.customer_id
+      AND event.event_type = 'checkout'
+      AND event.event_time >= added.added_at
+  GROUP BY
+    added.customer_id,
+    added.viewed_at,
+    added.added_at
+),
+purchase_stage AS (
+  SELECT
+    checkout.customer_id,
+    checkout.viewed_at,
+    checkout.added_at,
+    checkout.checkout_at,
+    MIN(customer_order.order_date) AS purchased_at
+  FROM
+    checkout_stage checkout
+    LEFT JOIN orders customer_order ON customer_order.customer_id = checkout.customer_id
+      AND customer_order.order_date >= checkout.checkout_at
+      AND customer_order.order_date >= CURRENT_TIMESTAMP - interval '90 days'
+  GROUP BY
+    checkout.customer_id,
+    checkout.viewed_at,
+    checkout.added_at,
+    checkout.checkout_at
+),
+activity AS (
+  SELECT
+    customer_id,
+    viewed_at IS NOT NULL AS viewed,
+    added_at IS NOT NULL
+    AND added_at >= viewed_at AS added,
+    checkout_at IS NOT NULL
+    AND checkout_at >= added_at AS checked_out,
+    purchased_at IS NOT NULL
+    AND purchased_at >= checkout_at AS bought
+  FROM
+    purchase_stage
 )
-SELECT COUNT(*) FILTER (WHERE viewed) AS viewers,
-       COUNT(*) FILTER (WHERE added) AS adders,
-       COUNT(*) FILTER (WHERE checked_out) AS checkouts,
-       COUNT(*) FILTER (WHERE bought) AS buyers
-FROM activity;
-
+SELECT
+  COUNT(*) FILTER (WHERE viewed) AS viewers,
+  COUNT(*) FILTER (WHERE added) AS adders,
+  COUNT(*) FILTER (WHERE checked_out) AS checkouts,
+  COUNT(*) FILTER (WHERE bought) AS buyers
+FROM
+  activity;
 -- c) Top product pairs by co-occurrence (market basket)
 WITH items AS (
-  SELECT order_id, product_id FROM order_items GROUP BY order_id, product_id
-), pairs AS (
-  SELECT a.product_id AS p1, b.product_id AS p2, COUNT(*) AS together
-  FROM items a
-  JOIN items b ON a.order_id = b.order_id AND a.product_id < b.product_id
-  GROUP BY a.product_id, b.product_id
+  SELECT
+    order_id,
+    product_id
+  FROM
+    order_items
+  GROUP BY
+    order_id,
+    product_id
+),
+pairs AS (
+  SELECT
+    a.product_id AS p1,
+    b.product_id AS p2,
+    COUNT(*) AS together
+  FROM
+    items a
+    JOIN items b ON a.order_id = b.order_id
+      AND a.product_id < b.product_id
+  GROUP BY
+    a.product_id,
+    b.product_id
 )
-SELECT p1.name AS product_a, p2.name AS product_b, together
-FROM pairs
-JOIN products p1 ON p1.product_id = pairs.p1
-JOIN products p2 ON p2.product_id = pairs.p2
-ORDER BY together DESC
+SELECT
+  p1.name AS product_a,
+  p2.name AS product_b,
+  together
+FROM
+  pairs
+  JOIN products p1 ON p1.product_id = pairs.p1
+  JOIN products p2 ON p2.product_id = pairs.p2
+ORDER BY
+  together DESC
 LIMIT 20;
-
 -- 2. Performance Aids (indexes/partitioning hints) - run EXPLAIN before/after
 -- Note: These DDLs are rolled back unless you COMMIT intentionally
-CREATE INDEX IF NOT EXISTS idx_orders_customer_date ON orders(customer_id, order_date);
-CREATE INDEX IF NOT EXISTS idx_order_items_order ON order_items(order_id);
-CREATE INDEX IF NOT EXISTS idx_payments_order_date ON payments(order_id, payment_date);
-
+CREATE INDEX IF NOT EXISTS idx_orders_customer_date ON orders (customer_id, order_date);
+CREATE INDEX IF NOT EXISTS idx_order_items_order ON order_items (order_id);
+CREATE INDEX IF NOT EXISTS idx_payments_order_date ON payments (order_id, payment_date);
 EXPLAIN ANALYZE
-SELECT o.customer_id, SUM(o.total_amount)
-FROM orders o
-WHERE o.order_date >= now() - interval '180 days'
-GROUP BY o.customer_id
-ORDER BY SUM(o.total_amount) DESC
+SELECT
+  o.customer_id,
+  SUM(o.total_amount)
+FROM
+  orders o
+WHERE
+  o.order_date >= now() - interval '180 days'
+GROUP BY
+  o.customer_id
+ORDER BY
+  SUM(o.total_amount) DESC
 LIMIT 50;
-
 -- 3. Stakeholder Views
 -- a) Finance: Budget vs Actual YTD by category
 WITH ytd_exp AS (
-  SELECT date_trunc('year', expense_date)::date AS yr,
-         category,
-         SUM(amount) AS actual
-  FROM expenses
-  WHERE expense_date >= date_trunc('year', now())
-  GROUP BY 1,2
-), ytd_bud AS (
-  SELECT date_trunc('year', period)::date AS yr,
-         category,
-         SUM(amount) AS budget
-  FROM budgets
-  WHERE period >= date_trunc('year', now())
-  GROUP BY 1,2
+  SELECT
+    date_trunc('year', expense_date)::date AS yr,
+    category,
+    SUM(amount) AS actual
+  FROM
+    expenses
+  WHERE
+    expense_date >= date_trunc('year', now())
+  GROUP BY
+    1,
+    2
+),
+ytd_bud AS (
+  SELECT
+    date_trunc('year', period)::date AS yr,
+    category,
+    SUM(amount) AS budget
+  FROM
+    budgets
+  WHERE
+    period >= date_trunc('year', now())
+  GROUP BY
+    1,
+    2
 )
-SELECT COALESCE(b.category, e.category) AS category,
-       COALESCE(b.yr, e.yr) AS year,
-       COALESCE(b.budget,0) AS budget_ytd,
-       COALESCE(e.actual,0) AS actual_ytd,
-       ROUND(COALESCE(e.actual,0) - COALESCE(b.budget,0),2) AS variance
-FROM ytd_bud b
-FULL OUTER JOIN ytd_exp e ON e.yr=b.yr AND e.category=b.category
-ORDER BY category;
-
+SELECT
+  COALESCE(b.category, e.category) AS category,
+  COALESCE(b.yr, e.yr) AS year,
+  COALESCE(b.budget, 0) AS budget_ytd,
+  COALESCE(e.actual, 0) AS actual_ytd,
+  ROUND(COALESCE(e.actual, 0) - COALESCE(b.budget, 0), 2) AS variance
+FROM
+  ytd_bud b
+  FULL OUTER JOIN ytd_exp e ON e.yr = b.yr
+  AND e.category = b.category
+ORDER BY
+  category;
 -- b) Marketing: Campaign-assisted purchases (within 7 days)
 WITH first_purchase AS (
-  SELECT o.customer_id, MIN(o.order_date) AS first_buy
-  FROM orders o
-  GROUP BY o.customer_id
-), touch AS (
-  SELECT e.customer_id,
-         e.event_time,
-         e.metadata->>'campaign' AS campaign
-  FROM events e
-  WHERE e.event_type IN ('page_view', 'add_to_cart', 'checkout')
+  SELECT
+    o.customer_id,
+    MIN(o.order_date) AS first_buy
+  FROM
+    orders o
+  GROUP BY
+    o.customer_id
+),
+touch AS (
+  SELECT
+    e.customer_id,
+    e.event_time,
+    e.metadata ->> 'campaign' AS campaign
+  FROM
+    events e
+  WHERE
+    e.event_type IN ('page_view', 'add_to_cart', 'checkout')
     AND e.metadata ? 'campaign'
-    AND NULLIF(trim(e.metadata->>'campaign'), '') IS NOT NULL
+    AND NULLIF (trim(e.metadata ->> 'campaign'), '') IS NOT NULL
 )
-SELECT t.campaign,
-       COUNT(DISTINCT t.customer_id) AS assisted_customers
-FROM touch t
-JOIN first_purchase fp ON fp.customer_id = t.customer_id
-WHERE t.event_time BETWEEN fp.first_buy - interval '7 days' AND fp.first_buy
-GROUP BY t.campaign
-ORDER BY assisted_customers DESC
+SELECT
+  t.campaign,
+  COUNT(DISTINCT t.customer_id) AS assisted_customers
+FROM
+  touch t
+  JOIN first_purchase fp ON fp.customer_id = t.customer_id
+WHERE
+  t.event_time BETWEEN fp.first_buy - interval '7 days' AND fp.first_buy
+GROUP BY
+  t.campaign
+ORDER BY
+  assisted_customers DESC
 LIMIT 20;
-
 -- 4. Large-scale considerations
 -- For 100M+ rows, favor partitioning by time on orders/events, and use partial indexes on recent partitions.
 -- Ensure queries constrain partition key (order_date, event_time) to enable pruning.
-
 -- Exercises
 -- 1. Prediction: state the grain of every CTE in the LTV query and identify the
 --    exact step where order-grain values become customer-grain values.
@@ -245,5 +331,4 @@ LIMIT 20;
 --    Expected result/shape: For sql-59 Exercise 8, expected output: one row per `customer_id`. The final columns are `control_name`, and `observed_value`. The final order is `control_name`.
 --    Verify: For sql-59 Exercise 8, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `control_name`, and `observed_value` against `customers`, `orders`, `order_items`, and `payments`. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
 --    Hint ladder, rung 1: For sql-59 Exercise 8, check `control_name` before applying the row cap.
-
 ROLLBACK;

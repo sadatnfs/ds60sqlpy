@@ -2,30 +2,43 @@ import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
-
 object Main {
-  def amountRows(frame: DataFrame): Seq[(Long,Option[Long])] =
-    frame.select("event_id","amount_cents").orderBy("event_id").collect().toSeq.map(row => (row.getLong(0),if(row.isNullAt(1)) None else Some(row.getLong(1))))
+  def amountRows(frame: DataFrame): Seq[(Long, Option[Long])] =
+    frame
+      .select("event_id", "amount_cents")
+      .orderBy("event_id")
+      .collect()
+      .toSeq
+      .map(row => (row.getLong(0), if (row.isNullAt(1)) None else Some(row.getLong(1))))
 
   def withParsed(frame: DataFrame): DataFrame = {
-    frame.withColumn("parsed_amount",expr("try_cast(trim(amount_text) AS BIGINT)"))
+    frame.withColumn("parsed_amount", expr("try_cast(trim(amount_text) AS BIGINT)"))
   }
 
   def parseLedger(frame: DataFrame): DataFrame = {
-    withParsed(frame).withColumn("parse_status",when(col("amount_text").isNull,lit("missing")).when(col("parsed_amount").isNull,lit("rejected")).otherwise(lit("valid")))
+    withParsed(frame).withColumn(
+      "parse_status",
+      when(col("amount_text").isNull, lit("missing"))
+        .when(col("parsed_amount").isNull, lit("rejected"))
+        .otherwise(lit("valid"))
+    )
   }
 
   def acceptedProjection(frame: DataFrame): DataFrame = {
-    parseLedger(frame).filter(col("parse_status") =!= lit("rejected")).select(col("event_id"),col("parsed_amount").as("amount_cents"))
+    parseLedger(frame)
+      .filter(col("parse_status") =!= lit("rejected"))
+      .select(col("event_id"), col("parsed_amount").as("amount_cents"))
   }
 
   def sqlProjection(spark: SparkSession, frame: DataFrame): DataFrame = {
     frame.createOrReplaceTempView("ds60_spark_015_raw")
-    spark.sql("WITH parsed AS (SELECT event_id,amount_text,try_cast(trim(amount_text) AS BIGINT) AS amount_cents FROM ds60_spark_015_raw) SELECT event_id,amount_cents FROM parsed WHERE amount_text IS NULL OR amount_cents IS NOT NULL")
+    spark.sql(
+      "WITH parsed AS (SELECT event_id,amount_text,try_cast(trim(amount_text) AS BIGINT) AS amount_cents FROM ds60_spark_015_raw) SELECT event_id,amount_cents FROM parsed WHERE amount_text IS NULL OR amount_cents IS NOT NULL"
+    )
   }
 
   def strictProjection(frame: DataFrame): DataFrame = {
-    frame.select(col("event_id"),trim(col("amount_text")).cast(LongType).as("amount_cents"))
+    frame.select(col("event_id"), trim(col("amount_text")).cast(LongType).as("amount_cents"))
   }
 
   def nonnegativeAmounts(frame: DataFrame): DataFrame = {
@@ -33,53 +46,150 @@ object Main {
   }
 
   def main(args: Array[String]): Unit = {
-    val spark = SparkSession.builder().appName("ds60-spark-015").master("local[2]")
-      .config("spark.ui.enabled","false")
-      .config("spark.driver.host","127.0.0.1")
-      .config("spark.driver.bindAddress","127.0.0.1")
-      .config("spark.sql.shuffle.partitions","2")
-      .config("spark.sql.adaptive.enabled","false")
-      .config("spark.sql.ansi.enabled","true")
-      .config("spark.sql.session.timeZone","UTC").getOrCreate()
+    val spark = SparkSession
+      .builder()
+      .appName("ds60-spark-015")
+      .master("local[2]")
+      .config("spark.ui.enabled", "false")
+      .config("spark.driver.host", "127.0.0.1")
+      .config("spark.driver.bindAddress", "127.0.0.1")
+      .config("spark.sql.shuffle.partitions", "2")
+      .config("spark.sql.adaptive.enabled", "false")
+      .config("spark.sql.ansi.enabled", "true")
+      .config("spark.sql.session.timeZone", "UTC")
+      .getOrCreate()
     try {
       require(spark.sparkContext.master == "local[2]", "local-only course session")
       spark.sparkContext.setLogLevel("ERROR")
-      val schema = StructType(Seq(StructField("event_id",LongType,false),StructField("amount_text",StringType,true)))
-      val rows = Seq(Row(1L,"100"),Row(2L,"0"),Row(3L," 25 "),Row(4L,null),Row(5L,"bad"),Row(6L,"9223372036854775808"),Row(7L,"-5"),Row(8L,"50"))
-      val raw = spark.createDataFrame(spark.sparkContext.parallelize(rows,2),schema)
+      val schema = StructType(
+        Seq(StructField("event_id", LongType, false), StructField("amount_text", StringType, true))
+      )
+      val rows = Seq(
+        Row(1L, "100"),
+        Row(2L, "0"),
+        Row(3L, " 25 "),
+        Row(4L, null),
+        Row(5L, "bad"),
+        Row(6L, "9223372036854775808"),
+        Row(7L, "-5"),
+        Row(8L, "50")
+      )
+      val raw = spark.createDataFrame(spark.sparkContext.parallelize(rows, 2), schema)
       // Exercise 1: Add an explicit tolerant parse column
       val parsed = withParsed(raw)
       assert(parsed.schema("parsed_amount").dataType == LongType)
-      assert(parsed.orderBy("event_id").select("event_id","parsed_amount").collect().toSeq.map(row => (row.getLong(0),if(row.isNullAt(1)) None else Some(row.getLong(1)))) == Seq((1L,Some(100L)),(2L,Some(0L)),(3L,Some(25L)),(4L,None),(5L,None),(6L,None),(7L,Some(-5L)),(8L,Some(50L))))
+      assert(
+        parsed
+          .orderBy("event_id")
+          .select("event_id", "parsed_amount")
+          .collect()
+          .toSeq
+          .map(row => (row.getLong(0), if (row.isNullAt(1)) None else Some(row.getLong(1)))) == Seq(
+          (1L, Some(100L)),
+          (2L, Some(0L)),
+          (3L, Some(25L)),
+          (4L, None),
+          (5L, None),
+          (6L, None),
+          (7L, Some(-5L)),
+          (8L, Some(50L))
+        )
+      )
       // Exercise 2: Classify missing versus rejected tokens
       val ledger = parseLedger(raw)
-      assert(ledger.orderBy("event_id").select("parse_status").collect().map(_.getString(0)).toSeq == Seq("valid","valid","valid","missing","rejected","rejected","valid","valid"))
-      assert(ledger.filter(col("parse_status") === lit("rejected")).select("event_id").orderBy("event_id").collect().map(_.getLong(0)).toSeq == Seq(5L,6L))
+      assert(
+        ledger
+          .orderBy("event_id")
+          .select("parse_status")
+          .collect()
+          .map(_.getString(0))
+          .toSeq == Seq(
+          "valid",
+          "valid",
+          "valid",
+          "missing",
+          "rejected",
+          "rejected",
+          "valid",
+          "valid"
+        )
+      )
+      assert(
+        ledger
+          .filter(col("parse_status") === lit("rejected"))
+          .select("event_id")
+          .orderBy("event_id")
+          .collect()
+          .map(_.getLong(0))
+          .toSeq == Seq(5L, 6L)
+      )
       // Exercise 3: Project the six parse-accepted events
       val accepted = acceptedProjection(raw)
-      assert(amountRows(accepted) == Seq((1L,Some(100L)),(2L,Some(0L)),(3L,Some(25L)),(4L,None),(7L,Some(-5L)),(8L,Some(50L))))
-      val metric = accepted.agg(count(lit(1)),count("amount_cents"),sum("amount_cents")).first()
-      assert((metric.getLong(0),metric.getLong(1),metric.getLong(2)) == (6L,5L,170L))
+      assert(
+        amountRows(accepted) == Seq(
+          (1L, Some(100L)),
+          (2L, Some(0L)),
+          (3L, Some(25L)),
+          (4L, None),
+          (7L, Some(-5L)),
+          (8L, Some(50L))
+        )
+      )
+      val metric = accepted.agg(count(lit(1)), count("amount_cents"), sum("amount_cents")).first()
+      assert((metric.getLong(0), metric.getLong(1), metric.getLong(2)) == (6L, 5L, 170L))
       // Exercise 4: Express the same parse contract in SQL
-      val expected = Seq((1L,Some(100L)),(2L,Some(0L)),(3L,Some(25L)),(4L,None),(7L,Some(-5L)),(8L,Some(50L)))
-      assert(amountRows(sqlProjection(spark,raw)) == expected && amountRows(acceptedProjection(raw)) == expected)
+      val expected = Seq(
+        (1L, Some(100L)),
+        (2L, Some(0L)),
+        (3L, Some(25L)),
+        (4L, None),
+        (7L, Some(-5L)),
+        (8L, Some(50L))
+      )
+      assert(
+        amountRows(sqlProjection(spark, raw)) == expected && amountRows(
+          acceptedProjection(raw)
+        ) == expected
+      )
       // Exercise 5: Observe strict ANSI failure at evaluation
       assert(spark.conf.get("spark.sql.ansi.enabled") == "true")
-      assert(amountRows(strictProjection(raw.filter(!col("event_id").isin(5L,6L)))) == expected)
+      assert(amountRows(strictProjection(raw.filter(!col("event_id").isin(5L, 6L)))) == expected)
       var expectedCastFailure = false
-      try strictProjection(raw.filter(col("event_id") === lit(5L))).collect() catch { case error: Exception =>
-        expectedCastFailure = Iterator.iterate[Throwable](error)(_.getCause).take(8).takeWhile(_ != null).exists(cause => Option(cause.getMessage).exists(_.contains("CAST_INVALID_INPUT")))
+      try strictProjection(raw.filter(col("event_id") === lit(5L))).collect()
+      catch {
+        case error: Exception =>
+          expectedCastFailure = Iterator
+            .iterate[Throwable](error)(_.getCause)
+            .take(8)
+            .takeWhile(_ != null)
+            .exists(cause => Option(cause.getMessage).exists(_.contains("CAST_INVALID_INPUT")))
       }
       assert(expectedCastFailure, "strict invalid text must produce CAST_INVALID_INPUT")
       println("Expected strict-cast diagnostic observed: CAST_INVALID_INPUT")
       // Exercise 6: Apply a separate nonnegative domain policy
       val domain = nonnegativeAmounts(raw)
-      assert(amountRows(domain) == Seq((1L,Some(100L)),(2L,Some(0L)),(3L,Some(25L)),(4L,None),(8L,Some(50L))))
-      val dm = domain.agg(count(lit(1)),count("amount_cents"),sum("amount_cents")).first()
-      assert((dm.getLong(0),dm.getLong(1),dm.getLong(2)) == (5L,4L,175L))
-      assert(accepted.filter(col("amount_cents") < lit(0L)).select("event_id").first().getLong(0) == 7L)
-      assert(domain.count() + ledger.filter(col("parse_status") === lit("rejected")).count() + accepted.filter(col("amount_cents") < lit(0L)).count() == 8L)
-      println("spark-015: six Scala reference contracts passed; Spark=" + spark.version + "; Scala=" + scala.util.Properties.versionNumberString)
+      assert(
+        amountRows(domain) == Seq(
+          (1L, Some(100L)),
+          (2L, Some(0L)),
+          (3L, Some(25L)),
+          (4L, None),
+          (8L, Some(50L))
+        )
+      )
+      val dm = domain.agg(count(lit(1)), count("amount_cents"), sum("amount_cents")).first()
+      assert((dm.getLong(0), dm.getLong(1), dm.getLong(2)) == (5L, 4L, 175L))
+      assert(
+        accepted.filter(col("amount_cents") < lit(0L)).select("event_id").first().getLong(0) == 7L
+      )
+      assert(
+        domain.count() + ledger.filter(col("parse_status") === lit("rejected")).count() + accepted
+          .filter(col("amount_cents") < lit(0L))
+          .count() == 8L
+      )
+      println(
+        "spark-015: six Scala reference contracts passed; Spark=" + spark.version + "; Scala=" + scala.util.Properties.versionNumberString
+      )
     } finally { spark.stop() }
   }
 }

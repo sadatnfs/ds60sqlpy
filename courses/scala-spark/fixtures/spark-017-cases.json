@@ -46,52 +46,18 @@
     }
   ],
   "golden": {
-    "accepted_sources": [
-      1,
-      2,
-      3,
-      4
-    ],
-    "array_lengths": [
-      2,
-      0,
-      null,
-      1
-    ],
+    "accepted_sources": [1, 2, 3, 4],
+    "array_lengths": [2, 0, null, 1],
     "child_rows": [
-      [
-        10,
-        0,
-        "a",
-        2
-      ],
-      [
-        10,
-        1,
-        "a",
-        3
-      ],
-      [
-        40,
-        0,
-        "b",
-        null
-      ]
+      [10, 0, "a", 2],
+      [10, 1, "a", 3],
+      [40, 0, "b", null]
     ],
     "outer_count": 5,
     "quarantine": [
-      [
-        5,
-        "malformed_json"
-      ],
-      [
-        6,
-        "missing_parent"
-      ],
-      [
-        7,
-        "missing_payload"
-      ]
+      [5, "malformed_json"],
+      [6, "missing_parent"],
+      [7, "missing_payload"]
     ]
   }
 }

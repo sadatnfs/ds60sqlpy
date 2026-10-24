@@ -10,5 +10,7 @@
     <NuGetAudit>false</NuGetAudit>
     <RestoreIgnoreFailedSources>false</RestoreIgnoreFailedSources>
   </PropertyGroup>
-  <ItemGroup><Compile Include="Program.cs" /></ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+  </ItemGroup>
 </Project>

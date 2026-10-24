@@ -1,10 +1,10 @@
 #include <iostream>
 
 int main() {
-    const int whole = 7 / 2;
-    const double fractional = 7.0 / 2.0;
-    std::cout << "whole=" << whole << " fractional=" << fractional << '\n';
-    return 0;
+  const int whole = 7 / 2;
+  const double fractional = 7.0 / 2.0;
+  std::cout << "whole=" << whole << " fractional=" << fractional << '\n';
+  return 0;
 }
 
 // Exercise 1: Predict integer division. Inputs: 7/2 and7.0/2.0. Expected: 3 and3.5. Verify: compare both numeric results and explain operand types.

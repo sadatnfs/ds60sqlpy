@@ -14,15 +14,12 @@
 --
 -- Target: PostgreSQL 16+; run only in advanced_sql_training.
 -- ON_ERROR_STOP is supplied by the documented psql command.
-
 BEGIN;
 SET search_path TO training, public;
-
 -- Shared teaching contract
 -- Focus: Build a result deliberately from projection, filtering, deterministic ordering, and a bounded row count.
 -- Assumptions: Timestamps are `timestamptz`; relative-date exercises use the database clock. A result is stable only when its final sort key breaks ties.
 -- Pitfall: Never use `= NULL`, depend on implicit row order, or apply `LIMIT` without first defining which rows are first.
-
 -- ---------------------------------------------------------------------------
 -- Exercise 1: Query writing
 -- Prompt: List the 20 newest orders with customer ID and total amount.
@@ -35,14 +32,17 @@ SET search_path TO training, public;
 -- - `FROM`: establishes the starting relation and therefore the initial row grain.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 -- - `LIMIT`: is applied after ordering and is meaningful only when the query first defines which rows come first.
-SELECT o.order_id,
-       o.customer_id,
-       o.total_amount,
-       o.order_date
-FROM orders AS o
-ORDER BY o.order_date DESC, o.order_id DESC
+SELECT
+  o.order_id,
+  o.customer_id,
+  o.total_amount,
+  o.order_date
+FROM
+  orders AS o
+ORDER BY
+  o.order_date DESC,
+  o.order_id DESC
 LIMIT 20;
-
 -- ---------------------------------------------------------------------------
 -- Exercise 2: Query writing
 -- Prompt: Find the 10 most expensive products created in the last 90 days.
@@ -56,15 +56,19 @@ LIMIT 20;
 -- - `WHERE`: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 -- - `LIMIT`: is applied after ordering and is meaningful only when the query first defines which rows come first.
-SELECT p.product_id,
-       p.name,
-       p.price,
-       p.created_at
-FROM products AS p
-WHERE p.created_at >= CURRENT_TIMESTAMP - INTERVAL '90 days'
-ORDER BY p.price DESC, p.product_id
+SELECT
+  p.product_id,
+  p.name,
+  p.price,
+  p.created_at
+FROM
+  products AS p
+WHERE
+  p.created_at >= CURRENT_TIMESTAMP - INTERVAL '90 days'
+ORDER BY
+  p.price DESC,
+  p.product_id
 LIMIT 10;
-
 -- ---------------------------------------------------------------------------
 -- Exercise 3: Query writing
 -- Prompt: Show customers from GB or DE created in the last year, newest first.
@@ -77,15 +81,19 @@ LIMIT 10;
 -- - `FROM`: establishes the starting relation and therefore the initial row grain.
 -- - `WHERE`: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
-SELECT c.customer_id,
-       c.full_name,
-       c.country,
-       c.created_at
-FROM customers AS c
-WHERE c.country IN ('GB', 'DE')
+SELECT
+  c.customer_id,
+  c.full_name,
+  c.country,
+  c.created_at
+FROM
+  customers AS c
+WHERE
+  c.country IN ('GB', 'DE')
   AND c.created_at >= CURRENT_TIMESTAMP - INTERVAL '1 year'
-ORDER BY c.created_at DESC, c.customer_id;
-
+ORDER BY
+  c.created_at DESC,
+  c.customer_id;
 -- ---------------------------------------------------------------------------
 -- Exercise 4: Prediction
 -- Prompt: Predict which rows survive `email = NULL`, then write a query that counts missing and present emails correctly.
@@ -97,11 +105,12 @@ ORDER BY c.created_at DESC, c.customer_id;
 -- - `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
 -- - `FROM`: establishes the starting relation and therefore the initial row grain.
 -- - `FILTER (WHERE ...)`: limits one aggregate without removing rows needed by neighboring aggregates.
-SELECT COUNT(*) FILTER (WHERE c.email IS NULL) AS missing_email_count,
-       COUNT(*) FILTER (WHERE c.email IS NOT NULL) AS present_email_count,
-       COUNT(*) AS customer_count
-FROM customers AS c;
-
+SELECT
+  COUNT(*) FILTER (WHERE c.email IS NULL) AS missing_email_count,
+  COUNT(*) FILTER (WHERE c.email IS NOT NULL) AS present_email_count,
+  COUNT(*) AS customer_count
+FROM
+  customers AS c;
 -- ---------------------------------------------------------------------------
 -- Exercise 5: Debugging
 -- Prompt: Repair a top-price query that uses `LIMIT 10` without `ORDER BY` and explain why the original is nondeterministic.
@@ -114,13 +123,16 @@ FROM customers AS c;
 -- - `FROM`: establishes the starting relation and therefore the initial row grain.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 -- - `LIMIT`: is applied after ordering and is meaningful only when the query first defines which rows come first.
-SELECT p.product_id,
-       p.name,
-       p.price
-FROM products AS p
-ORDER BY p.price DESC, p.product_id
+SELECT
+  p.product_id,
+  p.name,
+  p.price
+FROM
+  products AS p
+ORDER BY
+  p.price DESC,
+  p.product_id
 LIMIT 10;
-
 -- ---------------------------------------------------------------------------
 -- Exercise 6: Extension
 -- Prompt: Return the second page of 10 newest orders using a keyset cursor derived from the first page rather than `OFFSET`.
@@ -137,27 +149,39 @@ LIMIT 10;
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 -- - `LIMIT`: is applied after ordering and is meaningful only when the query first defines which rows come first.
 WITH first_page AS (
-  SELECT o.order_id,
-         o.order_date
-  FROM orders AS o
-  ORDER BY o.order_date DESC, o.order_id DESC
+  SELECT
+    o.order_id,
+    o.order_date
+  FROM
+    orders AS o
+  ORDER BY
+    o.order_date DESC,
+    o.order_id DESC
   LIMIT 10
-), cursor_row AS (
-  SELECT fp.order_date,
-         fp.order_id
-  FROM first_page AS fp
-  ORDER BY fp.order_date, fp.order_id
+),
+cursor_row AS (
+  SELECT
+    fp.order_date,
+    fp.order_id
+  FROM
+    first_page AS fp
+  ORDER BY
+    fp.order_date,
+    fp.order_id
   LIMIT 1
 )
-SELECT o.order_id,
-       o.customer_id,
-       o.total_amount,
-       o.order_date
-FROM orders AS o
-CROSS JOIN cursor_row AS cursor
+SELECT
+  o.order_id,
+  o.customer_id,
+  o.total_amount,
+  o.order_date
+FROM
+  orders AS o
+  CROSS JOIN cursor_row AS cursor
 WHERE (o.order_date, o.order_id) < (cursor.order_date, cursor.order_id)
-ORDER BY o.order_date DESC, o.order_id DESC
+ORDER BY
+  o.order_date DESC,
+  o.order_id DESC
 LIMIT 10;
-
 -- No course answer persists changes or temporary objects.
 ROLLBACK;

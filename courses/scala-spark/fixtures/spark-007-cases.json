@@ -46,32 +46,12 @@
     }
   ],
   "golden": {
-    "lines": [
-      "a1|paid|100",
-      "a2|paid|0",
-      "a3|void|50",
-      "|paid|20",
-      "a5|paid|bad",
-      "a6|mystery|10"
-    ],
-    "accepted_ids": [
-      "a1",
-      "a2",
-      "a3"
-    ],
+    "lines": ["a1|paid|100", "a2|paid|0", "a3|void|50", "|paid|20", "a5|paid|bad", "a6|mystery|10"],
+    "accepted_ids": ["a1", "a2", "a3"],
     "rejected": [
-      [
-        3,
-        "missing_id"
-      ],
-      [
-        4,
-        "invalid_amount"
-      ],
-      [
-        5,
-        "unknown_status"
-      ]
+      [3, "missing_id"],
+      [4, "invalid_amount"],
+      [5, "unknown_status"]
     ],
     "paid_count": 2,
     "paid_total": 100

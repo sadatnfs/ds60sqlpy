@@ -15,12 +15,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl ca-certificates gosu libgomp1 libexpat1 \
     && install -d /usr/share/postgresql-common/pgdg \
     && curl --fail --silent --show-error --location --retry 3 \
-       https://www.postgresql.org/media/keys/ACCC4CF8.asc \
-       -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc \
+        https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+        -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc \
     && . /etc/os-release \
     && printf 'Types: deb\nURIs: https://apt.postgresql.org/pub/repos/apt\nSuites: %s-pgdg\nArchitectures: %s\nComponents: main\nSigned-By: /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc\n' \
-       "$VERSION_CODENAME" "$(dpkg --print-architecture)" \
-       > /etc/apt/sources.list.d/pgdg.sources \
+        "$VERSION_CODENAME" "$(dpkg --print-architecture)" \
+        >/etc/apt/sources.list.d/pgdg.sources \
     && apt-get update \
     && apt-get install -y --no-install-recommends postgresql-client-17 \
     && rm -rf /var/lib/apt/lists/* \
@@ -39,10 +39,10 @@ COPY . .
 # Normalize only public source lacking read/traverse permissions. Keep ownership
 # and write bits; prune the large dependency environment to avoid overlay copy-up.
 RUN uv pip install --offline --python /opt/course/.venv/bin/python \
-       --no-deps --no-build-isolation -e . \
+    --no-deps --no-build-isolation -e . \
     && find /opt/course -path /opt/course/.venv -prune -o \
-       -type d ! -perm -055 -exec chmod go+rx {} + -o \
-       -type f ! -perm -044 -exec chmod go+rX {} + \
+        -type d ! -perm -055 -exec chmod go+rx {} + -o \
+        -type f ! -perm -044 -exec chmod go+rX {} + \
     && mkdir /workspace && chown learner:learner /workspace
 EXPOSE 8765
 ENTRYPOINT ["python", "/opt/course/docker/entrypoint.py"]

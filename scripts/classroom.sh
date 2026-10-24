@@ -5,7 +5,11 @@ repo_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 cd "$repo_dir"
 action=up
 if [ "$#" -gt 0 ]; then
-  case "$1" in up|start|resume|build|stop|status|logs|doctor) action="$1"; shift ;; esac
+  case "$1" in up | start | resume | build | stop | status | logs | doctor)
+    action="$1"
+    shift
+    ;;
+  esac
 fi
 [ "$action" != start ] || action=up
 registry=mirrors
@@ -54,29 +58,59 @@ Kubernetes owned-cluster preparation and optional pretrained-model downloads
 remain explicit workflows in the course guides. Nothing is pushed or pruned.
 HELP
 }
-fail() { printf '\n%s\n' "$*" >&2; exit 2; }
+fail() {
+  printf '\n%s\n' "$*" >&2
+  exit 2
+}
 while [ "$#" -gt 0 ]; do
   case "$1" in
-    --starter) profiles=(python-core); profiles_explicit=1; shift ;;
-    --all) profiles=("${all_profiles[@]}"); profiles_explicit=1; shift ;;
-    --rebuild) rebuild=1; shift ;;
-    --no-build) no_build=1; shift ;;
-    --no-browser) no_browser=1; shift ;;
-    --profile|--port|--database-port|--project|--registry)
+    --starter)
+      profiles=(python-core)
+      profiles_explicit=1
+      shift
+      ;;
+    --all)
+      profiles=("${all_profiles[@]}")
+      profiles_explicit=1
+      shift
+      ;;
+    --rebuild)
+      rebuild=1
+      shift
+      ;;
+    --no-build)
+      no_build=1
+      shift
+      ;;
+    --no-browser)
+      no_browser=1
+      shift
+      ;;
+    --profile | --port | --database-port | --project | --registry)
       [ "$#" -ge 2 ] || fail "Missing value after $1. Use ./classroom --help."
       case "$1" in
-        --profile) profiles+=("$2"); profiles_explicit=1 ;;
+        --profile)
+          profiles+=("$2")
+          profiles_explicit=1
+          ;;
         --port) requested_port="$2" ;;
         --database-port) requested_db_port="$2" ;;
         --project) project_option="$2" ;;
-        --registry) registry="$2"; registry_explicit=1 ;;
+        --registry)
+          registry="$2"
+          registry_explicit=1
+          ;;
       esac
-      shift 2 ;;
-    -h|--help) usage; exit 0 ;;
+      shift 2
+      ;;
+    -h | --help)
+      usage
+      exit 0
+      ;;
     *) fail "Unknown option: $1. Use ./classroom --help." ;;
   esac
 done
-case "$registry" in mirrors|upstream) ;; *) fail 'Registry must be mirrors or upstream.' ;; esac
+case "$registry" in mirrors | upstream) ;; *) fail 'Registry must be mirrors or upstream.' ;; esac
 valid_port() { [[ "$1" =~ ^[0-9]{1,5}$ ]] && [ "$((10#$1))" -le 65535 ]; }
 for port in "$requested_port" "$requested_db_port"; do
   [ -z "$port" ] || valid_port "$port" || fail 'Ports must be integers from 0 through 65535.'
@@ -90,19 +124,23 @@ for profile in ${profiles[@]+"${profiles[@]}"}; do
   for known in "${all_profiles[@]}"; do [ "$profile" != "$known" ] || found=1; done
   [ "$found" -eq 1 ] || fail "Unknown ordinary profile: $profile. Use ./classroom --help."
 done
-case "$(uname -s)" in MINGW*|MSYS*|CYGWIN*) fail 'Run ./classroom from a WSL 2 Linux terminal, or double-click START_DOCKER_CLASSROOM.cmd.' ;; esac
-if command -v docker >/dev/null 2>&1; then docker_cli="$(command -v docker)"
-elif [ -x "$HOME/.rd/bin/docker" ]; then docker_cli="$HOME/.rd/bin/docker"
+case "$(uname -s)" in MINGW* | MSYS* | CYGWIN*) fail 'Run ./classroom from a WSL 2 Linux terminal, or double-click START_DOCKER_CLASSROOM.cmd.' ;; esac
+if command -v docker >/dev/null 2>&1; then
+  docker_cli="$(command -v docker)"
+elif [ -x "$HOME/.rd/bin/docker" ]; then
+  docker_cli="$HOME/.rd/bin/docker"
 else fail 'Docker CLI is unavailable. Start/install a local Docker-compatible engine. In WSL, enable the engine integration for this Linux distribution, then reopen the terminal.'; fi
 endpoint="${DOCKER_HOST:-}"
 if [ -n "$endpoint" ]; then unset DOCKER_CONTEXT; else endpoint="$("$docker_cli" context inspect --format '{{.Endpoints.docker.Host}}')"; fi
-case "$endpoint" in unix:///*|npipe:////./pipe/*|npipe://./pipe/*) ;;
-  tcp://*) [[ "$endpoint" =~ ^tcp://(127[.]0[.]0[.]1|localhost):[0-9]{1,5}$ ]] || fail 'Choose a local Docker context so learning volumes stay on this machine.' ;;
-  *) fail 'Choose a local Docker context. Remote SSH/TCP engines are not the personal classroom route.' ;;
+case "$endpoint" in unix:///* | npipe:////./pipe/* | npipe://./pipe/*) ;;
+tcp://*) [[ "$endpoint" =~ ^tcp://(127[.]0[.]0[.]1|localhost):[0-9]{1,5}$ ]] || fail 'Choose a local Docker context so learning volumes stay on this machine.' ;;
+*) fail 'Choose a local Docker context. Remote SSH/TCP engines are not the personal classroom route.' ;;
 esac
 version="$("$docker_cli" compose version --short)" || fail 'Docker Compose is unavailable. Install/update the Compose plugin supplied by your engine.'
 if [[ "$version" =~ ^v?([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
-  major=$((10#${BASH_REMATCH[1]})); minor=$((10#${BASH_REMATCH[2]})); patch=$((10#${BASH_REMATCH[3]}))
+  major=$((10#${BASH_REMATCH[1]}))
+  minor=$((10#${BASH_REMATCH[2]}))
+  patch=$((10#${BASH_REMATCH[3]}))
   [ "$major" -gt 2 ] || { [ "$major" -eq 2 ] && { [ "$minor" -gt 28 ] || { [ "$minor" -eq 28 ] && [ "$patch" -ge 0 ]; }; }; } || fail 'Update Docker Compose to 2.28.0 or newer.'
 else fail 'Could not read the Compose version. Update the engine/Compose plugin.'; fi
 engine_os="$("$docker_cli" info --format '{{.OSType}}')" || fail 'The Docker engine is not ready. Start it and rerun the same command.'
@@ -119,37 +157,54 @@ make_compose() {
 selected_profiles=()
 make_compose
 settings="$("${compose[@]}" config --environment | awk '/^(COMPOSE_PROJECT_NAME|DS60_LAB_PORT|DS60_CLASSROOM_PORT|DS60_POSTGRES_PORT|DS60_POSTGRES_IMAGE)=/')" || fail 'Compose could not read the course configuration. Check .env syntax and the Compose version.'
-project_name=''; internal_port=8765; configured_port=''; configured_db_port=''; db_image=postgres:17
+project_name=''
+internal_port=8765
+configured_port=''
+configured_db_port=''
+db_image=postgres:17
 while IFS='=' read -r key value; do
   case "$key" in
     COMPOSE_PROJECT_NAME) project_name="$value" ;;
-    DS60_LAB_PORT) internal_port="$value"; configured_port="$value" ;;
+    DS60_LAB_PORT)
+      internal_port="$value"
+      configured_port="$value"
+      ;;
     DS60_CLASSROOM_PORT) requested_port="${requested_port:-$value}" ;;
     DS60_POSTGRES_PORT) configured_db_port="$value" ;;
     DS60_POSTGRES_IMAGE) db_image="${value:-postgres:17}" ;;
   esac
-done <<< "$settings"
+done <<<"$settings"
 [[ "$project_name" =~ ^[a-z0-9][a-z0-9_-]{0,48}$ ]] || fail 'Compose resolved an invalid project name.'
 valid_port "$internal_port" && [ "$((10#$internal_port))" -gt 0 ] || fail 'DS60_LAB_PORT must be a container port from 1 through 65535.'
 [ "$((10#$internal_port))" -ne 5432 ] || fail 'DS60_LAB_PORT cannot be 5432 because the app shares the PostgreSQL network namespace.'
 state_dir="$repo_dir/.classroom/$project_name"
 [ ! -L "$repo_dir/.classroom" ] && [ ! -L "$state_dir" ] || fail 'The launcher state directory must not be a symbolic link.'
 # Store declarative values only. No shell evaluation, paths or private environment data.
-saved_profiles=''; saved_registry=''
+saved_profiles=''
+saved_registry=''
 if [ -e "$state_dir/selection.env" ] || [ -L "$state_dir/selection.env" ]; then
   [ -f "$state_dir/selection.env" ] && [ ! -L "$state_dir/selection.env" ] || fail 'The saved selection must be a regular file.'
-  seen_profiles=0; seen_registry=0
+  seen_profiles=0
+  seen_registry=0
   while IFS='=' read -r key value || [ -n "$key$value" ]; do
     case "$key" in
-      DS60_PROFILES) [ "$seen_profiles" -eq 0 ] || fail 'Duplicate saved profile setting.'; saved_profiles="$value"; seen_profiles=1 ;;
-      DS60_REGISTRY) [ "$seen_registry" -eq 0 ] || fail 'Duplicate saved registry setting.'; saved_registry="$value"; seen_registry=1 ;;
+      DS60_PROFILES)
+        [ "$seen_profiles" -eq 0 ] || fail 'Duplicate saved profile setting.'
+        saved_profiles="$value"
+        seen_profiles=1
+        ;;
+      DS60_REGISTRY)
+        [ "$seen_registry" -eq 0 ] || fail 'Duplicate saved registry setting.'
+        saved_registry="$value"
+        seen_registry=1
+        ;;
       *) fail 'Unexpected saved selection setting. Inspect .classroom for this project.' ;;
     esac
-  done < "$state_dir/selection.env"
+  done <"$state_dir/selection.env"
   [ "$seen_profiles" -eq 1 ] && [ "$seen_registry" -eq 1 ] || fail 'The saved selection is incomplete.'
-  case "$saved_registry" in mirrors|upstream) ;; *) fail 'The saved registry setting is invalid.' ;; esac
+  case "$saved_registry" in mirrors | upstream) ;; *) fail 'The saved registry setting is invalid.' ;; esac
   [[ "$saved_profiles" =~ ^[a-z0-9-]+(,[a-z0-9-]+)*$ ]] || fail 'The saved profile setting is invalid.'
-  IFS=',' read -r -a saved_profile_list <<< "$saved_profiles"
+  IFS=',' read -r -a saved_profile_list <<<"$saved_profiles"
   for profile in "${saved_profile_list[@]}"; do
     found=0
     for known in "${all_profiles[@]}"; do [ "$profile" != "$known" ] || found=1; done
@@ -169,38 +224,46 @@ if [ "$profiles_explicit" -eq 0 ]; then
     # classroom into every optional SDK merely because selection.env is new.
     existing_services="$("${compose[@]}" --profile '*' ps --all --services)"
     while IFS= read -r service; do
-      for ((i=0;i<${#all_services[@]};i++)); do
+      for ((i = 0; i < ${#all_services[@]}; i++)); do
         [ "$service" != "${all_services[$i]}" ] || profiles+=("${all_profiles[$i]}")
       done
-    done <<< "$existing_services"
+    done <<<"$existing_services"
     if [ "${#profiles[@]}" -eq 0 ]; then
-      if [[ $'\n'"$existing_services"$'\n' == *$'\nlab\n'* ]] || [[ $'\n'"$existing_services"$'\n' == *$'\npostgres\n'* ]] || [[ $'\n'"$existing_services"$'\n' == *$'\nclassroom-init\n'* ]]; then profiles=(python-core)
+      if [[ $'\n'"$existing_services"$'\n' == *$'\nlab\n'* ]] || [[ $'\n'"$existing_services"$'\n' == *$'\npostgres\n'* ]] || [[ $'\n'"$existing_services"$'\n' == *$'\nclassroom-init\n'* ]]; then
+        profiles=(python-core)
       else profiles=("${all_profiles[@]}"); fi
     fi
   fi
 fi
 profiles=(python-core ${profiles[@]+"${profiles[@]}"})
-services=(); selected_profiles=()
+services=()
+selected_profiles=()
 for profile in ${profiles[@]+"${profiles[@]}"}; do
   duplicate=0
   for known in ${selected_profiles[@]+"${selected_profiles[@]}"}; do [ "$profile" != "$known" ] || duplicate=1; done
   if [ "$duplicate" -eq 0 ]; then
-    for ((i=0;i<${#all_profiles[@]};i++)); do
-      if [ "$profile" = "${all_profiles[$i]}" ]; then selected_profiles+=("$profile"); services+=("${all_services[$i]}"); break; fi
+    for ((i = 0; i < ${#all_profiles[@]}; i++)); do
+      if [ "$profile" = "${all_profiles[$i]}" ]; then
+        selected_profiles+=("$profile")
+        services+=("${all_services[$i]}")
+        break
+      fi
     done
   fi
 done
 make_compose
-saved_port=''; saved_db_port=''
+saved_port=''
+saved_db_port=''
 if [ -e "$state_dir/ports.env" ] || [ -L "$state_dir/ports.env" ]; then
   [ -f "$state_dir/ports.env" ] && [ ! -L "$state_dir/ports.env" ] || fail 'The saved port settings must be a regular file.'
   while IFS='=' read -r key value; do
     case "$key" in DS60_CLASSROOM_PORT) saved_port="$value" ;; DS60_POSTGRES_PORT) saved_db_port="$value" ;; '') ;; *) fail 'Unexpected saved port setting. Inspect .classroom for this project.' ;; esac
-  done < "$state_dir/ports.env"
+  done <"$state_dir/ports.env"
 fi
 # Existing explicitly published ports are retained when adopting an older classroom.
 existing="$("${compose[@]}" ps --all --quiet postgres)"
-existing_port=''; existing_db_port=''
+existing_port=''
+existing_db_port=''
 if [ -n "$existing" ] && [[ "$existing" != *$'\n'* ]]; then
   existing_port="$("$docker_cli" inspect --format "{{range (index .HostConfig.PortBindings \"${internal_port}/tcp\")}}{{.HostPort}}{{end}}" "$existing")"
   existing_db_port="$("$docker_cli" inspect --format '{{range (index .HostConfig.PortBindings "5432/tcp")}}{{.HostPort}}{{end}}' "$existing")"
@@ -208,7 +271,8 @@ fi
 browser_port="${requested_port:-${configured_port:-${saved_port:-${existing_port:-0}}}}"
 database_port="${requested_db_port:-${configured_db_port:-${saved_db_port:-${existing_db_port:-0}}}}"
 valid_port "$browser_port" && valid_port "$database_port" || fail 'Configured/saved host ports must be integers from 0 through 65535.'
-browser_port=$((10#$browser_port)); database_port=$((10#$database_port))
+browser_port=$((10#$browser_port))
+database_port=$((10#$database_port))
 [ "$browser_port" = 0 ] || [ "$browser_port" != "$database_port" ] || fail 'The browser and database require different host ports.'
 export DS60_CLASSROOM_PORT="$browser_port" DS60_POSTGRES_PORT="$database_port"
 "${compose[@]}" config --quiet
@@ -220,9 +284,19 @@ published_url() {
   printf 'http://%s/classroom' "$address"
 }
 case "$action" in
-  doctor) printf 'Local Linux Docker engine and Compose %s are ready.\nProject: %s\nProfiles: %s\n' "$version" "$project_name" "${selected_profiles[*]}"; exit 0 ;;
-  status) "${compose[@]}" ps --all; if url="$(published_url)"; then printf 'Published classroom address: %s\n' "$url"; fi; exit 0 ;;
-  logs) "${compose[@]}" logs --tail 100 lab postgres; exit 0 ;;
+  doctor)
+    printf 'Local Linux Docker engine and Compose %s are ready.\nProject: %s\nProfiles: %s\n' "$version" "$project_name" "${selected_profiles[*]}"
+    exit 0
+    ;;
+  status)
+    "${compose[@]}" ps --all
+    if url="$(published_url)"; then printf 'Published classroom address: %s\n' "$url"; fi
+    exit 0
+    ;;
+  logs)
+    "${compose[@]}" logs --tail 100 lab postgres
+    exit 0
+    ;;
 esac
 umask 077
 mkdir -p "$state_dir"
@@ -243,13 +317,21 @@ reclaim_stale_lock() (
   mkdir "$lock" || fail 'Another launcher acquired the project lock. Retry after it finishes.'
 )
 if ! mkdir "$lock" 2>/dev/null; then reclaim_stale_lock; fi
-printf '%s\n' "$$" > "$lock/pid"
+printf '%s\n' "$$" >"$lock/pid"
 release_lock() {
-  if [ -f "$lock/pid" ] && [ "$(cat "$lock/pid")" = "$$" ]; then rm "$lock/pid"; rmdir "$lock" 2>/dev/null || true; fi
+  if [ -f "$lock/pid" ] && [ "$(cat "$lock/pid")" = "$$" ]; then
+    rm "$lock/pid"
+    rmdir "$lock" 2>/dev/null || true
+  fi
 }
 trap release_lock EXIT
 trap 'printf "\nInterrupted. Saved volumes are retained; rerun ./classroom when ready.\n" >&2; exit 130' INT TERM
-trap 'code=$?; printf "\nClassroom command failed. Read the preceding error; rerun the same command after fixing it.\nSaved volumes are retained. For a busy explicit port, choose --port 0 --database-port 0.\n" >&2; exit "$code"' ERR
+handle_classroom_error() {
+  local code=$?
+  printf "\nClassroom command failed. Read the preceding error; rerun the same command after fixing it.\nSaved volumes are retained. For a busy explicit port, choose --port 0 --database-port 0.\n" >&2
+  exit "$code"
+}
+trap handle_classroom_error ERR
 if [ "$action" = stop ]; then
   "$docker_cli" compose --project-directory "$repo_dir" -p "$project_name" -f "$repo_dir/compose.classroom.yaml" --profile '*' stop --timeout 20
   printf 'Classroom stopped. All project learning/database volumes were retained.\n'
@@ -259,8 +341,11 @@ printf '\nDS60 Classroom | %s\nProfiles: %s\n' "$project_name" "${selected_profi
 # Persist the chosen intent before preparation so Ctrl+C or a failed download does
 # not lose a small selection. Writes remain atomic and protected by the project lock.
 selection_temp="$(mktemp "$state_dir/selection.XXXXXX")"
-profile_csv="$(IFS=,; printf '%s' "${selected_profiles[*]}")"
-printf 'DS60_PROFILES=%s\nDS60_REGISTRY=%s\n' "$profile_csv" "$registry" > "$selection_temp"
+profile_csv="$(
+  IFS=,
+  printf '%s' "${selected_profiles[*]}"
+)"
+printf 'DS60_PROFILES=%s\nDS60_REGISTRY=%s\n' "$profile_csv" "$registry" >"$selection_temp"
 mv -f "$selection_temp" "$state_dir/selection.env"
 container_id() {
   local id
@@ -326,7 +411,7 @@ if [ "$rebuild" -eq 0 ]; then
   for service in "${services[@]}"; do check_config "$service" "$(container_id "$service")"; done
 fi
 settings_temp="$(mktemp "$state_dir/ports.XXXXXX")"
-printf 'DS60_CLASSROOM_PORT=%s\nDS60_POSTGRES_PORT=%s\n' "$browser_port" "$database_port" > "$settings_temp"
+printf 'DS60_CLASSROOM_PORT=%s\nDS60_POSTGRES_PORT=%s\n' "$browser_port" "$database_port" >"$settings_temp"
 mv -f "$settings_temp" "$state_dir/ports.env"
 app_image="$(image_for lab)"
 restore_app_image_name() {
@@ -345,7 +430,8 @@ restore_app_image_name() {
   printf '\nRestoring the missing app image name from its existing local image...\n'
   "$docker_cli" image tag "$image_id" "$app_image"
 }
-missing_services=(); build_services=()
+missing_services=()
+build_services=()
 if [ "$rebuild" -eq 1 ]; then
   build_services=(lab "${services[@]}")
 else
@@ -394,12 +480,12 @@ wait_for_container() {
   deadline=$((SECONDS + timeout))
   while :; do
     state="$("$docker_cli" inspect --format '{{.State.Status}} {{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "$id")" || fail "Could not inspect the resumed $service container. Saved volumes are retained; inspect ./classroom status with the same project."
-    read -r status health extra <<< "$state"
+    read -r status health extra <<<"$state"
     [ -z "${extra:-}" ] || fail "Docker returned an unexpected state for $service. Saved volumes are retained."
     case "$status:$health" in
-      running:healthy|running:none) return 0 ;;
-      *:unhealthy|exited:*|dead:*|paused:*|removing:*) fail "The resumed $service container is $status (health: $health). Saved volumes are retained; inspect its logs before retrying." ;;
-      running:starting|created:*|restarting:*) ;;
+      running:healthy | running:none) return 0 ;;
+      *:unhealthy | exited:* | dead:* | paused:* | removing:*) fail "The resumed $service container is $status (health: $health). Saved volumes are retained; inspect its logs before retrying." ;;
+      running:starting | created:* | restarting:*) ;;
       *) fail "Docker returned an unexpected state for $service. Saved volumes are retained." ;;
     esac
     [ "$SECONDS" -lt "$deadline" ] || fail "Timed out after ${timeout}s waiting for the resumed $service container to become healthy. Saved volumes are retained; inspect its logs before retrying."
@@ -430,7 +516,8 @@ start_or_create() {
 }
 start_or_create postgres 180
 url="$(published_url)" || fail 'Docker did not report a loopback browser mapping for this project.'
-public_port="${url#http://127.0.0.1:}"; public_port="${public_port%/classroom}"
+public_port="${url#http://127.0.0.1:}"
+public_port="${public_port%/classroom}"
 export DS60_PUBLIC_PORT="$public_port"
 # If PostgreSQL was recreated externally, an old app still points at the old
 # network namespace. A changed dynamic host port also needs the exact Host/Origin
@@ -481,15 +568,19 @@ else
 fi
 [ ! -d "$state_dir/classroom.url" ] || fail 'The classroom URL path is a directory; it was preserved.'
 url_temp="$(mktemp "$state_dir/url.XXXXXX")"
-printf '%s\n' "$url" > "$url_temp"
+printf '%s\n' "$url" >"$url_temp"
 mv -f "$url_temp" "$state_dir/classroom.url"
 printf '\nReady: %s\nSaved learning and database data remain in project %s Docker volumes.\nStop safely with: ./classroom stop --project %s\n' "$url" "$project_name" "$project_name"
 if [ "$no_browser" -eq 0 ]; then
-  if [ "$(uname -s)" = Darwin ] && command -v open >/dev/null 2>&1; then open "$url" || printf 'Open %s in your browser.\n' "$url"
+  if [ "$(uname -s)" = Darwin ] && command -v open >/dev/null 2>&1; then
+    open "$url" || printf 'Open %s in your browser.\n' "$url"
   elif [ -n "${WSL_DISTRO_NAME:-}" ] || { [ -r /proc/sys/kernel/osrelease ] && grep -qi microsoft /proc/sys/kernel/osrelease; }; then
-    if command -v wslview >/dev/null 2>&1; then wslview "$url" || printf 'Open %s in your Windows browser.\n' "$url"
-    elif command -v cmd.exe >/dev/null 2>&1; then cmd.exe /c start '' "$url" || printf 'Open %s in your Windows browser.\n' "$url"
+    if command -v wslview >/dev/null 2>&1; then
+      wslview "$url" || printf 'Open %s in your Windows browser.\n' "$url"
+    elif command -v cmd.exe >/dev/null 2>&1; then
+      cmd.exe /c start '' "$url" || printf 'Open %s in your Windows browser.\n' "$url"
     else printf 'Open %s in your Windows browser.\n' "$url"; fi
-  elif command -v xdg-open >/dev/null 2>&1; then xdg-open "$url" >/dev/null 2>&1 || printf 'Open %s in your browser.\n' "$url"
+  elif command -v xdg-open >/dev/null 2>&1; then
+    xdg-open "$url" >/dev/null 2>&1 || printf 'Open %s in your browser.\n' "$url"
   else printf 'Open %s in your browser.\n' "$url"; fi
 fi

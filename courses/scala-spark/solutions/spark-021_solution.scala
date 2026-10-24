@@ -1,7 +1,7 @@
 import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
-import java.nio.file.{Files,Path,Paths}
+import java.nio.file.{Files, Path, Paths}
 import scala.jdk.CollectionConverters._
 
 object Main {
@@ -11,12 +11,12 @@ object Main {
     finally paths.close()
   }
 
-  def projectionResult(spark: SparkSession, query: String): Seq[(Long,Long)] = {
-    spark.sql(query).orderBy("id").collect().toSeq.map(r => (r.getLong(0),r.getLong(1)))
+  def projectionResult(spark: SparkSession, query: String): Seq[(Long, Long)] = {
+    spark.sql(query).orderBy("id").collect().toSeq.map(r => (r.getLong(0), r.getLong(1)))
   }
 
   def explainText(spark: SparkSession, query: String, mode: String): String = {
-    require(Set("EXTENDED","FORMATTED").contains(mode),"Unsupported evidence mode")
+    require(Set("EXTENDED", "FORMATTED").contains(mode), "Unsupported evidence mode")
     spark.sql("EXPLAIN " + mode + " " + query).collect().map(_.getString(0)).mkString("\n")
   }
 
@@ -24,74 +24,130 @@ object Main {
     formatted.linesIterator.filter(_.contains("ReadSchema")).mkString("\n")
   }
 
-  def aggregateResult(spark: SparkSession, query: String): Seq[(Long,Long,Long)] = {
-    spark.sql(query).orderBy("group_id").collect().toSeq.map(r => (r.getLong(0),r.getLong(1),r.getLong(2)))
+  def aggregateResult(spark: SparkSession, query: String): Seq[(Long, Long, Long)] = {
+    spark
+      .sql(query)
+      .orderBy("group_id")
+      .collect()
+      .toSeq
+      .map(r => (r.getLong(0), r.getLong(1), r.getLong(2)))
   }
 
   def normalizeEvidence(plan: String, root: String): String = {
-    plan.replace(root,"<owned-root>").replaceAll("#[0-9]+","#ID")
+    plan.replace(root, "<owned-root>").replaceAll("#[0-9]+", "#ID")
   }
 
-  def configurationReceipt(spark: SparkSession): Map[String,String] = {
-    Map("spark_version"->spark.version,"ansi"->spark.conf.get("spark.sql.ansi.enabled"),"aqe"->spark.conf.get("spark.sql.adaptive.enabled"),"shuffle_partitions"->spark.conf.get("spark.sql.shuffle.partitions"))
+  def configurationReceipt(spark: SparkSession): Map[String, String] = {
+    Map(
+      "spark_version" -> spark.version,
+      "ansi" -> spark.conf.get("spark.sql.ansi.enabled"),
+      "aqe" -> spark.conf.get("spark.sql.adaptive.enabled"),
+      "shuffle_partitions" -> spark.conf.get("spark.sql.shuffle.partitions")
+    )
   }
 
   def main(args: Array[String]): Unit = {
     var ownedRoot: Path = null
-    val spark = SparkSession.builder().appName("ds60-spark-021").master("local[2]")
-      .config("spark.ui.enabled","false")
-      .config("spark.driver.host","127.0.0.1")
-      .config("spark.driver.bindAddress","127.0.0.1")
-      .config("spark.sql.shuffle.partitions","2")
-      .config("spark.sql.adaptive.enabled","false")
-      .config("spark.sql.ansi.enabled","true")
-      .config("spark.sql.session.timeZone","UTC").getOrCreate()
+    val spark = SparkSession
+      .builder()
+      .appName("ds60-spark-021")
+      .master("local[2]")
+      .config("spark.ui.enabled", "false")
+      .config("spark.driver.host", "127.0.0.1")
+      .config("spark.driver.bindAddress", "127.0.0.1")
+      .config("spark.sql.shuffle.partitions", "2")
+      .config("spark.sql.adaptive.enabled", "false")
+      .config("spark.sql.ansi.enabled", "true")
+      .config("spark.sql.session.timeZone", "UTC")
+      .getOrCreate()
     try {
       require(spark.sparkContext.master == "local[2]", "local-only course session")
       spark.sparkContext.setLogLevel("ERROR")
-      ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(),".ds60-spark-021-")
-      val fixture = spark.range(0L,12L,1L,2).withColumn("group_id",col("id") % 3L).withColumn("amount",col("id") * 10L).withColumn("unused_payload",lit("xxxxxxxxxxxxxxxx"))
+      ownedRoot =
+        Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(), ".ds60-spark-021-")
+      val fixture = spark
+        .range(0L, 12L, 1L, 2)
+        .withColumn("group_id", col("id") % 3L)
+        .withColumn("amount", col("id") * 10L)
+        .withColumn("unused_payload", lit("xxxxxxxxxxxxxxxx"))
       val dataPath = ownedRoot.resolve("data").toString
       fixture.write.mode("errorifexists").parquet(dataPath)
       val input = spark.read.parquet(dataPath)
       input.createOrReplaceTempView("ds60_spark_021_input")
-      val projectionQuery = "SELECT id,amount*2 AS doubled FROM ds60_spark_021_input WHERE amount>=30"
-      val aggregateQuery = "SELECT group_id,COUNT(*) AS n,SUM(amount) AS total FROM ds60_spark_021_input WHERE amount>=30 GROUP BY group_id"
+      val projectionQuery =
+        "SELECT id,amount*2 AS doubled FROM ds60_spark_021_input WHERE amount>=30"
+      val aggregateQuery =
+        "SELECT group_id,COUNT(*) AS n,SUM(amount) AS total FROM ds60_spark_021_input WHERE amount>=30 GROUP BY group_id"
       // Exercise 1: Check the query meaning before its execution plan
-      val expected = (3L until 12L).map(id => (id,20L*id))
-      assert(projectionResult(spark,projectionQuery) == expected)
+      val expected = (3L until 12L).map(id => (id, 20L * id))
+      assert(projectionResult(spark, projectionQuery) == expected)
       // Exercise 2: Capture each extended planning stage
-      val extended = explainText(spark,projectionQuery,"EXTENDED")
-      for(label <- Seq("Parsed Logical Plan","Analyzed Logical Plan","Optimized Logical Plan","Physical Plan")) assert(extended.contains(label))
+      val extended = explainText(spark, projectionQuery, "EXTENDED")
+      for (
+        label <- Seq(
+          "Parsed Logical Plan",
+          "Analyzed Logical Plan",
+          "Optimized Logical Plan",
+          "Physical Plan"
+        )
+      ) assert(extended.contains(label))
       var rejectedMode = false
-      try explainText(spark,projectionQuery,"UNSUPPORTED") catch { case _: IllegalArgumentException => rejectedMode = true }
+      try explainText(spark, projectionQuery, "UNSUPPORTED")
+      catch { case _: IllegalArgumentException => rejectedMode = true }
       assert(rejectedMode)
       // Exercise 3: Inspect the scan scope for column pruning
-      val formatted = explainText(spark,projectionQuery,"FORMATTED")
+      val formatted = explainText(spark, projectionQuery, "FORMATTED")
       val readSchema = readSchemaEvidence(formatted)
       assert(readSchema.contains("id:bigint") && readSchema.contains("amount:bigint"))
       assert(!readSchema.contains("unused_payload") && !readSchema.contains("group_id"))
       assert(formatted.contains("Filter") && formatted.contains("Project"))
       println(readSchema)
       // Exercise 4: Connect grouped output to a redistribution boundary
-      assert(aggregateResult(spark,aggregateQuery) == Seq((0L,3L,180L),(1L,3L,210L),(2L,3L,240L)))
-      val aggregatePlan = explainText(spark,aggregateQuery,"FORMATTED")
+      assert(
+        aggregateResult(spark, aggregateQuery) == Seq(
+          (0L, 3L, 180L),
+          (1L, 3L, 210L),
+          (2L, 3L, 240L)
+        )
+      )
+      val aggregatePlan = explainText(spark, aggregateQuery, "FORMATTED")
       assert(aggregatePlan.contains("Aggregate") && aggregatePlan.contains("Exchange"))
       assert(spark.conf.get("spark.sql.adaptive.enabled") == "false")
       println(aggregatePlan)
       // Exercise 5: Normalize incidental identifiers without erasing semantics
-      assert(normalizeEvidence("Project id#123L at " + ownedRoot.toString,ownedRoot.toString) == "Project id#IDL at <owned-root>")
-      val normalized = normalizeEvidence(formatted,ownedRoot.toString)
-      assert(!normalized.contains(ownedRoot.toString) && normalized.contains("Filter") && normalized.contains("amount"))
+      assert(
+        normalizeEvidence(
+          "Project id#123L at " + ownedRoot.toString,
+          ownedRoot.toString
+        ) == "Project id#IDL at <owned-root>"
+      )
+      val normalized = normalizeEvidence(formatted, ownedRoot.toString)
+      assert(
+        !normalized.contains(ownedRoot.toString) && normalized.contains("Filter") && normalized
+          .contains("amount")
+      )
       // Exercise 6: Compare equivalent query forms with separate semantic and plan evidence
-      val nested = "SELECT id,doubled FROM (SELECT id,amount,amount*2 AS doubled FROM ds60_spark_021_input) WHERE amount>=30"
-      assert(projectionResult(spark,nested) == expected)
-      assert(explainText(spark,nested,"EXTENDED").contains("Optimized Logical Plan"))
+      val nested =
+        "SELECT id,doubled FROM (SELECT id,amount,amount*2 AS doubled FROM ds60_spark_021_input) WHERE amount>=30"
+      assert(projectionResult(spark, nested) == expected)
+      assert(explainText(spark, nested, "EXTENDED").contains("Optimized Logical Plan"))
       val receipt = configurationReceipt(spark)
-      assert(receipt == Map("spark_version"->"4.0.1","ansi"->"true","aqe"->"false","shuffle_partitions"->"2"))
+      assert(
+        receipt == Map(
+          "spark_version" -> "4.0.1",
+          "ansi" -> "true",
+          "aqe" -> "false",
+          "shuffle_partitions" -> "2"
+        )
+      )
       println(receipt)
-      println("spark-021: six Scala reference contracts passed; Spark=" + spark.version + "; Scala=" + scala.util.Properties.versionNumberString)
-    } finally { try { if(ownedRoot != null) deleteOwned(ownedRoot) } finally { spark.stop() } }
+      println(
+        "spark-021: six Scala reference contracts passed; Spark=" + spark.version + "; Scala=" + scala.util.Properties.versionNumberString
+      )
+    } finally {
+      try { if (ownedRoot != null) deleteOwned(ownedRoot) }
+      finally { spark.stop() }
+    }
   }
 }
 

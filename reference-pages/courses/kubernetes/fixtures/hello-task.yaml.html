@@ -183,28 +183,28 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">        <span class="syntax-tag">seccompProfile</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">          <span class="syntax-tag">type</span><span class="syntax-punctuation">:</span> RuntimeDefault</span>
 <span class="source-line">      <span class="syntax-tag">containers</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">      <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> task</span>
-<span class="source-line">        <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ds60sqlpy-k8s-fixture:0.2.0</span>
-<span class="source-line">        <span class="syntax-tag">imagePullPolicy</span><span class="syntax-punctuation">:</span> Never</span>
-<span class="source-line">        <span class="syntax-tag">command</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">        <span class="syntax-punctuation">-</span> python</span>
-<span class="source-line">        <span class="syntax-punctuation">-</span> /fixture.py</span>
-<span class="source-line">        <span class="syntax-punctuation">-</span> task</span>
-<span class="source-line">        <span class="syntax-punctuation">-</span> --outcome</span>
-<span class="source-line">        <span class="syntax-punctuation">-</span> success</span>
-<span class="source-line">        <span class="syntax-tag">resources</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">          <span class="syntax-tag">requests</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">            <span class="syntax-tag">cpu</span><span class="syntax-punctuation">:</span> 10m</span>
-<span class="source-line">            <span class="syntax-tag">memory</span><span class="syntax-punctuation">:</span> 16Mi</span>
-<span class="source-line">          <span class="syntax-tag">limits</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">            <span class="syntax-tag">cpu</span><span class="syntax-punctuation">:</span> 100m</span>
-<span class="source-line">            <span class="syntax-tag">memory</span><span class="syntax-punctuation">:</span> 64Mi</span>
-<span class="source-line">        <span class="syntax-tag">securityContext</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">          <span class="syntax-tag">allowPrivilegeEscalation</span><span class="syntax-punctuation">:</span> false</span>
-<span class="source-line">          <span class="syntax-tag">readOnlyRootFilesystem</span><span class="syntax-punctuation">:</span> true</span>
-<span class="source-line">          <span class="syntax-tag">capabilities</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">            <span class="syntax-tag">drop</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">            <span class="syntax-punctuation">-</span> ALL</span>
+<span class="source-line">        <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> task</span>
+<span class="source-line">          <span class="syntax-tag">image</span><span class="syntax-punctuation">:</span> ds60sqlpy-k8s-fixture:0.2.0</span>
+<span class="source-line">          <span class="syntax-tag">imagePullPolicy</span><span class="syntax-punctuation">:</span> Never</span>
+<span class="source-line">          <span class="syntax-tag">command</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-punctuation">-</span> python</span>
+<span class="source-line">            <span class="syntax-punctuation">-</span> /fixture.py</span>
+<span class="source-line">            <span class="syntax-punctuation">-</span> task</span>
+<span class="source-line">            <span class="syntax-punctuation">-</span> --outcome</span>
+<span class="source-line">            <span class="syntax-punctuation">-</span> success</span>
+<span class="source-line">          <span class="syntax-tag">resources</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-tag">requests</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">              <span class="syntax-tag">cpu</span><span class="syntax-punctuation">:</span> 10m</span>
+<span class="source-line">              <span class="syntax-tag">memory</span><span class="syntax-punctuation">:</span> 16Mi</span>
+<span class="source-line">            <span class="syntax-tag">limits</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">              <span class="syntax-tag">cpu</span><span class="syntax-punctuation">:</span> 100m</span>
+<span class="source-line">              <span class="syntax-tag">memory</span><span class="syntax-punctuation">:</span> 64Mi</span>
+<span class="source-line">          <span class="syntax-tag">securityContext</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-tag">allowPrivilegeEscalation</span><span class="syntax-punctuation">:</span> false</span>
+<span class="source-line">            <span class="syntax-tag">readOnlyRootFilesystem</span><span class="syntax-punctuation">:</span> true</span>
+<span class="source-line">            <span class="syntax-tag">capabilities</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">              <span class="syntax-tag">drop</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">                <span class="syntax-punctuation">-</span> ALL</span>
 <span class="source-line">      <span class="syntax-tag">restartPolicy</span><span class="syntax-punctuation">:</span> Never</span>
 <span class="source-line"></span></code></pre></article>
   </main>

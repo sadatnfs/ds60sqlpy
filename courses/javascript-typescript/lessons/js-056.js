@@ -20,4 +20,6 @@
 // Exercise 6: Review focus and announcement behavior.
 // Expected: Focus stays predictable and the live summary is concise.
 
-throw new Error("Implement the six D3 practice tasks in your saved pad before claiming completion.");
+throw new Error(
+  "Implement the six D3 practice tasks in your saved pad before claiming completion.",
+);

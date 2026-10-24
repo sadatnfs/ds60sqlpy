@@ -14,30 +14,32 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Buffers;
 
-internal static class Program
-{
-    private static void Check(bool condition, string reason)
-    {
-        if (!condition) throw new InvalidOperationException(reason);
-    }
+internal static class Program {
+  private static void Check(bool condition, string reason) {
+    if (!condition)
+      throw new InvalidOperationException(reason);
+  }
 
-    private static async Task Main()
+  private static async Task Main() {
     {
-        {
-            var original = new ItemDto("pear", 3);
-            string json = JsonSerializer.Serialize(original);
-            var restored = JsonSerializer.Deserialize<ItemDto>(json);
-            Check(restored == original, "record round trip");
-        }
-        {
-            var invalid = JsonSerializer.Deserialize<ItemDto>("{\"Name\":\"pear\",\"Quantity\":-2}");
-            Check(invalid is not null && !Valid(invalid), "domain rejection after decoding");
-            Check(!Valid(new ItemDto("", 2)), "empty identity rejected");
-        }
-        Console.WriteLine("csharp-026: passed");
-        await Task.CompletedTask;
+      var original = new ItemDto("pear", 3);
+      string json = JsonSerializer.Serialize(original);
+      var restored = JsonSerializer.Deserialize<ItemDto>(json);
+      Check(restored == original, "record round trip");
     }
+    {
+      var invalid = JsonSerializer.Deserialize<ItemDto>(
+          "{\"Name\":\"pear\",\"Quantity\":-2}");
+      Check(invalid is not null && !Valid(invalid),
+            "domain rejection after decoding");
+      Check(!Valid(new ItemDto("", 2)), "empty identity rejected");
+    }
+    Console.WriteLine("csharp-026: passed");
+    await Task.CompletedTask;
+  }
 
-    public record ItemDto(string Name, int Quantity);
-    public static bool Valid(ItemDto item) => !string.IsNullOrWhiteSpace(item.Name) && item.Quantity >= 0;
+  public record ItemDto(string Name, int Quantity);
+  public static bool
+  Valid(ItemDto item) => !string.IsNullOrWhiteSpace(item.Name) && item.Quantity
+                                                                      >= 0;
 }

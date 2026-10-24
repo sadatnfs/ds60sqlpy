@@ -18,50 +18,48 @@
 --
 BEGIN;
 SET search_path TO training, public;
-
 -- Study contract
 -- Focus: Use `FIRST_VALUE` and `LAST_VALUE` only with an ordering and frame that covers the intended partition.
 -- Assumptions: First/last refer to ordered rows, not minimum/maximum values unless ordering states that. Ties need unique keys for deterministic row identity.
 -- Pitfall: The default `LAST_VALUE` frame ends at the current row/peer group, often making it return the current value rather than the partition's final value.
 -- Predict row grain and NULL/order behavior before executing each example.
-
 -- First and last order amount per customer
-SELECT o.customer_id,
-       o.order_id,
-       o.order_date,
-       o.total_amount,
-       FIRST_VALUE(o.total_amount) OVER (
-         PARTITION BY o.customer_id
-         ORDER BY o.order_date, o.order_id
-         ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
-       ) AS first_order_amount,
-       LAST_VALUE(o.total_amount) OVER (
-         PARTITION BY o.customer_id
-         ORDER BY o.order_date, o.order_id
-         ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
-       ) AS last_order_amount
-FROM orders o
-ORDER BY o.customer_id, o.order_date, o.order_id
+SELECT
+  o.customer_id,
+  o.order_id,
+  o.order_date,
+  o.total_amount,
+  FIRST_VALUE(o.total_amount) OVER (PARTITION BY o.customer_id ORDER BY o.order_date, o.order_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS first_order_amount,
+  LAST_VALUE(o.total_amount) OVER (PARTITION BY o.customer_id ORDER BY o.order_date, o.order_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS last_order_amount
+FROM
+  orders o
+ORDER BY
+  o.customer_id,
+  o.order_date,
+  o.order_id
 LIMIT 100;
-
 -- Compare current to first/last
 WITH per_cust AS (
-  SELECT o.customer_id,
-         o.order_id,
-         o.order_date,
-         o.total_amount,
-         FIRST_VALUE(o.total_amount) OVER (
-           PARTITION BY o.customer_id
-           ORDER BY o.order_date, o.order_id
-           ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
-         ) AS first_amt
-  FROM orders o
+  SELECT
+    o.customer_id,
+    o.order_id,
+    o.order_date,
+    o.total_amount,
+    FIRST_VALUE(o.total_amount) OVER (PARTITION BY o.customer_id ORDER BY o.order_date,
+      o.order_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS first_amt
+  FROM
+    orders o
 )
-SELECT *, ROUND(total_amount - first_amt, 2) AS delta_from_first
-FROM per_cust
-ORDER BY customer_id, order_date, order_id
+SELECT
+  *,
+  ROUND(total_amount - first_amt, 2) AS delta_from_first
+FROM
+  per_cust
+ORDER BY
+  customer_id,
+  order_date,
+  order_id
 LIMIT 100;
-
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.
@@ -101,5 +99,4 @@ LIMIT 100;
 --    Expected result/shape: For sql-20 Exercise 6, expected output: At most one latest order per customer. The final columns are `customer_id`, `order_id`, `order_date`, and `total_amount`. The final order is `o.customer_id, o.order_date DESC, o.order_id DESC`.
 --    Verify: For sql-20 Exercise 6, reselect the returned keys directly from the source; require unique `order_id` where the expected grain is one row per key and confirm the projected `customer_id`, `order_id`, `order_date`, and `total_amount` against `orders`. Tie two rows on `o.customer_id` and give them different `o.order_id DESC` values; verify `o.customer_id, o.order_date DESC, o.order_id DESC` chooses a stable first/last row.
 --    Hint ladder, rung 1: For sql-20 Exercise 6, check `o.customer_id, o.order_date DESC, o.order_id DESC` before applying the row cap.
-
 ROLLBACK;

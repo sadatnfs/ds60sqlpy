@@ -18,37 +18,65 @@
 --
 BEGIN;
 SET search_path TO training, public;
-
 -- Show current isolation level
 SHOW TRANSACTION ISOLATION LEVEL;
-
 -- Set per-transaction isolation level (demo)
 SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;
-
 -- Demo table
-CREATE TEMP TABLE txn_demo(id int PRIMARY KEY, qty int);
-INSERT INTO txn_demo VALUES (1, 10), (2, 20), (3, 30);
-
+CREATE TEMP TABLE txn_demo (
+  id int PRIMARY KEY,
+  qty int
+);
+INSERT INTO txn_demo
+VALUES
+  (1, 10),
+  (2, 20),
+  (3, 30);
 -- Read snapshot under REPEATABLE READ
-SELECT * FROM txn_demo ORDER BY id;
-
+SELECT
+  *
+FROM
+  txn_demo
+ORDER BY
+  id;
 -- In a second session (instruction):
 --   BEGIN; UPDATE txn_demo SET qty = qty + 5 WHERE id = 2; COMMIT;
 -- Back here, under REPEATABLE READ snapshot, we still see old value
-SELECT * FROM txn_demo WHERE id = 2;
-
+SELECT
+  *
+FROM
+  txn_demo
+WHERE
+  id = 2;
 -- Now switch to READ COMMITTED to see new row versions on each statement
 -- Note: This affects only subsequent transactions; included here for demo
 -- COMMIT;  -- would end current tx; but we keep everything safe and roll back at end
 -- BEGIN; SET TRANSACTION ISOLATION LEVEL READ COMMITTED; SELECT * FROM txn_demo WHERE id=2;
-
 -- Savepoint / rollback demo
 SAVEPOINT sp1;
-UPDATE txn_demo SET qty = qty + 100 WHERE id = 1;
-SELECT * FROM txn_demo WHERE id = 1; -- shows +100 within tx
+UPDATE
+  txn_demo
+SET
+  qty = qty + 100
+WHERE
+  id = 1;
+SELECT
+  *
+FROM
+  txn_demo
+WHERE
+  id = 1;
+-- shows +100 within tx
 ROLLBACK TO SAVEPOINT sp1;
-SELECT * FROM txn_demo WHERE id = 1; -- back to original in this tx
 
+SELECT
+  *
+FROM
+  txn_demo
+WHERE
+  id = 1;
+
+-- back to original in this tx
 -- Exercises
 -- 1. In two sessions, reproduce non-repeatable reads under READ COMMITTED.
 --    Inputs: For sql-38 Exercise 1, read from `isolation_lab`. Build the answer toward `qty`; keep `qty` visible whenever the result has row-level grain.
@@ -89,5 +117,4 @@ SELECT * FROM txn_demo WHERE id = 1; -- back to original in this tx
 --    Expected result/shape: For sql-38 Exercise 7, expected output: a statement-by-statement Session A/Session B transcript followed by the committed fixture state and cleanup evidence. The final columns are `session`, `statement_number`, `outcome`, and `sqlstate`.
 --    Verify: For sql-38 Exercise 7, compare every observed value, wait, and SQLSTATE with the written schedule; query `txn_demo`, `isolation_solution`, and `transfer_accounts` after each commit/rollback and finish with both sessions idle and the fixture reset. Repeat the exact interleaving after cleanup and confirm the same wait, SQLSTATE, and committed final rows.
 --    Hint ladder, rung 1: For sql-38 Exercise 7, compare every observed value, wait, and SQLSTATE with the written schedule; query `txn_demo`, `isolation_solution`, and `transfer_accounts` after each commit/rollback and finish with both sessions idle and the fixture reset.
-
 ROLLBACK;

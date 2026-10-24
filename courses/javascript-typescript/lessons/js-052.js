@@ -20,4 +20,6 @@
 // Exercise 6: Design a comparison of two estimated effects.
 // Expected: Show estimates, interval method, units and a meaningful zero reference.
 
-throw new Error("Implement the six D3 practice tasks in your saved pad before claiming completion.");
+throw new Error(
+  "Implement the six D3 practice tasks in your saved pad before claiming completion.",
+);

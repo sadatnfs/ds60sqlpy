@@ -20,4 +20,6 @@
 // Exercise 6: Choose a strategy for a dense network.
 // Expected: Filter or aggregate according to an analytical question.
 
-throw new Error("Implement the six D3 practice tasks in your saved pad before claiming completion.");
+throw new Error(
+  "Implement the six D3 practice tasks in your saved pad before claiming completion.",
+);

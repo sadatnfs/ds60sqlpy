@@ -1,10 +1,12 @@
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         use std::io::{Read, Write};
         let path = std::env::temp_dir().join(format!("rust-lesson-{}-a.txt", std::process::id()));
-        let mut file = std::fs::OpenOptions::new().write(true).read(true).create_new(true).open(&path)?;
+        let mut file = std::fs::OpenOptions::new()
+            .write(true)
+            .read(true)
+            .create_new(true)
+            .open(&path)?;
         file.write_all("café".as_bytes())?;
         drop(file);
         let mut actual = String::new();

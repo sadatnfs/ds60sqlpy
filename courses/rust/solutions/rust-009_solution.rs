@@ -1,5 +1,3 @@
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let text = String::from("pear");
@@ -10,7 +8,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     {
-        fn first_word(text: &str) -> &str { text.split_whitespace().next().unwrap_or("") }
+        fn first_word(text: &str) -> &str {
+            text.split_whitespace().next().unwrap_or("")
+        }
         let sentence = String::from("pear apple");
         assert_eq!(first_word(&sentence), "pear");
         assert_eq!(first_word(""), "");

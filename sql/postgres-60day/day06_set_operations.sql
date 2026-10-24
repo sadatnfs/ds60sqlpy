@@ -18,41 +18,79 @@
 --
 BEGIN;
 SET search_path TO training, public;
-
 -- Study contract
 -- Focus: Combine compatible row sets with explicit duplicate semantics: `UNION`, `UNION ALL`, `INTERSECT`, and `EXCEPT`.
 -- Assumptions: Set-operation inputs must have compatible column counts/types. Output order is undefined unless one final `ORDER BY` follows the complete set expression.
 -- Pitfall: `UNION` removes duplicates and can hide data multiplicity; `NOT IN` is not a safe substitute for `EXCEPT` when NULL is possible.
 -- Predict row grain and NULL/order behavior before executing each example.
-
 -- Customers who purchased AND generated support events
 WITH purchasers AS (
-  SELECT DISTINCT o.customer_id FROM orders o
-), supporters AS (
-  SELECT DISTINCT e.customer_id FROM events e WHERE e.event_type = 'support'
+  SELECT DISTINCT
+    o.customer_id
+  FROM
+    orders o
+),
+supporters AS (
+  SELECT DISTINCT
+    e.customer_id
+  FROM
+    events e
+  WHERE
+    e.event_type = 'support'
 )
-SELECT * FROM purchasers
+SELECT
+  *
+FROM
+  purchasers
 INTERSECT
-SELECT * FROM supporters
-ORDER BY customer_id;
-
+SELECT
+  *
+FROM
+  supporters
+ORDER BY
+  customer_id;
 -- Customers who browsed but never purchased
 WITH browsers AS (
-  SELECT DISTINCT e.customer_id FROM events e WHERE e.event_type = 'page_view'
-), purchasers AS (
-  SELECT DISTINCT o.customer_id FROM orders o
+  SELECT DISTINCT
+    e.customer_id
+  FROM
+    events e
+  WHERE
+    e.event_type = 'page_view'
+),
+purchasers AS (
+  SELECT DISTINCT
+    o.customer_id
+  FROM
+    orders o
 )
-SELECT * FROM browsers
+SELECT
+  *
+FROM
+  browsers
 EXCEPT
-SELECT * FROM purchasers
-ORDER BY customer_id;
-
+SELECT
+  *
+FROM
+  purchasers
+ORDER BY
+  customer_id;
 -- UNION vs UNION ALL (dedupe demo)
-SELECT country FROM customers WHERE country IN ('US','CA')
+SELECT
+  country
+FROM
+  customers
+WHERE
+  country IN ('US', 'CA')
 UNION ALL
-SELECT country FROM customers WHERE country IN ('CA','GB')
-ORDER BY country;
-
+SELECT
+  country
+FROM
+  customers
+WHERE
+  country IN ('CA', 'GB')
+ORDER BY
+  country;
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.
@@ -92,5 +130,4 @@ ORDER BY country;
 --    Expected result/shape: For sql-06 Exercise 6, expected output: Customers present in exactly one of the two source sets. The final columns are `customer_id`, and `source`. The final order is `customer_id, source`.
 --    Verify: For sql-06 Exercise 6, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, and `source` against `orders`, and `events`. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
 --    Hint ladder, rung 1: For sql-06 Exercise 6, run `ordering_customers`, `support_customers`, `only_orders`, and `only_support` one at a time. Record each CTE's row count and `customer_id` uniqueness before the next stage uses it.
-
 ROLLBACK;

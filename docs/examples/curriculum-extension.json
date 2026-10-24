@@ -18,9 +18,7 @@
       "prerequisites": ["python-stats-01"],
       "lesson_path": "courses/llm-theory/lessons/01_evaluation_units.md",
       "guide_path": "courses/llm-theory/guides/01_evaluation_units_guide.md",
-      "solution_paths": [
-        "courses/llm-theory/solutions/01_evaluation_units_solutions.md"
-      ],
+      "solution_paths": ["courses/llm-theory/solutions/01_evaluation_units_solutions.md"],
       "dependency_group": "core",
       "network": "offline",
       "runner": "none",

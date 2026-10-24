@@ -18,45 +18,45 @@
 --
 BEGIN;
 SET search_path TO training, public;
-
 -- Study contract
 -- Focus: Define cumulative and moving window frames explicitly so peers, boundaries, and partition resets match the business question.
 -- Assumptions: Ordered money windows use exact numeric. `ROWS` counts physical ordered rows; `RANGE` groups peers with equal ordering values.
 -- Pitfall: Relying on the default frame can include tied peers unexpectedly; a moving-row window is not automatically a moving-time window.
 -- Predict row grain and NULL/order behavior before executing each example.
-
 -- Running total per customer by order date
-SELECT o.customer_id,
-       o.order_id,
-       o.order_date,
-       o.total_amount,
-       SUM(o.total_amount) OVER (
-         PARTITION BY o.customer_id
-         ORDER BY o.order_date, o.order_id
-         ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-       ) AS running_total
-FROM orders o
-ORDER BY o.customer_id, o.order_date, o.order_id
+SELECT
+  o.customer_id,
+  o.order_id,
+  o.order_date,
+  o.total_amount,
+  SUM(o.total_amount) OVER (PARTITION BY o.customer_id ORDER BY o.order_date, o.order_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_total
+FROM
+  orders o
+ORDER BY
+  o.customer_id,
+  o.order_date,
+  o.order_id
 LIMIT 200;
-
 -- Moving average across seven observed UTC dates. Densify the calendar first
 -- if the business meaning requires exactly seven consecutive calendar dates.
 WITH daily AS (
-  SELECT (order_date AT TIME ZONE 'UTC')::date AS d_utc,
-         SUM(total_amount) AS revenue
-  FROM orders
-  GROUP BY d_utc
+  SELECT
+    (order_date AT TIME ZONE 'UTC')::date AS d_utc,
+    SUM(total_amount) AS revenue
+  FROM
+    orders
+  GROUP BY
+    d_utc
 )
-SELECT d_utc,
-       revenue,
-       ROUND(AVG(revenue) OVER (
-         ORDER BY d_utc
-         ROWS BETWEEN 6 PRECEDING AND CURRENT ROW
-       ),2) AS ma7
-FROM daily
-ORDER BY d_utc DESC
+SELECT
+  d_utc,
+  revenue,
+  ROUND(AVG(revenue) OVER (ORDER BY d_utc ROWS BETWEEN 6 PRECEDING AND CURRENT ROW), 2) AS ma7
+FROM
+  daily
+ORDER BY
+  d_utc DESC
 LIMIT 40;
-
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.
@@ -96,5 +96,4 @@ LIMIT 40;
 --    Expected result/shape: For sql-19 Exercise 6, expected output: One row with zero difference. The final columns are `final_cumulative`, `aggregate_total`, and `difference`.
 --    Verify: For sql-19 Exercise 6, independently aggregate `orders` by `cumulative_revenue`; require one output row for every distinct `cumulative_revenue` tuple and compare `aggregate_total` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `aggregate_total` for the existing `cumulative_revenue` tuple and verify the new tuple appears exactly once.
 --    Hint ladder, rung 1: For sql-19 Exercise 6, run `running`, and `final_running` one at a time. Record each CTE's row count and `cumulative_revenue` uniqueness before the next stage uses it.
-
 ROLLBACK;

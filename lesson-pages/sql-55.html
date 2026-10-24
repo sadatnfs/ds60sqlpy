@@ -673,71 +673,108 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line"><span class="syntax-comment">-- Multi-dimensional analysis (drill-down capability)</span></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Use GROUPING SETS/ROLLUP/CUBE for flexible drilldowns.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Dimensions: country, category, primary payment method, month.</span></span>
 <span class="source-line"><span class="syntax-comment">-- An order can have split payments, so first choose one reporting label:</span></span>
 <span class="source-line"><span class="syntax-comment">-- the method with the greatest paid amount (method name breaks ties).</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> payment_by_method <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> order_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">method</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> method_amount</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> payments</span>
-<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> order_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">method</span></span>
-<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> primary_payment_method <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> order_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">method</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    order_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-keyword">method</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> method_amount</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    payments</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">    order_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-keyword">method</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">primary_payment_method <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    order_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-keyword">method</span></span>
 <span class="source-line">  <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">    <span class="syntax-keyword">SELECT</span> order_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">           <span class="syntax-keyword">method</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">           ROW_NUMBER<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span></span>
-<span class="source-line">             PARTITION <span class="syntax-keyword">BY</span> order_id</span>
-<span class="source-line">             <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> method_amount <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">method</span></span>
-<span class="source-line">           <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> method_rank</span>
-<span class="source-line">    <span class="syntax-keyword">FROM</span> payment_by_method</span>
-<span class="source-line">  <span class="syntax-punctuation">)</span> ranked_methods</span>
-<span class="source-line">  <span class="syntax-keyword">WHERE</span> method_rank <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
-<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> line <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>pm<span class="syntax-punctuation">.</span><span class="syntax-keyword">method</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;unpaid&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> payment_method<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">         <span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>unit_price<span class="syntax-operator">*</span>oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-operator">*</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">-</span>oi<span class="syntax-punctuation">.</span>discount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         oi<span class="syntax-punctuation">.</span>quantity <span class="syntax-keyword">AS</span> qty</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> orders o</span>
-<span class="source-line">  <span class="syntax-keyword">JOIN</span> customers <span class="syntax-keyword">c</span>  <span class="syntax-keyword">ON</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>customer_id</span>
-<span class="source-line">  <span class="syntax-keyword">JOIN</span> order_items oi <span class="syntax-keyword">ON</span> oi<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_id</span>
-<span class="source-line">  <span class="syntax-keyword">JOIN</span> products p   <span class="syntax-keyword">ON</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>product_id</span>
-<span class="source-line">  <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> primary_payment_method pm <span class="syntax-keyword">ON</span> pm<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_id</span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">      order_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">      <span class="syntax-keyword">method</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      ROW_NUMBER<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> order_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> method_amount <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">        <span class="syntax-keyword">method</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> method_rank</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    payment_by_method<span class="syntax-punctuation">)</span> ranked_methods</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">    method_rank <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">line <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>pm<span class="syntax-punctuation">.</span><span class="syntax-keyword">method</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;unpaid&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> payment_method<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    date_trunc<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;month&#x27;</span><span class="syntax-punctuation">,</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>unit_price <span class="syntax-operator">*</span> oi<span class="syntax-punctuation">.</span>quantity <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">-</span> oi<span class="syntax-punctuation">.</span>discount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    oi<span class="syntax-punctuation">.</span>quantity <span class="syntax-keyword">AS</span> qty</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    orders o</span>
+<span class="source-line">    <span class="syntax-keyword">JOIN</span> customers <span class="syntax-keyword">c</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line">    <span class="syntax-keyword">JOIN</span> order_items oi <span class="syntax-keyword">ON</span> oi<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_id</span>
+<span class="source-line">    <span class="syntax-keyword">JOIN</span> products p <span class="syntax-keyword">ON</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>product_id</span>
+<span class="source-line">    <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> primary_payment_method pm <span class="syntax-keyword">ON</span> pm<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_id</span>
 <span class="source-line"><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> country<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       category<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       payment_method<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">       ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>qty<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> units<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">GROUPING</span><span class="syntax-punctuation">(</span>country<span class="syntax-punctuation">)</span>        <span class="syntax-keyword">AS</span> g_country<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">GROUPING</span><span class="syntax-punctuation">(</span>category<span class="syntax-punctuation">)</span>       <span class="syntax-keyword">AS</span> g_category<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">GROUPING</span><span class="syntax-punctuation">(</span>payment_method<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> g_method<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">GROUPING</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span>          <span class="syntax-keyword">AS</span> g_month</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> line</span>
-<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">ROLLUP</span> <span class="syntax-punctuation">(</span>country<span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">,</span> payment_method<span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> country NULLS <span class="syntax-keyword">FIRST</span><span class="syntax-punctuation">,</span> category NULLS <span class="syntax-keyword">FIRST</span><span class="syntax-punctuation">,</span> payment_method NULLS <span class="syntax-keyword">FIRST</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span> NULLS <span class="syntax-keyword">FIRST</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  payment_method<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">month</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  ROUND<span class="syntax-punctuation">(</span><span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>qty<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> units<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">GROUPING</span> <span class="syntax-punctuation">(</span>country<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> g_country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">GROUPING</span> <span class="syntax-punctuation">(</span>category<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> g_category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">GROUPING</span> <span class="syntax-punctuation">(</span>payment_method<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> g_method<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">GROUPING</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> g_month</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  line</span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  <span class="syntax-keyword">ROLLUP</span> <span class="syntax-punctuation">(</span>country<span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">,</span> payment_method<span class="syntax-punctuation">,</span> <span class="syntax-keyword">month</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  country NULLS <span class="syntax-keyword">FIRST</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  category NULLS <span class="syntax-keyword">FIRST</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  payment_method NULLS <span class="syntax-keyword">FIRST</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">month</span> NULLS <span class="syntax-keyword">FIRST</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Drill-down example: country -&gt; category -&gt; product (top-N per level)</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> prod_rev <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>name<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>unit_price<span class="syntax-operator">*</span>oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-operator">*</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">-</span>oi<span class="syntax-punctuation">.</span>discount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> orders o</span>
-<span class="source-line">  <span class="syntax-keyword">JOIN</span> customers <span class="syntax-keyword">c</span>  <span class="syntax-keyword">ON</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>customer_id</span>
-<span class="source-line">  <span class="syntax-keyword">JOIN</span> order_items oi <span class="syntax-keyword">ON</span> oi<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_id</span>
-<span class="source-line">  <span class="syntax-keyword">JOIN</span> products p   <span class="syntax-keyword">ON</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>product_id</span>
-<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>name</span>
-<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> ranked <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">         RANK<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> country<span class="syntax-punctuation">,</span> category <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> revenue <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> rnk</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> prod_rev</span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    p<span class="syntax-punctuation">.</span>name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>unit_price <span class="syntax-operator">*</span> oi<span class="syntax-punctuation">.</span>quantity <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">-</span> oi<span class="syntax-punctuation">.</span>discount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    orders o</span>
+<span class="source-line">    <span class="syntax-keyword">JOIN</span> customers <span class="syntax-keyword">c</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line">    <span class="syntax-keyword">JOIN</span> order_items oi <span class="syntax-keyword">ON</span> oi<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_id</span>
+<span class="source-line">    <span class="syntax-keyword">JOIN</span> products p <span class="syntax-keyword">ON</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>product_id</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">    <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    p<span class="syntax-punctuation">.</span>name</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">ranked <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    RANK<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">      category <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> revenue <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> rnk</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    prod_rev</span>
 <span class="source-line"><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> ranked <span class="syntax-keyword">WHERE</span> rnk <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">5</span></span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> country<span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">,</span> rnk<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-operator">*</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  ranked</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  rnk <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">5</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  rnk<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
 <span class="source-line"><span class="syntax-comment">-- 1. Replace ROLLUP with CUBE to get all subtotal combinations and compare row counts.</span></span>
 <span class="source-line"><span class="syntax-comment">--    Inputs: For sql-55 Exercise 1, read from `orders`, `customers`, `order_items`, and `products`. Compute `rollup_row_count`, and `cube_row_count` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.</span></span>
@@ -774,7 +811,6 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-55 Exercise 6, expected output: one row per `display_country`. The final columns are `display_country`, `is_generated_total`, and `customers`. The final order is `is_generated_total, display_country`.</span></span>
 <span class="source-line"><span class="syntax-comment">--    Verify: For sql-55 Exercise 6, independently aggregate `customers` by `display_country`; require one output row for every distinct `display_country` tuple and compare `is_generated_total`, and `customers` tuple by tuple. Repeat with `NULL` in `display_country`, and `is_generated_total` and state whether the row is kept, rejected, or classified.</span></span>
 <span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-55 Exercise 6, confirm the groups are `display_country`; then check `is_generated_total, display_country` before applying the row cap.</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>
       </section>
@@ -1019,133 +1055,224 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> line <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         o<span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         p<span class="syntax-punctuation">.</span>name<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         oi<span class="syntax-punctuation">.</span>unit_price <span class="syntax-operator">*</span> oi<span class="syntax-punctuation">.</span>quantity <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">-</span> oi<span class="syntax-punctuation">.</span>discount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> orders o</span>
-<span class="source-line">  <span class="syntax-keyword">JOIN</span> customers <span class="syntax-keyword">c</span> <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span></span>
-<span class="source-line">  <span class="syntax-keyword">JOIN</span> order_items oi <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span></span>
-<span class="source-line">  <span class="syntax-keyword">JOIN</span> products p <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>product_id<span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> rollup_rows <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> country<span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">,</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> line</span>
-<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">ROLLUP</span> <span class="syntax-punctuation">(</span>country<span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> cube_rows <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> country<span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">,</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> line</span>
-<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">CUBE</span> <span class="syntax-punctuation">(</span>country<span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-comment">-- Exercise 1: CUBE adds category-only subtotals that ROLLUP omits.</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> rollup_rows<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> rollup_row_count<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> cube_rows<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> cube_row_count<span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    o<span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    p<span class="syntax-punctuation">.</span>name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    oi<span class="syntax-punctuation">.</span>unit_price <span class="syntax-operator">*</span> oi<span class="syntax-punctuation">.</span>quantity <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">-</span> oi<span class="syntax-punctuation">.</span>discount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    orders o</span>
+<span class="source-line">    <span class="syntax-keyword">JOIN</span> customers <span class="syntax-keyword">c</span> <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">JOIN</span> order_items oi <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">JOIN</span> products p <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>product_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">rollup_rows <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    line</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">    <span class="syntax-keyword">ROLLUP</span> <span class="syntax-punctuation">(</span>country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    category<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">cube_rows <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    line</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">    <span class="syntax-keyword">CUBE</span> <span class="syntax-punctuation">(</span>country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    category<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-comment">-- Exercise 1: CUBE adds category-only subtotals that ROLLUP omits.</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">      <span class="syntax-punctuation">(</span></span>
+<span class="source-line">        <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">          <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">          rollup_rows<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> rollup_row_count<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">      <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">      cube_rows<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> cube_row_count<span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> line <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         o<span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         p<span class="syntax-punctuation">.</span>name<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         oi<span class="syntax-punctuation">.</span>unit_price <span class="syntax-operator">*</span> oi<span class="syntax-punctuation">.</span>quantity <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">-</span> oi<span class="syntax-punctuation">.</span>discount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> orders o</span>
-<span class="source-line">  <span class="syntax-keyword">JOIN</span> customers <span class="syntax-keyword">c</span> <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span></span>
-<span class="source-line">  <span class="syntax-keyword">JOIN</span> order_items oi <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span></span>
-<span class="source-line">  <span class="syntax-keyword">JOIN</span> products p <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>product_id<span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> product_revenue <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> country<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         category<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         status<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         product_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         name<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> line</span>
-<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> country<span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">,</span> status<span class="syntax-punctuation">,</span> product_id<span class="syntax-punctuation">,</span> name</span>
-<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> ranked <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">         ROW_NUMBER<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span></span>
-<span class="source-line">           PARTITION <span class="syntax-keyword">BY</span> country<span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">,</span> status</span>
-<span class="source-line">           <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> revenue <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> product_id</span>
-<span class="source-line">         <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> product_rank</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> product_revenue</span>
-<span class="source-line"><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-comment">-- Exercise 2: status-aware top-five drill-down.</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> country<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       category<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       status<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       product_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       name<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       ROUND<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       product_rank</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> ranked</span>
-<span class="source-line"><span class="syntax-keyword">WHERE</span> product_rank <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">5</span></span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> country<span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">,</span> status<span class="syntax-punctuation">,</span> product_rank<span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    o<span class="syntax-punctuation">.</span>status<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    p<span class="syntax-punctuation">.</span>name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    oi<span class="syntax-punctuation">.</span>unit_price <span class="syntax-operator">*</span> oi<span class="syntax-punctuation">.</span>quantity <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">-</span> oi<span class="syntax-punctuation">.</span>discount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    orders o</span>
+<span class="source-line">    <span class="syntax-keyword">JOIN</span> customers <span class="syntax-keyword">c</span> <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">JOIN</span> order_items oi <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">JOIN</span> products p <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>product_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">product_revenue <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    status<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    product_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    line</span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">    country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    status<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    product_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    name</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">ranked <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    ROW_NUMBER<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">      category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">      status <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> revenue <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      product_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> product_rank</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    product_revenue<span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-comment">-- Exercise 2: status-aware top-five drill-down.</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    status<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    product_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    ROUND<span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    product_rank</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    ranked</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">    product_rank <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">5</span></span>
+<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">    country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    status<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    product_rank<span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 3: GROUPING&#x27;s bit mask documents each ROLLUP level: detail (0),</span></span>
 <span class="source-line"><span class="syntax-comment">-- category subtotal within country (1), and grand total (3).</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> line <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         oi<span class="syntax-punctuation">.</span>quantity <span class="syntax-operator">*</span> oi<span class="syntax-punctuation">.</span>unit_price <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">-</span> oi<span class="syntax-punctuation">.</span>discount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> orders o</span>
-<span class="source-line">  <span class="syntax-keyword">JOIN</span> customers <span class="syntax-keyword">c</span> <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span></span>
-<span class="source-line">  <span class="syntax-keyword">JOIN</span> order_items oi <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span></span>
-<span class="source-line">  <span class="syntax-keyword">JOIN</span> products p <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>product_id<span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> country<span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">,</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">GROUPING</span><span class="syntax-punctuation">(</span>country<span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> grouping_mask</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> line</span>
-<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">ROLLUP</span> <span class="syntax-punctuation">(</span>country<span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> grouping_mask<span class="syntax-punctuation">,</span> country<span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    oi<span class="syntax-punctuation">.</span>quantity <span class="syntax-operator">*</span> oi<span class="syntax-punctuation">.</span>unit_price <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">-</span> oi<span class="syntax-punctuation">.</span>discount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    orders o</span>
+<span class="source-line">    <span class="syntax-keyword">JOIN</span> customers <span class="syntax-keyword">c</span> <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">JOIN</span> order_items oi <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">JOIN</span> products p <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>product_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">GROUPING</span> <span class="syntax-punctuation">(</span>country<span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> grouping_mask</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  line</span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  <span class="syntax-keyword">ROLLUP</span> <span class="syntax-punctuation">(</span>country<span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  grouping_mask<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  category<span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 4: PostgreSQL&#x27;s GROUPING(args) returns the stable bit mask used as</span></span>
 <span class="source-line"><span class="syntax-comment">-- both machine-readable level ID and source for display labels.</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> line <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         oi<span class="syntax-punctuation">.</span>quantity <span class="syntax-operator">*</span> oi<span class="syntax-punctuation">.</span>unit_price <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">-</span> oi<span class="syntax-punctuation">.</span>discount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> orders o</span>
-<span class="source-line">  <span class="syntax-keyword">JOIN</span> customers <span class="syntax-keyword">c</span> <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span></span>
-<span class="source-line">  <span class="syntax-keyword">JOIN</span> order_items oi <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span></span>
-<span class="source-line">  <span class="syntax-keyword">JOIN</span> products p <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>product_id<span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">GROUPING</span><span class="syntax-punctuation">(</span>country<span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> level_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">GROUPING</span><span class="syntax-punctuation">(</span>country<span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">)</span></span>
-<span class="source-line">         <span class="syntax-keyword">WHEN</span> <span class="syntax-number">0</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;country/category detail&#x27;</span></span>
-<span class="source-line">         <span class="syntax-keyword">WHEN</span> <span class="syntax-number">1</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;country subtotal&#x27;</span></span>
-<span class="source-line">         <span class="syntax-keyword">WHEN</span> <span class="syntax-number">3</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;grand total&#x27;</span></span>
-<span class="source-line">       <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> level_name<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       country<span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">,</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> line</span>
-<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">ROLLUP</span> <span class="syntax-punctuation">(</span>country<span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> level_id<span class="syntax-punctuation">,</span> country<span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    oi<span class="syntax-punctuation">.</span>quantity <span class="syntax-operator">*</span> oi<span class="syntax-punctuation">.</span>unit_price <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">-</span> oi<span class="syntax-punctuation">.</span>discount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    orders o</span>
+<span class="source-line">    <span class="syntax-keyword">JOIN</span> customers <span class="syntax-keyword">c</span> <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">JOIN</span> order_items oi <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">JOIN</span> products p <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>product_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-keyword">GROUPING</span> <span class="syntax-punctuation">(</span>country<span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> level_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">GROUPING</span> <span class="syntax-punctuation">(</span>country<span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">WHEN</span> <span class="syntax-number">0</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;country/category detail&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">WHEN</span> <span class="syntax-number">1</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;country subtotal&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">WHEN</span> <span class="syntax-number">3</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;grand total&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> level_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>revenue<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  line</span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  <span class="syntax-keyword">ROLLUP</span> <span class="syntax-punctuation">(</span>country<span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  level_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  category<span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 5: ROW_NUMBER and product_id as the final sort key guarantee no more</span></span>
 <span class="source-line"><span class="syntax-comment">-- than five deterministic products per group even when revenue ties.</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> revenue <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>name<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>quantity <span class="syntax-operator">*</span> oi<span class="syntax-punctuation">.</span>unit_price <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">-</span> oi<span class="syntax-punctuation">.</span>discount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> orders o</span>
-<span class="source-line">  <span class="syntax-keyword">JOIN</span> customers <span class="syntax-keyword">c</span> <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span></span>
-<span class="source-line">  <span class="syntax-keyword">JOIN</span> order_items oi <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span></span>
-<span class="source-line">  <span class="syntax-keyword">JOIN</span> products p <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>product_id<span class="syntax-punctuation">)</span></span>
-<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>name</span>
-<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> ranked <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> ROW_NUMBER<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span></span>
-<span class="source-line">    PARTITION <span class="syntax-keyword">BY</span> country <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> revenue <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> product_id</span>
-<span class="source-line">  <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">position</span></span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> revenue</span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    p<span class="syntax-punctuation">.</span>name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>quantity <span class="syntax-operator">*</span> oi<span class="syntax-punctuation">.</span>unit_price <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">-</span> oi<span class="syntax-punctuation">.</span>discount<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    orders o</span>
+<span class="source-line">    <span class="syntax-keyword">JOIN</span> customers <span class="syntax-keyword">c</span> <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">JOIN</span> order_items oi <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">JOIN</span> products p <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>product_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">    <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">.</span>name</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">ranked <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    ROW_NUMBER<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> OVER <span class="syntax-punctuation">(</span>PARTITION <span class="syntax-keyword">BY</span> country <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> revenue <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">      product_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">position</span></span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    revenue</span>
 <span class="source-line"><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> ranked <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">position</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">5</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> country<span class="syntax-punctuation">,</span> <span class="syntax-keyword">position</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-operator">*</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  ranked</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  <span class="syntax-keyword">position</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">5</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">position</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 6: grouping flag and stored-member label are separate columns, so</span></span>
 <span class="source-line"><span class="syntax-comment">-- a real unknown value can never masquerade as the ALL subtotal.</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> <span class="syntax-keyword">GROUPING</span><span class="syntax-punctuation">(</span>country<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;ALL&#x27;</span></span>
-<span class="source-line">            <span class="syntax-keyword">ELSE</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>country<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;(unknown member)&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> display_country<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">GROUPING</span><span class="syntax-punctuation">(</span>country<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> is_generated_total<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> customers</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> customers</span>
-<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">GROUPING</span> <span class="syntax-keyword">SETS</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>country<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> is_generated_total<span class="syntax-punctuation">,</span> display_country<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> <span class="syntax-keyword">GROUPING</span> <span class="syntax-punctuation">(</span>country<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">1</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;ALL&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">ELSE</span></span>
+<span class="source-line">    <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>country<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;(unknown member)&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> display_country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">GROUPING</span> <span class="syntax-punctuation">(</span>country<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> is_generated_total<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> customers</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  customers</span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  <span class="syntax-keyword">GROUPING</span> <span class="syntax-keyword">SETS</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>country<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  is_generated_total<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  display_country<span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>
       </section>
 

@@ -20,4 +20,6 @@
 // Exercise 6: Defend the finished analysis and its evidence limits.
 // Expected: Explain data grain, cleaning, scales, aggregation, interactions and untested surfaces.
 
-throw new Error("Implement the six D3 practice tasks in your saved pad before claiming completion.");
+throw new Error(
+  "Implement the six D3 practice tasks in your saved pad before claiming completion.",
+);

@@ -652,97 +652,147 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line"><span class="syntax-comment">-- Topics: Slowly Changing Dimensions (Type 2) for customers/products</span></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> dwh<span class="syntax-punctuation">,</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Example SCD Type 2 upsert for dim_customer</span></span>
 <span class="source-line"><span class="syntax-comment">-- Assumption: source-of-truth is training.customers; we detect changes by comparing attributes</span></span>
 <span class="source-line"><span class="syntax-comment">-- Steps per changed business key:</span></span>
 <span class="source-line"><span class="syntax-comment">--   1) Close current row (set valid_to = today - 1, is_current = false)</span></span>
 <span class="source-line"><span class="syntax-comment">--   2) Insert new row with updated attributes (valid_from = today, is_current = true)</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Simulate a change in the OLTP source (demo only)</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> changed_customers <span class="syntax-keyword">AS</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>segment <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;platinum&#x27;</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;gold&#x27;</span> <span class="syntax-keyword">ELSE</span> <span class="syntax-string">&#x27;platinum&#x27;</span> <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> segment</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> training<span class="syntax-punctuation">.</span>customers <span class="syntax-keyword">c</span></span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>segment <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;platinum&#x27;</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;gold&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">ELSE</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;platinum&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> segment</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  training<span class="syntax-punctuation">.</span>customers <span class="syntax-keyword">c</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id</span>
 <span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">10</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Detect current rows that differ from source attributes</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> current_dim <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> dc<span class="syntax-punctuation">.</span><span class="syntax-operator">*</span></span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> dim_customer dc</span>
-<span class="source-line">  <span class="syntax-keyword">WHERE</span> dc<span class="syntax-punctuation">.</span>is_current</span>
-<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> diffs <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> s<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         s<span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         s<span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span></span>
-<span class="source-line">         s<span class="syntax-punctuation">.</span>segment</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> changed_customers s</span>
-<span class="source-line">  <span class="syntax-keyword">JOIN</span> current_dim dc <span class="syntax-keyword">ON</span> dc<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> s<span class="syntax-punctuation">.</span>customer_id</span>
-<span class="source-line">  <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>dc<span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">     <span class="syntax-keyword">OR</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span>   <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>dc<span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">     <span class="syntax-keyword">OR</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>segment<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span>   <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>dc<span class="syntax-punctuation">.</span>segment<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> closed <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">UPDATE</span> dim_customer dc</span>
-<span class="source-line">  <span class="syntax-keyword">SET</span> valid_to <span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_DATE</span> <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      is_current <span class="syntax-operator">=</span> <span class="syntax-keyword">FALSE</span></span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> diffs d</span>
-<span class="source-line">  <span class="syntax-keyword">WHERE</span> dc<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> d<span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    dc<span class="syntax-punctuation">.</span><span class="syntax-operator">*</span></span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    dim_customer dc</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">    dc<span class="syntax-punctuation">.</span>is_current</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">diffs <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    s<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    s<span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    s<span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    s<span class="syntax-punctuation">.</span>segment</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    changed_customers s</span>
+<span class="source-line">    <span class="syntax-keyword">JOIN</span> current_dim dc <span class="syntax-keyword">ON</span> dc<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> s<span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">    <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>dc<span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">OR</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>dc<span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">OR</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>segment<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>dc<span class="syntax-punctuation">.</span>segment<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">closed <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">UPDATE</span></span>
+<span class="source-line">    dim_customer dc</span>
+<span class="source-line">  <span class="syntax-keyword">SET</span></span>
+<span class="source-line">    valid_to <span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_DATE</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    is_current <span class="syntax-operator">=</span> <span class="syntax-keyword">FALSE</span></span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    diffs d</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">    dc<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> d<span class="syntax-punctuation">.</span>customer_id</span>
 <span class="source-line">    <span class="syntax-keyword">AND</span> dc<span class="syntax-punctuation">.</span>is_current</span>
-<span class="source-line">  RETURNING dc<span class="syntax-punctuation">.</span>customer_id</span>
-<span class="source-line"><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> dim_customer<span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">,</span> full_name<span class="syntax-punctuation">,</span> country<span class="syntax-punctuation">,</span> segment<span class="syntax-punctuation">,</span> valid_from<span class="syntax-punctuation">,</span> valid_to<span class="syntax-punctuation">,</span> is_current<span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> d<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> d<span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span> d<span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span> d<span class="syntax-punctuation">.</span>segment<span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_DATE</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">TRUE</span></span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> diffs d<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line">  RETURNING</span>
+<span class="source-line">    dc<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> dim_customer <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">,</span> full_name<span class="syntax-punctuation">,</span> country<span class="syntax-punctuation">,</span> segment<span class="syntax-punctuation">,</span> valid_from<span class="syntax-punctuation">,</span> valid_to<span class="syntax-punctuation">,</span> is_current<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  d<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  d<span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  d<span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  d<span class="syntax-punctuation">.</span>segment<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">CURRENT_DATE</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">TRUE</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  diffs d<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Verify multiple versions per customer</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">versions</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">MIN</span><span class="syntax-punctuation">(</span>valid_from<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> first_seen<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">MAX</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>valid_to<span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_DATE</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> last_seen</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> dim_customer</span>
-<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> customer_id</span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">versions</span> <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> customer_id</span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">versions</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">MIN</span><span class="syntax-punctuation">(</span>valid_from<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> first_seen<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">MAX</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>valid_to<span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_DATE</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> last_seen</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  dim_customer</span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  customer_id</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  <span class="syntax-keyword">versions</span> <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  customer_id</span>
 <span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">10</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- SCD Type 2 for dim_product (similar pattern)</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> changed_products <span class="syntax-keyword">AS</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       p<span class="syntax-punctuation">.</span>name<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       round<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">.</span>price <span class="syntax-operator">*</span> <span class="syntax-number">1</span><span class="syntax-punctuation">.</span><span class="syntax-number">05</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> price<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       p<span class="syntax-punctuation">.</span>cost</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> training<span class="syntax-punctuation">.</span>products p</span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>product_id</span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span>name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  round<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">.</span>price <span class="syntax-operator">*</span> <span class="syntax-number">1</span><span class="syntax-punctuation">.</span><span class="syntax-number">05</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> price<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span>cost</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  training<span class="syntax-punctuation">.</span>products p</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span>product_id</span>
 <span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">10</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> current_p <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">FROM</span> dim_product <span class="syntax-keyword">WHERE</span> is_current</span>
-<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> diffs <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> s<span class="syntax-punctuation">.</span><span class="syntax-operator">*</span></span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> changed_products s</span>
-<span class="source-line">  <span class="syntax-keyword">JOIN</span> current_p dp <span class="syntax-keyword">ON</span> dp<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> s<span class="syntax-punctuation">.</span>product_id</span>
-<span class="source-line">  <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>name<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span>     <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>dp<span class="syntax-punctuation">.</span>name<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">     <span class="syntax-keyword">OR</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>dp<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">     <span class="syntax-keyword">OR</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>price<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>     <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>dp<span class="syntax-punctuation">.</span>price<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">     <span class="syntax-keyword">OR</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>cost<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>      <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>dp<span class="syntax-punctuation">.</span>cost<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> close_p <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">UPDATE</span> dim_product dp</span>
-<span class="source-line">  <span class="syntax-keyword">SET</span> valid_to <span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_DATE</span> <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">      is_current <span class="syntax-operator">=</span> <span class="syntax-keyword">FALSE</span></span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> diffs d</span>
-<span class="source-line">  <span class="syntax-keyword">WHERE</span> dp<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> d<span class="syntax-punctuation">.</span>product_id</span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    <span class="syntax-operator">*</span></span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    dim_product</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">    is_current</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">diffs <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    s<span class="syntax-punctuation">.</span><span class="syntax-operator">*</span></span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    changed_products s</span>
+<span class="source-line">    <span class="syntax-keyword">JOIN</span> current_p dp <span class="syntax-keyword">ON</span> dp<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> s<span class="syntax-punctuation">.</span>product_id</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">    <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>name<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>dp<span class="syntax-punctuation">.</span>name<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">OR</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>dp<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">OR</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>price<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>dp<span class="syntax-punctuation">.</span>price<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">OR</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>cost<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">coalesce</span><span class="syntax-punctuation">(</span>dp<span class="syntax-punctuation">.</span>cost<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">close_p <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">UPDATE</span></span>
+<span class="source-line">    dim_product dp</span>
+<span class="source-line">  <span class="syntax-keyword">SET</span></span>
+<span class="source-line">    valid_to <span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_DATE</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    is_current <span class="syntax-operator">=</span> <span class="syntax-keyword">FALSE</span></span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    diffs d</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">    dp<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> d<span class="syntax-punctuation">.</span>product_id</span>
 <span class="source-line">    <span class="syntax-keyword">AND</span> dp<span class="syntax-punctuation">.</span>is_current</span>
-<span class="source-line">  RETURNING dp<span class="syntax-punctuation">.</span>product_id</span>
-<span class="source-line"><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> dim_product<span class="syntax-punctuation">(</span>product_id<span class="syntax-punctuation">,</span> name<span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">,</span> price<span class="syntax-punctuation">,</span> cost<span class="syntax-punctuation">,</span> valid_from<span class="syntax-punctuation">,</span> valid_to<span class="syntax-punctuation">,</span> is_current<span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> d<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span> d<span class="syntax-punctuation">.</span>name<span class="syntax-punctuation">,</span> d<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> d<span class="syntax-punctuation">.</span>price<span class="syntax-punctuation">,</span> d<span class="syntax-punctuation">.</span>cost<span class="syntax-punctuation">,</span> <span class="syntax-keyword">CURRENT_DATE</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">TRUE</span></span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> diffs d<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line">  RETURNING</span>
+<span class="source-line">    dp<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> dim_product <span class="syntax-punctuation">(</span>product_id<span class="syntax-punctuation">,</span> name<span class="syntax-punctuation">,</span> category<span class="syntax-punctuation">,</span> price<span class="syntax-punctuation">,</span> cost<span class="syntax-punctuation">,</span> valid_from<span class="syntax-punctuation">,</span> valid_to<span class="syntax-punctuation">,</span> is_current<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  d<span class="syntax-punctuation">.</span>product_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  d<span class="syntax-punctuation">.</span>name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  d<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  d<span class="syntax-punctuation">.</span>price<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  d<span class="syntax-punctuation">.</span>cost<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">CURRENT_DATE</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">TRUE</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  diffs d<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Fact table joins should point to is_current at load time; for historical facts you would key by date to choose appropriate SCD version.</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
 <span class="source-line"><span class="syntax-comment">-- 1. Implement SCD2 change capture keyed by date_key (choose version where valid_from &lt;= order_date &lt;= coalesce(valid_to,&#x27;infinity&#x27;)).</span></span>
 <span class="source-line"><span class="syntax-comment">--    Inputs: For sql-53 Exercise 1, read from `training.orders`, `training.order_items`, `dim_date`, `dim_customer`, and `dim_product`. Build the answer toward `order_id`, `order_item_id`, `date_key`, `customer_sk`, `product_sk`, `quantity`, `unit_price`, `discount`, and `amount`; keep `order_id` visible whenever the result has row-level grain.</span></span>
@@ -778,7 +828,6 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-53 Exercise 6, expected output: exactly one aggregate summary row. The final columns are `first_version`, and `ROLLBACK`.</span></span>
 <span class="source-line"><span class="syntax-comment">--    Verify: For sql-53 Exercise 6, evaluate each of `first_version`, and `ROLLBACK` in a separate control `SELECT` over `training.customers`, `dim_customer`, and `changed_customers`; require one final row and compare every value. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.</span></span>
 <span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-53 Exercise 6, select `customer_id` from `training.customers`, `dim_customer`, and `changed_customers` before adding derived columns.</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>
       </section>
@@ -1019,7 +1068,6 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-comment">--</span></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> dwh<span class="syntax-punctuation">,</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">DO</span> $require_day52$</span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">  <span class="syntax-keyword">IF</span> to_regclass<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;dwh.dim_customer&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span></span>
@@ -1027,7 +1075,6 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$require_day52$<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 2: audit metadata on both changing dimensions.</span></span>
 <span class="source-line"><span class="syntax-keyword">ALTER</span> <span class="syntax-keyword">TABLE</span> dim_customer</span>
 <span class="source-line">  <span class="syntax-keyword">ADD</span> <span class="syntax-keyword">COLUMN</span> updated_by <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-keyword">CURRENT_USER</span><span class="syntax-punctuation">,</span></span>
@@ -1035,120 +1082,152 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="source-line"><span class="syntax-keyword">ALTER</span> <span class="syntax-keyword">TABLE</span> dim_product</span>
 <span class="source-line">  <span class="syntax-keyword">ADD</span> <span class="syntax-keyword">COLUMN</span> updated_by <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-keyword">CURRENT_USER</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  <span class="syntax-keyword">ADD</span> <span class="syntax-keyword">COLUMN</span> updated_at timestamptz <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- A deterministic customer change effective 30 days ago.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> staged_customer_change <span class="syntax-keyword">AS</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       full_name<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       country<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> segment <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;gold&#x27;</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;silver&#x27;</span> <span class="syntax-keyword">ELSE</span> <span class="syntax-string">&#x27;gold&#x27;</span> <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> segment<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-punctuation">(</span><span class="syntax-keyword">CURRENT_DATE</span> <span class="syntax-operator">-</span> <span class="syntax-number">30</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> effective_date</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> dim_customer</span>
-<span class="source-line"><span class="syntax-keyword">WHERE</span> customer_id <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  full_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> segment <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;gold&#x27;</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;silver&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">ELSE</span></span>
+<span class="source-line">    <span class="syntax-string">&#x27;gold&#x27;</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> segment<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-keyword">CURRENT_DATE</span> <span class="syntax-operator">-</span><span class="syntax-number">30</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> effective_date</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  dim_customer</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  customer_id <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
 <span class="source-line">  <span class="syntax-keyword">AND</span> is_current<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
-<span class="source-line"><span class="syntax-keyword">UPDATE</span> dim_customer dc</span>
-<span class="source-line"><span class="syntax-keyword">SET</span> valid_to <span class="syntax-operator">=</span> s<span class="syntax-punctuation">.</span>effective_date <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">    is_current <span class="syntax-operator">=</span> <span class="syntax-keyword">FALSE</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">    updated_by <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;day53_solution&#x27;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">    updated_at <span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span></span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> staged_customer_change s</span>
-<span class="source-line"><span class="syntax-keyword">WHERE</span> dc<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> s<span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line"><span class="syntax-keyword">UPDATE</span></span>
+<span class="source-line">  dim_customer dc</span>
+<span class="source-line"><span class="syntax-keyword">SET</span></span>
+<span class="source-line">  valid_to <span class="syntax-operator">=</span> s<span class="syntax-punctuation">.</span>effective_date <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  is_current <span class="syntax-operator">=</span> <span class="syntax-keyword">FALSE</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  updated_by <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;day53_solution&#x27;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  updated_at <span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  staged_customer_change s</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  dc<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> s<span class="syntax-punctuation">.</span>customer_id</span>
 <span class="source-line">  <span class="syntax-keyword">AND</span> dc<span class="syntax-punctuation">.</span>is_current<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
-<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> dim_customer<span class="syntax-punctuation">(</span></span>
-<span class="source-line">  customer_id<span class="syntax-punctuation">,</span> full_name<span class="syntax-punctuation">,</span> country<span class="syntax-punctuation">,</span> segment<span class="syntax-punctuation">,</span> country_sk<span class="syntax-punctuation">,</span></span>
-<span class="source-line">  valid_from<span class="syntax-punctuation">,</span> valid_to<span class="syntax-punctuation">,</span> is_current<span class="syntax-punctuation">,</span> updated_by<span class="syntax-punctuation">,</span> updated_at</span>
-<span class="source-line"><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> s<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       s<span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       s<span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       s<span class="syntax-punctuation">.</span>segment<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       co<span class="syntax-punctuation">.</span>country_sk<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       s<span class="syntax-punctuation">.</span>effective_date<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">TRUE</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-string">&#x27;day53_solution&#x27;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">CURRENT_TIMESTAMP</span></span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> staged_customer_change s</span>
-<span class="source-line"><span class="syntax-keyword">JOIN</span> dim_country co <span class="syntax-keyword">ON</span> co<span class="syntax-punctuation">.</span>country_code <span class="syntax-operator">=</span> s<span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> dim_customer <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">,</span> full_name<span class="syntax-punctuation">,</span> country<span class="syntax-punctuation">,</span> segment<span class="syntax-punctuation">,</span> country_sk<span class="syntax-punctuation">,</span> valid_from<span class="syntax-punctuation">,</span> valid_to<span class="syntax-punctuation">,</span> is_current<span class="syntax-punctuation">,</span> updated_by<span class="syntax-punctuation">,</span> updated_at<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  s<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  s<span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  s<span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  s<span class="syntax-punctuation">.</span>segment<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  co<span class="syntax-punctuation">.</span>country_sk<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  s<span class="syntax-punctuation">.</span>effective_date<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">TRUE</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-string">&#x27;day53_solution&#x27;</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">CURRENT_TIMESTAMP</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  staged_customer_change s</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> dim_country co <span class="syntax-keyword">ON</span> co<span class="syntax-punctuation">.</span>country_code <span class="syntax-operator">=</span> s<span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 1: rebuild a fact-key mapping by choosing the dimension versions</span></span>
 <span class="source-line"><span class="syntax-comment">-- whose validity intervals contain each order date.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> fact_sales_temporal_solution <span class="syntax-keyword">AS</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       oi<span class="syntax-punctuation">.</span>order_item_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       dd<span class="syntax-punctuation">.</span>date_key<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       dc<span class="syntax-punctuation">.</span>customer_sk<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       dp<span class="syntax-punctuation">.</span>product_sk<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       oi<span class="syntax-punctuation">.</span>unit_price<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       oi<span class="syntax-punctuation">.</span>discount<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       oi<span class="syntax-punctuation">.</span>unit_price <span class="syntax-operator">*</span> oi<span class="syntax-punctuation">.</span>quantity <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">-</span> oi<span class="syntax-punctuation">.</span>discount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> amount</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> training<span class="syntax-punctuation">.</span>orders o</span>
-<span class="source-line"><span class="syntax-keyword">JOIN</span> training<span class="syntax-punctuation">.</span>order_items oi <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">JOIN</span> dim_date dd <span class="syntax-keyword">ON</span> dd<span class="syntax-punctuation">.</span>date_actual <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span></span>
-<span class="source-line"><span class="syntax-keyword">JOIN</span> dim_customer dc</span>
-<span class="source-line">  <span class="syntax-keyword">ON</span> dc<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>customer_id</span>
-<span class="source-line"> <span class="syntax-keyword">AND</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> dc<span class="syntax-punctuation">.</span>valid_from</span>
-<span class="source-line"> <span class="syntax-keyword">AND</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>dc<span class="syntax-punctuation">.</span>valid_to<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;infinity&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">JOIN</span> dim_product dp</span>
-<span class="source-line">  <span class="syntax-keyword">ON</span> dp<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>product_id</span>
-<span class="source-line"> <span class="syntax-keyword">AND</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> dp<span class="syntax-punctuation">.</span>valid_from</span>
-<span class="source-line"> <span class="syntax-keyword">AND</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>dp<span class="syntax-punctuation">.</span>valid_to<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;infinity&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> fact_sales_temporal_solution<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> mapped_fact_rows<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> training<span class="syntax-punctuation">.</span>order_items<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> source_item_rows<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> dim_customer <span class="syntax-keyword">WHERE</span> customer_id <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> customer_versions<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  oi<span class="syntax-punctuation">.</span>order_item_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  dd<span class="syntax-punctuation">.</span>date_key<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  dc<span class="syntax-punctuation">.</span>customer_sk<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  dp<span class="syntax-punctuation">.</span>product_sk<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  oi<span class="syntax-punctuation">.</span>unit_price<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  oi<span class="syntax-punctuation">.</span>discount<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  oi<span class="syntax-punctuation">.</span>unit_price <span class="syntax-operator">*</span> oi<span class="syntax-punctuation">.</span>quantity <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">-</span> oi<span class="syntax-punctuation">.</span>discount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> amount</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  training<span class="syntax-punctuation">.</span>orders o</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> training<span class="syntax-punctuation">.</span>order_items oi <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> dim_date dd <span class="syntax-keyword">ON</span> dd<span class="syntax-punctuation">.</span>date_actual <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span></span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> dim_customer dc <span class="syntax-keyword">ON</span> dc<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> dc<span class="syntax-punctuation">.</span>valid_from</span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>dc<span class="syntax-punctuation">.</span>valid_to<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;infinity&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> dim_product dp <span class="syntax-keyword">ON</span> dp<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>product_id</span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> dp<span class="syntax-punctuation">.</span>valid_from</span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> o<span class="syntax-punctuation">.</span>order_date<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>dp<span class="syntax-punctuation">.</span>valid_to<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;infinity&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">      <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">      fact_sales_temporal_solution<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> mapped_fact_rows<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">      <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">      training<span class="syntax-punctuation">.</span>order_items<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> source_item_rows<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-punctuation">(</span></span>
+<span class="source-line">    <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">      <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">      dim_customer</span>
+<span class="source-line">    <span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">      customer_id <span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> customer_versions<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 3: date-grain closed intervals cannot represent two ordered changes</span></span>
 <span class="source-line"><span class="syntax-comment">-- on one date without an invalid or overlapping range. Surface that limitation.</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span> valid_from<span class="syntax-punctuation">,</span> valid_to<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-punctuation">(</span>valid_to <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">AND</span> valid_to <span class="syntax-operator">&lt;</span> valid_from<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> invalid_range</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> dim_customer</span>
-<span class="source-line"><span class="syntax-keyword">WHERE</span> customer_id <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> valid_from<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  valid_from<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  valid_to<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-punctuation">(</span>valid_to <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> valid_to <span class="syntax-operator">&lt;</span> valid_from<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> invalid_range</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  dim_customer</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  customer_id <span class="syntax-operator">=</span> <span class="syntax-number">1</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  valid_from<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 4: each pair is compared once. Inclusive validity ranges overlap</span></span>
 <span class="source-line"><span class="syntax-comment">-- when neither ends before the other begins.</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> a<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       a<span class="syntax-punctuation">.</span>customer_sk <span class="syntax-keyword">AS</span> version_a<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       b<span class="syntax-punctuation">.</span>customer_sk <span class="syntax-keyword">AS</span> version_b<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       a<span class="syntax-punctuation">.</span>valid_from <span class="syntax-keyword">AS</span> a_from<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       a<span class="syntax-punctuation">.</span>valid_to <span class="syntax-keyword">AS</span> a_to<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       b<span class="syntax-punctuation">.</span>valid_from <span class="syntax-keyword">AS</span> b_from<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       b<span class="syntax-punctuation">.</span>valid_to <span class="syntax-keyword">AS</span> b_to</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> dim_customer a</span>
-<span class="source-line"><span class="syntax-keyword">JOIN</span> dim_customer b</span>
-<span class="source-line">  <span class="syntax-keyword">ON</span> b<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> a<span class="syntax-punctuation">.</span>customer_id</span>
-<span class="source-line"> <span class="syntax-keyword">AND</span> b<span class="syntax-punctuation">.</span>customer_sk <span class="syntax-operator">&gt;</span> a<span class="syntax-punctuation">.</span>customer_sk</span>
-<span class="source-line"> <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span>valid_from <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>valid_to<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;infinity&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line"> <span class="syntax-keyword">AND</span> b<span class="syntax-punctuation">.</span>valid_from <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span>valid_to<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;infinity&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> a<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span> version_a<span class="syntax-punctuation">,</span> version_b<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  a<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  a<span class="syntax-punctuation">.</span>customer_sk <span class="syntax-keyword">AS</span> version_a<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  b<span class="syntax-punctuation">.</span>customer_sk <span class="syntax-keyword">AS</span> version_b<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  a<span class="syntax-punctuation">.</span>valid_from <span class="syntax-keyword">AS</span> a_from<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  a<span class="syntax-punctuation">.</span>valid_to <span class="syntax-keyword">AS</span> a_to<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  b<span class="syntax-punctuation">.</span>valid_from <span class="syntax-keyword">AS</span> b_from<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  b<span class="syntax-punctuation">.</span>valid_to <span class="syntax-keyword">AS</span> b_to</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  dim_customer a</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> dim_customer b <span class="syntax-keyword">ON</span> b<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> a<span class="syntax-punctuation">.</span>customer_id</span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> b<span class="syntax-punctuation">.</span>customer_sk <span class="syntax-operator">&gt;</span> a<span class="syntax-punctuation">.</span>customer_sk</span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> a<span class="syntax-punctuation">.</span>valid_from <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">.</span>valid_to<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;infinity&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> b<span class="syntax-punctuation">.</span>valid_from <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span>valid_to<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;infinity&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">date</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">    a<span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    version_a<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    version_b<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 5: replay the SAME desired state used by the first application.</span></span>
 <span class="source-line"><span class="syntax-comment">-- Comparing to training.customers here would be wrong: Exercise 2 deliberately</span></span>
 <span class="source-line"><span class="syntax-comment">-- changed the segment only in staged_customer_change and dim_customer.</span></span>
 <span class="source-line"><span class="syntax-keyword">WITH</span> desired_customer_state <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">  <span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span> full_name<span class="syntax-punctuation">,</span> country<span class="syntax-punctuation">,</span> segment</span>
-<span class="source-line">  <span class="syntax-keyword">FROM</span> staged_customer_change</span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">    customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    full_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    country<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    segment</span>
+<span class="source-line">  <span class="syntax-keyword">FROM</span></span>
+<span class="source-line">    staged_customer_change</span>
 <span class="source-line"><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> unchanged_rows_that_would_version</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> dim_customer dc</span>
-<span class="source-line"><span class="syntax-keyword">JOIN</span> desired_customer_state desired <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">WHERE</span> dc<span class="syntax-punctuation">.</span>is_current</span>
-<span class="source-line">  <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span></span>
-<span class="source-line">    dc<span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> desired<span class="syntax-punctuation">.</span>full_name</span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> unchanged_rows_that_would_version</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  dim_customer dc</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> desired_customer_state desired <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>customer_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  dc<span class="syntax-punctuation">.</span>is_current</span>
+<span class="source-line">  <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span>dc<span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> desired<span class="syntax-punctuation">.</span>full_name</span>
 <span class="source-line">    <span class="syntax-keyword">OR</span> dc<span class="syntax-punctuation">.</span>country <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> desired<span class="syntax-punctuation">.</span>country</span>
-<span class="source-line">    <span class="syntax-keyword">OR</span> dc<span class="syntax-punctuation">.</span>segment <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> desired<span class="syntax-punctuation">.</span>segment</span>
-<span class="source-line">  <span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">OR</span> dc<span class="syntax-punctuation">.</span>segment <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> desired<span class="syntax-punctuation">.</span>segment<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 6: timestamp-effective ranges support same-day ordering, but require</span></span>
 <span class="source-line"><span class="syntax-comment">-- source effective timestamps (or a source sequence), not load time guesses.</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;[2026-01-15 09:00+00,2026-01-15 12:00+00)&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>tstzrange</span>
-<span class="source-line">         <span class="syntax-keyword">AS</span> first_version<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-string">&#x27;[2026-01-15 12:00+00,infinity)&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>tstzrange <span class="syntax-keyword">AS</span> second_version<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-string">&#x27;[2026-01-15 09:00+00,2026-01-15 12:00+00)&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>tstzrange <span class="syntax-keyword">AS</span> first_version<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-string">&#x27;[2026-01-15 12:00+00,infinity)&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>tstzrange <span class="syntax-keyword">AS</span> second_version<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>
       </section>

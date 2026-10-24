@@ -1,5 +1,13 @@
-enum Outcome { Ready(u32), Failed(String) }
-fn render(value: &Outcome) -> String { match value { Outcome::Ready(count) => format!("count:{count}"), Outcome::Failed(reason) => format!("error:{reason}") } }
+enum Outcome {
+    Ready(u32),
+    Failed(String),
+}
+fn render(value: &Outcome) -> String {
+    match value {
+        Outcome::Ready(count) => format!("count:{count}"),
+        Outcome::Failed(reason) => format!("error:{reason}"),
+    }
+}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {

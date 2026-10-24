@@ -30,17 +30,17 @@
 #include <variant>
 #include <vector>
 
-int add(int,int);
-int add(int a,int b) { return a+b; }
-int subtract_example(int a,int b) { return a-b; }
+int add(int, int);
+int add(int a, int b) { return a + b; }
+int subtract_example(int a, int b) { return a - b; }
 int main() {
-    assert(add(2,3)==5); assert(add(0,0)==0);
-    // Reference extension checks for the exercise changes.
-    assert(subtract_example(5,3)==2);
-    std::cout << "cpp-012 examples passed\n";
-    return 0;
+  assert(add(2, 3) == 5);
+  assert(add(0, 0) == 0);
+  // Reference extension checks for the exercise changes.
+  assert(subtract_example(5, 3) == 2);
+  std::cout << "cpp-012 examples passed\n";
+  return 0;
 }
-
 
 // Exercise 1: Separate declaration. Split add declaration, definition and caller using the supplied host-project recipe. Expected: math.hpp, math.cpp and main.cpp build one executable returning 5.
 // Exercise 2: Compile one object. Compile main.cpp with -c before linking. Expected: main.o exists even though the function body is in math.cpp.

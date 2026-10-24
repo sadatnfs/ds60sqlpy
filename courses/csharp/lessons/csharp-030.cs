@@ -8,10 +8,9 @@
 // Task 6: Design an operation receipt distinguishing cancelled waiting, confirmed cancellation and unknown outcome.
 using System;
 
-internal static class Program
-{
-    private static void Main()
-    {
-        throw new NotImplementedException("Implement your own lesson attempt before running.");
-    }
+internal static class Program {
+  private static void Main() {
+    throw new NotImplementedException(
+        "Implement your own lesson attempt before running.");
+  }
 }

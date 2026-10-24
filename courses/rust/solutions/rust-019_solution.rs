@@ -1,4 +1,10 @@
-fn longer<'a>(left: &'a str, right: &'a str) -> &'a str { if left.len() >= right.len() { left } else { right } }
+fn longer<'a>(left: &'a str, right: &'a str) -> &'a str {
+    if left.len() >= right.len() {
+        left
+    } else {
+        right
+    }
+}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
@@ -8,7 +14,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     {
-        let result = { let temporary = String::from("retained"); temporary.to_owned() };
+        let result = {
+            let temporary = String::from("retained");
+            temporary.to_owned()
+        };
         assert_eq!(result, "retained");
     }
     println!("rust-019: passed");

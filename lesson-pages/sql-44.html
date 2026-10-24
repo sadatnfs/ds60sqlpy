@@ -633,14 +633,23 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line"><span class="syntax-comment">--</span></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Active sessions</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> pid<span class="syntax-punctuation">,</span> usename<span class="syntax-punctuation">,</span> datname<span class="syntax-punctuation">,</span> <span class="syntax-keyword">state</span><span class="syntax-punctuation">,</span> query_start<span class="syntax-punctuation">,</span> NOW<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> query_start <span class="syntax-keyword">AS</span> running_for<span class="syntax-punctuation">,</span> <span class="syntax-keyword">left</span><span class="syntax-punctuation">(</span>query<span class="syntax-punctuation">,</span> <span class="syntax-number">120</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> query</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> pg_stat_activity</span>
-<span class="source-line"><span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">state</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;idle&#x27;</span></span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> running_for <span class="syntax-keyword">DESC</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pid<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  usename<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  datname<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">state</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  query_start<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  NOW<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> query_start <span class="syntax-keyword">AS</span> running_for<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">left</span> <span class="syntax-punctuation">(</span>query<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-number">120</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> query</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  pg_stat_activity</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  <span class="syntax-keyword">state</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;idle&#x27;</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  running_for <span class="syntax-keyword">DESC</span></span>
 <span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">20</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- pg_stat_statements has three relevant states:</span></span>
 <span class="source-line"><span class="syntax-comment">--   1. absent: its view does not exist;</span></span>
 <span class="source-line"><span class="syntax-comment">--   2. installed but unusable: the view exists, but the server was not started</span></span>
@@ -652,17 +661,21 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line"><span class="syntax-comment">-- FROM pg_stat_statements</span></span>
 <span class="source-line"><span class="syntax-comment">-- ORDER BY total_exec_time DESC</span></span>
 <span class="source-line"><span class="syntax-comment">-- LIMIT 20;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Slow queries from logs are an ops topic; here we simulate using EXPLAIN ANALYZE</span></span>
 <span class="source-line"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-keyword">ANALYZE</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span> <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> qty</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> order_items oi</span>
-<span class="source-line"><span class="syntax-keyword">JOIN</span> products p <span class="syntax-keyword">ON</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>product_id</span>
-<span class="source-line"><span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">ON</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>order_id</span>
-<span class="source-line"><span class="syntax-keyword">WHERE</span> o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;180 days&#x27;</span></span>
-<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>category</span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> qty <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span>category<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> qty</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  order_items oi</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> products p <span class="syntax-keyword">ON</span> p<span class="syntax-punctuation">.</span>product_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>product_id</span>
+<span class="source-line">  <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">ON</span> o<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> oi<span class="syntax-punctuation">.</span>order_id</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> now<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;180 days&#x27;</span></span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  p<span class="syntax-punctuation">.</span>category</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  qty <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
 <span class="source-line"><span class="syntax-comment">-- 1. Identify the longest-running active queries on your system.</span></span>
 <span class="source-line"><span class="syntax-comment">--    Inputs: For sql-44 Exercise 1, take a read-only snapshot of `pg_stat_activity`. Build the answer toward `pid`, `usename`, `datname`, `state`, `runtime`, `wait_event_type`, `wait_event`, and `query`; keep `pid` visible because the output grain is one backend session.</span></span>
@@ -698,7 +711,6 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-44 Exercise 6, expected output: one row per `pid` whose state is `idle in transaction`. The final columns are `pid`, `usename`, `datname`, `transaction_age`, `wait_event_type`, and `wait_event`. The final order is `transaction_age DESC NULLS LAST`.</span></span>
 <span class="source-line"><span class="syntax-comment">--    Verify: For sql-44 Exercise 6, run an anti-check for any row whose state is not `idle in transaction`; require unique `pid`, non-NULL transaction starts, and nonnegative `transaction_age`, and compare every projected value with `pg_stat_activity`. When practical, open a controlled second `psql` session, run `BEGIN`, wait without committing, observe the session, then run `ROLLBACK` and confirm that it disappears from this result.</span></span>
 <span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-44 Exercise 6, inspect the source keys that survive `WHERE`; then check `transaction_age DESC NULLS LAST` before applying the row cap.</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>
       </section>
@@ -971,21 +983,24 @@ $optional_pg_stat_statements$<span class="syntax-punctuation">;</span>
 <span class="source-line"><span class="syntax-comment">--</span></span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 1: longest-running active statements, excluding this session.</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> pid<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       usename<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       datname<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">state</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">       clock_timestamp<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> query_start <span class="syntax-keyword">AS</span> runtime<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       wait_event_type<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       wait_event<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       <span class="syntax-keyword">left</span><span class="syntax-punctuation">(</span>query<span class="syntax-punctuation">,</span> <span class="syntax-number">160</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> query</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> pg_stat_activity</span>
-<span class="source-line"><span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">state</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;active&#x27;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pid<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  usename<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  datname<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">state</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  clock_timestamp<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> query_start <span class="syntax-keyword">AS</span> runtime<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  wait_event_type<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  wait_event<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">left</span> <span class="syntax-punctuation">(</span>query<span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-number">160</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> query</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  pg_stat_activity</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  <span class="syntax-keyword">state</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;active&#x27;</span></span>
 <span class="source-line">  <span class="syntax-keyword">AND</span> pid <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> pg_backend_pid<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> runtime <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  runtime <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 2: pg_stat_statements is optional. Dynamic SQL keeps this file</span></span>
 <span class="source-line"><span class="syntax-comment">-- runnable when the extension is not installed.</span></span>
 <span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> top_statement_stats <span class="syntax-punctuation">(</span></span>
@@ -1000,7 +1015,6 @@ $optional_pg_stat_statements$<span class="syntax-punctuation">;</span>
 <span class="source-line">  mean_exec_time double <span class="syntax-keyword">precision</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">  total_exec_time double <span class="syntax-keyword">precision</span></span>
 <span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">DO</span> $optional_pg_stat_statements$</span>
 <span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
 <span class="source-line">  <span class="syntax-keyword">IF</span> to_regclass<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;public.pg_stat_statements&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span></span>
@@ -1057,50 +1071,76 @@ $optional_pg_stat_statements$<span class="syntax-punctuation">;</span>
 <span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">END</span></span>
 <span class="source-line">$optional_pg_stat_statements$<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-operator">*</span></span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> top_statement_stats</span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> ranking<span class="syntax-punctuation">,</span> rank_position<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  <span class="syntax-operator">*</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  top_statement_stats</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  ranking<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  rank_position<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 3: transaction age can exceed statement age, especially for</span></span>
 <span class="source-line"><span class="syntax-comment">-- idle-in-transaction sessions.</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> pid<span class="syntax-punctuation">,</span> usename<span class="syntax-punctuation">,</span> <span class="syntax-keyword">state</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">       clock_timestamp<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> xact_start <span class="syntax-keyword">AS</span> transaction_age<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       clock_timestamp<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> query_start <span class="syntax-keyword">AS</span> statement_age</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> pg_stat_activity</span>
-<span class="source-line"><span class="syntax-keyword">WHERE</span> pid <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> pg_backend_pid<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pid<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  usename<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">state</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  clock_timestamp<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> xact_start <span class="syntax-keyword">AS</span> transaction_age<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  clock_timestamp<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> query_start <span class="syntax-keyword">AS</span> statement_age</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  pg_stat_activity</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  pid <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> pg_backend_pid<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line">  <span class="syntax-keyword">AND</span> <span class="syntax-keyword">state</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;idle&#x27;</span></span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> transaction_age <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  transaction_age <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 4: aggregate rather than exposing full statement text.</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> datname<span class="syntax-punctuation">,</span> usename<span class="syntax-punctuation">,</span> <span class="syntax-keyword">state</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> connections</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> pg_stat_activity</span>
-<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> datname<span class="syntax-punctuation">,</span> usename<span class="syntax-punctuation">,</span> <span class="syntax-keyword">state</span></span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> datname<span class="syntax-punctuation">,</span> usename<span class="syntax-punctuation">,</span> <span class="syntax-keyword">state</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  datname<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  usename<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">state</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> connections</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  pg_stat_activity</span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  datname<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  usename<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">state</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  datname<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  usename<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-keyword">state</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 5: retain both rankings. Mean identifies costly calls; total time</span></span>
 <span class="source-line"><span class="syntax-comment">-- captures cumulative workload impact.</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> ranking<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       rank_position<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       userid<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       dbid<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       toplevel<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       queryid<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       query<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       calls<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       mean_exec_time<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       total_exec_time</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> top_statement_stats</span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> ranking<span class="syntax-punctuation">,</span> rank_position<span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  ranking<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  rank_position<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  userid<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  dbid<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  toplevel<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  queryid<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  query<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  calls<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  mean_exec_time<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  total_exec_time</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  top_statement_stats</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  ranking<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  rank_position<span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">-- Exercise 6: this is diagnostic only; do not cancel or terminate sessions.</span></span>
-<span class="source-line"><span class="syntax-keyword">SELECT</span> pid<span class="syntax-punctuation">,</span> usename<span class="syntax-punctuation">,</span> datname<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       clock_timestamp<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> xact_start <span class="syntax-keyword">AS</span> transaction_age<span class="syntax-punctuation">,</span></span>
-<span class="source-line">       wait_event_type<span class="syntax-punctuation">,</span> wait_event</span>
-<span class="source-line"><span class="syntax-keyword">FROM</span> pg_stat_activity</span>
-<span class="source-line"><span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">state</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;idle in transaction&#x27;</span></span>
-<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> transaction_age <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">;</span></span>
-<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span></span>
+<span class="source-line">  pid<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  usename<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  datname<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  clock_timestamp<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> xact_start <span class="syntax-keyword">AS</span> transaction_age<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  wait_event_type<span class="syntax-punctuation">,</span></span>
+<span class="source-line">  wait_event</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span></span>
+<span class="source-line">  pg_stat_activity</span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span></span>
+<span class="source-line">  <span class="syntax-keyword">state</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;idle in transaction&#x27;</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span></span>
+<span class="source-line">  transaction_age <span class="syntax-keyword">DESC</span> NULLS <span class="syntax-keyword">LAST</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"></span></code></pre></div>
       </section>

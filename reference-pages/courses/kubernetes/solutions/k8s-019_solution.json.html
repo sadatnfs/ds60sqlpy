@@ -237,11 +237,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">                <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;observer&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">                <span class="syntax-tag">&quot;image&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;ds60sqlpy-k8s-fixture:0.2.0&quot;</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">                <span class="syntax-tag">&quot;imagePullPolicy&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;Never&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">                <span class="syntax-tag">&quot;command&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
-<span class="source-line">                  <span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">                  <span class="syntax-string">&quot;-u&quot;</span><span class="syntax-punctuation">,</span></span>
-<span class="source-line">                  <span class="syntax-string">&quot;/lesson/app.py&quot;</span></span>
-<span class="source-line">                <span class="syntax-punctuation">],</span></span>
+<span class="source-line">                <span class="syntax-tag">&quot;command&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;python&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;-u&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;/lesson/app.py&quot;</span><span class="syntax-punctuation">],</span></span>
 <span class="source-line">                <span class="syntax-tag">&quot;env&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
 <span class="source-line">                  <span class="syntax-punctuation">{</span></span>
 <span class="source-line">                    <span class="syntax-tag">&quot;name&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;SYNTHETIC_MARKER&quot;</span><span class="syntax-punctuation">,</span></span>
@@ -280,9 +276,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">                  <span class="syntax-tag">&quot;allowPrivilegeEscalation&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">                  <span class="syntax-tag">&quot;readOnlyRootFilesystem&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">,</span></span>
 <span class="source-line">                  <span class="syntax-tag">&quot;capabilities&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>
-<span class="source-line">                    <span class="syntax-tag">&quot;drop&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span></span>
-<span class="source-line">                      <span class="syntax-string">&quot;ALL&quot;</span></span>
-<span class="source-line">                    <span class="syntax-punctuation">]</span></span>
+<span class="source-line">                    <span class="syntax-tag">&quot;drop&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;ALL&quot;</span><span class="syntax-punctuation">]</span></span>
 <span class="source-line">                  <span class="syntax-punctuation">}</span></span>
 <span class="source-line">                <span class="syntax-punctuation">},</span></span>
 <span class="source-line">                <span class="syntax-tag">&quot;readinessProbe&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span></span>

@@ -1,7 +1,7 @@
 import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
-import java.nio.file.{Files,Path,Paths}
+import java.nio.file.{Files, Path, Paths}
 import scala.jdk.CollectionConverters._
 
 object Main {
@@ -11,8 +11,8 @@ object Main {
     finally paths.close()
   }
   def sameBag(left: DataFrame, right: DataFrame): Boolean = {
-    val columns = Seq("id","day","amount","payload")
-    val a = left.select(columns.map(col):_*);val b = right.select(columns.map(col):_*)
+    val columns = Seq("id", "day", "amount", "payload")
+    val a = left.select(columns.map(col): _*); val b = right.select(columns.map(col): _*)
     a.exceptAll(b).count() == 0L && b.exceptAll(a).count() == 0L
   }
 
@@ -22,13 +22,13 @@ object Main {
   def filteredProduct(frame: DataFrame): DataFrame =
     throw new UnsupportedOperationException("Complete filteredProduct")
 
-  def scanEvidence(frame: DataFrame): Map[String,String] =
+  def scanEvidence(frame: DataFrame): Map[String, String] =
     throw new UnsupportedOperationException("Complete scanEvidence")
 
-  def fileInventory(path: String): (Int,Long) =
+  def fileInventory(path: String): (Int, Long) =
     throw new UnsupportedOperationException("Complete fileInventory")
 
-  def layoutReceipt(frame: DataFrame, path: String): (Int,Int,Int) =
+  def layoutReceipt(frame: DataFrame, path: String): (Int, Int, Int) =
     throw new UnsupportedOperationException("Complete layoutReceipt")
 
   def rejectExisting(source: DataFrame, path: String): Unit =
@@ -36,20 +36,45 @@ object Main {
 
   def main(args: Array[String]): Unit = {
     var ownedRoot: Path = null
-    val spark = SparkSession.builder().appName("ds60-spark-025").master("local[2]")
-      .config("spark.ui.enabled","false")
-      .config("spark.driver.host","127.0.0.1")
-      .config("spark.driver.bindAddress","127.0.0.1")
-      .config("spark.sql.shuffle.partitions","2")
-      .config("spark.sql.adaptive.enabled","false")
-      .config("spark.sql.ansi.enabled","true")
-      .config("spark.sql.session.timeZone","UTC").getOrCreate()
+    val spark = SparkSession
+      .builder()
+      .appName("ds60-spark-025")
+      .master("local[2]")
+      .config("spark.ui.enabled", "false")
+      .config("spark.driver.host", "127.0.0.1")
+      .config("spark.driver.bindAddress", "127.0.0.1")
+      .config("spark.sql.shuffle.partitions", "2")
+      .config("spark.sql.adaptive.enabled", "false")
+      .config("spark.sql.ansi.enabled", "true")
+      .config("spark.sql.session.timeZone", "UTC")
+      .getOrCreate()
     try {
       require(spark.sparkContext.master == "local[2]", "local-only course session")
       spark.sparkContext.setLogLevel("ERROR")
-      ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(),".ds60-spark-025-")
-      val schema = StructType(Seq(StructField("id",LongType,false),StructField("day",StringType,false),StructField("amount",LongType,false),StructField("payload",StringType,false)))
-      val source = spark.createDataFrame(spark.sparkContext.parallelize((0L until 2000L).map(id => Row(id,if(id%2L==0L) "even" else "odd",id*7L,"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")),4),schema)
+      ownedRoot =
+        Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(), ".ds60-spark-025-")
+      val schema = StructType(
+        Seq(
+          StructField("id", LongType, false),
+          StructField("day", StringType, false),
+          StructField("amount", LongType, false),
+          StructField("payload", StringType, false)
+        )
+      )
+      val source = spark.createDataFrame(
+        spark.sparkContext.parallelize(
+          (0L until 2000L).map(id =>
+            Row(
+              id,
+              if (id % 2L == 0L) "even" else "odd",
+              id * 7L,
+              "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+            )
+          ),
+          4
+        ),
+        schema
+      )
       val compactPath = ownedRoot.resolve("compact").toString
       val manyPath = ownedRoot.resolve("many").toString
       locally {
@@ -58,12 +83,15 @@ object Main {
         println("Explicit-schema source:2000 rows,total13993000")
       }
       locally {
-        val ids = (1990L until 2000L).filter(_%2L==0L)
-        assert(ids == Seq(1990L,1992L,1994L,1996L,1998L))
+        val ids = (1990L until 2000L).filter(_ % 2L == 0L)
+        assert(ids == Seq(1990L, 1992L, 1994L, 1996L, 1998L))
         println("Independent filtered identity oracle=" + ids)
       }
       println("spark-025: worked examples passed; six task implementations remain")
-    } finally { try { if(ownedRoot != null) deleteOwned(ownedRoot) } finally { spark.stop() } }
+    } finally {
+      try { if (ownedRoot != null) deleteOwned(ownedRoot) }
+      finally { spark.stop() }
+    }
   }
 }
 

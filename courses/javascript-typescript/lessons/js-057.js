@@ -20,4 +20,6 @@
 // Exercise 6: Design a two-chart coordination rule.
 // Expected: One shared selected-ID set drives both views.
 
-throw new Error("Implement the six D3 practice tasks in your saved pad before claiming completion.");
+throw new Error(
+  "Implement the six D3 practice tasks in your saved pad before claiming completion.",
+);

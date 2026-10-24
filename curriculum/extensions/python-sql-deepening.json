@@ -10,9 +10,7 @@
       "level": "intermediate",
       "phase": "Python data mechanics and algorithmic reasoning",
       "estimated_minutes": 150,
-      "prerequisites": [
-        "python-16"
-      ],
+      "prerequisites": ["python-16"],
       "lesson_path": "python/professional/lessons/py_numpy_01.py",
       "guide_path": "python/professional/companion-guides/py_numpy_01.md",
       "solution_paths": [
@@ -22,15 +20,7 @@
       "dependency_group": "data",
       "network": "offline",
       "runner": "python",
-      "topics": [
-        "numpy",
-        "memory",
-        "ownership",
-        "strides",
-        "and",
-        "safe",
-        "mutation"
-      ]
+      "topics": ["numpy", "memory", "ownership", "strides", "and", "safe", "mutation"]
     },
     {
       "id": "python-numpy-02",
@@ -40,9 +30,7 @@
       "level": "intermediate",
       "phase": "Python data mechanics and algorithmic reasoning",
       "estimated_minutes": 150,
-      "prerequisites": [
-        "python-numpy-01"
-      ],
+      "prerequisites": ["python-numpy-01"],
       "lesson_path": "python/professional/lessons/py_numpy_02.py",
       "guide_path": "python/professional/companion-guides/py_numpy_02.md",
       "solution_paths": [
@@ -52,14 +40,7 @@
       "dependency_group": "data",
       "network": "offline",
       "runner": "python",
-      "topics": [
-        "axes",
-        "broadcasting",
-        "and",
-        "batched",
-        "linear",
-        "algebra"
-      ]
+      "topics": ["axes", "broadcasting", "and", "batched", "linear", "algebra"]
     },
     {
       "id": "python-numpy-03",
@@ -69,9 +50,7 @@
       "level": "intermediate",
       "phase": "Python data mechanics and algorithmic reasoning",
       "estimated_minutes": 150,
-      "prerequisites": [
-        "python-numpy-02"
-      ],
+      "prerequisites": ["python-numpy-02"],
       "lesson_path": "python/professional/lessons/py_numpy_03.py",
       "guide_path": "python/professional/companion-guides/py_numpy_03.md",
       "solution_paths": [
@@ -81,14 +60,7 @@
       "dependency_group": "data",
       "network": "offline",
       "runner": "python",
-      "topics": [
-        "gather",
-        "scatter",
-        "masks",
-        "and",
-        "deterministic",
-        "selection"
-      ]
+      "topics": ["gather", "scatter", "masks", "and", "deterministic", "selection"]
     },
     {
       "id": "python-numpy-04",
@@ -98,9 +70,7 @@
       "level": "intermediate",
       "phase": "Python data mechanics and algorithmic reasoning",
       "estimated_minutes": 150,
-      "prerequisites": [
-        "python-numpy-03"
-      ],
+      "prerequisites": ["python-numpy-03"],
       "lesson_path": "python/professional/lessons/py_numpy_04.py",
       "guide_path": "python/professional/companion-guides/py_numpy_04.md",
       "solution_paths": [
@@ -110,15 +80,7 @@
       "dependency_group": "data",
       "network": "offline",
       "runner": "python",
-      "topics": [
-        "stable",
-        "numerical",
-        "computation",
-        "and",
-        "honest",
-        "error",
-        "bounds"
-      ]
+      "topics": ["stable", "numerical", "computation", "and", "honest", "error", "bounds"]
     },
     {
       "id": "python-pandas-01",
@@ -128,9 +90,7 @@
       "level": "intermediate",
       "phase": "Python data mechanics and algorithmic reasoning",
       "estimated_minutes": 150,
-      "prerequisites": [
-        "python-20"
-      ],
+      "prerequisites": ["python-20"],
       "lesson_path": "python/professional/lessons/py_pandas_01.py",
       "guide_path": "python/professional/companion-guides/py_pandas_01.md",
       "solution_paths": [
@@ -140,16 +100,7 @@
       "dependency_group": "data",
       "network": "offline",
       "runner": "python",
-      "topics": [
-        "pandas",
-        "label",
-        "alignment",
-        "nullable",
-        "logic",
-        "and",
-        "safe",
-        "assignment"
-      ]
+      "topics": ["pandas", "label", "alignment", "nullable", "logic", "and", "safe", "assignment"]
     },
     {
       "id": "python-pandas-02",
@@ -159,10 +110,7 @@
       "level": "intermediate",
       "phase": "Python data mechanics and algorithmic reasoning",
       "estimated_minutes": 150,
-      "prerequisites": [
-        "python-pandas-01",
-        "python-21"
-      ],
+      "prerequisites": ["python-pandas-01", "python-21"],
       "lesson_path": "python/professional/lessons/py_pandas_02.py",
       "guide_path": "python/professional/companion-guides/py_pandas_02.md",
       "solution_paths": [
@@ -172,14 +120,7 @@
       "dependency_group": "data",
       "network": "offline",
       "runner": "python",
-      "topics": [
-        "join",
-        "contracts",
-        "and",
-        "point-in-time",
-        "feature",
-        "lookup"
-      ]
+      "topics": ["join", "contracts", "and", "point-in-time", "feature", "lookup"]
     },
     {
       "id": "python-pandas-03",
@@ -189,9 +130,7 @@
       "level": "intermediate",
       "phase": "Python data mechanics and algorithmic reasoning",
       "estimated_minutes": 150,
-      "prerequisites": [
-        "python-pandas-02"
-      ],
+      "prerequisites": ["python-pandas-02"],
       "lesson_path": "python/professional/lessons/py_pandas_03.py",
       "guide_path": "python/professional/companion-guides/py_pandas_03.md",
       "solution_paths": [
@@ -201,15 +140,7 @@
       "dependency_group": "data",
       "network": "offline",
       "runner": "python",
-      "topics": [
-        "grouped",
-        "transforms",
-        "temporal",
-        "windows",
-        "and",
-        "session",
-        "boundaries"
-      ]
+      "topics": ["grouped", "transforms", "temporal", "windows", "and", "session", "boundaries"]
     },
     {
       "id": "python-pandas-04",
@@ -219,10 +150,7 @@
       "level": "intermediate",
       "phase": "Python data mechanics and algorithmic reasoning",
       "estimated_minutes": 150,
-      "prerequisites": [
-        "python-pandas-03",
-        "python-23"
-      ],
+      "prerequisites": ["python-pandas-03", "python-23"],
       "lesson_path": "python/professional/lessons/py_pandas_04.py",
       "guide_path": "python/professional/companion-guides/py_pandas_04.md",
       "solution_paths": [
@@ -232,15 +160,7 @@
       "dependency_group": "data",
       "network": "offline",
       "runner": "python",
-      "topics": [
-        "chunked",
-        "data",
-        "global",
-        "reductions",
-        "and",
-        "cross-batch",
-        "state"
-      ]
+      "topics": ["chunked", "data", "global", "reductions", "and", "cross-batch", "state"]
     },
     {
       "id": "python-algo-01",
@@ -250,10 +170,7 @@
       "level": "intermediate",
       "phase": "Python data mechanics and algorithmic reasoning",
       "estimated_minutes": 150,
-      "prerequisites": [
-        "python-06",
-        "python-10"
-      ],
+      "prerequisites": ["python-06", "python-10"],
       "lesson_path": "python/professional/lessons/py_algo_01.py",
       "guide_path": "python/professional/companion-guides/py_algo_01.md",
       "solution_paths": [
@@ -263,15 +180,7 @@
       "dependency_group": "core",
       "network": "offline",
       "runner": "python",
-      "topics": [
-        "algorithmic",
-        "cost",
-        "hash",
-        "indexes",
-        "and",
-        "duplicate-aware",
-        "matching"
-      ]
+      "topics": ["algorithmic", "cost", "hash", "indexes", "and", "duplicate-aware", "matching"]
     },
     {
       "id": "python-algo-02",
@@ -281,9 +190,7 @@
       "level": "intermediate",
       "phase": "Python data mechanics and algorithmic reasoning",
       "estimated_minutes": 150,
-      "prerequisites": [
-        "python-algo-01"
-      ],
+      "prerequisites": ["python-algo-01"],
       "lesson_path": "python/professional/lessons/py_algo_02.py",
       "guide_path": "python/professional/companion-guides/py_algo_02.md",
       "solution_paths": [
@@ -293,15 +200,7 @@
       "dependency_group": "core",
       "network": "offline",
       "runner": "python",
-      "topics": [
-        "stable",
-        "ordering",
-        "binary-search",
-        "boundaries",
-        "and",
-        "merge",
-        "algorithms"
-      ]
+      "topics": ["stable", "ordering", "binary-search", "boundaries", "and", "merge", "algorithms"]
     },
     {
       "id": "python-algo-03",
@@ -311,9 +210,7 @@
       "level": "intermediate",
       "phase": "Python data mechanics and algorithmic reasoning",
       "estimated_minutes": 150,
-      "prerequisites": [
-        "python-algo-02"
-      ],
+      "prerequisites": ["python-algo-02"],
       "lesson_path": "python/professional/lessons/py_algo_03.py",
       "guide_path": "python/professional/companion-guides/py_algo_03.md",
       "solution_paths": [
@@ -323,15 +220,7 @@
       "dependency_group": "core",
       "network": "offline",
       "runner": "python",
-      "topics": [
-        "graph",
-        "traversal",
-        "priority",
-        "queues",
-        "and",
-        "shortest-path",
-        "evidence"
-      ]
+      "topics": ["graph", "traversal", "priority", "queues", "and", "shortest-path", "evidence"]
     },
     {
       "id": "python-algo-04",
@@ -341,9 +230,7 @@
       "level": "intermediate",
       "phase": "Python data mechanics and algorithmic reasoning",
       "estimated_minutes": 150,
-      "prerequisites": [
-        "python-algo-03"
-      ],
+      "prerequisites": ["python-algo-03"],
       "lesson_path": "python/professional/lessons/py_algo_04.py",
       "guide_path": "python/professional/companion-guides/py_algo_04.md",
       "solution_paths": [
@@ -353,15 +240,7 @@
       "dependency_group": "core",
       "network": "offline",
       "runner": "python",
-      "topics": [
-        "dynamic",
-        "programming",
-        "state",
-        "design",
-        "and",
-        "reconstructable",
-        "decisions"
-      ]
+      "topics": ["dynamic", "programming", "state", "design", "and", "reconstructable", "decisions"]
     },
     {
       "id": "sql-deep-01",
@@ -371,10 +250,7 @@
       "level": "advanced",
       "phase": "SQL semantics, temporal metrics and correctness",
       "estimated_minutes": 150,
-      "prerequisites": [
-        "sql-09",
-        "sql-quality-01"
-      ],
+      "prerequisites": ["sql-09", "sql-quality-01"],
       "lesson_path": "sql/professional/lessons/sql_deep_01.sql",
       "guide_path": "sql/professional/companion-guides/sql_deep_01.md",
       "solution_paths": [
@@ -384,14 +260,7 @@
       "dependency_group": "core",
       "network": "offline",
       "runner": "sql",
-      "topics": [
-        "null-aware",
-        "quantification",
-        "anti-joins",
-        "and",
-        "relational",
-        "division"
-      ]
+      "topics": ["null-aware", "quantification", "anti-joins", "and", "relational", "division"]
     },
     {
       "id": "sql-deep-02",
@@ -401,10 +270,7 @@
       "level": "advanced",
       "phase": "SQL semantics, temporal metrics and correctness",
       "estimated_minutes": 150,
-      "prerequisites": [
-        "sql-quality-01",
-        "sql-analytics-01"
-      ],
+      "prerequisites": ["sql-quality-01", "sql-analytics-01"],
       "lesson_path": "sql/professional/lessons/sql_deep_02.sql",
       "guide_path": "sql/professional/companion-guides/sql_deep_02.md",
       "solution_paths": [
@@ -414,16 +280,7 @@
       "dependency_group": "core",
       "network": "offline",
       "runner": "sql",
-      "topics": [
-        "metric",
-        "algebra",
-        "across",
-        "grains",
-        "snapshots",
-        "and",
-        "weighted",
-        "bridges"
-      ]
+      "topics": ["metric", "algebra", "across", "grains", "snapshots", "and", "weighted", "bridges"]
     },
     {
       "id": "sql-deep-03",
@@ -433,10 +290,7 @@
       "level": "advanced",
       "phase": "SQL semantics, temporal metrics and correctness",
       "estimated_minutes": 150,
-      "prerequisites": [
-        "sql-22",
-        "sql-analytics-01"
-      ],
+      "prerequisites": ["sql-22", "sql-analytics-01"],
       "lesson_path": "sql/professional/lessons/sql_deep_03.sql",
       "guide_path": "sql/professional/companion-guides/sql_deep_03.md",
       "solution_paths": [
@@ -446,14 +300,7 @@
       "dependency_group": "core",
       "network": "offline",
       "runner": "sql",
-      "topics": [
-        "rows",
-        "range",
-        "groups",
-        "exclusions",
-        "and",
-        "sessionization"
-      ]
+      "topics": ["rows", "range", "groups", "exclusions", "and", "sessionization"]
     },
     {
       "id": "sql-deep-04",
@@ -463,10 +310,7 @@
       "level": "advanced",
       "phase": "SQL semantics, temporal metrics and correctness",
       "estimated_minutes": 150,
-      "prerequisites": [
-        "sql-24",
-        "sql-25"
-      ],
+      "prerequisites": ["sql-24", "sql-25"],
       "lesson_path": "sql/professional/lessons/sql_deep_04.sql",
       "guide_path": "sql/professional/companion-guides/sql_deep_04.md",
       "solution_paths": [
@@ -495,10 +339,7 @@
       "level": "advanced",
       "phase": "SQL semantics, temporal metrics and correctness",
       "estimated_minutes": 150,
-      "prerequisites": [
-        "sql-ops-01",
-        "sql-concurrency-01"
-      ],
+      "prerequisites": ["sql-ops-01", "sql-concurrency-01"],
       "lesson_path": "sql/professional/lessons/sql_deep_05.sql",
       "guide_path": "sql/professional/companion-guides/sql_deep_05.md",
       "solution_paths": [
@@ -527,11 +368,7 @@
       "level": "advanced",
       "phase": "SQL semantics, temporal metrics and correctness",
       "estimated_minutes": 150,
-      "prerequisites": [
-        "sql-analytics-01",
-        "sql-quality-01",
-        "sql-deep-03"
-      ],
+      "prerequisites": ["sql-analytics-01", "sql-quality-01", "sql-deep-03"],
       "lesson_path": "sql/professional/lessons/sql_deep_06.sql",
       "guide_path": "sql/professional/companion-guides/sql_deep_06.md",
       "solution_paths": [
@@ -556,17 +393,12 @@
     "python-data-mechanics": {
       "title": "NumPy and pandas data mechanics",
       "description": "Trace ownership, numerical stability, label alignment, temporal lookup and chunked reductions with exact evidence.",
-      "targets": [
-        "python-numpy-04",
-        "python-pandas-04"
-      ]
+      "targets": ["python-numpy-04", "python-pandas-04"]
     },
     "algorithmic-reasoning": {
       "title": "Algorithmic reasoning and reconstructable decisions",
       "description": "Progress from hash indexes and stable ordering to graph search and dynamic programming with checked counterexamples.",
-      "targets": [
-        "python-algo-04"
-      ]
+      "targets": ["python-algo-04"]
     },
     "sql-semantic-depth": {
       "title": "SQL semantics, temporal metrics and mutation evidence",

@@ -1,5 +1,21 @@
-struct Inventory { stock: u32 }
-impl Inventory { fn new(stock: u32) -> Self { Self { stock } } fn stock(&self) -> u32 { self.stock } fn reserve(&mut self, amount: u32) -> bool { if amount > self.stock { return false; } self.stock -= amount; true } }
+struct Inventory {
+    stock: u32,
+}
+impl Inventory {
+    fn new(stock: u32) -> Self {
+        Self { stock }
+    }
+    fn stock(&self) -> u32 {
+        self.stock
+    }
+    fn reserve(&mut self, amount: u32) -> bool {
+        if amount > self.stock {
+            return false;
+        }
+        self.stock -= amount;
+        true
+    }
+}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {

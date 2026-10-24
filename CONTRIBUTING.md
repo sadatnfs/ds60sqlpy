@@ -41,14 +41,14 @@ logs. Use UTF-8, repository-relative paths and the checked-in editor settings.
 
 Find the durable source before changing a generated artifact:
 
-| Work | Start here |
-| --- | --- |
-| Python, SQL or bridge lesson | Subject `AGENTS.md`, catalog builder and lesson artifacts |
-| New module or language | [Extension playbook](docs/curriculum-extension-playbook.md), [module contract](docs/implementation/ADDING_A_MODULE.md) |
-| Existing generated subject | Its `courses/<subject>/authoring/README.md` |
-| Browser interface | `src/ds60sqlpy/assets/classroom.*` and `classroom.py` |
-| Runtime adapter | `module_jobs.py`, `worker_operations.py`, profile Dockerfile and Compose |
-| Reader formatting | `lesson_reader.py`, `reader_math.py`, `reader_content.py` |
+| Work                         | Start here                                                                                                             |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Python, SQL or bridge lesson | Subject `AGENTS.md`, catalog builder and lesson artifacts                                                              |
+| New module or language       | [Extension playbook](docs/curriculum-extension-playbook.md), [module contract](docs/implementation/ADDING_A_MODULE.md) |
+| Existing generated subject   | Its `courses/<subject>/authoring/README.md`                                                                            |
+| Browser interface            | `src/ds60sqlpy/assets/classroom.*` and `classroom.py`                                                                  |
+| Runtime adapter              | `module_jobs.py`, `worker_operations.py`, profile Dockerfile and Compose                                               |
+| Reader formatting            | `lesson_reader.py`, `reader_math.py`, `reader_content.py`                                                              |
 
 Python implementation filenames are under `src/ds60sqlpy/`. The repository
 [add-learning-path skill](.agents/skills/add-learning-path/SKILL.md) provides a
@@ -123,6 +123,16 @@ The formatter builds its dedicated tool image on first use, with visible build
 logs, then reuses the local image. Use `./scripts/format-repo --build` after
 changing the toolchain or when deliberately rebuilding that image. It does not
 rebuild or restart classroom services or change their saved volumes.
+If the default npm registry is unreachable during tool-image preparation, set
+`DS60_FORMAT_NPM_REGISTRY` to a public HTTPS registry mirror for that build:
+
+```sh
+DS60_FORMAT_NPM_REGISTRY=https://registry.yarnpkg.com ./scripts/format-repo --build
+```
+
+Package integrity remains checked against the lockfile. The override accepts no
+embedded credentials or query parameters and applies only while building tools;
+formatting and lint checks themselves run without network access.
 
 Use `./scripts/format-repo --list` to inspect the actual coverage and
 `./scripts/format-repo --language python` to narrow an iteration. Repeat
@@ -137,6 +147,11 @@ checks and language syntax checks answer different questions; parser success is
 not compilation, runtime behavior or proof of lesson correctness. Keep the
 relevant tests and prepared-worker execution checks after linting. A new
 language needs a deliberate lint/validation adapter alongside its formatter.
+
+Markdown files are not passed through Prettier. Bare technical identifiers,
+inline code and ordinary teaching fences keep their authored spelling and
+spacing. Reviewed prose/math normalization and the explicitly owned statistics
+example synchronization below are separate steps.
 
 Formatting includes application code, notebooks, every supported language's
 executable lesson files, fixtures and authoring programs. Generated executable
@@ -276,3 +291,11 @@ Before submission, review the diff for unintended generated data, outputs,
 credentials, broken links and unrelated formatting. Follow repository review
 policy for commits and publication. Local image builds do not authorize pushing
 them to a registry.
+
+Complete Python examples in the statistics book are the one fence-synchronization
+exception: the full formatting command uses `scripts/sync_example_fences.py` to
+copy each manifest-declared, styled example into its matching chapter fence only
+after proving that the Python syntax trees and literal values agree. Other
+fences and teaching strings retain their authored content. SQL formatting
+preserves quoted values and entire dollar-quoted routine bodies exactly, and
+checks PostgreSQL syntax trees plus psql controls before writing.

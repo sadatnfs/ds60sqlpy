@@ -5,24 +5,33 @@
 #include <utility>
 #include <vector>
 namespace ds60 {
-long long positive_sum(const std::vector<int>&) { throw std::logic_error("Complete Exercise 2"); }
-bool replace_at(std::vector<int>&, std::size_t, int) { throw std::logic_error("Complete Exercise 3"); }
-std::optional<int> checked_read(const std::vector<int>&, long long) { throw std::logic_error("Complete Exercise 5"); }
-std::vector<int> nonnegative_copy(const std::vector<int>&) { throw std::logic_error("Complete Exercise 6"); }
+long long positive_sum(const std::vector<int> &) {
+  throw std::logic_error("Complete Exercise 2");
 }
+bool replace_at(std::vector<int> &, std::size_t, int) {
+  throw std::logic_error("Complete Exercise 3");
+}
+std::optional<int> checked_read(const std::vector<int> &, long long) {
+  throw std::logic_error("Complete Exercise 5");
+}
+std::vector<int> nonnegative_copy(const std::vector<int> &) {
+  throw std::logic_error("Complete Exercise 6");
+}
+} // namespace ds60
 int main() {
-    std::vector<int> original{4, 7, 9};
-    const auto copy = original;
-    original.at(0) = 5;
-    if (copy.at(0) != 4 || original.at(0) != 5) return 1;
-    std::cout << "copy=" << copy.at(0) << " original=" << original.at(0) << '\n';
-    try {
-        (void)original.at(original.size());
-        return 2;
-    } catch (const std::out_of_range&) {
-        std::cout << "bounds rejected\n";
-    }
-    return 0;
+  std::vector<int> original{4, 7, 9};
+  const auto copy = original;
+  original.at(0) = 5;
+  if (copy.at(0) != 4 || original.at(0) != 5)
+    return 1;
+  std::cout << "copy=" << copy.at(0) << " original=" << original.at(0) << '\n';
+  try {
+    (void)original.at(original.size());
+    return 2;
+  } catch (const std::out_of_range &) {
+    std::cout << "bounds rejected\n";
+  }
+  return 0;
 }
 // Exercise 1: Predict copy3 versus alias4 for values{3,8}, then retain an ownership trace.
 // Exercise 2: positive_sum reads at most10000 integers in[-1000000,1000000]; mixed result20 and large result10000000000.

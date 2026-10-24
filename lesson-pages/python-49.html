@@ -680,19 +680,19 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li>spaCy tokenization demo.</li>
 </ul></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> transformers <span class="syntax-keyword">import</span> pipeline</span>
-<span class="source-line">clf <span class="syntax-operator">=</span> pipeline<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">sentiment-analysis</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">clf<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">I love this course!</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> clf<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">This is terrible...</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line"></span></code></pre>
+<span class="source-line"></span>
+<span class="source-line">clf <span class="syntax-operator">=</span> pipeline<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">sentiment-analysis</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">clf<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">I love this course!</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> clf<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">This is terrible...</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> spacy</span>
+<span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># python -m spacy download en_core_web_sm (run once)</span></span>
 <span class="source-line"><span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
-<span class="source-line">    nlp <span class="syntax-operator">=</span> spacy<span class="syntax-operator">.</span>load<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">en_core_web_sm</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">    doc <span class="syntax-operator">=</span> nlp<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Natural Language Processing is fun.</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    nlp <span class="syntax-operator">=</span> spacy<span class="syntax-operator">.</span>load<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">en_core_web_sm</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    doc <span class="syntax-operator">=</span> nlp<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Natural Language Processing is fun.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
 <span class="source-line">    <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span>t<span class="syntax-operator">.</span>text<span class="syntax-punctuation">,</span> t<span class="syntax-operator">.</span>pos_<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> t <span class="syntax-operator">in</span> doc<span class="syntax-punctuation">]</span></span>
 <span class="source-line"><span class="syntax-keyword">except</span> OSError<span class="syntax-punctuation">:</span></span>
-<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Install spaCy model: python -m spacy download en_core_web_sm</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line"></span></code></pre>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Install spaCy model: python -m spacy download en_core_web_sm</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-4--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-4--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
 <p>Select the <code>Python (ds60sqlpy)</code> kernel, start at the first cell, and write each prediction before execution. Keep attempts in the provided scratch cell or new cells. Restart the kernel and run from the top before calling the work reproducible.</p>
@@ -1216,8 +1216,7 @@ doc <span class="syntax-operator">=</span> nlp<span class="syntax-punctuation">(
 <span class="source-line">    <span class="syntax-punctuation">)</span></span>
 <span class="source-line"></span>
 <span class="source-line">    trainer<span class="syntax-operator">.</span>train<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">    trainer<span class="syntax-operator">.</span>evaluate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line"></span></code></pre>
+<span class="source-line">    trainer<span class="syntax-operator">.</span>evaluate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><p>Line‑by‑line</p>
 <ul>
@@ -1287,8 +1286,7 @@ doc <span class="syntax-operator">=</span> nlp<span class="syntax-punctuation">(
 <span class="source-line">        class_weights<span class="syntax-operator">=</span>w<span class="syntax-punctuation">,</span></span>
 <span class="source-line">    <span class="syntax-punctuation">)</span></span>
 <span class="source-line">    trainer_weighted<span class="syntax-operator">.</span>train<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line">    trainer_weighted<span class="syntax-operator">.</span>evaluate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span>
-<span class="source-line"></span></code></pre>
+<span class="source-line">    trainer_weighted<span class="syntax-operator">.</span>evaluate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><p>Explanation</p>
 <ul>
@@ -1329,8 +1327,7 @@ doc <span class="syntax-operator">=</span> nlp<span class="syntax-punctuation">(
 <span class="source-line">doc <span class="syntax-operator">=</span> nlp<span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">)</span></span>
 <span class="source-line"><span class="syntax-keyword">for</span> mid<span class="syntax-punctuation">,</span> start<span class="syntax-punctuation">,</span> end <span class="syntax-operator">in</span> matcher<span class="syntax-punctuation">(</span>doc<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    span <span class="syntax-operator">=</span> doc<span class="syntax-punctuation">[</span>start<span class="syntax-punctuation">:</span>end<span class="syntax-punctuation">]</span></span>
-<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">MATCH:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> span<span class="syntax-operator">.</span>text<span class="syntax-punctuation">)</span></span>
-<span class="source-line"></span></code></pre>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">MATCH:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> span<span class="syntax-operator">.</span>text<span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><p>Line‑by‑line</p>
 <ul>

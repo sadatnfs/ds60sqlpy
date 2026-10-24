@@ -1,6 +1,18 @@
-trait Pricer { fn cost(&self, units: u32) -> u32; }
-struct FlatPrice(u32); impl Pricer for FlatPrice { fn cost(&self, units: u32) -> u32 { self.0 * units } }
-struct CappedPrice(u32, u32); impl Pricer for CappedPrice { fn cost(&self, units: u32) -> u32 { (self.0 * units).min(self.1) } }
+trait Pricer {
+    fn cost(&self, units: u32) -> u32;
+}
+struct FlatPrice(u32);
+impl Pricer for FlatPrice {
+    fn cost(&self, units: u32) -> u32 {
+        self.0 * units
+    }
+}
+struct CappedPrice(u32, u32);
+impl Pricer for CappedPrice {
+    fn cost(&self, units: u32) -> u32 {
+        (self.0 * units).min(self.1)
+    }
+}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {

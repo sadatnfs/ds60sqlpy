@@ -1,4 +1,8 @@
-mod domain { pub fn double(value: i32) -> i32 { value * 2 } }
+mod domain {
+    pub fn double(value: i32) -> i32 {
+        value * 2
+    }
+}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {

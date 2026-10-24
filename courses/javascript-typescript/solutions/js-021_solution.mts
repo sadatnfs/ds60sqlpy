@@ -1,17 +1,17 @@
-import { strict as assert } from 'node:assert';
-
-
+import { strict as assert } from "node:assert";
 
 export async function verify(): Promise<{ checks: number; status: string }> {
   // Exercise 1: Use structural compatibility
   {
-    function label(value: { id: string }): string { return value.id; }
-    const wider = { id: 'A', count: 2 };
-    assert.equal(label(wider), 'A');
+    function label(value: { id: string }): string {
+      return value.id;
+    }
+    const wider = { id: "A", count: 2 };
+    assert.equal(label(wider), "A");
     assert.equal(wider.count, 2);
     function negativeTypeCheck(): void {
       // @ts-expect-error A fresh literal is checked for excess properties.
-      label({ id: 'A', count: 2 });
+      label({ id: "A", count: 2 });
     }
     void negativeTypeCheck;
   }
@@ -32,7 +32,9 @@ export async function verify(): Promise<{ checks: number; status: string }> {
   // Exercise 3: Handle absent and zero-valued optional counts
   {
     type Options = { count?: number };
-    function count(options: Options): number { return options.count ?? 10; }
+    function count(options: Options): number {
+      return options.count ?? 10;
+    }
     assert.equal(count({}), 10);
     assert.equal(count({ count: 0 }), 0);
   }
@@ -41,10 +43,10 @@ export async function verify(): Promise<{ checks: number; status: string }> {
   {
     const absent: { count?: number } = {};
     const present: { count?: number } = { count: undefined };
-    assert.equal(Object.hasOwn(absent, 'count'), false);
-    assert.equal(Object.hasOwn(present, 'count'), true);
-    assert.equal(JSON.stringify(absent), '{}');
-    assert.equal(JSON.stringify(present), '{}');
+    assert.equal(Object.hasOwn(absent, "count"), false);
+    assert.equal(Object.hasOwn(present, "count"), true);
+    assert.equal(JSON.stringify(absent), "{}");
+    assert.equal(JSON.stringify(present), "{}");
   }
 
   // Exercise 5: Show shallow readonly and shallow freeze boundaries
@@ -59,7 +61,7 @@ export async function verify(): Promise<{ checks: number; status: string }> {
   // Exercise 6: Transform a readonly array without mutation
   {
     const values: readonly number[] = [1, 2];
-    const doubled = values.map(value => value * 2);
+    const doubled = values.map((value) => value * 2);
     assert.deepEqual(doubled, [2, 4]);
     assert.deepEqual(values, [1, 2]);
     function negativeTypeCheck(): void {

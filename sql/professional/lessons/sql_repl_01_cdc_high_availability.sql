@@ -19,132 +19,103 @@
 -- Target: PostgreSQL 16+
 -- Default path is one-database outbox/idempotency simulation plus read-only
 -- capability inspection. It creates no publication, subscription, or slot.
-
 \set ON_ERROR_STOP on
 \echo 'SQL-REPL-01: read-only replication capability summary'
 SELECT
-    current_database() AS database_name,
-    current_setting('wal_level') AS wal_level,
-    current_setting('max_wal_senders') AS max_wal_senders,
-    current_setting('max_replication_slots') AS max_replication_slots,
-    current_setting('hot_standby') AS hot_standby,
-    pg_catalog.pg_is_in_recovery() AS is_in_recovery;
+  current_database() AS database_name,
+  current_setting('wal_level') AS wal_level,
+  current_setting('max_wal_senders') AS max_wal_senders,
+  current_setting('max_replication_slots') AS max_replication_slots,
+  current_setting('hot_standby') AS hot_standby,
+  pg_catalog.pg_is_in_recovery() AS is_in_recovery;
 
 SELECT
-    (SELECT COUNT(*) FROM pg_catalog.pg_replication_slots) AS slot_count,
-    (
-        SELECT COUNT(*)
-        FROM pg_catalog.pg_replication_slots AS s
-        WHERE s.active
-    ) AS active_slot_count,
-    (SELECT COUNT(*) FROM pg_catalog.pg_publication) AS publication_count,
-    (SELECT COUNT(*) FROM pg_catalog.pg_subscription) AS subscription_count,
-    (SELECT COUNT(*) FROM pg_catalog.pg_stat_replication) AS sender_count,
-    (SELECT COUNT(*) FROM pg_catalog.pg_stat_wal_receiver) AS receiver_count;
+  (
+    SELECT
+      COUNT(*)
+    FROM
+      pg_catalog.pg_replication_slots) AS slot_count,
+  (
+    SELECT
+      COUNT(*)
+    FROM
+      pg_catalog.pg_replication_slots AS s
+    WHERE
+      s.active) AS active_slot_count,
+  (
+    SELECT
+      COUNT(*)
+    FROM
+      pg_catalog.pg_publication) AS publication_count,
+  (
+    SELECT
+      COUNT(*)
+    FROM
+      pg_catalog.pg_subscription) AS subscription_count,
+  (
+    SELECT
+      COUNT(*)
+    FROM
+      pg_catalog.pg_stat_replication) AS sender_count,
+  (
+    SELECT
+      COUNT(*)
+    FROM
+      pg_catalog.pg_stat_wal_receiver) AS receiver_count;
 
 \echo 'SQL-REPL-01: disposable transactional outbox lab'
 BEGIN;
 SET LOCAL search_path TO pg_catalog, public;
 CREATE SCHEMA pro_replication_lab;
-
 CREATE TABLE pro_replication_lab.orders (
-    order_key text PRIMARY KEY,
-    status text NOT NULL CHECK (status IN ('open', 'paid', 'cancelled')),
-    aggregate_version integer NOT NULL CHECK (aggregate_version > 0),
-    updated_at timestamptz NOT NULL
+  order_key text PRIMARY KEY,
+  status text NOT NULL CHECK (status IN ('open', 'paid', 'cancelled')),
+  aggregate_version integer NOT NULL CHECK (aggregate_version > 0),
+  updated_at timestamptz NOT NULL
 );
-
 CREATE TABLE pro_replication_lab.outbox_events (
-    event_id text PRIMARY KEY,
-    aggregate_type text NOT NULL,
-    aggregate_key text NOT NULL,
-    aggregate_version integer NOT NULL CHECK (aggregate_version > 0),
-    event_type text NOT NULL,
-    payload jsonb NOT NULL CHECK (jsonb_typeof(payload) = 'object'),
-    occurred_at timestamptz NOT NULL,
-    published_at timestamptz,
-    delivery_attempts integer NOT NULL DEFAULT 0 CHECK (delivery_attempts >= 0),
-    UNIQUE (aggregate_type, aggregate_key, aggregate_version)
+  event_id text PRIMARY KEY,
+  aggregate_type text NOT NULL,
+  aggregate_key text NOT NULL,
+  aggregate_version integer NOT NULL CHECK (aggregate_version > 0),
+  event_type text NOT NULL,
+  payload jsonb NOT NULL CHECK (jsonb_typeof(payload) = 'object'),
+  occurred_at timestamptz NOT NULL,
+  published_at timestamptz,
+  delivery_attempts integer NOT NULL DEFAULT 0 CHECK (delivery_attempts >= 0),
+  UNIQUE (aggregate_type, aggregate_key, aggregate_version)
 );
-
 CREATE TABLE pro_replication_lab.consumer_inbox (
-    consumer_name text NOT NULL,
-    event_id text NOT NULL,
-    accepted_at timestamptz NOT NULL DEFAULT clock_timestamp(),
-    payload_sha256 text NOT NULL CHECK (
-        payload_sha256 ~ '^[0-9a-f]{64}$'
-    ),
-    PRIMARY KEY (consumer_name, event_id)
+  consumer_name text NOT NULL,
+  event_id text NOT NULL,
+  accepted_at timestamptz NOT NULL DEFAULT clock_timestamp(),
+  payload_sha256 text NOT NULL CHECK (payload_sha256 ~ '^[0-9a-f]{64}$'),
+  PRIMARY KEY (consumer_name, event_id)
 );
-
 CREATE TABLE pro_replication_lab.projected_orders (
-    consumer_name text NOT NULL,
-    order_key text NOT NULL,
-    status text NOT NULL,
-    aggregate_version integer NOT NULL,
-    last_event_id text NOT NULL,
-    PRIMARY KEY (consumer_name, order_key)
+  consumer_name text NOT NULL,
+  order_key text NOT NULL,
+  status text NOT NULL,
+  aggregate_version integer NOT NULL,
+  last_event_id text NOT NULL,
+  PRIMARY KEY (consumer_name, order_key)
 );
-
 -- Business state and event are committed by the same database transaction.
-INSERT INTO pro_replication_lab.orders (
-    order_key, status, aggregate_version, updated_at
-)
-VALUES (
-    'ORD-100',
-    'open',
-    1,
-    TIMESTAMPTZ '2026-06-01 10:00:00+00'
-);
-
-INSERT INTO pro_replication_lab.outbox_events (
-    event_id,
-    aggregate_type,
-    aggregate_key,
-    aggregate_version,
-    event_type,
-    payload,
-    occurred_at
-)
-VALUES (
-    'EVT-100-v1',
-    'order',
-    'ORD-100',
-    1,
-    'order.opened',
-    '{"order_key":"ORD-100","status":"open"}',
-    TIMESTAMPTZ '2026-06-01 10:00:00+00'
-);
-
-UPDATE pro_replication_lab.orders AS o
-SET status = 'paid',
-    aggregate_version = 2,
-    updated_at = TIMESTAMPTZ '2026-06-01 10:05:00+00'
-WHERE o.order_key = 'ORD-100';
-
-INSERT INTO pro_replication_lab.outbox_events (
-    event_id,
-    aggregate_type,
-    aggregate_key,
-    aggregate_version,
-    event_type,
-    payload,
-    occurred_at
-)
-VALUES (
-    'EVT-100-v2',
-    'order',
-    'ORD-100',
-    2,
-    'order.paid',
-    '{"order_key":"ORD-100","status":"paid"}',
-    TIMESTAMPTZ '2026-06-01 10:05:00+00'
-);
-
-CREATE PROCEDURE pro_replication_lab.consume_outbox_batch(
-    p_consumer_name text,
-    p_batch_size integer
-)
+INSERT INTO pro_replication_lab.orders (order_key, status, aggregate_version, updated_at)
+  VALUES ('ORD-100', 'open', 1, TIMESTAMPTZ '2026-06-01 10:00:00+00');
+INSERT INTO pro_replication_lab.outbox_events (event_id, aggregate_type, aggregate_key, aggregate_version, event_type, payload, occurred_at)
+  VALUES ('EVT-100-v1', 'order', 'ORD-100', 1, 'order.opened', '{"order_key":"ORD-100","status":"open"}', TIMESTAMPTZ '2026-06-01 10:00:00+00');
+UPDATE
+  pro_replication_lab.orders AS o
+SET
+  status = 'paid',
+  aggregate_version = 2,
+  updated_at = TIMESTAMPTZ '2026-06-01 10:05:00+00'
+WHERE
+  o.order_key = 'ORD-100';
+INSERT INTO pro_replication_lab.outbox_events (event_id, aggregate_type, aggregate_key, aggregate_version, event_type, payload, occurred_at)
+  VALUES ('EVT-100-v2', 'order', 'ORD-100', 2, 'order.paid', '{"order_key":"ORD-100","status":"paid"}', TIMESTAMPTZ '2026-06-01 10:05:00+00');
+CREATE PROCEDURE pro_replication_lab.consume_outbox_batch (p_consumer_name text, p_batch_size integer)
 LANGUAGE plpgsql
 SECURITY INVOKER
 AS $procedure$
@@ -232,19 +203,22 @@ BEGIN
         WHERE oe.event_id = event_row.event_id;
     END LOOP;
 END
-$procedure$;
-
+$procedure$
+;
 \echo 'First at-least-once delivery: consumer accepts two unique events'
-CALL pro_replication_lab.consume_outbox_batch('order_projection', 10);
+CALL pro_replication_lab.consume_outbox_batch ('order_projection', 10);
 
 SELECT
-    po.consumer_name,
-    po.order_key,
-    po.status,
-    po.aggregate_version,
-    po.last_event_id
-FROM pro_replication_lab.projected_orders AS po
-ORDER BY po.consumer_name, po.order_key;
+  po.consumer_name,
+  po.order_key,
+  po.status,
+  po.aggregate_version,
+  po.last_event_id
+FROM
+  pro_replication_lab.projected_orders AS po
+ORDER BY
+  po.consumer_name,
+  po.order_key;
 
 DO $expected_payload_conflict$
 BEGIN
@@ -267,25 +241,34 @@ END
 $expected_payload_conflict$;
 
 \echo 'Simulated redelivery: inbox key prevents repeated side effects'
-UPDATE pro_replication_lab.outbox_events
-SET published_at = NULL;
+UPDATE
+  pro_replication_lab.outbox_events
+SET
+  published_at = NULL;
 
-CALL pro_replication_lab.consume_outbox_batch('order_projection', 10);
-
-SELECT
-    oe.event_id,
-    oe.aggregate_version,
-    oe.delivery_attempts,
-    (oe.published_at IS NOT NULL) AS acknowledged
-FROM pro_replication_lab.outbox_events AS oe
-ORDER BY oe.aggregate_key, oe.aggregate_version, oe.event_id;
+CALL pro_replication_lab.consume_outbox_batch ('order_projection', 10);
 
 SELECT
-    ci.consumer_name,
-    COUNT(*) AS accepted_unique_events
-FROM pro_replication_lab.consumer_inbox AS ci
-GROUP BY ci.consumer_name
-ORDER BY ci.consumer_name;
+  oe.event_id,
+  oe.aggregate_version,
+  oe.delivery_attempts,
+  (oe.published_at IS NOT NULL) AS acknowledged
+FROM
+  pro_replication_lab.outbox_events AS oe
+ORDER BY
+  oe.aggregate_key,
+  oe.aggregate_version,
+  oe.event_id;
+
+SELECT
+  ci.consumer_name,
+  COUNT(*) AS accepted_unique_events
+FROM
+  pro_replication_lab.consumer_inbox AS ci
+GROUP BY
+  ci.consumer_name
+ORDER BY
+  ci.consumer_name;
 
 -- Exercises:
 --
@@ -355,7 +338,6 @@ ORDER BY ci.consumer_name;
 -- 12. Write failback/reseed steps after promotion. Cover new-primary backup,
 --     old-primary fencing, timeline divergence, rewind or rebuild choice,
 --     replication slots, subscriptions, client routing, data checks, and audit.
-
 DO $self_check$
 BEGIN
     IF (
@@ -378,9 +360,10 @@ BEGIN
     END IF;
 END
 $self_check$;
+
 --    Inputs: For sql-repl-01 Exercise 12, Write a topology-specific failback/reseed plan after promotion; this local SQL file cannot rewind, rebuild, route clients, or manipulate replication objects.
 --    Expected result/shape: For sql-repl-01 Exercise 12, One row per `step_number`, with `phase`, `required_evidence`, `decision`, `owner`, and `stop_condition`. Cover a protected new-primary backup, old-primary fencing, timeline divergence, rewind/rebuild choice, slots/subscriptions, client routing, data checks, new redundancy/backup, and audit.
 --    Verify: For sql-repl-01 Exercise 12, Tabletop both a rewind-eligible and rewind-ineligible former primary. Rejoin stays blocked until lineage/data checks pass, no client can write the fenced node, CDC state is rebuilt/reconciled, and rollback/stop authority is explicit. Hint ladder, rung 1: Failback is another migration with data-lineage risk, not simply “point traffic back.”
-
 ROLLBACK;
+
 \echo 'SQL-REPL-01 complete: no replication object was created'

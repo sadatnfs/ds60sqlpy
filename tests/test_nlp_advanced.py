@@ -99,6 +99,53 @@ def test_all_guide_blocks_and_references_execute_without_network(
     assert capsys.readouterr().out.strip()
 
 
+def mutate_reference_once(source: str, original: str, broken: str) -> ast.Module:
+    """Replace one exact expression or contiguous statement sequence by syntax."""
+    tree = ast.parse(source)
+    before = ast.dump(tree)
+    target = ast.parse(original)
+    replacement = ast.parse(broken)
+    if len(target.body) == 1 and isinstance(target.body[0], ast.Expr):
+        assert len(replacement.body) == 1 and isinstance(replacement.body[0], ast.Expr)
+        expression_signature = ast.dump(target.body[0].value)
+        matches = [node for node in ast.walk(tree) if ast.dump(node) == expression_signature]
+        assert len(matches) == 1, "Mutation must identify exactly one expression"
+        old = matches[0]
+        new = replacement.body[0].value
+
+        class ReplaceExpression(ast.NodeTransformer):
+            def visit(self, node: ast.AST) -> ast.AST:
+                if node is old:
+                    return ast.copy_location(new, node)
+                visited = super().visit(node)
+                assert isinstance(visited, ast.AST)
+                return visited
+
+        mutated = ReplaceExpression().visit(tree)
+        assert isinstance(mutated, ast.Module)
+        tree = mutated
+    else:
+        width = len(target.body)
+        statement_signature = [ast.dump(node) for node in target.body]
+        sequences: list[tuple[list[ast.stmt], int]] = []
+        for parent in ast.walk(tree):
+            for _name, value in ast.iter_fields(parent):
+                if not isinstance(value, list) or not all(
+                    isinstance(item, ast.stmt) for item in value
+                ):
+                    continue
+                for index in range(len(value) - width + 1):
+                    if [
+                        ast.dump(node) for node in value[index : index + width]
+                    ] == statement_signature:
+                        sequences.append((value, index))
+        assert len(sequences) == 1, "Mutation must identify exactly one statement sequence"
+        statements, index = sequences[0]
+        statements[index : index + width] = replacement.body
+    assert ast.dump(tree) != before, "The mutation must change the intended program syntax"
+    return ast.fix_missing_locations(tree)
+
+
 @pytest.mark.parametrize(
     "key,original,broken",
     [
@@ -116,8 +163,12 @@ def test_all_guide_blocks_and_references_execute_without_network(
             "sum(count for gram,count in c.items() if gram in r)",
         ),
         ("nlp-020", "np.where(negative>positive,0,-1)", "np.where(negative>positive,0,0)"),
-        ("nlp-023", "role in doc['roles'] and ", ""),
-        ("nlp-024", "(?![0-9])", ""),
+        ("nlp-023", "role in doc['roles']", "True"),
+        (
+            "nlp-024",
+            r'r"(?<!\w)TKT-([0-9]{3})(?![0-9])"',
+            r'r"(?<!\w)TKT-([0-9]{3})"',
+        ),
     ],
 )
 def test_reference_checks_reject_plausible_shortcuts(
@@ -125,9 +176,9 @@ def test_reference_checks_reject_plausible_shortcuts(
 ) -> None:
     monkeypatch.setattr(socket.socket, "connect", refuse_network)
     source = (BASE / "solutions" / f"{key}_solution.py").read_text()
-    assert original in source
+    mutant = mutate_reference_once(source, original, broken)
     namespace: dict[str, Any] = {"__name__": "regression_probe"}
-    exec(compile(source.replace(original, broken, 1), key, "exec"), namespace)
+    exec(compile(mutant, key, "exec"), namespace)
     with pytest.raises(AssertionError):
         namespace["main"]()
 
@@ -144,3 +195,9 @@ def test_probability_and_label_boundaries_reject_invalid_inputs() -> None:
         tagger.tag_loss([[1.0, 0.0]], [-100])
     with pytest.raises(ValueError):
         tagger.encode([[1.0, 0.0]], [False])
+
+
+@pytest.mark.parametrize("source", ["other = 2", "value = 1\nvalue = 1"])
+def test_mutation_refuses_missing_or_ambiguous_targets(source: str) -> None:
+    with pytest.raises(AssertionError, match="exactly one"):
+        mutate_reference_once(source, "value = 1", "value = 2")

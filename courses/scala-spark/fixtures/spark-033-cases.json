@@ -48,39 +48,17 @@
   "golden": {
     "branch_metric_scope": "PreparedSpark4.0.1 reports scan rows after branch filters;raw deliveries are independently counted.",
     "reported_inputs_by_phase": {
-      "accepted": [
-        2,
-        2,
-        1
-      ],
-      "quarantine": [
-        1,
-        0,
-        0
-      ]
+      "accepted": [2, 2, 1],
+      "quarantine": [1, 0, 0]
     },
     "source_deliveries": 6,
     "known_id_deliveries": 5,
-    "quarantine_deliveries": [
-      3
-    ],
+    "quarantine_deliveries": [3],
     "replay_delivery": 4,
     "business_rows": [
-      [
-        "e1",
-        1,
-        10
-      ],
-      [
-        "e2",
-        2,
-        10
-      ],
-      [
-        "e3",
-        5,
-        10
-      ]
+      ["e1", 1, 10],
+      ["e2", 2, 10],
+      ["e3", 5, 10]
     ],
     "advancer_delivery": 6,
     "accepted_sink_rows": 4,

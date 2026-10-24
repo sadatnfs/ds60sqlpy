@@ -8,10 +8,9 @@
 // Task 6: Choose wait, reject or drop behavior for a workload and explain what evidence the producer receives.
 using System;
 
-internal static class Program
-{
-    private static void Main()
-    {
-        throw new NotImplementedException("Implement your own lesson attempt before running.");
-    }
+internal static class Program {
+  private static void Main() {
+    throw new NotImplementedException(
+        "Implement your own lesson attempt before running.");
+  }
 }

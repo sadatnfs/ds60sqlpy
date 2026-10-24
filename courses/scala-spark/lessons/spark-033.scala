@@ -1,25 +1,64 @@
 import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
-import org.apache.spark.sql.streaming.{StreamingQueryProgress,Trigger}
-import java.nio.file.{Files,Path,Paths,StandardOpenOption,StandardCopyOption}
+import org.apache.spark.sql.streaming.{StreamingQueryProgress, Trigger}
+import java.nio.file.{Files, Path, Paths, StandardOpenOption, StandardCopyOption}
 import java.nio.charset.StandardCharsets
 import scala.jdk.CollectionConverters._
 
 object Main {
-  val eventSchema = StructType(Seq(StructField("delivery_id",LongType,true),StructField("event_id",StringType,true),StructField("amount",LongType,true),StructField("event_time",TimestampType,true)))
+  val eventSchema = StructType(
+    Seq(
+      StructField("delivery_id", LongType, true),
+      StructField("event_id", StringType, true),
+      StructField("amount", LongType, true),
+      StructField("event_time", TimestampType, true)
+    )
+  )
   def publish(root: Path, index: Int, lines: Seq[String]): Unit = {
-    val target = root.resolve("input").resolve(s"batch-$index.json");require(!Files.exists(target),"New source filename required")
-    val staged = Files.createTempFile(root.resolve("staging"),"arrival-",".tmp")
-    try { Files.writeString(staged,lines.mkString("\n")+"\n",StandardCharsets.UTF_8,StandardOpenOption.TRUNCATE_EXISTING);Files.move(staged,target,StandardCopyOption.ATOMIC_MOVE) } finally Files.deleteIfExists(staged)
+    val target = root.resolve("input").resolve(s"batch-$index.json");
+    require(!Files.exists(target), "New source filename required")
+    val staged = Files.createTempFile(root.resolve("staging"), "arrival-", ".tmp")
+    try {
+      Files.writeString(
+        staged,
+        lines.mkString("\n") + "\n",
+        StandardCharsets.UTF_8,
+        StandardOpenOption.TRUNCATE_EXISTING
+      );
+      Files.move(staged, target, StandardCopyOption.ATOMIC_MOVE)
+    } finally Files.deleteIfExists(staged)
   }
-  def input(spark: SparkSession, root: Path): DataFrame = spark.readStream.schema(eventSchema).option("maxFilesPerTrigger",1).option("mode","FAILFAST").json(root.resolve("input").toString)
+  def input(spark: SparkSession, root: Path): DataFrame = spark.readStream
+    .schema(eventSchema)
+    .option("maxFilesPerTrigger", 1)
+    .option("mode", "FAILFAST")
+    .json(root.resolve("input").toString)
   def runSink(frame: DataFrame, root: Path, name: String): Seq[StreamingQueryProgress] = {
-    val query = frame.writeStream.format("parquet").outputMode("append").option("checkpointLocation",root.resolve(name+"-checkpoint").toString).trigger(Trigger.AvailableNow()).start(root.resolve(name+"-output").toString)
-    try { require(query.awaitTermination(30000L),"Finite sink deadline exceeded");require(!query.isActive && query.exception.isEmpty,"Query failed");query.recentProgress.toSeq } finally query.stop()
+    val query = frame.writeStream
+      .format("parquet")
+      .outputMode("append")
+      .option("checkpointLocation", root.resolve(name + "-checkpoint").toString)
+      .trigger(Trigger.AvailableNow())
+      .start(root.resolve(name + "-output").toString)
+    try {
+      require(query.awaitTermination(30000L), "Finite sink deadline exceeded");
+      require(!query.isActive && query.exception.isEmpty, "Query failed");
+      query.recentProgress.toSeq
+    } finally query.stop()
   }
-  def outputRows(spark: SparkSession, root: Path): Seq[(String,Long,Long)] = spark.read.parquet(root.resolve("accepted-output").toString).select("event_id","delivery_id","amount").orderBy("event_id","delivery_id").collect().toSeq.map(r => (r.getString(0),r.getLong(1),r.getLong(2)))
-  def deleteOwned(root: Path): Unit = { val paths = Files.walk(root);try paths.iterator().asScala.toSeq.sortBy(_.getNameCount).reverse.foreach(p => Files.delete(p)) finally paths.close() }
+  def outputRows(spark: SparkSession, root: Path): Seq[(String, Long, Long)] = spark.read
+    .parquet(root.resolve("accepted-output").toString)
+    .select("event_id", "delivery_id", "amount")
+    .orderBy("event_id", "delivery_id")
+    .collect()
+    .toSeq
+    .map(r => (r.getString(0), r.getLong(1), r.getLong(2)))
+  def deleteOwned(root: Path): Unit = {
+    val paths = Files.walk(root);
+    try paths.iterator().asScala.toSeq.sortBy(_.getNameCount).reverse.foreach(p => Files.delete(p))
+    finally paths.close()
+  }
 
   def classify(events: DataFrame): DataFrame =
     throw new UnsupportedOperationException("Complete classify")
@@ -27,49 +66,73 @@ object Main {
   def deduplicated(classified: DataFrame): DataFrame =
     throw new UnsupportedOperationException("Complete deduplicated")
 
-  def runBranches(spark: SparkSession, root: Path): (Seq[StreamingQueryProgress],Seq[StreamingQueryProgress]) =
+  def runBranches(
+      spark: SparkSession,
+      root: Path
+  ): (Seq[StreamingQueryProgress], Seq[StreamingQueryProgress]) =
     throw new UnsupportedOperationException("Complete runBranches")
 
-  def businessRows(spark: SparkSession, root: Path): Seq[(String,Long,Long)] =
+  def businessRows(spark: SparkSession, root: Path): Seq[(String, Long, Long)] =
     throw new UnsupportedOperationException("Complete businessRows")
 
   def removedState(progress: Seq[StreamingQueryProgress]): Long =
     throw new UnsupportedOperationException("Complete removedState")
 
-  def deliveryLedger(spark: SparkSession, root: Path): (Long,Long,Long,Long,Long) =
+  def deliveryLedger(spark: SparkSession, root: Path): (Long, Long, Long, Long, Long) =
     throw new UnsupportedOperationException("Complete deliveryLedger")
 
   def main(args: Array[String]): Unit = {
     var ownedRoot: Path = null
-    val spark = SparkSession.builder().appName("ds60-spark-033").master("local[2]")
-      .config("spark.ui.enabled","false")
-      .config("spark.driver.host","127.0.0.1")
-      .config("spark.driver.bindAddress","127.0.0.1")
-      .config("spark.sql.shuffle.partitions","2")
-      .config("spark.sql.adaptive.enabled","false")
-      .config("spark.sql.ansi.enabled","true")
-      .config("spark.sql.session.timeZone","UTC").getOrCreate()
+    val spark = SparkSession
+      .builder()
+      .appName("ds60-spark-033")
+      .master("local[2]")
+      .config("spark.ui.enabled", "false")
+      .config("spark.driver.host", "127.0.0.1")
+      .config("spark.driver.bindAddress", "127.0.0.1")
+      .config("spark.sql.shuffle.partitions", "2")
+      .config("spark.sql.adaptive.enabled", "false")
+      .config("spark.sql.ansi.enabled", "true")
+      .config("spark.sql.session.timeZone", "UTC")
+      .getOrCreate()
     try {
       require(spark.sparkContext.master == "local[2]", "local-only course session")
       spark.sparkContext.setLogLevel("ERROR")
-      spark.conf.set("spark.sql.streaming.stopTimeout","10000")
-      ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(),".ds60-spark-033-")
-      Files.createDirectory(ownedRoot.resolve("input"));Files.createDirectory(ownedRoot.resolve("staging"))
+      spark.conf.set("spark.sql.streaming.stopTimeout", "10000")
+      ownedRoot =
+        Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(), ".ds60-spark-033-")
+      Files.createDirectory(ownedRoot.resolve("input"));
+      Files.createDirectory(ownedRoot.resolve("staging"))
       val batches = Seq(
-       Seq("""{"delivery_id":1,"event_id":"e1","amount":10,"event_time":"2024-01-01T00:01:00Z"}""","""{"delivery_id":2,"event_id":"e2","amount":10,"event_time":"2024-01-01T00:02:00Z"}""","""{"delivery_id":3,"event_id":null,"amount":99,"event_time":"2024-01-01T00:02:00Z"}"""),
-       Seq("""{"delivery_id":4,"event_id":"e1","amount":10,"event_time":"2024-01-01T00:01:00Z"}""","""{"delivery_id":5,"event_id":"e3","amount":10,"event_time":"2024-01-01T00:03:00Z"}"""),
-       Seq("""{"delivery_id":6,"event_id":"__advance__","amount":0,"event_time":"2024-01-01T00:20:00Z"}"""))
+        Seq(
+          """{"delivery_id":1,"event_id":"e1","amount":10,"event_time":"2024-01-01T00:01:00Z"}""",
+          """{"delivery_id":2,"event_id":"e2","amount":10,"event_time":"2024-01-01T00:02:00Z"}""",
+          """{"delivery_id":3,"event_id":null,"amount":99,"event_time":"2024-01-01T00:02:00Z"}"""
+        ),
+        Seq(
+          """{"delivery_id":4,"event_id":"e1","amount":10,"event_time":"2024-01-01T00:01:00Z"}""",
+          """{"delivery_id":5,"event_id":"e3","amount":10,"event_time":"2024-01-01T00:03:00Z"}"""
+        ),
+        Seq(
+          """{"delivery_id":6,"event_id":"__advance__","amount":0,"event_time":"2024-01-01T00:20:00Z"}"""
+        )
+      )
       locally {
-        val occurrences = Seq(("e1",10L),("e2",10L),("e1",10L),("e3",10L))
+        val occurrences = Seq(("e1", 10L), ("e2", 10L), ("e1", 10L), ("e3", 10L))
         assert(occurrences.map(_._1).distinct.size == 3 && occurrences.map(_._2).distinct.size == 1)
         println("Equal amounts are not equal event identities")
       }
       locally {
-        assert(batches.map(_.size) == Seq(3,2,1) && batches.flatten.size == 6)
+        assert(batches.map(_.size) == Seq(3, 2, 1) && batches.flatten.size == 6)
         println("Six source deliveries feed two independently checkpointed branches")
       }
       println("spark-033: worked examples passed; six task implementations remain")
-    } finally { try { require(spark.streams.active.isEmpty,"Query still active; preserve scratch"); if(ownedRoot != null) deleteOwned(ownedRoot) } finally { spark.stop() } }
+    } finally {
+      try {
+        require(spark.streams.active.isEmpty, "Query still active; preserve scratch");
+        if (ownedRoot != null) deleteOwned(ownedRoot)
+      } finally { spark.stop() }
+    }
   }
 }
 

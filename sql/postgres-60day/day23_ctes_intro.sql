@@ -18,32 +18,42 @@
 --
 BEGIN;
 SET search_path TO training, public;
-
 -- Study contract
 -- Focus: Use CTEs to name grains and decisions in a multi-stage query, while understanding that readability—not forced materialization—is the default goal.
 -- Assumptions: Each CTE declares its output grain. PostgreSQL 16 may inline a side-effect-free single-use CTE unless `MATERIALIZED` is requested.
 -- Pitfall: A CTE does not automatically improve performance; duplicated rows or ambiguous names remain logical bugs even when split into stages.
 -- Predict row grain and NULL/order behavior before executing each example.
-
 -- Rewrite subqueries as CTEs
 WITH order_lines AS (
-  SELECT o.order_id,
-         o.customer_id,
-         SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS order_total
-  FROM orders o
-  JOIN order_items oi ON oi.order_id = o.order_id
-  GROUP BY o.order_id, o.customer_id
-), top_customers AS (
-  SELECT customer_id,
-         SUM(order_total) AS lifetime_revenue
-  FROM order_lines
-  GROUP BY customer_id
+  SELECT
+    o.order_id,
+    o.customer_id,
+    SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS order_total
+  FROM
+    orders o
+    JOIN order_items oi ON oi.order_id = o.order_id
+  GROUP BY
+    o.order_id,
+    o.customer_id
+),
+top_customers AS (
+  SELECT
+    customer_id,
+    SUM(order_total) AS lifetime_revenue
+  FROM
+    order_lines
+  GROUP BY
+    customer_id
 )
-SELECT tc.customer_id, tc.lifetime_revenue
-FROM top_customers tc
-ORDER BY lifetime_revenue DESC, tc.customer_id
+SELECT
+  tc.customer_id,
+  tc.lifetime_revenue
+FROM
+  top_customers tc
+ORDER BY
+  lifetime_revenue DESC,
+  tc.customer_id
 LIMIT 20;
-
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.
@@ -83,5 +93,4 @@ LIMIT 20;
 --    Expected result/shape: For sql-23 Exercise 6, expected output: One summary row for a bounded three-product update. The final columns are `updated_rows`, `first_updated_product`, and `last_updated_product`.
 --    Verify: For sql-23 Exercise 6, materialize the intended `product_id` target set first; require the command tag/`RETURNING` set to match it, then query `products` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `product_id` values in both cases.
 --    Hint ladder, rung 1: For sql-23 Exercise 6, run `candidates`, and `updated` one at a time. Record each CTE's row count and `product_id` uniqueness before the next stage uses it.
-
 ROLLBACK;

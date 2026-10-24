@@ -12,10 +12,7 @@
   "success": {
     "path": "/version",
     "body": "ds60-dualstack-v1\n",
-    "required_families": [
-      "IPv4",
-      "IPv6"
-    ]
+    "required_families": ["IPv4", "IPv6"]
   },
   "prerequisites": [
     "owned disposable target",

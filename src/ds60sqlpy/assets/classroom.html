@@ -16,11 +16,7 @@
   <body data-mode="light">
     <a class="skip" href="#main">Skip to learning content</a>
     <header class="site-header">
-      <button
-        id="home-button"
-        class="brand"
-        aria-label="DS60 Classroom, all learning paths"
-      >
+      <button id="home-button" class="brand" aria-label="DS60 Classroom, all learning paths">
         <span class="brand-mark" aria-hidden="true">d.</span
         ><span
           >DS60 <strong>Classroom</strong
@@ -29,8 +25,7 @@
       </button>
       <nav aria-label="Classroom">
         <button id="paths-button">All learning paths</button
-        ><a href="/reference-pages/docs/docker-classroom.md.html"
-          >Setup &amp; saved work</a
+        ><a href="/reference-pages/docs/docker-classroom.md.html">Setup &amp; saved work</a
         ><button id="theme-toggle" aria-pressed="false">Dark appearance</button>
       </nav>
     </header>
@@ -40,21 +35,19 @@
         <div class="home-intro">
           <div>
             <p class="eyebrow">YOUR CURIOSITY. YOUR PACE.</p>
-            <h1 id="home-title" tabindex="-1">
-              What will you<br /><em>understand next?</em>
-            </h1>
+            <h1 id="home-title" tabindex="-1"> What will you<br /><em>understand next?</em> </h1>
             <p class="intro-copy">
-              Start with a first line of code. Follow a question into the
-              theory. Build something that makes it click. Every path belongs
-              here, and you choose where to begin.
+              Start with a first line of code. Follow a question into the theory. Build something
+              that makes it click. Every path belongs here, and you choose where to begin.
             </p>
-            <p id="catalog-summary" class="catalog-summary">
-              Loading the classroom library...
-            </p>
+            <p id="catalog-summary" class="catalog-summary"> Loading the classroom library... </p>
           </div>
           <aside class="pace-card">
             <span class="tiny-heading">MAKE IT YOURS</span>
-            <h2>A little time.<br /> A meaningful next step.</h2>
+            <h2
+              >A little time.<br />
+              A meaningful next step.</h2
+            >
             <label for="pace">Time for a typical study session</label
             ><select id="pace">
               <option value="15">15 minutes · one idea</option>
@@ -63,8 +56,7 @@
               <option value="90">90 minutes · settle into a project</option>
             </select>
             <p id="pace-note">
-              Session estimates are suggestions. Nothing is locked, timed, or
-              graded by your pace.
+              Session estimates are suggestions. Nothing is locked, timed, or graded by your pace.
             </p>
             <button id="resume" class="primary" hidden></button>
           </aside>
@@ -96,42 +88,26 @@
           <div id="search-lesson-list"></div>
         </section>
         <p id="no-results" class="notice" hidden>
-          No subjects or lessons match yet. Try a shorter topic, a language, or
-          a lesson ID.
+          No subjects or lessons match yet. Try a shorter topic, a language, or a lesson ID.
         </p>
         <div class="home-footnote">
           <strong>Pick up where you left off.</strong>
           <p>
-            Your saved code and notes stay in this classroom's local learning
-            workspace. Reading, experimenting, and revisiting an idea all count
-            as learning. Completion labels describe your own records, not
-            automatic certification.
+            Your saved code and notes stay in this classroom's local learning workspace. Reading,
+            experimenting, and revisiting an idea all count as learning. Completion labels describe
+            your own records, not automatic certification.
           </p>
         </div>
       </section>
-      <section
-        id="workspace-view"
-        class="workspace-view"
-        hidden
-        aria-label="Learning workspace"
-      >
+      <section id="workspace-view" class="workspace-view" hidden aria-label="Learning workspace">
         <div class="workspace-top">
-          <button id="back-paths" class="quiet">← All paths</button
-          ><span id="subject-label"></span
-          ><button
-            id="lesson-menu"
-            aria-expanded="false"
-            aria-controls="lesson-sidebar"
-          >
+          <button id="back-paths" class="quiet">← All paths</button><span id="subject-label"></span
+          ><button id="lesson-menu" aria-expanded="false" aria-controls="lesson-sidebar">
             Browse lessons
           </button>
         </div>
         <div class="workspace-grid">
-          <aside
-            id="lesson-sidebar"
-            class="lesson-sidebar"
-            aria-label="Lesson navigation"
-          >
+          <aside id="lesson-sidebar" class="lesson-sidebar" aria-label="Lesson navigation">
             <p class="eyebrow">YOUR PATH</p>
             <h2 id="path-title"></h2>
             <p id="path-description" class="muted"></p>
@@ -173,9 +149,8 @@
               <details id="runtime-setup" class="notice" hidden>
                 <summary>Prepare this lesson's runtime</summary>
                 <p>
-                  With your Docker engine running, open a terminal in the
-                  repository folder. On Windows, use WSL. Your saved progress is
-                  retained.
+                  With your Docker engine running, open a terminal in the repository folder. On
+                  Windows, use WSL. Your saved progress is retained.
                 </p>
                 <pre id="runtime-commands"></pre>
                 <p id="runtime-setup-note"></p>
@@ -192,24 +167,21 @@
                     <span class="tiny-heading">UNDERSTAND</span>
                     <h2>The lesson</h2>
                   </div>
-                  <button id="reading-toggle" aria-pressed="false">
-                    Focus on reading
-                  </button>
+                  <button id="reading-toggle" aria-pressed="false"> Focus on reading </button>
                 </div>
                 <div class="reader-tools">
                   <label for="section-jump">Jump to a section</label
                   ><select id="section-jump">
                     <option value="">Choose a section</option></select
                   ><label id="chapter-read-label" class="check-label" hidden
-                    ><input id="read-chapter" type="checkbox" /> I have read
-                    this chapter</label
+                    ><input id="read-chapter" type="checkbox" /> I have read this chapter</label
                   >
                 </div>
                 <article id="guide" class="guide"></article>
                 <div id="solution-section" class="solution-section">
                   <p class="muted">
-                    Try your own approach first. Use the lesson's hints before
-                    comparing with the worked solution.
+                    Try your own approach first. Use the lesson's hints before comparing with the
+                    worked solution.
                   </p>
                   <button id="reveal">Reveal separate solutions</button>
                   <div id="solutions" hidden></div>
@@ -232,11 +204,9 @@
                       ><select id="pad-mode"></select>
                     </div>
                   </div>
-                  <label id="variant-label" for="variant" hidden
-                    >Language variant</label
+                  <label id="variant-label" for="variant" hidden>Language variant</label
                   ><select id="variant" hidden></select
-                  ><label id="prediction-label" for="prediction"
-                    >Predict before you run</label
+                  ><label id="prediction-label" for="prediction">Predict before you run</label
                   ><textarea
                     id="prediction"
                     class="reflection"
@@ -254,9 +224,7 @@
                           aria-controls="syntax-preview"
                         >
                           Syntax preview</button
-                        ><button id="download-source" class="quiet">
-                          Download
-                        </button>
+                        ><button id="download-source" class="quiet"> Download </button>
                       </div>
                     </div>
                     <textarea
@@ -272,8 +240,8 @@
                       <div id="syntax-code"></div>
                     </div>
                     <p id="source-help" class="muted">
-                      Tab indents. Escape then Tab leaves the editor. Ctrl/Cmd+S
-                      saves; Ctrl/Cmd+Enter runs.
+                      Tab indents. Escape then Tab leaves the editor. Ctrl/Cmd+S saves;
+                      Ctrl/Cmd+Enter runs.
                     </p>
                     <details id="runtime-details">
                       <summary>How this code runs</summary>
@@ -287,30 +255,20 @@
                         ><select id="pad-history"></select>
                         <div class="toolbar">
                           <button id="load-history" disabled>Load a copy</button
-                          ><button id="refresh-history">
-                            Refresh versions
-                          </button>
+                          ><button id="refresh-history"> Refresh versions </button>
                         </div>
                       </details>
                       <details id="sql-setup" class="notice" hidden>
                         <summary>Prepare SQL training data</summary>
                         <p>
-                          This resets only the disposable course training schema
-                          in advanced_sql_training. Saved pads remain in your
-                          workspace.
+                          This resets only the disposable course training schema in
+                          advanced_sql_training. Saved pads remain in your workspace.
                         </p>
-                        <button id="prepare-sql">
-                          Reset and verify training schema
-                        </button>
+                        <button id="prepare-sql"> Reset and verify training schema </button>
                       </details>
                     </div>
                   </div>
-                  <p
-                    id="save-state"
-                    class="save-state"
-                    role="status"
-                    aria-live="polite"
-                  ></p>
+                  <p id="save-state" class="save-state" role="status" aria-live="polite"></p>
                   <div class="toolbar run-tools">
                     <button id="run" class="primary">Run code</button
                     ><label class="sr-only" for="timeout">Run deadline</label
@@ -319,15 +277,11 @@
                       <option value="60" selected>60 seconds</option>
                       <option value="120">120 seconds</option></select
                     ><button id="cancel" disabled>Cancel job</button
-                    ><button id="save">Save work</button
-                    ><button id="refresh">Check runtime</button
+                    ><button id="save">Save work</button><button id="refresh">Check runtime</button
                     ><button id="reconnect" hidden>Reconnect saved job</button
-                    ><button id="recover" hidden>
-                      Confirm manual recovery
-                    </button>
+                    ><button id="recover" hidden> Confirm manual recovery </button>
                   </div>
-                  <label id="explanation-label" for="explanation"
-                    >Explain the evidence</label
+                  <label id="explanation-label" for="explanation">Explain the evidence</label
                   ><textarea
                     id="explanation"
                     class="reflection"
@@ -340,13 +294,8 @@
                       <option value="read">Reading notes</option>
                       <option value="attempt">Attempt and observations</option>
                       <option value="compare">Comparison notes</option></select
-                    ><label for="phase-note" id="phase-label"
-                      >Reading notes</label
-                    ><textarea
-                      id="phase-note"
-                      class="reflection"
-                      maxlength="12000"
-                    ></textarea>
+                    ><label for="phase-note" id="phase-label">Reading notes</label
+                    ><textarea id="phase-note" class="reflection" maxlength="12000"></textarea>
                     <div class="hint-area">
                       <button id="hint-button">Give me one hint</button>
                       <p id="hint" role="status"></p>
@@ -357,9 +306,8 @@
                     </details>
                     <div class="completion-area">
                       <label class="check-label"
-                        ><input id="confirmed" type="checkbox" /> I checked my
-                        result and can explain it. My prediction, attempt, and
-                        explanation are saved.</label
+                        ><input id="confirmed" type="checkbox" /> I checked my result and can
+                        explain it. My prediction, attempt, and explanation are saved.</label
                       ><button id="complete">Record demonstrated lesson</button>
                     </div>
                   </div>
@@ -367,30 +315,41 @@
                 </div>
                 <section class="results" aria-labelledby="results-title">
                   <h3 id="results-title">What actually happened</h3>
-                  <p id="job-status" class="muted">
-                    No run yet for this lesson.
-                  </p>
-                  <section id="browser-preview-panel" hidden aria-label="Interactive browser preview">
+                  <p id="job-status" class="muted"> No run yet for this lesson. </p>
+                  <section
+                    id="browser-preview-panel"
+                    hidden
+                    aria-label="Interactive browser preview"
+                  >
                     <div class="browser-preview-toolbar">
                       <h4>Visualization preview</h4>
-                      <button id="browser-fullscreen" type="button" hidden
-                        aria-controls="browser-preview-panel" aria-pressed="false">
+                      <button
+                        id="browser-fullscreen"
+                        type="button"
+                        hidden
+                        aria-controls="browser-preview-panel"
+                        aria-pressed="false"
+                      >
                         Fullscreen preview
                       </button>
                     </div>
-                    <p id="browser-preview-description" class="muted">The visualization runs in an isolated browser frame. Stop it or
-                      leave the lesson to close it. Saved observations contain console output and
-                      the submitted source; viewing history never reruns a chart.</p>
-                    <p id="browser-fullscreen-status" class="muted" role="status" aria-live="polite"></p>
+                    <p id="browser-preview-description" class="muted"
+                      >The visualization runs in an isolated browser frame. Stop it or leave the
+                      lesson to close it. Saved observations contain console output and the
+                      submitted source; viewing history never reruns a chart.</p
+                    >
+                    <p
+                      id="browser-fullscreen-status"
+                      class="muted"
+                      role="status"
+                      aria-live="polite"
+                    ></p>
                     <div id="browser-preview"></div>
-                    <button id="browser-observation-save" disabled>Save latest console observation</button>
+                    <button id="browser-observation-save" disabled
+                      >Save latest console observation</button
+                    >
                   </section>
-                  <pre
-                    id="output"
-                    class="result-log"
-                    tabindex="0"
-                    aria-label="Runtime output"
-                  >
+                  <pre id="output" class="result-log" tabindex="0" aria-label="Runtime output">
 Your output and compiler diagnostics will appear here.</pre
                   >
                   <p id="run-storage-status" class="muted" role="status"></p>
@@ -416,15 +375,12 @@ Your output and compiler diagnostics will appear here.</pre
     <footer class="site-footer">
       <span>DS60 Classroom</span>
       <p>One library. Many ways to learn. Built for your local machine.</p>
-      <a href="/reference-pages/docs/one-command-classroom.md.html"
-        >Classroom guide</a
-      >
+      <a href="/reference-pages/docs/one-command-classroom.md.html">Classroom guide</a>
     </footer>
     <noscript
       ><p>
         This interactive classroom needs JavaScript. Read the
-        <a href="/START_HERE.html">static lesson library</a> without running
-        code.
+        <a href="/START_HERE.html">static lesson library</a> without running code.
       </p></noscript
     >
     <script>

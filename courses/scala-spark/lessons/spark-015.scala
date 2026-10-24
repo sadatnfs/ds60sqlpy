@@ -2,10 +2,14 @@ import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
-
 object Main {
-  def amountRows(frame: DataFrame): Seq[(Long,Option[Long])] =
-    frame.select("event_id","amount_cents").orderBy("event_id").collect().toSeq.map(row => (row.getLong(0),if(row.isNullAt(1)) None else Some(row.getLong(1))))
+  def amountRows(frame: DataFrame): Seq[(Long, Option[Long])] =
+    frame
+      .select("event_id", "amount_cents")
+      .orderBy("event_id")
+      .collect()
+      .toSeq
+      .map(row => (row.getLong(0), if (row.isNullAt(1)) None else Some(row.getLong(1))))
 
   def withParsed(frame: DataFrame): DataFrame =
     throw new UnsupportedOperationException("Complete withParsed")
@@ -26,27 +30,55 @@ object Main {
     throw new UnsupportedOperationException("Complete nonnegativeAmounts")
 
   def main(args: Array[String]): Unit = {
-    val spark = SparkSession.builder().appName("ds60-spark-015").master("local[2]")
-      .config("spark.ui.enabled","false")
-      .config("spark.driver.host","127.0.0.1")
-      .config("spark.driver.bindAddress","127.0.0.1")
-      .config("spark.sql.shuffle.partitions","2")
-      .config("spark.sql.adaptive.enabled","false")
-      .config("spark.sql.ansi.enabled","true")
-      .config("spark.sql.session.timeZone","UTC").getOrCreate()
+    val spark = SparkSession
+      .builder()
+      .appName("ds60-spark-015")
+      .master("local[2]")
+      .config("spark.ui.enabled", "false")
+      .config("spark.driver.host", "127.0.0.1")
+      .config("spark.driver.bindAddress", "127.0.0.1")
+      .config("spark.sql.shuffle.partitions", "2")
+      .config("spark.sql.adaptive.enabled", "false")
+      .config("spark.sql.ansi.enabled", "true")
+      .config("spark.sql.session.timeZone", "UTC")
+      .getOrCreate()
     try {
       require(spark.sparkContext.master == "local[2]", "local-only course session")
       spark.sparkContext.setLogLevel("ERROR")
-      val schema = StructType(Seq(StructField("event_id",LongType,false),StructField("amount_text",StringType,true)))
-      val rows = Seq(Row(1L,"100"),Row(2L,"0"),Row(3L," 25 "),Row(4L,null),Row(5L,"bad"),Row(6L,"9223372036854775808"),Row(7L,"-5"),Row(8L,"50"))
-      val raw = spark.createDataFrame(spark.sparkContext.parallelize(rows,2),schema)
+      val schema = StructType(
+        Seq(StructField("event_id", LongType, false), StructField("amount_text", StringType, true))
+      )
+      val rows = Seq(
+        Row(1L, "100"),
+        Row(2L, "0"),
+        Row(3L, " 25 "),
+        Row(4L, null),
+        Row(5L, "bad"),
+        Row(6L, "9223372036854775808"),
+        Row(7L, "-5"),
+        Row(8L, "50")
+      )
+      val raw = spark.createDataFrame(spark.sparkContext.parallelize(rows, 2), schema)
       locally {
-        val tolerant = raw.select(col("event_id"),expr("try_cast(trim(amount_text) AS BIGINT)").as("parsed_amount"))
-        assert(tolerant.filter(col("parsed_amount").isNull).select("event_id").orderBy("event_id").collect().map(_.getLong(0)).toSeq == Seq(4L,5L,6L))
+        val tolerant = raw.select(
+          col("event_id"),
+          expr("try_cast(trim(amount_text) AS BIGINT)").as("parsed_amount")
+        )
+        assert(
+          tolerant
+            .filter(col("parsed_amount").isNull)
+            .select("event_id")
+            .orderBy("event_id")
+            .collect()
+            .map(_.getLong(0))
+            .toSeq == Seq(4L, 5L, 6L)
+        )
         println("Parse NULLs include both source missingness and rejected text")
       }
       locally {
-        val signed = raw.filter(col("event_id") === lit(7L)).select(expr("try_cast(amount_text AS BIGINT)").as("amount"))
+        val signed = raw
+          .filter(col("event_id") === lit(7L))
+          .select(expr("try_cast(amount_text AS BIGINT)").as("amount"))
         assert(signed.first().getLong(0) == -5L)
         assert(spark.conf.get("spark.sql.ansi.enabled") == "true")
         println("A signed integer can be cast-valid while domain-invalid")

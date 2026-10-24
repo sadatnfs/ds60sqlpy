@@ -9,7 +9,10 @@ pub struct Report {
 /// Parse a deliberately simple name,quantity fixture, not general quoted CSV.
 /// Reject malformed, empty-name, negative and overflowing records.
 pub fn summarize(lines: &[&str]) -> Report {
-    let mut report = Report { totals: BTreeMap::new(), rejected: 0 };
+    let mut report = Report {
+        totals: BTreeMap::new(),
+        rejected: 0,
+    };
     for line in lines {
         let Some((name, quantity)) = line.split_once(',') else {
             report.rejected += 1;
@@ -34,6 +37,11 @@ pub fn summarize(lines: &[&str]) -> Report {
 }
 
 pub fn render(report: &Report) -> String {
-    let totals = report.totals.iter().map(|(name, total)| format!("{name}={total}")).collect::<Vec<_>>().join(";");
+    let totals = report
+        .totals
+        .iter()
+        .map(|(name, total)| format!("{name}={total}"))
+        .collect::<Vec<_>>()
+        .join(";");
     format!("{totals};rejected={}", report.rejected)
 }

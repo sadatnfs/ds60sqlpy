@@ -8,10 +8,9 @@
 // Task 6: Design a reusable import result that retains per-line rejection reasons without exposing sensitive raw input.
 using System;
 
-internal static class Program
-{
-    private static void Main()
-    {
-        throw new NotImplementedException("Implement your own lesson attempt before running.");
-    }
+internal static class Program {
+  private static void Main() {
+    throw new NotImplementedException(
+        "Implement your own lesson attempt before running.");
+  }
 }

@@ -18,39 +18,61 @@
 --
 BEGIN;
 SET search_path TO training, public;
-
 -- Multiple metrics with FILTER
-SELECT p.category,
-       SUM(oi.quantity)                                                   AS total_qty,
-       SUM(oi.quantity) FILTER (WHERE o.order_date >= now() - interval '30 days') AS qty_30d,
-       SUM(oi.quantity) FILTER (WHERE o.order_date >= now() - interval '90 days') AS qty_90d,
-       ROUND(SUM(oi.unit_price*oi.quantity*(1-oi.discount)),2)           AS revenue,
-       ROUND(SUM(oi.unit_price*oi.quantity*(1-oi.discount))
-             FILTER (WHERE o.order_date >= now() - interval '30 days'),2) AS revenue_30d
-FROM order_items oi
-JOIN products p ON p.product_id = oi.product_id
-JOIN orders o   ON o.order_id = oi.order_id
-GROUP BY p.category
-ORDER BY revenue DESC;
-
+SELECT
+  p.category,
+  SUM(oi.quantity) AS total_qty,
+  SUM(oi.quantity) FILTER (WHERE o.order_date >= now() - interval '30 days') AS qty_30d,
+  SUM(oi.quantity) FILTER (WHERE o.order_date >= now() - interval '90 days') AS qty_90d,
+  ROUND(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)), 2) AS revenue,
+  ROUND(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) FILTER (WHERE o.order_date >= now() - interval '30 days'), 2) AS revenue_30d
+FROM
+  order_items oi
+  JOIN products p ON p.product_id = oi.product_id
+  JOIN orders o ON o.order_id = oi.order_id
+GROUP BY
+  p.category
+ORDER BY
+  revenue DESC;
 -- Conditional aggregation using CASE for multi-metric report
-SELECT c.country,
-       SUM(CASE WHEN o.status IN ('paid','shipped','delivered') THEN 1 ELSE 0 END) AS successful_orders,
-       SUM(CASE WHEN o.status = 'returned' THEN 1 ELSE 0 END)                      AS returned_orders,
-       ROUND(SUM(CASE WHEN o.status <> 'returned' THEN o.total_amount ELSE 0 END),2) AS net_revenue
-FROM orders o
-JOIN customers c ON c.customer_id = o.customer_id
-GROUP BY c.country
-ORDER BY net_revenue DESC;
-
+SELECT
+  c.country,
+  SUM(
+    CASE WHEN o.status IN ('paid', 'shipped', 'delivered') THEN
+      1
+    ELSE
+      0
+    END) AS successful_orders,
+  SUM(
+    CASE WHEN o.status = 'returned' THEN
+      1
+    ELSE
+      0
+    END) AS returned_orders,
+  ROUND(SUM(
+      CASE WHEN o.status <> 'returned' THEN
+        o.total_amount
+      ELSE
+        0
+      END), 2) AS net_revenue
+FROM
+  orders o
+  JOIN customers c ON c.customer_id = o.customer_id
+GROUP BY
+  c.country
+ORDER BY
+  net_revenue DESC;
 -- String aggregation for labels
-SELECT p.category,
-       string_agg(DISTINCT p.name, ', ' ORDER BY p.name) AS sample_products
-FROM products p
-GROUP BY p.category
-ORDER BY p.category
+SELECT
+  p.category,
+  string_agg(DISTINCT p.name, ', ' ORDER BY p.name) AS sample_products
+FROM
+  products p
+GROUP BY
+  p.category
+ORDER BY
+  p.category
 LIMIT 10;
-
 -- CUBE / GROUPING reading key
 -- CUBE(country, category) expands to four grouping sets:
 --   (country, category) -> detail
@@ -60,7 +82,6 @@ LIMIT 10;
 -- GROUPING(country, category) encodes those levels as 0, 1, 2, and 3.
 -- The rightmost argument is the least-significant bit. A stored NULL in a
 -- grouped column still has bit 0; only omission by a grouping set produces 1.
-
 -- Exercises
 -- 1. Build a 6-metric dashboard by category using FILTER for various time windows.
 --    Inputs: For sql-41 Exercise 1, read from `orders`, `order_items`, `products`, and `training.products`. Build the answer toward `category`, `revenue_30d`, `revenue_90d`, `orders_30d`, `units_30d`, `customers_90d`, and `revenue_per_order_30d`; keep `category` visible whenever the result has row-level grain.
@@ -96,5 +117,4 @@ LIMIT 10;
 --    Expected result/shape: For sql-41 Exercise 6, expected output: exactly one scalar row with one column, `empty_email_array`, whose value is the non-NULL empty `text[]` value `{}`. There is no customer-level key because the query has no `GROUP BY`.
 --    Verify: For sql-41 Exercise 6, assert that the uncoalesced filtered `array_agg` result is `NULL`, while the final result satisfies `empty_email_array IS NOT NULL` and `cardinality(empty_email_array) = 0`.
 --    Hint ladder, rung 1: For sql-41 Exercise 6, inspect the source keys that survive `WHERE`.
-
 ROLLBACK;

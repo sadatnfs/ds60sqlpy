@@ -18,38 +18,52 @@
 --
 BEGIN;
 SET search_path TO training, public;
-
 -- Study contract
 -- Focus: Deliver a reconciled Phase 1 report that combines filtering, joins, aggregation, text/time handling, and exact money semantics.
 -- Assumptions: All monetary summaries identify stored totals versus computed net line revenue. Reporting month uses UTC and empty populations remain visible where required.
 -- Pitfall: Combining fact tables before fixing their grain multiplies measures; every project output must state its row grain and acceptance checks.
 -- Predict row grain and NULL/order behavior before executing each example.
-
 -- Customer purchase analysis with segmentation and temporal patterns
 WITH line AS (
-  SELECT o.customer_id,
-         date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date
-           AS month_utc,
-         SUM(oi.unit_price*oi.quantity*(1-oi.discount)) AS revenue
-  FROM orders o
-  JOIN order_items oi ON oi.order_id = o.order_id
-  GROUP BY o.customer_id,
-           date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date
+  SELECT
+    o.customer_id,
+    date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date AS month_utc,
+    SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS revenue
+  FROM
+    orders o
+    JOIN order_items oi ON oi.order_id = o.order_id
+  GROUP BY
+    o.customer_id,
+    date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date
 ),
 segment AS (
-  SELECT c.customer_id, COALESCE(c.segment,'standard') AS segment, c.country
-  FROM customers c
+  SELECT
+    c.customer_id,
+    COALESCE(c.segment, 'standard') AS segment,
+    c.country
+  FROM
+    customers c
 )
-SELECT s.segment, s.country, l.month_utc,
-       ROUND(SUM(l.revenue),2) AS revenue,
-       COUNT(DISTINCT l.customer_id) AS actives,
-       ROUND(SUM(l.revenue)/NULLIF(COUNT(DISTINCT l.customer_id),0),2) AS rev_per_active
-FROM line l
-JOIN segment s ON s.customer_id = l.customer_id
-GROUP BY s.segment, s.country, l.month_utc
-ORDER BY l.month_utc DESC, revenue DESC, s.segment, s.country
+SELECT
+  s.segment,
+  s.country,
+  l.month_utc,
+  ROUND(SUM(l.revenue), 2) AS revenue,
+  COUNT(DISTINCT l.customer_id) AS actives,
+  ROUND(SUM(l.revenue) / NULLIF (COUNT(DISTINCT l.customer_id), 0), 2) AS rev_per_active
+FROM
+  line l
+  JOIN segment s ON s.customer_id = l.customer_id
+GROUP BY
+  s.segment,
+  s.country,
+  l.month_utc
+ORDER BY
+  l.month_utc DESC,
+  revenue DESC,
+  s.segment,
+  s.country
 LIMIT 200;
-
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.
@@ -89,5 +103,4 @@ LIMIT 200;
 --    Expected result/shape: For sql-15 Exercise 6, expected output: Exactly one summary row. The final columns are `customers`, `orders`, `stored_revenue`, `computed_revenue`, and `payments`.
 --    Verify: For sql-15 Exercise 6, project `customer_id` plus the raw source columns from `customers`, `orders`, `order_items`, and `payments` at each join stage; record row count and distinct `customer_id`, then assert the final `customers`, `orders`, `stored_revenue`, `computed_revenue`, and `payments` values match those staged rows without unintended fanout or loss. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
 --    Hint ladder, rung 1: For sql-15 Exercise 6, run `customer_kpis`, `order_kpis`, `line_kpis`, and `payment_kpis` one at a time. Record each CTE's row count and `customer_id` uniqueness before the next stage uses it.
-
 ROLLBACK;

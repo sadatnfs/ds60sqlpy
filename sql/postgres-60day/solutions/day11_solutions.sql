@@ -14,15 +14,12 @@
 --
 -- Target: PostgreSQL 16+; run only in advanced_sql_training.
 -- ON_ERROR_STOP is supplied by the documented psql command.
-
 BEGIN;
 SET search_path TO training, public;
-
 -- Shared teaching contract
 -- Focus: Use `CASE` to encode mutually exclusive business rules in deliberate order while preserving NULL as a distinct state when required.
 -- Assumptions: Searched `CASE` uses first-match wins. Status/category labels are illustrative course rules, not universal business definitions.
 -- Pitfall: Overlapping broad conditions placed first make later branches unreachable; an omitted `ELSE` produces NULL.
-
 -- ---------------------------------------------------------------------------
 -- Exercise 1: Query writing
 -- Prompt: Classify orders as small, medium, or large by total amount.
@@ -35,16 +32,20 @@ SET search_path TO training, public;
 -- - `FROM`: establishes the starting relation and therefore the initial row grain.
 -- - `CASE`: encodes ordered business conditions; the first true branch wins and `ELSE` defines the remainder.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
-SELECT o.order_id,
-       o.total_amount,
-       CASE
-         WHEN o.total_amount >= 500 THEN 'large'
-         WHEN o.total_amount >= 100 THEN 'medium'
-         ELSE 'small'
-       END AS order_size
-FROM orders AS o
-ORDER BY o.order_id;
-
+SELECT
+  o.order_id,
+  o.total_amount,
+  CASE WHEN o.total_amount >= 500 THEN
+    'large'
+  WHEN o.total_amount >= 100 THEN
+    'medium'
+  ELSE
+    'small'
+  END AS order_size
+FROM
+  orders AS o
+ORDER BY
+  o.order_id;
 -- ---------------------------------------------------------------------------
 -- Exercise 2: Query writing
 -- Prompt: Count order statuses in paid-like, open, returned, and other buckets with conditional aggregation.
@@ -56,12 +57,13 @@ ORDER BY o.order_id;
 -- - `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
 -- - `FROM`: establishes the starting relation and therefore the initial row grain.
 -- - `FILTER (WHERE ...)`: limits one aggregate without removing rows needed by neighboring aggregates.
-SELECT COUNT(*) FILTER (WHERE o.status IN ('paid', 'shipped', 'delivered')) AS paid_like,
-       COUNT(*) FILTER (WHERE o.status = 'placed') AS open_orders,
-       COUNT(*) FILTER (WHERE o.status = 'returned') AS returned_orders,
-       COUNT(*) AS all_orders
-FROM orders AS o;
-
+SELECT
+  COUNT(*) FILTER (WHERE o.status IN ('paid', 'shipped', 'delivered')) AS paid_like,
+  COUNT(*) FILTER (WHERE o.status = 'placed') AS open_orders,
+  COUNT(*) FILTER (WHERE o.status = 'returned') AS returned_orders,
+  COUNT(*) AS all_orders
+FROM
+  orders AS o;
 -- ---------------------------------------------------------------------------
 -- Exercise 3: Query writing
 -- Prompt: Label missing customer segments separately from known segment values.
@@ -74,16 +76,20 @@ FROM orders AS o;
 -- - `FROM`: establishes the starting relation and therefore the initial row grain.
 -- - `CASE`: encodes ordered business conditions; the first true branch wins and `ELSE` defines the remainder.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
-SELECT c.customer_id,
-       c.segment,
-       CASE
-         WHEN c.segment IS NULL THEN 'missing'
-         WHEN c.segment IN ('gold', 'platinum') THEN 'premium'
-         ELSE 'core'
-       END AS segment_group
-FROM customers AS c
-ORDER BY c.customer_id;
-
+SELECT
+  c.customer_id,
+  c.segment,
+  CASE WHEN c.segment IS NULL THEN
+    'missing'
+  WHEN c.segment IN ('gold', 'platinum') THEN
+    'premium'
+  ELSE
+    'core'
+  END AS segment_group
+FROM
+  customers AS c
+ORDER BY
+  c.customer_id;
 -- ---------------------------------------------------------------------------
 -- Exercise 4: Prediction
 -- Prompt: Predict the label for 500 when `>= 100` appears before `>= 500`, then repair the branch order.
@@ -97,15 +103,21 @@ ORDER BY c.customer_id;
 -- - `FROM`: establishes the starting relation and therefore the initial row grain.
 -- - `CASE`: encodes ordered business conditions; the first true branch wins and `ELSE` defines the remainder.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
-SELECT amount,
-       CASE
-         WHEN amount >= 500 THEN 'high'
-         WHEN amount >= 100 THEN 'medium'
-         ELSE 'low'
-       END AS corrected_label
-FROM (VALUES (50::numeric), (100::numeric), (500::numeric)) AS sample(amount)
-ORDER BY amount;
-
+SELECT
+  amount,
+  CASE WHEN amount >= 500 THEN
+    'high'
+  WHEN amount >= 100 THEN
+    'medium'
+  ELSE
+    'low'
+  END AS corrected_label
+FROM (
+  VALUES (50::numeric),
+    (100::numeric),
+    (500::numeric)) AS sample (amount)
+ORDER BY
+  amount;
 -- ---------------------------------------------------------------------------
 -- Exercise 5: Debugging
 -- Prompt: Replace a CASE expression that returns mixed numeric and text types with one consistent output type.
@@ -119,15 +131,21 @@ ORDER BY amount;
 -- - `FROM`: establishes the starting relation and therefore the initial row grain.
 -- - `CASE`: encodes ordered business conditions; the first true branch wins and `ELSE` defines the remainder.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
-SELECT value,
-       CASE
-         WHEN value IS NULL THEN 'missing'
-         WHEN value = 0 THEN 'zero'
-         ELSE 'nonzero'
-       END AS value_state
-FROM (VALUES (NULL::integer), (0), (2)) AS sample(value)
-ORDER BY value NULLS FIRST;
-
+SELECT
+  value,
+  CASE WHEN value IS NULL THEN
+    'missing'
+  WHEN value = 0 THEN
+    'zero'
+  ELSE
+    'nonzero'
+  END AS value_state
+FROM (
+  VALUES (NULL::integer),
+    (0),
+    (2)) AS sample (value)
+ORDER BY
+  value NULLS FIRST;
 -- ---------------------------------------------------------------------------
 -- Exercise 6: Extension
 -- Prompt: Create payment-method display labels and preserve unknown future methods with an explicit fallback.
@@ -141,18 +159,26 @@ ORDER BY value NULLS FIRST;
 -- - `CASE`: encodes ordered business conditions; the first true branch wins and `ELSE` defines the remainder.
 -- - `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
 -- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
-SELECT p.method,
-       CASE p.method
-         WHEN 'card' THEN 'Card'
-         WHEN 'paypal' THEN 'PayPal'
-         WHEN 'bank' THEN 'Bank transfer'
-         WHEN 'credit' THEN 'Store credit'
-         ELSE 'Other'
-       END AS method_label,
-       COUNT(*) AS payment_count
-FROM payments AS p
-GROUP BY p.method
-ORDER BY p.method;
-
+SELECT
+  p.method,
+  CASE p.method
+  WHEN 'card' THEN
+    'Card'
+  WHEN 'paypal' THEN
+    'PayPal'
+  WHEN 'bank' THEN
+    'Bank transfer'
+  WHEN 'credit' THEN
+    'Store credit'
+  ELSE
+    'Other'
+  END AS method_label,
+  COUNT(*) AS payment_count
+FROM
+  payments AS p
+GROUP BY
+  p.method
+ORDER BY
+  p.method;
 -- No course answer persists changes or temporary objects.
 ROLLBACK;

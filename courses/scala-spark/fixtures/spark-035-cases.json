@@ -46,27 +46,10 @@
     }
   ],
   "golden": {
-    "first": [
-      "1:100",
-      "2:200"
-    ],
-    "final": [
-      "1:100",
-      "2:200",
-      "2:200",
-      "3:300"
-    ],
-    "run_input_rows": [
-      2,
-      2,
-      0,
-      4
-    ],
-    "counts": [
-      4,
-      3,
-      800
-    ],
+    "first": ["1:100", "2:200"],
+    "final": ["1:100", "2:200", "2:200", "3:300"],
+    "run_input_rows": [2, 2, 0, 4],
+    "counts": [4, 3, 800],
     "maximum_source_rows": 8,
     "query_deadline_seconds": 45,
     "same_checkpoint_query_id": "equal",

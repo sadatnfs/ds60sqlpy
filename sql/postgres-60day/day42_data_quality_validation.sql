@@ -18,38 +18,68 @@
 --
 BEGIN;
 SET search_path TO training, public;
-
 -- Null analysis and basic profiling
-SELECT 'customers' AS table,
-       COUNT(*) AS rows,
-       SUM(CASE WHEN email IS NULL THEN 1 ELSE 0 END) AS null_emails,
-       SUM(CASE WHEN country IS NULL THEN 1 ELSE 0 END) AS null_country
-FROM customers;
-
+SELECT
+  'customers' AS table,
+  COUNT(*) AS rows,
+  SUM(
+    CASE WHEN email IS NULL THEN
+      1
+    ELSE
+      0
+    END) AS null_emails,
+  SUM(
+    CASE WHEN country IS NULL THEN
+      1
+    ELSE
+      0
+    END) AS null_country
+FROM
+  customers;
 -- Duplicate detection (emails should be unique ideally)
-SELECT email, COUNT(*) AS cnt
-FROM customers
-GROUP BY email
-HAVING COUNT(*) > 1
-ORDER BY cnt DESC;
-
+SELECT
+  email,
+  COUNT(*) AS cnt
+FROM
+  customers
+GROUP BY
+  email
+HAVING
+  COUNT(*) > 1
+ORDER BY
+  cnt DESC;
 -- Orphan checks (should be zero due to FK, but as validation queries)
-SELECT oi.order_id
-FROM order_items oi
-LEFT JOIN orders o ON o.order_id = oi.order_id
-WHERE o.order_id IS NULL
+SELECT
+  oi.order_id
+FROM
+  order_items oi
+  LEFT JOIN orders o ON o.order_id = oi.order_id
+WHERE
+  o.order_id IS NULL
 LIMIT 10;
-
-SELECT p.payment_id
-FROM payments p
-LEFT JOIN orders o ON o.order_id = p.order_id
-WHERE o.order_id IS NULL
+SELECT
+  p.payment_id
+FROM
+  payments p
+  LEFT JOIN orders o ON o.order_id = p.order_id
+WHERE
+  o.order_id IS NULL
 LIMIT 10;
-
 -- Domain/constraint validation examples
-SELECT * FROM orders WHERE total_amount < 0 LIMIT 10;
-SELECT * FROM payments WHERE amount < 0 LIMIT 10;
-
+SELECT
+  *
+FROM
+  orders
+WHERE
+  total_amount < 0
+LIMIT 10;
+SELECT
+  *
+FROM
+  payments
+WHERE
+  amount < 0
+LIMIT 10;
 -- Exercises
 -- 1. Build a validation report summarizing nulls, duplicates, and constraint violations across core tables.
 --    Inputs: For sql-42 Exercise 1, read from `customers`, `orders`, `order_items`, `products`, and `payments`. Build the answer toward `check_name`, and `failing_rows`; keep `check_name` visible whenever the result has row-level grain.
@@ -85,5 +115,4 @@ SELECT * FROM payments WHERE amount < 0 LIMIT 10;
 --    Expected result/shape: For sql-42 Exercise 6, expected output: one row per `product_id`. The final columns are `promotion_a`, `promotion_b`, and `product_id`. The final order is `a.product_id, promotion_a, promotion_b`.
 --    Verify: For sql-42 Exercise 6, project `product_id` plus the raw source columns from `promotions` at each join stage; record row count and distinct `product_id`, then assert the final `promotion_a`, `promotion_b`, and `product_id` values match those staged rows without unintended fanout or loss. Insert rows immediately before, exactly at, and immediately after the literal lower and upper comparisons in the final `WHERE` clause; identify which rows pass each inclusive or exclusive comparison.
 --    Hint ladder, rung 1: For sql-42 Exercise 6, start with the first relation in `promotions`; after each join, record total rows and distinct `product_id` so the exact fanout or loss is visible.
-
 ROLLBACK;

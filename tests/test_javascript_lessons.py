@@ -7,6 +7,7 @@ import os
 import re
 import shutil
 import subprocess
+from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any
 
@@ -18,6 +19,19 @@ ALL_ENTRIES = json.loads((BASE / "lessons.json").read_text())["lessons"]
 # Preserve the original language/Node/browser-fixture contracts independently of D3.
 ENTRIES = [row for row in ALL_ENTRIES if int(row["id"].split("-")[-1]) <= 42]
 PLAN = {row["id"]: row for row in json.loads((BASE / "track.json").read_text())["lessons"]}
+
+
+class FixtureMarkup(HTMLParser):
+    """Read meaningful HTML attributes independently of quote and line style."""
+
+    def __init__(self, source: str) -> None:
+        super().__init__()
+        self.tags: list[tuple[str, dict[str, str | None]]] = []
+        self.feed(source)
+        self.close()
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        self.tags.append((tag, dict(attrs)))
 
 
 def test_registered_bundles_have_real_host_contracts_and_separate_solutions() -> None:
@@ -116,10 +130,14 @@ def test_bounded_host_examples_keep_failure_channels_and_cleanup_visible() -> No
     module = (BASE / "solutions/js-010_solution.mjs").read_text()
     assert "ERR_MODULE_NOT_FOUND" in module and "pathToFileURL" in module
     cancellation = (BASE / "solutions/js-013_solution.mjs").read_text()
-    assert "signal.removeEventListener('abort', onAbort)" in cancellation
+    assert re.search(
+        r"signal\s*\.\s*removeEventListener\s*\(\s*(['\"])abort\1\s*,\s*onAbort\s*,?\s*\)",
+        cancellation,
+    )
     assert "clearTimeout(timer)" in cancellation and "if (signal.aborted)" in cancellation
     http = (BASE / "solutions/js-017_solution.mjs").read_text()
-    assert "server.listen(0, '127.0.0.1'" in http and "server.closeAllConnections()" in http
+    assert re.search(r"server\s*\.\s*listen\s*\(\s*0\s*,\s*(['\"])127\.0\.0\.1\1\s*,", http)
+    assert "server.closeAllConnections()" in http
     assert "integerParameter" in http and "unsafe_total" in http
 
 
@@ -208,7 +226,9 @@ def test_browser_lessons_have_separate_real_fixtures_and_explicit_reading_profil
             for name in ["index.html", "app.js", "style.css", "README.md"]:
                 assert (base / name).is_file()
             markup = (base / "index.html").read_text()
-            assert "lang='en'" in markup and "app.js" in markup
+            tags = FixtureMarkup(markup).tags
+            assert any(tag == "html" and attrs.get("lang") == "en" for tag, attrs in tags)
+            assert any(tag == "script" and attrs.get("src") == "app.js" for tag, attrs in tags)
             instructions = (base / "README.md").read_text()
             assert "--bind 127.0.0.1" in instructions
             assert "No screen-reader compatibility claim" in instructions
@@ -217,7 +237,7 @@ def test_browser_lessons_have_separate_real_fixtures_and_explicit_reading_profil
     storage = (BASE / "solutions/browser/js-030/app.js").read_text()
     assert "localStorage.clear" not in storage
     assert "localStorage.removeItem(KEY)" in storage
-    assert "window.addEventListener('storage'" in storage
+    assert re.search(r"window\s*\.\s*addEventListener\s*\(\s*(['\"])storage\1\s*,", storage)
     rendering = (BASE / "solutions/browser/js-031/app.js").read_text()
     assert "innerHTML" not in rendering and "output.textContent = input.value" in rendering
     assert "url.origin !== location.origin" in rendering

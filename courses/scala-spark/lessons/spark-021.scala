@@ -1,7 +1,7 @@
 import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
-import java.nio.file.{Files,Path,Paths}
+import java.nio.file.{Files, Path, Paths}
 import scala.jdk.CollectionConverters._
 
 object Main {
@@ -11,7 +11,7 @@ object Main {
     finally paths.close()
   }
 
-  def projectionResult(spark: SparkSession, query: String): Seq[(Long,Long)] =
+  def projectionResult(spark: SparkSession, query: String): Seq[(Long, Long)] =
     throw new UnsupportedOperationException("Complete projectionResult")
 
   def explainText(spark: SparkSession, query: String, mode: String): String =
@@ -20,39 +20,50 @@ object Main {
   def readSchemaEvidence(formatted: String): String =
     throw new UnsupportedOperationException("Complete readSchemaEvidence")
 
-  def aggregateResult(spark: SparkSession, query: String): Seq[(Long,Long,Long)] =
+  def aggregateResult(spark: SparkSession, query: String): Seq[(Long, Long, Long)] =
     throw new UnsupportedOperationException("Complete aggregateResult")
 
   def normalizeEvidence(plan: String, root: String): String =
     throw new UnsupportedOperationException("Complete normalizeEvidence")
 
-  def configurationReceipt(spark: SparkSession): Map[String,String] =
+  def configurationReceipt(spark: SparkSession): Map[String, String] =
     throw new UnsupportedOperationException("Complete configurationReceipt")
 
   def main(args: Array[String]): Unit = {
     var ownedRoot: Path = null
-    val spark = SparkSession.builder().appName("ds60-spark-021").master("local[2]")
-      .config("spark.ui.enabled","false")
-      .config("spark.driver.host","127.0.0.1")
-      .config("spark.driver.bindAddress","127.0.0.1")
-      .config("spark.sql.shuffle.partitions","2")
-      .config("spark.sql.adaptive.enabled","false")
-      .config("spark.sql.ansi.enabled","true")
-      .config("spark.sql.session.timeZone","UTC").getOrCreate()
+    val spark = SparkSession
+      .builder()
+      .appName("ds60-spark-021")
+      .master("local[2]")
+      .config("spark.ui.enabled", "false")
+      .config("spark.driver.host", "127.0.0.1")
+      .config("spark.driver.bindAddress", "127.0.0.1")
+      .config("spark.sql.shuffle.partitions", "2")
+      .config("spark.sql.adaptive.enabled", "false")
+      .config("spark.sql.ansi.enabled", "true")
+      .config("spark.sql.session.timeZone", "UTC")
+      .getOrCreate()
     try {
       require(spark.sparkContext.master == "local[2]", "local-only course session")
       spark.sparkContext.setLogLevel("ERROR")
-      ownedRoot = Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(),".ds60-spark-021-")
-      val fixture = spark.range(0L,12L,1L,2).withColumn("group_id",col("id") % 3L).withColumn("amount",col("id") * 10L).withColumn("unused_payload",lit("xxxxxxxxxxxxxxxx"))
+      ownedRoot =
+        Files.createTempDirectory(Paths.get(".").toAbsolutePath.normalize(), ".ds60-spark-021-")
+      val fixture = spark
+        .range(0L, 12L, 1L, 2)
+        .withColumn("group_id", col("id") % 3L)
+        .withColumn("amount", col("id") * 10L)
+        .withColumn("unused_payload", lit("xxxxxxxxxxxxxxxx"))
       val dataPath = ownedRoot.resolve("data").toString
       fixture.write.mode("errorifexists").parquet(dataPath)
       val input = spark.read.parquet(dataPath)
       input.createOrReplaceTempView("ds60_spark_021_input")
-      val projectionQuery = "SELECT id,amount*2 AS doubled FROM ds60_spark_021_input WHERE amount>=30"
-      val aggregateQuery = "SELECT group_id,COUNT(*) AS n,SUM(amount) AS total FROM ds60_spark_021_input WHERE amount>=30 GROUP BY group_id"
+      val projectionQuery =
+        "SELECT id,amount*2 AS doubled FROM ds60_spark_021_input WHERE amount>=30"
+      val aggregateQuery =
+        "SELECT group_id,COUNT(*) AS n,SUM(amount) AS total FROM ds60_spark_021_input WHERE amount>=30 GROUP BY group_id"
       locally {
         assert(input.count() == 12L)
-        assert(input.columns.toSeq == Seq("id","group_id","amount","unused_payload"))
+        assert(input.columns.toSeq == Seq("id", "group_id", "amount", "unused_payload"))
         println("Owned Parquet fixture has four stored columns and12 rows")
       }
       locally {
@@ -61,7 +72,10 @@ object Main {
         spark.sql("EXPLAIN FORMATTED " + projectionQuery).show(false)
       }
       println("spark-021: worked examples passed; six task implementations remain")
-    } finally { try { if(ownedRoot != null) deleteOwned(ownedRoot) } finally { spark.stop() } }
+    } finally {
+      try { if (ownedRoot != null) deleteOwned(ownedRoot) }
+      finally { spark.stop() }
+    }
   }
 }
 

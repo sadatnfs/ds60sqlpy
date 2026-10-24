@@ -2,11 +2,8 @@
 -- rank constraint is not edited in place when a fourth rank becomes necessary.
 \set ON_ERROR_STOP on
 BEGIN;
-
-SELECT pg_catalog.pg_advisory_xact_lock(
-    pg_catalog.hashtextextended('ds60sqlpy:pro_migration_lab', 0)
-);
-
+SELECT
+  pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended('ds60sqlpy:pro_migration_lab', 0));
 DO $preflight$
 DECLARE
     id_exists boolean;
@@ -58,41 +55,27 @@ BEGIN
     );
 END
 $preflight$;
-
-SELECT pg_catalog.current_setting('ds60.migration_applied')::boolean
-    AS migration_applied
+SELECT
+  pg_catalog.current_setting('ds60.migration_applied')::boolean AS migration_applied
 \gset
-
 \if :migration_applied
-    \echo 'Migration 005 identity and schema contract verified; skipping body'
+\echo 'Migration 005 identity and schema contract verified; skipping body'
 \else
-    ALTER TABLE pro_migration_lab.priority_levels
-        DROP CONSTRAINT priority_levels_sort_rank_ck;
+ALTER TABLE pro_migration_lab.priority_levels
+  DROP CONSTRAINT priority_levels_sort_rank_ck;
 
-    ALTER TABLE pro_migration_lab.priority_levels
-        ADD CONSTRAINT priority_levels_sort_rank_ck
-        CHECK (sort_rank BETWEEN 1 AND 9);
+ALTER TABLE pro_migration_lab.priority_levels
+  ADD CONSTRAINT priority_levels_sort_rank_ck CHECK (sort_rank BETWEEN 1 AND 9);
 
-    INSERT INTO pro_migration_lab.priority_levels (
-        priority_code,
-        display_name,
-        sort_rank
-    )
-    VALUES ('critical', 'Critical priority', 4)
-    ON CONFLICT (priority_code) DO UPDATE
-    SET display_name = EXCLUDED.display_name,
-        sort_rank = EXCLUDED.sort_rank;
+INSERT INTO pro_migration_lab.priority_levels (priority_code, display_name, sort_rank)
+  VALUES ('critical', 'Critical priority', 4)
+ON CONFLICT (priority_code)
+  DO UPDATE SET
+    display_name = EXCLUDED.display_name,
+    sort_rank = EXCLUDED.sort_rank;
 
-    INSERT INTO pro_migration_lab.schema_migrations (
-        migration_id,
-        migration_name,
-        content_tag
-    )
-    VALUES (
-        5,
-        'forward_fix_priority_rank',
-        'course-fixture-005-v1'
-    );
+INSERT INTO pro_migration_lab.schema_migrations (migration_id, migration_name, content_tag)
+  VALUES (5, 'forward_fix_priority_rank', 'course-fixture-005-v1');
+
 \endif
-
 COMMIT;

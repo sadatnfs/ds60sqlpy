@@ -20,4 +20,6 @@
 // Exercise 6: Choose grouped or stacked bars for subgroup comparison.
 // Expected: Use shared baselines when precise subgroup comparison is the primary task.
 
-throw new Error("Implement the six D3 practice tasks in your saved pad before claiming completion.");
+throw new Error(
+  "Implement the six D3 practice tasks in your saved pad before claiming completion.",
+);

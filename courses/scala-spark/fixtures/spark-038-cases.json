@@ -55,25 +55,13 @@
     "synthetic_incidents": [
       {
         "kind": "skew",
-        "task_runtime_ms": [
-          100,
-          100,
-          10000
-        ],
+        "task_runtime_ms": [100, 100, 10000],
         "provenance": "synthetic"
       },
       {
         "kind": "state",
-        "retained_rows": [
-          10,
-          100,
-          1000
-        ],
-        "watermark": [
-          "unchanged",
-          "unchanged",
-          "unchanged"
-        ],
+        "retained_rows": [10, 100, 1000],
+        "watermark": ["unchanged", "unchanged", "unchanged"],
         "provenance": "synthetic"
       },
       {

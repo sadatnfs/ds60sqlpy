@@ -30,15 +30,23 @@
 #include <variant>
 #include <vector>
 
-long long serial_total(std::span<const int> xs){return std::accumulate(xs.begin(),xs.end(),0LL);}
-int main() {
-    const std::vector<int> rows{1,2,3,4,5,6};long long first=0,second=0;
-    std::thread a([&]{first=serial_total(std::span<const int>(rows).first(3));});std::thread b([&]{second=serial_total(std::span<const int>(rows).subspan(3));});a.join();b.join();assert(first==6 && second==15 && first+second==serial_total(rows));
-    assert(serial_total(std::span<const int>{})==0);
-    std::cout << "cpp-042 examples passed\n";
-    return 0;
+long long serial_total(std::span<const int> xs) {
+  return std::accumulate(xs.begin(), xs.end(), 0LL);
 }
-
+int main() {
+  const std::vector<int> rows{1, 2, 3, 4, 5, 6};
+  long long first = 0, second = 0;
+  std::thread a(
+      [&] { first = serial_total(std::span<const int>(rows).first(3)); });
+  std::thread b(
+      [&] { second = serial_total(std::span<const int>(rows).subspan(3)); });
+  a.join();
+  b.join();
+  assert(first == 6 && second == 15 && first + second == serial_total(rows));
+  assert(serial_total(std::span<const int>{}) == 0);
+  std::cout << "cpp-042 examples passed\n";
+  return 0;
+}
 
 // Exercise 1: Define budgets. Declare at most 2 workers, 100 input rows and 16 characters per integer field. Expected: Three limits plus rejection behavior documented.
 // Exercise 2: Prove serial parity. Compare two-worker total on [1,2,3,4,5,6] with serial oracle. Expected: Subtotals 6 and 15; total 21.

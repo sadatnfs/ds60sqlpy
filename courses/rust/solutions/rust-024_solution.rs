@@ -1,9 +1,9 @@
-
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let cases = [(-2, 0), (0, 0), (3, 3)];
-        for (input, expected) in cases { assert_eq!(input.max(0), expected); }
+        for (input, expected) in cases {
+            assert_eq!(input.max(0), expected);
+        }
     }
 
     {

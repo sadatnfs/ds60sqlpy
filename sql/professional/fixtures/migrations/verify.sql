@@ -1,6 +1,5 @@
 -- Verify the final fixture state. Any failed invariant stops psql.
 \set ON_ERROR_STOP on
-
 DO $verify$
 DECLARE
     observed_versions integer[];
@@ -61,26 +60,32 @@ END
 $verify$;
 
 SELECT
-    sm.migration_id,
-    sm.migration_name,
-    sm.content_tag
-FROM pro_migration_lab.schema_migrations AS sm
-ORDER BY sm.migration_id;
+  sm.migration_id,
+  sm.migration_name,
+  sm.content_tag
+FROM
+  pro_migration_lab.schema_migrations AS sm
+ORDER BY
+  sm.migration_id;
 
 SELECT
-    api.request_key,
-    api.summary,
-    api.priority_code,
-    api.opened_at
-FROM pro_migration_lab.service_requests_api AS api
-ORDER BY api.request_key;
+  api.request_key,
+  api.summary,
+  api.priority_code,
+  api.opened_at
+FROM
+  pro_migration_lab.service_requests_api AS api
+ORDER BY
+  api.request_key;
 
 SELECT
-    pl.priority_code,
-    pl.display_name,
-    pl.sort_rank
-FROM pro_migration_lab.priority_levels AS pl
-ORDER BY pl.sort_rank, pl.priority_code;
+  pl.priority_code,
+  pl.display_name,
+  pl.sort_rank
+FROM
+  pro_migration_lab.priority_levels AS pl
+ORDER BY
+  pl.sort_rank,
+  pl.priority_code;
 
 \echo 'Migration fixture verification passed'
-

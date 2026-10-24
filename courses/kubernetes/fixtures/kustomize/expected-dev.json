@@ -34,11 +34,7 @@
             "name": "hello",
             "image": "ds60sqlpy-k8s-fixture:0.2.0",
             "imagePullPolicy": "Never",
-            "command": [
-              "python",
-              "/fixture.py",
-              "server"
-            ],
+            "command": ["python", "/fixture.py", "server"],
             "ports": [
               {
                 "name": "http",
@@ -67,9 +63,7 @@
               "allowPrivilegeEscalation": false,
               "readOnlyRootFilesystem": true,
               "capabilities": {
-                "drop": [
-                  "ALL"
-                ]
+                "drop": ["ALL"]
               }
             }
           }

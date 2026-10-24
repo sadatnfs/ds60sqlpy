@@ -8,10 +8,9 @@
 // Task 6: Design checks that distinguish one-to-one, one-to-many and many-to-many joins before aggregation.
 using System;
 
-internal static class Program
-{
-    private static void Main()
-    {
-        throw new NotImplementedException("Implement your own lesson attempt before running.");
-    }
+internal static class Program {
+  private static void Main() {
+    throw new NotImplementedException(
+        "Implement your own lesson attempt before running.");
+  }
 }

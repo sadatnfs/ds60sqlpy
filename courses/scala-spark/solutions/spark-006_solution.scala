@@ -1,5 +1,3 @@
-
-
 object Main {
   sealed trait Event { def id: String }
   final case class Paid(id: String, cents: Long) extends Event {
@@ -21,16 +19,16 @@ object Main {
 
   def kind(event: Event): String = {
     event match {
-      case Paid(_, _) => "paid"
-      case Voided(_, _) => "voided"
+      case Paid(_, _)     => "paid"
+      case Voided(_, _)   => "voided"
       case Refunded(_, _) => "refunded"
     }
   }
 
   def signedCents(event: Event): Long = {
     event match {
-      case Paid(_, amount) => amount
-      case Voided(_, _) => 0L
+      case Paid(_, amount)     => amount
+      case Voided(_, _)        => 0L
       case Refunded(_, amount) => -amount
     }
   }
@@ -40,58 +38,68 @@ object Main {
   }
 
   def netTotal(events: Seq[Event]): Long = {
-    events.foldLeft(0L)((total,event) => Math.addExact(total,signedCents(event)))
+    events.foldLeft(0L)((total, event) => Math.addExact(total, signedCents(event)))
   }
 
   def audit(events: Seq[Event]): (Seq[String], Long, Map[String, Long]) = {
     val identities = events.map(eventId)
     require(identities.distinct.size == identities.size, "event IDs must be unique")
-    val counts = events.foldLeft(Map("paid" -> 0L,"voided" -> 0L,"refunded" -> 0L)) { (current,event) =>
-      val state = kind(event)
-      current.updated(state,current(state) + 1L)
+    val counts = events.foldLeft(Map("paid" -> 0L, "voided" -> 0L, "refunded" -> 0L)) {
+      (current, event) =>
+        val state = kind(event)
+        current.updated(state, current(state) + 1L)
     }
-    (identities,netTotal(events),counts)
+    (identities, netTotal(events), counts)
   }
 
   def expectIllegalArgument(body: => Any): Unit = {
     var caught = false
-    try body catch { case _: IllegalArgumentException => caught = true }
+    try body
+    catch { case _: IllegalArgumentException => caught = true }
     assert(caught, "Expected IllegalArgumentException")
   }
   def expectArithmetic(body: => Any): Unit = {
     var caught = false
-    try body catch { case _: ArithmeticException => caught = true }
+    try body
+    catch { case _: ArithmeticException => caught = true }
     assert(caught, "Expected ArithmeticException")
   }
 
   def main(args: Array[String]): Unit = {
     // Exercise 1: Keep identity independent of value
-    val events: Seq[Event] = Seq(Paid("p1",100L),Paid("p2",100L),Voided("v1","duplicate"),Refunded("r1",25L))
-    assert(events.map(eventId) == Seq("p1","p2","v1","r1"))
-    expectIllegalArgument(Paid("",100L))
+    val events: Seq[Event] =
+      Seq(Paid("p1", 100L), Paid("p2", 100L), Voided("v1", "duplicate"), Refunded("r1", 25L))
+    assert(events.map(eventId) == Seq("p1", "p2", "v1", "r1"))
+    expectIllegalArgument(Paid("", 100L))
     // Exercise 2: Match every defined state
-    assert(events.map(kind) == Seq("paid","paid","voided","refunded"))
-    assert(kind(Paid("zero",0L)) == "paid")
+    assert(events.map(kind) == Seq("paid", "paid", "voided", "refunded"))
+    assert(kind(Paid("zero", 0L)) == "paid")
     // Exercise 3: Separate magnitude from signed contribution
-    assert(events.map(signedCents) == Seq(100L,100L,0L,-25L))
-    assert(signedCents(Refunded("r0",0L)) == 0L && kind(Refunded("r0",0L)) == "refunded")
-    expectIllegalArgument(Paid("bad",-1L))
+    assert(events.map(signedCents) == Seq(100L, 100L, 0L, -25L))
+    assert(signedCents(Refunded("r0", 0L)) == 0L && kind(Refunded("r0", 0L)) == "refunded")
+    expectIllegalArgument(Paid("bad", -1L))
     // Exercise 4: Create a validated replacement value
-    val original = Paid("p1",100L)
-    val revised = revisePaid(original,125L)
-    assert(original.cents == 100L && revised == Paid("p1",125L) && revised.id == original.id)
-    expectIllegalArgument(revisePaid(original,1000001L))
+    val original = Paid("p1", 100L)
+    val revised = revisePaid(original, 125L)
+    assert(original.cents == 100L && revised == Paid("p1", 125L) && revised.id == original.id)
+    expectIllegalArgument(revisePaid(original, 1000001L))
     // Exercise 5: Reduce signed events without dropping zero states
     assert(netTotal(events) == 175L && netTotal(Seq.empty) == 0L)
-    val zeroStates: Seq[Event] = Seq(Paid("z",0L),Voided("v","reason"))
+    val zeroStates: Seq[Event] = Seq(Paid("z", 0L), Voided("v", "reason"))
     assert(netTotal(zeroStates) == 0L && zeroStates.size == 2)
     // Exercise 6: Reconcile identity, state and net value
     val report = audit(events)
-    assert(report._1 == Seq("p1","p2","v1","r1") && report._2 == 175L)
-    assert(report._3 == Map("paid" -> 2L,"voided" -> 1L,"refunded" -> 1L) && report._3.values.sum == 4L)
-    expectIllegalArgument(audit(Seq(Paid("same",10L),Paid("same",10L))))
+    assert(report._1 == Seq("p1", "p2", "v1", "r1") && report._2 == 175L)
+    assert(
+      report._3 == Map("paid" -> 2L, "voided" -> 1L, "refunded" -> 1L) && report._3.values.sum == 4L
+    )
+    expectIllegalArgument(audit(Seq(Paid("same", 10L), Paid("same", 10L))))
     println("spark-006: six reference contracts passed")
-    println("Scala=" + scala.util.Properties.versionNumberString + "; Java=" + System.getProperty("java.version"))
+    println(
+      "Scala=" + scala.util.Properties.versionNumberString + "; Java=" + System.getProperty(
+        "java.version"
+      )
+    )
   }
 }
 

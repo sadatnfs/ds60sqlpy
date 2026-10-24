@@ -18,36 +18,47 @@
 --
 BEGIN;
 SET search_path TO training, public;
-
 -- Study contract
 -- Focus: Choose literal, wildcard, or regular-expression matching from the text grammar and make case, escaping, and anchoring explicit.
 -- Assumptions: PostgreSQL `LIKE` is case-sensitive, `ILIKE` is case-insensitive, and POSIX regex operators use `~`/`~*`. Collation can affect text behavior.
 -- Pitfall: Leading wildcards can prevent ordinary b-tree use; unanchored or overly broad regex patterns can match more text than intended.
 -- Predict row grain and NULL/order behavior before executing each example.
-
 -- LIKE/ILIKE patterns
-SELECT customer_id, full_name, email
-FROM customers
-WHERE email ILIKE '%@example.com' ESCAPE '\'
+SELECT
+  customer_id,
+  full_name,
+  email
+FROM
+  customers
+WHERE
+  email ILIKE '%@example.com' ESCAPE '\'
   AND full_name ILIKE 'customer %' ESCAPE '\'
-ORDER BY customer_id
+ORDER BY
+  customer_id
 LIMIT 20;
-
 -- Regex with ~ and ~*
-SELECT product_id, name, category
-FROM products
-WHERE name ~ '^Product [0-9]{2,3}$'
-ORDER BY product_id
+SELECT
+  product_id,
+  name,
+  category
+FROM
+  products
+WHERE
+  name ~ '^Product [0-9]{2,3}$'
+ORDER BY
+  product_id
 LIMIT 20;
-
 -- Full-text search (basic)
 -- Ensure textsearch configs are available (Postgres built-in)
-SELECT p.product_id, p.name
-FROM products p
-WHERE to_tsvector('english', p.name || ' ' || p.category)
-      @@ to_tsquery('english', 'electronics | sports')
-ORDER BY p.product_id;
-
+SELECT
+  p.product_id,
+  p.name
+FROM
+  products p
+WHERE
+  to_tsvector('english', p.name || ' ' || p.category) @@ to_tsquery('english', 'electronics | sports')
+ORDER BY
+  p.product_id;
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.
@@ -87,5 +98,4 @@ ORDER BY p.product_id;
 --    Expected result/shape: For sql-29 Exercise 6, expected output: One row per customer with one classification. The final columns are `customer_id`, `email`, and `email_class`. The final order is `c.customer_id`.
 --    Verify: For sql-29 Exercise 6, evaluate each of `email`, and `email_class` in a separate control `SELECT` over `customers`; require one final row and compare every value. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
 --    Hint ladder, rung 1: For sql-29 Exercise 6, check `c.customer_id` before applying the row cap.
-
 ROLLBACK;

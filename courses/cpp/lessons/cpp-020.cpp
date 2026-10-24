@@ -31,14 +31,15 @@
 #include <vector>
 
 #include <concepts>
-template<std::integral T> T identity_sum(T a,T b) { return a+b; }
+template <std::integral T> T identity_sum(T a, T b) { return a + b; }
 int main() {
-    assert(identity_sum(2,3)==5); assert(identity_sum(2LL,3LL)==5LL);
-    static_assert(std::integral<int>); static_assert(!std::integral<double>);
-    std::cout << "cpp-020 examples passed\n";
-    return 0;
+  assert(identity_sum(2, 3) == 5);
+  assert(identity_sum(2LL, 3LL) == 5LL);
+  static_assert(std::integral<int>);
+  static_assert(!std::integral<double>);
+  std::cout << "cpp-020 examples passed\n";
+  return 0;
 }
-
 
 // Exercise 1: Read deduction. Call identity_sum with int values and long long values. Expected: Result types int and long long respectively.
 // Exercise 2: Reject a category. Try identity_sum with two strings in a scratch file. Expected: Constraint-related compile failure.

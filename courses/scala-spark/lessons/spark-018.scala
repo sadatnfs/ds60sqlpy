@@ -2,14 +2,12 @@ import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 
-
 object Main {
-
 
   def parseInstants(raw: DataFrame): DataFrame =
     throw new UnsupportedOperationException("Complete parseInstants")
 
-  def renderClock(events: DataFrame, zone: String): Seq[(Long,String)] =
+  def renderClock(events: DataFrame, zone: String): Seq[(Long, String)] =
     throw new UnsupportedOperationException("Complete renderClock")
 
   def localDay(events: DataFrame): DataFrame =
@@ -18,34 +16,59 @@ object Main {
   def localFields(spark: SparkSession): Seq[String] =
     throw new UnsupportedOperationException("Complete localFields")
 
-  def foldEvidence(events: DataFrame): (Int,Int) =
+  def foldEvidence(events: DataFrame): (Int, Int) =
     throw new UnsupportedOperationException("Complete foldEvidence")
 
   def parseLedger(spark: SparkSession): DataFrame =
     throw new UnsupportedOperationException("Complete parseLedger")
 
   def main(args: Array[String]): Unit = {
-    val spark = SparkSession.builder().appName("ds60-spark-018").master("local[2]")
-      .config("spark.ui.enabled","false")
-      .config("spark.driver.host","127.0.0.1")
-      .config("spark.driver.bindAddress","127.0.0.1")
-      .config("spark.sql.shuffle.partitions","2")
-      .config("spark.sql.adaptive.enabled","false")
-      .config("spark.sql.ansi.enabled","true")
-      .config("spark.sql.session.timeZone","UTC").getOrCreate()
+    val spark = SparkSession
+      .builder()
+      .appName("ds60-spark-018")
+      .master("local[2]")
+      .config("spark.ui.enabled", "false")
+      .config("spark.driver.host", "127.0.0.1")
+      .config("spark.driver.bindAddress", "127.0.0.1")
+      .config("spark.sql.shuffle.partitions", "2")
+      .config("spark.sql.adaptive.enabled", "false")
+      .config("spark.sql.ansi.enabled", "true")
+      .config("spark.sql.session.timeZone", "UTC")
+      .getOrCreate()
     try {
       require(spark.sparkContext.master == "local[2]", "local-only course session")
       spark.sparkContext.setLogLevel("ERROR")
-      spark.conf.set("spark.sql.timestampType","TIMESTAMP_LTZ")
-      val schema = StructType(Seq(StructField("event_id",LongType,false),StructField("text",StringType,false)))
-      val raw = spark.createDataFrame(spark.sparkContext.parallelize(Seq(Row(1L,"2024-11-03T07:00:00Z"),Row(2L,"2024-11-03T01:30:00-07:00"),Row(3L,"2024-11-03T01:30:00-08:00"),Row(4L,"2024-11-04T08:00:00Z"),Row(5L,"2024-11-03T08:30:00Z"),Row(6L,"2024-11-03T06:59:59Z")),2),schema)
+      spark.conf.set("spark.sql.timestampType", "TIMESTAMP_LTZ")
+      val schema = StructType(
+        Seq(StructField("event_id", LongType, false), StructField("text", StringType, false))
+      )
+      val raw = spark.createDataFrame(
+        spark.sparkContext.parallelize(
+          Seq(
+            Row(1L, "2024-11-03T07:00:00Z"),
+            Row(2L, "2024-11-03T01:30:00-07:00"),
+            Row(3L, "2024-11-03T01:30:00-08:00"),
+            Row(4L, "2024-11-04T08:00:00Z"),
+            Row(5L, "2024-11-03T08:30:00Z"),
+            Row(6L, "2024-11-03T06:59:59Z")
+          ),
+          2
+        ),
+        schema
+      )
       locally {
-        val pair = spark.sql("SELECT unix_timestamp(to_timestamp('2024-11-03T08:30:00Z')) AS utc, unix_timestamp(to_timestamp('2024-11-03T01:30:00-07:00')) AS offset")
-        val r = pair.first();assert(r.getLong(0) == r.getLong(1))
+        val pair = spark.sql(
+          "SELECT unix_timestamp(to_timestamp('2024-11-03T08:30:00Z')) AS utc, unix_timestamp(to_timestamp('2024-11-03T01:30:00-07:00')) AS offset"
+        )
+        val r = pair.first(); assert(r.getLong(0) == r.getLong(1))
         println("Different text, same instant")
       }
       locally {
-        val r = spark.sql("SELECT timestampdiff(HOUR,to_timestamp('2024-11-03T07:00:00Z'),to_timestamp('2024-11-04T08:00:00Z')) AS hours").first()
+        val r = spark
+          .sql(
+            "SELECT timestampdiff(HOUR,to_timestamp('2024-11-03T07:00:00Z'),to_timestamp('2024-11-04T08:00:00Z')) AS hours"
+          )
+          .first()
         assert(r.getLong(0) == 25L)
         println("Declared Los Angeles day spans 25 elapsed hours")
       }

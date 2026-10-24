@@ -1,4 +1,6 @@
-fn larger<T: Ord>(left: T, right: T) -> T { if left >= right { left } else { right } }
+fn larger<T: Ord>(left: T, right: T) -> T {
+    if left >= right { left } else { right }
+}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     {

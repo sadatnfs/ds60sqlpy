@@ -1,18 +1,22 @@
 // js-066: complete offline D3 browser reference.
-if (typeof d3 !== 'object' || d3.version !== '7.9.0') throw new Error('Prepared D3 7.9.0 is required.');
-const host = document.querySelector('#chart');
-const output = document.querySelector('#output');
-if (!host || !output) throw new Error('Preview chart/output nodes are required.');
+if (typeof d3 !== "object" || d3.version !== "7.9.0")
+  throw new Error("Prepared D3 7.9.0 is required.");
+const host = document.querySelector("#chart");
+const output = document.querySelector("#output");
+if (!host || !output) throw new Error("Preview chart/output nodes are required.");
 host.replaceChildren();
-const check = (condition, message) => { if (!condition) throw new Error(message); };
-const svg = d3.select(host)
-  .append('svg')
-  .attr('viewBox', '0 0 640 360')
-  .attr('role', 'img')
-  .attr('aria-label', "D3 capstone: an accessible, tested analytical dashboard")
-  .style('width', '100%')
-  .style('max-width', '640px');
-svg.append('title').text("D3 capstone: an accessible, tested analytical dashboard");
+const check = (condition, message) => {
+  if (!condition) throw new Error(message);
+};
+const svg = d3
+  .select(host)
+  .append("svg")
+  .attr("viewBox", "0 0 640 360")
+  .attr("role", "img")
+  .attr("aria-label", "D3 capstone: an accessible, tested analytical dashboard")
+  .style("width", "100%")
+  .style("max-width", "640px");
+svg.append("title").text("D3 capstone: an accessible, tested analytical dashboard");
 let chartWidth = Math.max(240, Math.min(host.clientWidth, 640));
 svg.attr("viewBox", `0 0 ${chartWidth} 300`).style("font-size", "14px");
 const rows = [
@@ -88,9 +92,7 @@ function render(group) {
     .style("padding", ".3rem .6rem")
     .style("text-align", (d, i) => (i ? "right" : "left"))
     .text((d) => d);
-  summary.text(
-    `${visible.length} records; total ${d3.sum(visible, (d) => d.hours)} hours`,
-  );
+  summary.text(`${visible.length} records; total ${d3.sum(visible, (d) => d.hours)} hours`);
   return visible;
 }
 select.on("change", (event) => render(event.target.value));
@@ -108,9 +110,7 @@ check(
 );
 d3.select(host)
   .append("p")
-  .text(
-    "Synthetic study hours by learner group; this fixture is not a population estimate.",
-  );
+  .text("Synthetic study hours by learner group; this fixture is not a population estimate.");
 let resizeFrame = 0;
 const observer = new ResizeObserver(() => {
   if (resizeFrame !== 0) return;
@@ -125,10 +125,14 @@ const observer = new ResizeObserver(() => {
   });
 });
 observer.observe(host);
-addEventListener("pagehide", () => {
-  observer.disconnect();
-  if (resizeFrame !== 0) cancelAnimationFrame(resizeFrame);
-}, { once: true });
+addEventListener(
+  "pagehide",
+  () => {
+    observer.disconnect();
+    if (resizeFrame !== 0) cancelAnimationFrame(resizeFrame);
+  },
+  { once: true },
+);
 
 output.textContent = "js-066 D3 complete";
 console.log("js-066 D3 complete");

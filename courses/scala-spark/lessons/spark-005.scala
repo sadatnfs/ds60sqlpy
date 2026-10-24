@@ -1,7 +1,4 @@
-
-
 object Main {
-
 
   def parseAmount(raw: Option[String]): Option[Long] =
     throw new UnsupportedOperationException("Complete parseAmount")

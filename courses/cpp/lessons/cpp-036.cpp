@@ -30,15 +30,16 @@
 #include <variant>
 #include <vector>
 
-constexpr int square(int x){return x*x;}
-consteval int fixed_limit(){return 16;}
+constexpr int square(int x) { return x * x; }
+consteval int fixed_limit() { return 16; }
 int main() {
-    static_assert(square(4)==16);static_assert(fixed_limit()==16);
-    int runtime=5;assert(square(runtime)==25);
-    std::cout << "cpp-036 examples passed\n";
-    return 0;
+  static_assert(square(4) == 16);
+  static_assert(fixed_limit() == 16);
+  int runtime = 5;
+  assert(square(runtime) == 25);
+  std::cout << "cpp-036 examples passed\n";
+  return 0;
 }
-
 
 // Exercise 1: Distinguish phases. Classify static_assert(square(4)==16) and square(runtime). Expected: First compile-time requirement; second runtime-capable call.
 // Exercise 2: Add a lookup table. Build squares for indices 0 through 4 with constexpr data. Expected: [0,1,4,9,16].

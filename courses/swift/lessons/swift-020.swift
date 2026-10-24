@@ -10,7 +10,7 @@ import Foundation
 
 @main
 struct LessonMain {
-    static func main() async throws {
-        fatalError("Implement your own lesson attempt before running.")
-    }
+  static func main() async throws {
+    fatalError("Implement your own lesson attempt before running.")
+  }
 }

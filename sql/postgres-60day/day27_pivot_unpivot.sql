@@ -18,38 +18,28 @@
 --
 BEGIN;
 SET search_path TO training, public;
-
 -- Study contract
 -- Focus: Pivot with conditional aggregation when output categories are known, and unpivot with explicit typed rows while preserving missing-value meaning.
 -- Assumptions: PostgreSQL core has no portable dynamic PIVOT keyword. `FILTER`, `CASE`, `VALUES`, JSON objects, or optional `tablefunc` serve different needs.
 -- Pitfall: Replacing missing category combinations with zero is a business decision; dynamic columns are difficult for stable downstream schemas.
 -- Predict row grain and NULL/order behavior before executing each example.
-
 -- Approach 1: Conditional aggregation (portable)
-SELECT p.category,
-       SUM(oi.quantity) FILTER (
-         WHERE EXTRACT(MONTH FROM o.order_date AT TIME ZONE 'UTC') = 1
-       ) AS jan_qty,
-       SUM(oi.quantity) FILTER (
-         WHERE EXTRACT(MONTH FROM o.order_date AT TIME ZONE 'UTC') = 2
-       ) AS feb_qty,
-       SUM(oi.quantity) FILTER (
-         WHERE EXTRACT(MONTH FROM o.order_date AT TIME ZONE 'UTC') = 3
-       ) AS mar_qty
-FROM order_items oi
-JOIN orders o ON o.order_id = oi.order_id
-JOIN products p ON p.product_id = oi.product_id
-WHERE o.order_date >= (
-        date_trunc('year', CURRENT_TIMESTAMP AT TIME ZONE 'UTC')
-        AT TIME ZONE 'UTC'
-      )
-  AND o.order_date < (
-        date_trunc('year', CURRENT_TIMESTAMP AT TIME ZONE 'UTC')
-        + INTERVAL '1 year'
-      ) AT TIME ZONE 'UTC'
-GROUP BY p.category
-ORDER BY p.category;
-
+SELECT
+  p.category,
+  SUM(oi.quantity) FILTER (WHERE EXTRACT(MONTH FROM o.order_date AT TIME ZONE 'UTC') = 1) AS jan_qty,
+  SUM(oi.quantity) FILTER (WHERE EXTRACT(MONTH FROM o.order_date AT TIME ZONE 'UTC') = 2) AS feb_qty,
+  SUM(oi.quantity) FILTER (WHERE EXTRACT(MONTH FROM o.order_date AT TIME ZONE 'UTC') = 3) AS mar_qty
+FROM
+  order_items oi
+  JOIN orders o ON o.order_id = oi.order_id
+  JOIN products p ON p.product_id = oi.product_id
+WHERE
+  o.order_date >= (date_trunc('year', CURRENT_TIMESTAMP AT TIME ZONE 'UTC') AT TIME ZONE 'UTC')
+  AND o.order_date < (date_trunc('year', CURRENT_TIMESTAMP AT TIME ZONE 'UTC') + INTERVAL '1 year') AT TIME ZONE 'UTC'
+GROUP BY
+  p.category
+ORDER BY
+  p.category;
 -- Approach 2: crosstab (requires the optional tablefunc extension; an
 -- authorized database role must install it before this query is used)
 -- SELECT * FROM crosstab(
@@ -66,40 +56,42 @@ ORDER BY p.category;
 --   $$,
 --   $$ SELECT m FROM generate_series(1,12) AS t(m) $$
 -- ) AS ct(category text, m1 numeric, m2 numeric, m3 numeric, m4 numeric, m5 numeric, m6 numeric, m7 numeric, m8 numeric, m9 numeric, m10 numeric, m11 numeric, m12 numeric);
-
 -- UNPIVOT-like: calculate the wide row once, then turn named columns into rows.
 WITH source AS (
-  SELECT p.category,
-         EXTRACT(MONTH FROM o.order_date AT TIME ZONE 'UTC')::integer
-           AS month_number,
-         oi.quantity
-  FROM order_items oi
-  JOIN orders o ON o.order_id = oi.order_id
-  JOIN products p ON p.product_id = oi.product_id
-  WHERE o.order_date >= (
-          date_trunc('year', CURRENT_TIMESTAMP AT TIME ZONE 'UTC')
-          AT TIME ZONE 'UTC'
-        )
-    AND o.order_date < (
-          date_trunc('year', CURRENT_TIMESTAMP AT TIME ZONE 'UTC')
-          + INTERVAL '1 year'
-        ) AT TIME ZONE 'UTC'
-), wide AS (
-  SELECT category,
-         SUM(quantity) FILTER (WHERE month_number = 1) AS jan_qty,
-         SUM(quantity) FILTER (WHERE month_number = 2) AS feb_qty
-  FROM source
-  GROUP BY category
+  SELECT
+    p.category,
+    EXTRACT(MONTH FROM o.order_date AT TIME ZONE 'UTC')::integer AS month_number,
+    oi.quantity
+  FROM
+    order_items oi
+    JOIN orders o ON o.order_id = oi.order_id
+    JOIN products p ON p.product_id = oi.product_id
+  WHERE
+    o.order_date >= (date_trunc('year', CURRENT_TIMESTAMP AT TIME ZONE 'UTC') AT TIME ZONE 'UTC')
+    AND o.order_date < (date_trunc('year', CURRENT_TIMESTAMP AT TIME ZONE 'UTC') + INTERVAL '1 year') AT TIME ZONE 'UTC'
+),
+wide AS (
+  SELECT
+    category,
+    SUM(quantity) FILTER (WHERE month_number = 1) AS jan_qty,
+  SUM(quantity) FILTER (WHERE month_number = 2) AS feb_qty
+FROM
+  source
+GROUP BY
+  category
 )
-SELECT wide.category,
-       month_value.month_name,
-       month_value.quantity
-FROM wide
-CROSS JOIN LATERAL (
-  VALUES ('jan', wide.jan_qty), ('feb', wide.feb_qty)
-) AS month_value(month_name, quantity)
-ORDER BY wide.category, month_value.month_name;
-
+SELECT
+  wide.category,
+  month_value.month_name,
+  month_value.quantity
+FROM
+  wide
+  CROSS JOIN LATERAL (
+    VALUES ('jan', wide.jan_qty),
+      ('feb', wide.feb_qty)) AS month_value (month_name, quantity)
+ORDER BY
+  wide.category,
+  month_value.month_name;
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.
@@ -139,5 +131,4 @@ ORDER BY wide.category, month_value.month_name;
 --    Expected result/shape: For sql-27 Exercise 6, expected output: Two reconstructed rows matching the source. The final columns are `company`, `q1`, and `q2`. The final order is `company`.
 --    Verify: For sql-27 Exercise 6, independently aggregate `wide` by `company`; require one output row for every distinct `company` tuple and compare `q1`, and `q2` tuple by tuple. Repeat with `NULL` in `company`, and `q1` and state whether the row is kept, rejected, or classified.
 --    Hint ladder, rung 1: For sql-27 Exercise 6, run `long` one at a time. Record each CTE's row count and `company` uniqueness before the next stage uses it.
-
 ROLLBACK;

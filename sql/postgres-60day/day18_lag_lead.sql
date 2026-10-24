@@ -18,65 +18,64 @@
 --
 BEGIN;
 SET search_path TO training, public;
-
 -- Study contract
 -- Focus: Use `LAG` and `LEAD` to compare adjacent rows only after defining partition, chronology, tie-breakers, and first/last-row behavior.
 -- Assumptions: Intervals are computed from `timestamptz` instants. The first/last row in a partition has no adjacent value and therefore returns NULL.
 -- Pitfall: Omitting a partition compares unrelated entities; ordering only by a nonunique timestamp makes adjacency ambiguous.
 -- Predict row grain and NULL/order behavior before executing each example.
-
 -- Period-over-period change per customer
 WITH cust_orders AS (
-  SELECT o.customer_id,
-         o.order_id,
-         o.order_date,
-         o.total_amount
-  FROM orders o
+  SELECT
+    o.customer_id,
+    o.order_id,
+    o.order_date,
+    o.total_amount
+  FROM
+    orders o
 )
-SELECT customer_id,
-       order_id,
-       order_date,
-       total_amount,
-       LAG(total_amount) OVER (
-         PARTITION BY customer_id
-         ORDER BY order_date, order_id
-       ) AS prev_order_amount,
-       total_amount - LAG(total_amount) OVER (
-         PARTITION BY customer_id
-         ORDER BY order_date, order_id
-       ) AS delta_from_prev,
-       LEAD(total_amount) OVER (
-         PARTITION BY customer_id
-         ORDER BY order_date, order_id
-       ) AS next_order_amount
-FROM cust_orders
-ORDER BY customer_id, order_date, order_id
+SELECT
+  customer_id,
+  order_id,
+  order_date,
+  total_amount,
+  LAG(total_amount) OVER (PARTITION BY customer_id ORDER BY order_date, order_id) AS prev_order_amount,
+  total_amount - LAG(total_amount) OVER (PARTITION BY customer_id ORDER BY order_date, order_id) AS delta_from_prev,
+  LEAD(total_amount) OVER (PARTITION BY customer_id ORDER BY order_date, order_id) AS next_order_amount
+FROM
+  cust_orders
+ORDER BY
+  customer_id,
+  order_date,
+  order_id
 LIMIT 100;
-
 -- YoY comparison by month
 WITH monthly AS (
-  SELECT date_trunc('month', order_date AT TIME ZONE 'UTC')::date AS month_utc,
-         SUM(total_amount) AS revenue
-  FROM orders
-  GROUP BY month_utc
-), compared AS (
-  SELECT month_utc,
-         revenue,
-         LAG(revenue, 12) OVER (ORDER BY month_utc) AS revenue_prev_year
-  FROM monthly
+  SELECT
+    date_trunc('month', order_date AT TIME ZONE 'UTC')::date AS month_utc,
+    SUM(total_amount) AS revenue
+  FROM
+    orders
+  GROUP BY
+    month_utc
+),
+compared AS (
+  SELECT
+    month_utc,
+    revenue,
+    LAG(revenue, 12) OVER (ORDER BY month_utc) AS revenue_prev_year
+  FROM
+    monthly
 )
-SELECT month_utc,
-       revenue,
-       revenue_prev_year,
-       ROUND(
-         (revenue - revenue_prev_year)
-         / NULLIF(revenue_prev_year, 0),
-         4
-       ) AS yoy_growth
-FROM compared
-ORDER BY month_utc DESC
+SELECT
+  month_utc,
+  revenue,
+  revenue_prev_year,
+  ROUND((revenue - revenue_prev_year) / NULLIF (revenue_prev_year, 0), 4) AS yoy_growth
+FROM
+  compared
+ORDER BY
+  month_utc DESC
 LIMIT 36;
-
 -- Exercises
 -- Work prediction -> query writing -> debugging -> extension in order.
 -- Keep answers in your own scratch file; this learner script remains answer-free.
@@ -116,5 +115,4 @@ LIMIT 36;
 --    Expected result/shape: For sql-18 Exercise 6, expected output: One row per product with nullable next price. The final columns are `product_id`, `category`, `price`, and `next_price`. The final order is `p.category, p.price, p.product_id`.
 --    Verify: For sql-18 Exercise 6, choose one complete partition from `products`; hand-calculate its first, middle, and final window values for `category`, `price`, and `next_price`, then verify output keys remain `product_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 --    Hint ladder, rung 1: For sql-18 Exercise 6, inspect one window partition before projecting; then check `p.category, p.price, p.product_id` before applying the row cap.
-
 ROLLBACK;

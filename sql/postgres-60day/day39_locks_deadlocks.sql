@@ -18,13 +18,19 @@
 --
 BEGIN;
 SET search_path TO training, public;
-
 -- Observe locks (requires access to pg_catalog)
-SELECT pid, locktype, relation::regclass, mode, granted
-FROM pg_locks
-LEFT JOIN pg_class ON pg_locks.relation = pg_class.oid
-ORDER BY granted DESC, relation;
-
+SELECT
+  pid,
+  locktype,
+  relation::regclass,
+  mode,
+  granted
+FROM
+  pg_locks
+  LEFT JOIN pg_class ON pg_locks.relation = pg_class.oid
+ORDER BY
+  granted DESC,
+  relation;
 -- Row-level locking for concurrent updates
 -- Session A:
 --   BEGIN; SELECT * FROM orders WHERE order_id = 1 FOR UPDATE;
@@ -32,19 +38,28 @@ ORDER BY granted DESC, relation;
 --   BEGIN; SELECT * FROM orders WHERE order_id = 1 FOR UPDATE; -- will wait
 -- Deadlock demo (do NOT run in prod):
 --   A locks row X then tries row Y; B locks row Y then tries row X -> deadlock
-
 -- Correct lock ordering strategy: always lock rows in a consistent order
 WITH to_lock AS (
-  SELECT order_id FROM orders WHERE total_amount > 900 ORDER BY order_id LIMIT 5
+  SELECT
+    order_id
+  FROM
+    orders
+  WHERE
+    total_amount > 900
+  ORDER BY
+    order_id
+  LIMIT 5
 )
-SELECT * FROM orders o
-JOIN to_lock t ON t.order_id = o.order_id
-FOR UPDATE; -- consistent order prevents deadlocks
-
+SELECT
+  *
+FROM
+  orders o
+  JOIN to_lock t ON t.order_id = o.order_id
+  FOR UPDATE;
+-- consistent order prevents deadlocks
 -- Explicit advisory locks (application-level)
 -- SELECT pg_try_advisory_lock(42);  -- returns boolean
 -- SELECT pg_advisory_unlock(42);
-
 -- Exercises
 -- 1. Simulate a deadlock in two sessions and capture with pg_locks.
 --    Inputs: For sql-39 Exercise 1, read the target keys from `orders`, and `pg_locks` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
@@ -85,5 +100,4 @@ FOR UPDATE; -- consistent order prevents deadlocks
 --    Expected result/shape: For sql-39 Exercise 7, expected output: exactly one aggregate summary row. The final columns are `ROLLBACK`.
 --    Verify: For sql-39 Exercise 7, evaluate each of `row_count` in a separate control `SELECT` over `pg_try_advisory_xact_lock`; require one final row and compare every value. Add one source row with a new `ROLLBACK`; verify the result gains exactly one row carrying that `ROLLBACK` value.
 --    Hint ladder, rung 1: For sql-39 Exercise 7, select `ROLLBACK` from `pg_try_advisory_xact_lock` before adding derived columns.
-
 ROLLBACK;

@@ -20,4 +20,6 @@
 // Exercise 6: Explain ecological inference limits.
 // Expected: Regional summaries do not automatically describe individuals.
 
-throw new Error("Implement the six D3 practice tasks in your saved pad before claiming completion.");
+throw new Error(
+  "Implement the six D3 practice tasks in your saved pad before claiming completion.",
+);

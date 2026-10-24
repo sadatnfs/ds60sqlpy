@@ -30,14 +30,18 @@
 #include <variant>
 #include <vector>
 
-
 int main() {
-    std::vector<int> values{2,3,2,4};std::map<int,int> counts;for(int x:values)++counts[x];assert(counts[2]==2);assert(counts[3]==1);assert(std::count(values.begin(),values.end(),2)==counts[2]);
-    assert(counts.find(9)==counts.end());
-    std::cout << "cpp-035 examples passed\n";
-    return 0;
+  std::vector<int> values{2, 3, 2, 4};
+  std::map<int, int> counts;
+  for (int x : values)
+    ++counts[x];
+  assert(counts[2] == 2);
+  assert(counts[3] == 1);
+  assert(std::count(values.begin(), values.end(), 2) == counts[2]);
+  assert(counts.find(9) == counts.end());
+  std::cout << "cpp-035 examples passed\n";
+  return 0;
 }
-
 
 // Exercise 1: Count linear work. Search four rows for key 2 once. Expected: Four comparisons and count 2.
 // Exercise 2: Build an index. Build frequency map for [2,3,2,4]. Expected: Three keys with counts 2,1,1.

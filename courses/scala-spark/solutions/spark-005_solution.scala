@@ -1,10 +1,9 @@
-
-
 object Main {
 
-
   def parseAmount(raw: Option[String]): Option[Long] = {
-    raw.flatMap(text => Option(text)).map(_.trim)
+    raw
+      .flatMap(text => Option(text))
+      .map(_.trim)
       .filter(_.matches("[0-9]+"))
       .flatMap(_.toLongOption)
       .filter(amount => amount >= 0L && amount <= 1000000L)
@@ -12,7 +11,7 @@ object Main {
 
   def classify(raw: Option[String]): String = {
     raw match {
-      case None => "missing"
+      case None    => "missing"
       case Some(_) => if (parseAmount(raw).isDefined) "observed" else "rejected"
     }
   }
@@ -38,12 +37,14 @@ object Main {
 
   def expectIllegalArgument(body: => Any): Unit = {
     var caught = false
-    try body catch { case _: IllegalArgumentException => caught = true }
+    try body
+    catch { case _: IllegalArgumentException => caught = true }
     assert(caught, "Expected IllegalArgumentException")
   }
   def expectArithmetic(body: => Any): Unit = {
     var caught = false
-    try body catch { case _: ArithmeticException => caught = true }
+    try body
+    catch { case _: ArithmeticException => caught = true }
     assert(caught, "Expected ArithmeticException")
   }
 
@@ -51,20 +52,25 @@ object Main {
     // Exercise 1: Parse a strict optional amount
     assert(parseAmount(Some("0")).contains(0L) && parseAmount(Some(" 25 ")).contains(25L))
     assert(parseAmount(None).isEmpty && parseAmount(Some("bad")).isEmpty)
-    assert(Seq(null, "", "-1", "+1", "1.0", "1000001", "999999999999999999999999").forall(text => parseAmount(Some(text)).isEmpty))
+    assert(
+      Seq(null, "", "-1", "+1", "1.0", "1000001", "999999999999999999999999").forall(text =>
+        parseAmount(Some(text)).isEmpty
+      )
+    )
     // Exercise 2: Separate absence from invalid supplied content
-    val tokens: Seq[Option[String]] = Seq(Some("0"), Some("25"), None, Some("bad"), Some(null: String))
-    assert(tokens.map(classify) == Seq("observed","observed","missing","rejected","rejected"))
+    val tokens: Seq[Option[String]] =
+      Seq(Some("0"), Some("25"), None, Some("bad"), Some(null: String))
+    assert(tokens.map(classify) == Seq("observed", "observed", "missing", "rejected", "rejected"))
     assert(parseAmount(None) == parseAmount(Some("bad")))
     // Exercise 3: Collect only observed numerical values
-    assert(observed(tokens) == Seq(0L,25L))
-    assert(observed(tokens :+ Some("25")) == Seq(0L,25L,25L))
-    assert(observed(Seq(None,Some("bad"))).isEmpty)
+    assert(observed(tokens) == Seq(0L, 25L))
+    assert(observed(tokens :+ Some("25")) == Seq(0L, 25L, 25L))
+    assert(observed(Seq(None, Some("bad"))).isEmpty)
     // Exercise 4: Reconcile all input states
     val counts = ledger(tokens)
-    assert(counts == Map("observed" -> 2L,"missing" -> 1L,"rejected" -> 2L))
+    assert(counts == Map("observed" -> 2L, "missing" -> 1L, "rejected" -> 2L))
     assert(counts.values.sum == tokens.size.toLong)
-    assert(ledger(Seq.empty) == Map("observed" -> 0L,"missing" -> 0L,"rejected" -> 0L))
+    assert(ledger(Seq.empty) == Map("observed" -> 0L, "missing" -> 0L, "rejected" -> 0L))
     // Exercise 5: Keep presentation distinct from measurement
     assert(displayAmount(Some("0")) == "0")
     assert(displayAmount(None) == "missing" && displayAmount(Some("bad")) == "rejected")
@@ -73,7 +79,11 @@ object Main {
     assert(feeOption(Some("100")).contains(5L) && feeOption(Some("0")).contains(0L))
     assert(feeOption(None).isEmpty && feeOption(Some("bad")).isEmpty)
     println("spark-005: six reference contracts passed")
-    println("Scala=" + scala.util.Properties.versionNumberString + "; Java=" + System.getProperty("java.version"))
+    println(
+      "Scala=" + scala.util.Properties.versionNumberString + "; Java=" + System.getProperty(
+        "java.version"
+      )
+    )
   }
 }
 

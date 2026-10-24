@@ -165,7 +165,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line">project(ds60_cpp_002 LANGUAGES CXX)</span>
 <span class="source-line">include(CTest)</span>
 <span class="source-line">add_executable(hello main.cpp)</span>
-<span class="source-line">set_target_properties(hello PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)</span>
+<span class="source-line">set_target_properties(</span>
+<span class="source-line">  hello</span>
+<span class="source-line">  PROPERTIES CXX_STANDARD 20</span>
+<span class="source-line">             CXX_STANDARD_REQUIRED ON</span>
+<span class="source-line">             CXX_EXTENSIONS OFF)</span>
 <span class="source-line">add_test(NAME greeting COMMAND hello)</span>
 <span class="source-line">set_tests_properties(greeting PROPERTIES TIMEOUT 5 PASS_REGULAR_EXPRESSION &quot;hello, learner&quot;)</span>
 <span class="source-line"></span></code></pre></article>

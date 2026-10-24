@@ -18,34 +18,36 @@
 --
 BEGIN;
 SET search_path TO training, public;
-
 -- Create a partitioned table for large events (demo table)
 CREATE TABLE big_events (
   id BIGSERIAL,
   event_time TIMESTAMPTZ NOT NULL,
   customer_id INT,
   payload JSONB
-) PARTITION BY RANGE (event_time);
-
+)
+PARTITION BY RANGE (event_time);
 -- Create monthly partitions
 CREATE TABLE big_events_2025_01 PARTITION OF big_events
-  FOR VALUES FROM ('2025-01-01 00:00:00+00') TO ('2025-02-01 00:00:00+00');
+FOR VALUES FROM ('2025-01-01 00:00:00+00') TO ('2025-02-01 00:00:00+00');
 CREATE TABLE big_events_2025_02 PARTITION OF big_events
-  FOR VALUES FROM ('2025-02-01 00:00:00+00') TO ('2025-03-01 00:00:00+00');
-
+FOR VALUES FROM ('2025-02-01 00:00:00+00') TO ('2025-03-01 00:00:00+00');
 -- Insert sample rows
-INSERT INTO big_events(event_time, customer_id, payload)
-SELECT timestamp with time zone '2025-01-01 00:00:00+00'
-         + ((event_no * 37) % (59 * 24 * 60)) * interval '1 minute',
-       1 + ((event_no * 29 - 1) % 500),
-       jsonb_build_object('k', 'v', 'source_row', event_no)
-FROM generate_series(1, 1000) AS g(event_no);
-
+INSERT INTO big_events (event_time, customer_id, payload)
+SELECT
+  timestamp with time zone '2025-01-01 00:00:00+00' + ((event_no * 37) % (59 * 24 * 60)) * interval '1 minute',
+  1 + ((event_no * 29 - 1) % 500),
+  jsonb_build_object('k', 'v', 'source_row', event_no)
+FROM
+  generate_series(1, 1000) AS g (event_no);
 -- Query with partition pruning
 EXPLAIN ANALYZE
-SELECT COUNT(*) FROM big_events
-WHERE event_time >= '2025-01-15' AND event_time < '2025-02-15';
-
+SELECT
+  COUNT(*)
+FROM
+  big_events
+WHERE
+  event_time >= '2025-01-15'
+  AND event_time < '2025-02-15';
 -- Exercises
 -- 1. Add more partitions and test pruning.
 --    Inputs: For sql-37 Exercise 1, run the underlying read-only query over `solution_big_events` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
@@ -81,5 +83,4 @@ WHERE event_time >= '2025-01-15' AND event_time < '2025-02-15';
 --    Expected result/shape: For sql-37 Exercise 6, expected output: one row per `physical_partition`. The final columns are `physical_partition`, and `event_time`.
 --    Verify: For sql-37 Exercise 6, run an anti-check that counts rows where NOT ((payload->>'source' = 'boundary')); require unique `physical_partition` where the expected grain is one row per key and confirm the projected `physical_partition`, and `event_time` against `solution_events`. Insert rows immediately before, exactly at, and immediately after the literal lower and upper comparisons in the final `WHERE` clause; identify which rows pass each inclusive or exclusive comparison.
 --    Hint ladder, rung 1: For sql-37 Exercise 6, inspect the source keys that survive `WHERE`.
-
 ROLLBACK;

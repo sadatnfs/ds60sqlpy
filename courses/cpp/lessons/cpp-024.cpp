@@ -30,15 +30,21 @@
 #include <variant>
 #include <vector>
 
-std::vector<int> reversed(std::vector<int> xs){std::reverse(xs.begin(),xs.end());return xs;}
-int main() {
-    assert((reversed({1,2,3})==std::vector<int>{3,2,1}));
-    for(int a=-2;a<=2;++a)for(int b=-2;b<=2;++b){std::vector<int> xs{a,b};assert(reversed(reversed(xs))==xs);}
-    assert(reversed({}).empty());
-    std::cout << "cpp-024 examples passed\n";
-    return 0;
+std::vector<int> reversed(std::vector<int> xs) {
+  std::reverse(xs.begin(), xs.end());
+  return xs;
 }
-
+int main() {
+  assert((reversed({1, 2, 3}) == std::vector<int>{3, 2, 1}));
+  for (int a = -2; a <= 2; ++a)
+    for (int b = -2; b <= 2; ++b) {
+      std::vector<int> xs{a, b};
+      assert(reversed(reversed(xs)) == xs);
+    }
+  assert(reversed({}).empty());
+  std::cout << "cpp-024 examples passed\n";
+  return 0;
+}
 
 // Exercise 1: Write a golden case. Reverse [1,2,3] against a literal expected vector. Expected: [3,2,1].
 // Exercise 2: Enumerate a property. Test all pairs from integers -2 through 2. Expected: 25 cases satisfy double reversal.

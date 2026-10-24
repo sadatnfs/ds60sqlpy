@@ -21,35 +21,35 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       containers:
-      - name: hello
-        image: ds60sqlpy-k8s-fixture:0.2.0
-        imagePullPolicy: Never
-        command:
-        - python
-        - /fixture.py
-        - server
-        ports:
-        - name: http
-          containerPort: 8080
-        readinessProbe:
-          httpGet:
-            path: /ready
-            port: http
-          periodSeconds: 2
-          failureThreshold: 2
-        resources:
-          requests:
-            cpu: 10m
-            memory: 16Mi
-          limits:
-            cpu: 100m
-            memory: 64Mi
-        securityContext:
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: true
-          capabilities:
-            drop:
-            - ALL
+        - name: hello
+          image: ds60sqlpy-k8s-fixture:0.2.0
+          imagePullPolicy: Never
+          command:
+            - python
+            - /fixture.py
+            - server
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            periodSeconds: 2
+            failureThreshold: 2
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
 ---
 apiVersion: v1
 kind: Service
@@ -59,10 +59,9 @@ spec:
   selector:
     app: hello
   ports:
-  - name: http
-    port: 8080
-    targetPort: http
-
+    - name: http
+      port: 8080
+      targetPort: http
 # Exercise 1: Trace selector equality. Compare Deployment template app=hello with Service selector app=hello and app=wrong. Expected: Matching selector finds the intended set;wrong selector has no intended backends.
 # Exercise 2: Resolve the port chain. Read Service port,targetPort and container port name/number. Expected: Client8080 -> targetPort http -> container8080.
 # Exercise 3: Count unique backends. Deduplicate the four synthetic EndpointSlice entries. Expected: Exactly two unique Pod UIDs matching the owned Ready set.
