@@ -25,10 +25,10 @@ export default [
   },
   ...ts.configs.recommended.map((config) => ({
     ...config,
-    files: ["**/*.{ts,tsx}"],
+    files: ["**/*.{ts,tsx,mts,cts}"],
   })),
   {
-    files: ["**/*.{js,mjs,cjs,ts,tsx}"],
+    files: ["**/*.{js,mjs,cjs,ts,tsx,mts,cts}"],
     languageOptions: {
       globals: { ...globals.es2024 },
     },
@@ -36,9 +36,9 @@ export default [
   {
     files: [
       "**/*.{mjs,cjs}",
-      "scripts/**/*.{js,ts,tsx}",
-      "docker/**/*.{js,ts,tsx}",
-      "courses/javascript-typescript/**/*.{ts,tsx}",
+      "scripts/**/*.{js,ts,tsx,mts,cts}",
+      "docker/**/*.{js,ts,tsx,mts,cts}",
+      "courses/javascript-typescript/**/*.{ts,tsx,mts,cts}",
     ],
     languageOptions: { globals: { ...globals.node } },
   },
@@ -50,7 +50,7 @@ export default [
     },
   },
   {
-    files: ["courses/javascript-typescript/lessons/js-0{4,5,6}*.js"],
+    files: ["courses/javascript-typescript/{lessons,solutions}/js-0{4,5,6}*.js"],
     languageOptions: { globals: { d3: "readonly" } },
   },
   {

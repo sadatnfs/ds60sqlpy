@@ -7,6 +7,8 @@ import os
 import shutil
 import subprocess
 import sys
+from collections.abc import Iterator
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
@@ -480,3 +482,97 @@ def test_missing_host_inventory_fails_without_broadening_file_scope(
     monkeypatch.setenv("DS60_FORMAT_FILE_LIST", str(tmp_path / "missing.bin"))
     with pytest.raises(FileNotFoundError):
         formatting.source_files(tmp_path)
+
+
+def test_wrapper_cleans_host_git_inventory_after_container_exit(wrapper: Any) -> None:
+    root, invoke = wrapper
+    git = shutil.which("git")
+    if git is None:
+        pytest.skip("Git unavailable")
+    subprocess.run([git, "init", "--quiet"], cwd=root, check=True, capture_output=True)
+    put(root, "example.py", "answer = 42\n")
+    result, calls = invoke("--check")
+    assert result.returncode == 0, result.stderr
+    run = next(command for command in calls if command[0] == "run")
+    assert "DS60_FORMAT_FILE_LIST=/tmp/source-files.bin" in run
+    inventory = next(value for value in run if "dst=/tmp/source-files.bin" in value)
+    assert inventory.endswith(",readonly")
+    temporary = inventory.split("src=", 1)[1].split(",dst=", 1)[0]
+    assert not Path(temporary).exists()
+
+
+def guarded_scandir(
+    monkeypatch: pytest.MonkeyPatch, *, duplicate_entries: bool = False
+) -> dict[Path, int]:
+    """Model a mounted filesystem that forbids nested open directory streams."""
+    real_scandir = os.scandir
+    visits: dict[Path, int] = {}
+    open_streams = 0
+
+    @contextmanager
+    def scan(directory: Path | str) -> Iterator[Iterator[os.DirEntry[str]]]:
+        nonlocal open_streams
+        assert open_streams == 0, "Close the parent directory stream before descending"
+        path = Path(directory)
+        visits[path] = visits.get(path, 0) + 1
+        with real_scandir(path) as original:
+            entries = list(original)
+        if duplicate_entries:
+            entries = entries + entries
+        open_streams += 1
+        try:
+            yield iter(entries)
+        finally:
+            open_streams -= 1
+
+    monkeypatch.setattr(os, "scandir", scan)
+    return visits
+
+
+@pytest.mark.parametrize("duplicate_entries", [False, True])
+def test_source_inventory_closes_streams_and_visits_each_directory_once(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, duplicate_entries: bool
+) -> None:
+    root = tmp_path / "checkout"
+    put(root, "src/deep/module.py")
+    put(root, "src/sibling.py")
+    manifest = tmp_path / "sources.bin"
+    manifest.write_bytes(b"src/deep/module.py\0src/sibling.py\0")
+    monkeypatch.setenv("DS60_FORMAT_FILE_LIST", str(manifest))
+    visits = guarded_scandir(monkeypatch, duplicate_entries=duplicate_entries)
+    assert formatting.source_files(root) == ["src/deep/module.py", "src/sibling.py"]
+    assert visits == {root: 1, root / "src": 1, root / "src/deep": 1}
+
+
+@pytest.mark.parametrize("duplicate_entries", [False, True])
+def test_publication_preflight_closes_streams_and_deduplicates_directories(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, duplicate_entries: bool
+) -> None:
+    put(tmp_path, "courses/topic/guides/chapter.md")
+    put(tmp_path, "src/assets/classroom.html")
+    put(tmp_path, "courses/.learning/private.md")
+    visits = guarded_scandir(monkeypatch, duplicate_entries=duplicate_entries)
+    formatting.ensure_publication_paths(tmp_path)
+    assert visits == {
+        tmp_path / "courses": 1,
+        tmp_path / "courses/topic": 1,
+        tmp_path / "courses/topic/guides": 1,
+        tmp_path / "src": 1,
+        tmp_path / "src/assets": 1,
+    }
+
+
+def test_publication_preflight_still_rejects_links_after_materializing_entries(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root = tmp_path / "checkout"
+    put(root, "courses/topic/guide.md")
+    outside = put(tmp_path, "private/notes.md")
+    try:
+        (root / "courses/topic/linked.md").symlink_to(outside)
+    except OSError:
+        pytest.skip("Symlinks unavailable")
+    guarded_scandir(monkeypatch, duplicate_entries=True)
+    with pytest.raises(ValueError, match="symlink"):
+        formatting.ensure_publication_paths(root)
+    assert outside.read_text() == "value\n"

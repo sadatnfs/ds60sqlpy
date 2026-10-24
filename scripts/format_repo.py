@@ -159,25 +159,35 @@ def source_files(root: Path) -> list[str]:
                 if d not in IGNORED_DIRS and not (Path(current) / d).is_symlink()
             )
             candidates.extend((Path(current) / f).relative_to(root).as_posix() for f in filenames)
-    safe = []
-    symlinks: dict[Path, bool] = {}
-    for name in candidates:
-        path = Path(name)
-        if path.is_absolute() or ".." in path.parts or any(p in IGNORED_DIRS for p in path.parts):
-            continue
-        full = root / path
-        linked = False
-        for i in range(1, len(path.parts) + 1):
-            ancestor = root / Path(*path.parts[:i])
-            if ancestor not in symlinks:
-                symlinks[ancestor] = ancestor.is_symlink()
-            if symlinks[ancestor]:
-                linked = True
-                break
-        if linked:
-            continue
-        if full.is_file():
-            safe.append(name)
+    wanted = {
+        name for name in candidates
+        if not Path(name).is_absolute() and ".." not in Path(name).parts
+        and not any(part in IGNORED_DIRS for part in Path(name).parts)
+    }
+    ancestors = {parent.as_posix() for name in wanted for parent in Path(name).parents}
+    safe: set[str] = set()
+    visited: set[str] = set()
+
+    def collect(directory: Path, prefix: str = "") -> None:
+        if prefix in visited:
+            return
+        visited.add(prefix)
+        # Close each directory stream before descending. Some Docker bind-mount
+        # filesystems repeat entries when nested directory streams stay open.
+        with os.scandir(directory) as iterator:
+            entries = list(iterator)
+        for entry in entries:
+            name = prefix + entry.name
+            if name not in wanted and name not in ancestors:
+                continue
+            if entry.is_symlink():
+                continue
+            if name in wanted and entry.is_file(follow_symlinks=False):
+                safe.add(name)
+            elif name in ancestors and entry.is_dir(follow_symlinks=False):
+                collect(Path(entry.path), name + "/")
+
+    collect(root)
     return sorted(safe)
 
 
@@ -363,20 +373,29 @@ def ensure_publication_paths(root: Path) -> None:
         "src",
         "scripts",
     )
+    visited: set[Path] = set()
+
+    def check_directory(directory: Path) -> None:
+        if directory in visited:
+            return
+        visited.add(directory)
+        with os.scandir(directory) as iterator:
+            entries = list(iterator)
+        for entry in entries:
+            if entry.name in IGNORED_DIRS:
+                continue
+            path = Path(entry.path)
+            if entry.is_symlink():
+                raise ValueError(f"Publication path must not be a symlink: {path.relative_to(root)}")
+            if entry.is_dir(follow_symlinks=False):
+                check_directory(path)
+
     for name in names:
         base = root / name
         if base.is_symlink():
             raise ValueError(f"Publication path must not be a symlink: {name}")
-        if not base.is_dir():
-            continue
-        for current, directories, files in os.walk(base, followlinks=False):
-            directories[:] = [d for d in directories if d not in IGNORED_DIRS]
-            for child in [*directories, *files]:
-                path = Path(current) / child
-                if path.is_symlink():
-                    raise ValueError(
-                        f"Publication path must not be a symlink: {path.relative_to(root)}"
-                    )
+        if base.is_dir():
+            check_directory(base)
 
 
 def generated_views(root: Path, check: bool) -> bool:
@@ -438,6 +457,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.list:
             lint_args.append("--list")
         return lint_repo.main(lint_args)
+    print("Discovering source files and formatting policy...", flush=True)
     groups, excluded, unmanaged = inventory(ROOT)
     chosen = [language for language in LANGUAGES if not args.language or language in args.language]
     print(

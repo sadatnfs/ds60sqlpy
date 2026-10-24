@@ -392,6 +392,10 @@ def main(argv: list[str] | None = None) -> int:
     )
     arguments = parser.parse_args(argv)
     groups, excluded, unmanaged = inventory(ROOT)
+    # Markdown is formatted separately and checked by the content pipeline.
+    # Its deliberately partial snippets are not standalone source programs.
+    if "web" in groups:
+        groups["web"] = [path for path in groups["web"] if Path(path).suffix.lower() != ".md"]
     selected = [
         language
         for language in LANGUAGES
