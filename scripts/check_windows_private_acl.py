@@ -14,6 +14,7 @@ import os
 import subprocess
 import sys
 import tempfile
+import time
 from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
@@ -42,6 +43,7 @@ FAILURE_STAGES = frozenset(
         "private-file-readback",
         "synthetic-broad-acl-setup",
         "broad-file-acl-was-accepted",
+        "broad-file-acl-rejection-unverified",
     }
 )
 
@@ -59,17 +61,21 @@ def instrument_script(source: str) -> str:
     points = (
         ("$sid=", "identity"),
         ("if($env:DS60_PRIVATE_ESTABLISH", "establish"),
-        ("  Set-Acl", "set-acl"),
-        ("$observed=", "read-acl"),
+        ("  [System.IO.Directory]::SetAccessControl", "set-acl"),
+        ("if([System.IO.Directory]::Exists", "read-acl"),
         ("$rules=", "read-rules"),
         ("$owner=", "read-owner"),
         ("if($owner", "verify"),
     )
-    lines = ["Write-Output 'DS60-ACL-PHASE:startup'"]
+
+    def phase(label: str) -> str:
+        return f"[Console]::Out.WriteLine('DS60-ACL-PHASE:{label}'); [Console]::Out.Flush()"
+
+    lines = [phase("startup")]
     for line in source.splitlines():
-        for prefix, phase in points:
+        for prefix, label in points:
             if line.startswith(prefix):
-                lines.append(f"Write-Output 'DS60-ACL-PHASE:{phase}'")
+                lines.append(phase(label))
         lines.append(line)
     return "\n".join(lines)
 
@@ -87,6 +93,7 @@ def native_acl_smoke(report: dict[str, Any], directory: Path) -> None:
         options = {**kwargs, "stdout": subprocess.PIPE, "stderr": subprocess.PIPE}
         record: dict[str, Any] = {"operation": operation, "timeout_seconds": kwargs["timeout"]}
         report["commands"].append(record)
+        started = time.monotonic()
         try:
             result = original_run(command, **options)
         except subprocess.TimeoutExpired as error:
@@ -95,6 +102,8 @@ def native_acl_smoke(report: dict[str, Any], directory: Path) -> None:
         except OSError as error:
             record.update(phases=[], launch_error=type(error).__name__)
             raise
+        finally:
+            record["elapsed_seconds"] = round(time.monotonic() - started, 3)
         record.update(
             phases=observed_phases(result.stdout),
             returncode=result.returncode,
@@ -124,18 +133,26 @@ def native_acl_smoke(report: dict[str, Any], directory: Path) -> None:
             raise RuntimeError("private-file-readback")
         report["checks"].append("Inherited private file ACL accepted by the runtime boundary")
 
-        # Grant a deliberately broad ACE on this synthetic owned file only.
-        # The runtime must then reject it even though the enclosing directory is private.
+        # Grant an inheritable broad ACE on an owned synthetic parent, then
+        # create a child that inherits it. The private-file boundary must reject
+        # inherited broad permissions as well as explicit file permissions.
+        broad_parent = directory / "synthetic-broad-parent"
+        broad_parent.mkdir()
         script = r"""
 $ErrorActionPreference='Stop'
-$acl=Get-Acl -LiteralPath $env:DS60_PRIVATE_PATH
-$everyone=New-Object Security.Principal.SecurityIdentifier('S-1-1-0')
-$values=@($everyone,'Read','Allow')
-$rule=New-Object Security.AccessControl.FileSystemAccessRule -ArgumentList $values
+$acl=[System.IO.Directory]::GetAccessControl($env:DS60_PRIVATE_PATH)
+$everyone=[Security.Principal.SecurityIdentifier]::new('S-1-1-0')
+$rule=[Security.AccessControl.FileSystemAccessRule]::new(
+  $everyone,
+  [Security.AccessControl.FileSystemRights]::Read,
+  [Security.AccessControl.InheritanceFlags]'ContainerInherit,ObjectInherit',
+  [Security.AccessControl.PropagationFlags]::None,
+  [Security.AccessControl.AccessControlType]::Allow
+)
 $acl.AddAccessRule($rule)
-Set-Acl -LiteralPath $env:DS60_PRIVATE_PATH -AclObject $acl
+[System.IO.Directory]::SetAccessControl($env:DS60_PRIVATE_PATH,$acl)
 """
-        environment = {**startup_environment, "DS60_PRIVATE_PATH": str(fixture)}
+        environment = {**startup_environment, "DS60_PRIVATE_PATH": str(broad_parent)}
         grant = observed_run(
             [*prefix, script],
             env=environment,
@@ -145,10 +162,17 @@ Set-Acl -LiteralPath $env:DS60_PRIVATE_PATH -AclObject $acl
         )
         if grant.returncode:
             raise RuntimeError("synthetic-broad-acl-setup")
+        broad_fixture = broad_parent / "synthetic-inherited.txt"
+        broad_fixture.write_bytes(b"synthetic-runtime-fixture")
         try:
-            kubernetes_module._private_file(fixture, 100)
+            kubernetes_module._private_file(broad_fixture, 100)
         except kubernetes_module.KubernetesRefusal:
-            report["checks"].append("Broad file ACL refused without accepting its contents")
+            rejection = report["commands"][-1]
+            if rejection.get("returncode") != 3 or rejection.get("timed_out"):
+                raise RuntimeError("broad-file-acl-rejection-unverified") from None
+            report["checks"].append(
+                "Inherited broad file ACL refused without accepting its contents"
+            )
         else:
             raise RuntimeError("broad-file-acl-was-accepted")
 

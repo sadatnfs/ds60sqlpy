@@ -1394,6 +1394,9 @@ def test_windows_acl_command_keeps_paths_as_data_and_refuses_failed_policy(
         "-Command",
     ]
     assert str(path) not in argv[-1]
+    # The bounded helper must not reintroduce cmdlet module discovery before
+    # reaching the ACL policy. Real policy behavior is covered by the native smoke.
+    assert not any(cmdlet in argv[-1] for cmdlet in ("New-Object", "Get-Acl", "Set-Acl"))
     assert options["env"]["DS60_PRIVATE_PATH"] == str(path)
     assert options["env"]["DS60_PRIVATE_ESTABLISH"] == "1"
     assert not {"DS60_WORKER_TOKEN", "KUBECONFIG"} & options["env"].keys()

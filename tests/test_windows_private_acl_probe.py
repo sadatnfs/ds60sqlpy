@@ -10,6 +10,7 @@ from typing import Any
 
 import pytest
 
+from ds60sqlpy import kubernetes_module
 from scripts.check_windows_private_acl import FAILURE_STAGES, instrument_script, observed_phases
 
 
@@ -25,15 +26,19 @@ def test_native_diagnostics_extract_only_known_fixed_phases() -> None:
 
 def test_native_phase_instrumentation_preserves_original_statements() -> None:
     source = (
-        "\n$sid=identify\nif($env:DS60_PRIVATE_ESTABLISH) {\n  Set-Acl fixture\n}\n$observed=read\n"
+        "\n$sid=identify\nif($env:DS60_PRIVATE_ESTABLISH) {\n"
+        "  [System.IO.Directory]::SetAccessControl($p,$acl)\n}\n"
+        "if([System.IO.Directory]::Exists($p)) {\n  $observed=read\n}\n"
     )
     instrumented = instrument_script(source)
     original = "\n".join(
         line
         for line in instrumented.splitlines()
-        if not line.startswith("Write-Output 'DS60-ACL-PHASE:")
+        if not line.startswith("[Console]::Out.WriteLine('DS60-ACL-PHASE:")
     )
     assert original == source.rstrip("\n")
+    assert "Write-Output" not in instrumented
+    assert "[Console]::Out.Flush()" in instrumented
     assert instrumented.index("PHASE:identity") < instrumented.index("$sid=identify")
     assert instrumented.index("PHASE:read-acl") < instrumented.index("$observed=read")
 
@@ -122,3 +127,58 @@ def test_public_report_allows_only_controlled_runtime_failure_stages(
         assert "failure_stage" not in report and stage not in text
         captured = capsys.readouterr()
         assert stage not in captured.out and stage not in captured.err
+
+
+@pytest.mark.parametrize(
+    ("rejection_code", "expected_stage"),
+    [
+        (3, None),
+        (2, "broad-file-acl-rejection-unverified"),
+        (None, "broad-file-acl-rejection-unverified"),
+    ],
+)
+def test_native_negative_case_requires_confirmed_broad_rule_rejection(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    rejection_code: int | None,
+    expected_stage: str | None,
+) -> None:
+    from scripts import check_windows_private_acl as probe
+
+    report: dict[str, Any] = {"checks": [], "commands": []}
+    monkeypatch.setattr(
+        kubernetes_module, "_windows_powershell_runtime", lambda: ("fixed-powershell", {})
+    )
+
+    def run(argv: list[str], **kwargs: Any) -> subprocess.CompletedProcess[bytes]:
+        if "DS60_PRIVATE_PATH" in kwargs["env"]:
+            parent = Path(kwargs["env"]["DS60_PRIVATE_PATH"])
+            assert parent.is_dir()
+            # The child must be created after the parent receives its inheritable
+            # rule, so the native test exercises inheritance rather than a broad
+            # ACE installed directly on the child.
+            assert not list(parent.iterdir())
+            assert "New-Object" not in argv[-1] and "Set-Acl" not in argv[-1]
+        return subprocess.CompletedProcess(argv, 0, b"DS60-ACL-PHASE:startup\n", b"")
+
+    monkeypatch.setattr(subprocess, "run", run)
+    monkeypatch.setattr(kubernetes_module, "_windows_private_acl", lambda *a, **k: True)
+
+    def private_file(path: Path, maximum: int) -> bytes:
+        if path.parent == tmp_path:
+            return path.read_bytes()
+        assert path.parent.name == "synthetic-broad-parent" and path.exists()
+        report["commands"].append(
+            {"returncode": rejection_code, "timed_out": rejection_code is None}
+        )
+        raise kubernetes_module.KubernetesRefusal("synthetic refusal")
+
+    monkeypatch.setattr(kubernetes_module, "_private_file", private_file)
+    if expected_stage is None:
+        probe.native_acl_smoke(report, tmp_path)
+        assert len(report["checks"]) == 4
+        assert "Inherited broad file ACL refused" in report["checks"][-1]
+    else:
+        with pytest.raises(RuntimeError, match=expected_stage):
+            probe.native_acl_smoke(report, tmp_path)
+        assert len(report["checks"]) == 3

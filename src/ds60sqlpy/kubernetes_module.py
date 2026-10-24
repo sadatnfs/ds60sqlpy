@@ -467,23 +467,34 @@ def _windows_powershell_runtime() -> tuple[str, dict[str, str]]:
 def _windows_private_acl(path: Path, *, establish: bool = False) -> bool:
     # The path is data in one process-local environment variable, never interpolated
     # into PowerShell source. Only a newly created runtime directory is modified.
+    # Built-in Windows PowerShell uses .NET Framework. Direct ACL APIs avoid
+    # loading Utility and Security cmdlet modules inside this bounded operation.
     script = r"""
 $ErrorActionPreference='Stop'
 $p=$env:DS60_PRIVATE_PATH
 $sid=[Security.Principal.WindowsIdentity]::GetCurrent().User
-$system=New-Object Security.Principal.SecurityIdentifier('S-1-5-18')
+$system=[Security.Principal.SecurityIdentifier]::new('S-1-5-18')
 if($env:DS60_PRIVATE_ESTABLISH -eq '1') {
-  $acl=New-Object Security.AccessControl.DirectorySecurity
+  $acl=[Security.AccessControl.DirectorySecurity]::new()
   $acl.SetAccessRuleProtection($true,$false)
   $acl.SetOwner($sid)
   foreach($who in @($sid,$system)) {
-    $values=@($who,'FullControl','ContainerInherit,ObjectInherit','None','Allow')
-    $rule=New-Object Security.AccessControl.FileSystemAccessRule -ArgumentList $values
+    $rule=[Security.AccessControl.FileSystemAccessRule]::new(
+      $who,
+      [Security.AccessControl.FileSystemRights]::FullControl,
+      [Security.AccessControl.InheritanceFlags]'ContainerInherit,ObjectInherit',
+      [Security.AccessControl.PropagationFlags]::None,
+      [Security.AccessControl.AccessControlType]::Allow
+    )
     $acl.AddAccessRule($rule)
   }
-  Set-Acl -LiteralPath $p -AclObject $acl
+  [System.IO.Directory]::SetAccessControl($p,$acl)
 }
-$observed=Get-Acl -LiteralPath $p
+if([System.IO.Directory]::Exists($p)) {
+  $observed=[System.IO.Directory]::GetAccessControl($p)
+} else {
+  $observed=[System.IO.File]::GetAccessControl($p)
+}
 $rules=@($observed.GetAccessRules($true,$true,[Security.Principal.SecurityIdentifier]))
 $owner=$observed.GetOwner([Security.Principal.SecurityIdentifier]).Value
 if($owner -ne $sid.Value -or $rules.Count -eq 0){exit 2}

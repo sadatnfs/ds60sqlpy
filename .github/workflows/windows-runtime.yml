@@ -36,17 +36,19 @@ jobs:
       - name: Prepare report and temporary workspace parent
         id: reports
         run: python -c "from pathlib import Path; Path('work/test-results').mkdir(parents=True, exist_ok=True)"
-      - name: Compare fixed Windows PowerShell startup conditions
-        timeout-minutes: 5
-        run: >-
-          uv run --no-sync python scripts/check_windows_runtime_startup.py
-          --report work/test-results/windows-runtime-startup.json
+      # Prove ACL acceptance before comparison commands can warm module caches.
       - name: Exercise the real native private ACL boundary
         if: (success() || failure()) && steps.environment.outcome == 'success' && steps.reports.outcome == 'success'
         timeout-minutes: 3
         run: >-
           uv run --no-sync python scripts/check_windows_private_acl.py
           --report work/test-results/windows-private-acl.json
+      - name: Compare fixed Windows PowerShell startup conditions
+        if: (success() || failure()) && steps.environment.outcome == 'success' && steps.reports.outcome == 'success'
+        timeout-minutes: 5
+        run: >-
+          uv run --no-sync python scripts/check_windows_runtime_startup.py
+          --report work/test-results/windows-runtime-startup.json
       - name: Run focused portal, doctor and ACL contracts
         if: (success() || failure()) && steps.environment.outcome == 'success' && steps.reports.outcome == 'success'
         timeout-minutes: 5
